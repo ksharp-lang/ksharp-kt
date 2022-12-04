@@ -9,11 +9,13 @@ import org.ksharp.typesystem.TypeSystemErrorCode
 
 sealed interface Type {
     val compound: Boolean get() = true
+    val terms: Sequence<Type>
     val representation: String get() = toString().let { s -> if (compound) "($s)" else s }
 }
 
 sealed interface TypeVariable : Type {
     override val compound: Boolean get() = false
+    override val terms: Sequence<Type> get() = emptySequence()
 }
 
 data class Concrete internal constructor(

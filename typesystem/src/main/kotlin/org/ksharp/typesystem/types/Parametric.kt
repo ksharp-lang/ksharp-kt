@@ -20,6 +20,9 @@ data class ParametricType internal constructor(
     val type: TypeVariable,
     val params: List<Type>
 ) : Type {
+    override val terms: Sequence<Type>
+        get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()
+
     override fun toString(): String = "$type ${params.asSequence().map { it.representation }.joinToString(" ")}"
 }
 
