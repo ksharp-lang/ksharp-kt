@@ -24,7 +24,7 @@ class LexerTest : StringSpec({
             listOf(
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("H", 0, 0),
+                    text = TextToken("h", 0, 0),
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
