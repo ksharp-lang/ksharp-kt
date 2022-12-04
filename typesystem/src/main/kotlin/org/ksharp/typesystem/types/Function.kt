@@ -9,6 +9,9 @@ import org.ksharp.typesystem.TypeSystemErrorCode.InvalidFunctionType
 data class FunctionType internal constructor(
     val arguments: List<Type>,
 ) : Type {
+    override val terms: Sequence<Type>
+        get() = arguments.asSequence()
+
     override fun toString(): String = arguments.asSequence().map { it.representation }.joinToString(" -> ")
 }
 

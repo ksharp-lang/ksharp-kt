@@ -10,6 +10,9 @@ typealias UnionTypeFactoryBuilder = UnionTypeFactory.() -> Unit
 data class UnionType internal constructor(
     val arguments: Map<String, ClassType>,
 ) : Type {
+    override val terms: Sequence<Type>
+        get() = arguments.values.asSequence()
+
     override val compound: Boolean = false
     override fun toString(): String =
         arguments.asSequence().map { (_, value) -> value.representation }
@@ -19,6 +22,9 @@ data class UnionType internal constructor(
         val label: String,
         val params: List<Type>
     ) : Type {
+        override val terms: Sequence<Type>
+            get() = params.asSequence()
+        
         override val compound: Boolean = false
         override fun toString(): String = "$label${if (params.isEmpty()) "" else " "}${
             params.asSequence().map { it.representation }.joinToString(" ")

@@ -5,6 +5,9 @@ import org.ksharp.typesystem.TypeItemBuilder
 data class TupleType internal constructor(
     val elements: List<Type>,
 ) : Type {
+    override val terms: Sequence<Type>
+        get() = elements.asSequence()
+    
     override val compound: Boolean = true
     override fun toString(): String = elements.asSequence().map { it.representation }.joinToString(", ")
 }
