@@ -12,3 +12,4 @@ pluginManagement {
 include("typesystem")
 include("common")
 include("test")
+include("parser")
