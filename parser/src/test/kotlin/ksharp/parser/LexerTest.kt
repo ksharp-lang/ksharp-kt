@@ -22,29 +22,29 @@ class LexerTest : StringSpec({
             null
         }.toList().shouldBe(
             listOf(
-                LexerToken(
+                LToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("H", 0, 0),
+                    token = TextToken("H", 0, 0),
                 ),
-                LexerToken(
+                LToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("e", 1, 1),
+                    token = TextToken("e", 1, 1),
                 ),
-                LexerToken(
+                LToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken(" ", 2, 2)
+                    token = TextToken(" ", 2, 2)
                 ),
-                LexerToken(
+                LToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("M", 3, 3)
+                    token = TextToken("M", 3, 3)
                 ),
-                LexerToken(
+                LToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("a", 4, 4)
+                    token = TextToken("a", 4, 4)
                 ),
-                LexerToken(
+                LToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("n", 5, 5)
+                    token = TextToken("n", 5, 5)
                 )
             )
         )
@@ -56,17 +56,17 @@ class LexerTest : StringSpec({
             } else null
         }.toList().shouldBe(
             listOf(
-                LexerToken(
+                LToken(
                     type = WordToken.Word,
-                    text = TextToken("He", 0, 1)
+                    token = TextToken("He", 0, 1)
                 ),
-                LexerToken(
+                LToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken(" ", 2, 2)
+                    token = TextToken(" ", 2, 2)
                 ),
-                LexerToken(
+                LToken(
                     type = WordToken.Word,
-                    text = TextToken("man", 3, 5)
+                    token = TextToken("man", 3, 5)
                 ),
             )
         )
