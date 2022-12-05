@@ -23,7 +23,7 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given lexer, check [], (), @" {
-        "[](){}@".lexer(kSharpTokenFactory)
+        "[](){}@,".lexer(kSharpTokenFactory)
             .toList()
             .shouldContainAll(
                 LexerToken(KSharpTokenType.OpenBracket, TextToken("[", 0, 0)),
@@ -32,7 +32,8 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.CloseParenthesis, TextToken(")", 3, 3)),
                 LexerToken(KSharpTokenType.OpenCurlyBraces, TextToken("{", 4, 4)),
                 LexerToken(KSharpTokenType.CloseCurlyBraces, TextToken("}", 5, 5)),
-                LexerToken(KSharpTokenType.Alt, TextToken("@", 6, 6))
+                LexerToken(KSharpTokenType.Alt, TextToken("@", 6, 6)),
+                LexerToken(KSharpTokenType.Comma, TextToken(",", 7, 7))
             )
     }
     "Given lexer, check operators" {

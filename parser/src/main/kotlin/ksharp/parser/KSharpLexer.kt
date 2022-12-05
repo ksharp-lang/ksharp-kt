@@ -6,6 +6,7 @@ enum class KSharpTokenType : TokenType {
     Integer,
     Float,
     Alt,
+    Comma,
     OpenBracket,
     CloseBracket,
     OpenParenthesis,
@@ -14,12 +15,12 @@ enum class KSharpTokenType : TokenType {
     CloseCurlyBraces,
     WhiteSpace,
     NewLine,
-
     Operator,
 }
 
 private val mappings = mapOf(
     '@' to KSharpTokenType.Alt,
+    ',' to KSharpTokenType.Comma,
     '[' to KSharpTokenType.OpenBracket,
     ']' to KSharpTokenType.CloseBracket,
     '(' to KSharpTokenType.OpenParenthesis,
