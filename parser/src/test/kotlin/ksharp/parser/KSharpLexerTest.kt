@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldContainAll
 class KSharpLexerTest : StringSpec({
     "Given lexer, check LowerCaseWord, UpperCaseWord, WhiteSpace token" {
         "type Name".lexer(kSharpTokenFactory)
+            .asSequence()
             .toList()
             .shouldContainAll(
                 LexerToken(
@@ -24,6 +25,7 @@ class KSharpLexerTest : StringSpec({
     }
     "Given lexer, check [], (), @" {
         "[](){}@,".lexer(kSharpTokenFactory)
+            .asSequence()
             .toList()
             .shouldContainAll(
                 LexerToken(KSharpTokenType.OpenBracket, TextToken("[", 0, 0)),
@@ -38,6 +40,7 @@ class KSharpLexerTest : StringSpec({
     }
     "Given lexer, check operators" {
         "+-*/%><=!&$#^?.\\|".lexer(kSharpTokenFactory)
+            .asSequence()
             .toList()
             .shouldContainAll(
                 LexerToken(KSharpTokenType.Operator, TextToken("+-*/%><=!&$#^?.\\|", 0, 16)),
@@ -45,6 +48,7 @@ class KSharpLexerTest : StringSpec({
     }
     "Given lexer, check integers, decimals, integer and dot operator" {
         "100 1.3 .6 2.".lexer(kSharpTokenFactory)
+            .asSequence()
             .toList().also(::println)
             .shouldContainAll(
                 LexerToken(KSharpTokenType.Integer, TextToken("100", 0, 2)),

@@ -20,31 +20,31 @@ class LexerTest : StringSpec({
     "Given a lexer without rules should return unknown tokens" {
         "He Man".reader().lexer {
             null
-        }.toList().shouldBe(
+        }.asSequence().toList().shouldBe(
             listOf(
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("H", 0, 0),
+                    token = TextToken("H", 0, 0),
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("e", 1, 1),
+                    token = TextToken("e", 1, 1),
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken(" ", 2, 2)
+                    token = TextToken(" ", 2, 2)
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("M", 3, 3)
+                    token = TextToken("M", 3, 3)
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("a", 4, 4)
+                    token = TextToken("a", 4, 4)
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken("n", 5, 5)
+                    token = TextToken("n", 5, 5)
                 )
             )
         )
@@ -54,19 +54,19 @@ class LexerTest : StringSpec({
             if (it.isLetter()) {
                 consumeWord()
             } else null
-        }.toList().shouldBe(
+        }.asSequence().toList().shouldBe(
             listOf(
                 LexerToken(
                     type = WordToken.Word,
-                    text = TextToken("He", 0, 1)
+                    token = TextToken("He", 0, 1)
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    text = TextToken(" ", 2, 2)
+                    token = TextToken(" ", 2, 2)
                 ),
                 LexerToken(
                     type = WordToken.Word,
-                    text = TextToken("man", 3, 5)
+                    token = TextToken("man", 3, 5)
                 ),
             )
         )

@@ -11,39 +11,36 @@ enum class BaseTokenType : TokenType {
     Unknown
 }
 
-data class LexerToken(
+data class LexerToken internal constructor(
     val type: TokenType,
-    val text: TextToken
-)
+    private val token: TextToken
+) {
+    val text: String = token.text
+    val startOffset: Int = token.startOffset
+    val endOffset: Int = token.endOffset
+}
 
 @Mutable
 class Lexer internal constructor(
     private val stream: CharStream,
     private val factory: TokenFactory
 ) {
-
-    fun token(type: TokenType, skip: Int) = stream.token(skip).let {
-        LexerToken(type, it!!)
-    }
-
+    fun token(type: TokenType, skip: Int) = LexerToken(type, stream.token(skip)!!)
     fun nextChar(): Char? = stream.read()
-
     fun next(): LexerToken? =
         nextChar()?.let { c ->
             factory(c) ?: run {
                 token(BaseTokenType.Unknown, 0)
             }
         }
-
 }
 
-fun lexer(content: CharStream, factory: TokenFactory): Sequence<LexerToken> {
+fun lexer(content: CharStream, factory: TokenFactory): Iterator<LexerToken> {
     val l = Lexer(content, factory)
     return generateSequence {
         l.next()
-    }
+    }.iterator()
 }
 
 fun String.lexer(factory: TokenFactory) = lexer(charStream(), factory)
-
 fun Reader.lexer(factory: TokenFactory) = lexer(charStream(), factory)
