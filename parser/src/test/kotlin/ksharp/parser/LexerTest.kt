@@ -20,29 +20,29 @@ class LexerTest : StringSpec({
     "Given a lexer without rules should return unknown tokens" {
         "He Man".reader().lexer {
             null
-        }.toList().shouldBe(
+        }.asSequence().toList().shouldBe(
             listOf(
-                LToken(
+                LexerToken(
                     type = BaseTokenType.Unknown,
                     token = TextToken("H", 0, 0),
                 ),
-                LToken(
+                LexerToken(
                     type = BaseTokenType.Unknown,
                     token = TextToken("e", 1, 1),
                 ),
-                LToken(
+                LexerToken(
                     type = BaseTokenType.Unknown,
                     token = TextToken(" ", 2, 2)
                 ),
-                LToken(
+                LexerToken(
                     type = BaseTokenType.Unknown,
                     token = TextToken("M", 3, 3)
                 ),
-                LToken(
+                LexerToken(
                     type = BaseTokenType.Unknown,
                     token = TextToken("a", 4, 4)
                 ),
-                LToken(
+                LexerToken(
                     type = BaseTokenType.Unknown,
                     token = TextToken("n", 5, 5)
                 )
@@ -54,17 +54,17 @@ class LexerTest : StringSpec({
             if (it.isLetter()) {
                 consumeWord()
             } else null
-        }.toList().shouldBe(
+        }.asSequence().toList().shouldBe(
             listOf(
-                LToken(
+                LexerToken(
                     type = WordToken.Word,
                     token = TextToken("He", 0, 1)
                 ),
-                LToken(
+                LexerToken(
                     type = BaseTokenType.Unknown,
                     token = TextToken(" ", 2, 2)
                 ),
-                LToken(
+                LexerToken(
                     type = WordToken.Word,
                     token = TextToken("man", 3, 5)
                 ),

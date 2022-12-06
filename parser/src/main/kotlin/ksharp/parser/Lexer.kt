@@ -11,47 +11,13 @@ enum class BaseTokenType : TokenType {
     Unknown
 }
 
-interface LexerToken {
-    val type: TokenType
-    val text: String
-    val startOffset: Int
-    val endOffset: Int
-}
-
-class LToken internal constructor(
-    override val type: TokenType,
+data class LexerToken internal constructor(
+    val type: TokenType,
     private val token: TextToken
-) : LexerToken {
-    override val text: String
-        get() = token.text
-
-    override val startOffset: Int
-        get() = token.startOffset
-
-    override val endOffset: Int
-        get() = token.endOffset
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as LexerToken
-
-        if (type != other.type) return false
-        if (text != other.text) return false
-        if (startOffset != other.startOffset) return false
-        if (endOffset != other.endOffset) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = type.hashCode()
-        result = 31 * result + text.hashCode()
-        result = 31 * result + startOffset
-        result = 31 * result + endOffset
-        return result
-    }
+) {
+    val text: String = token.text
+    val startOffset: Int = token.startOffset
+    val endOffset: Int = token.endOffset
 }
 
 @Mutable
@@ -59,27 +25,22 @@ class Lexer internal constructor(
     private val stream: CharStream,
     private val factory: TokenFactory
 ) {
-
-    fun token(type: TokenType, skip: Int): LexerToken = LToken(type, stream.token(skip)!!)
-
+    fun token(type: TokenType, skip: Int) = LexerToken(type, stream.token(skip)!!)
     fun nextChar(): Char? = stream.read()
-
     fun next(): LexerToken? =
         nextChar()?.let { c ->
             factory(c) ?: run {
                 token(BaseTokenType.Unknown, 0)
             }
         }
-
 }
 
-fun lexer(content: CharStream, factory: TokenFactory): Sequence<LexerToken> {
+fun lexer(content: CharStream, factory: TokenFactory): Iterator<LexerToken> {
     val l = Lexer(content, factory)
     return generateSequence {
         l.next()
-    }
+    }.iterator()
 }
 
 fun String.lexer(factory: TokenFactory) = lexer(charStream(), factory)
-
 fun Reader.lexer(factory: TokenFactory) = lexer(charStream(), factory)
