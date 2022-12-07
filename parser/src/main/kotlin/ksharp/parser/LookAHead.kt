@@ -10,10 +10,10 @@ data class LookAHeadResult<T>(
     val leaveLastTokens: Int = 0
 )
 
-fun Error.asLookAHeadResult(): ErrorOrValue<LookAHeadResult<Nothing>> =
+fun <T : Any> Error.asLookAHeadResult(): ErrorOrValue<LookAHeadResult<T>> =
     Either.Left(this)
 
-fun <T : Any> T.asLookAHeadResult(leaveLastTokens: Int = 0): ErrorOrValue<LookAHeadResult<T>> =
+fun <T> T.asLookAHeadResult(leaveLastTokens: Int = 0): ErrorOrValue<LookAHeadResult<T>> =
     Either.Right(LookAHeadResult(this, leaveLastTokens))
 
 @Mutable

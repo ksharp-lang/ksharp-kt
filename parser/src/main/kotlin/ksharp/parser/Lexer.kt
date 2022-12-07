@@ -5,20 +5,6 @@ import java.io.Reader
 
 typealias TokenFactory = Lexer.(c: Char) -> LexerToken?
 
-interface TokenType
-
-enum class BaseTokenType : TokenType {
-    Unknown
-}
-
-data class LexerToken internal constructor(
-    val type: TokenType,
-    private val token: TextToken
-) {
-    val text: String = token.text
-    val startOffset: Int = token.startOffset
-    val endOffset: Int = token.endOffset
-}
 
 @Mutable
 class Lexer internal constructor(
@@ -44,3 +30,35 @@ fun lexer(content: CharStream, factory: TokenFactory): Iterator<LexerToken> {
 
 fun String.lexer(factory: TokenFactory) = lexer(charStream(), factory)
 fun Reader.lexer(factory: TokenFactory) = lexer(charStream(), factory)
+
+internal class ConsIterator internal constructor(
+    private val token: LexerToken,
+    internal val iterator: Iterator<LexerToken>
+) : Iterator<LexerToken> {
+
+    internal var tokenConsumed = false
+        private set
+
+    override fun hasNext(): Boolean {
+        if (!tokenConsumed) {
+            return true
+        }
+        return iterator.hasNext()
+    }
+
+    override fun next(): LexerToken {
+        if (!tokenConsumed) {
+            tokenConsumed = true
+            return token
+        }
+        return iterator.next()
+    }
+
+}
+
+fun Iterator<LexerToken>.cons(token: LexerToken): Iterator<LexerToken> {
+    if (this is ConsIterator && tokenConsumed) {
+        return ConsIterator(token, iterator)
+    }
+    return ConsIterator(token, this)
+}
