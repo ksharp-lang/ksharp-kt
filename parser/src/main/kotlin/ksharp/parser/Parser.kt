@@ -30,7 +30,7 @@ val <T> ParserResult<T>.remainTokens
 
 @Mutable
 data class NodeCollector internal constructor(
-    internal val collection: MutableList<Any>,
+    internal val collection: ListBuilder<Any>,
     internal val tokens: Iterator<LexerToken>
 )
 
@@ -41,7 +41,14 @@ fun Iterator<LexerToken>.consume(predicate: (LexerToken) -> Boolean): ConsumeRes
     if (hasNext()) {
         val item = next()
         return if (predicate(item)) {
-            Either.Right(NodeCollector(mutableListOf(item), this))
+            Either.Right(
+                NodeCollector(
+                    listBuilder<Any>().apply {
+                        add(item)
+                    },
+                    this
+                )
+            )
         } else {
             Either.Left(cons(item))
         }
@@ -111,7 +118,7 @@ fun WithNodeCollector.then(
 
 fun <L, T> Either<L, NodeCollector>.build(block: (items: List<Any>) -> T): Either<L, ParserValue<T>> =
     map {
-        ParserValue(block(it.collection.toList()), it.tokens)
+        ParserValue(block(it.collection.build()), it.tokens)
     }
 
 fun <T : Any> WithNodeCollector.thenLoop(block: (Iterator<LexerToken>) -> Either<*, ParserValue<T>>): ErrorOrValue<NodeCollector> =
@@ -121,7 +128,7 @@ fun <T : Any> WithNodeCollector.thenLoop(block: (Iterator<LexerToken>) -> Either
             val result = it.tokens.lookAHead { lexer ->
                 when (val result = block(lexer)) {
                     is Either.Right -> result.value.value.asLookAHeadResult()
-                    is Either.Left -> BaseParserErrorCode.BreakLoop.new().asLookAHeadResult<T>()
+                    is Either.Left -> BaseParserErrorCode.BreakLoop.new().asLookAHeadResult()
                 }
             }
             if (result is Either.Right) {

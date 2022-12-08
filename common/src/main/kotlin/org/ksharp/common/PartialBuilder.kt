@@ -28,7 +28,7 @@ class PartialItemBuilder<Value> {
 
     fun validation(validation: Validation) = validations.add(validation)
 
-    internal fun build() = PartialItem(item, validations.value)
+    internal fun build() = PartialItem(item, validations.build())
 }
 
 @Mutable
@@ -47,7 +47,7 @@ class PartialBuilder<Value, Instance>(
 
     fun build(): PartialBuilderResult<Instance> {
         val partialItems =
-            state.value.asSequence()
+            state.build().asSequence()
                 .map {
                     val errors = it.validations.toList()
                     if (errors.isEmpty()) {
