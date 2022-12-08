@@ -1,9 +1,6 @@
 package org.ksharp.typesystem
 
-import org.ksharp.common.Either
-import org.ksharp.common.PartialBuilderResult
-import org.ksharp.common.new
-import org.ksharp.common.partialBuilder
+import org.ksharp.common.*
 import org.ksharp.typesystem.types.Type
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
@@ -23,7 +20,7 @@ operator fun PartialTypeSystem.get(name: String) = value[name]
 
 fun typeSystem(block: TypeSystemBuilder.() -> Unit): PartialTypeSystem =
     TypeSystemBuilder(
-        store = mutableMapOf(),
+        store = mapBuilder(),
         builder = partialBuilder {
             TypeSystem(it.toMap())
         }
