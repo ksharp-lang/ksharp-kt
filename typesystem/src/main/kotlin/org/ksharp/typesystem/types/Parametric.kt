@@ -4,6 +4,7 @@ import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.validateTypeParamName
 
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
@@ -102,7 +103,11 @@ fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryB
         }
 
 
-fun TypeSystemBuilder.parametricType(name: String, factory: ParametricTypeFactoryBuilder) =
-    item(name) {
+fun TypeSystemBuilder.parametricType(
+    name: String,
+    annotations: List<Annotation> = listOf(),
+    factory: ParametricTypeFactoryBuilder
+) =
+    item(name, annotations) {
         this.parametricType(name, factory)
     }

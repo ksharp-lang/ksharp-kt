@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import ksharp.test.shouldBeLeft
 import ksharp.test.shouldBeRight
 import org.ksharp.common.new
+import org.ksharp.typesystem.annotations.annotation
 import org.ksharp.typesystem.types.*
 
 fun ErrorOrType.shouldBeType(type: Type, repr: String) =
@@ -16,6 +17,45 @@ fun ErrorOrType.shouldBeType(type: Type, repr: String) =
 
 class TypeSystemTest : ShouldSpec({
     context("Given a type system. Check:") {
+        context("Annotated types") {
+            val annotations = listOf(
+                annotation("impure") {
+                    set("lang", "kotlin")
+                }
+            )
+            typeSystem {
+                type("Int", annotations)
+                alias("Integer", annotations) {
+                    type("Int")
+                }
+                parametricType("List", annotations) {
+                    parameter("a")
+                }
+            }.apply {
+                context("Should contains the following types:") {
+                    should("Int type") {
+                        get("Int").shouldBeType(Annotated(annotations, Concrete("Int")), "@impure(lang=kotlin) Int")
+                    }
+                    should("Integer type") {
+                        get("Integer").shouldBeType(Annotated(annotations, Concrete("Int")), "@impure(lang=kotlin) Int")
+                    }
+                    should("List type") {
+                        get("List").shouldBeType(
+                            Annotated(
+                                annotations,
+                                ParametricType(Concrete("List"), listOf(Parameter("a")))
+                            ), "@impure(lang=kotlin) List a"
+                        )
+                    }
+                }
+                should("Should have 3 types") {
+                    size.shouldBe(3)
+                }
+                should("Shouldn't have errors") {
+                    errors.shouldBeEmpty()
+                }
+            }
+        }
         context("Concrete, Aliases, Parametric and Function Types") {
             typeSystem {
                 type("Int")

@@ -1,7 +1,9 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.annotated
 
 typealias TypeEntry = Pair<String, Type>
 typealias ErrorOrType = ErrorOrValue<Type>
@@ -28,7 +30,11 @@ class TypeSystemBuilder(
     private val builder: PartialBuilder<TypeEntry, TypeSystem>
 ) {
 
-    fun item(name: String, factory: TypeFactoryBuilder) {
+    fun item(
+        name: String,
+        annotations: List<Annotation>,
+        factory: TypeFactoryBuilder
+    ) {
         builder.item {
             TypeItemBuilder(name, store.view, this).apply {
                 validateTypeName(name).flatMap {
@@ -37,7 +43,10 @@ class TypeSystemBuilder(
                     } else {
                         factory()
                     }
-                }.map { type ->
+                }.map { t ->
+                    val type = if (annotations.isEmpty()) {
+                        t
+                    } else t.annotated(annotations)
                     store.put(name, type)
                     value(name to type)
                 }.mapLeft { error ->
