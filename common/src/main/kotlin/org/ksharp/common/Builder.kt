@@ -1,100 +1,77 @@
 package org.ksharp.common
 
 import org.ksharp.common.annotation.Mutable
+import java.util.*
 
-typealias Action<State, Payload, Result> = (state: State, payload: Payload) -> Result
 typealias ToValueAction<State, Value> = (state: State) -> Value
 
-interface ActionKey
+typealias ListBuilder<Item> = Builder<MutableList<Item>, List<Item>>
+typealias MapBuilder<Key, Value> = Builder<MutableMap<Key, Value>, Map<Key, Value>>
 
-enum class BaseActions : ActionKey {
-    Add,
-}
+class MapView<K, V> internal constructor(private val builder: MapBuilder<K, V>) {
+    operator fun get(key: K) = builder.get(key)
 
-enum class MapActions : ActionKey {
-    ContainsKey
-}
-
-@Mutable
-class ActionsBuilder<State> {
-    private val actionTable = mutableMapOf<ActionKey, Pair<Boolean, Action<State, Any, Any>>>()
-
-    @Suppress("UNCHECKED_CAST")
-    fun <Payload, Result> query(key: ActionKey, action: Action<State, Payload, Result>) {
-        actionTable[key] = false to action as Action<State, Any, Any>
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <Payload> mutator(key: ActionKey, action: Action<State, Payload, State>) {
-        actionTable[key] = true to action as Action<State, Any, Any>
-    }
-
-    internal fun build() = actionTable.toMap()
+    fun containsKey(key: K) = builder.containsKey(key)
 }
 
 @Mutable
 class Builder<T, Value>(
     private var state: T,
-    private val toValue: ToValueAction<T, Value>,
-    private val actions: ActionsBuilder<T>.() -> Unit
+    private val toValue: ToValueAction<T, Value>
 ) {
-    private val actionsTable by lazy { ActionsBuilder<T>().apply(actions).build() }
-    val value: Value get() = toValue(state)
+    private var built = false
 
-    @Suppress("UNCHECKED_CAST")
-    operator fun <Result> invoke(key: ActionKey, payload: Any): Result {
-        actionsTable[key]!!.let { (isMutator, action) ->
-            val newResult = action(state, payload)
-            if (isMutator) {
-                state = newResult as T
-                return Unit as Result
-            }
-            return newResult as Result
-        }
+    fun build(): Value {
+        built = true
+        return toValue(state)
     }
+
+    fun mutate(block: (T) -> T): Boolean =
+        if (!built) {
+            state = block(state)
+            true
+        } else false
+
+    fun <V> execute(block: (T) -> V): V? =
+        if (!built) {
+            block(state)
+        } else null
 }
 
 @Mutable
 fun <T, Value> builder(
     state: T,
-    toValue: ToValueAction<T, Value>,
-    actions: ActionsBuilder<T>.() -> Unit
-) = Builder(state, toValue, actions)
+    toValue: ToValueAction<T, Value>
+) = Builder(state, toValue)
 
 @Mutable
-fun <Item> listBuilder(actions: ActionsBuilder<MutableList<Item>>.() -> Unit = {}) = builder(
-    mutableListOf(),
-    MutableList<Item>::toList
-) {
-    mutator<Item>(BaseActions.Add) { state, payload ->
-        state.apply {
-            add(payload)
-        }
-    }
-    actions()
-}
+fun <Item> listBuilder(): ListBuilder<Item> = builder(
+    mutableListOf()
+) { Collections.unmodifiableList(it) }
 
-fun <V> Builder<MutableList<V>, List<V>>.add(value: V) =
-    this<Unit>(BaseActions.Add, value as Any)
+
+fun <V> ListBuilder<V>.add(value: V) =
+    this.mutate {
+        it.add(value)
+        it
+    }
 
 @Mutable
-fun <Key, Value> mapBuilder(actions: ActionsBuilder<MutableMap<Key, Value>>.() -> Unit = {}) = builder(
-    mutableMapOf<Key, Value>(),
-    { it.toMap() }
-) {
-    mutator<Pair<Key, Value>>(BaseActions.Add) { state, (key, value) ->
-        state.apply {
-            put(key, value)
-        }
-    }
-    query<Key, Boolean>(MapActions.ContainsKey) { state, key ->
-        state.containsKey(key)
-    }
-    actions()
+fun <Key, Value> mapBuilder(): MapBuilder<Key, Value> = builder(
+    mutableMapOf()
+) { Collections.unmodifiableMap(it) }
+
+fun <K, V> MapBuilder<K, V>.containsKey(key: K) = execute {
+    it.containsKey(key)
 }
 
-fun <K, V> Builder<MutableMap<K, V>, Map<K, V>>.containsKey(key: K) =
-    this<Boolean>(MapActions.ContainsKey, key as Any)
+fun <K, V> MapBuilder<K, V>.put(key: K, value: V) = this.mutate {
+    it[key] = value
+    it
+}
 
-fun <K, V> Builder<MutableMap<K, V>, Map<K, V>>.add(value: Pair<K, V>) =
-    this<Unit>(BaseActions.Add, value as Any)
+fun <K, V> MapBuilder<K, V>.get(key: K) = execute {
+    it[key]
+}
+
+val <K, V> MapBuilder<K, V>.view get() = MapView(this)

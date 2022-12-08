@@ -1,7 +1,6 @@
 package org.ksharp.typesystem.types
 
-import org.ksharp.common.Either
-import org.ksharp.common.ErrorOrValue
+import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.validateTypeName
 
@@ -24,7 +23,7 @@ data class UnionType internal constructor(
     ) : Type {
         override val terms: Sequence<Type>
             get() = params.asSequence()
-        
+
         override val compound: Boolean = false
         override fun toString(): String = "$label${if (params.isEmpty()) "" else " "}${
             params.asSequence().map { it.representation }.joinToString(" ")
@@ -35,15 +34,17 @@ data class UnionType internal constructor(
 class UnionTypeFactory(
     private val factory: TypeItemBuilder
 ) {
-    private var result: ErrorOrValue<MutableMap<String, UnionType.ClassType>> = Either.Right(mutableMapOf())
+    private var result: ErrorOrValue<MapBuilder<String, UnionType.ClassType>> = Either.Right(mapBuilder())
 
     fun clazz(label: String, parameters: ParametricTypeFactoryBuilder = {}) {
         result = result.flatMap { params ->
             validateTypeName(label).flatMap {
                 ParametricTypeFactory(factory).apply(parameters).build().map { args ->
-                    params[label] = UnionType.ClassType(
-                        label = label,
-                        params = args
+                    params.put(
+                        label, UnionType.ClassType(
+                            label = label,
+                            params = args
+                        )
                     )
                     params
                 }
@@ -51,7 +52,7 @@ class UnionTypeFactory(
         }
     }
 
-    internal fun build() = result.map { it.toMap() }
+    internal fun build() = result.map { it.build() }
 }
 
 fun TypeItemBuilder.unionType(factory: UnionTypeFactoryBuilder) =

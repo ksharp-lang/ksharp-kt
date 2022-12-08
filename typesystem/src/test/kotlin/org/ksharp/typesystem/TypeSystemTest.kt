@@ -579,7 +579,7 @@ class TypeSystemTest : ShouldSpec({
                     should("(Some value: v | None) type") {
                         get("Option").shouldBeType(
                             UnionType(
-                                mutableMapOf(
+                                mapOf(
                                     "Some" to UnionType.ClassType(
                                         "Some",
                                         listOf(Parameter("v").labeled("value"))

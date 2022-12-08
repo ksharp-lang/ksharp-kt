@@ -1,8 +1,6 @@
 package org.ksharp.typesystem.types
 
-import org.ksharp.common.Either
-import org.ksharp.common.ErrorOrValue
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode
@@ -30,7 +28,7 @@ data class ParametricType internal constructor(
 class ParametricTypeFactory(
     private val builder: TypeItemBuilder
 ) {
-    private var result: ErrorOrValue<MutableList<Type>> = Either.Right(mutableListOf())
+    private var result: ErrorOrValue<ListBuilder<Type>> = Either.Right(listBuilder())
 
     fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->
@@ -68,8 +66,7 @@ class ParametricTypeFactory(
         }
     }
 
-
-    internal fun build(): ErrorOrValue<List<Type>> = result.map { it.toList() }
+    internal fun build(): ErrorOrValue<List<Type>> = result.map { it.build() }
 }
 
 fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryBuilder) =

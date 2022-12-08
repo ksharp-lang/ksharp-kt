@@ -6,7 +6,7 @@ data class Labeled internal constructor(
 ) : Type by type {
     override val terms: Sequence<Type>
         get() = sequenceOf(type)
-    
+
     override val representation: String
         get() = toString()
 
@@ -14,3 +14,9 @@ data class Labeled internal constructor(
 }
 
 internal fun Type.labeled(label: String?) = label?.let { Labeled(it, this) } ?: this
+
+val Type.label: String?
+    get() = when (this) {
+        is Labeled -> label
+        else -> null
+    }

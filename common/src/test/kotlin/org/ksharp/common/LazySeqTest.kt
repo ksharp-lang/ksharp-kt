@@ -9,14 +9,14 @@ class ValidatorTest : StringSpec({
             add { "Hello" }
             add { null }
             add { "World" }
-            value.joinToString(" ").shouldBe("Hello World")
+            build().joinToString(" ").shouldBe("Hello World")
         }
     }
     "Test lazy seq with just null values" {
         lazySeqBuilder<String>().apply {
             add { null }
             add { null }
-            value.joinToString("").shouldBe("")
+            build().joinToString("").shouldBe("")
         }
     }
 })
