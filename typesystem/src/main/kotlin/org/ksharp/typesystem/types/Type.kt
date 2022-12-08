@@ -7,7 +7,7 @@ import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode
 
-sealed interface Type {
+interface Type {
     val compound: Boolean get() = true
     val terms: Sequence<Type>
     val representation: String get() = toString().let { s -> if (compound) "($s)" else s }
