@@ -462,6 +462,80 @@ class TypeSystemTest : ShouldSpec({
                 }
             }
         }
+        context("Trait types") {
+            typeSystem {
+                trait("Num", "a") {
+                    method("(+)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                    method("(-)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
+                trait("num", "a") {
+                    method("(+)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
+                trait("Functor", "F") {
+                    method("map") {
+                        functionType {
+                            parameter("a")
+                            parameter("b")
+                        }
+                        parameter("b")
+                    }
+                }
+                trait("Monad", "m") {
+                    method("map ing") {
+                        functionType {
+                            parameter("a")
+                            parameter("b")
+                        }
+                        parameter("b")
+                    }
+                }
+            }.apply {
+                context("Should contains the following types:") {
+                    should("Num trait") {
+                        get("Num").shouldBeType(
+                            TraitType(
+                                "Num", "a", mapOf(
+                                    "(+)" to TraitType.MethodType(
+                                        "(+)",
+                                        listOf(Parameter("a"), Parameter("a"), Parameter("a"))
+                                    ),
+                                    "(-)" to TraitType.MethodType(
+                                        "(-)",
+                                        listOf(Parameter("a"), Parameter("a"), Parameter("a"))
+                                    )
+                                )
+                            ), "trait Num a =\n" +
+                                    "    (+) :: a -> a -> a\n" +
+                                    "    (-) :: a -> a -> a"
+                        )
+                    }
+                }
+                should("Should have 1 type") {
+                    size.shouldBe(1)
+                }
+                should("Shouldn't have errors") {
+                    errors.shouldBe(
+                        listOf(
+                            TypeSystemErrorCode.TypeNameShouldStartWithUpperCase.new("name" to "num"),
+                            TypeSystemErrorCode.TypeParamNameShouldStartWithLowerCase.new("name" to "F"),
+                            TypeSystemErrorCode.FunctionNameShouldntHaveSpaces.new("name" to "map ing"),
+                        )
+                    )
+                }
+            }
+        }
         context("Error validations") {
             typeSystem {
                 type("int")
