@@ -68,7 +68,7 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("name", 15, 18)),
-                LexerToken(KSharpTokenType.Operator, TextToken("->", 21, 22)),
+                LexerToken(KSharpTokenType.Operator3, TextToken("->", 21, 22)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("wire", 25, 28)),
             )
     }
@@ -82,7 +82,7 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("name", 15, 18)),
-                LexerToken(KSharpTokenType.Operator, TextToken("=", 20, 20)),
+                LexerToken(KSharpTokenType.Operator12, TextToken("=", 20, 20)),
                 LexerToken(KSharpTokenType.NewLine, TextToken("\n", 22, 22)),
                 LexerToken(KSharpTokenType.WhiteSpace, TextToken("    ", 23, 26)),
                 LexerToken(KSharpTokenType.Integer, TextToken("10", 27, 28)),

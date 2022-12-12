@@ -17,6 +17,19 @@ enum class KSharpTokenType : TokenType {
     WhiteSpace,
     NewLine,
     Operator,
+
+    Operator1,
+    Operator2,
+    Operator3,
+    Operator4,
+    Operator5,
+    Operator6,
+    Operator7,
+    Operator8,
+    Operator9,
+    Operator10,
+    Operator11,
+    Operator12
 }
 
 private val mappings = mapOf(
@@ -139,6 +152,40 @@ private fun canCollapseTokens(current: LexerToken, newToken: LexerToken): Boolea
     }
 }
 
+private val operator2 = "*/%".asSequence().toSet()
+private val operator3 = "+-".asSequence().toSet()
+private val operator5 = "<>".asSequence().toSet()
+private val operator6 = "=!".asSequence().toSet()
+private val operator7 = "&".asSequence().toSet()
+private val operator8 = "^".asSequence().toSet()
+private val operator9 = "|".asSequence().toSet()
+
+/// https://docs.ksharp.org/rfc/syntax#operator-precedence
+private fun LexerToken.mapOperatorToken(): LexerToken = when (type) {
+    KSharpTokenType.Operator -> {
+        when {
+            text == "**" -> copy(type = KSharpTokenType.Operator1)
+            text == "<<" || text == ">>" -> copy(type = KSharpTokenType.Operator4)
+            text == "&&" -> copy(type = KSharpTokenType.Operator10)
+            text == "||" -> copy(type = KSharpTokenType.Operator11)
+            text == "=" -> copy(type = KSharpTokenType.Operator12)
+
+            text.isEmpty() -> this
+
+            operator2.contains(text.first()) -> copy(type = KSharpTokenType.Operator2)
+            operator3.contains(text.first()) -> copy(type = KSharpTokenType.Operator3)
+            operator5.contains(text.first()) -> copy(type = KSharpTokenType.Operator5)
+            operator6.contains(text.first()) -> copy(type = KSharpTokenType.Operator6)
+            operator7.contains(text.first()) -> copy(type = KSharpTokenType.Operator7)
+            operator8.contains(text.first()) -> copy(type = KSharpTokenType.Operator8)
+            operator9.contains(text.first()) -> copy(type = KSharpTokenType.Operator9)
+            else -> this
+        }
+    }
+
+    else -> this
+}
+
 fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
     val newTokens = this.collapseTokens()
 
@@ -187,7 +234,7 @@ fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
             return token != null
         }
 
-        override fun next(): LexerToken = token!!
+        override fun next(): LexerToken = token!!.mapOperatorToken()
 
     }
 }
