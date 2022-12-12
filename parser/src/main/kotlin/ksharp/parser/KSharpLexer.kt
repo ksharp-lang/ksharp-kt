@@ -90,7 +90,7 @@ fun Lexer.newLine(): LexerToken {
 fun Lexer.whiteSpace(): LexerToken {
     while (true) {
         val c = this.nextChar() ?: return token(KSharpTokenType.WhiteSpace, 1)
-        if (!c.isWhitespace()) {
+        if (!(c.isWhitespace() && !c.isNewLine())) {
             return token(KSharpTokenType.WhiteSpace, 1)
         }
     }
@@ -110,7 +110,7 @@ val kSharpTokenFactory: TokenFactory = { c ->
             isDot() -> decimal(KSharpTokenType.Operator, 1)
             isNewLine() -> newLine()
             isWhitespace() -> whiteSpace()
-            isOperator() -> operator().also { println(it) }
+            isOperator() -> operator()
             else -> mappings[c]?.let {
                 token(it, 0)
             }
@@ -145,6 +145,7 @@ fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
     return object : Iterator<LexerToken> {
         private var token: LexerToken? = null
         private var lastToken: LexerToken? = null
+        private var lastWasNewLine = false
 
         override fun hasNext(): Boolean {
             token = lastToken
@@ -153,8 +154,19 @@ fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
                 lastToken = newTokens.next()
                 if (token == null) {
                     token = lastToken
+                    lastToken = null
                     continue
                 }
+
+                if (token!!.type == KSharpTokenType.WhiteSpace) {
+                    if (lastWasNewLine) {
+                        break
+                    }
+                    token = lastToken
+                    lastToken = null
+                    continue
+                }
+
                 if (canCollapseTokens(token!!, lastToken!!)) {
                     token = token!!.copy(
                         type = KSharpTokenType.FunctionName,
@@ -166,8 +178,12 @@ fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
                     )
                     continue
                 }
+
+                lastWasNewLine = false
                 break
             }
+
+            lastWasNewLine = token?.type == KSharpTokenType.NewLine
             return token != null
         }
 
