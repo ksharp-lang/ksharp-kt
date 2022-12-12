@@ -58,4 +58,20 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 12, 12)),
             )
     }
+
+    "Given a lexer, check collapse tokens to form function tokens" {
+        "internal->wire.name  ->  wire".lexer(kSharpTokenFactory)
+            .collapseKSharpTokens()
+            .asSequence()
+            .toList().also(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
+                LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("name", 15, 18)),
+                LexerToken(KSharpTokenType.WhiteSpace, TextToken("  ", 19, 20)),
+                LexerToken(KSharpTokenType.Operator, TextToken("->", 21, 22)),
+                LexerToken(KSharpTokenType.WhiteSpace, TextToken("  ", 23, 24)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("wire", 25, 28)),
+            )
+    }
 })

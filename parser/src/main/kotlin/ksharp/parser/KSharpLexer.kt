@@ -3,6 +3,7 @@ package ksharp.parser
 enum class KSharpTokenType : TokenType {
     UpperCaseWord,
     LowerCaseWord,
+    FunctionName,
     Integer,
     Float,
     Alt,
@@ -114,5 +115,63 @@ val kSharpTokenFactory: TokenFactory = { c ->
                 token(it, 0)
             }
         }
+    }
+}
+
+private fun canCollapseTokens(current: LexerToken, newToken: LexerToken): Boolean {
+    val allowedToken = when (current.type) {
+        KSharpTokenType.LowerCaseWord -> true
+        KSharpTokenType.UpperCaseWord -> true
+        KSharpTokenType.FunctionName -> true
+        else -> false
+    }
+    if (!allowedToken) return false
+    return when (newToken.type) {
+        KSharpTokenType.Operator -> {
+            newToken.text != "."
+        }
+
+        KSharpTokenType.LowerCaseWord -> true
+        KSharpTokenType.UpperCaseWord -> true
+        KSharpTokenType.FunctionName -> true
+        KSharpTokenType.Alt -> true
+        else -> false
+    }
+}
+
+fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
+    val newTokens = this.collapseTokens()
+
+    return object : Iterator<LexerToken> {
+        private var token: LexerToken? = null
+        private var lastToken: LexerToken? = null
+
+        override fun hasNext(): Boolean {
+            token = lastToken
+            lastToken = null
+            while (newTokens.hasNext()) {
+                lastToken = newTokens.next()
+                if (token == null) {
+                    token = lastToken
+                    continue
+                }
+                if (canCollapseTokens(token!!, lastToken!!)) {
+                    token = token!!.copy(
+                        type = KSharpTokenType.FunctionName,
+                        token = TextToken(
+                            text = "${token!!.text}${lastToken!!.text}",
+                            startOffset = token!!.startOffset,
+                            endOffset = lastToken!!.endOffset
+                        )
+                    )
+                    continue
+                }
+                break
+            }
+            return token != null
+        }
+
+        override fun next(): LexerToken = token!!
+
     }
 }
