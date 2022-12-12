@@ -88,4 +88,93 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Integer, TextToken("10", 27, 28)),
             )
     }
+
+    "Given a lexer, map operators" {
+        "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ?".lexer(kSharpTokenFactory)
+            .collapseKSharpTokens()
+            .asSequence()
+            .toList().onEach(::println)
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.Operator1,
+                    token = TextToken(text = "**", startOffset = 0, endOffset = 1)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator2,
+                    token = TextToken(text = "*>>", startOffset = 3, endOffset = 5)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator2,
+                    token = TextToken(text = "//>", startOffset = 7, endOffset = 9)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator2,
+                    token = TextToken(text = "%%%", startOffset = 11, endOffset = 13)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator3,
+                    token = TextToken(text = "+++", startOffset = 15, endOffset = 17)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator3,
+                    token = TextToken(text = "-", startOffset = 19, endOffset = 19)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator4,
+                    token = TextToken(text = "<<", startOffset = 21, endOffset = 22)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator4,
+                    token = TextToken(text = ">>", startOffset = 24, endOffset = 25)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator5,
+                    token = TextToken(text = "<==", startOffset = 27, endOffset = 29)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator6,
+                    token = TextToken(text = "!=", startOffset = 31, endOffset = 32)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator7,
+                    token = TextToken(text = "&", startOffset = 34, endOffset = 34)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator9,
+                    token = TextToken(text = "|||", startOffset = 36, endOffset = 38)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator8,
+                    token = TextToken(text = "^&", startOffset = 40, endOffset = 41)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator10,
+                    token = TextToken(text = "&&", startOffset = 43, endOffset = 44)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator11,
+                    token = TextToken(text = "||", startOffset = 46, endOffset = 47)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator12,
+                    token = TextToken(text = "=", startOffset = 49, endOffset = 49)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator,
+                    token = TextToken(text = ".", startOffset = 51, endOffset = 51)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator,
+                    token = TextToken(text = "#", startOffset = 53, endOffset = 53)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator,
+                    token = TextToken(text = "$", startOffset = 55, endOffset = 55)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator,
+                    token = TextToken(text = "?", startOffset = 57, endOffset = 57)
+                )
+            )
+    }
 })
