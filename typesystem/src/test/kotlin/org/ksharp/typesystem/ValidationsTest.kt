@@ -38,4 +38,17 @@ class ValidationsTest : StringSpec({
             .shouldBeLeft(TypeSystemErrorCode.InvalidName.new("name" to "int-10"))
     }
 
+    "Function names shouldn't contains spaces" {
+        validateFunctionName("++ sum")
+            .shouldBeLeft(TypeSystemErrorCode.FunctionNameShouldntHaveSpaces.new("name" to "++ sum"))
+    }
+
+    "Valid function names" {
+        sequenceOf("++", "sum", "(+)")
+            .forEach {
+                validateFunctionName(it)
+                    .shouldBeRight(it)
+            }
+    }
+
 })

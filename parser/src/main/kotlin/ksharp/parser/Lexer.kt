@@ -62,3 +62,36 @@ fun Iterator<LexerToken>.cons(token: LexerToken): Iterator<LexerToken> {
     }
     return ConsIterator(token, this)
 }
+
+
+fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> = object : Iterator<LexerToken> {
+    private var token: LexerToken? = null
+    private var lastToken: LexerToken? = null
+
+    override fun hasNext(): Boolean {
+        token = lastToken
+        lastToken = null
+        while (this@collapseTokens.hasNext()) {
+            lastToken = this@collapseTokens.next()
+            if (token == null) {
+                token = lastToken
+                continue
+            }
+            if (lastToken!!.type == token!!.type) {
+                token = token!!.copy(
+                    token = TextToken(
+                        text = "${token!!.text}${lastToken!!.text}",
+                        startOffset = token!!.startOffset,
+                        endOffset = lastToken!!.endOffset
+                    )
+                )
+                continue
+            }
+            break
+        }
+        return token != null
+    }
+
+    override fun next(): LexerToken = token!!
+
+}

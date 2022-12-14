@@ -71,4 +71,28 @@ class LexerTest : StringSpec({
             )
         )
     }
+
+    "Given a lexer, calling collapse should return just three tokens" {
+        "He --- man".lexer {
+            if (it.isLetter()) {
+                consumeWord()
+            } else null
+        }.collapseTokens()
+            .asSequence().toList().shouldBe(
+                listOf(
+                    LexerToken(
+                        type = WordToken.Word,
+                        token = TextToken("He", 0, 1)
+                    ),
+                    LexerToken(
+                        type = BaseTokenType.Unknown,
+                        token = TextToken(" --- ", 2, 6)
+                    ),
+                    LexerToken(
+                        type = WordToken.Word,
+                        token = TextToken("man", 7, 9)
+                    ),
+                )
+            )
+    }
 })
