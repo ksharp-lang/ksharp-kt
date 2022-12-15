@@ -1,4 +1,7 @@
-package ksharp.parser
+package ksharp.parser.ksharp
+
+import ksharp.parser.*
+import java.io.Reader
 
 enum class KSharpTokenType : TokenType {
     UpperCaseWord,
@@ -238,3 +241,7 @@ fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
 
     }
 }
+
+
+fun String.kSharpLexer() = lexer(charStream(), kSharpTokenFactory)
+fun Reader.kSharpLexer() = lexer(charStream(), kSharpTokenFactory)

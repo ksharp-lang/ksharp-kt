@@ -88,7 +88,7 @@ class ParserTest : StringSpec({
                     }
                 }
             }.map {
-                it.value to it.remainTokens.asSequence().toList().also { println(it) }
+                it.value to it.remainTokens.asSequence().toList()
             }.shouldBeRight("kotlin.sequence" to listOf(pcomma()))
 
     }

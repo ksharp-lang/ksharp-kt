@@ -2,10 +2,13 @@ package ksharp.parser
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainAll
+import ksharp.parser.ksharp.KSharpTokenType
+import ksharp.parser.ksharp.collapseKSharpTokens
+import ksharp.parser.ksharp.kSharpLexer
 
 class KSharpLexerTest : StringSpec({
     "Given lexer, check LowerCaseWord, UpperCaseWord, WhiteSpace token" {
-        "type Name".lexer(kSharpTokenFactory)
+        "type Name".kSharpLexer()
             .asSequence()
             .toList()
             .shouldContainAll(
@@ -24,7 +27,7 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given lexer, check [], (), @" {
-        "[](){}@,".lexer(kSharpTokenFactory)
+        "[](){}@,".kSharpLexer()
             .asSequence()
             .toList()
             .shouldContainAll(
@@ -39,7 +42,7 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given lexer, check operators" {
-        "+-*/%><=!&$#^?.\\|".lexer(kSharpTokenFactory)
+        "+-*/%><=!&$#^?.\\|".kSharpLexer()
             .asSequence()
             .toList()
             .shouldContainAll(
@@ -47,7 +50,7 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given lexer, check integers, decimals, integer and dot operator" {
-        "100 1.3 .6 2.".lexer(kSharpTokenFactory)
+        "100 1.3 .6 2.".kSharpLexer()
             .asSequence()
             .toList().also(::println)
             .shouldContainAll(
@@ -60,7 +63,7 @@ class KSharpLexerTest : StringSpec({
     }
 
     "Given a lexer, check collapse tokens to form function tokens" {
-        "internal->wire.name  ->  wire".lexer(kSharpTokenFactory)
+        "internal->wire.name  ->  wire".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
             .toList().also(::println)
@@ -74,7 +77,7 @@ class KSharpLexerTest : StringSpec({
     }
 
     "Given a lexer, check collapse tokens, should leave really important whitespaces (those after a newline)" {
-        "internal->wire.name = \n    10".lexer(kSharpTokenFactory)
+        "internal->wire.name = \n    10".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
             .toList().onEach(::println)
@@ -90,7 +93,7 @@ class KSharpLexerTest : StringSpec({
     }
 
     "Given a lexer, map operators" {
-        "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ?".lexer(kSharpTokenFactory)
+        "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ?".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
             .toList().onEach(::println)

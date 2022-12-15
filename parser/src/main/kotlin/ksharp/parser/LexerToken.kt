@@ -1,5 +1,7 @@
 package ksharp.parser
 
+import org.ksharp.common.Position
+
 interface TokenType
 
 enum class BaseTokenType : TokenType {
@@ -11,6 +13,6 @@ data class LexerToken internal constructor(
     private val token: TextToken
 ) {
     val text: String = token.text
-    val startOffset: Int = token.startOffset
-    val endOffset: Int = token.endOffset
+    val startPosition: Position = token.start
+    val endPosition: Position = token.end
 }
