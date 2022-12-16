@@ -1,5 +1,8 @@
 package ksharp.parser
 
+import org.ksharp.common.Line
+import org.ksharp.common.Offset
+import org.ksharp.common.Position
 import org.ksharp.common.annotation.Mutable
 import java.io.Reader
 
@@ -31,10 +34,10 @@ fun lexer(content: CharStream, factory: TokenFactory): Iterator<LexerToken> {
 fun String.lexer(factory: TokenFactory) = lexer(charStream(), factory)
 fun Reader.lexer(factory: TokenFactory) = lexer(charStream(), factory)
 
-internal class ConsIterator internal constructor(
-    private val token: LexerToken,
-    internal val iterator: Iterator<LexerToken>
-) : Iterator<LexerToken> {
+internal class ConsIterator<L : LexerValue> internal constructor(
+    private val token: L,
+    internal val iterator: Iterator<L>
+) : Iterator<L> {
 
     internal var tokenConsumed = false
         private set
@@ -46,7 +49,7 @@ internal class ConsIterator internal constructor(
         return iterator.hasNext()
     }
 
-    override fun next(): LexerToken {
+    override fun next(): L {
         if (!tokenConsumed) {
             tokenConsumed = true
             return token
@@ -56,7 +59,7 @@ internal class ConsIterator internal constructor(
 
 }
 
-fun Iterator<LexerToken>.cons(token: LexerToken): Iterator<LexerToken> {
+fun <L : LexerValue> Iterator<L>.cons(token: L): Iterator<L> {
     if (this is ConsIterator && tokenConsumed) {
         return ConsIterator(token, iterator)
     }
@@ -95,3 +98,23 @@ fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> = object : Itera
     override fun next(): LexerToken = token!!
 
 }
+
+fun Iterator<LexerToken>.toLogicalLexerToken(newLineType: TokenType): Iterator<LogicalLexerToken> =
+    object : Iterator<LogicalLexerToken> {
+        private var startPosition: Position = Line(1) to Offset(0)
+        private var startLineOffset: Int = 0
+
+        override fun hasNext(): Boolean = this@toLogicalLexerToken.hasNext()
+
+        override fun next(): LogicalLexerToken = with(this@toLogicalLexerToken.next()) {
+            if (type == newLineType) {
+                startPosition = Line(startPosition.first.value.inc()) to Offset(0)
+                startLineOffset = endOffset.inc()
+            }
+            LogicalLexerToken(
+                this,
+                startPosition = startPosition,
+                endPosition = startPosition.first to Offset((endOffset - startLineOffset).coerceAtLeast(0))
+            )
+        }
+    }

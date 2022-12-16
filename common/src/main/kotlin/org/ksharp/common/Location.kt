@@ -1,7 +1,11 @@
 package org.ksharp.common
 
-typealias Line = Int
-typealias Offset = Int
+@JvmInline
+value class Line(val value: Int)
+
+@JvmInline
+value class Offset(val value: Int)
+
 typealias Position = Pair<Line, Offset>
 
 data class Location(
