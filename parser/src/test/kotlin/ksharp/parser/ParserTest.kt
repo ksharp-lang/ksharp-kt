@@ -92,6 +92,90 @@ class ParserTest : StringSpec({
             }.shouldBeRight("kotlin.sequence" to listOf(pcomma()))
 
     }
-
-
+    "Given a lexer iterator, consume tokens, then resume" {
+        listOf(
+            keyword("kotlin"),
+            point(),
+            keyword("sequence"),
+            pcomma()
+        ).iterator()
+            .consume(TestParserTokenTypes.Keyword)
+            .thenLoop {
+                it.consume(TestParserTokenTypes.Operator, ".")
+                    .then(TestParserTokenTypes.Keyword)
+                    .build { v ->
+                        v.joinToString("") { i ->
+                            i as LexerToken
+                            i.text
+                        }
+                    }
+            }.build {
+                it.joinToString("") { v ->
+                    when (v) {
+                        is String -> v
+                        is LexerToken -> v.text
+                        else -> ""
+                    }
+                }
+            }.resume()
+            .then(TestParserTokenTypes.Operator, ";")
+            .build {
+                it.joinToString("") { v ->
+                    when (v) {
+                        is String -> v
+                        is LexerToken -> v.text
+                        else -> ""
+                    }
+                }
+            }
+            .map {
+                it.value to it.remainTokens.asSequence().toList()
+            }.shouldBeRight("kotlin.sequence;" to emptyList())
+    }
+    "Given a lexer iterator, consume token, then consume a collection of tokens" {
+        listOf(
+            keyword("import"),
+            keyword("kotlin"),
+            point(),
+            keyword("sequence"),
+            pcomma(),
+            pcomma()
+        ).iterator()
+            .consume(TestParserTokenTypes.Keyword, "import")
+            .consume {
+                it.consume(TestParserTokenTypes.Keyword)
+                    .thenLoop {
+                        it.consume(TestParserTokenTypes.Operator, ".")
+                            .then(TestParserTokenTypes.Keyword)
+                            .build { v ->
+                                v.joinToString("") { i ->
+                                    i as LexerToken
+                                    i.text
+                                }
+                            }
+                    }.build {
+                        it.joinToString("") { v ->
+                            when (v) {
+                                is String -> v
+                                is LexerToken -> v.text
+                                else -> ""
+                            }
+                        }
+                    }
+            }
+            .then(TestParserTokenTypes.Operator, ";")
+            .then(TestParserTokenTypes.Operator, ";")
+            .build {
+                it.joinToString(" --- ") { v ->
+                    when (v) {
+                        is String -> v
+                        is LexerToken -> v.text
+                        else -> ""
+                    }
+                }
+            }
+            .map {
+                it.value to it.remainTokens.asSequence().toList()
+            }.shouldBeRight("import --- kotlin.sequence --- ; --- ;" to emptyList())
+    }
 })

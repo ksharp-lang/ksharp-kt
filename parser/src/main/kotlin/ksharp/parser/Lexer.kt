@@ -4,6 +4,7 @@ import org.ksharp.common.Line
 import org.ksharp.common.Offset
 import org.ksharp.common.Position
 import org.ksharp.common.annotation.Mutable
+import org.ksharp.common.generateIterator
 import java.io.Reader
 
 typealias TokenFactory = Lexer.(c: Char) -> LexerToken?
@@ -67,11 +68,11 @@ fun <L : LexerValue> Iterator<L>.cons(token: L): Iterator<L> {
 }
 
 
-fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> = object : Iterator<LexerToken> {
-    private var token: LexerToken? = null
-    private var lastToken: LexerToken? = null
+fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> {
+    var token: LexerToken?
+    var lastToken: LexerToken? = null
 
-    override fun hasNext(): Boolean {
+    return generateIterator {
         token = lastToken
         lastToken = null
         while (this@collapseTokens.hasNext()) {
@@ -88,18 +89,16 @@ fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> = object : Itera
                         endOffset = lastToken!!.endOffset
                     )
                 )
+                lastToken = null
                 continue
             }
             break
         }
-        return token != null
+        token
     }
-
-    override fun next(): LexerToken = token!!
-
 }
 
-fun Iterator<LexerToken>.toLogicalLexerToken(newLineType: TokenType): Iterator<LogicalLexerToken> =
+fun Iterator<LexerToken>.toLogicalLexerToken(context: String, newLineType: TokenType): Iterator<LogicalLexerToken> =
     object : Iterator<LogicalLexerToken> {
         private var startPosition: Position = Line(1) to Offset(0)
         private var startLineOffset: Int = 0
@@ -113,6 +112,7 @@ fun Iterator<LexerToken>.toLogicalLexerToken(newLineType: TokenType): Iterator<L
             }
             LogicalLexerToken(
                 this,
+                context,
                 startPosition = startPosition,
                 endPosition = startPosition.first to Offset((endOffset - startLineOffset).coerceAtLeast(0))
             )

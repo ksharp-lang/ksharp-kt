@@ -12,8 +12,7 @@ private class ErrorExample(
 
 private val location = Location(
     context = "context",
-    start = Line(0) to Offset(0),
-    end = Line(0) to Offset(5)
+    position = Line(0) to Offset(0)
 )
 
 class ErrorTest : StringSpec({
@@ -35,8 +34,7 @@ class ErrorTest : StringSpec({
             location.shouldBe(
                 Location(
                     context = "context",
-                    start = Line(0) to Offset(0),
-                    end = Line(0) to Offset(5)
+                    position = Line(0) to Offset(0)
                 )
             )
             toString().shouldBe("EX001: ExampleError Test Replace")
@@ -47,8 +45,7 @@ class ErrorTest : StringSpec({
             location.shouldBe(
                 Location(
                     context = "context",
-                    start = Line(0) to Offset(0),
-                    end = Line(0) to Offset(5)
+                    position = Line(0) to Offset(0)
                 )
             )
             toString().shouldBe("EX001: ExampleError {Argument1}")

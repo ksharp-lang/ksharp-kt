@@ -1,6 +1,7 @@
 package ksharp.parser.ksharp
 
 import ksharp.parser.*
+import org.ksharp.common.generateIterator
 import java.io.Reader
 
 enum class KSharpTokenType : TokenType {
@@ -192,56 +193,51 @@ private fun LexerToken.mapOperatorToken(): LexerToken = when (type) {
 fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
     val newTokens = this.collapseTokens()
 
-    return object : Iterator<LexerToken> {
-        private var token: LexerToken? = null
-        private var lastToken: LexerToken? = null
-        private var lastWasNewLine = false
+    var token: LexerToken?
+    var lastToken: LexerToken? = null
+    var lastWasNewLine = false
 
-        override fun hasNext(): Boolean {
-            token = lastToken
-            lastToken = null
-            while (newTokens.hasNext()) {
-                lastToken = newTokens.next()
-                if (token == null) {
-                    token = lastToken
-                    lastToken = null
-                    continue
-                }
-
-                if (token!!.type == KSharpTokenType.WhiteSpace) {
-                    if (lastWasNewLine) {
-                        break
-                    }
-                    token = lastToken
-                    lastToken = null
-                    continue
-                }
-
-                if (canCollapseTokens(token!!, lastToken!!)) {
-                    token = token!!.copy(
-                        type = KSharpTokenType.FunctionName,
-                        token = TextToken(
-                            text = "${token!!.text}${lastToken!!.text}",
-                            startOffset = token!!.startOffset,
-                            endOffset = lastToken!!.endOffset
-                        )
-                    )
-                    continue
-                }
-
-                lastWasNewLine = false
-                break
+    return generateIterator {
+        token = lastToken
+        lastToken = null
+        while (newTokens.hasNext()) {
+            lastToken = newTokens.next()
+            if (token == null) {
+                token = lastToken
+                lastToken = null
+                continue
             }
 
-            lastWasNewLine = token?.type == KSharpTokenType.NewLine
-            return token != null
+            if (token!!.type == KSharpTokenType.WhiteSpace) {
+                if (lastWasNewLine) {
+                    break
+                }
+                token = lastToken
+                lastToken = null
+                continue
+            }
+
+            if (canCollapseTokens(token!!, lastToken!!)) {
+                token = token!!.copy(
+                    type = KSharpTokenType.FunctionName,
+                    token = TextToken(
+                        text = "${token!!.text}${lastToken!!.text}",
+                        startOffset = token!!.startOffset,
+                        endOffset = lastToken!!.endOffset
+                    )
+                )
+                lastToken = null
+                continue
+            }
+
+            lastWasNewLine = false
+            break
         }
 
-        override fun next(): LexerToken = token!!.mapOperatorToken()
-
+        lastWasNewLine = token?.type == KSharpTokenType.NewLine
+        token?.mapOperatorToken()
     }
 }
-
 
 fun String.kSharpLexer() = lexer(charStream(), kSharpTokenFactory)
 fun Reader.kSharpLexer() = lexer(charStream(), kSharpTokenFactory)

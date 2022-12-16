@@ -121,16 +121,28 @@ fun <L, T, LV : LexerValue> Either<L, NodeCollector<LV>>.build(block: (items: Li
         ParserValue(block(it.collection.build()), it.tokens)
     }
 
-fun <T : Any, LV : LexerValue> WithNodeCollector<LV>.thenLoop(block: (Iterator<LV>) -> Either<*, ParserValue<T, LV>>): ErrorOrValue<NodeCollector<LV>> =
+fun <L, T, LV : LexerValue> Either<L, ParserValue<T, LV>>.resume() =
+    map {
+        val items = listBuilder<Any>()
+        items.add(it.value as Any)
+        NodeCollector(
+            items,
+            it.remainTokens
+        )
+    }
+
+fun <T : Any, LV : LexerValue> WithNodeCollector<LV>.thenLoopIndexed(block: (Iterator<LV>, index: Int) -> Either<*, ParserValue<T, LV>>): ErrorOrValue<NodeCollector<LV>> =
     this.flatMap {
         val returnValue: NodeCollector<LV>
+        var index = 0
         while (true) {
             val result = it.tokens.lookAHead { lexer ->
-                when (val result = block(lexer)) {
+                when (val result = block(lexer, index)) {
                     is Either.Right -> result.value.value.asLookAHeadResult()
                     is Either.Left -> BaseParserErrorCode.BreakLoop.new().asLookAHeadResult()
                 }
             }
+            index += 1
             if (result is Either.Right) {
                 it.collection.add(result.value.value as Any)
                 continue
@@ -144,4 +156,24 @@ fun <T : Any, LV : LexerValue> WithNodeCollector<LV>.thenLoop(block: (Iterator<L
             }
         }
         Either.Right(returnValue)
+    }
+
+fun <T : Any, LV : LexerValue> WithNodeCollector<LV>.thenLoop(block: (Iterator<LV>) -> Either<*, ParserValue<T, LV>>): ErrorOrValue<NodeCollector<LV>> =
+    thenLoopIndexed { iterator, _ ->
+        block(iterator)
+    }
+
+fun <T : LexerValue> Iterator<T>.collect(): WithNodeCollector<T> =
+    Either.Right(NodeCollector(listBuilder(), this))
+
+
+fun <L, T, LV : LexerValue> WithNodeCollector<LV>.consume(block: (Iterator<LV>) -> Either<L, ParserValue<T, LV>>): WithNodeCollector<LV> =
+    flatMap { collector ->
+        block(collector.tokens).map {
+            collector.collection.add(it.value as Any)
+            NodeCollector(
+                collector.collection,
+                it.remainTokens
+            )
+        }
     }

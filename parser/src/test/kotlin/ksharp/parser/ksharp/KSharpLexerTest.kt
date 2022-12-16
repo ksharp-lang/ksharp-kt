@@ -1,10 +1,9 @@
-package ksharp.parser
+package ksharp.parser.ksharp
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainAll
-import ksharp.parser.ksharp.KSharpTokenType
-import ksharp.parser.ksharp.collapseKSharpTokens
-import ksharp.parser.ksharp.kSharpLexer
+import ksharp.parser.LexerToken
+import ksharp.parser.TextToken
 
 class KSharpLexerTest : StringSpec({
     "Given lexer, check LowerCaseWord, UpperCaseWord, WhiteSpace token" {
@@ -62,11 +61,26 @@ class KSharpLexerTest : StringSpec({
             )
     }
 
+    "Given a lexer, check collapse tokens, should remove whitespace only" {
+        "import ksharp.test as math".kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence()
+            .toList()
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("import", 0, 5)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("ksharp", 7, 12)),
+                LexerToken(KSharpTokenType.Operator, TextToken(".", 13, 13)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("test", 14, 17)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("as", 19, 20)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("math", 22, 25))
+            )
+    }
+
     "Given a lexer, check collapse tokens to form function tokens" {
         "internal->wire.name  ->  wire".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
-            .toList().also(::println)
+            .toList()
             .shouldContainAll(
                 LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
@@ -80,7 +94,7 @@ class KSharpLexerTest : StringSpec({
         "internal->wire.name = \n    10".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
-            .toList().onEach(::println)
+            .toList()
             .shouldContainAll(
                 LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
@@ -96,7 +110,7 @@ class KSharpLexerTest : StringSpec({
         "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ?".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
-            .toList().onEach(::println)
+            .toList()
             .shouldContainAll(
                 LexerToken(
                     type = KSharpTokenType.Operator1,

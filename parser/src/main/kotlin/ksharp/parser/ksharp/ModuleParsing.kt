@@ -1,26 +1,21 @@
 package ksharp.parser.ksharp
 
-import ksharp.parser.LexerToken
-import ksharp.parser.build
-import ksharp.parser.thenLoop
+import ksharp.nodes.ImportNode
+import ksharp.nodes.ModuleNode
+import ksharp.nodes.NodeData
+import ksharp.parser.*
+import org.ksharp.common.Location
+import org.ksharp.common.cast
 
-/**
- * [module name grammar](https://docs.ksharp.org/rfc/syntax#modulename)
- */
-fun Iterator<LexerToken>.moduleName() =
-    consumeLowerCaseWord()
-        .thenLoop {
-            consumeDot()
-                .thenLowerCaseWord()
-                .build {
-                    it.joinToString("") { t ->
-                        t as LexerToken
-                        t.text
-                    }
-                }
+fun <L : LexerValue> Iterator<L>.consumeModule(name: String) =
+    collect()
+        .thenLoopIndexed { it, index ->
+            if (index != 0) it.consume(KSharpTokenType.NewLine)
+                .consume { consumeImport() }
+                .build { it.last().cast() }
+            else consumeImport()
         }.build {
-            it.joinToString("") { t ->
-                t as LexerToken
-                t.text
-            }
+            val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
+            val imports = it.filterIsInstance<ImportNode>()
+            ModuleNode(name, imports, location)
         }

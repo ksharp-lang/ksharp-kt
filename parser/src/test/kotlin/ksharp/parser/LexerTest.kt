@@ -105,7 +105,7 @@ class LexerTest : StringSpec({
             } else if (it == '\n') {
                 token(WordToken.NewLine, 0)
             } else null
-        }.toLogicalLexerToken(WordToken.NewLine)
+        }.toLogicalLexerToken("context", WordToken.NewLine)
             .asSequence()
             .toList().onEach(::println)
             .shouldBe(
@@ -115,6 +115,7 @@ class LexerTest : StringSpec({
                             type = WordToken.Word,
                             token = TextToken("Hello", 0, 4)
                         ),
+                        "context",
                         startPosition = Line(1) to Offset(0),
                         endPosition = Line(1) to Offset(4)
                     ),
@@ -123,6 +124,7 @@ class LexerTest : StringSpec({
                             type = WordToken.NewLine,
                             token = TextToken("\n", 5, 5)
                         ),
+                        "context",
                         startPosition = Line(2) to Offset(0),
                         endPosition = Line(2) to Offset(0)
                     ),
@@ -131,6 +133,7 @@ class LexerTest : StringSpec({
                             type = WordToken.Word,
                             token = TextToken("World", 6, 10)
                         ),
+                        "context",
                         startPosition = Line(2) to Offset(0),
                         endPosition = Line(2) to Offset(4)
                     ),
@@ -139,6 +142,7 @@ class LexerTest : StringSpec({
                             type = WordToken.NewLine,
                             token = TextToken("\n", 11, 11)
                         ),
+                        "context",
                         startPosition = Line(3) to Offset(0),
                         endPosition = Line(3) to Offset(0)
                     ),
@@ -147,6 +151,7 @@ class LexerTest : StringSpec({
                             type = WordToken.Word,
                             token = TextToken("FS", 12, 13)
                         ),
+                        "context",
                         startPosition = Line(3) to Offset(0),
                         endPosition = Line(3) to Offset(1)
                     )
