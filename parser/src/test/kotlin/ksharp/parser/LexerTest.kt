@@ -2,9 +2,11 @@ package ksharp.parser
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.Line
+import org.ksharp.common.Offset
 
 enum class WordToken : TokenType {
-    Word,
+    Word, NewLine
 }
 
 fun Lexer.consumeWord(): LexerToken {
@@ -92,6 +94,62 @@ class LexerTest : StringSpec({
                         type = WordToken.Word,
                         token = TextToken("man", 7, 9)
                     ),
+                )
+            )
+    }
+
+    "Given a lexer with newLines, convert tokens to logical tokens" {
+        "Hello\nWorld\nFS".lexer {
+            if (it.isLetter()) {
+                consumeWord()
+            } else if (it == '\n') {
+                token(WordToken.NewLine, 0)
+            } else null
+        }.toLogicalLexerToken(WordToken.NewLine)
+            .asSequence()
+            .toList().onEach(::println)
+            .shouldBe(
+                listOf(
+                    LogicalLexerToken(
+                        LexerToken(
+                            type = WordToken.Word,
+                            token = TextToken("Hello", 0, 4)
+                        ),
+                        startPosition = Line(1) to Offset(0),
+                        endPosition = Line(1) to Offset(4)
+                    ),
+                    LogicalLexerToken(
+                        LexerToken(
+                            type = WordToken.NewLine,
+                            token = TextToken("\n", 5, 5)
+                        ),
+                        startPosition = Line(2) to Offset(0),
+                        endPosition = Line(2) to Offset(0)
+                    ),
+                    LogicalLexerToken(
+                        LexerToken(
+                            type = WordToken.Word,
+                            token = TextToken("World", 6, 10)
+                        ),
+                        startPosition = Line(2) to Offset(0),
+                        endPosition = Line(2) to Offset(4)
+                    ),
+                    LogicalLexerToken(
+                        LexerToken(
+                            type = WordToken.NewLine,
+                            token = TextToken("\n", 11, 11)
+                        ),
+                        startPosition = Line(3) to Offset(0),
+                        endPosition = Line(3) to Offset(0)
+                    ),
+                    LogicalLexerToken(
+                        LexerToken(
+                            type = WordToken.Word,
+                            token = TextToken("FS", 12, 13)
+                        ),
+                        startPosition = Line(3) to Offset(0),
+                        endPosition = Line(3) to Offset(1)
+                    )
                 )
             )
     }

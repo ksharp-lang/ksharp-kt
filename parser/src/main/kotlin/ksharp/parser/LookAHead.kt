@@ -15,8 +15,8 @@ fun <T> T.asLookAHeadResult(leaveLastTokens: Int = 0): ErrorOrValue<LookAHeadRes
     Either.Right(LookAHeadResult(this, leaveLastTokens))
 
 @Mutable
-fun <T> Iterator<LexerToken>.lookAHead(block: (Iterator<LexerToken>) -> ErrorOrValue<LookAHeadResult<T>>): ParserResult<T> {
-    val collBuilder = listBuilder<LexerToken>()
+fun <T, LV : LexerValue> Iterator<LV>.lookAHead(block: (Iterator<LV>) -> ErrorOrValue<LookAHeadResult<T>>): ParserResult<T, LV> {
+    val collBuilder = listBuilder<LV>()
     val seq = generateSequence {
         if (hasNext()) {
             val value = next()

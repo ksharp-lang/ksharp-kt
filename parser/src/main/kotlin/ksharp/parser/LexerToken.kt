@@ -4,15 +4,36 @@ import org.ksharp.common.Position
 
 interface TokenType
 
+interface LexerValue {
+    val text: String
+    val type: TokenType
+}
+
+interface LexerDocumentPosition {
+    val startOffset: Int
+    val endOffset: Int
+}
+
+interface LexerLogicalPosition {
+    val startPosition: Position
+    val endPosition: Position
+}
+
 enum class BaseTokenType : TokenType {
     Unknown
 }
 
 data class LexerToken internal constructor(
-    val type: TokenType,
+    override val type: TokenType,
     private val token: TextToken
-) {
-    val text: String = token.text
-    val startPosition: Position = token.start
-    val endPosition: Position = token.end
+) : LexerValue, LexerDocumentPosition {
+    override val text: String = token.text
+    override val startOffset: Int = token.startOffset
+    override val endOffset: Int = token.endOffset
 }
+
+data class LogicalLexerToken internal constructor(
+    val token: LexerToken,
+    override val startPosition: Position,
+    override val endPosition: Position
+) : LexerValue by token, LexerDocumentPosition by token, LexerLogicalPosition
