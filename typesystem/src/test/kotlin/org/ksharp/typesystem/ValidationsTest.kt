@@ -1,9 +1,9 @@
 package org.ksharp.typesystem
 
 import io.kotest.core.spec.style.StringSpec
-import ksharp.test.shouldBeLeft
-import ksharp.test.shouldBeRight
 import org.ksharp.common.new
+import org.ksharp.test.shouldBeLeft
+import org.ksharp.test.shouldBeRight
 
 class ValidationsTest : StringSpec({
     "Test valid type names" {
