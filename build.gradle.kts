@@ -13,15 +13,17 @@ sonarqube {
 allprojects {
     val project = this
 
-    apply(plugin = "jacoco")
-
     group = "org.ksharp"
     version = "1.0.0"
 
     System.getenv("CUSTOM_GRADLE_BUILD_DIR")?.run {
         project.buildDir = File("$this/ksharp-kt/${project.name}")
     }
+}
 
+subprojects {
+    apply(plugin = "jacoco")
+    
     tasks {
         withType<Test> {
             useJUnitPlatform()
@@ -32,8 +34,10 @@ allprojects {
         }
         withType<JacocoReport> {
             reports.apply {
-                xml.required.set(false)
-                csv.required.set(false)
+                xml.required.set(true)
+                csv.required.set(true)
+                xml.outputLocation.set(layout.buildDirectory.file("reports/jacocoXml.xml"))
+                csv.outputLocation.set(layout.buildDirectory.file("reports/jacocoCSV.csv"))
                 html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
             }
         }
