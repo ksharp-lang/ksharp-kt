@@ -1,5 +1,11 @@
 plugins {
+    base
     id("org.sonarqube")
+    id("jacoco-report-aggregation")
+}
+
+repositories {
+    mavenCentral()
 }
 
 sonarqube {
@@ -8,6 +14,24 @@ sonarqube {
         property("sonar.organization", "ksharp-lang")
         property("sonar.host.url", "https://sonarcloud.io")
     }
+}
+
+dependencies {
+    subprojects.forEach {
+        jacocoAggregation(project(":${it.name}"))
+    }
+}
+
+reporting {
+    reports {
+        val testCodeCoverageReport by creating(JacocoCoverageReport::class) {
+            testType.set(TestSuiteType.UNIT_TEST)
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
 }
 
 allprojects {
@@ -23,7 +47,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "jacoco")
-    
+
     tasks {
         withType<Test> {
             useJUnitPlatform()
@@ -36,15 +60,13 @@ subprojects {
             reports.apply {
                 xml.required.set(true)
                 csv.required.set(true)
-                xml.outputLocation.set(layout.buildDirectory.file("reports/jacocoXml.xml"))
-                csv.outputLocation.set(layout.buildDirectory.file("reports/jacocoCSV.csv"))
                 html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
             }
         }
     }
 
     extensions.configure(JacocoPluginExtension::class) {
-        this.toolVersion = "0.8.7"
+        this.toolVersion = "0.8.8"
         reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
     }
 }
