@@ -1,3 +1,15 @@
+plugins {
+    id("org.sonarqube")
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "ksharp-lang_ksharp-kt")
+        property("sonar.organization", "ksharp-lang")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
+
 allprojects {
     val project = this
 
