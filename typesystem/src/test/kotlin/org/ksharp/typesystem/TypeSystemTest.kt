@@ -3,9 +3,9 @@ package org.ksharp.typesystem
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
-import ksharp.test.shouldBeLeft
-import ksharp.test.shouldBeRight
 import org.ksharp.common.new
+import org.ksharp.test.shouldBeLeft
+import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.annotations.annotation
 import org.ksharp.typesystem.types.*
 
