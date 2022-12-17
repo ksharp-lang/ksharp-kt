@@ -14,7 +14,7 @@ sonarqube {
         property("sonar.organization", "ksharp-lang")
         property("sonar.host.url", "https://sonarcloud.io")
         property(
-            "sonar.coverageReportPaths",
+            "sonar.coverage.jacoco.xmlReportPath",
             "${project.buildDir}/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
         )
     }
