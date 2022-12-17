@@ -13,6 +13,10 @@ sonarqube {
         property("sonar.projectKey", "ksharp-lang_ksharp-kt")
         property("sonar.organization", "ksharp-lang")
         property("sonar.host.url", "https://sonarcloud.io")
+        property(
+            "sonar.coverageReportPaths",
+            "${project.buildDir}/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
+        )
     }
 }
 
@@ -59,7 +63,7 @@ subprojects {
         withType<JacocoReport> {
             reports.apply {
                 xml.required.set(true)
-                csv.required.set(true)
+                csv.required.set(false)
                 html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
             }
         }
