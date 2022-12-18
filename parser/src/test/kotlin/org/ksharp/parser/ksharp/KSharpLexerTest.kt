@@ -1,7 +1,9 @@
 package org.ksharp.parser.ksharp
 
+import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.shouldBe
 import org.ksharp.parser.LexerToken
 import org.ksharp.parser.TextToken
 
@@ -60,7 +62,6 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 12, 12)),
             )
     }
-
     "Given a lexer, check collapse tokens, should remove whitespace only" {
         "import ksharp.test as math".kSharpLexer()
             .collapseKSharpTokens()
@@ -75,7 +76,6 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("math", 22, 25))
             )
     }
-
     "Given a lexer, check collapse tokens to form function tokens" {
         "internal->wire.name  ->  wire".kSharpLexer()
             .collapseKSharpTokens()
@@ -89,8 +89,7 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("wire", 25, 28)),
             )
     }
-
-    "Given a lexer, check collapse tokens, should leave really important whitespaces (those after a newline)" {
+    "Given a lexer, check collapse tokens, should leave really important whitespaces (those after a newline) inside the NewLine token" {
         "internal->wire.name = \n    10".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
@@ -100,12 +99,10 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("name", 15, 18)),
                 LexerToken(KSharpTokenType.Operator12, TextToken("=", 20, 20)),
-                LexerToken(KSharpTokenType.NewLine, TextToken("\n", 22, 22)),
-                LexerToken(KSharpTokenType.WhiteSpace, TextToken("    ", 23, 26)),
+                LexerToken(KSharpTokenType.NewLine, TextToken("\n    ", 22, 26)),
                 LexerToken(KSharpTokenType.Integer, TextToken("10", 27, 28)),
             )
     }
-
     "Given a lexer, map operators" {
         "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ?".kSharpLexer()
             .collapseKSharpTokens()
@@ -193,5 +190,72 @@ class KSharpLexerTest : StringSpec({
                     token = TextToken(text = "?", startOffset = 57, endOffset = 57)
                 )
             )
+    }
+})
+
+class KSharpLexerMarkExpressionsTest : ShouldSpec({
+    val endExpression = LexerToken(
+        type = KSharpTokenType.EndExpression,
+        token = TextToken("", 0, 0)
+    )
+    context("With just one expression without new line") {
+        "type Int = Integer"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions(endExpression)
+            .apply {
+                should("Should return one expression") {
+                    asSequence()
+                        .filter { it.type == KSharpTokenType.EndExpression }
+                        .count().shouldBe(1)
+                }
+            }
+    }
+    context("With just one expression and new line at end") {
+        "type Int = Integer\n"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions(endExpression)
+            .apply {
+                should("Should return one expression") {
+                    asSequence()
+                        .filter { it.type == KSharpTokenType.EndExpression }
+                        .count().shouldBe(1)
+                }
+            }
+    }
+    context("With just one expression but with new lines and spaces") {
+        """type
+           | Int =
+           | Integer
+        """.trimMargin().kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions(endExpression)
+            .apply {
+                should("Should return one expression") {
+                    asSequence()
+                        .filter { it.type == KSharpTokenType.EndExpression }
+                        .count().shouldBe(1)
+                }
+            }
+    }
+    context("With many expression") {
+        """type Int = Integer
+          |
+          |
+          |type 
+          | Int =
+          | Integer
+        """.trimMargin().kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions(endExpression)
+            .asSequence().toList().onEach(::println)
+            .apply {
+                should("Should return two expression") {
+                    asSequence()
+                        .filter { it.type == KSharpTokenType.EndExpression }
+                        .count().shouldBe(2)
+                }
+            }
     }
 })
