@@ -93,13 +93,14 @@ class KSharpLexerTest : StringSpec({
         "internal->wire.name = \n    10".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
-            .toList()
+            .toList().onEach { println("+++ $it") }
             .shouldContainAll(
                 LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("name", 15, 18)),
                 LexerToken(KSharpTokenType.Operator12, TextToken("=", 20, 20)),
-                LexerToken(KSharpTokenType.NewLine, TextToken("\n    ", 22, 26)),
+                LexerToken(KSharpTokenType.NewLine, TextToken("\n", 22, 22)),
+                LexerToken(KSharpTokenType.WhiteSpace, TextToken("    ", 23, 26)),
                 LexerToken(KSharpTokenType.Integer, TextToken("10", 27, 28)),
             )
     }
@@ -194,10 +195,12 @@ class KSharpLexerTest : StringSpec({
 })
 
 class KSharpLexerMarkExpressionsTest : ShouldSpec({
-    val endExpression = LexerToken(
-        type = KSharpTokenType.EndExpression,
-        token = TextToken("", 0, 0)
-    )
+    val endExpression: (Int) -> LexerToken = { index ->
+        LexerToken(
+            type = KSharpTokenType.EndExpression,
+            token = TextToken("$index", 0, 0)
+        )
+    }
     context("With just one expression without new line") {
         "type Int = Integer"
             .kSharpLexer()
@@ -206,8 +209,31 @@ class KSharpLexerMarkExpressionsTest : ShouldSpec({
             .apply {
                 should("Should return one expression") {
                     asSequence()
-                        .filter { it.type == KSharpTokenType.EndExpression }
-                        .count().shouldBe(1)
+                        .toList()
+                        .shouldBe(
+                            listOf(
+                                LexerToken(
+                                    type = KSharpTokenType.LowerCaseWord,
+                                    token = TextToken(text = "type", startOffset = 0, endOffset = 3)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.UpperCaseWord,
+                                    token = TextToken(text = "Int", startOffset = 5, endOffset = 7)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.Operator12,
+                                    token = TextToken(text = "=", startOffset = 9, endOffset = 9)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.UpperCaseWord,
+                                    token = TextToken(text = "Integer", startOffset = 11, endOffset = 17)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.EndExpression,
+                                    token = TextToken(text = "1", startOffset = 0, endOffset = 0)
+                                )
+                            )
+                        )
                 }
             }
     }
@@ -249,12 +275,104 @@ class KSharpLexerMarkExpressionsTest : ShouldSpec({
         """.trimMargin().kSharpLexer()
             .collapseKSharpTokens()
             .markExpressions(endExpression)
-            .asSequence().toList().onEach(::println)
             .apply {
                 should("Should return two expression") {
                     asSequence()
                         .filter { it.type == KSharpTokenType.EndExpression }
                         .count().shouldBe(2)
+                }
+            }
+    }
+    context("With nested expressions") {
+        """type Int = Integer
+          |
+          |
+          |let sum3 a = 
+          | let x = 3
+          |   a + 3
+        """.trimMargin().kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions(endExpression)
+            .apply {
+                should("Should return three expression") {
+                    asSequence()
+                        .toList()
+                        .shouldBe(
+                            listOf(
+                                LexerToken(
+                                    type = KSharpTokenType.LowerCaseWord,
+                                    token = TextToken(text = "type", startOffset = 0, endOffset = 3)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.UpperCaseWord,
+                                    token = TextToken(text = "Int", startOffset = 5, endOffset = 7)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.Operator12,
+                                    token = TextToken(text = "=", startOffset = 9, endOffset = 9)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.UpperCaseWord,
+                                    token = TextToken(text = "Integer", startOffset = 11, endOffset = 17)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.EndExpression,
+                                    token = TextToken(text = "1", startOffset = 0, endOffset = 0)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.LowerCaseWord,
+                                    token = TextToken(text = "let", startOffset = 21, endOffset = 23)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.LowerCaseWord,
+                                    token = TextToken(text = "sum3", startOffset = 25, endOffset = 28)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.LowerCaseWord,
+                                    token = TextToken(text = "a", startOffset = 30, endOffset = 30)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.Operator12,
+                                    token = TextToken(text = "=", startOffset = 32, endOffset = 32)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.LowerCaseWord,
+                                    token = TextToken(text = "let", startOffset = 36, endOffset = 38)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.LowerCaseWord,
+                                    token = TextToken(text = "x", startOffset = 40, endOffset = 40)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.Operator12,
+                                    token = TextToken(text = "=", startOffset = 42, endOffset = 42)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.Integer,
+                                    token = TextToken(text = "3", startOffset = 44, endOffset = 44)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.LowerCaseWord,
+                                    token = TextToken(text = "a", startOffset = 49, endOffset = 49)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.Operator3,
+                                    token = TextToken(text = "+", startOffset = 51, endOffset = 51)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.Integer,
+                                    token = TextToken(text = "3", startOffset = 53, endOffset = 53)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.EndExpression,
+                                    token = TextToken(text = "2", startOffset = 0, endOffset = 0)
+                                ),
+                                LexerToken(
+                                    type = KSharpTokenType.EndExpression,
+                                    token = TextToken(text = "3", startOffset = 0, endOffset = 0)
+                                )
+                            )
+                        )
                 }
             }
     }
