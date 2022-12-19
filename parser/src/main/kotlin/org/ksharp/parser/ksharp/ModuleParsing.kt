@@ -12,7 +12,7 @@ import org.ksharp.parser.thenLoop
 
 fun <L : LexerValue> Iterator<L>.consumeModule(name: String) =
     collect()
-        .thenLoop { it ->
+        .thenLoop {
             it.consumeImport()
         }.build {
             val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided

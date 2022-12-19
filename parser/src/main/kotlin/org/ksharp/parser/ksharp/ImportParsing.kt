@@ -14,7 +14,7 @@ fun <L : LexerValue> Iterator<L>.consumeModuleName() =
                 .thenLowerCaseWord()
                 .build { pair ->
                     pair.joinToString("") { t ->
-                        t as LexerToken
+                        t as LexerValue
                         t.text
                     }
                 }
