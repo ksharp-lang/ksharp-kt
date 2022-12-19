@@ -3,6 +3,7 @@ package org.ksharp.parser
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
+import org.ksharp.common.Location
 import org.ksharp.common.Offset
 import org.ksharp.parser.ksharp.KSharpTokenType
 
@@ -16,6 +17,7 @@ class LexerTokenTest : StringSpec({
         token.text.shouldBe("H")
         token.startOffset.shouldBe(2)
         token.endOffset.shouldBe(3)
+        token.location.shouldBe(Location.NoProvided)
     }
     "Assert LogicalLexerToken properties access" {
         val token = LexerToken(
@@ -31,6 +33,7 @@ class LexerTokenTest : StringSpec({
         logicalToken.endOffset.shouldBe(3)
         logicalToken.startPosition.shouldBe(Line(1) to Offset(0))
         logicalToken.endPosition.shouldBe(Line(2) to Offset(0))
+        logicalToken.location.shouldBe(Location("File", Line(1) to Offset(0)))
     }
     "Check LexerToken collapse" {
         val token1 = LexerToken(
