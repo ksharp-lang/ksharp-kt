@@ -235,6 +235,11 @@ private fun <L : CollapsableToken> Iterator<L>.prepareNewLines(): Iterator<L> {
     }
 }
 
+private fun <L : CollapsableToken> L.whenNewLine(block: (L) -> L?): L? =
+    if (type == KSharpTokenType.NewLine) {
+        block(this)
+    } else this
+
 fun <L : CollapsableToken> Iterator<L>.markExpressions(
     expressionToken: (index: Int) -> L,
 ): Iterator<L> {
@@ -243,37 +248,37 @@ fun <L : CollapsableToken> Iterator<L>.markExpressions(
     val expressions = Stack<Int>()
     val withEndExpressions = generateIterator {
         while (collapseNewLines.hasNext()) {
-            val token = collapseNewLines.next()
-            if (token.type == KSharpTokenType.NewLine) {
-                val len = token.text.length
-                if (len == 1) {
-                    if (expressions.isNotEmpty()) {
-                        expressions.pop()
+            val token = collapseNewLines
+                .next()
+                .whenNewLine {
+                    val len = it.text.length
+                    if (len == 1) {
+                        if (expressions.isNotEmpty()) {
+                            expressions.pop()
+                        }
+                        return@whenNewLine expressionToken(
+                            expressionId.incrementAndGet()
+                        )
                     }
-                    return@generateIterator expressionToken(
-                        expressionId.incrementAndGet()
-                    )
-                }
-                if (expressions.isEmpty()) {
+                    if (expressions.isEmpty()) {
+                        expressions.push(len)
+                        return@whenNewLine null
+                    }
+                    val lastIndent = expressions.peek()
+                    if (lastIndent == len) {
+                        return@whenNewLine null
+                    }
+                    if (lastIndent > len) {
+                        expressions.pop()
+                        return@whenNewLine expressionToken(
+                            expressionId.incrementAndGet()
+                        )
+                    }
                     expressions.push(len)
-                    continue
-                }
-                val lastIndent = expressions.peek()
-                if (lastIndent == len) {
-                    continue
-                }
-                if (lastIndent > len) {
-                    expressions.pop()
-                    return@generateIterator expressionToken(
-                        expressionId.incrementAndGet()
-                    )
-                }
-                expressions.push(len)
-                continue
-            }
+                    return@whenNewLine null
+                } ?: continue
             return@generateIterator token
         }
-
         if (expressions.isEmpty()) return@generateIterator null
         expressions.pop()
         return@generateIterator expressionToken(
