@@ -240,6 +240,29 @@ private fun <L : CollapsableToken> L.whenNewLine(block: (L) -> L?): L? =
         block(this)
     } else this
 
+private fun <L : CollapsableToken> Stack<Int>.processNewLine(
+    expressionId: AtomicInteger,
+    len: Int,
+    expressionToken: (index: Int) -> L
+): L? {
+    if (isEmpty()) {
+        push(len)
+        return null
+    }
+    val lastIndent = peek()
+    if (lastIndent == len) {
+        return null
+    }
+    if (lastIndent > len) {
+        pop()
+        return expressionToken(
+            expressionId.incrementAndGet()
+        )
+    }
+    push(len)
+    return null
+}
+
 fun <L : CollapsableToken> Iterator<L>.markExpressions(
     expressionToken: (index: Int) -> L,
 ): Iterator<L> {
@@ -260,22 +283,7 @@ fun <L : CollapsableToken> Iterator<L>.markExpressions(
                             expressionId.incrementAndGet()
                         )
                     }
-                    if (expressions.isEmpty()) {
-                        expressions.push(len)
-                        return@whenNewLine null
-                    }
-                    val lastIndent = expressions.peek()
-                    if (lastIndent == len) {
-                        return@whenNewLine null
-                    }
-                    if (lastIndent > len) {
-                        expressions.pop()
-                        return@whenNewLine expressionToken(
-                            expressionId.incrementAndGet()
-                        )
-                    }
-                    expressions.push(len)
-                    return@whenNewLine null
+                    expressions.processNewLine(expressionId, len, expressionToken)
                 } ?: continue
             return@generateIterator token
         }
