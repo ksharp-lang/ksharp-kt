@@ -14,7 +14,7 @@ fun <L : LexerValue> Iterator<L>.consumeModuleName() =
                 .thenLowerCaseWord()
                 .build { pair ->
                     pair.joinToString("") { t ->
-                        t as LexerToken
+                        t as LexerValue
                         t.text
                     }
                 }
@@ -32,8 +32,9 @@ fun <L : LexerValue> Iterator<L>.consumeImport() =
         }
         .thenKeyword("as")
         .thenLowerCaseWord()
+        .then(KSharpTokenType.EndExpression)
         .build {
             val moduleName = it[1] as String
-            val key = it.last().cast<LexerValue>().text
+            val key = it[it.size - 2].cast<LexerValue>().text
             ImportNode(moduleName, key, it.first().cast<LexerValue>().location)
         }

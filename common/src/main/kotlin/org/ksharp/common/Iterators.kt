@@ -1,6 +1,6 @@
 package org.ksharp.common
 
-fun <T> generateIterator(generator: () -> T?): Iterator<T> = object : Iterator<T> {
+inline fun <T> generateIterator(crossinline generator: () -> T?): Iterator<T> = object : Iterator<T> {
     private var current: T? = null
 
     override fun hasNext(): Boolean {

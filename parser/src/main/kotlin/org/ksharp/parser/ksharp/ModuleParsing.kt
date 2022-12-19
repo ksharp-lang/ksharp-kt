@@ -5,15 +5,15 @@ import org.ksharp.common.cast
 import org.ksharp.nodes.ImportNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.NodeData
-import org.ksharp.parser.*
+import org.ksharp.parser.LexerValue
+import org.ksharp.parser.build
+import org.ksharp.parser.collect
+import org.ksharp.parser.thenLoop
 
 fun <L : LexerValue> Iterator<L>.consumeModule(name: String) =
     collect()
-        .thenLoopIndexed { it, index ->
-            if (index != 0) it.consume(KSharpTokenType.NewLine)
-                .consume { consumeImport() }
-                .build { it.last().cast() }
-            else consumeImport()
+        .thenLoop {
+            it.consumeImport()
         }.build {
             val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
             val imports = it.filterIsInstance<ImportNode>()

@@ -5,6 +5,10 @@ import org.ksharp.common.Position
 
 interface TokenType
 
+interface CollapsableToken : LexerValue {
+    fun collapse(newType: TokenType, text: String, end: CollapsableToken): CollapsableToken
+}
+
 interface LexerValue {
     val text: String
     val type: TokenType
@@ -28,10 +32,23 @@ enum class BaseTokenType : TokenType {
 data class LexerToken internal constructor(
     override val type: TokenType,
     private val token: TextToken
-) : LexerValue, LexerDocumentPosition {
+) : LexerValue, LexerDocumentPosition, CollapsableToken {
     override val text: String = token.text
     override val startOffset: Int = token.startOffset
     override val endOffset: Int = token.endOffset
+
+    override fun collapse(newType: TokenType, text: String, end: CollapsableToken): CollapsableToken {
+        end as LexerDocumentPosition
+        return copy(
+            type = newType,
+            token = TextToken(
+                text = text,
+                startOffset = startOffset,
+                endOffset = end.endOffset
+            )
+        )
+    }
+
 }
 
 data class LogicalLexerToken internal constructor(
@@ -39,7 +56,19 @@ data class LogicalLexerToken internal constructor(
     override val context: String,
     override val startPosition: Position,
     override val endPosition: Position
-) : LexerValue by token, LexerDocumentPosition by token, LexerLogicalPosition
+) : LexerValue by token, LexerDocumentPosition by token, LexerLogicalPosition, CollapsableToken {
+
+    override fun collapse(newType: TokenType, text: String, end: CollapsableToken): CollapsableToken {
+        val newToken = token.collapse(newType, text, end)
+        end as LexerLogicalPosition
+        return copy(
+            token = newToken as LexerToken,
+            context = context,
+            startPosition = startPosition,
+            endPosition = end.endPosition
+        )
+    }
+}
 
 val LexerValue.location: Location
     get() =

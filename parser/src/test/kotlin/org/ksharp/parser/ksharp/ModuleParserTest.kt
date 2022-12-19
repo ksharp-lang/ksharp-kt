@@ -1,7 +1,9 @@
 package org.ksharp.parser.ksharp
 
 import io.kotest.core.spec.style.StringSpec
+import org.ksharp.common.Line
 import org.ksharp.common.Location
+import org.ksharp.common.Offset
 import org.ksharp.nodes.ImportNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.test.shouldBeRight
@@ -22,17 +24,25 @@ class ModuleParserTest : StringSpec({
                 )
             )
     }
-    "Parse a module without newline at the end" {
+    "Parse a module without newline at the end with locations" {
         """
             import ksharp.text as text
             import ksharp.math as math""".trimIndent()
-            .parseModule("File", false)
+            .parseModule("File", true)
             .shouldBeRight(
                 ModuleNode(
                     "File", listOf(
-                        ImportNode("ksharp.text", "text", Location.NoProvided),
-                        ImportNode("ksharp.math", "math", Location.NoProvided)
-                    ), Location.NoProvided
+                        ImportNode(
+                            "ksharp.text",
+                            "text",
+                            Location(context = "File", position = Line(value = 1) to Offset(value = 0))
+                        ),
+                        ImportNode(
+                            "ksharp.math",
+                            "math",
+                            Location(context = "File", position = Line(value = 2) to Offset(value = 0))
+                        )
+                    ), Location(context = "File", position = Line(value = 1) to Offset(value = 0))
                 )
             )
     }

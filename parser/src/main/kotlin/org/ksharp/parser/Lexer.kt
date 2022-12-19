@@ -75,8 +75,8 @@ fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> {
     return generateIterator {
         token = lastToken
         lastToken = null
-        while (this@collapseTokens.hasNext()) {
-            lastToken = this@collapseTokens.next()
+        while (hasNext()) {
+            lastToken = next()
             if (token == null) {
                 token = lastToken
                 continue
