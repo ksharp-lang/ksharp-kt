@@ -269,7 +269,15 @@ fun <L : CollapsableToken> Iterator<L>.markExpressions(
     val expressionId = AtomicInteger(0)
     val collapseNewLines = prepareNewLines()
     val expressions = Stack<Int>()
+    var discardAllExpressions = false
     val withEndExpressions = generateIterator {
+        if (discardAllExpressions) {
+            expressions.pop()
+            discardAllExpressions = expressions.isNotEmpty()
+            return@generateIterator expressionToken(
+                expressionId.incrementAndGet()
+            )
+        }
         while (collapseNewLines.hasNext()) {
             val token = collapseNewLines
                 .next()
@@ -278,6 +286,7 @@ fun <L : CollapsableToken> Iterator<L>.markExpressions(
                     if (len == 1) {
                         if (expressions.isNotEmpty()) {
                             expressions.pop()
+                            discardAllExpressions = expressions.isNotEmpty()
                         }
                         return@whenNewLine expressionToken(
                             expressionId.incrementAndGet()
