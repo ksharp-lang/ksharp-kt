@@ -125,7 +125,7 @@ fun <L, T, LV : LexerValue> Either<L, ParserValue<T, LV>>.resume() =
         )
     }
 
-fun <T : Any, LV : LexerValue> ConsumeResult<LV>.thenLoop(block: (Iterator<LV>) -> Either<*, ParserValue<T, LV>>): ConsumeResult<LV> =
+fun <T : Any, LV : LexerValue> ConsumeResult<LV>.thenLoop(block: (Iterator<LV>) -> ParserResult<T, LV>): ConsumeResult<LV> =
     this.flatMap {
         val returnValue: NodeCollector<LV>
         var index = 0
@@ -141,7 +141,7 @@ fun <T : Any, LV : LexerValue> ConsumeResult<LV>.thenLoop(block: (Iterator<LV>) 
                 it.collection.add(result.value.value as Any)
                 continue
             }
-            if (result is Either.Left<ParserError<LV>>) {
+            if (result is Either.Left) {
                 returnValue = NodeCollector(
                     it.collection,
                     result.value.remainTokens
