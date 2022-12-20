@@ -1,6 +1,7 @@
 package org.ksharp.parser
 
 import io.kotest.core.spec.style.StringSpec
+import org.ksharp.common.new
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
@@ -39,7 +40,17 @@ class ParserTest : StringSpec({
                 )
             )
     }
-
+    "Given a lexer iterator, consume tokens and later then but no moe tokens, should fail with error" {
+        generateSequence {
+            LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
+        }.take(1).iterator()
+            .consume(BaseTokenType.Unknown)
+            .then(BaseTokenType.Unknown)
+            .mapLeft {
+                it.error to it.remainTokens.asSequence().toList()
+            }
+            .shouldBeLeft(BaseParserErrorCode.EofToken.new() to emptyList())
+    }
     "Given a lexer iterator, fail first type and then consume another rule" {
         generateSequence {
             LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
