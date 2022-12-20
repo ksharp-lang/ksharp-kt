@@ -26,6 +26,10 @@ class ParserTest : StringSpec({
                     n as LexerToken
                     n.text.toInt()
                 }.sum()
+            }.or {
+                it.consume(TestParserTokenTypes.Test1)
+                    .build { 0 }
+
             }.map {
                 it.value to it.remainTokens.asSequence().toList()
             }.shouldBeRight(
