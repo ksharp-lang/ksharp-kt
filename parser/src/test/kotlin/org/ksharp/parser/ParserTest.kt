@@ -51,6 +51,21 @@ class ParserTest : StringSpec({
             }
             .shouldBeLeft(BaseParserErrorCode.EofToken.new() to emptyList())
     }
+    "Given a lexer iterator, consume tokens and later then but token is different type, should fail" {
+        generateSequence {
+            LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
+        }.take(3).iterator()
+            .consume(BaseTokenType.Unknown)
+            .then(TestParserTokenTypes.Test1)
+            .mapLeft {
+                it.error to it.remainTokens.asSequence().toList()
+            }
+            .shouldBeLeft(
+                BaseParserErrorCode.ExpectingToken.new("token" to "Test1", "received-token" to "Unknown:2") to listOf(
+                    LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
+                )
+            )
+    }
     "Given a lexer iterator, fail first type and then consume another rule" {
         generateSequence {
             LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
