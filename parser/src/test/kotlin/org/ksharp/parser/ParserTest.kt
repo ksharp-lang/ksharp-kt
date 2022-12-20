@@ -61,7 +61,7 @@ class ParserTest : StringSpec({
                 it.error to it.remainTokens.asSequence().toList()
             }
             .shouldBeLeft(
-                BaseParserErrorCode.ExpectingToken.new("token" to "Test1", "received-token" to "Unknown:2") to listOf(
+                BaseParserErrorCode.ExpectingToken.new("token" to "<Test1>", "received-token" to "Unknown:1") to listOf(
                     LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
                 )
             )
