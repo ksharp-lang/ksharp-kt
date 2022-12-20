@@ -41,17 +41,20 @@ class ParserTest : StringSpec({
             LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
         }.take(5).iterator()
             .consume(TestParserTokenTypes.Test1)
-            .shouldBeLeft()
-
-            .or(BaseTokenType.Unknown)
-            .then(BaseTokenType.Unknown)
-            .then(BaseTokenType.Unknown)
-            .build {
-                it.asSequence().map { n ->
-                    n as LexerToken
-                    n.text.toInt()
-                }.sum()
-            }.map {
+            .build { it as Any }
+            .also { it.shouldBeLeft() }
+            .or {
+                it.consume(BaseTokenType.Unknown)
+                    .then(BaseTokenType.Unknown)
+                    .then(BaseTokenType.Unknown)
+                    .build { data ->
+                        data.asSequence().map { n ->
+                            n as LexerToken
+                            n.text.toInt()
+                        }.sum()
+                    }
+            }
+            .map {
                 it.value to it.remainTokens.asSequence().toList()
             }.shouldBeRight(
                 3 to listOf(
@@ -144,8 +147,8 @@ class ParserTest : StringSpec({
             .consume(TestParserTokenTypes.Keyword, "import")
             .consume {
                 it.consume(TestParserTokenTypes.Keyword)
-                    .thenLoop {
-                        it.consume(TestParserTokenTypes.Operator, ".")
+                    .thenLoop { lexer ->
+                        lexer.consume(TestParserTokenTypes.Operator, ".")
                             .then(TestParserTokenTypes.Keyword)
                             .build { v ->
                                 v.joinToString("") { i ->
@@ -153,8 +156,8 @@ class ParserTest : StringSpec({
                                     i.text
                                 }
                             }
-                    }.build {
-                        it.joinToString("") { v ->
+                    }.build { data ->
+                        data.joinToString("") { v ->
                             when (v) {
                                 is String -> v
                                 is LexerToken -> v.text

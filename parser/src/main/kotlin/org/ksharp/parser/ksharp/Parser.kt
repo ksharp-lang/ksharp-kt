@@ -1,7 +1,7 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.ErrorOrValue
 import org.ksharp.common.ZeroPosition
+import org.ksharp.common.cast
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.parser.*
 import java.io.File
@@ -15,21 +15,24 @@ fun <L : LexerValue> Iterator<L>.consumeLowerCaseWord(text: String? = null) = if
     consume(KSharpTokenType.LowerCaseWord, text)
 } else consume(KSharpTokenType.LowerCaseWord)
 
-fun <L : LexerValue> WithNodeCollector<L>.thenLowerCaseWord(text: String? = null) = if (text != null) {
+fun <L : LexerValue> ConsumeResult<L>.thenLowerCaseWord(text: String? = null) = if (text != null) {
     then(KSharpTokenType.LowerCaseWord, text)
 } else then(KSharpTokenType.LowerCaseWord)
 
 fun <L : LexerValue> Iterator<L>.consumeKeyword(text: String) = consumeLowerCaseWord(text)
-fun <L : LexerValue> WithNodeCollector<L>.thenKeyword(text: String) = thenLowerCaseWord(text)
+fun <L : LexerValue> ConsumeResult<L>.thenKeyword(text: String) = thenLowerCaseWord(text)
 
 
-fun Reader.parseModule(context: String, withLocations: Boolean = false): ErrorOrValue<ModuleNode> =
+fun Reader.parseModule(
+    context: String,
+    withLocations: Boolean = false
+): ParserErrorOrValue<CollapsableToken, ModuleNode> =
     kSharpLexer()
         .collapseKSharpTokens()
         .let {
             if (withLocations) it.toLogicalLexerToken(context, KSharpTokenType.NewLine)
             else it
-        }
+        }.cast<Iterator<CollapsableToken>>()
         .markExpressions {
             val token = LexerToken(KSharpTokenType.EndExpression, TextToken("$it", 0, 0))
             if (withLocations) LogicalLexerToken(token, context, ZeroPosition, ZeroPosition)
