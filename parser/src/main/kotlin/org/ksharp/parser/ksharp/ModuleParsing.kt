@@ -5,12 +5,9 @@ import org.ksharp.common.cast
 import org.ksharp.nodes.ImportNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.NodeData
-import org.ksharp.parser.LexerValue
-import org.ksharp.parser.build
-import org.ksharp.parser.collect
-import org.ksharp.parser.thenLoop
+import org.ksharp.parser.*
 
-fun <L : LexerValue> Iterator<L>.consumeModule(name: String) =
+fun <L : LexerValue> Iterator<L>.consumeModule(name: String): ParserResult<ModuleNode, L> =
     collect()
         .thenLoop {
             it.consumeImport()

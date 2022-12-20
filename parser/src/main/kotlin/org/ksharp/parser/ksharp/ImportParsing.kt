@@ -29,8 +29,7 @@ fun <L : LexerValue> Iterator<L>.consumeImport() =
     consumeKeyword("import")
         .consume {
             it.consumeModuleName()
-        }
-        .thenKeyword("as")
+        }.thenKeyword("as")
         .thenLowerCaseWord()
         .then(KSharpTokenType.EndExpression)
         .build {

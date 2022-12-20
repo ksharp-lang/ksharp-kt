@@ -6,7 +6,8 @@ import org.ksharp.common.annotation.Mutable
 enum class BaseParserErrorCode(override val description: String) : ErrorCode {
     EofToken("No more tokens"),
     ExpectingToken("Expecting token {token} was {received-token}"),
-    BreakLoop("Breaking loop")
+    BreakLoop("Breaking loop"),
+    ConsumeTokenFailed("Consume token failed")
 }
 
 data class ParserValue<T, LV>(
@@ -20,6 +21,7 @@ data class ParserError<LV>(
 )
 
 typealias ParserResult<T, LV> = Either<ParserError<LV>, ParserValue<T, LV>>
+typealias ParserErrorOrValue<LV, V> = Either<ParserError<LV>, V>
 
 val <T, LV : LexerValue> ParserResult<T, LV>.remainTokens
     get() =
@@ -34,8 +36,7 @@ data class NodeCollector<T> internal constructor(
     internal val tokens: Iterator<T>
 )
 
-typealias ConsumeResult<T> = Either<Iterator<T>, NodeCollector<T>>
-typealias WithNodeCollector<T> = Either<*, NodeCollector<T>>
+typealias ConsumeResult<T> = Either<ParserError<T>, NodeCollector<T>>
 
 fun <T : LexerValue> Iterator<T>.consume(predicate: (T) -> Boolean): ConsumeResult<T> {
     if (hasNext()) {
@@ -50,10 +51,10 @@ fun <T : LexerValue> Iterator<T>.consume(predicate: (T) -> Boolean): ConsumeResu
                 )
             )
         } else {
-            Either.Left(cons(item))
+            Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), cons(item)))
         }
     }
-    return Either.Left(this)
+    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), this))
 }
 
 fun <T : LexerValue> Iterator<T>.consume(type: TokenType): ConsumeResult<T> = consume {
@@ -64,26 +65,19 @@ fun <T : LexerValue> Iterator<T>.consume(type: TokenType, text: String): Consume
     it.type == type && it.text == text
 }
 
-fun <T : LexerValue> Either<Iterator<T>, NodeCollector<T>>.or(predicate: (T) -> Boolean) =
+fun <LV : LexerValue, T> ParserResult<T, LV>.or(
+    rule: (Iterator<LV>) -> ParserResult<T, LV>
+) =
     when (this) {
-        is Either.Left -> value.consume(predicate)
+        is Either.Left -> rule(value.remainTokens)
         is Either.Right -> this
     }
 
-
-fun <T : LexerValue> Either<Iterator<T>, NodeCollector<T>>.or(type: TokenType) = or {
-    it.type == type
-}
-
-fun <T : LexerValue> Either<Iterator<T>, NodeCollector<T>>.or(type: TokenType, text: String) = or {
-    it.type == type && it.text == text
-}
-
-fun <T : LexerValue> WithNodeCollector<T>.then(
+fun <T : LexerValue> ConsumeResult<T>.then(
     predicate: (T) -> Boolean,
     error: (T) -> Error,
     discardToken: Boolean = false,
-): ErrorOrValue<NodeCollector<T>> =
+): ConsumeResult<T> =
     this.flatMap {
         val iterator = it.tokens
         if (iterator.hasNext()) {
@@ -92,12 +86,12 @@ fun <T : LexerValue> WithNodeCollector<T>.then(
                 if (!discardToken) it.collection.add(item)
                 Either.Right(it)
             } else {
-                Either.Left(error(item))
+                Either.Left(ParserError(error(item), iterator))
             }
-        } else Either.Left(BaseParserErrorCode.EofToken.new())
+        } else Either.Left(ParserError(BaseParserErrorCode.EofToken.new(), iterator))
     }
 
-fun <T : LexerValue> WithNodeCollector<T>.then(
+fun <T : LexerValue> ConsumeResult<T>.then(
     type: TokenType,
     discardToken: Boolean = false
 ) = then({
@@ -106,7 +100,7 @@ fun <T : LexerValue> WithNodeCollector<T>.then(
     BaseParserErrorCode.ExpectingToken.new("token" to "<$type>", "received-token" to "${it.type}:${it.text}")
 }, discardToken)
 
-fun <T : LexerValue> WithNodeCollector<T>.then(
+fun <T : LexerValue> ConsumeResult<T>.then(
     type: TokenType,
     text: String,
     discardToken: Boolean = false
@@ -116,7 +110,7 @@ fun <T : LexerValue> WithNodeCollector<T>.then(
     BaseParserErrorCode.ExpectingToken.new("token" to "'$type:$text'", "received-token" to "'${it.type}:${it.text}'")
 }, discardToken)
 
-fun <L, T, LV : LexerValue> Either<L, NodeCollector<LV>>.build(block: (items: List<Any>) -> T): Either<L, ParserValue<T, LV>> =
+fun <T, LV : LexerValue> ConsumeResult<LV>.build(block: (items: List<Any>) -> T): ParserResult<T, LV> =
     map {
         ParserValue(block(it.collection.build()), it.tokens)
     }
@@ -131,13 +125,13 @@ fun <L, T, LV : LexerValue> Either<L, ParserValue<T, LV>>.resume() =
         )
     }
 
-fun <T : Any, LV : LexerValue> WithNodeCollector<LV>.thenLoopIndexed(block: (Iterator<LV>, index: Int) -> Either<*, ParserValue<T, LV>>): ErrorOrValue<NodeCollector<LV>> =
+fun <T : Any, LV : LexerValue> ConsumeResult<LV>.thenLoop(block: (Iterator<LV>) -> ParserResult<T, LV>): ConsumeResult<LV> =
     this.flatMap {
         val returnValue: NodeCollector<LV>
         var index = 0
         while (true) {
             val result = it.tokens.lookAHead { lexer ->
-                when (val result = block(lexer, index)) {
+                when (val result = block(lexer)) {
                     is Either.Right -> result.value.value.asLookAHeadResult()
                     is Either.Left -> BaseParserErrorCode.BreakLoop.new().asLookAHeadResult()
                 }
@@ -147,7 +141,7 @@ fun <T : Any, LV : LexerValue> WithNodeCollector<LV>.thenLoopIndexed(block: (Ite
                 it.collection.add(result.value.value as Any)
                 continue
             }
-            if (result is Either.Left<ParserError<LV>>) {
+            if (result is Either.Left) {
                 returnValue = NodeCollector(
                     it.collection,
                     result.value.remainTokens
@@ -158,16 +152,11 @@ fun <T : Any, LV : LexerValue> WithNodeCollector<LV>.thenLoopIndexed(block: (Ite
         Either.Right(returnValue)
     }
 
-fun <T : Any, LV : LexerValue> WithNodeCollector<LV>.thenLoop(block: (Iterator<LV>) -> Either<*, ParserValue<T, LV>>): ErrorOrValue<NodeCollector<LV>> =
-    thenLoopIndexed { iterator, _ ->
-        block(iterator)
-    }
-
-fun <T : LexerValue> Iterator<T>.collect(): WithNodeCollector<T> =
+fun <T : LexerValue> Iterator<T>.collect(): ConsumeResult<T> =
     Either.Right(NodeCollector(listBuilder(), this))
 
 
-fun <L, T, LV : LexerValue> WithNodeCollector<LV>.consume(block: (Iterator<LV>) -> Either<L, ParserValue<T, LV>>): WithNodeCollector<LV> =
+fun <T, LV : LexerValue> ConsumeResult<LV>.consume(block: (Iterator<LV>) -> ParserResult<T, LV>): ConsumeResult<LV> =
     flatMap { collector ->
         block(collector.tokens).map {
             collector.collection.add(it.value as Any)

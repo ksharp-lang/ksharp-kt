@@ -1,6 +1,7 @@
 package org.ksharp.parser
 
 import io.kotest.core.spec.style.StringSpec
+import org.ksharp.common.new
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
@@ -26,6 +27,10 @@ class ParserTest : StringSpec({
                     n as LexerToken
                     n.text.toInt()
                 }.sum()
+            }.or {
+                it.consume(TestParserTokenTypes.Test1)
+                    .build { 0 }
+
             }.map {
                 it.value to it.remainTokens.asSequence().toList()
             }.shouldBeRight(
@@ -35,23 +40,51 @@ class ParserTest : StringSpec({
                 )
             )
     }
-
+    "Given a lexer iterator, consume tokens and later then but no more tokens, should fail with error" {
+        generateSequence {
+            LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
+        }.take(1).iterator()
+            .consume(BaseTokenType.Unknown)
+            .then(BaseTokenType.Unknown)
+            .mapLeft {
+                it.error to it.remainTokens.asSequence().toList()
+            }
+            .shouldBeLeft(BaseParserErrorCode.EofToken.new() to emptyList())
+    }
+    "Given a lexer iterator, consume tokens and later then but token is different type, should fail" {
+        generateSequence {
+            LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
+        }.take(3).iterator()
+            .consume(BaseTokenType.Unknown)
+            .then(TestParserTokenTypes.Test1)
+            .mapLeft {
+                it.error to it.remainTokens.asSequence().toList()
+            }
+            .shouldBeLeft(
+                BaseParserErrorCode.ExpectingToken.new("token" to "<Test1>", "received-token" to "Unknown:1") to listOf(
+                    LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
+                )
+            )
+    }
     "Given a lexer iterator, fail first type and then consume another rule" {
         generateSequence {
             LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
         }.take(5).iterator()
             .consume(TestParserTokenTypes.Test1)
-            .shouldBeLeft()
-
-            .or(BaseTokenType.Unknown)
-            .then(BaseTokenType.Unknown)
-            .then(BaseTokenType.Unknown)
-            .build {
-                it.asSequence().map { n ->
-                    n as LexerToken
-                    n.text.toInt()
-                }.sum()
-            }.map {
+            .build { it as Any }
+            .also { it.shouldBeLeft() }
+            .or {
+                it.consume(BaseTokenType.Unknown)
+                    .then(BaseTokenType.Unknown)
+                    .then(BaseTokenType.Unknown)
+                    .build { data ->
+                        data.asSequence().map { n ->
+                            n as LexerToken
+                            n.text.toInt()
+                        }.sum()
+                    }
+            }
+            .map {
                 it.value to it.remainTokens.asSequence().toList()
             }.shouldBeRight(
                 3 to listOf(
@@ -144,8 +177,8 @@ class ParserTest : StringSpec({
             .consume(TestParserTokenTypes.Keyword, "import")
             .consume {
                 it.consume(TestParserTokenTypes.Keyword)
-                    .thenLoop {
-                        it.consume(TestParserTokenTypes.Operator, ".")
+                    .thenLoop { lexer ->
+                        lexer.consume(TestParserTokenTypes.Operator, ".")
                             .then(TestParserTokenTypes.Keyword)
                             .build { v ->
                                 v.joinToString("") { i ->
@@ -153,8 +186,8 @@ class ParserTest : StringSpec({
                                     i.text
                                 }
                             }
-                    }.build {
-                        it.joinToString("") { v ->
+                    }.build { data ->
+                        data.joinToString("") { v ->
                             when (v) {
                                 is String -> v
                                 is LexerToken -> v.text
