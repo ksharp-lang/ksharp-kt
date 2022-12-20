@@ -40,7 +40,7 @@ class ParserTest : StringSpec({
                 )
             )
     }
-    "Given a lexer iterator, consume tokens and later then but no moe tokens, should fail with error" {
+    "Given a lexer iterator, consume tokens and later then but no more tokens, should fail with error" {
         generateSequence {
             LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
         }.take(1).iterator()
