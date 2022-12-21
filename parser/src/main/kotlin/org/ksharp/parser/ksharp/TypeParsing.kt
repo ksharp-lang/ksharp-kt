@@ -57,8 +57,6 @@ fun <L : LexerValue> ConsumeResult<L>.consumeType(internal: Boolean): KSharpPars
         .build { if (internal) it.toInternalType() else it.toPublicType() }
 
 fun <L : LexerValue> Iterator<L>.consumeTypeDeclaration(): KSharpParserResult<L> =
-    collect().consumeType(false)
-//
-//    consumeKeyword("internal", true)
-//        .consumeType(true)
-//        .or { collect(). }
+    consumeKeyword("internal", true)
+        .consumeType(true)
+        .or { collect().consumeType(false) }

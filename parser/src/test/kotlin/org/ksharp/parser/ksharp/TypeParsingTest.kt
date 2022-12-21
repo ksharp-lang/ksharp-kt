@@ -7,17 +7,26 @@ import org.ksharp.parser.TextToken
 import org.ksharp.test.shouldBeRight
 
 class TypeParserTest : StringSpec({
-    "Type using parenthesis" {
-        "type ListOfInt = (List Int)"
+//    "Type using parenthesis" {
+//        "type ListOfInt = (List Int)"
+//            .kSharpLexer()
+//            .collapseKSharpTokens()
+//            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+//            .consumeTypeDeclaration()
+//            .map { it.value }
+//            .shouldBeRight(TempNode(listOf("type", "ListOfInt", TempNode(listOf("List", TempNode(listOf("Int")))))))
+//    }
+    "Alias type" {
+        "type Integer = Int"
             .kSharpLexer()
             .collapseKSharpTokens()
             .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
             .consumeTypeDeclaration()
             .map { it.value }
-            .shouldBeRight(TempNode(listOf("type", "ListOfInt", TempNode(listOf("List", TempNode(listOf("Int")))))))
+            .shouldBeRight(TempNode(listOf("type", "Integer", TempNode(listOf("Int")))))
     }
-    "Alias type" {
-        "type Integer = Int"
+    "Internal Alias type" {
+        "internal type Integer = Int"
             .kSharpLexer()
             .collapseKSharpTokens()
             .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
