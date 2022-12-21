@@ -28,9 +28,8 @@ class ParserTest : StringSpec({
                     n.text.toInt()
                 }.sum()
             }.or {
-                it.consume(TestParserTokenTypes.Test1)
+                consume(TestParserTokenTypes.Test1)
                     .build { 0 }
-
             }.map {
                 it.value to it.remainTokens.asSequence().toList()
             }.shouldBeRight(
@@ -74,7 +73,7 @@ class ParserTest : StringSpec({
             .build { it as Any }
             .also { it.shouldBeLeft() }
             .or {
-                it.consume(BaseTokenType.Unknown)
+                consume(BaseTokenType.Unknown)
                     .then(BaseTokenType.Unknown)
                     .then(BaseTokenType.Unknown)
                     .build { data ->

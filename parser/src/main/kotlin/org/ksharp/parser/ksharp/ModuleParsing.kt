@@ -11,6 +11,7 @@ fun <L : LexerValue> Iterator<L>.consumeModule(name: String): ParserResult<Modul
     collect()
         .thenLoop {
             it.consumeImport()
+                .or { consumeTypeDeclaration() }
         }.build {
             val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
             val imports = it.filterIsInstance<ImportNode>()

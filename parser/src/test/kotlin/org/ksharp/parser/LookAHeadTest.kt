@@ -51,7 +51,7 @@ class LookAHeadTest : StringSpec({
         }.iterator()
             .lookAHead {
                 it.consume(3)
-                10.asLookAHeadResult()
+                10.asLookAHeadResult(it)
             }.also {
                 it.shouldBeRight()
             }.remainTokens
@@ -74,7 +74,7 @@ class LookAHeadTest : StringSpec({
         }.iterator()
             .lookAHead {
                 it.consume(3)
-                10.asLookAHeadResult(2)
+                10.asLookAHeadResult(it, 2)
             }.also {
                 it.shouldBeRight()
             }.remainTokens
