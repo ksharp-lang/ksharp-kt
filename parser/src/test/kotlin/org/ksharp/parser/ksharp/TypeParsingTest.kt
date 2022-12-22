@@ -37,6 +37,60 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Invalid type separator 2" {
+        "type Bool = True |- False"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .shouldBeLeft()
+            .mapLeft {
+                (it.error to it.remainTokens.asSequence().toList()).also {
+                    println(it)
+                }
+            }.shouldBeLeft(
+                BaseParserErrorCode.ExpectingToken.new(
+                    "token" to "<EndExpression>",
+                    "received-token" to "Operator9:|-"
+                ) to listOf(
+                    LexerToken(
+                        type = KSharpTokenType.UpperCaseWord,
+                        token = TextToken(text = "False", startOffset = 20, endOffset = 24)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.EndExpression,
+                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                    )
+                )
+            )
+    }
+    "Invalid type separator 3" {
+        "type Bool = True &- False"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .shouldBeLeft()
+            .mapLeft {
+                (it.error to it.remainTokens.asSequence().toList()).also {
+                    println(it)
+                }
+            }.shouldBeLeft(
+                BaseParserErrorCode.ExpectingToken.new(
+                    "token" to "<EndExpression>",
+                    "received-token" to "Operator7:&-"
+                ) to listOf(
+                    LexerToken(
+                        type = KSharpTokenType.UpperCaseWord,
+                        token = TextToken(text = "False", startOffset = 20, endOffset = 24)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.EndExpression,
+                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                    )
+                )
+            )
+    }
     "Type using parenthesis" {
         "type ListOfInt = (List Int)"
             .kSharpLexer()
