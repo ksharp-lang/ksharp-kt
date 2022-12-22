@@ -7,15 +7,50 @@ import org.ksharp.parser.TextToken
 import org.ksharp.test.shouldBeRight
 
 class TypeParserTest : StringSpec({
-//    "Type using parenthesis" {
-//        "type ListOfInt = (List Int)"
-//            .kSharpLexer()
-//            .collapseKSharpTokens()
-//            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-//            .consumeTypeDeclaration()
-//            .map { it.value }
-//            .shouldBeRight(TempNode(listOf("type", "ListOfInt", TempNode(listOf("List", TempNode(listOf("Int")))))))
-//    }
+    "Type using parenthesis" {
+        "type ListOfInt = (List Int)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "type",
+                        "ListOfInt",
+                        TempNode(listOf(TempNode(listOf("List", TempNode(listOf("Int"))))))
+                    )
+                )
+            )
+    }
+    "Function type using parenthesis" {
+        "type ListOfInt = (List Int) -> a -> a"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "type",
+                        "ListOfInt",
+                        TempNode(
+                            listOf(
+                                TempNode(listOf("List", TempNode(listOf("Int")))), "->", TempNode(
+                                    listOf(
+                                        "a", "->", TempNode(
+                                            listOf("a")
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+    }
     "Alias type" {
         "type Integer = Int"
             .kSharpLexer()
@@ -90,9 +125,7 @@ class TypeParserTest : StringSpec({
                         "type",
                         "Sum",
                         "a",
-                        TempNode(listOf("a")),
-                        TempNode(listOf("->", TempNode(listOf("a")))),
-                        TempNode(listOf("->", TempNode(listOf("a"))))
+                        TempNode(listOf("a", "->", TempNode(listOf("a", "->", TempNode(listOf("a")))))),
                     )
                 )
             )
@@ -110,8 +143,7 @@ class TypeParserTest : StringSpec({
                         "type",
                         "ToString",
                         "a",
-                        TempNode(listOf("a")),
-                        TempNode(listOf("->", TempNode(listOf("String"))))
+                        TempNode(listOf("a", "->", TempNode(listOf("String"))))
                     )
                 )
             )

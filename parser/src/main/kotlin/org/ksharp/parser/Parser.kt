@@ -57,6 +57,32 @@ fun <T : LexerValue> Iterator<T>.consume(predicate: (T) -> Boolean, discardToken
     return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), this))
 }
 
+fun <T, LV : LexerValue> Iterator<LV>.ifConsume(
+    predicate: (LV) -> Boolean,
+    discardToken: Boolean = false,
+    block: (tokens: ConsumeResult<LV>) -> ParserResult<T, LV>
+): ParserResult<T, LV> {
+    if (hasNext()) {
+        val item = next()
+        return if (predicate(item)) {
+            block(
+                Either.Right(
+                    NodeCollector(
+                        listBuilder<Any>().apply {
+                            if (!discardToken) add(item)
+                        },
+                        this
+                    )
+                )
+            )
+        } else {
+            Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), cons(item)))
+        }
+    }
+    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), this))
+}
+
+
 fun <T : LexerValue> Iterator<T>.consume(type: TokenType, discardToken: Boolean = false): ConsumeResult<T> = consume({
     it.type == type
 }, discardToken)
@@ -69,8 +95,25 @@ fun <T : LexerValue> Iterator<T>.consume(
     it.type == type && it.text == text
 }, discardToken)
 
+fun <T, LV : LexerValue> Iterator<LV>.ifConsume(
+    type: TokenType,
+    discardToken: Boolean = false,
+    block: (tokens: ConsumeResult<LV>) -> ParserResult<T, LV>
+): ParserResult<T, LV> = ifConsume({
+    it.type == type
+}, discardToken, block)
+
+fun <T, LV : LexerValue> Iterator<LV>.ifConsume(
+    type: TokenType,
+    text: String,
+    discardToken: Boolean = false,
+    block: (tokens: ConsumeResult<LV>) -> ParserResult<T, LV>
+): ParserResult<T, LV> = ifConsume({
+    it.type == type && it.text == text
+}, discardToken, block)
+
 fun <LV : LexerValue, T> ParserResult<T, LV>.or(
-    rule: Iterator<LV>.() -> ParserResult<T, LV>
+    rule: (tokens: Iterator<LV>) -> ParserResult<T, LV>
 ) =
     when (this) {
         is Either.Left -> rule(value.remainTokens)
@@ -129,6 +172,7 @@ fun <L, T, LV : LexerValue> Either<L, ParserValue<T, LV>>.resume() =
         )
     }
 
+
 fun <T : Any, LV : LexerValue> ConsumeResult<LV>.thenLoop(block: (Iterator<LV>) -> ParserResult<T, LV>): ConsumeResult<LV> =
     this.flatMap {
         val returnValue: NodeCollector<LV>
@@ -155,6 +199,50 @@ fun <T : Any, LV : LexerValue> ConsumeResult<LV>.thenLoop(block: (Iterator<LV>) 
         }
         Either.Right(returnValue)
     }
+
+fun <LV : LexerValue> ConsumeResult<LV>.thenIf(
+    predicate: (token: LV) -> Boolean,
+    discardToken: Boolean = false,
+    block: (ConsumeResult<LV>) -> ConsumeResult<LV>
+): ConsumeResult<LV> =
+    this.flatMap {
+        val tokens = it.tokens
+        if (tokens.hasNext()) {
+            val token = tokens.next()
+            if (predicate(token)) {
+                if (!discardToken) it.collection.add(token)
+                block(
+                    Either.Right(
+                        NodeCollector(
+                            it.collection,
+                            tokens
+                        )
+                    )
+                )
+            } else Either.Right(
+                NodeCollector(
+                    it.collection,
+                    tokens.cons(token)
+                )
+            )
+        } else Either.Right(it)
+    }
+
+fun <LV : LexerValue> ConsumeResult<LV>.thenIf(
+    type: TokenType,
+    discardToken: Boolean = false,
+    block: (ConsumeResult<LV>) -> ConsumeResult<LV>
+): ConsumeResult<LV> =
+    thenIf({ it.type == type }, discardToken, block)
+
+fun <LV : LexerValue> ConsumeResult<LV>.thenIf(
+    type: TokenType,
+    text: String,
+    discardToken: Boolean = false,
+    block: (ConsumeResult<LV>) -> ConsumeResult<LV>
+): ConsumeResult<LV> =
+    thenIf({ it.type == type && it.text == text }, discardToken, block)
+
 
 fun <T : LexerValue> Iterator<T>.collect(): ConsumeResult<T> =
     Either.Right(NodeCollector(listBuilder(), this))

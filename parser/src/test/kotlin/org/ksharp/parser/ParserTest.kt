@@ -28,7 +28,7 @@ class ParserTest : StringSpec({
                     n.text.toInt()
                 }.sum()
             }.or {
-                consume(TestParserTokenTypes.Test1)
+                it.consume(TestParserTokenTypes.Test1)
                     .build { 0 }
             }.map {
                 it.value to it.remainTokens.asSequence().toList()
@@ -73,7 +73,7 @@ class ParserTest : StringSpec({
             .build { it as Any }
             .also { it.shouldBeLeft() }
             .or {
-                consume(BaseTokenType.Unknown)
+                it.consume(BaseTokenType.Unknown)
                     .then(BaseTokenType.Unknown)
                     .then(BaseTokenType.Unknown)
                     .build { data ->
@@ -92,7 +92,6 @@ class ParserTest : StringSpec({
                 )
             )
     }
-
     "Given a lexer iterator, consume tokens, persisting last token" {
         listOf(
             keyword("kotlin"),
@@ -209,5 +208,119 @@ class ParserTest : StringSpec({
             .map {
                 it.value to it.remainTokens.asSequence().toList()
             }.shouldBeRight("import --- kotlin.sequence --- ; --- ;" to emptyList())
+    }
+    "Given a lexer iterator, use ifConsume" {
+        listOf(
+            keyword("kotlin"),
+            point(),
+            keyword("sequence"),
+            pcomma()
+        ).iterator()
+            .ifConsume(TestParserTokenTypes.Keyword) {
+                it.thenLoop { l ->
+                    l.consume(TestParserTokenTypes.Operator, ".")
+                        .then(TestParserTokenTypes.Keyword)
+                        .build { v ->
+                            v.joinToString("") { i ->
+                                i as LexerToken
+                                i.text
+                            }
+                        }
+                }.build { l ->
+                    l.joinToString("") { v ->
+                        when (v) {
+                            is String -> v
+                            is LexerToken -> v.text
+                            else -> ""
+                        }
+                    }
+                }
+            }
+            .map {
+                it.value to it.remainTokens.asSequence().toList()
+            }.shouldBeRight("kotlin.sequence" to listOf(pcomma()))
+    }
+    "Given a lexer iterator, use ifConsume and then use or" {
+        listOf(
+            keyword("kotlin"),
+            point(),
+            keyword("sequence"),
+            pcomma()
+        ).iterator()
+            .ifConsume(TestParserTokenTypes.Operator) {
+                it.build { "" }
+            }.or {
+                it.consume(TestParserTokenTypes.Keyword).thenLoop { l ->
+                    l.consume(TestParserTokenTypes.Operator, ".")
+                        .then(TestParserTokenTypes.Keyword)
+                        .build { v ->
+                            v.joinToString("") { i ->
+                                i as LexerToken
+                                i.text
+                            }
+                        }
+                }.build { l ->
+                    l.joinToString("") { v ->
+                        when (v) {
+                            is String -> v
+                            is LexerToken -> v.text
+                            else -> ""
+                        }
+                    }
+                }
+            }
+            .map {
+                it.value to it.remainTokens.asSequence().toList()
+            }.shouldBeRight("kotlin.sequence" to listOf(pcomma()))
+    }
+    "Given a lexer iterator, use consume and thenIf" {
+        listOf(
+            keyword("kotlin"),
+            point(),
+            keyword("sequence"),
+            pcomma()
+        ).iterator()
+            .consume(TestParserTokenTypes.Keyword)
+            .thenIf(TestParserTokenTypes.Operator, ".") {
+                it.then(TestParserTokenTypes.Keyword)
+            }
+            .then(TestParserTokenTypes.Operator, ";", true)
+            .build {
+                it.joinToString("") { v ->
+                    when (v) {
+                        is String -> v
+                        is LexerToken -> v.text
+                        else -> ""
+                    }
+                }
+            }.map {
+                it.value to it.remainTokens.asSequence().toList()
+            }.shouldBeRight("kotlin.sequence" to emptyList())
+    }
+    "Given a lexer iterator, use consume and thenIf but it fails" {
+        listOf(
+            keyword("kotlin"),
+            point(),
+            keyword("sequence"),
+            pcomma()
+        ).iterator()
+            .consume(TestParserTokenTypes.Keyword)
+            .thenIf(TestParserTokenTypes.Operator, ":") {
+                it.then(TestParserTokenTypes.Keyword)
+            }
+            .then(TestParserTokenTypes.Operator, ".")
+            .then(TestParserTokenTypes.Keyword)
+            .then(TestParserTokenTypes.Operator, ";", true)
+            .build {
+                it.joinToString("") { v ->
+                    when (v) {
+                        is String -> v
+                        is LexerToken -> v.text
+                        else -> ""
+                    }
+                }
+            }.map {
+                it.value to it.remainTokens.asSequence().toList()
+            }.shouldBeRight("kotlin.sequence" to emptyList())
     }
 })
