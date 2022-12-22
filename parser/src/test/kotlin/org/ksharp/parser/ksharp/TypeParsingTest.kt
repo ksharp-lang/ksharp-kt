@@ -10,7 +10,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
 class TypeParserTest : StringSpec({
-    "Invalid type separator 1" {
+    "Invalid type separator" {
         "type ListOfInt = List -- Int"
             .kSharpLexer()
             .collapseKSharpTokens()
@@ -25,33 +25,6 @@ class TypeParserTest : StringSpec({
                 BaseParserErrorCode.ExpectingToken.new(
                     "token" to "<EndExpression>",
                     "received-token" to "Operator3:--"
-                ) to listOf(
-                    LexerToken(
-                        type = KSharpTokenType.UpperCaseWord,
-                        token = TextToken(text = "Int", startOffset = 25, endOffset = 27)
-                    ),
-                    LexerToken(
-                        type = KSharpTokenType.EndExpression,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
-                    )
-                )
-            )
-    }
-    "Invalid type separator 2" {
-        "type ListOfInt = List *- Int"
-            .kSharpLexer()
-            .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
-            .shouldBeLeft()
-            .mapLeft {
-                (it.error to it.remainTokens.asSequence().toList()).also {
-                    println(it)
-                }
-            }.shouldBeLeft(
-                BaseParserErrorCode.ExpectingToken.new(
-                    "token" to "<EndExpression>",
-                    "received-token" to "Operator2:*-"
                 ) to listOf(
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
@@ -222,23 +195,6 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
-    "Intersection type" {
-        "type Num = Eq * Ord"
-            .kSharpLexer()
-            .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
-            .map { it.value }
-            .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type",
-                        "Num",
-                        TempNode(listOf("Eq", "*", TempNode(listOf("Ord"))))
-                    )
-                )
-            )
-    }
     "Internal function type" {
         "internal type ToString a = a -> String"
             .kSharpLexer()
@@ -256,6 +212,76 @@ class TypeParserTest : StringSpec({
                                 "ToString",
                                 "a",
                                 TempNode(listOf("a", "->", TempNode(listOf("String"))))
+                            )
+                        )
+                    )
+                )
+            )
+    }
+    "Union type" {
+        "type Bool = True | False"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "type",
+                        "Bool",
+                        TempNode(
+                            listOf(
+                                TempNode(
+                                    listOf(
+                                        "True"
+                                    )
+                                ),
+                                TempNode(
+                                    listOf(
+                                        "|",
+                                        TempNode(
+                                            listOf(
+                                                "False"
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+    }
+    "Intersection type" {
+        "type Num = Eq & Ord"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "type",
+                        "Num",
+                        TempNode(
+                            listOf(
+                                TempNode(
+                                    listOf(
+                                        "Eq"
+                                    )
+                                ),
+                                TempNode(
+                                    listOf(
+                                        "&",
+                                        TempNode(
+                                            listOf(
+                                                "Ord"
+                                            )
+                                        )
+                                    )
+                                )
                             )
                         )
                     )

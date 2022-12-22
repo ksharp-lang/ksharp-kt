@@ -19,7 +19,6 @@ fun <L : LexerValue> ConsumeResult<L>.thenIfTypeValueSeparator(block: (ConsumeRe
     thenIf({
         when {
             it.type == KSharpTokenType.Operator3 && it.text == "->" -> true
-            it.type == KSharpTokenType.Operator2 && it.text == "*" -> true
             it.type == KSharpTokenType.Comma -> true
             else -> false
         }
@@ -56,6 +55,14 @@ private fun <L : LexerValue> Iterator<L>.consumeTypeValue(): KSharpParserResult<
 
 fun <L : LexerValue> Iterator<L>.consumeTypeExpr(): KSharpParserResult<L> =
     consumeTypeValue()
+        .resume().thenLoop {
+            it.consumeTypeSetSeparator()
+                .consume { i -> i.consumeTypeValue() }
+                .build { i -> i.toTypeValue() }
+        }.build {
+            if (it.size == 1) it.first().cast<TempNode>()
+            else it.toTypeValue()
+        }
 
 fun <L : LexerValue> ConsumeResult<L>.consumeType(internal: Boolean): KSharpParserResult<L> =
     thenKeyword("type")
