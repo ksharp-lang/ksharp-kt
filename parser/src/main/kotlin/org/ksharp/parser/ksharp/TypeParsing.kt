@@ -73,7 +73,7 @@ fun <L : LexerValue> ConsumeResult<L>.consumeType(internal: Boolean): KSharpPars
                     param.last().cast<LexerValue>().text
                 }
         }
-        .thenAssignOperator(true)
+        .thenAssignOperator()
         .consume { it.consumeTypeExpr() }
         .thenEndExpression()
         .build { if (internal) it.toInternalType() else it.toPublicType() }

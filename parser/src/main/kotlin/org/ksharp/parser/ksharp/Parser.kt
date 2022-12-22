@@ -36,8 +36,8 @@ fun <L : LexerValue> ConsumeResult<L>.thenKeyword(text: String, discardToken: Bo
 
 fun <L : LexerValue> ConsumeResult<L>.thenEndExpression() = then(KSharpTokenType.EndExpression, true)
 
-fun <L : LexerValue> ConsumeResult<L>.thenAssignOperator(discardToken: Boolean = false) =
-    then(KSharpTokenType.Operator12, discardToken)
+fun <L : LexerValue> ConsumeResult<L>.thenAssignOperator() =
+    then(KSharpTokenType.Operator12, true)
 
 fun Reader.parseModule(
     context: String,
