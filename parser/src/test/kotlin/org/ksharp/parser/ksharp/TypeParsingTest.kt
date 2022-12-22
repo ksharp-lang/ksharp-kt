@@ -148,4 +148,57 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Tuple type" {
+        "type Point = Double , Double"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "type",
+                        "Point",
+                        TempNode(listOf("Double", ",", TempNode(listOf("Double"))))
+                    )
+                )
+            )
+    }
+    "Intersection type" {
+        "type Num = Eq * Ord"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "type",
+                        "Num",
+                        TempNode(listOf("Eq", "*", TempNode(listOf("Ord"))))
+                    )
+                )
+            )
+    }
+    "Internal function type" {
+        "internal type ToString a = a -> String"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "internal",
+                        "type",
+                        "ToString",
+                        "a",
+                        TempNode(listOf("a", "->", TempNode(listOf("String"))))
+                    )
+                )
+            )
+    }
 })
