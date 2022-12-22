@@ -1,12 +1,69 @@
 package org.ksharp.parser.ksharp
 
 import io.kotest.core.spec.style.StringSpec
+import org.ksharp.common.new
 import org.ksharp.nodes.TempNode
+import org.ksharp.parser.BaseParserErrorCode
 import org.ksharp.parser.LexerToken
 import org.ksharp.parser.TextToken
+import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
 class TypeParserTest : StringSpec({
+    "Invalid type separator 1" {
+        "type ListOfInt = List -- Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .shouldBeLeft()
+            .mapLeft {
+                (it.error to it.remainTokens.asSequence().toList()).also {
+                    println(it)
+                }
+            }.shouldBeLeft(
+                BaseParserErrorCode.ExpectingToken.new(
+                    "token" to "<EndExpression>",
+                    "received-token" to "Operator3:--"
+                ) to listOf(
+                    LexerToken(
+                        type = KSharpTokenType.UpperCaseWord,
+                        token = TextToken(text = "Int", startOffset = 25, endOffset = 27)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.EndExpression,
+                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                    )
+                )
+            )
+    }
+    "Invalid type separator 2" {
+        "type ListOfInt = List *- Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .shouldBeLeft()
+            .mapLeft {
+                (it.error to it.remainTokens.asSequence().toList()).also {
+                    println(it)
+                }
+            }.shouldBeLeft(
+                BaseParserErrorCode.ExpectingToken.new(
+                    "token" to "<EndExpression>",
+                    "received-token" to "Operator2:*-"
+                ) to listOf(
+                    LexerToken(
+                        type = KSharpTokenType.UpperCaseWord,
+                        token = TextToken(text = "Int", startOffset = 25, endOffset = 27)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.EndExpression,
+                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                    )
+                )
+            )
+    }
     "Type using parenthesis" {
         "type ListOfInt = (List Int)"
             .kSharpLexer()
