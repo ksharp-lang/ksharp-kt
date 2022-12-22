@@ -60,7 +60,7 @@ fun <L : LexerValue> Iterator<L>.consumeTypeExpr(): KSharpParserResult<L> =
                 .consume { i -> i.consumeTypeValue() }
                 .build { i -> i.toTypeValue() }
         }.build {
-            if (it.size == 1) it.first().cast<TempNode>()
+            if (it.size == 1) it.first().cast()
             else it.toTypeValue()
         }
 
