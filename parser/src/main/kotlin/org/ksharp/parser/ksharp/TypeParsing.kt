@@ -5,7 +5,7 @@ import org.ksharp.nodes.NodeData
 import org.ksharp.nodes.TempNode
 import org.ksharp.parser.*
 
-fun List<Any>.toInternalType() = toPublicType()
+fun List<Any>.toInternalType() = TempNode(listOf("internal", toPublicType()))
 fun List<Any>.toPublicType() = TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
 
 fun List<Any>.toTypeValue() = TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
@@ -20,7 +20,7 @@ fun <L : LexerValue> ConsumeResult<L>.thenIfTypeValueSeparator(block: (ConsumeRe
         when {
             it.type == KSharpTokenType.Operator3 && it.text == "->" -> true
             it.type == KSharpTokenType.Operator2 && it.text == "*" -> true
-            it.type == KSharpTokenType.Operator2 && it.text == "," -> true
+            it.type == KSharpTokenType.Comma -> true
             else -> false
         }
     }, false, block)
@@ -72,6 +72,6 @@ fun <L : LexerValue> ConsumeResult<L>.consumeType(internal: Boolean): KSharpPars
         .build { if (internal) it.toInternalType() else it.toPublicType() }
 
 fun <L : LexerValue> Iterator<L>.consumeTypeDeclaration(): KSharpParserResult<L> =
-    consumeKeyword("internal")
+    consumeKeyword("internal", true)
         .consumeType(true)
         .or { it.collect().consumeType(false) }

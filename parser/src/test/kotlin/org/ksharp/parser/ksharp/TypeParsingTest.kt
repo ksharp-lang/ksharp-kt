@@ -67,7 +67,7 @@ class TypeParserTest : StringSpec({
             .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
             .consumeTypeDeclaration()
             .map { it.value }
-            .shouldBeRight(TempNode(listOf("type", "Integer", TempNode(listOf("Int")))))
+            .shouldBeRight(TempNode(listOf("internal", TempNode(listOf("type", "Integer", TempNode(listOf("Int")))))))
     }
     "Parametric alias type" {
         "type ListOfInt = List Int"
@@ -193,10 +193,14 @@ class TypeParserTest : StringSpec({
                 TempNode(
                     listOf(
                         "internal",
-                        "type",
-                        "ToString",
-                        "a",
-                        TempNode(listOf("a", "->", TempNode(listOf("String"))))
+                        TempNode(
+                            listOf(
+                                "type",
+                                "ToString",
+                                "a",
+                                TempNode(listOf("a", "->", TempNode(listOf("String"))))
+                            )
+                        )
                     )
                 )
             )
