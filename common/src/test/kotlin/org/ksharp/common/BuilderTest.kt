@@ -10,6 +10,7 @@ class ListAccumulatorStateTest : StringSpec({
             add("World")
             size().shouldBe(2)
             build().shouldBe(listOf("Hello", "World"))
+            size().shouldBe(0)
         }
     }
     "Test map builder" {
