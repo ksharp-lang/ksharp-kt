@@ -315,8 +315,10 @@ fun <L : CollapsableToken> Iterator<L>.markExpressions(
 @Suppress("UNCHECKED_CAST")
 fun <L : CollapsableToken> Iterator<L>.collapseNewLines(): Iterator<L> = collapseTokens(
     predicate = { start, end ->
-        if (start.isEndExpression() && end.isEndExpression()) false
-        else start.isNewLineOrEndExpression() && end.isNewLineOrEndExpression()
+        when {
+            start.isEndExpression() && end.isEndExpression() -> false
+            else -> start.isNewLineOrEndExpression() && end.isNewLineOrEndExpression()
+        }
     }
 ) { start, end ->
     start.collapse(
