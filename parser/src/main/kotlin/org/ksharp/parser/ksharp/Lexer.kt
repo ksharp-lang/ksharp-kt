@@ -51,7 +51,7 @@ private val mappings = mapOf(
     '}' to KSharpTokenType.CloseCurlyBraces
 )
 
-private val operators = "+-*/%><=!&$#^?.\\|".toSet()
+private val operators = "+-*/%><=!&$#^?.\\|:".toSet()
 
 fun Char.isNewLine() = this == '\n'
 fun Char.isOperator() = operators.contains(this)
@@ -194,6 +194,12 @@ private fun LexerToken.mapOperatorToken(): LexerToken = when (type) {
     else -> this
 }
 
+fun LexerValue.isNewLineOrEndExpression() =
+    type == KSharpTokenType.NewLine || type == KSharpTokenType.EndExpression
+
+fun LexerValue.isEndExpression() =
+    type == KSharpTokenType.EndExpression
+
 
 @Suppress("UNCHECKED_CAST")
 private fun <L : CollapsableToken> Iterator<L>.prepareNewLines(): Iterator<L> {
@@ -243,6 +249,7 @@ private fun <L : CollapsableToken> L.whenNewLine(block: (L) -> L?): L? =
 private fun <L : CollapsableToken> Stack<Int>.processNewLine(
     expressionId: AtomicInteger,
     len: Int,
+    token: L,
     expressionToken: (index: Int) -> L
 ): L? {
     if (isEmpty()) {
@@ -251,7 +258,7 @@ private fun <L : CollapsableToken> Stack<Int>.processNewLine(
     }
     val lastIndent = peek()
     if (lastIndent == len) {
-        return null
+        return token
     }
     if (lastIndent > len) {
         pop()
@@ -292,7 +299,7 @@ fun <L : CollapsableToken> Iterator<L>.markExpressions(
                             expressionId.incrementAndGet()
                         )
                     }
-                    expressions.processNewLine(expressionId, len, expressionToken)
+                    expressions.processNewLine(expressionId, len, it, expressionToken)
                 } ?: continue
             return@generateIterator token
         }
@@ -301,10 +308,27 @@ fun <L : CollapsableToken> Iterator<L>.markExpressions(
         return@generateIterator expressionToken(
             expressionId.incrementAndGet()
         )
-    }
+    }.collapseNewLines()
     return withEndExpressions
 }
 
+@Suppress("UNCHECKED_CAST")
+fun <L : CollapsableToken> Iterator<L>.collapseNewLines(): Iterator<L> = collapseTokens(
+    predicate = { start, end ->
+        when {
+            start.isEndExpression() && end.isEndExpression() -> false
+            else -> start.isNewLineOrEndExpression() && end.isNewLineOrEndExpression()
+        }
+    }
+) { start, end ->
+    start.collapse(
+        if (start.isEndExpression() || end.isEndExpression())
+            KSharpTokenType.EndExpression
+        else KSharpTokenType.NewLine,
+        "",
+        end
+    ) as L
+}
 
 private fun Iterator<LexerToken>.ensureNewLineAtEnd(): Iterator<LexerToken> {
     var lastToken: LexerToken? = null

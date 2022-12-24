@@ -25,15 +25,15 @@ fun <L : LexerValue> Iterator<L>.consumeModuleName() =
             }
         }
 
-fun <L : LexerValue> Iterator<L>.consumeImport() =
+fun <L : LexerValue> Iterator<L>.consumeImport(): KSharpParserResult<L> =
     consumeKeyword("import")
         .consume {
             it.consumeModuleName()
-        }.thenKeyword("as")
+        }.thenKeyword("as", true)
         .thenLowerCaseWord()
-        .then(KSharpTokenType.EndExpression)
+        .endExpression()
         .build {
             val moduleName = it[1] as String
-            val key = it[it.size - 2].cast<LexerValue>().text
+            val key = it.last().cast<LexerValue>().text
             ImportNode(moduleName, key, it.first().cast<LexerValue>().location)
         }

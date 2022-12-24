@@ -56,6 +56,11 @@ fun <V> ListBuilder<V>.add(value: V) =
         it
     }
 
+fun <V> ListBuilder<V>.size() =
+    execute {
+        it.size
+    } ?: 0
+
 @Mutable
 fun <Key, Value> mapBuilder(): MapBuilder<Key, Value> = builder(
     mutableMapOf()
