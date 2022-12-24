@@ -18,14 +18,16 @@ class TypeParserTest : StringSpec({
             .consumeTypeDeclaration()
             .shouldBeLeft()
             .mapLeft {
-                (it.error to it.remainTokens.asSequence().toList()).also {
-                    println(it)
-                }
+                (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     "token" to "<EndExpression>",
                     "received-token" to "Operator3:--"
                 ) to listOf(
+                    LexerToken(
+                        type = KSharpTokenType.Operator3,
+                        token = TextToken(text = "--", startOffset = 22, endOffset = 23)
+                    ),
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
                         token = TextToken(text = "Int", startOffset = 25, endOffset = 27)
@@ -54,6 +56,10 @@ class TypeParserTest : StringSpec({
                     "received-token" to "Operator9:|-"
                 ) to listOf(
                     LexerToken(
+                        type = KSharpTokenType.Operator9,
+                        token = TextToken(text = "|-", startOffset = 17, endOffset = 18)
+                    ),
+                    LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
                         token = TextToken(text = "False", startOffset = 20, endOffset = 24)
                     ),
@@ -72,14 +78,16 @@ class TypeParserTest : StringSpec({
             .consumeTypeDeclaration()
             .shouldBeLeft()
             .mapLeft {
-                (it.error to it.remainTokens.asSequence().toList()).also {
-                    println(it)
-                }
+                (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     "token" to "<EndExpression>",
                     "received-token" to "Operator7:&-"
                 ) to listOf(
+                    LexerToken(
+                        type = KSharpTokenType.Operator7,
+                        token = TextToken(text = "&-", startOffset = 17, endOffset = 18)
+                    ),
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
                         token = TextToken(text = "False", startOffset = 20, endOffset = 24)
@@ -334,6 +342,51 @@ class TypeParserTest : StringSpec({
                                                 "Ord"
                                             )
                                         )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+    }
+    "Trait types" {
+        """
+            trait Num a =
+                sum :: a -> a -> a
+                prod :: a -> a -> a
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    list = listOf(
+                        "trait",
+                        "Num",
+                        "a",
+                        TempNode(
+                            list = listOf(
+                                "sum",
+                                TempNode(
+                                    list = listOf(
+                                        "a",
+                                        "->",
+                                        TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                    )
+                                )
+                            )
+                        ),
+                        TempNode(
+                            list = listOf(
+                                "prod",
+                                TempNode(
+                                    list = listOf(
+                                        "a",
+                                        "->",
+                                        TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
                                     )
                                 )
                             )

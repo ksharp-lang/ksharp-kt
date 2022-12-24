@@ -17,6 +17,7 @@ data class ParserValue<T, LV>(
 
 data class ParserError<LV>(
     val error: Error,
+    val consumedTokens: Boolean,
     val remainTokens: Iterator<LV>
 )
 
@@ -34,7 +35,9 @@ val <T, LV : LexerValue> ParserResult<T, LV>.remainTokens
 data class NodeCollector<T> internal constructor(
     internal val collection: ListBuilder<Any>,
     internal val tokens: Iterator<T>
-)
+) {
+    val consumed: Boolean get() = collection.size() > 0
+}
 
 typealias ConsumeResult<T> = Either<ParserError<T>, NodeCollector<T>>
 
@@ -51,10 +54,10 @@ fun <T : LexerValue> Iterator<T>.consume(predicate: (T) -> Boolean, discardToken
                 )
             )
         } else {
-            Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), cons(item)))
+            Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), false, cons(item)))
         }
     }
-    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), this))
+    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), false, this))
 }
 
 fun <T, LV : LexerValue> Iterator<LV>.ifConsume(
@@ -76,10 +79,10 @@ fun <T, LV : LexerValue> Iterator<LV>.ifConsume(
                 )
             )
         } else {
-            Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), cons(item)))
+            Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), false, cons(item)))
         }
     }
-    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), this))
+    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new(), false, this))
 }
 
 
@@ -116,7 +119,10 @@ fun <LV : LexerValue, T> ParserResult<T, LV>.or(
     rule: (tokens: Iterator<LV>) -> ParserResult<T, LV>
 ) =
     when (this) {
-        is Either.Left -> rule(value.remainTokens)
+        is Either.Left -> if (value.consumedTokens) {
+            this
+        } else rule(value.remainTokens)
+
         is Either.Right -> this
     }
 
@@ -133,9 +139,9 @@ fun <T : LexerValue> ConsumeResult<T>.then(
                 if (!discardToken) it.collection.add(item)
                 Either.Right(it)
             } else {
-                Either.Left(ParserError(error(item), iterator))
+                Either.Left(ParserError(error(item), it.consumed, iterator.cons(item)))
             }
-        } else Either.Left(ParserError(BaseParserErrorCode.EofToken.new(), iterator))
+        } else Either.Left(ParserError(BaseParserErrorCode.EofToken.new(), it.consumed, iterator))
     }
 
 fun <T : LexerValue> ConsumeResult<T>.then(
@@ -152,7 +158,7 @@ fun <T : LexerValue> ConsumeResult<T>.then(
     text: String,
     discardToken: Boolean = false
 ) = then({
-    it.type == type
+    it.type == type && it.text == text
 }, {
     BaseParserErrorCode.ExpectingToken.new("token" to "'$type:$text'", "received-token" to "'${it.type}:${it.text}'")
 }, discardToken)

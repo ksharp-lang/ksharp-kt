@@ -105,7 +105,7 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given a lexer, map operators" {
-        "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ?".kSharpLexer()
+        "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ? :".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
             .toList()
@@ -189,6 +189,10 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(
                     type = KSharpTokenType.Operator,
                     token = TextToken(text = "?", startOffset = 57, endOffset = 57)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Operator,
+                    token = TextToken(text = ":", startOffset = 59, endOffset = 59)
                 )
             )
     }
@@ -607,6 +611,64 @@ class KSharpLexerMarkExpressionsTest : ShouldSpec({
                                 ),
                             )
                         )
+                }
+            }
+    }
+    context("Check newline preservation on traits") {
+        """
+            trait Num =
+                sum
+                prod
+                
+                div
+                
+                
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions(endExpression)
+            .apply {
+                should("Should return the two new lines and one endExpression") {
+                    asSequence().toList().shouldBe(
+                        listOf(
+                            LexerToken(
+                                type = KSharpTokenType.LowerCaseWord,
+                                token = TextToken(text = "trait", startOffset = 0, endOffset = 4)
+                            ),
+                            LexerToken(
+                                type = KSharpTokenType.UpperCaseWord,
+                                token = TextToken(text = "Num", startOffset = 6, endOffset = 8)
+                            ),
+                            LexerToken(
+                                type = KSharpTokenType.Operator12,
+                                token = TextToken(text = "=", startOffset = 10, endOffset = 10)
+                            ),
+                            LexerToken(
+                                type = KSharpTokenType.LowerCaseWord,
+                                token = TextToken(text = "sum", startOffset = 16, endOffset = 18)
+                            ),
+                            LexerToken(
+                                type = KSharpTokenType.NewLine,
+                                token = TextToken(text = "\n    ", startOffset = 19, endOffset = 23)
+                            ),
+                            LexerToken(
+                                type = KSharpTokenType.LowerCaseWord,
+                                token = TextToken(text = "prod", startOffset = 24, endOffset = 27)
+                            ),
+                            LexerToken(
+                                type = KSharpTokenType.NewLine,
+                                token = TextToken(text = "", startOffset = 28, endOffset = 37)
+                            ),
+                            LexerToken(
+                                type = KSharpTokenType.LowerCaseWord,
+                                token = TextToken(text = "div", startOffset = 38, endOffset = 40)
+                            ),
+                            LexerToken(
+                                type = KSharpTokenType.EndExpression,
+                                token = TextToken(text = "", startOffset = 41, endOffset = 0)
+                            ),
+                        )
+                    )
                 }
             }
     }

@@ -9,7 +9,6 @@ import java.io.Reader
 
 typealias TokenFactory = Lexer.(c: Char) -> LexerToken?
 
-
 @Mutable
 class Lexer internal constructor(
     private val stream: CharStream,
@@ -67,10 +66,22 @@ fun <L : LexerValue> Iterator<L>.cons(token: L): Iterator<L> {
     return ConsIterator(token, this)
 }
 
-
-fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> {
-    var token: LexerToken?
-    var lastToken: LexerToken? = null
+@Suppress("UNCHECKED_CAST")
+/*
+    When collapsing preserve the type of the end token
+ */
+inline fun <L : CollapsableToken> Iterator<L>.collapseTokens(
+    crossinline predicate: (start: L, end: L) -> Boolean,
+    crossinline collapse: (start: L, end: L) -> L = { start, end ->
+        start.collapse(
+            end.type,
+            "${start.text}${end.text}",
+            end
+        ) as L
+    }
+): Iterator<L> {
+    var token: L?
+    var lastToken: L? = null
 
     return generateIterator {
         token = lastToken
@@ -81,14 +92,8 @@ fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> {
                 token = lastToken
                 continue
             }
-            if (lastToken!!.type == token!!.type) {
-                token = token!!.copy(
-                    token = TextToken(
-                        text = "${token!!.text}${lastToken!!.text}",
-                        startOffset = token!!.startOffset,
-                        endOffset = lastToken!!.endOffset
-                    )
-                )
+            if (predicate(token!!, lastToken!!)) {
+                token = collapse(token!!, lastToken!!)
                 lastToken = null
                 continue
             }
@@ -97,6 +102,11 @@ fun Iterator<LexerToken>.collapseTokens(): Iterator<LexerToken> {
         token
     }
 }
+
+@Suppress("UNCHECKED_CAST")
+fun <L : CollapsableToken> Iterator<L>.collapseTokens(): Iterator<L> = collapseTokens(predicate = { start, end ->
+    start.type == end.type
+})
 
 fun Iterator<LexerToken>.toLogicalLexerToken(context: String, newLineType: TokenType): Iterator<LogicalLexerToken> =
     object : Iterator<LogicalLexerToken> {

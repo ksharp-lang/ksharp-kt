@@ -42,6 +42,6 @@ fun <T, LV : LexerValue> Iterator<LV>.lookAHead(block: (Iterator<LV>) -> ErrorOr
     }.mapLeft {
         val collection = collBuilder.build()
         val newIter = sequenceOf(collection.asSequence(), this.asSequence()).flatten().iterator()
-        ParserError(it, newIter)
+        ParserError(it, false, newIter)
     }
 }

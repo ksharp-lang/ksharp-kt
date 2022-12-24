@@ -8,6 +8,7 @@ class ListAccumulatorStateTest : StringSpec({
         listBuilder<String>().apply {
             add("Hello")
             add("World")
+            size().shouldBe(2)
             build().shouldBe(listOf("Hello", "World"))
         }
     }

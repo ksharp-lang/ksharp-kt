@@ -31,7 +31,7 @@ fun <L : LexerValue> Iterator<L>.consumeImport(): KSharpParserResult<L> =
             it.consumeModuleName()
         }.thenKeyword("as", true)
         .thenLowerCaseWord()
-        .thenEndExpression()
+        .endExpression()
         .build {
             val moduleName = it[1] as String
             val key = it.last().cast<LexerValue>().text

@@ -1,7 +1,9 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.Either
 import org.ksharp.common.ZeroPosition
 import org.ksharp.common.cast
+import org.ksharp.common.new
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.NodeData
 import org.ksharp.parser.*
@@ -34,7 +36,34 @@ fun <L : LexerValue> Iterator<L>.consumeKeyword(text: String, discardToken: Bool
 fun <L : LexerValue> ConsumeResult<L>.thenKeyword(text: String, discardToken: Boolean = false) =
     thenLowerCaseWord(text, discardToken)
 
-fun <L : LexerValue> ConsumeResult<L>.thenEndExpression() = then(KSharpTokenType.EndExpression, true)
+fun <L : LexerValue> ConsumeResult<L>.endExpression() =
+    when (this) {
+        is Either.Left -> {
+            if (value.consumedTokens) {
+                val iter = value.remainTokens
+                var result = Either.Left(ParserError(value.error, true, emptySequence<L>().iterator()))
+                while (iter.hasNext()) {
+                    val tk = iter.next()
+                    if (tk.isNewLineOrEndExpression()) {
+                        result = Either.Left(ParserError(value.error, true, iter))
+                        break
+                    }
+                }
+                result
+            } else this
+        }
+
+        is Either.Right -> then(
+            { it.isNewLineOrEndExpression() },
+            {
+                BaseParserErrorCode.ExpectingToken.new(
+                    "token" to "<EndExpression>",
+                    "received-token" to "${it.type}:${it.text}"
+                )
+            },
+            true
+        )
+    }
 
 fun <L : LexerValue> ConsumeResult<L>.thenAssignOperator() =
     then(KSharpTokenType.Operator12, true)

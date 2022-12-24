@@ -5,10 +5,11 @@ import org.ksharp.nodes.NodeData
 import org.ksharp.nodes.TempNode
 import org.ksharp.parser.*
 
-fun List<Any>.toInternalType() = TempNode(listOf("internal", toPublicType()))
-fun List<Any>.toPublicType() = TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
+fun List<Any>.toType(internal: Boolean): NodeData =
+    if (internal) TempNode(listOf("internal", toType(false)))
+    else TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
 
-fun List<Any>.toTypeValue() = TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
+fun List<Any>.toTypeValue(): NodeData = TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
 
 fun <L : LexerValue> Iterator<L>.consumeTypeVariable() =
     consume({
@@ -35,7 +36,7 @@ fun <L : LexerValue> Iterator<L>.consumeTypeSetSeparator() =
 
 
 private fun <L : LexerValue> Iterator<L>.consumeTypeValue(): KSharpParserResult<L> =
-    ifConsume<NodeData, L>(KSharpTokenType.OpenParenthesis, true) {
+    ifConsume(KSharpTokenType.OpenParenthesis, true) {
         it.consume { i -> i.consumeTypeValue() }
             .then(KSharpTokenType.CloseParenthesis, true)
             .thenIfTypeValueSeparator { i ->
@@ -55,7 +56,8 @@ private fun <L : LexerValue> Iterator<L>.consumeTypeValue(): KSharpParserResult<
 
 fun <L : LexerValue> Iterator<L>.consumeTypeExpr(): KSharpParserResult<L> =
     consumeTypeValue()
-        .resume().thenLoop {
+        .resume()
+        .thenLoop {
             it.consumeTypeSetSeparator()
                 .consume { i -> i.consumeTypeValue() }
                 .build { i -> i.toTypeValue() }
@@ -63,6 +65,27 @@ fun <L : LexerValue> Iterator<L>.consumeTypeExpr(): KSharpParserResult<L> =
             if (it.size == 1) it.first().cast()
             else it.toTypeValue()
         }
+
+fun <L : LexerValue> Iterator<L>.consumeTraitFunction(): KSharpParserResult<L> =
+    consumeLowerCaseWord()
+        .then(KSharpTokenType.Operator, "::", true)
+        .consume { it.consumeTypeValue() }
+        .endExpression()
+        .build { it.toTypeValue() }
+
+fun <L : LexerValue> Iterator<L>.consumeTrait(internal: Boolean): KSharpParserResult<L> =
+    consumeKeyword("trait")
+        .thenUpperCaseWord()
+        .thenLoop {
+            it.consumeLowerCaseWord()
+                .build { param ->
+                    param.last().cast<LexerValue>().text
+                }
+        }.thenAssignOperator()
+        .thenLoop {
+            it.consumeTraitFunction()
+        }
+        .build { it.toType(internal) }
 
 fun <L : LexerValue> ConsumeResult<L>.consumeType(internal: Boolean): KSharpParserResult<L> =
     thenKeyword("type")
@@ -75,10 +98,13 @@ fun <L : LexerValue> ConsumeResult<L>.consumeType(internal: Boolean): KSharpPars
         }
         .thenAssignOperator()
         .consume { it.consumeTypeExpr() }
-        .thenEndExpression()
-        .build { if (internal) it.toInternalType() else it.toPublicType() }
+        .endExpression()
+        .build { it.toType(internal) }
+        .or {
+            it.consumeTrait(internal)
+        }
 
 fun <L : LexerValue> Iterator<L>.consumeTypeDeclaration(): KSharpParserResult<L> =
-    consumeKeyword("internal", true)
-        .consumeType(true)
-        .or { it.collect().consumeType(false) }
+    ifConsume(KSharpTokenType.LowerCaseWord, "internal", true) {
+        it.consumeType(true)
+    }.or { it.collect().consumeType(false) }
