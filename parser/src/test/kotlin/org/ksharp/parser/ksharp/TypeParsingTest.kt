@@ -395,4 +395,52 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Labels on types" {
+        "type KVStore k v = Map key: k value: v"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "type", "KVStore", "k", "v", TempNode(
+                            listOf(
+                                "Map",
+                                TempNode(
+                                    listOf(
+                                        "key:", "k",
+                                        TempNode(listOf("value:", "v"))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+
+        "type Point2D = x: Double, y: Double"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TempNode(
+                    listOf(
+                        "type", "Point2D", TempNode(
+                            listOf(
+                                "x:", "Double", ",",
+                                TempNode(
+                                    listOf(
+                                        "y:", "Double",
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+    }
 })

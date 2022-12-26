@@ -8,8 +8,8 @@ import org.ksharp.parser.LexerToken
 import org.ksharp.parser.TextToken
 
 class KSharpLexerTest : StringSpec({
-    "Given lexer, check LowerCaseWord, UpperCaseWord, WhiteSpace token" {
-        "type Name".kSharpLexer()
+    "Given lexer, check LowerCaseWord, UpperCaseWord, WhiteSpace, Label, Operator token" {
+        "type Name lbl: Name:".kSharpLexer()
             .asSequence()
             .toList()
             .shouldContainAll(
@@ -24,7 +24,27 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(
                     KSharpTokenType.UpperCaseWord,
                     TextToken("Name", 5, 8)
-                )
+                ),
+                LexerToken(
+                    KSharpTokenType.WhiteSpace,
+                    TextToken(" ", 9, 9)
+                ),
+                LexerToken(
+                    KSharpTokenType.Label,
+                    TextToken("lbl:", 10, 13)
+                ),
+                LexerToken(
+                    KSharpTokenType.WhiteSpace,
+                    TextToken(" ", 14, 14)
+                ),
+                LexerToken(
+                    KSharpTokenType.UpperCaseWord,
+                    TextToken("Name", 15, 18)
+                ),
+                LexerToken(
+                    KSharpTokenType.Operator,
+                    TextToken(":", 19, 19)
+                ),
             )
     }
     "Given lexer, check [], (), @" {
