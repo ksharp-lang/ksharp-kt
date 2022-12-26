@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger
 enum class KSharpTokenType : TokenType {
     UpperCaseWord,
     LowerCaseWord,
+    Label,
     FunctionName,
     Integer,
     Float,
@@ -71,6 +72,9 @@ fun Lexer.word(type: TokenType): LexerToken {
         val c = this.nextChar() ?: return token(type, 1)
         val value = c.isLetter() || c.isDigit() || c == '_'
         if (!value) {
+            if (type == KSharpTokenType.LowerCaseWord && c == ':') {
+                return token(KSharpTokenType.Label, 0)
+            }
             return token(type, 1)
         }
     }

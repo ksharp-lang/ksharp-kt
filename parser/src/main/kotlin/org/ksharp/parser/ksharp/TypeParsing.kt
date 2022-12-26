@@ -1,6 +1,7 @@
 package org.ksharp.parser.ksharp
 
 import org.ksharp.common.cast
+import org.ksharp.common.new
 import org.ksharp.nodes.NodeData
 import org.ksharp.nodes.TempNode
 import org.ksharp.parser.*
@@ -14,6 +15,13 @@ fun List<Any>.toTypeValue(): NodeData = TempNode(this.map { if (it is LexerValue
 fun <L : LexerValue> Iterator<L>.consumeTypeVariable() =
     consume({
         it.type == KSharpTokenType.LowerCaseWord || it.type == KSharpTokenType.UpperCaseWord
+    })
+
+fun <L : LexerValue> ConsumeResult<L>.thenTypeVariable() =
+    then({
+        it.type == KSharpTokenType.LowerCaseWord || it.type == KSharpTokenType.UpperCaseWord
+    }, {
+        BaseParserErrorCode.ExpectingToken.new("token" to "<Word>", "received-token" to "${it.type}:${it.text}")
     })
 
 fun <L : LexerValue> ConsumeResult<L>.thenIfTypeValueSeparator(block: (ConsumeResult<L>) -> ConsumeResult<L>) =
@@ -34,24 +42,25 @@ fun <L : LexerValue> Iterator<L>.consumeTypeSetSeparator() =
         }
     })
 
+private fun <L : LexerValue> ConsumeResult<L>.thenJoinType() =
+    thenIfTypeValueSeparator { i ->
+        i.consume { it.consumeTypeValue() }
+    }.build { it.toTypeValue() }
 
-private fun <L : LexerValue> Iterator<L>.consumeTypeValue(): KSharpParserResult<L> =
+fun <L : LexerValue> Iterator<L>.consumeTypeValue(): KSharpParserResult<L> =
     ifConsume(KSharpTokenType.OpenParenthesis, true) {
         it.consume { i -> i.consumeTypeValue() }
             .then(KSharpTokenType.CloseParenthesis, true)
-            .thenIfTypeValueSeparator { i ->
-                i.consume { consumeTypeValue() }
-            }
-            .build { i ->
-                i.toTypeValue()
-            }
+            .thenJoinType()
+    }.or {
+        it.consume(KSharpTokenType.Label)
+            .thenTypeVariable()
+            .thenLoop { i -> i.consumeTypeValue() }
+            .thenJoinType()
     }.or {
         it.consumeTypeVariable()
             .thenLoop { i -> i.consumeTypeValue() }
-            .thenIfTypeValueSeparator { i ->
-                i.consume { consumeTypeValue() }
-            }
-            .build { i -> i.toTypeValue() }
+            .thenJoinType()
     }
 
 fun <L : LexerValue> Iterator<L>.consumeTypeExpr(): KSharpParserResult<L> =
