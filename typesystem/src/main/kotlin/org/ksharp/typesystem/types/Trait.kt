@@ -9,11 +9,13 @@ import org.ksharp.typesystem.validateTypeParamName
 
 typealias TraitTypeFactoryBuilder = TraitTypeFactory.() -> Unit
 
+interface IsTrait
+
 data class TraitType internal constructor(
     val name: String,
     val param: String,
     val methods: Map<String, MethodType>,
-) : Type {
+) : Type, IsTrait {
 
     data class MethodType internal constructor(
         val name: String,
