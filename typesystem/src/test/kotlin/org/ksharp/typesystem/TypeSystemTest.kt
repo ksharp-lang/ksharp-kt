@@ -536,6 +536,57 @@ class TypeSystemTest : ShouldSpec({
                 }
             }
         }
+        context("Intersection types") {
+            typeSystem {
+                type("Int")
+                type("Char")
+                alias("OrdNum") {
+                    intersectionType {
+                        type("Num")
+                        type("Ord")
+                    }
+                }
+                trait("Num", "a") {
+                    method("(+)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
+                trait("Ord", "a") {
+                    method("(<=)") {
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
+                alias("Str") {
+                    intersectionType {
+                        type("Int")
+                        type("Char")
+                    }
+                }
+            }.apply {
+                context("Should contains the following types:") {
+                    should("OrdNum intersection type") {
+                        get("OrdNum").shouldBeType(
+                            IntersectionType(listOf(Concrete("Num"), Concrete("Ord"))),
+                            "(Num & Ord)"
+                        )
+                    }
+                }
+                should("Should have 5 types") {
+                    size.shouldBe(5)
+                }
+                should("Should have errors") {
+                    errors.shouldBe(
+                        listOf(
+                            TypeSystemErrorCode.IntersectionTypeShouldBeTraits.new("name" to "Int"),
+                            TypeSystemErrorCode.IntersectionTypeShouldBeTraits.new("name" to "Char"),
+                        )
+                    )
+                }
+            }
+        }
         context("Error validations") {
             typeSystem {
                 type("int")
