@@ -56,4 +56,23 @@ class LexerIteratorTest : StringSpec({
                 state.value.shouldBe(4)
             }
     }
+    "Generate a finite lexer iterator" {
+        val state = LexerState(0)
+        generateLexerIterator(state) {
+            state.update(state.value.inc())
+            if (state.value <= 3) {
+                TempToken(state.value.toString(), TempTokens.TOKEN)
+            } else null
+        }.asSequence()
+            .apply {
+                toList().shouldBe(
+                    listOf(
+                        TempToken("1", TempTokens.TOKEN),
+                        TempToken("2", TempTokens.TOKEN),
+                        TempToken("3", TempTokens.TOKEN)
+                    )
+                )
+                state.value.shouldBe(4)
+            }
+    }
 })
