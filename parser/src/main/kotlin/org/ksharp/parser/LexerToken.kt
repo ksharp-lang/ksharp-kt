@@ -5,8 +5,8 @@ import org.ksharp.common.Position
 
 interface TokenType
 
-interface CollapsableToken : LexerValue {
-    fun collapse(newType: TokenType, text: String, end: CollapsableToken): CollapsableToken
+interface Token : LexerValue {
+    fun collapse(newType: TokenType, text: String, end: Token): Token
 }
 
 interface LexerValue {
@@ -32,12 +32,12 @@ enum class BaseTokenType : TokenType {
 data class LexerToken internal constructor(
     override val type: TokenType,
     private val token: TextToken
-) : LexerValue, LexerDocumentPosition, CollapsableToken {
+) : LexerValue, LexerDocumentPosition, Token {
     override val text: String = token.text
     override val startOffset: Int = token.startOffset
     override val endOffset: Int = token.endOffset
 
-    override fun collapse(newType: TokenType, text: String, end: CollapsableToken): CollapsableToken {
+    override fun collapse(newType: TokenType, text: String, end: Token): Token {
         end as LexerDocumentPosition
         return copy(
             type = newType,
@@ -56,9 +56,9 @@ data class LogicalLexerToken internal constructor(
     override val context: String,
     override val startPosition: Position,
     override val endPosition: Position
-) : LexerValue by token, LexerDocumentPosition by token, LexerLogicalPosition, CollapsableToken {
+) : LexerValue by token, LexerDocumentPosition by token, LexerLogicalPosition, Token {
 
-    override fun collapse(newType: TokenType, text: String, end: CollapsableToken): CollapsableToken {
+    override fun collapse(newType: TokenType, text: String, end: Token): Token {
         val newToken = token.collapse(newType, text, end)
         end as LexerLogicalPosition
         return copy(
@@ -77,3 +77,8 @@ val LexerValue.location: Location
             val startPosition = startPosition
             Location(context, startPosition)
         } else Location.NoProvided
+
+
+typealias LexerTokenIterator<V> = LexerIterator<LexerToken, V>
+typealias LogicalLexerTokenIterator<V> = LexerIterator<LogicalLexerToken, V>
+typealias GenericLexerIterator<V> = LexerIterator<Token, V>

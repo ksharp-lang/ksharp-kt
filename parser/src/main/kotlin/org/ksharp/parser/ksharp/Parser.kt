@@ -71,13 +71,13 @@ fun <L : LexerValue> ConsumeResult<L>.thenAssignOperator() =
 fun Reader.parseModule(
     context: String,
     withLocations: Boolean = false
-): ParserErrorOrValue<CollapsableToken, ModuleNode> =
+): ParserErrorOrValue<Token, ModuleNode> =
     kSharpLexer()
         .collapseKSharpTokens()
         .let {
             if (withLocations) it.toLogicalLexerToken(context, KSharpTokenType.NewLine)
             else it
-        }.cast<Iterator<CollapsableToken>>()
+        }.cast<Iterator<Token>>()
         .markExpressions {
             val token = LexerToken(KSharpTokenType.EndExpression, TextToken("$it", 0, 0))
             if (withLocations) LogicalLexerToken(token, context, ZeroPosition, ZeroPosition)

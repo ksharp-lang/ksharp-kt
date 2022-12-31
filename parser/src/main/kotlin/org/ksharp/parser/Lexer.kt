@@ -1,18 +1,17 @@
 package org.ksharp.parser
 
-import org.ksharp.common.Line
-import org.ksharp.common.Offset
-import org.ksharp.common.Position
+import org.ksharp.common.*
 import org.ksharp.common.annotation.Mutable
-import org.ksharp.common.generateIterator
 import java.io.Reader
 
-typealias TokenFactory = Lexer.(c: Char) -> LexerToken?
+typealias TokenFactory<V> = Lexer<V>.(c: Char) -> LexerToken?
+
 
 @Mutable
-class Lexer internal constructor(
+class Lexer<V> internal constructor(
+    val state: LexerState<V>,
     private val stream: CharStream,
-    private val factory: TokenFactory
+    private val factory: TokenFactory<V>
 ) {
     fun token(type: TokenType, skip: Int) = LexerToken(type, stream.token(skip)!!)
     fun nextChar(): Char? = stream.read()
@@ -24,15 +23,17 @@ class Lexer internal constructor(
         }
 }
 
-fun lexer(content: CharStream, factory: TokenFactory): Iterator<LexerToken> {
-    val l = Lexer(content, factory)
-    return generateSequence {
+fun <V> lexer(initialState: V, content: CharStream, factory: TokenFactory<V>): Iterator<LexerToken> {
+    val state = LexerState(initialState)
+    val l = Lexer(state, content, factory)
+    return generateLexerIterator(state) {
         l.next()
-    }.iterator()
+    }.asIterator()
 }
 
-fun String.lexer(factory: TokenFactory) = lexer(charStream(), factory)
-fun Reader.lexer(factory: TokenFactory) = lexer(charStream(), factory)
+fun <V> String.lexer(initialState: V, factory: TokenFactory<V>) = lexer(initialState, charStream(), factory)
+fun <V> Reader.lexer(initialState: V, factory: TokenFactory<V>) = lexer(initialState, charStream(), factory)
+
 
 internal class ConsIterator<L : LexerValue> internal constructor(
     private val token: L,
@@ -70,7 +71,7 @@ fun <L : LexerValue> Iterator<L>.cons(token: L): Iterator<L> {
 /*
     When collapsing preserve the type of the end token
  */
-inline fun <L : CollapsableToken> Iterator<L>.collapseTokens(
+inline fun <L : Token> Iterator<L>.collapseTokens(
     crossinline predicate: (start: L, end: L) -> Boolean,
     crossinline collapse: (start: L, end: L) -> L = { start, end ->
         start.collapse(
@@ -104,7 +105,7 @@ inline fun <L : CollapsableToken> Iterator<L>.collapseTokens(
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <L : CollapsableToken> Iterator<L>.collapseTokens(): Iterator<L> = collapseTokens(predicate = { start, end ->
+fun <L : Token> Iterator<L>.collapseTokens(): Iterator<L> = collapseTokens(predicate = { start, end ->
     start.type == end.type
 })
 
