@@ -36,11 +36,9 @@ class LexerIteratorTest : StringSpec({
             stateVariable.update(stateVariable.value.inc())
             TempToken(stateVariable.value.toString(), TempTokens.TOKEN)
         }.apply {
-            state.value.shouldBe(5)
-        }.asSequence()
-            .take(5)
-            .apply {
-                toList().shouldBe(
+            asSequence()
+                .take(5)
+                .toList().shouldBe(
                     listOf(
                         TempToken("1", TempTokens.TOKEN),
                         TempToken("2", TempTokens.TOKEN),
@@ -49,7 +47,8 @@ class LexerIteratorTest : StringSpec({
                         TempToken("5", TempTokens.TOKEN)
                     )
                 )
-            }
+            state.value.shouldBe(5)
+        }
     }
     "Const a lexer iterator" {
         val state = LexerState(0)
@@ -100,20 +99,19 @@ class LexerIteratorTest : StringSpec({
             } else null
         }.cons(TempToken("99", TempTokens.TOKEN))
             .apply {
-                state.value.shouldBe(4)
+                state.value.shouldBe(0)
                 nextIterator().shouldBe(TempToken("99", TempTokens.TOKEN))
                 nextIterator().shouldBe(TempToken("1", TempTokens.TOKEN))
             }.cons(TempToken("50", TempTokens.TOKEN))
-            .asSequence()
             .apply {
-                toList().shouldBe(
+                asSequence().toList().shouldBe(
                     listOf(
                         TempToken("50", TempTokens.TOKEN),
                         TempToken("2", TempTokens.TOKEN),
                         TempToken("3", TempTokens.TOKEN)
                     )
                 )
-                stateVariable.value.shouldBe(4)
+                state.value.shouldBe(4)
             }
     }
 })
