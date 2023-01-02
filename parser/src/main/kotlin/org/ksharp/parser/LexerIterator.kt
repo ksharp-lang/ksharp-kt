@@ -47,8 +47,7 @@ internal class ConsLexerIterator<T : Token, V> internal constructor(
     internal var tokenConsumed = false
         private set
 
-    override val state: LexerState<V>
-        get() = iterator.state
+    override val state: LexerState<V> = iterator.state
 
     override fun hasNext(): Boolean {
         if (!tokenConsumed) {

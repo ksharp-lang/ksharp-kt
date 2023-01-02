@@ -1,5 +1,6 @@
 package org.ksharp.parser
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
@@ -18,6 +19,17 @@ private fun LexerIterator<TempToken, Int>.nextIterator(): TempToken =
     if (hasNext()) next() else throw NoSuchElementException()
 
 class LexerIteratorTest : StringSpec({
+    "Check call next before hasNext" {
+        val stateVariable = LexerState(0)
+        generateLexerIterator(stateVariable) {
+            stateVariable.update(stateVariable.value.inc())
+            TempToken(stateVariable.value.toString(), TempTokens.TOKEN)
+        }.apply {
+            shouldThrow<NoSuchElementException> {
+                next()
+            }
+        }
+    }
     "Generate a lexer iterator" {
         val stateVariable = LexerState(0)
         generateLexerIterator(stateVariable) {
@@ -80,14 +92,15 @@ class LexerIteratorTest : StringSpec({
             }
     }
     "Check cons, next and cons again" {
-        val state = LexerState(0)
-        generateLexerIterator(state) {
-            state.update(state.value.inc())
-            if (state.value <= 3) {
-                TempToken(state.value.toString(), TempTokens.TOKEN)
+        val stateVariable = LexerState(0)
+        generateLexerIterator(stateVariable) {
+            stateVariable.update(stateVariable.value.inc())
+            if (stateVariable.value <= 3) {
+                TempToken(stateVariable.value.toString(), TempTokens.TOKEN)
             } else null
         }.cons(TempToken("99", TempTokens.TOKEN))
             .apply {
+                state.value.shouldBe(4)
                 nextIterator().shouldBe(TempToken("99", TempTokens.TOKEN))
                 nextIterator().shouldBe(TempToken("1", TempTokens.TOKEN))
             }.cons(TempToken("50", TempTokens.TOKEN))
@@ -100,7 +113,7 @@ class LexerIteratorTest : StringSpec({
                         TempToken("3", TempTokens.TOKEN)
                     )
                 )
-                state.value.shouldBe(4)
+                stateVariable.value.shouldBe(4)
             }
     }
 })
