@@ -29,8 +29,7 @@ inline fun <T : Token, V> generateLexerIterator(
 ): LexerIterator<T, V> {
     return object : LexerIterator<T, V> {
         private var current: T? = null
-        override val state: LexerState<V>
-            get() = state
+        override val state: LexerState<V> = state
 
         override fun hasNext(): Boolean {
             current = generator()

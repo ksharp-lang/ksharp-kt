@@ -19,10 +19,12 @@ private fun LexerIterator<TempToken, Int>.nextIterator(): TempToken =
 
 class LexerIteratorTest : StringSpec({
     "Generate a lexer iterator" {
-        val state = LexerState(0)
-        generateLexerIterator(state) {
-            state.update(state.value.inc())
-            TempToken(state.value.toString(), TempTokens.TOKEN)
+        val stateVariable = LexerState(0)
+        generateLexerIterator(stateVariable) {
+            stateVariable.update(stateVariable.value.inc())
+            TempToken(stateVariable.value.toString(), TempTokens.TOKEN)
+        }.apply {
+            state.value.shouldBe(5)
         }.asSequence()
             .take(5)
             .apply {
@@ -35,7 +37,6 @@ class LexerIteratorTest : StringSpec({
                         TempToken("5", TempTokens.TOKEN)
                     )
                 )
-                state.value.shouldBe(5)
             }
     }
     "Const a lexer iterator" {
