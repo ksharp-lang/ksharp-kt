@@ -9,7 +9,7 @@ enum class WordToken : TokenType {
     Word, NewLine
 }
 
-fun Lexer.consumeWord(): LexerToken {
+fun Lexer<String>.consumeWord(): LexerToken {
     while (true) {
         val c = nextChar()
         if (c == null || !c.isLetter()) {
@@ -20,7 +20,7 @@ fun Lexer.consumeWord(): LexerToken {
 
 class LexerTest : StringSpec({
     "Given a lexer without rules should return unknown tokens" {
-        "He Man".reader().lexer {
+        "He Man".reader().lexer("") {
             null
         }.asSequence().toList().shouldBe(
             listOf(
@@ -52,7 +52,7 @@ class LexerTest : StringSpec({
         )
     }
     "Given a lexer with a rule, should return tokens" {
-        "He man".lexer {
+        "He man".lexer("") {
             if (it.isLetter()) {
                 consumeWord()
             } else null
@@ -75,7 +75,7 @@ class LexerTest : StringSpec({
     }
 
     "Given a lexer, calling collapse should return just three tokens" {
-        "He --- man".lexer {
+        "He --- man".lexer("") {
             if (it.isLetter()) {
                 consumeWord()
             } else null
@@ -99,7 +99,7 @@ class LexerTest : StringSpec({
     }
 
     "Given a lexer with newLines, convert tokens to logical tokens" {
-        "Hello\nWorld\nFS".lexer {
+        "Hello\nWorld\nFS".lexer("") {
             if (it.isLetter()) {
                 consumeWord()
             } else if (it == '\n') {

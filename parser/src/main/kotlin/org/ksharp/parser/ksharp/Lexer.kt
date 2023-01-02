@@ -6,6 +6,10 @@ import java.io.Reader
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
+data class KSharpLexerState(val consumeLabels: Boolean = false)
+
+typealias KSharpLexer = Lexer<KSharpLexerState>
+
 enum class KSharpTokenType : TokenType {
     UpperCaseWord,
     LowerCaseWord,
@@ -58,7 +62,7 @@ fun Char.isNewLine() = this == '\n'
 fun Char.isOperator() = operators.contains(this)
 fun Char.isDot() = this == '.'
 
-fun Lexer.operator(): LexerToken {
+fun KSharpLexer.operator(): LexerToken {
     while (true) {
         val c = this.nextChar() ?: return token(KSharpTokenType.Operator, 1)
         if (!c.isOperator()) {
@@ -67,7 +71,7 @@ fun Lexer.operator(): LexerToken {
     }
 }
 
-fun Lexer.word(type: TokenType): LexerToken {
+fun KSharpLexer.word(type: TokenType): LexerToken {
     while (true) {
         val c = this.nextChar() ?: return token(type, 1)
         val value = c.isLetter() || c.isDigit() || c == '_'
@@ -80,7 +84,7 @@ fun Lexer.word(type: TokenType): LexerToken {
     }
 }
 
-fun Lexer.number(): LexerToken {
+fun KSharpLexer.number(): LexerToken {
     while (true) {
         val c = this.nextChar() ?: return token(KSharpTokenType.Integer, 1)
         if (c.isDot()) return decimal(KSharpTokenType.Integer, 2)
@@ -90,7 +94,7 @@ fun Lexer.number(): LexerToken {
     }
 }
 
-fun Lexer.decimal(type: TokenType, skip: Int): LexerToken {
+fun KSharpLexer.decimal(type: TokenType, skip: Int): LexerToken {
     var start = false
     while (true) {
         val c = this.nextChar() ?: return token(type, skip)
@@ -103,7 +107,7 @@ fun Lexer.decimal(type: TokenType, skip: Int): LexerToken {
 }
 
 
-fun Lexer.newLine(): LexerToken {
+fun KSharpLexer.newLine(): LexerToken {
     while (true) {
         val c = this.nextChar() ?: return token(KSharpTokenType.NewLine, 1)
         if (c != '\r') {
@@ -112,7 +116,7 @@ fun Lexer.newLine(): LexerToken {
     }
 }
 
-fun Lexer.whiteSpace(): LexerToken {
+fun KSharpLexer.whiteSpace(): LexerToken {
     while (true) {
         val c = this.nextChar() ?: return token(KSharpTokenType.WhiteSpace, 1)
         if (!(c.isWhitespace() && !c.isNewLine())) {
@@ -122,7 +126,7 @@ fun Lexer.whiteSpace(): LexerToken {
 }
 
 
-val kSharpTokenFactory: TokenFactory = { c ->
+val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
     with(c) {
         when {
             isLetter() ->
@@ -206,7 +210,7 @@ fun LexerValue.isEndExpression() =
 
 
 @Suppress("UNCHECKED_CAST")
-private fun <L : CollapsableToken> Iterator<L>.prepareNewLines(): Iterator<L> {
+private fun <L : Token> Iterator<L>.prepareNewLines(): Iterator<L> {
     var token: L?
     var lastToken: L? = null
     return generateIterator {
@@ -245,12 +249,12 @@ private fun <L : CollapsableToken> Iterator<L>.prepareNewLines(): Iterator<L> {
     }
 }
 
-private fun <L : CollapsableToken> L.whenNewLine(block: (L) -> L?): L? =
+private fun <L : Token> L.whenNewLine(block: (L) -> L?): L? =
     if (type == KSharpTokenType.NewLine) {
         block(this)
     } else this
 
-private fun <L : CollapsableToken> Stack<Int>.processNewLine(
+private fun <L : Token> Stack<Int>.processNewLine(
     expressionId: AtomicInteger,
     len: Int,
     token: L,
@@ -274,7 +278,7 @@ private fun <L : CollapsableToken> Stack<Int>.processNewLine(
     return null
 }
 
-fun <L : CollapsableToken> Iterator<L>.markExpressions(
+fun <L : Token> Iterator<L>.markExpressions(
     expressionToken: (index: Int) -> L,
 ): Iterator<L> {
     val expressionId = AtomicInteger(0)
@@ -317,7 +321,7 @@ fun <L : CollapsableToken> Iterator<L>.markExpressions(
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <L : CollapsableToken> Iterator<L>.collapseNewLines(): Iterator<L> = collapseTokens(
+fun <L : Token> Iterator<L>.collapseNewLines(): Iterator<L> = collapseTokens(
     predicate = { start, end ->
         when {
             start.isEndExpression() && end.isEndExpression() -> false
@@ -405,5 +409,5 @@ fun Iterator<LexerToken>.collapseKSharpTokens(): Iterator<LexerToken> {
     }
 }
 
-fun String.kSharpLexer() = lexer(charStream(), kSharpTokenFactory)
-fun Reader.kSharpLexer() = lexer(charStream(), kSharpTokenFactory)
+fun String.kSharpLexer() = lexer(KSharpLexerState(), charStream(), kSharpTokenFactory)
+fun Reader.kSharpLexer() = lexer(KSharpLexerState(), charStream(), kSharpTokenFactory)
