@@ -14,6 +14,9 @@ private data class TempToken(override val text: String, override val type: Token
 
 }
 
+private fun LexerIterator<TempToken, Int>.nextIterator(): TempToken =
+    if (hasNext()) next() else throw NoSuchElementException()
+
 class LexerIteratorTest : StringSpec({
     "Generate a lexer iterator" {
         val state = LexerState(0)
@@ -68,6 +71,30 @@ class LexerIteratorTest : StringSpec({
                 toList().shouldBe(
                     listOf(
                         TempToken("1", TempTokens.TOKEN),
+                        TempToken("2", TempTokens.TOKEN),
+                        TempToken("3", TempTokens.TOKEN)
+                    )
+                )
+                state.value.shouldBe(4)
+            }
+    }
+    "Check cons, next and cons again" {
+        val state = LexerState(0)
+        generateLexerIterator(state) {
+            state.update(state.value.inc())
+            if (state.value <= 3) {
+                TempToken(state.value.toString(), TempTokens.TOKEN)
+            } else null
+        }.cons(TempToken("99", TempTokens.TOKEN))
+            .apply {
+                nextIterator().shouldBe(TempToken("99", TempTokens.TOKEN))
+                nextIterator().shouldBe(TempToken("1", TempTokens.TOKEN))
+            }.cons(TempToken("50", TempTokens.TOKEN))
+            .asSequence()
+            .apply {
+                toList().shouldBe(
+                    listOf(
+                        TempToken("50", TempTokens.TOKEN),
                         TempToken("2", TempTokens.TOKEN),
                         TempToken("3", TempTokens.TOKEN)
                     )
