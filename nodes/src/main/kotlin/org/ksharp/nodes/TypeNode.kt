@@ -19,5 +19,15 @@ data class TraitFunctionsNode(
         get() = Location.NoProvided
     override val children: Sequence<NodeData>
         get() = functions.asSequence()
+}
 
+data class TypeNode(
+    val internal: Boolean,
+    val name: String,
+    val params: List<String>,
+    val expr: NodeData,
+    override val location: Location
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(expr)
 }

@@ -2,10 +2,7 @@ package org.ksharp.parser.ksharp
 
 import org.ksharp.common.cast
 import org.ksharp.common.new
-import org.ksharp.nodes.NodeData
-import org.ksharp.nodes.TempNode
-import org.ksharp.nodes.TraitFunctionNode
-import org.ksharp.nodes.TraitFunctionsNode
+import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
 fun List<Any>.toType(internal: Boolean): NodeData =
@@ -89,7 +86,7 @@ private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
         }
 
 private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserResult =
-    consumeKeyword("trait")
+    consumeKeyword("trait", true)
         .enableDiscardBlockAndNewLineTokens { withoutBlocks ->
             withoutBlocks.thenUpperCaseWord()
                 .thenLoop {
@@ -104,7 +101,7 @@ private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserRes
         .build { it.toType(internal) }
 
 private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResult =
-    thenKeyword("type")
+    thenKeyword("type", true)
         .enableDiscardBlockAndNewLineTokens { withoutBlocks ->
             withoutBlocks.enableLabelToken { withLabels ->
                 withLabels.thenUpperCaseWord()
@@ -116,7 +113,14 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResu
                     }
                     .thenAssignOperator()
                     .consume { it.consumeTypeExpr() }
-                    .build { it.toType(internal) }
+                    .build {
+                        val name = it.first().cast<LexerValue>()
+                        val params = if (it.size == 2) {
+                            listOf<String>()
+                        } else it.subList(1, it.size - 1).cast()
+                        TypeNode(internal, name.text, params, it.last().cast(), name.location)
+                            .cast<NodeData>()
+                    }
             }
         }.or {
             it.consumeTrait(internal)
