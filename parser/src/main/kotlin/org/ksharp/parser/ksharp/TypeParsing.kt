@@ -5,10 +5,6 @@ import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
-fun List<Any>.toType(internal: Boolean): NodeData =
-    if (internal) TempNode(listOf("internal", toType(false)))
-    else TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
-
 fun List<Any>.toTypeValue(): NodeData = TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
 
 private fun KSharpLexerIterator.consumeTypeVariable() =
@@ -98,7 +94,14 @@ private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserRes
                 .thenLoop { it.consumeTraitFunction() }
                 .build { TraitFunctionsNode(it.cast()) }
         }
-        .build { it.toType(internal) }
+        .build {
+            val name = it.first().cast<LexerValue>()
+            val params = if (it.size == 2) {
+                listOf<String>()
+            } else it.subList(1, it.size - 1).cast()
+            TraitNode(internal, name.text, params, it.last().cast(), name.location)
+                .cast()
+        }
 
 private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResult =
     thenKeyword("type", true)

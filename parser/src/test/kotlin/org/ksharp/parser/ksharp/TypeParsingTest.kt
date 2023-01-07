@@ -3,10 +3,7 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.common.new
-import org.ksharp.nodes.TempNode
-import org.ksharp.nodes.TraitFunctionNode
-import org.ksharp.nodes.TraitFunctionsNode
-import org.ksharp.nodes.TypeNode
+import org.ksharp.nodes.*
 import org.ksharp.parser.BaseParserErrorCode
 import org.ksharp.parser.LexerToken
 import org.ksharp.parser.TextToken
@@ -379,37 +376,37 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    list = listOf(
-                        "Num",
-                        "a",
-                        TraitFunctionsNode(
-                            listOf(
-                                TraitFunctionNode(
-                                    "sum",
-                                    TempNode(
-                                        list = listOf(
-                                            "a",
-                                            "->",
-                                            TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
-                                        )
-                                    ),
-                                    Location.NoProvided
+                TraitNode(
+                    false,
+                    "Num",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "sum",
+                                TempNode(
+                                    list = listOf(
+                                        "a",
+                                        "->",
+                                        TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                    )
                                 ),
-                                TraitFunctionNode(
-                                    "prod",
-                                    TempNode(
-                                        list = listOf(
-                                            "a",
-                                            "->",
-                                            TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
-                                        )
-                                    ),
-                                    Location.NoProvided
-                                )
+                                Location.NoProvided
+                            ),
+                            TraitFunctionNode(
+                                "prod",
+                                TempNode(
+                                    list = listOf(
+                                        "a",
+                                        "->",
+                                        TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                    )
+                                ),
+                                Location.NoProvided
                             )
                         )
-                    )
+                    ),
+                    Location.NoProvided
                 )
             )
     }

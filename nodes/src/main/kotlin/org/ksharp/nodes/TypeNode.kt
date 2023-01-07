@@ -21,6 +21,18 @@ data class TraitFunctionsNode(
         get() = functions.asSequence()
 }
 
+data class TraitNode(
+    val internal: Boolean,
+    val name: String,
+    val params: List<String>,
+    val function: TraitFunctionsNode,
+    override val location: Location
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(function)
+
+}
+
 data class TypeNode(
     val internal: Boolean,
     val name: String,
