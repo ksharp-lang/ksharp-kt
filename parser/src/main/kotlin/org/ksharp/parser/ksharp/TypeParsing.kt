@@ -4,6 +4,8 @@ import org.ksharp.common.cast
 import org.ksharp.common.new
 import org.ksharp.nodes.NodeData
 import org.ksharp.nodes.TempNode
+import org.ksharp.nodes.TraitFunctionNode
+import org.ksharp.nodes.TraitFunctionsNode
 import org.ksharp.parser.*
 
 fun List<Any>.toType(internal: Boolean): NodeData =
@@ -80,7 +82,11 @@ private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
         .then(KSharpTokenType.Operator, "::", true)
         .consume { it.consumeTypeValue() }
         .thenNewLine()
-        .build { it.toTypeValue() }
+        .build {
+            val name = it.first().cast<Token>()
+            val type = it.last().cast<NodeData>()
+            TraitFunctionNode(name.text, type, name.location)
+        }
 
 private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserResult =
     consumeKeyword("trait")
@@ -93,7 +99,7 @@ private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserRes
         }.thenInBlock { block ->
             block.collect()
                 .thenLoop { it.consumeTraitFunction() }
-                .build { it.toTypeValue() }
+                .build { TraitFunctionsNode(it.cast()) }
         }
         .build { it.toType(internal) }
 
