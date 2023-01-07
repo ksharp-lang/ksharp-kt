@@ -2,6 +2,7 @@ package org.ksharp.parser.ksharp
 
 import org.ksharp.parser.*
 import java.io.Reader
+import java.util.concurrent.atomic.AtomicInteger
 
 data class KSharpLexerState(
     val consumeLabels: Boolean = false,
@@ -262,26 +263,32 @@ private fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
     }
 }
 
+private fun Token.shouldDiscardToken(discardBlockTokens: Boolean, blockCounter: AtomicInteger): Boolean {
+    if (discardBlockTokens) {
+        if (type == KSharpTokenType.BeginBlock) {
+            blockCounter.incrementAndGet()
+            return true
+        }
+        if (type == KSharpTokenType.EndBlock) {
+            if (blockCounter.get() == 0) {
+                return false
+            }
+            blockCounter.decrementAndGet()
+            return true
+        }
+    }
+    return false
+}
+
 private fun KSharpLexerIterator.discardBlocksOrNewLineTokens(): KSharpLexerIterator {
-    var beginBlock = 0
+    val blockCounter = AtomicInteger(0)
     return generateLexerIterator(state) {
         while (hasNext()) {
             val item = next()
-            val discardBlockTokens = state.value.discardBlockTokens
-            if (discardBlockTokens) {
-                if (item.type == KSharpTokenType.BeginBlock) {
-                    beginBlock += 1
-                    continue
-                }
-                if (item.type == KSharpTokenType.EndBlock) {
-                    if (beginBlock == 0) {
-                        return@generateLexerIterator item
-                    }
-                    beginBlock -= 1
-                    continue
-                }
-            }
             if (item.type == KSharpTokenType.NewLine && state.value.discardNewLineToken) {
+                continue
+            }
+            if (item.shouldDiscardToken(state.value.discardBlockTokens, blockCounter)) {
                 continue
             }
             return@generateLexerIterator item
