@@ -7,7 +7,7 @@ import org.ksharp.parser.*
 /**
  * [module name grammar](https://docs.ksharp.org/rfc/syntax#modulename)
  */
-private fun KSharpLexerIterator.consumeModuleName() =
+internal fun KSharpLexerIterator.consumeModuleName() =
     consumeLowerCaseWord()
         .thenLoop {
             it.consumeDot()
