@@ -3,31 +3,31 @@ package org.ksharp.parser
 import org.ksharp.common.*
 import org.ksharp.common.annotation.Mutable
 
-data class LookAHeadResult<T, L : LexerValue>(
+data class LookAHeadResult<T, S>(
     val value: T,
     val leaveLastTokens: Int = 0,
-    val remainTokens: Iterator<L>
+    val remainTokens: BaseLexerIterator<S>
 )
 
-fun <T : Any, L : LexerValue> Error.asLookAHeadResult(): ErrorOrValue<LookAHeadResult<T, L>> =
+fun <T : Any, S> Error.asLookAHeadResult(): ErrorOrValue<LookAHeadResult<T, S>> =
     Either.Left(this)
 
-fun <T, L : LexerValue> T.asLookAHeadResult(
-    remainTokens: Iterator<L>,
+fun <T, S> T.asLookAHeadResult(
+    remainTokens: BaseLexerIterator<S>,
     leaveLastTokens: Int = 0
-): ErrorOrValue<LookAHeadResult<T, L>> =
+): ErrorOrValue<LookAHeadResult<T, S>> =
     Either.Right(LookAHeadResult(this, leaveLastTokens, remainTokens))
 
 @Mutable
-fun <T, LV : LexerValue> Iterator<LV>.lookAHead(block: (Iterator<LV>) -> ErrorOrValue<LookAHeadResult<T, LV>>): ParserResult<T, LV> {
-    val collBuilder = listBuilder<LV>()
-    val seq = generateSequence {
+fun <T, S> BaseLexerIterator<S>.lookAHead(block: (BaseLexerIterator<S>) -> ErrorOrValue<LookAHeadResult<T, S>>): ParserResult<T, S> {
+    val collBuilder = listBuilder<Token>()
+    val seq = generateLexerIterator(state) {
         if (hasNext()) {
             val value = next()
             collBuilder.add(value)
             value
         } else null
-    }.iterator()
+    }
     val result = block(seq)
     return result.map {
         val newIter = if (it.leaveLastTokens != 0) {
@@ -36,12 +36,12 @@ fun <T, LV : LexerValue> Iterator<LV>.lookAHead(block: (Iterator<LV>) -> ErrorOr
                 collection.subList((collection.size - it.leaveLastTokens).coerceAtLeast(0), collection.size)
                     .asSequence(),
                 it.remainTokens.asSequence()
-            ).flatten().iterator()
+            ).flatten().iterator().asLexerIterator(state)
         } else it.remainTokens
         ParserValue(it.value, newIter)
     }.mapLeft {
         val collection = collBuilder.build()
         val newIter = sequenceOf(collection.asSequence(), this.asSequence()).flatten().iterator()
-        ParserError(it, false, newIter)
+        ParserError(it, false, newIter.asLexerIterator(state))
     }
 }

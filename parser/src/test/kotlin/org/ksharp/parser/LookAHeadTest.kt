@@ -8,7 +8,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import java.util.concurrent.atomic.AtomicInteger
 
-fun Iterator<LexerToken>.consume(size: Int) {
+fun <S> BaseLexerIterator<S>.consume(size: Int) {
     repeat((0 until size).count()) {
         if (this.hasNext()) {
             this.next()
@@ -23,15 +23,14 @@ enum class LookAHeadError(override val description: String) : ErrorCode {
 class LookAHeadTest : StringSpec({
     "Given a look a head lexer, if an error should reset" {
         val counter = AtomicInteger(0)
-        generateSequence {
+        generateLexerIterator(LexerState("")) {
             LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0))
-        }.iterator()
-            .lookAHead {
-                it.consume(3)
-                LookAHeadError.Error1.new().asLookAHeadResult()
-            }.also {
-                it.shouldBeLeft()
-            }.remainTokens
+        }.lookAHead {
+            it.consume(3)
+            LookAHeadError.Error1.new().asLookAHeadResult()
+        }.also {
+            it.shouldBeLeft()
+        }.remainTokens
             .asSequence()
             .take(4)
             .toList()
@@ -46,15 +45,14 @@ class LookAHeadTest : StringSpec({
     }
     "Given a look a head lexer, if a value is produced should discard tokens" {
         val counter = AtomicInteger(0)
-        generateSequence {
+        generateLexerIterator(LexerState("")) {
             LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0))
-        }.iterator()
-            .lookAHead {
-                it.consume(3)
-                10.asLookAHeadResult(it)
-            }.also {
-                it.shouldBeRight()
-            }.remainTokens
+        }.lookAHead {
+            it.consume(3)
+            10.asLookAHeadResult(it)
+        }.also {
+            it.shouldBeRight()
+        }.remainTokens
             .asSequence()
             .take(4)
             .toList()
@@ -69,15 +67,14 @@ class LookAHeadTest : StringSpec({
     }
     "Given a look a head lexer, if a value is produced should discard tokens leaving the last tokens" {
         val counter = AtomicInteger(0)
-        generateSequence {
+        generateLexerIterator(LexerState("")) {
             LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0))
-        }.iterator()
-            .lookAHead {
-                it.consume(3)
-                10.asLookAHeadResult(it, 2)
-            }.also {
-                it.shouldBeRight()
-            }.remainTokens
+        }.lookAHead {
+            it.consume(3)
+            10.asLookAHeadResult(it, 2)
+        }.also {
+            it.shouldBeRight()
+        }.remainTokens
             .asSequence()
             .take(4)
             .toList()

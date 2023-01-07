@@ -6,6 +6,7 @@ import org.ksharp.nodes.TempNode
 import org.ksharp.parser.BaseParserErrorCode
 import org.ksharp.parser.LexerToken
 import org.ksharp.parser.TextToken
+import org.ksharp.parser.asSequence
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
@@ -14,14 +15,14 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = List -- Int"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
-                    "token" to "<EndExpression>",
+                    "token" to "<EndBlock>",
                     "received-token" to "Operator3:--"
                 ) to listOf(
                     LexerToken(
@@ -33,7 +34,11 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "Int", startOffset = 25, endOffset = 27)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.EndExpression,
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.EndBlock,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     )
                 )
@@ -43,16 +48,14 @@ class TypeParserTest : StringSpec({
         "type Bool = True |- False"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .shouldBeLeft()
             .mapLeft {
-                (it.error to it.remainTokens.asSequence().toList()).also {
-                    println(it)
-                }
+                (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
-                    "token" to "<EndExpression>",
+                    "token" to "<EndBlock>",
                     "received-token" to "Operator9:|-"
                 ) to listOf(
                     LexerToken(
@@ -64,7 +67,11 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "False", startOffset = 20, endOffset = 24)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.EndExpression,
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.EndBlock,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     )
                 )
@@ -74,14 +81,14 @@ class TypeParserTest : StringSpec({
         "type Bool = True &- False"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
-                    "token" to "<EndExpression>",
+                    "token" to "<EndBlock>",
                     "received-token" to "Operator7:&-"
                 ) to listOf(
                     LexerToken(
@@ -93,7 +100,11 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "False", startOffset = 20, endOffset = 24)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.EndExpression,
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.EndBlock,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     )
                 )
@@ -103,8 +114,8 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = (List Int)"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -120,8 +131,8 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = (List Int) -> a -> a"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -147,8 +158,8 @@ class TypeParserTest : StringSpec({
         "type Integer = Int"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(TempNode(listOf("type", "Integer", TempNode(listOf("Int")))))
     }
@@ -156,8 +167,8 @@ class TypeParserTest : StringSpec({
         "internal type Integer = Int"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(TempNode(listOf("internal", TempNode(listOf("type", "Integer", TempNode(listOf("Int")))))))
     }
@@ -165,8 +176,8 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = List Int"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(TempNode(listOf("type", "ListOfInt", TempNode(listOf("List", TempNode(listOf("Int")))))))
     }
@@ -174,8 +185,8 @@ class TypeParserTest : StringSpec({
         "type KVStore k v = Map k v"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -199,8 +210,8 @@ class TypeParserTest : StringSpec({
         "type Num n = n"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(TempNode(listOf("type", "Num", "n", TempNode(listOf("n")))))
     }
@@ -208,8 +219,8 @@ class TypeParserTest : StringSpec({
         "type Sum a = a -> a -> a"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -226,8 +237,8 @@ class TypeParserTest : StringSpec({
         "type ToString a = a -> String"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -244,8 +255,8 @@ class TypeParserTest : StringSpec({
         "type Point = Double , Double"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -261,8 +272,8 @@ class TypeParserTest : StringSpec({
         "internal type ToString a = a -> String"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -284,8 +295,8 @@ class TypeParserTest : StringSpec({
         "type Bool = True | False"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -319,8 +330,8 @@ class TypeParserTest : StringSpec({
         "type Num = Eq & Ord"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -358,8 +369,8 @@ class TypeParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -368,25 +379,29 @@ class TypeParserTest : StringSpec({
                         "Num",
                         "a",
                         TempNode(
-                            list = listOf(
-                                "sum",
+                            listOf(
                                 TempNode(
                                     list = listOf(
-                                        "a",
-                                        "->",
-                                        TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                        "sum",
+                                        TempNode(
+                                            list = listOf(
+                                                "a",
+                                                "->",
+                                                TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                            )
+                                        )
                                     )
-                                )
-                            )
-                        ),
-                        TempNode(
-                            list = listOf(
-                                "prod",
+                                ),
                                 TempNode(
                                     list = listOf(
-                                        "a",
-                                        "->",
-                                        TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                        "prod",
+                                        TempNode(
+                                            list = listOf(
+                                                "a",
+                                                "->",
+                                                TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                            )
+                                        )
                                     )
                                 )
                             )
@@ -395,12 +410,12 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
-    "Labels on types" {
+    "Labels on parametric types" {
         "type KVStore k v = Map key: k value: v"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
@@ -419,12 +434,13 @@ class TypeParserTest : StringSpec({
                     )
                 )
             )
-
+    }
+    "Labels on tuples" {
         "type Point2D = x: Double, y: Double"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeTypeDeclaration()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
                 TempNode(
