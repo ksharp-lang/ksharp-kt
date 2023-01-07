@@ -12,19 +12,19 @@ fun List<Any>.toType(internal: Boolean): NodeData =
 
 fun List<Any>.toTypeValue(): NodeData = TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
 
-fun KSharpLexerIterator.consumeTypeVariable() =
+private fun KSharpLexerIterator.consumeTypeVariable() =
     consume({
         it.type == KSharpTokenType.LowerCaseWord || it.type == KSharpTokenType.UpperCaseWord
     })
 
-fun KSharpConsumeResult.thenTypeVariable() =
+private fun KSharpConsumeResult.thenTypeVariable() =
     then({
         it.type == KSharpTokenType.LowerCaseWord || it.type == KSharpTokenType.UpperCaseWord
     }, {
         BaseParserErrorCode.ExpectingToken.new("token" to "<Word>", "received-token" to "${it.type}:${it.text}")
     })
 
-fun KSharpConsumeResult.thenIfTypeValueSeparator(block: (KSharpConsumeResult) -> KSharpConsumeResult) =
+private fun KSharpConsumeResult.thenIfTypeValueSeparator(block: (KSharpConsumeResult) -> KSharpConsumeResult) =
     thenIf({
         when {
             it.type == KSharpTokenType.Operator3 && it.text == "->" -> true
@@ -33,7 +33,7 @@ fun KSharpConsumeResult.thenIfTypeValueSeparator(block: (KSharpConsumeResult) ->
         }
     }, false, block)
 
-fun KSharpLexerIterator.consumeTypeSetSeparator() =
+private fun KSharpLexerIterator.consumeTypeSetSeparator() =
     consume({
         when {
             it.type == KSharpTokenType.Operator9 && it.text == "|" -> true
@@ -47,7 +47,7 @@ private fun KSharpConsumeResult.thenJoinType() =
         i.consume { it.consumeTypeValue() }
     }.build { it.toTypeValue() }
 
-fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =
+private fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =
     ifConsume(KSharpTokenType.OpenParenthesis, true) {
         it.consume { i -> i.consumeTypeValue() }
             .then(KSharpTokenType.CloseParenthesis, true)
@@ -63,7 +63,7 @@ fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =
             .thenJoinType()
     }
 
-fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
+private fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
     consumeTypeValue()
         .resume()
         .thenLoop {
@@ -75,14 +75,14 @@ fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
             else it.toTypeValue()
         }
 
-fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
+private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
     consumeLowerCaseWord()
         .then(KSharpTokenType.Operator, "::", true)
         .consume { it.consumeTypeValue() }
         .thenNewLine()
         .build { it.toTypeValue() }
 
-fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserResult =
+private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserResult =
     consumeKeyword("trait")
         .enableDiscardBlockAndNewLineTokens { withoutBlocks ->
             withoutBlocks.thenUpperCaseWord()
@@ -97,7 +97,7 @@ fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserResult =
         }
         .build { it.toType(internal) }
 
-fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResult =
+private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResult =
     thenKeyword("type")
         .enableDiscardBlockAndNewLineTokens { withoutBlocks ->
             withoutBlocks.enableLabelToken { withLabels ->
