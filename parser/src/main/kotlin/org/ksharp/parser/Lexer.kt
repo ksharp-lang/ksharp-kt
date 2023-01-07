@@ -1,11 +1,14 @@
 package org.ksharp.parser
 
-import org.ksharp.common.*
+import org.ksharp.common.Line
+import org.ksharp.common.Offset
+import org.ksharp.common.Position
 import org.ksharp.common.annotation.Mutable
 import java.io.Reader
 
 typealias TokenFactory<V> = Lexer<V>.(c: Char) -> LexerToken?
-
+typealias TokenLexerIterator<S> = LexerIterator<LexerToken, S>
+typealias BaseLexerIterator<S> = LexerIterator<out Token, S>
 
 @Mutable
 class Lexer<V> internal constructor(
@@ -23,68 +26,22 @@ class Lexer<V> internal constructor(
         }
 }
 
-fun <V> lexer(initialState: V, content: CharStream, factory: TokenFactory<V>): Iterator<LexerToken> {
+fun <V> lexer(initialState: V, content: CharStream, factory: TokenFactory<V>): TokenLexerIterator<V> {
     val state = LexerState(initialState)
     val l = Lexer(state, content, factory)
     return generateLexerIterator(state) {
         l.next()
-    }.asIterator()
+    }
 }
 
 fun <V> String.lexer(initialState: V, factory: TokenFactory<V>) = lexer(initialState, charStream(), factory)
 fun <V> Reader.lexer(initialState: V, factory: TokenFactory<V>) = lexer(initialState, charStream(), factory)
 
+fun <V> BaseLexerIterator<V>.collapseTokens(canCollapse: (TokenType) -> Boolean = { true }): BaseLexerIterator<V> {
+    var token: Token?
+    var lastToken: Token? = null
 
-internal class ConsIterator<L : LexerValue> internal constructor(
-    private val token: L,
-    internal val iterator: Iterator<L>
-) : Iterator<L> {
-
-    internal var tokenConsumed = false
-        private set
-
-    override fun hasNext(): Boolean {
-        if (!tokenConsumed) {
-            return true
-        }
-        return iterator.hasNext()
-    }
-
-    override fun next(): L {
-        if (!tokenConsumed) {
-            tokenConsumed = true
-            return token
-        }
-        return iterator.next()
-    }
-
-}
-
-fun <L : LexerValue> Iterator<L>.cons(token: L): Iterator<L> {
-    if (this is ConsIterator && tokenConsumed) {
-        return ConsIterator(token, iterator)
-    }
-    return ConsIterator(token, this)
-}
-
-@Suppress("UNCHECKED_CAST")
-/*
-    When collapsing preserve the type of the end token
- */
-inline fun <L : Token> Iterator<L>.collapseTokens(
-    crossinline predicate: (start: L, end: L) -> Boolean,
-    crossinline collapse: (start: L, end: L) -> L = { start, end ->
-        start.collapse(
-            end.type,
-            "${start.text}${end.text}",
-            end
-        ) as L
-    }
-): Iterator<L> {
-    var token: L?
-    var lastToken: L? = null
-
-    return generateIterator {
+    return generateLexerIterator(state) {
         token = lastToken
         lastToken = null
         while (hasNext()) {
@@ -93,8 +50,12 @@ inline fun <L : Token> Iterator<L>.collapseTokens(
                 token = lastToken
                 continue
             }
-            if (predicate(token!!, lastToken!!)) {
-                token = collapse(token!!, lastToken!!)
+            if (token!!.type == lastToken!!.type && canCollapse(token!!.type)) {
+                token = token!!.collapse(
+                    token!!.type,
+                    "${token!!.text}${lastToken!!.text}",
+                    lastToken!!
+                )
                 lastToken = null
                 continue
             }
@@ -104,15 +65,15 @@ inline fun <L : Token> Iterator<L>.collapseTokens(
     }
 }
 
-@Suppress("UNCHECKED_CAST")
-fun <L : Token> Iterator<L>.collapseTokens(): Iterator<L> = collapseTokens(predicate = { start, end ->
-    start.type == end.type
-})
-
-fun Iterator<LexerToken>.toLogicalLexerToken(context: String, newLineType: TokenType): Iterator<LogicalLexerToken> =
-    object : Iterator<LogicalLexerToken> {
+fun <V> TokenLexerIterator<V>.toLogicalLexerToken(
+    context: String,
+    newLineType: TokenType
+): BaseLexerIterator<V> =
+    object : LexerIterator<Token, V> {
         private var startPosition: Position = Line(1) to Offset(0)
         private var startLineOffset: Int = 0
+
+        override val state: LexerState<V> = this@toLogicalLexerToken.state
 
         override fun hasNext(): Boolean = this@toLogicalLexerToken.hasNext()
 

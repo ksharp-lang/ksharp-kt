@@ -8,10 +8,20 @@ private enum class TempTokens : TokenType {
     TOKEN
 }
 
-private data class TempToken(override val text: String, override val type: TokenType) : LexerValue, Token {
+private data class TempToken(override val text: String, override val type: TokenType) : Token {
     override fun collapse(newType: TokenType, text: String, end: Token): Token {
         TODO("Not required for tests")
     }
+
+    override fun new(type: TokenType): Token {
+        TODO("Not required for tests")
+    }
+
+    override val endOffset: Int
+        get() = 0
+
+    override val startOffset: Int
+        get() = 0
 
 }
 
@@ -113,5 +123,26 @@ class LexerIteratorTest : StringSpec({
                 )
                 state.value.shouldBe(4)
             }
+    }
+    "Filter lexer iterator" {
+        val stateVariable = LexerState(0)
+        generateLexerIterator(stateVariable) {
+            stateVariable.update(stateVariable.value.inc())
+            TempToken(stateVariable.value.toString(), TempTokens.TOKEN)
+        }.filter { it.text.toInt() % 2 == 0 }
+            .apply {
+                asSequence().take(3).toList().shouldBe(
+                    listOf(
+                        TempToken("2", TempTokens.TOKEN),
+                        TempToken("4", TempTokens.TOKEN),
+                        TempToken("6", TempTokens.TOKEN)
+                    )
+                )
+            }
+    }
+    "Empty lexer iterator" {
+        emptyLexerIterator<TempToken, String>(LexerState(""))
+            .asSequence()
+            .toList().shouldBe(emptyList())
     }
 })

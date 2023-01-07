@@ -1,7 +1,6 @@
 package org.ksharp.parser
 
 import org.ksharp.common.annotation.Mutable
-import org.ksharp.common.generateIterator
 
 @Mutable
 class LexerState<V>(initialValue: V) {
@@ -13,7 +12,7 @@ class LexerState<V>(initialValue: V) {
     }
 }
 
-interface LexerIterator<T : Token, V> {
+interface LexerIterator<out T : Token, V> {
     val state: LexerState<V>
     fun hasNext(): Boolean
     fun next(): T
@@ -21,7 +20,19 @@ interface LexerIterator<T : Token, V> {
 
 fun <T : Token, V> LexerIterator<T, V>.asSequence() = generateSequence { if (hasNext()) next() else null }
 
-fun <T : Token, V> LexerIterator<T, V>.asIterator() = generateIterator { if (hasNext()) next() else null }
+fun <T : Token, S> LexerIterator<T, S>.filter(predicate: (T) -> Boolean) = generateLexerIterator(state) {
+    while (hasNext()) {
+        val item = next()
+        if (predicate(item)) return@generateLexerIterator item
+    }
+    null
+}
+
+fun <T : Token, S> Iterator<T>.asLexerIterator(state: LexerState<S>) = generateLexerIterator(state) {
+    if (hasNext()) next()
+    else null
+}
+
 
 inline fun <T : Token, V> generateLexerIterator(
     state: LexerState<V>,
@@ -38,6 +49,10 @@ inline fun <T : Token, V> generateLexerIterator(
 
         override fun next(): T = current ?: throw NoSuchElementException()
     }
+}
+
+fun <T : Token, S> emptyLexerIterator(state: LexerState<S>): LexerIterator<T, S> = generateLexerIterator(state) {
+    null
 }
 
 internal class ConsLexerIterator<T : Token, V> internal constructor(

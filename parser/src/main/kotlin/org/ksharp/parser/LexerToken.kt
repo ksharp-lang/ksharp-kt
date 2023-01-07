@@ -5,8 +5,10 @@ import org.ksharp.common.Position
 
 interface TokenType
 
-interface Token : LexerValue {
+interface Token : LexerValue, LexerDocumentPosition {
     fun collapse(newType: TokenType, text: String, end: Token): Token
+
+    fun new(type: TokenType): Token
 }
 
 interface LexerValue {
@@ -32,13 +34,12 @@ enum class BaseTokenType : TokenType {
 data class LexerToken internal constructor(
     override val type: TokenType,
     private val token: TextToken
-) : LexerValue, LexerDocumentPosition, Token {
+) : Token {
     override val text: String = token.text
     override val startOffset: Int = token.startOffset
     override val endOffset: Int = token.endOffset
 
     override fun collapse(newType: TokenType, text: String, end: Token): Token {
-        end as LexerDocumentPosition
         return copy(
             type = newType,
             token = TextToken(
@@ -49,6 +50,7 @@ data class LexerToken internal constructor(
         )
     }
 
+    override fun new(type: TokenType): Token = this.copy(type = type)
 }
 
 data class LogicalLexerToken internal constructor(
@@ -68,6 +70,9 @@ data class LogicalLexerToken internal constructor(
             endPosition = end.endPosition
         )
     }
+
+    override fun new(type: TokenType): Token = this.copy(token = token.copy(type = type))
+
 }
 
 val LexerValue.location: Location
@@ -77,8 +82,3 @@ val LexerValue.location: Location
             val startPosition = startPosition
             Location(context, startPosition)
         } else Location.NoProvided
-
-
-typealias LexerTokenIterator<V> = LexerIterator<LexerToken, V>
-typealias LogicalLexerTokenIterator<V> = LexerIterator<LogicalLexerToken, V>
-typealias GenericLexerIterator<V> = LexerIterator<Token, V>

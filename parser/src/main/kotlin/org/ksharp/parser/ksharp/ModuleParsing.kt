@@ -7,11 +7,13 @@ import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.NodeData
 import org.ksharp.parser.*
 
-fun <L : LexerValue> Iterator<L>.consumeModule(name: String): ParserResult<ModuleNode, L> =
+fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KSharpLexerState> =
     collect()
-        .thenLoop {
-            it.consumeImport()
-                .or { consumeTypeDeclaration() }
+        .thenLoop { then ->
+            then.consumeBlock {
+                it.consumeImport()
+                    .or { consumeTypeDeclaration() }
+            }
         }.build {
             val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
             val imports = it.filterIsInstance<ImportNode>()

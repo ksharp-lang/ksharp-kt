@@ -20,8 +20,8 @@ class ImportParserTest : StringSpec({
         "import ksharp.math as math"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .markExpressions { LexerToken(KSharpTokenType.EndExpression, TextToken("", 0, 0)) }
-            .consumeImport()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock { it.consumeImport() }
             .map { it.value }
             .shouldBeRight(ImportNode("ksharp.math", "math", Location.NoProvided))
     }

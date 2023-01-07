@@ -7,7 +7,7 @@ import org.ksharp.parser.*
 /**
  * [module name grammar](https://docs.ksharp.org/rfc/syntax#modulename)
  */
-fun <L : LexerValue> Iterator<L>.consumeModuleName() =
+fun KSharpLexerIterator.consumeModuleName() =
     consumeLowerCaseWord()
         .thenLoop {
             it.consumeDot()
@@ -25,13 +25,12 @@ fun <L : LexerValue> Iterator<L>.consumeModuleName() =
             }
         }
 
-fun <L : LexerValue> Iterator<L>.consumeImport(): KSharpParserResult<L> =
+fun KSharpLexerIterator.consumeImport(): KSharpParserResult =
     consumeKeyword("import")
         .consume {
             it.consumeModuleName()
         }.thenKeyword("as", true)
         .thenLowerCaseWord()
-        .endExpression()
         .build {
             val moduleName = it[1] as String
             val key = it.last().cast<LexerValue>().text
