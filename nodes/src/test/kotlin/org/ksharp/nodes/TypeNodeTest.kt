@@ -1,6 +1,7 @@
 package org.ksharp.nodes
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -172,6 +173,101 @@ class TypeNodeTest : StringSpec({
             }
             parent.shouldBeNull()
             children.toList().shouldBeEmpty()
+        }
+    }
+    "Test Node Interface over FunctionTypeNode" {
+        FunctionTypeNode(
+            listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)),
+            testLocation
+        ).node.apply {
+            cast<FunctionTypeNode>().apply {
+                params.shouldBe(listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)))
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation)),
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation))
+                )
+            )
+        }
+    }
+    "Test Node Interface over TupleTypeNode" {
+        TupleTypeNode(
+            listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)),
+            testLocation
+        ).node.apply {
+            cast<TupleTypeNode>().apply {
+                types.shouldBe(listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)))
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation)),
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation))
+                )
+            )
+        }
+    }
+    "Test Node Interface over UnionTypeNode" {
+        UnionTypeNode(
+            listOf(ConcreteTypeNode("True", testLocation), ConcreteTypeNode("False", testLocation)),
+            testLocation
+        ).node.apply {
+            cast<UnionTypeNode>().apply {
+                types.shouldBe(listOf(ConcreteTypeNode("True", testLocation), ConcreteTypeNode("False", testLocation)))
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(this, testLocation, ConcreteTypeNode("True", testLocation)),
+                    Node(this, testLocation, ConcreteTypeNode("False", testLocation))
+                )
+            )
+        }
+    }
+    "Test Node Interface over IntersectionTypeNode" {
+        IntersectionTypeNode(
+            listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("String", testLocation)),
+            testLocation
+        ).node.apply {
+            cast<IntersectionTypeNode>().apply {
+                types.shouldBe(listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("String", testLocation)))
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation)),
+                    Node(this, testLocation, ConcreteTypeNode("String", testLocation))
+                )
+            )
+        }
+    }
+    "Test Node Interface over TypeNode" {
+        TypeNode(
+            false,
+            "Num",
+            listOf("a"),
+            ConcreteTypeNode("Int", testLocation),
+            testLocation
+        ).node.apply {
+            cast<TypeNode>().apply {
+                internal.shouldBeFalse()
+                name.shouldBe("Num")
+                params.shouldBe(listOf("a"))
+                expr.shouldBe(ConcreteTypeNode("Int", testLocation))
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation)),
+                )
+            )
         }
     }
 })
