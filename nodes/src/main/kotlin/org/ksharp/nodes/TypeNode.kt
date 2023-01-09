@@ -69,6 +69,14 @@ data class ParametricTypeNode(
         get() = variables.asSequence().cast()
 }
 
+data class FunctionTypeNode(
+    val params: List<TypeExpression>,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = params.asSequence().cast()
+}
+
 data class TypeNode(
     val internal: Boolean,
     val name: String,

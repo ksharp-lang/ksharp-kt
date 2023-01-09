@@ -145,7 +145,7 @@ class TypeParserTest : StringSpec({
                     false,
                     "ListOfInt",
                     listOf(),
-                    TempNode(
+                    FunctionTypeNode(
                         listOf(
                             ParametricTypeNode(
                                 listOf(
@@ -153,15 +153,41 @@ class TypeParserTest : StringSpec({
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ), Location.NoProvided
                             ),
-                            "->", TempNode(
-                                listOf(
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    "->", ParameterTypeNode(
-                                        "a", Location.NoProvided
-                                    )
-                                )
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ParameterTypeNode(
+                                "a", Location.NoProvided
                             )
-                        )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Function type using parenthesis 2" {
+        "type ListOfInt = (Int -> Int) -> a -> a"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "ListOfInt",
+                    listOf(),
+                    FunctionTypeNode(
+                        listOf(
+                            FunctionTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Int", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ), Location.NoProvided
+                            ),
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ParameterTypeNode(
+                                "a", Location.NoProvided
+                            )
+                        ), Location.NoProvided
                     ),
                     Location.NoProvided
                 )
@@ -275,18 +301,13 @@ class TypeParserTest : StringSpec({
                     false,
                     "Sum",
                     listOf("a"),
-                    TempNode(
+                    FunctionTypeNode(
                         listOf(
                             ParameterTypeNode("a", Location.NoProvided),
-                            "->",
-                            TempNode(
-                                listOf(
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    "->",
-                                    ParameterTypeNode("a", Location.NoProvided)
-                                )
-                            )
-                        )
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ParameterTypeNode("a", Location.NoProvided)
+                        ),
+                        Location.NoProvided
                     ),
                     Location.NoProvided
                 )
@@ -304,12 +325,12 @@ class TypeParserTest : StringSpec({
                     false,
                     "ToString",
                     listOf("a"),
-                    TempNode(
+                    FunctionTypeNode(
                         listOf(
                             ParameterTypeNode("a", Location.NoProvided),
-                            "->",
                             ConcreteTypeNode("String", Location.NoProvided)
-                        )
+                        ),
+                        Location.NoProvided
                     ),
                     Location.NoProvided
                 )
@@ -350,12 +371,12 @@ class TypeParserTest : StringSpec({
                     true,
                     "ToString",
                     listOf("a"),
-                    TempNode(
+                    FunctionTypeNode(
                         listOf(
                             ParameterTypeNode("a", Location.NoProvided),
-                            "->",
                             ConcreteTypeNode("String", Location.NoProvided)
-                        )
+                        ),
+                        Location.NoProvided
                     ),
                     Location.NoProvided
                 )
@@ -443,35 +464,25 @@ class TypeParserTest : StringSpec({
                         listOf(
                             TraitFunctionNode(
                                 "sum",
-                                TempNode(
-                                    list = listOf(
+                                FunctionTypeNode(
+                                    listOf(
                                         ParameterTypeNode("a", Location.NoProvided),
-                                        "->",
-                                        TempNode(
-                                            list = listOf(
-                                                ParameterTypeNode("a", Location.NoProvided),
-                                                "->",
-                                                ParameterTypeNode("a", Location.NoProvided)
-                                            )
-                                        )
-                                    )
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
                                 ),
                                 Location.NoProvided
                             ),
                             TraitFunctionNode(
                                 "prod",
-                                TempNode(
-                                    list = listOf(
+                                FunctionTypeNode(
+                                    listOf(
                                         ParameterTypeNode("a", Location.NoProvided),
-                                        "->",
-                                        TempNode(
-                                            list = listOf(
-                                                ParameterTypeNode("a", Location.NoProvided),
-                                                "->",
-                                                ParameterTypeNode("a", Location.NoProvided)
-                                            )
-                                        )
-                                    )
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
                                 ),
                                 Location.NoProvided
                             )
