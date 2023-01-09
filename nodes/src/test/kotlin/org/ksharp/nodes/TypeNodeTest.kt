@@ -247,6 +247,21 @@ class TypeNodeTest : StringSpec({
             )
         }
     }
+    "Test Node Interface over SetElement" {
+        SetElement(
+            true,
+            ConcreteTypeNode("Int", testLocation),
+            testLocation
+        ).node.apply {
+            cast<SetElement>().apply {
+                union.shouldBeTrue()
+                expression.shouldBe(ConcreteTypeNode("Int", testLocation))
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBeEmpty()
+        }
+    }
     "Test Node Interface over TypeNode" {
         TypeNode(
             false,
