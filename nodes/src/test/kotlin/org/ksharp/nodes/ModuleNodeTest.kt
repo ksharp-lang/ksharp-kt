@@ -7,7 +7,7 @@ import org.ksharp.common.Line
 import org.ksharp.common.Location
 import org.ksharp.common.Offset
 
-private val location = Location(
+private val testLocation = Location(
     context = "file.ks",
     position = Line(0) to Offset(0)
 )
@@ -16,16 +16,17 @@ class ModuleNodeTest : StringSpec({
     "Test Node Interface over ModuleNode" {
         ModuleNode(
             name = "ksharp.math",
-            imports = listOf(ImportNode("ksharp.num", "n", location)),
-            location
+            imports = listOf(ImportNode("ksharp.num", "n", testLocation)),
+            testLocation
         ).node.apply {
             cast<ModuleNode>().apply {
                 name.shouldBe("ksharp.math")
-                imports.shouldBe(listOf(ImportNode("ksharp.num", "n", location)))
+                imports.shouldBe(listOf(ImportNode("ksharp.num", "n", testLocation)))
+                location.shouldBe(testLocation)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
-                listOf(Node(this, location, ImportNode("ksharp.num", "n", location)))
+                listOf(Node(this, testLocation, ImportNode("ksharp.num", "n", testLocation)))
             )
         }
     }

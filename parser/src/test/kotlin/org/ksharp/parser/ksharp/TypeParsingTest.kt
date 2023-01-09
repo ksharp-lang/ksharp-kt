@@ -1,8 +1,9 @@
 package org.ksharp.parser.ksharp
 
 import io.kotest.core.spec.style.StringSpec
+import org.ksharp.common.Location
 import org.ksharp.common.new
-import org.ksharp.nodes.TempNode
+import org.ksharp.nodes.*
 import org.ksharp.parser.BaseParserErrorCode
 import org.ksharp.parser.LexerToken
 import org.ksharp.parser.TextToken
@@ -118,12 +119,17 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type",
-                        "ListOfInt",
-                        TempNode(listOf(TempNode(listOf("List", TempNode(listOf("Int"))))))
-                    )
+                TypeNode(
+                    false,
+                    "ListOfInt",
+                    listOf(),
+                    ParametricTypeNode(
+                        listOf(
+                            ConcreteTypeNode("List", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -135,22 +141,55 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type",
-                        "ListOfInt",
-                        TempNode(
-                            listOf(
-                                TempNode(listOf("List", TempNode(listOf("Int")))), "->", TempNode(
-                                    listOf(
-                                        "a", "->", TempNode(
-                                            listOf("a")
-                                        )
-                                    )
-                                )
+                TypeNode(
+                    false,
+                    "ListOfInt",
+                    listOf(),
+                    FunctionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("List", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ), Location.NoProvided
+                            ),
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ParameterTypeNode(
+                                "a", Location.NoProvided
                             )
-                        )
-                    )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Function type using parenthesis 2" {
+        "type ListOfInt = (Int -> Int) -> a -> a"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "ListOfInt",
+                    listOf(),
+                    FunctionTypeNode(
+                        listOf(
+                            FunctionTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Int", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ), Location.NoProvided
+                            ),
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ParameterTypeNode(
+                                "a", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -161,7 +200,15 @@ class TypeParserTest : StringSpec({
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
-            .shouldBeRight(TempNode(listOf("type", "Integer", TempNode(listOf("Int")))))
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Integer",
+                    listOf(),
+                    ConcreteTypeNode("Int", Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
     }
     "Internal Alias type" {
         "internal type Integer = Int"
@@ -170,7 +217,15 @@ class TypeParserTest : StringSpec({
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
-            .shouldBeRight(TempNode(listOf("internal", TempNode(listOf("type", "Integer", TempNode(listOf("Int")))))))
+            .shouldBeRight(
+                TypeNode(
+                    true,
+                    "Integer",
+                    listOf(),
+                    ConcreteTypeNode("Int", Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
     }
     "Parametric alias type" {
         "type ListOfInt = List Int"
@@ -179,7 +234,20 @@ class TypeParserTest : StringSpec({
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
-            .shouldBeRight(TempNode(listOf("type", "ListOfInt", TempNode(listOf("List", TempNode(listOf("Int")))))))
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "ListOfInt",
+                    listOf(),
+                    ParametricTypeNode(
+                        listOf(
+                            ConcreteTypeNode("List", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
     }
     "Parametric type" {
         "type KVStore k v = Map k v"
@@ -189,20 +257,18 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type", "KVStore", "k", "v", TempNode(
-                            listOf(
-                                "Map", TempNode(
-                                    listOf(
-                                        "k", TempNode(
-                                            listOf("v")
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
+                TypeNode(
+                    false,
+                    "KVStore",
+                    listOf("k", "v"),
+                    ParametricTypeNode(
+                        listOf(
+                            ConcreteTypeNode("Map", Location.NoProvided),
+                            ParameterTypeNode("k", Location.NoProvided),
+                            ParameterTypeNode("v", Location.NoProvided)
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -213,7 +279,15 @@ class TypeParserTest : StringSpec({
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
-            .shouldBeRight(TempNode(listOf("type", "Num", "n", TempNode(listOf("n")))))
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Num",
+                    listOf("n"),
+                    ParameterTypeNode("n", Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
     }
     "Function type" {
         "type Sum a = a -> a -> a"
@@ -223,13 +297,19 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type",
-                        "Sum",
-                        "a",
-                        TempNode(listOf("a", "->", TempNode(listOf("a", "->", TempNode(listOf("a")))))),
-                    )
+                TypeNode(
+                    false,
+                    "Sum",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ParameterTypeNode("a", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -241,13 +321,18 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type",
-                        "ToString",
-                        "a",
-                        TempNode(listOf("a", "->", TempNode(listOf("String"))))
-                    )
+                TypeNode(
+                    false,
+                    "ToString",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ConcreteTypeNode("String", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -259,12 +344,18 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type",
-                        "Point",
-                        TempNode(listOf("Double", ",", TempNode(listOf("Double"))))
-                    )
+                TypeNode(
+                    false,
+                    "Point",
+                    listOf(),
+                    TupleTypeNode(
+                        listOf(
+                            ConcreteTypeNode("Double", Location.NoProvided),
+                            ConcreteTypeNode("Double", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -276,18 +367,18 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "internal",
-                        TempNode(
-                            listOf(
-                                "type",
-                                "ToString",
-                                "a",
-                                TempNode(listOf("a", "->", TempNode(listOf("String"))))
-                            )
-                        )
-                    )
+                TypeNode(
+                    true,
+                    "ToString",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParameterTypeNode("a", Location.NoProvided),
+                            ConcreteTypeNode("String", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -299,30 +390,69 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type",
-                        "Bool",
-                        TempNode(
-                            listOf(
-                                TempNode(
-                                    listOf(
-                                        "True"
-                                    )
-                                ),
-                                TempNode(
-                                    listOf(
-                                        "|",
-                                        TempNode(
-                                            listOf(
-                                                "False"
-                                            )
-                                        )
-                                    )
-                                )
+                TypeNode(
+                    false,
+                    "Bool",
+                    listOf(),
+                    UnionTypeNode(
+                        listOf(
+                            ConcreteTypeNode(
+                                "True", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "False", Location.NoProvided
                             )
-                        )
-                    )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Union type 2" {
+        "type Bool = True | False |  NoDefined"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Bool",
+                    listOf(),
+                    UnionTypeNode(
+                        listOf(
+                            ConcreteTypeNode(
+                                "True", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "False", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "NoDefined", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Invalid Set type 2" {
+        "type Bool = True | False & NoDefined"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Bool",
+                    listOf(),
+                    InvalidSetTypeNode(
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -334,30 +464,21 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type",
-                        "Num",
-                        TempNode(
-                            listOf(
-                                TempNode(
-                                    listOf(
-                                        "Eq"
-                                    )
-                                ),
-                                TempNode(
-                                    listOf(
-                                        "&",
-                                        TempNode(
-                                            listOf(
-                                                "Ord"
-                                            )
-                                        )
-                                    )
-                                )
+                TypeNode(
+                    false,
+                    "Num",
+                    listOf(),
+                    IntersectionTypeNode(
+                        listOf(
+                            ConcreteTypeNode(
+                                "Eq", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "Ord", Location.NoProvided
                             )
-                        )
-                    )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -373,40 +494,39 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    list = listOf(
-                        "trait",
-                        "Num",
-                        "a",
-                        TempNode(
-                            listOf(
-                                TempNode(
-                                    list = listOf(
-                                        "sum",
-                                        TempNode(
-                                            list = listOf(
-                                                "a",
-                                                "->",
-                                                TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
-                                            )
-                                        )
-                                    )
+                TraitNode(
+                    false,
+                    "Num",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "sum",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
                                 ),
-                                TempNode(
-                                    list = listOf(
-                                        "prod",
-                                        TempNode(
-                                            list = listOf(
-                                                "a",
-                                                "->",
-                                                TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
-                                            )
-                                        )
-                                    )
-                                )
+                                Location.NoProvided
+                            ),
+                            TraitFunctionNode(
+                                "prod",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
                             )
                         )
-                    )
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -418,20 +538,18 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type", "KVStore", "k", "v", TempNode(
-                            listOf(
-                                "Map",
-                                TempNode(
-                                    listOf(
-                                        "key:", "k",
-                                        TempNode(listOf("value:", "v"))
-                                    )
-                                )
-                            )
-                        )
-                    )
+                TypeNode(
+                    false,
+                    "KVStore",
+                    listOf("k", "v"),
+                    ParametricTypeNode(
+                        listOf(
+                            ConcreteTypeNode("Map", Location.NoProvided),
+                            LabelTypeNode("key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided),
+                            LabelTypeNode("value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided)
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
                 )
             )
     }
@@ -443,19 +561,13 @@ class TypeParserTest : StringSpec({
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
-                TempNode(
-                    listOf(
-                        "type", "Point2D", TempNode(
-                            listOf(
-                                "x:", "Double", ",",
-                                TempNode(
-                                    listOf(
-                                        "y:", "Double",
-                                    )
-                                )
-                            )
-                        )
-                    )
+                TypeNode(
+                    false, "Point2D", listOf(), TupleTypeNode(
+                        listOf(
+                            LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
+                            LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
+                        ), Location.NoProvided
+                    ), Location.NoProvided
                 )
             )
     }
