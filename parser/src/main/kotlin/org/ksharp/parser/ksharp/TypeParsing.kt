@@ -77,6 +77,14 @@ private fun List<Any>.toFunctionType(separator: Token): NodeData {
     } else FunctionTypeNode(listOf(first, last), separator.location)
 }
 
+private fun List<Any>.toTupleType(separator: Token): NodeData {
+    val first = first() as TypeExpression
+    val last = last() as TypeExpression
+    return if (last is TupleTypeNode) {
+        TupleTypeNode(listOf(first) + last.types, separator.location)
+    } else TupleTypeNode(listOf(first, last), separator.location)
+}
+
 private fun KSharpConsumeResult.thenJoinType() =
     appendNode {
         val node = it.first()
@@ -92,8 +100,9 @@ private fun KSharpConsumeResult.thenJoinType() =
         if (it.size == 1) return@build it.first().cast()
         val separator = it[1] as Token
         if (separator.type == KSharpTokenType.Operator3) {
-            it.toFunctionType(separator)
-        } else it.toTypeValue()
+            return@build it.toFunctionType(separator)
+        }
+        it.toTupleType(separator)
     }
 
 private fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =

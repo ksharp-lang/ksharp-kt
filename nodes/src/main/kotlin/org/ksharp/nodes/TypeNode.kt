@@ -77,6 +77,15 @@ data class FunctionTypeNode(
         get() = params.asSequence().cast()
 }
 
+data class TupleTypeNode(
+    val types: List<TypeExpression>,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = types.asSequence().cast()
+}
+
+
 data class TypeNode(
     val internal: Boolean,
     val name: String,

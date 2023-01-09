@@ -348,12 +348,12 @@ class TypeParserTest : StringSpec({
                     false,
                     "Point",
                     listOf(),
-                    TempNode(
+                    TupleTypeNode(
                         listOf(
                             ConcreteTypeNode("Double", Location.NoProvided),
-                            ",",
                             ConcreteTypeNode("Double", Location.NoProvided)
-                        )
+                        ),
+                        Location.NoProvided
                     ),
                     Location.NoProvided
                 )
@@ -524,12 +524,11 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Point2D", listOf(), TempNode(
+                    false, "Point2D", listOf(), TupleTypeNode(
                         listOf(
                             LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
-                            ",",
                             LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
-                        )
+                        ), Location.NoProvided
                     ), Location.NoProvided
                 )
             )
