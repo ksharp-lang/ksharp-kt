@@ -37,46 +37,51 @@ private fun KSharpLexerIterator.consumeTypeSetSeparator() =
         }
     })
 
+private fun Token.toTypeExpression(): TypeExpression =
+    if (type == KSharpTokenType.UpperCaseWord)
+        ConcreteTypeNode(text, location)
+    else ParameterTypeNode(text, location)
+
+private fun Token.toValueTypes(it: List<Any>): List<TypeExpression> {
+    val hasLabel = this.type == KSharpTokenType.Label
+    val valueTypes = mutableListOf<TypeExpression>()
+    it.asSequence()
+        .drop(if (hasLabel) 1 else 0)
+        .forEach { item ->
+            if (item is TypeExpression) {
+                if (item is ParametricTypeNode) valueTypes.addAll(item.variables)
+                else valueTypes.add(item)
+                return@forEach
+            }
+            val result = (item as Token)
+                .toTypeExpression()
+                .let {
+                    if (hasLabel) LabelTypeNode(
+                        text.substring(0, text.length - 1),
+                        it,
+                        location
+                    )
+                    else it
+                }
+            valueTypes.add(result)
+        }
+
+    return valueTypes
+}
+
 private fun KSharpConsumeResult.thenJoinType() =
     appendNode {
         val node = it.first()
         if (node is NodeData) return@appendNode node
-        
-        node as LexerValue
-        val hasLabel = node.cast<LexerValue>().type == KSharpTokenType.Label
-
-        val valueTypes = mutableListOf<TypeExpression>()
-        it.asSequence()
-            .drop(if (hasLabel) 1 else 0)
-            .forEach { item ->
-                when (item) {
-                    is TypeExpression -> if (item is ParametricTypeNode) valueTypes.addAll(item.variables)
-                    else valueTypes.add(item)
-
-                    is Token -> {
-                        var result = if (item.type == KSharpTokenType.UpperCaseWord)
-                            ConcreteTypeNode(item.text, item.location)
-                        else ParameterTypeNode(item.text, item.location)
-                        result = if (hasLabel) LabelTypeNode(
-                            node.text.substring(0, node.text.length - 1),
-                            result,
-                            node.location
-                        )
-                        else result
-                        valueTypes.add(result)
-                    }
-
-                    else -> {}
-                }
-            }
-
+        node as Token
+        val valueTypes = node.toValueTypes(it)
         if (valueTypes.size == 1) {
             valueTypes.first().cast()
         } else ParametricTypeNode(valueTypes.toList(), node.location)
     }.thenIfTypeValueSeparator { i ->
         i.consume { it.consumeTypeValue() }
     }.build {
-        if (it.size == 1) it.first().cast<NodeData>()
+        if (it.size == 1) it.first().cast()
         else it.toTypeValue()
     }
 
