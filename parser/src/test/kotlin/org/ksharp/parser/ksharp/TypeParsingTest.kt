@@ -394,20 +394,63 @@ class TypeParserTest : StringSpec({
                     false,
                     "Bool",
                     listOf(),
-                    TempNode(
+                    UnionTypeNode(
                         listOf(
                             ConcreteTypeNode(
                                 "True", Location.NoProvided
                             ),
-                            TempNode(
-                                listOf(
-                                    "|",
-                                    ConcreteTypeNode(
-                                        "False", Location.NoProvided
-                                    )
-                                )
+                            ConcreteTypeNode(
+                                "False", Location.NoProvided
                             )
-                        )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Union type 2" {
+        "type Bool = True | False |  NoDefined"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Bool",
+                    listOf(),
+                    UnionTypeNode(
+                        listOf(
+                            ConcreteTypeNode(
+                                "True", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "False", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "NoDefined", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Invalid Set type 2" {
+        "type Bool = True | False & NoDefined"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Bool",
+                    listOf(),
+                    InvalidSetTypeNode(
+                        Location.NoProvided
                     ),
                     Location.NoProvided
                 )
@@ -425,20 +468,15 @@ class TypeParserTest : StringSpec({
                     false,
                     "Num",
                     listOf(),
-                    TempNode(
+                    IntersectionTypeNode(
                         listOf(
                             ConcreteTypeNode(
                                 "Eq", Location.NoProvided
                             ),
-                            TempNode(
-                                listOf(
-                                    "&",
-                                    ConcreteTypeNode(
-                                        "Ord", Location.NoProvided
-                                    )
-                                )
+                            ConcreteTypeNode(
+                                "Ord", Location.NoProvided
                             )
-                        )
+                        ), Location.NoProvided
                     ),
                     Location.NoProvided
                 )

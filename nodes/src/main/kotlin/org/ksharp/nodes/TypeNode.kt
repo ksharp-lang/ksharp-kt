@@ -85,6 +85,40 @@ data class TupleTypeNode(
         get() = types.asSequence().cast()
 }
 
+data class InvalidSetTypeNode(
+    override val location: Location
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = emptySequence()
+}
+
+data class SetElement(
+    val union: Boolean,
+    val expression: TypeExpression,
+    override val location: Location
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = emptySequence()
+
+}
+
+data class UnionTypeNode(
+    val types: List<TypeExpression>,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = types.asSequence().cast()
+
+}
+
+data class IntersectionTypeNode(
+    val types: List<TypeExpression>,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = types.asSequence().cast()
+
+}
 
 data class TypeNode(
     val internal: Boolean,

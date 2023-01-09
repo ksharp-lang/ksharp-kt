@@ -5,7 +5,11 @@ import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
-fun List<Any>.toTypeValue(): NodeData = TempNode(this.map { if (it is LexerValue) it.cast<LexerValue>().text else it })
+private enum class SetType {
+    Invalid,
+    Union,
+    Intersection
+}
 
 private fun KSharpLexerIterator.consumeTypeVariable() =
     consume({
@@ -121,16 +125,53 @@ private fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =
             .thenJoinType()
     }
 
+private fun List<Any>.calculateSetType(): SetType {
+    var setType: SetType? = null
+    for (element in asSequence().drop(1)) {
+        element as SetElement
+        val type = if (element.union) SetType.Union else SetType.Intersection
+        if (setType == null) {
+            setType = type
+            continue
+        }
+        if (setType != type) {
+            return SetType.Invalid
+        }
+    }
+    return setType!!
+}
+
+private fun List<Any>.asTypeExpressionList(): List<TypeExpression> =
+    map {
+        if (it is SetElement) it.expression
+        else it as TypeExpression
+    }
+
 private fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
     consumeTypeValue()
         .resume()
         .thenLoop {
             it.consumeTypeSetSeparator()
                 .consume { i -> i.consumeTypeValue() }
-                .build { i -> i.toTypeValue() }
+                .build { i ->
+                    val setOperator = i.first() as Token
+                    SetElement(
+                        setOperator.type == KSharpTokenType.Operator9,
+                        i.last().cast(),
+                        setOperator.location
+                    )
+                }
         }.build {
             if (it.size == 1) it.first().cast()
-            else it.toTypeValue()
+            else {
+                val setType = it.calculateSetType()
+                val item = it.first() as NodeData
+                when (setType) {
+                    SetType.Invalid -> InvalidSetTypeNode(item.location)
+                    SetType.Union -> UnionTypeNode(it.asTypeExpressionList(), item.location)
+                    SetType.Intersection -> IntersectionTypeNode(it.asTypeExpressionList(), item.location)
+                }
+            }
         }
 
 private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
