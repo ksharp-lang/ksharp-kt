@@ -38,9 +38,47 @@ private fun KSharpLexerIterator.consumeTypeSetSeparator() =
     })
 
 private fun KSharpConsumeResult.thenJoinType() =
-    thenIfTypeValueSeparator { i ->
+    appendNode {
+        val node = it.first()
+        if (node is NodeData) return@appendNode node
+        
+        node as LexerValue
+        val hasLabel = node.cast<LexerValue>().type == KSharpTokenType.Label
+
+        val valueTypes = mutableListOf<TypeExpression>()
+        it.asSequence()
+            .drop(if (hasLabel) 1 else 0)
+            .forEach { item ->
+                when (item) {
+                    is TypeExpression -> if (item is ParametricTypeNode) valueTypes.addAll(item.variables)
+                    else valueTypes.add(item)
+
+                    is Token -> {
+                        var result = if (item.type == KSharpTokenType.UpperCaseWord)
+                            ConcreteTypeNode(item.text, item.location)
+                        else ParameterTypeNode(item.text, item.location)
+                        result = if (hasLabel) LabelTypeNode(
+                            node.text.substring(0, node.text.length - 1),
+                            result,
+                            node.location
+                        )
+                        else result
+                        valueTypes.add(result)
+                    }
+
+                    else -> {}
+                }
+            }
+
+        if (valueTypes.size == 1) {
+            valueTypes.first().cast()
+        } else ParametricTypeNode(valueTypes.toList(), node.location)
+    }.thenIfTypeValueSeparator { i ->
         i.consume { it.consumeTypeValue() }
-    }.build { it.toTypeValue() }
+    }.build {
+        if (it.size == 1) it.first().cast<NodeData>()
+        else it.toTypeValue()
+    }
 
 private fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =
     ifConsume(KSharpTokenType.OpenParenthesis, true) {

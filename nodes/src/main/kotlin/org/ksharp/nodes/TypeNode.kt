@@ -1,6 +1,9 @@
 package org.ksharp.nodes
 
 import org.ksharp.common.Location
+import org.ksharp.common.cast
+
+interface TypeExpression
 
 data class TraitFunctionNode(
     val name: String,
@@ -31,6 +34,39 @@ data class TraitNode(
     override val children: Sequence<NodeData>
         get() = sequenceOf(function)
 
+}
+
+data class LabelTypeNode(
+    val name: String,
+    val expr: TypeExpression,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(expr.cast())
+}
+
+data class ConcreteTypeNode(
+    val name: String,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = emptySequence()
+}
+
+data class ParameterTypeNode(
+    val name: String,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = emptySequence()
+}
+
+data class ParametricTypeNode(
+    val variables: List<TypeExpression>,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = variables.asSequence().cast()
 }
 
 data class TypeNode(

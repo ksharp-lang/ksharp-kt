@@ -123,7 +123,12 @@ class TypeParserTest : StringSpec({
                     false,
                     "ListOfInt",
                     listOf(),
-                    TempNode(listOf(TempNode(listOf("List", TempNode(listOf("Int")))))),
+                    ParametricTypeNode(
+                        listOf(
+                            ConcreteTypeNode("List", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ), Location.NoProvided
+                    ),
                     Location.NoProvided
                 )
             )
@@ -142,10 +147,17 @@ class TypeParserTest : StringSpec({
                     listOf(),
                     TempNode(
                         listOf(
-                            TempNode(listOf("List", TempNode(listOf("Int")))), "->", TempNode(
+                            ParametricTypeNode(
                                 listOf(
-                                    "a", "->", TempNode(
-                                        listOf("a")
+                                    ConcreteTypeNode("List", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ), Location.NoProvided
+                            ),
+                            "->", TempNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    "->", ParameterTypeNode(
+                                        "a", Location.NoProvided
                                     )
                                 )
                             )
@@ -162,7 +174,15 @@ class TypeParserTest : StringSpec({
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
-            .shouldBeRight(TypeNode(false, "Integer", listOf(), TempNode(listOf("Int")), Location.NoProvided))
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Integer",
+                    listOf(),
+                    ConcreteTypeNode("Int", Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
     }
     "Internal Alias type" {
         "internal type Integer = Int"
@@ -171,7 +191,15 @@ class TypeParserTest : StringSpec({
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
-            .shouldBeRight(TypeNode(true, "Integer", listOf(), TempNode(listOf("Int")), Location.NoProvided))
+            .shouldBeRight(
+                TypeNode(
+                    true,
+                    "Integer",
+                    listOf(),
+                    ConcreteTypeNode("Int", Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
     }
     "Parametric alias type" {
         "type ListOfInt = List Int"
@@ -185,7 +213,12 @@ class TypeParserTest : StringSpec({
                     false,
                     "ListOfInt",
                     listOf(),
-                    TempNode(listOf("List", TempNode(listOf("Int")))),
+                    ParametricTypeNode(
+                        listOf(
+                            ConcreteTypeNode("List", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ), Location.NoProvided
+                    ),
                     Location.NoProvided
                 )
             )
@@ -202,16 +235,12 @@ class TypeParserTest : StringSpec({
                     false,
                     "KVStore",
                     listOf("k", "v"),
-                    TempNode(
+                    ParametricTypeNode(
                         listOf(
-                            "Map", TempNode(
-                                listOf(
-                                    "k", TempNode(
-                                        listOf("v")
-                                    )
-                                )
-                            )
-                        )
+                            ConcreteTypeNode("Map", Location.NoProvided),
+                            ParameterTypeNode("k", Location.NoProvided),
+                            ParameterTypeNode("v", Location.NoProvided)
+                        ), Location.NoProvided
                     ),
                     Location.NoProvided
                 )
@@ -224,7 +253,15 @@ class TypeParserTest : StringSpec({
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
-            .shouldBeRight(TypeNode(false, "Num", listOf("n"), TempNode(listOf("n")), Location.NoProvided))
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Num",
+                    listOf("n"),
+                    ParameterTypeNode("n", Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
     }
     "Function type" {
         "type Sum a = a -> a -> a"
@@ -238,7 +275,19 @@ class TypeParserTest : StringSpec({
                     false,
                     "Sum",
                     listOf("a"),
-                    TempNode(listOf("a", "->", TempNode(listOf("a", "->", TempNode(listOf("a")))))),
+                    TempNode(
+                        listOf(
+                            ParameterTypeNode("a", Location.NoProvided),
+                            "->",
+                            TempNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    "->",
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                )
+                            )
+                        )
+                    ),
                     Location.NoProvided
                 )
             )
@@ -255,7 +304,13 @@ class TypeParserTest : StringSpec({
                     false,
                     "ToString",
                     listOf("a"),
-                    TempNode(listOf("a", "->", TempNode(listOf("String")))),
+                    TempNode(
+                        listOf(
+                            ParameterTypeNode("a", Location.NoProvided),
+                            "->",
+                            ConcreteTypeNode("String", Location.NoProvided)
+                        )
+                    ),
                     Location.NoProvided
                 )
             )
@@ -272,7 +327,13 @@ class TypeParserTest : StringSpec({
                     false,
                     "Point",
                     listOf(),
-                    TempNode(listOf("Double", ",", TempNode(listOf("Double")))),
+                    TempNode(
+                        listOf(
+                            ConcreteTypeNode("Double", Location.NoProvided),
+                            ",",
+                            ConcreteTypeNode("Double", Location.NoProvided)
+                        )
+                    ),
                     Location.NoProvided
                 )
             )
@@ -289,7 +350,13 @@ class TypeParserTest : StringSpec({
                     true,
                     "ToString",
                     listOf("a"),
-                    TempNode(listOf("a", "->", TempNode(listOf("String")))),
+                    TempNode(
+                        listOf(
+                            ParameterTypeNode("a", Location.NoProvided),
+                            "->",
+                            ConcreteTypeNode("String", Location.NoProvided)
+                        )
+                    ),
                     Location.NoProvided
                 )
             )
@@ -308,18 +375,14 @@ class TypeParserTest : StringSpec({
                     listOf(),
                     TempNode(
                         listOf(
-                            TempNode(
-                                listOf(
-                                    "True"
-                                )
+                            ConcreteTypeNode(
+                                "True", Location.NoProvided
                             ),
                             TempNode(
                                 listOf(
                                     "|",
-                                    TempNode(
-                                        listOf(
-                                            "False"
-                                        )
+                                    ConcreteTypeNode(
+                                        "False", Location.NoProvided
                                     )
                                 )
                             )
@@ -343,18 +406,14 @@ class TypeParserTest : StringSpec({
                     listOf(),
                     TempNode(
                         listOf(
-                            TempNode(
-                                listOf(
-                                    "Eq"
-                                )
+                            ConcreteTypeNode(
+                                "Eq", Location.NoProvided
                             ),
                             TempNode(
                                 listOf(
                                     "&",
-                                    TempNode(
-                                        listOf(
-                                            "Ord"
-                                        )
+                                    ConcreteTypeNode(
+                                        "Ord", Location.NoProvided
                                     )
                                 )
                             )
@@ -386,9 +445,15 @@ class TypeParserTest : StringSpec({
                                 "sum",
                                 TempNode(
                                     list = listOf(
-                                        "a",
+                                        ParameterTypeNode("a", Location.NoProvided),
                                         "->",
-                                        TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                        TempNode(
+                                            list = listOf(
+                                                ParameterTypeNode("a", Location.NoProvided),
+                                                "->",
+                                                ParameterTypeNode("a", Location.NoProvided)
+                                            )
+                                        )
                                     )
                                 ),
                                 Location.NoProvided
@@ -397,9 +462,15 @@ class TypeParserTest : StringSpec({
                                 "prod",
                                 TempNode(
                                     list = listOf(
-                                        "a",
+                                        ParameterTypeNode("a", Location.NoProvided),
                                         "->",
-                                        TempNode(list = listOf("a", "->", TempNode(list = listOf("a"))))
+                                        TempNode(
+                                            list = listOf(
+                                                ParameterTypeNode("a", Location.NoProvided),
+                                                "->",
+                                                ParameterTypeNode("a", Location.NoProvided)
+                                            )
+                                        )
                                     )
                                 ),
                                 Location.NoProvided
@@ -422,16 +493,12 @@ class TypeParserTest : StringSpec({
                     false,
                     "KVStore",
                     listOf("k", "v"),
-                    TempNode(
+                    ParametricTypeNode(
                         listOf(
-                            "Map",
-                            TempNode(
-                                listOf(
-                                    "key:", "k",
-                                    TempNode(listOf("value:", "v"))
-                                )
-                            )
-                        )
+                            ConcreteTypeNode("Map", Location.NoProvided),
+                            LabelTypeNode("key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided),
+                            LabelTypeNode("value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided)
+                        ), Location.NoProvided
                     ),
                     Location.NoProvided
                 )
@@ -448,12 +515,9 @@ class TypeParserTest : StringSpec({
                 TypeNode(
                     false, "Point2D", listOf(), TempNode(
                         listOf(
-                            "x:", "Double", ",",
-                            TempNode(
-                                listOf(
-                                    "y:", "Double",
-                                )
-                            )
+                            LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
+                            ",",
+                            LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
                         )
                     ), Location.NoProvided
                 )

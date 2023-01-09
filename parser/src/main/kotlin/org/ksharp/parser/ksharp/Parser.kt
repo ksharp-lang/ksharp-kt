@@ -1,8 +1,6 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.Either
-import org.ksharp.common.ZeroPosition
-import org.ksharp.common.cast
+import org.ksharp.common.*
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.NodeData
 import org.ksharp.parser.*
@@ -14,6 +12,13 @@ import java.nio.file.Path
 
 typealias KSharpParserResult = ParserResult<NodeData, KSharpLexerState>
 typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
+
+fun KSharpConsumeResult.appendNode(block: (items: List<Any>) -> NodeData): KSharpConsumeResult =
+    map {
+        val items = it.collection.build()
+        val item = block(items)
+        NodeCollector(listBuilder<Any>().apply { add(item as Any) }, it.tokens)
+    }
 
 fun <R> KSharpConsumeResult.enableLabelToken(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
     flatMap { collector ->
