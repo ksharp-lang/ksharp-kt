@@ -140,4 +140,38 @@ class TypeNodeTest : StringSpec({
             children.toList().shouldBeEmpty()
         }
     }
+    "Test Node Interface over ParametricTypeNode" {
+        ParametricTypeNode(
+            listOf(ConcreteTypeNode("List", testLocation), ConcreteTypeNode("Int", testLocation)),
+            testLocation
+        ).node.apply {
+            cast<ParametricTypeNode>().apply {
+                variables.shouldBe(
+                    listOf(
+                        ConcreteTypeNode("List", testLocation),
+                        ConcreteTypeNode("Int", testLocation)
+                    )
+                )
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(this, testLocation, ConcreteTypeNode("List", testLocation)),
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation))
+                ),
+            )
+        }
+    }
+    "Test Node Interface over InvalidSetTypeNode" {
+        InvalidSetTypeNode(
+            testLocation
+        ).node.apply {
+            cast<InvalidSetTypeNode>().apply {
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBeEmpty()
+        }
+    }
 })
