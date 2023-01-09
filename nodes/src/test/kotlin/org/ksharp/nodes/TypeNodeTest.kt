@@ -132,7 +132,7 @@ class TypeNodeTest : StringSpec({
             "k",
             testLocation
         ).node.apply {
-            cast<ConcreteTypeNode>().apply {
+            cast<ParameterTypeNode>().apply {
                 name.shouldBe("k")
                 location.shouldBe(testLocation)
             }
