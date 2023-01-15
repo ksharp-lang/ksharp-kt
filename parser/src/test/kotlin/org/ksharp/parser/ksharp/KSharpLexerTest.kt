@@ -96,11 +96,11 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given lexer, check hex, binary, octal" {
-        "0xFFFF".kSharpLexer()
+        "0xFF0F".kSharpLexer()
             .asSequence()
             .toList().onEach(::println)
             .shouldContainAll(
-                LexerToken(KSharpTokenType.HexInteger, TextToken("0xFFFF", 0, 5)),
+                LexerToken(KSharpTokenType.HexInteger, TextToken("0xFF0F", 0, 5)),
             )
 
         "0xFF_FF".kSharpLexer()
