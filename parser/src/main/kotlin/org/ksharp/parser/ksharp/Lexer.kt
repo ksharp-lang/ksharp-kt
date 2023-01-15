@@ -19,6 +19,12 @@ enum class KSharpTokenType : TokenType {
     LowerCaseWord,
     Label,
     FunctionName,
+    String,
+    MultiLineString,
+    Character,
+    HexInteger,
+    BinaryInteger,
+    OctalInteger,
     Integer,
     Float,
     Alt,
@@ -62,6 +68,9 @@ private val mappings = mapOf(
 )
 
 private val operators = "+-*/%><=!&$#^?.\\|:".toSet()
+private val hexLetterDigit = "abcdefABCDEF".toSet()
+private val octalLetterDigit = "01234567".toSet()
+fun Char.isHexDigit() = isDigit() || hexLetterDigit.contains(this)
 
 fun Char.isNewLine() = this == '\n'
 
@@ -123,9 +132,17 @@ fun KSharpLexer.word(type: TokenType): LexerToken {
     }
 }
 
-fun KSharpLexer.number(): LexerToken {
+fun KSharpLexer.number(firstLetterIsZero: Boolean): LexerToken {
+    var started = false
     while (true) {
         val c = this.nextChar() ?: return token(KSharpTokenType.Integer, 1)
+        if (firstLetterIsZero && !started) {
+            started = true
+            if (c == 'x') return hexNumber()
+            if (c == 'b') return binaryNumber()
+            if (c == 'o') return octalNumber()
+        }
+        if (c == '_') continue
         if (c.isDot()) return decimal(KSharpTokenType.Integer, 2)
         if (!c.isDigit()) {
             return token(KSharpTokenType.Integer, 1)
@@ -133,16 +150,94 @@ fun KSharpLexer.number(): LexerToken {
     }
 }
 
+fun KSharpLexer.hexNumber(): LexerToken {
+    var start = false
+    var skip = 2
+    while (true) {
+        val c = this.nextChar() ?: return if (start) token(
+            KSharpTokenType.HexInteger,
+            1
+        ) else token(KSharpTokenType.Integer, skip)
+        skip += 1
+        if (c == '_') continue
+        if (!c.isHexDigit()) {
+            if (!start) return token(KSharpTokenType.Integer, 1)
+            return token(KSharpTokenType.HexInteger, 1)
+        }
+        start = true
+    }
+}
+
+fun KSharpLexer.binaryNumber(): LexerToken {
+    var start = false
+    var skip = 2
+    while (true) {
+        val c = this.nextChar() ?: return if (start) token(
+            KSharpTokenType.BinaryInteger,
+            1
+        ) else token(KSharpTokenType.Integer, skip)
+        skip += 1
+        if (c == '_') continue
+        if (!(c == '1' || c == '0')) {
+            if (!start) return token(KSharpTokenType.Integer, 1)
+            return token(KSharpTokenType.BinaryInteger, 1)
+        }
+        start = true
+    }
+}
+
+fun KSharpLexer.octalNumber(): LexerToken {
+    var start = false
+    var skip = 2
+    while (true) {
+        val c = this.nextChar() ?: return if (start) token(
+            KSharpTokenType.OctalInteger,
+            1
+        ) else token(KSharpTokenType.Integer, skip)
+        skip += 1
+        if (c == '_') continue
+        if (!octalLetterDigit.contains(c)) {
+            if (!start) return token(KSharpTokenType.Integer, 1)
+            return token(KSharpTokenType.OctalInteger, 1)
+        }
+        start = true
+    }
+}
+
 fun KSharpLexer.decimal(type: TokenType, skip: Int): LexerToken {
     var start = false
     while (true) {
-        val c = this.nextChar() ?: return token(type, skip)
+        val c = this.nextChar() ?: return token(if (start) KSharpTokenType.Float else type, skip)
         if (!c.isDigit()) {
             if (!start) return token(type, skip)
             return token(KSharpTokenType.Float, 1)
         }
         start = true
     }
+}
+
+fun KSharpLexer.character(): LexerToken {
+    this.nextChar() ?: return token(KSharpTokenType.Character, 1)
+    val c = this.nextChar() ?: return token(KSharpTokenType.Character, 1)
+    if (c == '\'') return token(KSharpTokenType.Character, 0)
+    return token(KSharpTokenType.Character, 1)
+}
+
+fun KSharpLexer.string(): LexerToken {
+    var c = this.nextChar() ?: return token(KSharpTokenType.String, 1)
+    val isQuote = c == '"'
+    c = this.nextChar() ?: return token(KSharpTokenType.String, 1)
+    if (isQuote && c != '"') return token(KSharpTokenType.String, 1)
+    var endQuotesRequired = if (c == '"') 3 else 1
+    val tokenType = if (endQuotesRequired == 3) KSharpTokenType.MultiLineString else KSharpTokenType.String
+    while (endQuotesRequired > 0) {
+        c = this.nextChar() ?: return token(tokenType, 1)
+        if (c == '"') {
+            endQuotesRequired -= 1
+            continue
+        }
+    }
+    return token(tokenType, 0)
 }
 
 
@@ -174,7 +269,9 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
                     else KSharpTokenType.LowerCaseWord
                 )
 
-            isDigit() -> number()
+            equals('\'') -> character()
+            equals('"') -> string()
+            isDigit() -> number(c == '0')
             isDot() -> decimal(KSharpTokenType.Operator, 1)
             isNewLine() -> newLine()
             isSpace() -> whiteSpace()
