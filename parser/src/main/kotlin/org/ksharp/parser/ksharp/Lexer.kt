@@ -132,15 +132,21 @@ fun KSharpLexer.word(type: TokenType): LexerToken {
     }
 }
 
+fun KSharpLexer.numberDifferentBase(c: Char): LexerToken? {
+    if (c == 'x') return hexNumber()
+    if (c == 'b') return binaryNumber()
+    if (c == 'o') return octalNumber()
+    return null
+}
+
 fun KSharpLexer.number(firstLetterIsZero: Boolean): LexerToken {
     var started = false
     while (true) {
         val c = this.nextChar() ?: return token(KSharpTokenType.Integer, 1)
         if (firstLetterIsZero && !started) {
             started = true
-            if (c == 'x') return hexNumber()
-            if (c == 'b') return binaryNumber()
-            if (c == 'o') return octalNumber()
+            val result = numberDifferentBase(c)
+            if (result != null) return result
         }
         if (c == '_') continue
         if (c.isDot()) return decimal(KSharpTokenType.Integer, 2)
