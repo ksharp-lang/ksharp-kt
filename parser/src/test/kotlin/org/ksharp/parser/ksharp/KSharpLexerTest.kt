@@ -2,13 +2,14 @@ package org.ksharp.parser.ksharp
 
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import org.ksharp.parser.*
 
 class KSharpLexerTest : StringSpec({
     "Given lexer, check LowerCaseWord, UpperCaseWord, WhiteSpace, Label, Operator token" {
-        "type Name lbl: Name:".kSharpLexer()
+        "type Name lbl: Name: User_name".kSharpLexer()
             .enableLabelToken {
                 it.asSequence()
                     .toList()
@@ -46,6 +47,14 @@ class KSharpLexerTest : StringSpec({
                                 KSharpTokenType.Operator,
                                 TextToken(":", 19, 19)
                             ),
+                            LexerToken(
+                                type = KSharpTokenType.WhiteSpace,
+                                token = TextToken(text = " ", startOffset = 20, endOffset = 20)
+                            ),
+                            LexerToken(
+                                KSharpTokenType.UpperCaseWord,
+                                TextToken("User_name", 21, 29)
+                            ),
                         )
                     )
             }
@@ -65,6 +74,20 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Comma, TextToken(",", 7, 7))
             )
     }
+    "Given lexer, check #( #+ #{, #[" {
+        "#( #+ #{, #[".kSharpLexer()
+            .asSequence()
+            .toList()
+            .onEach(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.Operator, TextToken("#", 0, 0)),
+                LexerToken(KSharpTokenType.OpenParenthesis, TextToken("(", 1, 1)),
+                LexerToken(KSharpTokenType.Operator, TextToken("#+", 3, 4)),
+                LexerToken(KSharpTokenType.Operator, TextToken("#", 6, 6)),
+                LexerToken(KSharpTokenType.OpenCurlyBraces, TextToken("{", 7, 7)),
+                LexerToken(KSharpTokenType.OpenSetBracketBraces, TextToken("#[", 10, 11)),
+            )
+    }
     "Given lexer, check operators" {
         "+-*/%><=!&$#^?.\\|".kSharpLexer()
             .asSequence()
@@ -74,7 +97,7 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given lexer, check integers, decimals, integer and dot operator" {
-        "100 1.3 .6 2. 1_000 0xFFFFbB 0b110011 0o12345 ".kSharpLexer()
+        "100 1.3 .6 2. 1_000 0xFFFFbB 0b110011 0o12345 010 ".kSharpLexer()
             .asSequence()
             .toList().onEach(::println)
             .shouldContainAll(
@@ -92,6 +115,10 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(
                     KSharpTokenType.OctalInteger,
                     TextToken(text = "0o12345", startOffset = 38, endOffset = 44)
+                ),
+                LexerToken(
+                    KSharpTokenType.Integer,
+                    TextToken(text = "010", startOffset = 46, endOffset = 48)
                 )
             )
     }
@@ -370,6 +397,18 @@ class KSharpLexerTest : StringSpec({
                     ),
                 )
             )
+    }
+    "Given a lexer, map tabs as whitespaces" {
+        "\t".kSharpLexer()
+            .asSequence()
+            .toList()
+            .shouldBe(listOf(LexerToken(KSharpTokenType.WhiteSpace, TextToken("\t", 0, 0))))
+    }
+    "Given a lexer, ignore \r" {
+        "\r".kSharpLexer()
+            .asSequence()
+            .toList()
+            .shouldBeEmpty()
     }
 })
 

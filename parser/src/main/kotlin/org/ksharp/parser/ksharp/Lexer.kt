@@ -33,6 +33,7 @@ enum class KSharpTokenType : TokenType {
     CloseBracket,
     OpenParenthesis,
     CloseParenthesis,
+    OpenSetBracketBraces,
     OpenCurlyBraces,
     CloseCurlyBraces,
     WhiteSpace,
@@ -117,6 +118,15 @@ fun KSharpLexer.operator(): LexerToken {
             return token(KSharpTokenType.Operator, 1)
         }
     }
+}
+
+fun KSharpLexer.openSetCurlyBraces(): LexerToken {
+    val c = this.nextChar() ?: return token(KSharpTokenType.Operator, 1)
+    if (c == '[') {
+        return token(KSharpTokenType.OpenSetBracketBraces, 0)
+    }
+    if (c.isOperator()) return operator()
+    return token(KSharpTokenType.Operator, 1)
 }
 
 fun KSharpLexer.word(type: TokenType): LexerToken {
@@ -275,6 +285,7 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
                     else KSharpTokenType.LowerCaseWord
                 )
 
+            equals('#') -> openSetCurlyBraces()
             equals('\'') -> character()
             equals('"') -> string()
             isDigit() -> number(c == '0')
