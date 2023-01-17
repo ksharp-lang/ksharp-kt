@@ -252,16 +252,8 @@ private class StringLexerInfo {
     fun process(c: Char) {
         lastIsQuote = c == '"'
         isEscapeCharacter = c == '\\' && !isEscapeCharacter
-        if (!begin) {
-            if (c == '"') {
-                if (!isEscapeCharacter) {
-                    endQuotesRequired += 1
-                }
-            }
-            return
-        }
         if (c == '"' && !isEscapeCharacter) {
-            endQuotesRequired -= 1
+            endQuotesRequired += if (!begin) 1 else -1
         }
     }
 
