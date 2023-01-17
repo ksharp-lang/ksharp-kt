@@ -19,6 +19,12 @@ enum class KSharpTokenType : TokenType {
     LowerCaseWord,
     Label,
     FunctionName,
+    String,
+    MultiLineString,
+    Character,
+    HexInteger,
+    BinaryInteger,
+    OctalInteger,
     Integer,
     Float,
     Alt,
@@ -27,6 +33,7 @@ enum class KSharpTokenType : TokenType {
     CloseBracket,
     OpenParenthesis,
     CloseParenthesis,
+    OpenSetBracketBraces,
     OpenCurlyBraces,
     CloseCurlyBraces,
     WhiteSpace,
@@ -62,6 +69,12 @@ private val mappings = mapOf(
 )
 
 private val operators = "+-*/%><=!&$#^?.\\|:".toSet()
+private val hexLetterDigit = "0123456789abcdefABCDEF".toSet()
+private val octalLetterDigit = "01234567".toSet()
+private val binaryDigit = "01".toSet()
+private val escapeCharacters = "t'\"rnf\\b".toSet()
+
+fun Char.isEscapeCharacter() = escapeCharacters.contains(this)
 
 fun Char.isNewLine() = this == '\n'
 
@@ -71,6 +84,43 @@ fun Char.isOperator() = operators.contains(this)
 fun Char.isDot() = this == '.'
 
 fun Char.shouldIgnore() = this == '\r'
+private inline fun KSharpLexer.ifChar(
+    predicate: Char.() -> Boolean,
+    eofToken: TokenType,
+    then: KSharpLexer.(Char) -> LexerToken,
+    elseThen: KSharpLexer.(Char) -> LexerToken,
+): LexerToken {
+    val c = nextChar() ?: return token(eofToken, 1)
+    if (c.predicate()) return then(c)
+    return elseThen(c)
+}
+
+private inline fun KSharpLexer.ifChar(
+    expected: Char,
+    eofToken: TokenType,
+    thenToken: TokenType,
+    elseThen: KSharpLexer.(Char) -> LexerToken = { token(eofToken, 1) }
+): LexerToken = ifChar({ equals(expected) }, eofToken, {
+    token(thenToken, 0)
+}, elseThen)
+
+private inline fun KSharpLexer.loopChar(
+    predicate: Char.() -> Boolean,
+    endToken: TokenType,
+    elseToken: KSharpLexer.(Char) -> LexerToken
+): LexerToken {
+    while (true) {
+        val c = this.nextChar() ?: return token(endToken, 1)
+        if (!c.predicate()) {
+            return elseToken(c)
+        }
+    }
+}
+
+private inline fun KSharpLexer.loopChar(
+    predicate: Char.() -> Boolean,
+    endToken: TokenType
+): LexerToken = loopChar(predicate, endToken) { token(endToken, 1) }
 
 fun <R> KSharpLexerIterator.enableLabelToken(code: (KSharpLexerIterator) -> R): R =
     state.value.consumeLabels.let { initValue ->
@@ -101,31 +151,40 @@ fun <R> KSharpLexerIterator.enableDiscardBlockAndNewLineTokens(code: (KSharpLexe
         enableDiscardNewLineToken(code)
     }
 
-fun KSharpLexer.operator(): LexerToken {
-    while (true) {
-        val c = this.nextChar() ?: return token(KSharpTokenType.Operator, 1)
-        if (!c.isOperator()) {
-            return token(KSharpTokenType.Operator, 1)
-        }
-    }
-}
+fun KSharpLexer.operator(): LexerToken = loopChar({ isOperator() }, KSharpTokenType.Operator)
 
-fun KSharpLexer.word(type: TokenType): LexerToken {
-    while (true) {
-        val c = this.nextChar() ?: return token(type, 1)
-        val value = c.isLetter() || c.isDigit() || c == '_'
-        if (!value) {
-            if (state.value.consumeLabels && type == KSharpTokenType.LowerCaseWord && c == ':') {
-                return token(KSharpTokenType.Label, 0)
-            }
-            return token(type, 1)
-        }
+fun KSharpLexer.openSetCurlyBraces(): LexerToken =
+    ifChar('[', KSharpTokenType.Operator, KSharpTokenType.OpenSetBracketBraces) {
+        if (it.isOperator()) return operator()
+        return token(KSharpTokenType.Operator, 1)
     }
-}
 
-fun KSharpLexer.number(): LexerToken {
+fun KSharpLexer.word(type: TokenType): LexerToken =
+    loopChar({ isLetter() || isDigit() || equals('_') }, type) {
+        if (state.value.consumeLabels && type == KSharpTokenType.LowerCaseWord && it == ':') {
+            return token(KSharpTokenType.Label, 0)
+        }
+        return token(type, 1)
+    }
+
+fun KSharpLexer.numberDifferentBase(c: Char): LexerToken? =
+    when (c) {
+        'x' -> hexNumber()
+        'b' -> binaryNumber()
+        'o' -> octalNumber()
+        else -> null
+    }
+
+fun KSharpLexer.number(firstLetterIsZero: Boolean): LexerToken {
+    var started = false
     while (true) {
         val c = this.nextChar() ?: return token(KSharpTokenType.Integer, 1)
+        if (firstLetterIsZero && !started) {
+            started = true
+            val result = numberDifferentBase(c)
+            if (result != null) return result
+        }
+        if (c == '_') continue
         if (c.isDot()) return decimal(KSharpTokenType.Integer, 2)
         if (!c.isDigit()) {
             return token(KSharpTokenType.Integer, 1)
@@ -133,10 +192,34 @@ fun KSharpLexer.number(): LexerToken {
     }
 }
 
+private fun KSharpLexer.numberInDifferentBase(type: KSharpTokenType, expectedDigits: Set<Char>): LexerToken {
+    var start = false
+    var skip = 2
+    while (true) {
+        val c = this.nextChar() ?: return if (start) token(
+            type,
+            1
+        ) else token(KSharpTokenType.Integer, skip)
+        skip += 1
+        if (c == '_') continue
+        if (!expectedDigits.contains(c)) {
+            if (!start) return token(KSharpTokenType.Integer, 1)
+            return token(type, 1)
+        }
+        start = true
+    }
+}
+
+fun KSharpLexer.hexNumber(): LexerToken = numberInDifferentBase(KSharpTokenType.HexInteger, hexLetterDigit)
+
+fun KSharpLexer.binaryNumber(): LexerToken = numberInDifferentBase(KSharpTokenType.BinaryInteger, binaryDigit)
+
+fun KSharpLexer.octalNumber(): LexerToken = numberInDifferentBase(KSharpTokenType.OctalInteger, octalLetterDigit)
+
 fun KSharpLexer.decimal(type: TokenType, skip: Int): LexerToken {
     var start = false
     while (true) {
-        val c = this.nextChar() ?: return token(type, skip)
+        val c = this.nextChar() ?: return token(if (start) KSharpTokenType.Float else type, skip)
         if (!c.isDigit()) {
             if (!start) return token(type, skip)
             return token(KSharpTokenType.Float, 1)
@@ -145,24 +228,60 @@ fun KSharpLexer.decimal(type: TokenType, skip: Int): LexerToken {
     }
 }
 
-
-fun KSharpLexer.newLine(): LexerToken {
-    while (true) {
-        val c = this.nextChar() ?: return token(KSharpTokenType.NewLine, 1)
-        if (!c.isSpace()) {
-            return token(KSharpTokenType.NewLine, 1)
+fun KSharpLexer.character(): LexerToken =
+    ifChar({ equals('\\') }, KSharpTokenType.Character, {
+        loopChar({ !equals('\'') }, KSharpTokenType.Character)
+    }) {
+        if (it == '\'') token(KSharpTokenType.Character, 0)
+        else when (this.nextChar()) {
+            '\'' -> token(KSharpTokenType.Character, 0)
+            else -> token(KSharpTokenType.Character, 1)
         }
     }
-}
 
-fun KSharpLexer.whiteSpace(): LexerToken {
-    while (true) {
-        val c = this.nextChar() ?: return token(KSharpTokenType.WhiteSpace, 1)
-        if (!c.isSpace()) {
-            return token(KSharpTokenType.WhiteSpace, 1)
+private class StringLexerInfo {
+    private var begin: Boolean = false
+    var endQuotesRequired: Int = 1
+        private set
+    var isEscapeCharacter: Boolean = false
+        private set
+
+    var lastIsQuote: Boolean = false
+        private set
+
+    fun process(c: Char) {
+        lastIsQuote = c == '"'
+        isEscapeCharacter = c == '\\' && !isEscapeCharacter
+        if (c == '"' && !isEscapeCharacter) {
+            endQuotesRequired += if (!begin) 1 else -1
         }
     }
+
+    fun startStringContent() {
+        begin = true
+    }
+
 }
+
+fun KSharpLexer.string(): LexerToken {
+    val info = StringLexerInfo()
+    info.process(this.nextChar() ?: return token(KSharpTokenType.String, 1))
+    info.process(this.nextChar() ?: return token(KSharpTokenType.String, 1))
+
+    if (info.endQuotesRequired == 2) return token(KSharpTokenType.String, if (info.lastIsQuote) 0 else 1)
+    val tokenType = if (info.endQuotesRequired == 3) KSharpTokenType.MultiLineString else KSharpTokenType.String
+
+    info.startStringContent()
+    while (info.endQuotesRequired > 0) {
+        info.process(this.nextChar() ?: return token(tokenType, 1))
+    }
+    return token(tokenType, 0)
+}
+
+
+fun KSharpLexer.newLine(): LexerToken = loopChar({ isSpace() }, KSharpTokenType.NewLine)
+
+fun KSharpLexer.whiteSpace(): LexerToken = loopChar({ isSpace() }, KSharpTokenType.WhiteSpace)
 
 
 val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
@@ -174,7 +293,10 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
                     else KSharpTokenType.LowerCaseWord
                 )
 
-            isDigit() -> number()
+            equals('#') -> openSetCurlyBraces()
+            equals('\'') -> character()
+            equals('"') -> string()
+            isDigit() -> number(c == '0')
             isDot() -> decimal(KSharpTokenType.Operator, 1)
             isNewLine() -> newLine()
             isSpace() -> whiteSpace()

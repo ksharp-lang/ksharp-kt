@@ -2,13 +2,18 @@ package org.ksharp.parser.ksharp
 
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.sequences.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.parser.*
 
 class KSharpLexerTest : StringSpec({
+    "Check escaope characters" {
+        "t'\"rnf\\b".asSequence().map { it.isEscapeCharacter() }.filter { !it }.shouldBeEmpty()
+    }
     "Given lexer, check LowerCaseWord, UpperCaseWord, WhiteSpace, Label, Operator token" {
-        "type Name lbl: Name:".kSharpLexer()
+        "type Name lbl: Name: User_name".kSharpLexer()
             .enableLabelToken {
                 it.asSequence()
                     .toList()
@@ -46,6 +51,14 @@ class KSharpLexerTest : StringSpec({
                                 KSharpTokenType.Operator,
                                 TextToken(":", 19, 19)
                             ),
+                            LexerToken(
+                                type = KSharpTokenType.WhiteSpace,
+                                token = TextToken(text = " ", startOffset = 20, endOffset = 20)
+                            ),
+                            LexerToken(
+                                KSharpTokenType.UpperCaseWord,
+                                TextToken("User_name", 21, 29)
+                            ),
                         )
                     )
             }
@@ -65,6 +78,20 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Comma, TextToken(",", 7, 7))
             )
     }
+    "Given lexer, check #( #+ #{, #[" {
+        "#( #+ #{, #[".kSharpLexer()
+            .asSequence()
+            .toList()
+            .onEach(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.Operator, TextToken("#", 0, 0)),
+                LexerToken(KSharpTokenType.OpenParenthesis, TextToken("(", 1, 1)),
+                LexerToken(KSharpTokenType.Operator, TextToken("#+", 3, 4)),
+                LexerToken(KSharpTokenType.Operator, TextToken("#", 6, 6)),
+                LexerToken(KSharpTokenType.OpenCurlyBraces, TextToken("{", 7, 7)),
+                LexerToken(KSharpTokenType.OpenSetBracketBraces, TextToken("#[", 10, 11)),
+            )
+    }
     "Given lexer, check operators" {
         "+-*/%><=!&$#^?.\\|".kSharpLexer()
             .asSequence()
@@ -74,15 +101,68 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given lexer, check integers, decimals, integer and dot operator" {
-        "100 1.3 .6 2.".kSharpLexer()
+        "100 1.3 .6 2. 1_000 0xFFFFbB 0b110011 0o12345 010 ".kSharpLexer()
             .asSequence()
-            .toList().also(::println)
+            .toList().onEach(::println)
             .shouldContainAll(
                 LexerToken(KSharpTokenType.Integer, TextToken("100", 0, 2)),
                 LexerToken(KSharpTokenType.Float, TextToken("1.3", 4, 6)),
                 LexerToken(KSharpTokenType.Float, TextToken(".6", 8, 9)),
                 LexerToken(KSharpTokenType.Integer, TextToken("2", 11, 11)),
                 LexerToken(KSharpTokenType.Operator, TextToken(".", 12, 12)),
+                LexerToken(KSharpTokenType.Integer, TextToken("1_000", 14, 18)),
+                LexerToken(KSharpTokenType.HexInteger, TextToken("0xFFFFbB", 20, 27)),
+                LexerToken(
+                    KSharpTokenType.BinaryInteger,
+                    TextToken(text = "0b110011", startOffset = 29, endOffset = 36)
+                ),
+                LexerToken(
+                    KSharpTokenType.OctalInteger,
+                    TextToken(text = "0o12345", startOffset = 38, endOffset = 44)
+                ),
+                LexerToken(
+                    KSharpTokenType.Integer,
+                    TextToken(text = "010", startOffset = 46, endOffset = 48)
+                )
+            )
+    }
+    "Given lexer, check hex, binary, octal" {
+        "0xFF0F".kSharpLexer()
+            .asSequence()
+            .toList().onEach(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.HexInteger, TextToken("0xFF0F", 0, 5)),
+            )
+
+        "0xFF_FF".kSharpLexer()
+            .asSequence()
+            .toList().onEach(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.HexInteger, TextToken("0xFF_FF", 0, 6)),
+            )
+        "0b0001_1001".kSharpLexer()
+            .asSequence()
+            .toList().onEach(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.BinaryInteger, TextToken("0b0001_1001", 0, 10)),
+            )
+        "0b0011".kSharpLexer()
+            .asSequence()
+            .toList().onEach(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.BinaryInteger, TextToken("0b0011", 0, 5)),
+            )
+        "0o0011_6471".kSharpLexer()
+            .asSequence()
+            .toList().onEach(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.OctalInteger, TextToken("0o0011_6471", 0, 10)),
+            )
+        "0o1573".kSharpLexer()
+            .asSequence()
+            .toList().onEach(::println)
+            .shouldContainAll(
+                LexerToken(KSharpTokenType.OctalInteger, TextToken("0o1573", 0, 5)),
             )
     }
     "Given a lexer, check collapse tokens, should remove whitespace only" {
@@ -218,6 +298,130 @@ class KSharpLexerTest : StringSpec({
                     token = TextToken(text = ":", startOffset = 59, endOffset = 59)
                 )
             )
+    }
+    "Given a lexer, map character and string" {
+        "'a' \"Hello World\" \"\"\"Hello\nWorld\"\"\" \"\" '\\\''  \"\\\"\""
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence()
+            .toList()
+            .onEach(::println)
+            .shouldBe(
+                listOf(
+                    LexerToken(
+                        type = KSharpTokenType.Character,
+                        token = TextToken(text = "'a'", startOffset = 0, endOffset = 2)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.String,
+                        token = TextToken(text = "\"Hello World\"", startOffset = 4, endOffset = 16)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.MultiLineString,
+                        token = TextToken(text = "\"\"\"Hello\nWorld\"\"\"", startOffset = 18, endOffset = 34)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.String,
+                        token = TextToken(text = "\"\"", startOffset = 36, endOffset = 37)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Character,
+                        token = TextToken(text = "'\\''", startOffset = 39, endOffset = 42)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.String,
+                        token = TextToken(text = "\"\\\"\"", startOffset = 45, endOffset = 48)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "\n", startOffset = 49, endOffset = 49)
+                    ),
+                )
+            )
+    }
+    "Given a lexer, map invalid characters" {
+        "'".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+            .shouldBe(
+                listOf(
+                    LexerToken(
+                        type = KSharpTokenType.Character,
+                        token = TextToken(text = "'", startOffset = 0, endOffset = 0)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "\n", startOffset = 1, endOffset = 1)
+                    ),
+                )
+            )
+
+        "'a".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+            .shouldBe(
+                listOf(
+                    LexerToken(
+                        type = KSharpTokenType.Character,
+                        token = TextToken(text = "'a", startOffset = 0, endOffset = 1)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "\n", startOffset = 2, endOffset = 2)
+                    ),
+                )
+            )
+    }
+    "Given a lexer, map invalid strings" {
+        "\"".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+            .shouldBe(
+                listOf(
+                    LexerToken(
+                        type = KSharpTokenType.String,
+                        token = TextToken(text = "\"", startOffset = 0, endOffset = 0)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "\n", startOffset = 1, endOffset = 1)
+                    ),
+                )
+            )
+
+        "\"a".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+            .shouldBe(
+                listOf(
+                    LexerToken(
+                        type = KSharpTokenType.String,
+                        token = TextToken(text = "\"a", startOffset = 0, endOffset = 1)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "\n", startOffset = 2, endOffset = 2)
+                    ),
+                )
+            )
+
+        "\"\"\"".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+            .shouldBe(
+                listOf(
+                    LexerToken(
+                        type = KSharpTokenType.MultiLineString,
+                        token = TextToken(text = "\"\"\"", startOffset = 0, endOffset = 2)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "\n", startOffset = 3, endOffset = 3)
+                    ),
+                )
+            )
+    }
+    "Given a lexer, map tabs as whitespaces" {
+        "\t".kSharpLexer()
+            .asSequence()
+            .toList()
+            .shouldBe(listOf(LexerToken(KSharpTokenType.WhiteSpace, TextToken("\t", 0, 0))))
+    }
+    "Given a lexer, ignore \r" {
+        "\r".kSharpLexer()
+            .asSequence()
+            .toList()
+            .shouldBeEmpty()
     }
 })
 
