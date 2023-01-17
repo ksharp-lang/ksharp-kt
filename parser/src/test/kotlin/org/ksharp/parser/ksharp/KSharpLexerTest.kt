@@ -4,10 +4,14 @@ import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.sequences.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.parser.*
 
 class KSharpLexerTest : StringSpec({
+    "Check escaope characters" {
+        "t'\"rnf\\b".asSequence().map { it.isEscapeCharacter() }.filter { !it }.shouldBeEmpty()
+    }
     "Given lexer, check LowerCaseWord, UpperCaseWord, WhiteSpace, Label, Operator token" {
         "type Name lbl: Name: User_name".kSharpLexer()
             .enableLabelToken {
@@ -296,11 +300,12 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given a lexer, map character and string" {
-        "'a' \"Hello World\" \"\"\"Hello\nWorld\"\"\" \"\""
+        "'a' \"Hello World\" \"\"\"Hello\nWorld\"\"\" \"\" '\\\''  \"\\\"\""
             .kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
             .toList()
+            .onEach(::println)
             .shouldBe(
                 listOf(
                     LexerToken(
@@ -320,8 +325,16 @@ class KSharpLexerTest : StringSpec({
                         token = TextToken(text = "\"\"", startOffset = 36, endOffset = 37)
                     ),
                     LexerToken(
+                        type = KSharpTokenType.Character,
+                        token = TextToken(text = "'\\''", startOffset = 39, endOffset = 42)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.String,
+                        token = TextToken(text = "\"\\\"\"", startOffset = 45, endOffset = 48)
+                    ),
+                    LexerToken(
                         type = KSharpTokenType.NewLine,
-                        token = TextToken(text = "\n", startOffset = 38, endOffset = 38)
+                        token = TextToken(text = "\n", startOffset = 49, endOffset = 49)
                     ),
                 )
             )
