@@ -129,4 +129,60 @@ class LiteralParserTest : StringSpec({
                 )
             )
     }
+    "Tuple" {
+        "1, 2, 3"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
+                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                )
+            )
+
+        "(1, 2, 3)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
+                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                )
+            )
+    }
+    "List of tuples" {
+        "[(1, 2), (2, 3)]"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralCollectionNode(
+                            listOf(
+                                LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided)
+                            ), LiteralCollectionType.Tuple, Location.NoProvided
+                        ),
+                        LiteralCollectionNode(
+                            listOf(
+                                LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
+                            ), LiteralCollectionType.Tuple, Location.NoProvided
+                        )
+                    ), LiteralCollectionType.List, Location.NoProvided
+                )
+            )
+    }
 })

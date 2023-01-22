@@ -23,9 +23,9 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
     }).thenLoopIndexed { lexer, index ->
         if (index > 0) {
             lexer.consume(KSharpTokenType.Comma, true)
-                .consume { it.consumeExpression() }
+                .consume { it.consumeExpression(false) }
                 .build { it.last().cast() }
-        } else lexer.consumeExpression()
+        } else lexer.consumeExpression(false)
     }.then(KSharpTokenType.CloseBracket, true)
         .build {
             val token = it.first().cast<Token>()
@@ -39,10 +39,10 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
         }
 
 private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
-    consumeExpression()
+    consumeExpression(false)
         .resume()
         .then(KSharpTokenType.Operator, ":", true)
-        .consume { it.consumeExpression() }
+        .consume { it.consumeExpression(false) }
         .build {
             val first = it.first().cast<NodeData>()
             LiteralMapEntryNode(first, it.last().cast(), first.location)
