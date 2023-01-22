@@ -5,7 +5,7 @@ import org.ksharp.common.Location
 enum class LiteralValueType {
     Character,
     String,
-    MultiString,
+    MultiLineString,
     Integer,
     HexInteger,
     BinaryInteger,
@@ -17,6 +17,15 @@ enum class LiteralCollectionType {
     List,
     Map,
     Set
+}
+
+data class LiteralMapEntryNode(
+    val key: NodeData,
+    val value: NodeData,
+    override val location: Location
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(key, value)
 }
 
 data class LiteralValueNode(

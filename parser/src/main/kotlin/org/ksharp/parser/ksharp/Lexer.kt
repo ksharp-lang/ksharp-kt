@@ -33,7 +33,7 @@ enum class KSharpTokenType : TokenType {
     CloseBracket,
     OpenParenthesis,
     CloseParenthesis,
-    OpenSetBracketBraces,
+    OpenSetBracket,
     OpenCurlyBraces,
     CloseCurlyBraces,
     WhiteSpace,
@@ -154,7 +154,7 @@ fun <R> KSharpLexerIterator.enableDiscardBlockAndNewLineTokens(code: (KSharpLexe
 fun KSharpLexer.operator(): LexerToken = loopChar({ isOperator() }, KSharpTokenType.Operator)
 
 fun KSharpLexer.openSetCurlyBraces(): LexerToken =
-    ifChar('[', KSharpTokenType.Operator, KSharpTokenType.OpenSetBracketBraces) {
+    ifChar('[', KSharpTokenType.Operator, KSharpTokenType.OpenSetBracket) {
         if (it.isOperator()) return operator()
         return token(KSharpTokenType.Operator, 1)
     }
@@ -219,7 +219,7 @@ fun KSharpLexer.octalNumber(): LexerToken = numberInDifferentBase(KSharpTokenTyp
 fun KSharpLexer.decimal(type: TokenType, skip: Int): LexerToken {
     var start = false
     while (true) {
-        val c = this.nextChar() ?: return token(if (start) KSharpTokenType.Float else type, skip)
+        val c = this.nextChar() ?: return token(if (start) KSharpTokenType.Float else type, if (start) 1 else skip)
         if (!c.isDigit()) {
             if (!start) return token(type, skip)
             return token(KSharpTokenType.Float, 1)

@@ -45,4 +45,32 @@ class LiteralNodeTest : StringSpec({
             )
         }
     }
+    "Test Node Interface over LiteralMapEntryNode" {
+        LiteralMapEntryNode(
+            LiteralValueNode("1000.0", LiteralValueType.Decimal, Location.NoProvided),
+            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+            Location.NoProvided
+        ).node.apply {
+            cast<LiteralMapEntryNode>().apply {
+                key.shouldBe(LiteralValueNode("1000.0", LiteralValueType.Decimal, Location.NoProvided))
+                value.shouldBe(LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided))
+                location.shouldBe(Location.NoProvided)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(
+                        this,
+                        Location.NoProvided,
+                        LiteralValueNode("1000.0", LiteralValueType.Decimal, Location.NoProvided)
+                    ),
+                    Node(
+                        this,
+                        Location.NoProvided,
+                        LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided)
+                    )
+                )
+            )
+        }
+    }
 })
