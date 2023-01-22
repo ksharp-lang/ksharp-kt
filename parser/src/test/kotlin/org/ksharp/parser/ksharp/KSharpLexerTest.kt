@@ -89,7 +89,7 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Operator, TextToken("#+", 3, 4)),
                 LexerToken(KSharpTokenType.Operator, TextToken("#", 6, 6)),
                 LexerToken(KSharpTokenType.OpenCurlyBraces, TextToken("{", 7, 7)),
-                LexerToken(KSharpTokenType.OpenSetBracketBraces, TextToken("#[", 10, 11)),
+                LexerToken(KSharpTokenType.OpenSetBracket, TextToken("#[", 10, 11)),
             )
     }
     "Given lexer, check operators" {
@@ -98,6 +98,14 @@ class KSharpLexerTest : StringSpec({
             .toList()
             .shouldContainAll(
                 LexerToken(KSharpTokenType.Operator, TextToken("+-*/%><=!&$#^?.\\|", 0, 16)),
+            )
+    }
+    "Givenlexer, check decimal" {
+        "1.6"
+            .kSharpLexer()
+            .asSequence()
+            .toList().onEach(::println).shouldContainAll(
+                LexerToken(KSharpTokenType.Float, TextToken("1.6", 0, 2))
             )
     }
     "Given lexer, check integers, decimals, integer and dot operator" {
