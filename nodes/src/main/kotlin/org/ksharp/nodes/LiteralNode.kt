@@ -16,7 +16,8 @@ enum class LiteralValueType {
 enum class LiteralCollectionType {
     List,
     Map,
-    Set
+    Set,
+    Tuple
 }
 
 data class LiteralMapEntryNode(
