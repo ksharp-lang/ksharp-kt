@@ -78,6 +78,27 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Comma, TextToken(",", 7, 7))
             )
     }
+    "Given lexer, check operator function name, ( 1" {
+        "(+) (1"
+            .kSharpLexer()
+            .asSequence()
+            .toList()
+            .onEach(::println)
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.OperatorFunctionName,
+                    token = TextToken(text = "(+)", startOffset = 0, endOffset = 2)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.OpenParenthesis,
+                    token = TextToken(text = "(", startOffset = 4, endOffset = 4)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Integer,
+                    token = TextToken(text = "1", startOffset = 5, endOffset = 5)
+                )
+            )
+    }
     "Given lexer, check #( #+ #{, #[" {
         "#( #+ #{, #[".kSharpLexer()
             .asSequence()

@@ -19,6 +19,7 @@ enum class KSharpTokenType : TokenType {
     LowerCaseWord,
     Label,
     FunctionName,
+    OperatorFunctionName,
     String,
     MultiLineString,
     Character,
@@ -62,7 +63,6 @@ private val mappings = mapOf(
     ',' to KSharpTokenType.Comma,
     '[' to KSharpTokenType.OpenBracket,
     ']' to KSharpTokenType.CloseBracket,
-    '(' to KSharpTokenType.OpenParenthesis,
     ')' to KSharpTokenType.CloseParenthesis,
     '{' to KSharpTokenType.OpenCurlyBraces,
     '}' to KSharpTokenType.CloseCurlyBraces
@@ -283,6 +283,19 @@ fun KSharpLexer.newLine(): LexerToken = loopChar({ isSpace() }, KSharpTokenType.
 
 fun KSharpLexer.whiteSpace(): LexerToken = loopChar({ isSpace() }, KSharpTokenType.WhiteSpace)
 
+fun KSharpLexer.openParenthesisOrOperatorFunction(): LexerToken {
+    var skip = 0
+    while (true) {
+        skip += 1
+        val c = nextChar() ?: return token(KSharpTokenType.OpenParenthesis, skip)
+        if (c == ')' && skip > 1) {
+            return token(KSharpTokenType.OperatorFunctionName, 0)
+        }
+        if (!c.isOperator()) {
+            return token(KSharpTokenType.OpenParenthesis, skip)
+        }
+    }
+}
 
 val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
     with(c) {
@@ -296,6 +309,7 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
             equals('#') -> openSetCurlyBraces()
             equals('\'') -> character()
             equals('"') -> string()
+            equals('(') -> openParenthesisOrOperatorFunction()
             isDigit() -> number(c == '0')
             isDot() -> decimal(KSharpTokenType.Operator, 1)
             isNewLine() -> newLine()
