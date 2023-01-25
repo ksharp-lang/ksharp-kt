@@ -24,10 +24,10 @@ class TypeParserTest : StringSpec({
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     "token" to "<EndBlock>",
-                    "received-token" to "Operator3:--"
+                    "received-token" to "Operator10:--"
                 ) to listOf(
                     LexerToken(
-                        type = KSharpTokenType.Operator3,
+                        type = KSharpTokenType.Operator10,
                         token = TextToken(text = "--", startOffset = 22, endOffset = 23)
                     ),
                     LexerToken(
@@ -57,10 +57,10 @@ class TypeParserTest : StringSpec({
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     "token" to "<EndBlock>",
-                    "received-token" to "Operator9:|-"
+                    "received-token" to "Operator4:|-"
                 ) to listOf(
                     LexerToken(
-                        type = KSharpTokenType.Operator9,
+                        type = KSharpTokenType.Operator4,
                         token = TextToken(text = "|-", startOffset = 17, endOffset = 18)
                     ),
                     LexerToken(
@@ -90,10 +90,10 @@ class TypeParserTest : StringSpec({
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     "token" to "<EndBlock>",
-                    "received-token" to "Operator7:&-"
+                    "received-token" to "Operator6:&-"
                 ) to listOf(
                     LexerToken(
-                        type = KSharpTokenType.Operator7,
+                        type = KSharpTokenType.Operator6,
                         token = TextToken(text = "&-", startOffset = 17, endOffset = 18)
                     ),
                     LexerToken(

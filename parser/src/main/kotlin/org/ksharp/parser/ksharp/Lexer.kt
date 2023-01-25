@@ -40,6 +40,7 @@ enum class KSharpTokenType : TokenType {
     NewLine,
     Operator,
 
+    Operator0,
     Operator1,
     Operator2,
     Operator3,
@@ -330,33 +331,37 @@ private fun canCollapseTokens(current: Token, newToken: Token): Boolean {
     }
 }
 
-private val operator2 = "*/%".asSequence().toSet()
-private val operator3 = "+-".asSequence().toSet()
-private val operator5 = "<>".asSequence().toSet()
-private val operator6 = "=!".asSequence().toSet()
-private val operator7 = "&".asSequence().toSet()
-private val operator8 = "^".asSequence().toSet()
-private val operator9 = "|".asSequence().toSet()
+private val operator11 = "*/%".asSequence().toSet()
+private val operator10 = "+-".asSequence().toSet()
+private val operator8 = "<>".asSequence().toSet()
+private val operator7 = "=!".asSequence().toSet()
+private val operator6 = "&".asSequence().toSet()
+private val operator5 = "^".asSequence().toSet()
+private val operator4 = "|".asSequence().toSet()
+private val operator1 = "$".asSequence().toSet()
+private val operator0 = ".".asSequence().toSet()
 
 /// https://docs.ksharp.org/rfc/syntax#operator-precedence
 private fun Token.mapOperatorToken(): Token = when (type) {
     KSharpTokenType.Operator -> {
         when {
-            text == "**" -> new(type = KSharpTokenType.Operator1)
-            text == "<<" || text == ">>" -> new(type = KSharpTokenType.Operator4)
-            text == "&&" -> new(type = KSharpTokenType.Operator10)
-            text == "||" -> new(type = KSharpTokenType.Operator11)
-            text == "=" -> new(type = KSharpTokenType.Operator12)
+            text == "**" -> new(type = KSharpTokenType.Operator12)
+            text == "<<" || text == ">>" -> new(type = KSharpTokenType.Operator9)
+            text == "&&" -> new(type = KSharpTokenType.Operator3)
+            text == "||" -> new(type = KSharpTokenType.Operator2)
+            text == "=" -> new(type = KSharpTokenType.Operator)
 
             text.isEmpty() -> this
 
-            operator2.contains(text.first()) -> new(type = KSharpTokenType.Operator2)
-            operator3.contains(text.first()) -> new(type = KSharpTokenType.Operator3)
-            operator5.contains(text.first()) -> new(type = KSharpTokenType.Operator5)
-            operator6.contains(text.first()) -> new(type = KSharpTokenType.Operator6)
-            operator7.contains(text.first()) -> new(type = KSharpTokenType.Operator7)
+            operator11.contains(text.first()) -> new(type = KSharpTokenType.Operator11)
+            operator10.contains(text.first()) -> new(type = KSharpTokenType.Operator10)
             operator8.contains(text.first()) -> new(type = KSharpTokenType.Operator8)
-            operator9.contains(text.first()) -> new(type = KSharpTokenType.Operator9)
+            operator7.contains(text.first()) -> new(type = KSharpTokenType.Operator7)
+            operator6.contains(text.first()) -> new(type = KSharpTokenType.Operator6)
+            operator5.contains(text.first()) -> new(type = KSharpTokenType.Operator5)
+            operator4.contains(text.first()) -> new(type = KSharpTokenType.Operator4)
+            operator1.contains(text.first()) -> new(type = KSharpTokenType.Operator1)
+            operator0.contains(text.first()) -> new(type = KSharpTokenType.Operator0)
             else -> this
         }
     }
