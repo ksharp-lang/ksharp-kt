@@ -10,7 +10,9 @@ enum class LiteralValueType {
     HexInteger,
     BinaryInteger,
     OctalInteger,
-    Decimal
+    Decimal,
+    Variable,
+    Operator
 }
 
 enum class LiteralCollectionType {
