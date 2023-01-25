@@ -49,7 +49,7 @@ fun KSharpConsumeResult.thenInBlock(action: (KSharpLexerIterator) -> KSharpParse
     }
 
 
-fun KSharpLexerIterator.consumeDot() = consume(KSharpTokenType.Operator, ".")
+fun KSharpLexerIterator.consumeDot() = consume(KSharpTokenType.Operator0, ".")
 
 fun KSharpLexerIterator.consumeLowerCaseWord(text: String? = null, discardToken: Boolean = false) =
     if (text != null) {
@@ -100,7 +100,7 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
     }
 
 fun KSharpConsumeResult.thenAssignOperator() =
-    then(KSharpTokenType.Operator12, true)
+    then(KSharpTokenType.Operator, "=", true)
 
 fun Reader.parseModule(
     context: String,
