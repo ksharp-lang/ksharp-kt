@@ -100,7 +100,7 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Operator, TextToken("+-*/%><=!&$#^?.\\|", 0, 16)),
             )
     }
-    "Givenlexer, check decimal" {
+    "Given lexer, check decimal" {
         "1.6"
             .kSharpLexer()
             .asSequence()
@@ -181,7 +181,7 @@ class KSharpLexerTest : StringSpec({
             .shouldContainAll(
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("import", 0, 5)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("ksharp", 7, 12)),
-                LexerToken(KSharpTokenType.Operator, TextToken(".", 13, 13)),
+                LexerToken(KSharpTokenType.Operator0, TextToken(".", 13, 13)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("test", 14, 17)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("as", 19, 20)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("math", 22, 25))
@@ -194,9 +194,9 @@ class KSharpLexerTest : StringSpec({
             .toList()
             .shouldContainAll(
                 LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
-                LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
+                LexerToken(KSharpTokenType.Operator0, TextToken(".", 14, 14)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("name", 15, 18)),
-                LexerToken(KSharpTokenType.Operator3, TextToken("->", 21, 22)),
+                LexerToken(KSharpTokenType.Operator10, TextToken("->", 21, 22)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("wire", 25, 28)),
             )
     }
@@ -207,9 +207,9 @@ class KSharpLexerTest : StringSpec({
             .toList().onEach { println("+++ $it") }
             .shouldContainAll(
                 LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
-                LexerToken(KSharpTokenType.Operator, TextToken(".", 14, 14)),
+                LexerToken(KSharpTokenType.Operator0, TextToken(".", 14, 14)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("name", 15, 18)),
-                LexerToken(KSharpTokenType.Operator12, TextToken("=", 20, 20)),
+                LexerToken(KSharpTokenType.Operator, TextToken("=", 20, 20)),
                 LexerToken(KSharpTokenType.NewLine, TextToken("\n    ", 22, 26)),
                 LexerToken(KSharpTokenType.Integer, TextToken("10", 27, 28)),
                 LexerToken(KSharpTokenType.NewLine, TextToken("\n", 29, 29)),
@@ -222,71 +222,71 @@ class KSharpLexerTest : StringSpec({
             .toList()
             .shouldContainAll(
                 LexerToken(
-                    type = KSharpTokenType.Operator1,
+                    type = KSharpTokenType.Operator12,
                     token = TextToken(text = "**", startOffset = 0, endOffset = 1)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator2,
+                    type = KSharpTokenType.Operator11,
                     token = TextToken(text = "*>>", startOffset = 3, endOffset = 5)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator2,
+                    type = KSharpTokenType.Operator11,
                     token = TextToken(text = "//>", startOffset = 7, endOffset = 9)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator2,
+                    type = KSharpTokenType.Operator11,
                     token = TextToken(text = "%%%", startOffset = 11, endOffset = 13)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator3,
+                    type = KSharpTokenType.Operator10,
                     token = TextToken(text = "+++", startOffset = 15, endOffset = 17)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator3,
+                    type = KSharpTokenType.Operator10,
                     token = TextToken(text = "-", startOffset = 19, endOffset = 19)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator4,
+                    type = KSharpTokenType.Operator9,
                     token = TextToken(text = "<<", startOffset = 21, endOffset = 22)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator4,
+                    type = KSharpTokenType.Operator9,
                     token = TextToken(text = ">>", startOffset = 24, endOffset = 25)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator5,
+                    type = KSharpTokenType.Operator8,
                     token = TextToken(text = "<==", startOffset = 27, endOffset = 29)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator6,
+                    type = KSharpTokenType.Operator7,
                     token = TextToken(text = "!=", startOffset = 31, endOffset = 32)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator7,
+                    type = KSharpTokenType.Operator6,
                     token = TextToken(text = "&", startOffset = 34, endOffset = 34)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator9,
+                    type = KSharpTokenType.Operator4,
                     token = TextToken(text = "|||", startOffset = 36, endOffset = 38)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator8,
+                    type = KSharpTokenType.Operator5,
                     token = TextToken(text = "^&", startOffset = 40, endOffset = 41)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator10,
+                    type = KSharpTokenType.Operator3,
                     token = TextToken(text = "&&", startOffset = 43, endOffset = 44)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator11,
+                    type = KSharpTokenType.Operator2,
                     token = TextToken(text = "||", startOffset = 46, endOffset = 47)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator12,
+                    type = KSharpTokenType.Operator,
                     token = TextToken(text = "=", startOffset = 49, endOffset = 49)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator,
+                    type = KSharpTokenType.Operator0,
                     token = TextToken(text = ".", startOffset = 51, endOffset = 51)
                 ),
                 LexerToken(
@@ -294,7 +294,7 @@ class KSharpLexerTest : StringSpec({
                     token = TextToken(text = "#", startOffset = 53, endOffset = 53)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Operator,
+                    type = KSharpTokenType.Operator1,
                     token = TextToken(text = "$", startOffset = 55, endOffset = 55)
                 ),
                 LexerToken(
@@ -467,7 +467,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
-                                "Operator12:=",
+                                "Operator:=",
                                 "UpperCaseWord:Integer",
                                 "NewLine",
                                 "EndBlock",
@@ -492,7 +492,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
-                                "Operator12:=",
+                                "Operator:=",
                                 "UpperCaseWord:Integer",
                                 "NewLine",
                                 "EndBlock"
@@ -520,7 +520,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 /**/"LowerCaseWord:type",
                                 /**/"BeginBlock",
                                 /**//**/"UpperCaseWord:Int",
-                                /**//**/"Operator12:=",
+                                /**//**/"Operator:=",
                                 /**//**/"NewLine",
                                 /**//**/"UpperCaseWord:Integer",
                                 /**//**/"NewLine",
@@ -551,7 +551,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                             listOf(
                                 /**/"LowerCaseWord:type",
                                 /**//**/"UpperCaseWord:Int",
-                                /**//**/"Operator12:=",
+                                /**//**/"Operator:=",
                                 /**//**/"UpperCaseWord:Integer",
                             )
                         )
@@ -579,7 +579,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
-                                "Operator12:=",
+                                "Operator:=",
                                 "UpperCaseWord:Integer",
                                 "NewLine",
                                 "EndBlock",
@@ -588,7 +588,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "LowerCaseWord:type",
                                 "BeginBlock",
                                 "UpperCaseWord:Int",
-                                "Operator12:=",
+                                "Operator:=",
                                 "NewLine",
                                 "UpperCaseWord:Integer",
                                 "NewLine",
@@ -621,7 +621,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
-                                "Operator12:=",
+                                "Operator:=",
                                 "UpperCaseWord:Integer",
                                 "NewLine",
                                 "EndBlock",
@@ -629,15 +629,15 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "LowerCaseWord:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
-                                "Operator12:=",
+                                "Operator:=",
                                 "BeginBlock",
                                 "LowerCaseWord:let",
                                 "LowerCaseWord:x",
-                                "Operator12:=",
+                                "Operator:=",
                                 "Integer:3",
                                 "BeginBlock",
                                 "LowerCaseWord:a",
-                                "Operator3:+",
+                                "Operator10:+",
                                 "Integer:3",
                                 "NewLine",
                                 "EndBlock",
@@ -672,7 +672,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
-                                "Operator12:=",
+                                "Operator:=",
                                 "UpperCaseWord:Integer",
                                 "NewLine",
                                 "EndBlock",
@@ -681,16 +681,16 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "LowerCaseWord:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
-                                "Operator12:=",
+                                "Operator:=",
                                 "BeginBlock",
                                 "LowerCaseWord:let",
                                 "LowerCaseWord:x",
-                                "Operator12:=",
+                                "Operator:=",
                                 "Integer:3",
 
                                 "BeginBlock",
                                 "LowerCaseWord:a",
-                                "Operator3:+",
+                                "Operator10:+",
                                 "Integer:3",
                                 "NewLine",
                                 "EndBlock",
@@ -729,7 +729,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
-                                "Operator12:=",
+                                "Operator:=",
                                 "UpperCaseWord:Integer",
                                 "NewLine",
                                 "EndBlock",
@@ -738,17 +738,17 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "LowerCaseWord:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
-                                "Operator12:=",
+                                "Operator:=",
 
                                 "BeginBlock",
                                 "LowerCaseWord:let",
                                 "LowerCaseWord:x",
-                                "Operator12:=",
+                                "Operator:=",
                                 "Integer:3",
 
                                 "BeginBlock",
                                 "LowerCaseWord:a",
-                                "Operator3:+",
+                                "Operator10:+",
                                 "Integer:3",
                                 "NewLine",
                                 "EndBlock",
@@ -762,9 +762,9 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "LowerCaseWord:sum",
                                 "LowerCaseWord:a",
                                 "LowerCaseWord:b",
-                                "Operator12:=",
+                                "Operator:=",
                                 "LowerCaseWord:a",
-                                "Operator12:=",
+                                "Operator:=",
                                 "LowerCaseWord:b",
                                 "NewLine",
                                 "EndBlock",
@@ -793,7 +793,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                             "BeginBlock",
                             "LowerCaseWord:trait",
                             "UpperCaseWord:Num",
-                            "Operator12:=",
+                            "Operator:=",
                             "BeginBlock",
                             "LowerCaseWord:sum",
                             "NewLine",

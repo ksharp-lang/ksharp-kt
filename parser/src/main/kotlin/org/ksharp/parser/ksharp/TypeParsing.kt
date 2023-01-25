@@ -26,7 +26,7 @@ private fun KSharpConsumeResult.thenTypeVariable() =
 private fun KSharpConsumeResult.thenIfTypeValueSeparator(block: (KSharpConsumeResult) -> KSharpConsumeResult) =
     thenIf({
         when {
-            it.type == KSharpTokenType.Operator3 && it.text == "->" -> true
+            it.type == KSharpTokenType.Operator10 && it.text == "->" -> true
             it.type == KSharpTokenType.Comma -> true
             else -> false
         }
@@ -35,8 +35,8 @@ private fun KSharpConsumeResult.thenIfTypeValueSeparator(block: (KSharpConsumeRe
 private fun KSharpLexerIterator.consumeTypeSetSeparator() =
     consume({
         when {
-            it.type == KSharpTokenType.Operator9 && it.text == "|" -> true
-            it.type == KSharpTokenType.Operator7 && it.text == "&" -> true
+            it.type == KSharpTokenType.Operator4 && it.text == "|" -> true
+            it.type == KSharpTokenType.Operator6 && it.text == "&" -> true
             else -> false
         }
     })
@@ -103,7 +103,7 @@ private fun KSharpConsumeResult.thenJoinType() =
     }.build {
         if (it.size == 1) return@build it.first().cast()
         val separator = it[1] as Token
-        if (separator.type == KSharpTokenType.Operator3) {
+        if (separator.type == KSharpTokenType.Operator10) {
             return@build it.toFunctionType(separator)
         }
         it.toTupleType(separator)
@@ -156,7 +156,7 @@ private fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
                 .build { i ->
                     val setOperator = i.first() as Token
                     SetElement(
-                        setOperator.type == KSharpTokenType.Operator9,
+                        setOperator.type == KSharpTokenType.Operator4,
                         i.last().cast(),
                         setOperator.location
                     )
