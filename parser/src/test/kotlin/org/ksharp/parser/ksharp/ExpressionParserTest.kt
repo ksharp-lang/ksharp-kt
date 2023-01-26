@@ -32,6 +32,32 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "function name call" {
+        "sum->two 10 20"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpressionValue()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "sum->two",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralValueNode(
+                            "10",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        LiteralValueNode(
+                            "20",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "function call receiving tuples" {
         "moveX 10,20 5"
             .kSharpLexer()
