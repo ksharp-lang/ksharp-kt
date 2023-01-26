@@ -16,6 +16,7 @@ private fun KSharpLexerIterator.consumeLiteralValue(token: KSharpTokenType, type
 private fun KSharpParserResult.orConsumeLiteralValue(token: KSharpTokenType, type: LiteralValueType) =
     or { it.consumeLiteralValue(token, type) }
 
+
 private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
     consume({
         it.type == KSharpTokenType.OpenBracket ||
@@ -64,7 +65,7 @@ private fun KSharpLexerIterator.consumeMapLiteral(): KSharpParserResult =
             LiteralCollectionNode(it.drop(1).cast(), type, location)
         }
 
-fun KSharpLexerIterator.consumeLiteral() =
+fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean = false) =
     consumeLiteralValue(KSharpTokenType.Character, LiteralValueType.Character)
         .orConsumeLiteralValue(KSharpTokenType.String, LiteralValueType.String)
         .orConsumeLiteralValue(KSharpTokenType.MultiLineString, LiteralValueType.MultiLineString)
@@ -75,5 +76,20 @@ fun KSharpLexerIterator.consumeLiteral() =
         .orConsumeLiteralValue(KSharpTokenType.Float, LiteralValueType.Decimal)
         .or { it.consumeListOrSetLiteral() }
         .or { it.consumeMapLiteral() }
+        .let {
+            if (withBindings) {
+                it.orConsumeLiteralValue(KSharpTokenType.OperatorFunctionName, LiteralValueType.OperatorBinding)
+                    .or { l ->
+                        l.consume({ token ->
+                            when (token.type) {
+                                KSharpTokenType.LowerCaseWord -> true
+                                KSharpTokenType.UpperCaseWord -> true
+                                KSharpTokenType.FunctionName -> true
+                                else -> false
+                            }
+                        }).buildLiteralValue(LiteralValueType.Binding)
+                    }
+            } else it
+        }
 
 

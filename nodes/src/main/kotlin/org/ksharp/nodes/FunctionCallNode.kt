@@ -4,12 +4,13 @@ import org.ksharp.common.Location
 
 enum class FunctionType {
     Operator,
-    Function
+    Function,
+    TypeInstance
 }
 
 data class FunctionCallNode(
-    val type: FunctionType,
     val name: String,
+    val type: FunctionType,
     val arguments: List<NodeData>,
     override val location: Location
 ) : NodeData() {
