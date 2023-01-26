@@ -16,6 +16,7 @@ private fun KSharpLexerIterator.consumeLiteralValue(token: KSharpTokenType, type
 private fun KSharpParserResult.orConsumeLiteralValue(token: KSharpTokenType, type: LiteralValueType) =
     or { it.consumeLiteralValue(token, type) }
 
+
 private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
     consume({
         it.type == KSharpTokenType.OpenBracket ||
@@ -23,9 +24,9 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
     }).thenLoopIndexed { lexer, index ->
         if (index > 0) {
             lexer.consume(KSharpTokenType.Comma, true)
-                .consume { it.consumeExpression(false) }
+                .consume { it.consumeExpressionValue(false) }
                 .build { it.last().cast() }
-        } else lexer.consumeExpression(false)
+        } else lexer.consumeExpressionValue(false)
     }.then(KSharpTokenType.CloseBracket, true)
         .build {
             val token = it.first().cast<Token>()
@@ -39,10 +40,10 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
         }
 
 private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
-    consumeExpression(false)
+    consumeExpressionValue(false)
         .resume()
         .then(KSharpTokenType.Operator, ":", true)
-        .consume { it.consumeExpression(false) }
+        .consume { it.consumeExpressionValue(false) }
         .build {
             val first = it.first().cast<NodeData>()
             LiteralMapEntryNode(first, it.last().cast(), first.location)
@@ -64,7 +65,7 @@ private fun KSharpLexerIterator.consumeMapLiteral(): KSharpParserResult =
             LiteralCollectionNode(it.drop(1).cast(), type, location)
         }
 
-fun KSharpLexerIterator.consumeLiteral() =
+fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean = false) =
     consumeLiteralValue(KSharpTokenType.Character, LiteralValueType.Character)
         .orConsumeLiteralValue(KSharpTokenType.String, LiteralValueType.String)
         .orConsumeLiteralValue(KSharpTokenType.MultiLineString, LiteralValueType.MultiLineString)
@@ -75,5 +76,20 @@ fun KSharpLexerIterator.consumeLiteral() =
         .orConsumeLiteralValue(KSharpTokenType.Float, LiteralValueType.Decimal)
         .or { it.consumeListOrSetLiteral() }
         .or { it.consumeMapLiteral() }
+        .let {
+            if (withBindings) {
+                it.orConsumeLiteralValue(KSharpTokenType.OperatorFunctionName, LiteralValueType.OperatorBinding)
+                    .or { l ->
+                        l.consume({ token ->
+                            when (token.type) {
+                                KSharpTokenType.LowerCaseWord -> true
+                                KSharpTokenType.UpperCaseWord -> true
+                                KSharpTokenType.FunctionName -> true
+                                else -> false
+                            }
+                        }).buildLiteralValue(LiteralValueType.Binding)
+                    }
+            } else it
+        }
 
 

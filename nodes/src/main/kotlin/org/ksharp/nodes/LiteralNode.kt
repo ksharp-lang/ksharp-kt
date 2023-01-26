@@ -11,8 +11,8 @@ enum class LiteralValueType {
     BinaryInteger,
     OctalInteger,
     Decimal,
-    Variable,
-    Operator
+    Binding,
+    OperatorBinding
 }
 
 enum class LiteralCollectionType {

@@ -133,7 +133,7 @@ class LiteralParserTest : StringSpec({
         "1, 2, 3"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpression()
+            .consumeExpressionValue()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(
@@ -148,7 +148,7 @@ class LiteralParserTest : StringSpec({
         "(1, 2, 3)"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpression()
+            .consumeExpressionValue()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(
@@ -164,7 +164,7 @@ class LiteralParserTest : StringSpec({
         "[(1, 2), (2, 3)]"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpression()
+            .consumeExpressionValue()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(
@@ -183,6 +183,46 @@ class LiteralParserTest : StringSpec({
                         )
                     ), LiteralCollectionType.List, Location.NoProvided
                 )
+            )
+    }
+    "Binding" {
+        "map"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpressionValue(withBindings = true)
+            .map { it.value }
+            .shouldBeRight(
+                LiteralValueNode("map", LiteralValueType.Binding, Location.NoProvided),
+            )
+    }
+    "Type Instance Binding" {
+        "Point"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpressionValue(withBindings = true)
+            .map { it.value }
+            .shouldBeRight(
+                LiteralValueNode("Point", LiteralValueType.Binding, Location.NoProvided),
+            )
+    }
+    "Function name Binding" {
+        "point2d->point3d"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpressionValue(withBindings = true)
+            .map { it.value }
+            .shouldBeRight(
+                LiteralValueNode("point2d->point3d", LiteralValueType.Binding, Location.NoProvided),
+            )
+    }
+    "Operator Binding" {
+        "(+)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpressionValue(withBindings = true)
+            .map { it.value }
+            .shouldBeRight(
+                LiteralValueNode("(+)", LiteralValueType.OperatorBinding, Location.NoProvided),
             )
     }
 })

@@ -8,8 +8,8 @@ import org.ksharp.common.Location
 class FunctionCallNodeTest : StringSpec({
     "Test Node Interface over FunctionCallNode" {
         FunctionCallNode(
-            FunctionType.Function,
             "sum",
+            FunctionType.Function,
             listOf(
                 LiteralValueNode("1000.0", LiteralValueType.Decimal, Location.NoProvided),
                 LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided)
