@@ -186,4 +186,294 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "operator 12 test" {
+        "10 ** 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "**",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 11 test" {
+        "10 * 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "*",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 10 test" {
+        "10 + 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "+",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator precedence test" {
+        "10 + 2 * 3"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "*",
+                    OperatorNode(
+                        "+",
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 9 test" {
+        "10 >> 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    ">>",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 8 test" {
+        "10 > 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    ">",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 7 test" {
+        "10 != 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "!=",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 6 test" {
+        "10 & 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "&",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 5 test" {
+        "10 ^ 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "^",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 4 test" {
+        "10 | 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "|",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 3 test" {
+        "10 && 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "&&",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 2 test" {
+        "10 || 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "||",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 1 test" {
+        "10 $ 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "$",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator 0 test" {
+        "10 . 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    ".",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator test" {
+        "10 = 2"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "=",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "tuple and operators" {
+        "10 , 2 + 1"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "+",
+                    LiteralCollectionNode(
+                        listOf(
+                            LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided)
+                        ), LiteralCollectionType.Tuple, Location.NoProvided
+                    ),
+                    LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "tuple and operators 2" {
+        "10 , (2 + 1)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        OperatorNode(
+                            "+",
+                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                ),
+            )
+    }
+    "custom operator precedence test" {
+        "10 +> 2 * 3"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "*",
+                    OperatorNode(
+                        "+>",
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
 })
