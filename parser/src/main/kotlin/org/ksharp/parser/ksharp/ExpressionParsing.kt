@@ -86,203 +86,160 @@ private fun KSharpParserResult.thenOperatorRightExpression(
     }.buildOperatorExpression()
 
 private fun KSharpLexerIterator.consumeOperator12(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator11(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator12) {
         it.consumeOperator12(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 
 private fun KSharpLexerIterator.consumeOperator11(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator10(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator11) {
         it.consumeOperator11(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator10(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator09(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator10) {
         it.consumeOperator10(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator09(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator08(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator9) {
         it.consumeOperator09(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator08(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator07(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator8) {
         it.consumeOperator08(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator07(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator06(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator7) {
         it.consumeOperator07(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator06(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator05(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator6) {
         it.consumeOperator06(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator05(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator04(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator5) {
         it.consumeOperator05(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator04(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator03(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator4) {
         it.consumeOperator04(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator03(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator02(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator3) {
         it.consumeOperator03(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator02(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator01(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator2) {
         it.consumeOperator02(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator01(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator0(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator1) {
         it.consumeOperator01(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator0(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeOperator(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator0) {
         it.consumeOperator0(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 private fun KSharpLexerIterator.consumeOperator(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
+    tupleWithoutParenthesis: Boolean = true
 ): KSharpParserResult =
     consumeExpressionValue(
-        tupleWithoutParenthesis,
-        withBindings
+        tupleWithoutParenthesis
     ).thenOperatorRightExpression(KSharpTokenType.Operator) {
         it.consumeOperator(
-            tupleWithoutParenthesis,
-            withBindings
+            tupleWithoutParenthesis
         )
     }
 
 fun KSharpLexerIterator.consumeExpression(
-    tupleWithoutParenthesis: Boolean = true,
-    withBindings: Boolean = false
-): KSharpParserResult = consumeOperator12(tupleWithoutParenthesis, withBindings)
+    tupleWithoutParenthesis: Boolean = true
+): KSharpParserResult = consumeOperator12(tupleWithoutParenthesis)

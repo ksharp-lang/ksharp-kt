@@ -189,7 +189,7 @@ class LiteralParserTest : StringSpec({
         "map"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpression(withBindings = true)
+            .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(
                 LiteralValueNode("map", LiteralValueType.Binding, Location.NoProvided),
@@ -199,7 +199,7 @@ class LiteralParserTest : StringSpec({
         "Point"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpression(withBindings = true)
+            .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(
                 LiteralValueNode("Point", LiteralValueType.Binding, Location.NoProvided),
@@ -209,7 +209,7 @@ class LiteralParserTest : StringSpec({
         "point2d->point3d"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpression(withBindings = true)
+            .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(
                 LiteralValueNode("point2d->point3d", LiteralValueType.Binding, Location.NoProvided),
@@ -219,7 +219,7 @@ class LiteralParserTest : StringSpec({
         "(+)"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpression(withBindings = true)
+            .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(
                 LiteralValueNode("(+)", LiteralValueType.OperatorBinding, Location.NoProvided),
