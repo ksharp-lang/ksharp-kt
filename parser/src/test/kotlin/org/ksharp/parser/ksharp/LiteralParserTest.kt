@@ -10,7 +10,7 @@ class LiteralParserTest : StringSpec({
         "'a'"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("'a'", LiteralValueType.Character, Location.NoProvided))
     }
@@ -18,7 +18,7 @@ class LiteralParserTest : StringSpec({
         "\"a\""
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("\"a\"", LiteralValueType.String, Location.NoProvided))
     }
@@ -26,7 +26,7 @@ class LiteralParserTest : StringSpec({
         "\"\"\"Hello\"\"\""
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("\"\"\"Hello\"\"\"", LiteralValueType.MultiLineString, Location.NoProvided))
     }
@@ -34,7 +34,7 @@ class LiteralParserTest : StringSpec({
         "1_000"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("1_000", LiteralValueType.Integer, Location.NoProvided))
     }
@@ -42,7 +42,7 @@ class LiteralParserTest : StringSpec({
         "0xFFFF"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("0xFFFF", LiteralValueType.HexInteger, Location.NoProvided))
     }
@@ -50,7 +50,7 @@ class LiteralParserTest : StringSpec({
         "0o1234"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("0o1234", LiteralValueType.OctalInteger, Location.NoProvided))
     }
@@ -58,7 +58,7 @@ class LiteralParserTest : StringSpec({
         "0b0010"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("0b0010", LiteralValueType.BinaryInteger, Location.NoProvided))
     }
@@ -66,7 +66,7 @@ class LiteralParserTest : StringSpec({
         "1.6"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("1.6", LiteralValueType.Decimal, Location.NoProvided))
     }
@@ -74,7 +74,7 @@ class LiteralParserTest : StringSpec({
         "[1, 2, 3]"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(
@@ -92,7 +92,7 @@ class LiteralParserTest : StringSpec({
         "#[1, 2, 3]"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(
@@ -110,7 +110,7 @@ class LiteralParserTest : StringSpec({
         "{\"key1\": 1, \"key2\": 2}"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeLiteral()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(
@@ -133,7 +133,7 @@ class LiteralParserTest : StringSpec({
         "1, 2, 3"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(
@@ -148,7 +148,7 @@ class LiteralParserTest : StringSpec({
         "(1, 2, 3)"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(
@@ -164,7 +164,7 @@ class LiteralParserTest : StringSpec({
         "[(1, 2), (2, 3)]"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LiteralCollectionNode(

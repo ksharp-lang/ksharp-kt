@@ -24,17 +24,15 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
     }).thenLoopIndexed { lexer, index ->
         if (index > 0) {
             lexer.consume(KSharpTokenType.Comma, true)
-                .consume { it.consumeExpressionValue(false) }
+                .consume { it.consumeExpression(false) }
                 .build { it.last().cast() }
-        } else lexer.consumeExpressionValue(false)
+        } else lexer.consumeExpression(false)
     }.then(KSharpTokenType.CloseBracket, true)
         .build {
             val token = it.first().cast<Token>()
-            val type = when (token.type) {
-                KSharpTokenType.OpenBracket -> LiteralCollectionType.List
-                KSharpTokenType.OpenSetBracket -> LiteralCollectionType.Set
-                else -> TODO("")
-            }
+            val type = if (token.type == KSharpTokenType.OpenBracket) {
+                LiteralCollectionType.List
+            } else LiteralCollectionType.Set
             val location = token.location
             LiteralCollectionNode(it.drop(1).cast(), type, location)
         }
@@ -43,7 +41,7 @@ private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
     consumeExpressionValue(false)
         .resume()
         .then(KSharpTokenType.Operator, ":", true)
-        .consume { it.consumeExpressionValue(false) }
+        .consume { it.consumeExpression(false) }
         .build {
             val first = it.first().cast<NodeData>()
             LiteralMapEntryNode(first, it.last().cast(), first.location)
@@ -65,7 +63,7 @@ private fun KSharpLexerIterator.consumeMapLiteral(): KSharpParserResult =
             LiteralCollectionNode(it.drop(1).cast(), type, location)
         }
 
-fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean = false) =
+internal fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean) =
     consumeLiteralValue(KSharpTokenType.Character, LiteralValueType.Character)
         .orConsumeLiteralValue(KSharpTokenType.String, LiteralValueType.String)
         .orConsumeLiteralValue(KSharpTokenType.MultiLineString, LiteralValueType.MultiLineString)

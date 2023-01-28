@@ -10,7 +10,7 @@ class ExpressionParserTest : StringSpec({
         "sum 10 20"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 FunctionCallNode(
@@ -36,7 +36,7 @@ class ExpressionParserTest : StringSpec({
         "sum->two 10 20"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 FunctionCallNode(
@@ -62,7 +62,7 @@ class ExpressionParserTest : StringSpec({
         "moveX 10,20 5"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 FunctionCallNode(
@@ -98,7 +98,7 @@ class ExpressionParserTest : StringSpec({
         "Point 10 20"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 FunctionCallNode(
@@ -124,7 +124,7 @@ class ExpressionParserTest : StringSpec({
         "(+) 10 20"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 FunctionCallNode(
@@ -150,7 +150,7 @@ class ExpressionParserTest : StringSpec({
         "map toString [10, 20, 30]"
             .kSharpLexer()
             .collapseKSharpTokens()
-            .consumeExpressionValue()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 FunctionCallNode(
@@ -474,6 +474,58 @@ class ExpressionParserTest : StringSpec({
                     LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided
                 )
+            )
+    }
+    "collection with expressions" {
+        "[10 , 2 + 1]"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        OperatorNode(
+                            "+",
+                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ), LiteralCollectionType.List, Location.NoProvided
+                ),
+            )
+    }
+    "map with expressions" {
+        "{(10 + 2): 10 + 20, \"key2\": 20}"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralMapEntryNode(
+                            OperatorNode(
+                                "+",
+                                LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            OperatorNode(
+                                "+",
+                                LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ), Location.NoProvided
+                        ),
+                        LiteralMapEntryNode(
+                            LiteralValueNode("\"key2\"", LiteralValueType.String, Location.NoProvided),
+                            LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ), LiteralCollectionType.Map, Location.NoProvided
+                ),
             )
     }
 })
