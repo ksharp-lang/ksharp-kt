@@ -86,7 +86,7 @@ private fun KSharpParserResult.thenOperatorRightExpression(
     }.buildOperatorExpression()
 
 private fun KSharpLexerIterator.consumeOperator12(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator11(
         tupleWithoutParenthesis
@@ -98,7 +98,7 @@ private fun KSharpLexerIterator.consumeOperator12(
 
 
 private fun KSharpLexerIterator.consumeOperator11(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator10(
         tupleWithoutParenthesis
@@ -109,7 +109,7 @@ private fun KSharpLexerIterator.consumeOperator11(
     }
 
 private fun KSharpLexerIterator.consumeOperator10(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator09(
         tupleWithoutParenthesis
@@ -120,7 +120,7 @@ private fun KSharpLexerIterator.consumeOperator10(
     }
 
 private fun KSharpLexerIterator.consumeOperator09(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator08(
         tupleWithoutParenthesis
@@ -131,7 +131,7 @@ private fun KSharpLexerIterator.consumeOperator09(
     }
 
 private fun KSharpLexerIterator.consumeOperator08(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator07(
         tupleWithoutParenthesis
@@ -142,7 +142,7 @@ private fun KSharpLexerIterator.consumeOperator08(
     }
 
 private fun KSharpLexerIterator.consumeOperator07(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator06(
         tupleWithoutParenthesis
@@ -153,7 +153,7 @@ private fun KSharpLexerIterator.consumeOperator07(
     }
 
 private fun KSharpLexerIterator.consumeOperator06(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator05(
         tupleWithoutParenthesis
@@ -164,7 +164,7 @@ private fun KSharpLexerIterator.consumeOperator06(
     }
 
 private fun KSharpLexerIterator.consumeOperator05(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator04(
         tupleWithoutParenthesis
@@ -175,7 +175,7 @@ private fun KSharpLexerIterator.consumeOperator05(
     }
 
 private fun KSharpLexerIterator.consumeOperator04(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator03(
         tupleWithoutParenthesis
@@ -186,7 +186,7 @@ private fun KSharpLexerIterator.consumeOperator04(
     }
 
 private fun KSharpLexerIterator.consumeOperator03(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator02(
         tupleWithoutParenthesis
@@ -197,7 +197,7 @@ private fun KSharpLexerIterator.consumeOperator03(
     }
 
 private fun KSharpLexerIterator.consumeOperator02(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator01(
         tupleWithoutParenthesis
@@ -208,7 +208,7 @@ private fun KSharpLexerIterator.consumeOperator02(
     }
 
 private fun KSharpLexerIterator.consumeOperator01(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator0(
         tupleWithoutParenthesis
@@ -219,7 +219,7 @@ private fun KSharpLexerIterator.consumeOperator01(
     }
 
 private fun KSharpLexerIterator.consumeOperator0(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeOperator(
         tupleWithoutParenthesis
@@ -230,7 +230,7 @@ private fun KSharpLexerIterator.consumeOperator0(
     }
 
 private fun KSharpLexerIterator.consumeOperator(
-    tupleWithoutParenthesis: Boolean = true
+    tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeExpressionValue(
         tupleWithoutParenthesis
