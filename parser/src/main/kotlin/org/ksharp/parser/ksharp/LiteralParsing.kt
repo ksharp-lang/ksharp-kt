@@ -30,11 +30,9 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
     }.then(KSharpTokenType.CloseBracket, true)
         .build {
             val token = it.first().cast<Token>()
-            val type = when (token.type) {
-                KSharpTokenType.OpenBracket -> LiteralCollectionType.List
-                KSharpTokenType.OpenSetBracket -> LiteralCollectionType.Set
-                else -> TODO("")
-            }
+            val type = if (token.type == KSharpTokenType.OpenBracket) {
+                LiteralCollectionType.List
+            } else LiteralCollectionType.Set
             val location = token.location
             LiteralCollectionNode(it.drop(1).cast(), type, location)
         }
