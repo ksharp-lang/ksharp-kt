@@ -63,7 +63,7 @@ private fun KSharpLexerIterator.consumeMapLiteral(): KSharpParserResult =
             LiteralCollectionNode(it.drop(1).cast(), type, location)
         }
 
-internal fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean = false) =
+internal fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean) =
     consumeLiteralValue(KSharpTokenType.Character, LiteralValueType.Character)
         .orConsumeLiteralValue(KSharpTokenType.String, LiteralValueType.String)
         .orConsumeLiteralValue(KSharpTokenType.MultiLineString, LiteralValueType.MultiLineString)
