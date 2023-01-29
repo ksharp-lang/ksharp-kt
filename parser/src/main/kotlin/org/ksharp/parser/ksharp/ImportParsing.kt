@@ -8,22 +8,24 @@ import org.ksharp.parser.*
  * [module name grammar](https://docs.ksharp.org/rfc/syntax#modulename)
  */
 internal fun KSharpLexerIterator.consumeModuleName() =
-    consumeLowerCaseWord()
-        .thenLoop {
-            it.consumeDot()
-                .thenLowerCaseWord()
-                .build { pair ->
-                    pair.joinToString("") { t ->
-                        t as LexerValue
-                        t.text
+    disableCollapseDotOperatorRule { l ->
+        l.consumeLowerCaseWord()
+            .thenLoop {
+                it.consumeDot()
+                    .thenLowerCaseWord()
+                    .build { pair ->
+                        pair.joinToString("") { t ->
+                            t as LexerValue
+                            t.text
+                        }
                     }
+            }.build {
+                it.joinToString("") { t ->
+                    if (t is LexerValue) t.text
+                    else t.toString()
                 }
-        }.build {
-            it.joinToString("") { t ->
-                if (t is LexerValue) t.text
-                else t.toString()
             }
-        }
+    }
 
 fun KSharpLexerIterator.consumeImport(): KSharpParserResult =
     consumeKeyword("import")

@@ -195,17 +195,17 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given a lexer, check collapse tokens, should remove whitespace only" {
-        "import ksharp.test as math".kSharpLexer()
+        "import ksharp .test as math".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
             .toList()
             .shouldContainAll(
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("import", 0, 5)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("ksharp", 7, 12)),
-                LexerToken(KSharpTokenType.Operator0, TextToken(".", 13, 13)),
-                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("test", 14, 17)),
-                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("as", 19, 20)),
-                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("math", 22, 25))
+                LexerToken(KSharpTokenType.Operator0, TextToken(".", 14, 14)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("test", 15, 18)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("as", 20, 21)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("math", 23, 26))
             )
     }
     "Given a lexer, check collapse tokens to form function tokens" {
