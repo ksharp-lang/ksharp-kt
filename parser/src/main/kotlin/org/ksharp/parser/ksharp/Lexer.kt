@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger
 data class KSharpLexerState(
     val consumeLabels: Boolean = false,
     val discardBlockTokens: Boolean = false,
-    val discardNewLineToken: Boolean = false
+    val discardNewLineToken: Boolean = false,
+    val collapseDotOperatorRule: Boolean = true
 )
 
 typealias KSharpLexer = Lexer<KSharpLexerState>
@@ -122,6 +123,14 @@ private inline fun KSharpLexer.loopChar(
     predicate: Char.() -> Boolean,
     endToken: TokenType
 ): LexerToken = loopChar(predicate, endToken) { token(endToken, 1) }
+
+fun <R> KSharpLexerIterator.disableCollapseDotOperatorRule(code: (KSharpLexerIterator) -> R): R =
+    state.value.collapseDotOperatorRule.let { initValue ->
+        state.update(state.value.copy(collapseDotOperatorRule = false))
+        code(this).also {
+            state.update(state.value.copy(collapseDotOperatorRule = initValue))
+        }
+    }
 
 fun <R> KSharpLexerIterator.enableLabelToken(code: (KSharpLexerIterator) -> R): R =
     state.value.consumeLabels.let { initValue ->
@@ -324,9 +333,14 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
     }
 }
 
-private fun canCollapseTokens(current: Token, newToken: Token): Boolean {
+private fun KSharpLexerIterator.canCollapseTokens(current: Token, newToken: Token): Boolean {
+    var collapseDotOperatorRule = false
     val allowedToken = when (current.type) {
-        KSharpTokenType.LowerCaseWord -> true
+        KSharpTokenType.LowerCaseWord -> {
+            collapseDotOperatorRule = state.value.collapseDotOperatorRule
+            true
+        }
+
         KSharpTokenType.UpperCaseWord -> true
         KSharpTokenType.FunctionName -> true
         else -> false
@@ -334,7 +348,7 @@ private fun canCollapseTokens(current: Token, newToken: Token): Boolean {
     if (!allowedToken) return false
     return when (newToken.type) {
         KSharpTokenType.Operator -> {
-            newToken.text != "."
+            collapseDotOperatorRule || newToken.text != "."
         }
 
         KSharpTokenType.LowerCaseWord -> true
