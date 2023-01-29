@@ -209,10 +209,10 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given a lexer, check collapse tokens to form function tokens" {
-        "internal->wire.name  ->  wire data.list".kSharpLexer()
+        "internal->wire.name  ->  wire data.list map . test".kSharpLexer()
             .collapseKSharpTokens()
             .asSequence()
-            .toList()
+            .toList().onEach(::println)
             .shouldContainAll(
                 LexerToken(KSharpTokenType.FunctionName, TextToken("internal->wire", 0, 13)),
                 LexerToken(KSharpTokenType.Operator0, TextToken(".", 14, 14)),
@@ -220,6 +220,9 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Operator10, TextToken("->", 21, 22)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("wire", 25, 28)),
                 LexerToken(KSharpTokenType.FunctionName, TextToken("data.list", 30, 38)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("map", 40, 42)),
+                LexerToken(KSharpTokenType.Operator0, TextToken(".", 44, 44)),
+                LexerToken(KSharpTokenType.LowerCaseWord, TextToken("test", 46, 49)),
             )
     }
     "Given a lexer, check collapse tokens, should leave really important whitespaces (those after a newline) inside the NewLine token" {
