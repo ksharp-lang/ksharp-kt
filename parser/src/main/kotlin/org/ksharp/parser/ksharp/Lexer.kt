@@ -325,8 +325,13 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
 }
 
 private fun canCollapseTokens(current: Token, newToken: Token): Boolean {
+    var lowerCaseWord = false
     val allowedToken = when (current.type) {
-        KSharpTokenType.LowerCaseWord -> true
+        KSharpTokenType.LowerCaseWord -> {
+            lowerCaseWord = true
+            true
+        }
+
         KSharpTokenType.UpperCaseWord -> true
         KSharpTokenType.FunctionName -> true
         else -> false
@@ -334,7 +339,7 @@ private fun canCollapseTokens(current: Token, newToken: Token): Boolean {
     if (!allowedToken) return false
     return when (newToken.type) {
         KSharpTokenType.Operator -> {
-            newToken.text != "."
+            lowerCaseWord || newToken.text != "."
         }
 
         KSharpTokenType.LowerCaseWord -> true
