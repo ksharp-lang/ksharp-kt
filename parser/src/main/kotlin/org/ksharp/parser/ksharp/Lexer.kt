@@ -41,6 +41,7 @@ enum class KSharpTokenType : TokenType {
     WhiteSpace,
     NewLine,
     Operator,
+    AssignOperator,
 
     Operator0,
     Operator1,
@@ -377,7 +378,7 @@ private fun Token.mapOperatorToken(): Token = when (type) {
             text == "<<" || text == ">>" -> new(type = KSharpTokenType.Operator9)
             text == "&&" -> new(type = KSharpTokenType.Operator3)
             text == "||" -> new(type = KSharpTokenType.Operator2)
-            text == "=" -> new(type = KSharpTokenType.Operator)
+            text == "=" -> new(type = KSharpTokenType.AssignOperator)
 
             text.isEmpty() -> this
 

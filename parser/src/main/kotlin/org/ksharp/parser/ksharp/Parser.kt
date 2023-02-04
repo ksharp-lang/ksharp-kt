@@ -100,7 +100,7 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
     }
 
 fun KSharpConsumeResult.thenAssignOperator() =
-    then(KSharpTokenType.Operator, "=", true)
+    then(KSharpTokenType.AssignOperator, true)
 
 fun Reader.parseModule(
     context: String,
