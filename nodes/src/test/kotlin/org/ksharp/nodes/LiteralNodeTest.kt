@@ -73,4 +73,15 @@ class LiteralNodeTest : StringSpec({
             )
         }
     }
+    "Test Node Interface over UnitNode" {
+        UnitNode(
+            Location.NoProvided
+        ).node.apply {
+            cast<UnitNode>().apply {
+                location.shouldBe(Location.NoProvided)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBeEmpty()
+        }
+    }
 })

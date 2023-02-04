@@ -50,3 +50,8 @@ data class LiteralCollectionNode(
         get() = values.asSequence()
 
 }
+
+data class UnitNode(override val location: Location) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = emptySequence()
+}
