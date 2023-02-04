@@ -402,14 +402,14 @@ class ExpressionParserTest : StringSpec({
             )
     }
     "operator test" {
-        "10 = 2"
+        "10 : 2"
             .kSharpLexer()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
-                    "=",
+                    ":",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided
