@@ -8,7 +8,8 @@ data class KSharpLexerState(
     val consumeLabels: Boolean = false,
     val discardBlockTokens: Boolean = false,
     val discardNewLineToken: Boolean = false,
-    val collapseDotOperatorRule: Boolean = true
+    val collapseDotOperatorRule: Boolean = true,
+    val mapThenElseKeywords: Boolean = false
 )
 
 typealias KSharpLexer = Lexer<KSharpLexerState>
@@ -58,7 +59,12 @@ enum class KSharpTokenType : TokenType {
     Operator12,
 
     BeginBlock,
-    EndBlock
+    EndBlock,
+
+    //?Keywords
+    If,
+    Then,
+    Else
 }
 
 private val mappings = mapOf(
@@ -69,6 +75,11 @@ private val mappings = mapOf(
     ')' to KSharpTokenType.CloseParenthesis,
     '{' to KSharpTokenType.OpenCurlyBraces,
     '}' to KSharpTokenType.CloseCurlyBraces
+)
+
+private val ifKeywordsMapping = mapOf(
+    "then" to KSharpTokenType.Then,
+    "else" to KSharpTokenType.Else
 )
 
 private val operators = "+-*/%><=!&$#^?.\\|:".toSet()
@@ -160,6 +171,14 @@ fun <R> KSharpLexerIterator.enableDiscardNewLineToken(code: (KSharpLexerIterator
 fun <R> KSharpLexerIterator.enableDiscardBlockAndNewLineTokens(code: (KSharpLexerIterator) -> R): R =
     enableDiscardBlocksTokens {
         enableDiscardNewLineToken(code)
+    }
+
+fun <R> KSharpLexerIterator.enableMapElseThenKeywords(code: (KSharpLexerIterator) -> R): R =
+    state.value.mapThenElseKeywords.let { initValue ->
+        state.update(state.value.copy(mapThenElseKeywords = true))
+        code(this).also {
+            state.update(state.value.copy(mapThenElseKeywords = initValue))
+        }
     }
 
 fun KSharpLexer.operator(): LexerToken = loopChar({ isOperator() }, KSharpTokenType.Operator)
@@ -492,6 +511,25 @@ private fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {
     }
 }
 
+private fun Token.mapToKeyword(state: KSharpLexerState): Token =
+    if (text == "if") {
+        new(KSharpTokenType.If)
+    } else if (state.mapThenElseKeywords) {
+        val type = ifKeywordsMapping[text]
+        if (type != null) new(type)
+        else this
+    } else this
+
+private fun KSharpLexerIterator.mapKeywords(): KSharpLexerIterator =
+    generateLexerIterator(state) {
+        if (hasNext()) {
+            val token = next()
+            if (token.type == KSharpTokenType.LowerCaseWord) {
+                token.mapToKeyword(state.value)
+            } else token
+        } else null
+    }
+
 fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
     val newTokens = this.ensureNewLineAtEnd()
         .collapseTokens {
@@ -538,7 +576,7 @@ fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
 
         lastWasNewLine = token?.type == KSharpTokenType.NewLine
         token?.mapOperatorToken()
-    }
+    }.mapKeywords()
 }
 
 fun String.kSharpLexer() = lexer(KSharpLexerState(), charStream(), kSharpTokenFactory).filter {
