@@ -456,6 +456,48 @@ class KSharpLexerTest : StringSpec({
             .toList()
             .shouldBeEmpty()
     }
+    "if then else mapIfThenKeyword disabled" {
+        "if then else"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence().toList()
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.If,
+                    token = TextToken(text = "if", startOffset = 0, endOffset = 1)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.LowerCaseWord,
+                    token = TextToken(text = "then", startOffset = 3, endOffset = 6)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.LowerCaseWord,
+                    token = TextToken(text = "else", startOffset = 8, endOffset = 11)
+                )
+            )
+    }
+    "if then else mapIfThenKeyword enabled" {
+        "if then else"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .enableMapElseThenKeywords {
+                it.asSequence().toList()
+            }
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.If,
+                    token = TextToken(text = "if", startOffset = 0, endOffset = 1)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Then,
+                    token = TextToken(text = "then", startOffset = 3, endOffset = 6)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Else,
+                    token = TextToken(text = "else", startOffset = 8, endOffset = 11)
+                )
+            )
+    }
 })
 
 private fun Sequence<Token>.asStringSequence() = map {
@@ -916,7 +958,7 @@ class KSharpLexerExpressionBlocks : StringSpec({
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
                         "BeginBlock",
-                        "LowerCaseWord:if",
+                        "If:if",
                         "LowerCaseWord:true",
                         "BeginBlock",
                         "LowerCaseWord:then",
