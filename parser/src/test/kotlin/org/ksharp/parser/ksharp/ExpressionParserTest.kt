@@ -528,4 +528,74 @@ class ExpressionParserTest : StringSpec({
                 ),
             )
     }
+    "block expressions" {
+        """sum 10
+           |   20
+           |   30 + 15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "sum",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralValueNode(
+                            "10",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        LiteralValueNode(
+                            "20",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        OperatorNode(
+                            "+",
+                            LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "function and operators in block expressions" {
+        """10 +
+           |   sum 5
+           |       30 + 15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value.also { println(it) } }
+            .shouldBeRight(
+                OperatorNode(
+                    "+",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    FunctionCallNode(
+                        "sum",
+                        FunctionType.Function,
+                        listOf(
+                            LiteralValueNode(
+                                "5",
+                                LiteralValueType.Integer,
+                                Location.NoProvided
+                            ),
+                            OperatorNode(
+                                "+",
+                                LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
 })
