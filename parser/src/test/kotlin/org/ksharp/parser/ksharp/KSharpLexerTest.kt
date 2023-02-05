@@ -835,3 +835,146 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
             }
     }
 })
+
+class KSharpLexerExpressionBlocks : StringSpec({
+    val endExpression: (TokenType) -> LexerToken = {
+        LexerToken(
+            type = it,
+            token = TextToken("", 0, 0)
+        )
+    }
+    "Block Expression" {
+        """
+            10 +
+            |   calc 10 20
+        """.trimMargin()
+            .also { println(it) }
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks(endExpression)
+            .apply {
+                asSequence().asStringSequence().toList().printTokens().shouldBe(
+                    listOf(
+                        "BeginBlock",
+                        "Integer:10",
+                        "Operator10:+",
+                        "BeginBlock",
+                        "LowerCaseWord:calc",
+                        "Integer:10",
+                        "Integer:20",
+                        "NewLine",
+                        "EndBlock",
+                        "NewLine",
+                        "EndBlock",
+                    )
+                )
+            }
+    }
+    "Many Expression in block" {
+        """
+            10 + 
+            |   calc 10 20 + 
+            |   inc 2
+        """.trimMargin()
+            .also { println(it) }
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks(endExpression)
+            .apply {
+                asSequence().asStringSequence().toList().printTokens().shouldBe(
+                    listOf(
+                        "BeginBlock",
+                        "Integer:10",
+                        "Operator10:+",
+                        "BeginBlock",
+                        "LowerCaseWord:calc",
+                        "Integer:10",
+                        "Integer:20",
+                        "Operator10:+",
+                        "NewLine",
+                        "LowerCaseWord:inc",
+                        "Integer:2",
+                        "NewLine",
+                        "EndBlock",
+                        "NewLine",
+                        "EndBlock",
+                    )
+                )
+            }
+    }
+    "If-then-else Expression" {
+        """
+            |if true 
+            |   then 10 + 20 
+            |   else 30 + 40
+        """.trimMargin()
+            .also { println(it) }
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks(endExpression)
+            .apply {
+                asSequence().asStringSequence().toList().printTokens().shouldBe(
+                    listOf(
+                        "BeginBlock",
+                        "LowerCaseWord:if",
+                        "LowerCaseWord:true",
+                        "BeginBlock",
+                        "LowerCaseWord:then",
+                        "Integer:10",
+                        "Operator10:+",
+                        "Integer:20",
+                        "NewLine",
+                        "LowerCaseWord:else",
+                        "Integer:30",
+                        "Operator10:+",
+                        "Integer:40",
+                        "NewLine",
+                        "EndBlock",
+                        "NewLine",
+                        "EndBlock",
+                    )
+                )
+            }
+    }
+    "Let Expression" {
+        """
+            |let x = 10
+            |    y = 20
+            |    z = 30
+            |    x + y + z
+        """.trimMargin()
+            .also { println(it) }
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks(endExpression)
+            .apply {
+                asSequence().asStringSequence().toList().printTokens().shouldBe(
+                    listOf(
+                        "BeginBlock",
+                        "LowerCaseWord:let",
+                        "LowerCaseWord:x",
+                        "AssignOperator:=",
+                        "Integer:10",
+                        "BeginBlock",
+                        "LowerCaseWord:y",
+                        "AssignOperator:=",
+                        "Integer:20",
+                        "NewLine",
+                        "LowerCaseWord:z",
+                        "AssignOperator:=",
+                        "Integer:30",
+                        "NewLine",
+                        "LowerCaseWord:x",
+                        "Operator10:+",
+                        "LowerCaseWord:y",
+                        "Operator10:+",
+                        "LowerCaseWord:z",
+                        "NewLine",
+                        "EndBlock",
+                        "NewLine",
+                        "EndBlock",
+                    )
+                )
+            }
+    }
+})

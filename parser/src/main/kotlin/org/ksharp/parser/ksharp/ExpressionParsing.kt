@@ -44,6 +44,13 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
             .build { l ->
                 l.first().cast<NodeData>()
             }
+    }.or { l ->
+        l.ifConsume(KSharpTokenType.NewLine, true) {
+            it.consume { l -> l.consumeExpression() }
+                .build { l ->
+                    l.first().cast()
+                }
+        }
     }.or { it.consumeLiteral(withBindings) }
 
     val withTuple = if (tupleWithoutParenthesis) {

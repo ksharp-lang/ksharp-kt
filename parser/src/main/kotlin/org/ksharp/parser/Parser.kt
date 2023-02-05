@@ -93,6 +93,7 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
     return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), false, this))
 }
 
+
 fun <T, S> BaseLexerIterator<S>.ifConsume(
     predicate: (Token) -> Boolean,
     discardToken: Boolean = false,
