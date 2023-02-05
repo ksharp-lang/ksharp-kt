@@ -598,4 +598,37 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "function and operator expressions" {
+        """sum 10 20 30 + 15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "+",
+                    FunctionCallNode(
+                        "sum",
+                        FunctionType.Function,
+                        listOf(
+                            LiteralValueNode(
+                                "10",
+                                LiteralValueType.Integer,
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode(
+                                "20",
+                                LiteralValueType.Integer,
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
+                        ),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                ),
+            )
+    }
 })
