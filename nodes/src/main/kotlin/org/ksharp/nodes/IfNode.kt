@@ -2,7 +2,7 @@ package org.ksharp.nodes
 
 import org.ksharp.common.Location
 
-class IfNode(
+data class IfNode(
     val condition: NodeData,
     val trueExpression: NodeData,
     val falseExpression: NodeData,

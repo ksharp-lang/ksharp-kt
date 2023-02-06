@@ -93,6 +93,33 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
     return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), false, this))
 }
 
+fun <S> ConsumeResult<S>.thenOptional(
+    predicate: (Token) -> Boolean,
+    discardToken: Boolean
+): ConsumeResult<S> =
+    flatMap {
+        if (it.tokens.hasNext()) {
+            val item = it.tokens.next()
+            if (predicate(item)) {
+                if (!discardToken) it.collection.add(item)
+                Either.Right(it)
+            } else {
+                Either.Right(
+                    NodeCollector(
+                        it.collection,
+                        it.tokens.cons(item)
+                    )
+                )
+            }
+        } else Either.Left(
+            ParserError(
+                BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"),
+                false,
+                it.tokens
+            )
+        )
+    }
+
 
 fun <T, S> BaseLexerIterator<S>.ifConsume(
     predicate: (Token) -> Boolean,
@@ -141,6 +168,11 @@ fun <S> BaseLexerIterator<S>.consume(
 
 fun <S> BaseLexerIterator<S>.optionalConsume(type: TokenType, discardToken: Boolean = false): ConsumeResult<S> =
     optionalConsume({
+        it.type == type
+    }, discardToken)
+
+fun <S> ConsumeResult<S>.thenOptional(type: TokenType, discardToken: Boolean): ConsumeResult<S> =
+    thenOptional({
         it.type == type
     }, discardToken)
 
