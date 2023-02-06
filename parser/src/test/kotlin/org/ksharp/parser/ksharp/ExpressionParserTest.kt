@@ -776,4 +776,24 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "if with unit expression" {
+        "if 4 > a then () else ()"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    UnitNode(Location.NoProvided),
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
 })

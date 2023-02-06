@@ -456,6 +456,30 @@ class KSharpLexerTest : StringSpec({
             .toList()
             .shouldBeEmpty()
     }
+    "Given a lexer, unit value" {
+        "() ( 1 )"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence().toList()
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.UnitValue,
+                    token = TextToken(text = "()", startOffset = 0, endOffset = 1)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.OpenParenthesis,
+                    token = TextToken(text = "(", startOffset = 3, endOffset = 3)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Integer,
+                    token = TextToken(text = "1", startOffset = 5, endOffset = 5)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.CloseParenthesis,
+                    token = TextToken(text = ")", startOffset = 7, endOffset = 7)
+                ),
+            )
+    }
     "if then else mapIfThenKeyword disabled" {
         "if then else"
             .kSharpLexer()
