@@ -34,6 +34,32 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
             )
         }
 
+fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
+    consume(KSharpTokenType.If, false)
+        .enableIfKeywords {
+            it.consume { l -> l.consumeExpression() }
+                .thenOptional(KSharpTokenType.NewLine, true)
+                .then(KSharpTokenType.Then, true)
+                .consume { l -> l.consumeExpression() }
+                .thenOptional(KSharpTokenType.NewLine, true)
+                .thenIf(KSharpTokenType.Else, true) { el ->
+                    el.consume { l -> l.consumeExpression() }
+                }
+        }.build {
+            val location = it.first().cast<Token>().location
+            if (it.size == 3) IfNode(
+                it[1] as NodeData,
+                it[2] as NodeData,
+                UnitNode(location),
+                location
+            ) else IfNode(
+                it[1] as NodeData,
+                it[2] as NodeData,
+                it[3] as NodeData,
+                location
+            )
+        }
+
 internal fun KSharpLexerIterator.consumeExpressionValue(
     tupleWithoutParenthesis: Boolean = true,
     withBindings: Boolean = false
@@ -52,6 +78,7 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
                 }
         }
     }.or { it.consumeLiteral(withBindings) }
+        .or { it.consumeIfExpression() }
 
     val withTuple = if (tupleWithoutParenthesis) {
         literal
@@ -73,7 +100,6 @@ private fun KSharpConsumeResult.buildOperatorExpression(): KSharpParserResult =
     build {
         if (it.size == 1) it.first().cast<NodeData>()
         else {
-            it.onEach(::println)
             val operator = it[1] as Token
             OperatorNode(
                 operator.text,

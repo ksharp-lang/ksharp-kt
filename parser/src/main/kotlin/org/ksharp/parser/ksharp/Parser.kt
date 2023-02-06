@@ -28,6 +28,14 @@ fun <R> KSharpConsumeResult.enableLabelToken(code: (KSharpConsumeResult) -> Eith
         }
     }
 
+fun <R> KSharpConsumeResult.enableIfKeywords(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
+    flatMap { collector ->
+        val result = this@enableIfKeywords
+        collector.tokens.enableMapElseThenKeywords {
+            code(result)
+        }
+    }
+
 fun <R> KSharpConsumeResult.enableDiscardBlockAndNewLineTokens(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
     flatMap { collector ->
         val result = this@enableDiscardBlockAndNewLineTokens

@@ -571,7 +571,7 @@ class ExpressionParserTest : StringSpec({
             .kSharpLexer()
             .collapseKSharpTokens()
             .consumeExpression()
-            .map { it.value.also { println(it) } }
+            .map { it.value }
             .shouldBeRight(
                 OperatorNode(
                     "+",
@@ -629,6 +629,151 @@ class ExpressionParserTest : StringSpec({
                     LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided
                 ),
+            )
+    }
+    "complete if expression" {
+        "if 4 > a then 10 else 20"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "complete if without else expression" {
+        "if 4 > a then 10"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "complete if in block expression" {
+        """if 4 > a 
+           |    then 10
+           |    else 20""".trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "function with if expressions" {
+        """sum 10
+           |   if 1 != 2 
+           |      then 1
+           |      else 2
+           |   15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "sum",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralValueNode(
+                            "10",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        IfNode(
+                            OperatorNode(
+                                "!=",
+                                LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        LiteralValueNode(
+                            "15",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "function with if without else expressions" {
+        """sum 10
+           |   if 1 != 2 
+           |      then 1
+           |   15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "sum",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralValueNode(
+                            "10",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        IfNode(
+                            OperatorNode(
+                                "!=",
+                                LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            UnitNode(Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        LiteralValueNode(
+                            "15",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                    ),
+                    Location.NoProvided
+                )
             )
     }
 })
