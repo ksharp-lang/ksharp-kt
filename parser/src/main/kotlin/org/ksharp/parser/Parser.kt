@@ -95,7 +95,7 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
 
 fun <S> ConsumeResult<S>.thenOptional(
     predicate: (Token) -> Boolean,
-    discardToken: Boolean = false
+    discardToken: Boolean
 ): ConsumeResult<S> =
     flatMap {
         if (it.tokens.hasNext()) {
@@ -171,7 +171,7 @@ fun <S> BaseLexerIterator<S>.optionalConsume(type: TokenType, discardToken: Bool
         it.type == type
     }, discardToken)
 
-fun <S> ConsumeResult<S>.thenOptional(type: TokenType, discardToken: Boolean = false): ConsumeResult<S> =
+fun <S> ConsumeResult<S>.thenOptional(type: TokenType, discardToken: Boolean): ConsumeResult<S> =
     thenOptional({
         it.type == type
     }, discardToken)
