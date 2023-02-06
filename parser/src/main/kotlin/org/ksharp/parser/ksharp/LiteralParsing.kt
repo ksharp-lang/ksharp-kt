@@ -72,6 +72,13 @@ internal fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean) =
         .orConsumeLiteralValue(KSharpTokenType.OctalInteger, LiteralValueType.OctalInteger)
         .orConsumeLiteralValue(KSharpTokenType.BinaryInteger, LiteralValueType.BinaryInteger)
         .orConsumeLiteralValue(KSharpTokenType.Float, LiteralValueType.Decimal)
+        .or {
+            it.ifConsume(KSharpTokenType.UnitValue) { l ->
+                l.build { d ->
+                    UnitNode(d.first().cast<Token>().location)
+                }
+            }
+        }
         .or { it.consumeListOrSetLiteral() }
         .or { it.consumeMapLiteral() }
         .let {

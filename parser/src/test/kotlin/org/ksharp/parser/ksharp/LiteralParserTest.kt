@@ -225,4 +225,14 @@ class LiteralParserTest : StringSpec({
                 LiteralValueNode("(+)", LiteralValueType.OperatorBinding, Location.NoProvided),
             )
     }
+    "Unit literal" {
+        "()"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpressionValue(withBindings = true)
+            .map { it.value }
+            .shouldBeRight(
+                UnitNode(Location.NoProvided),
+            )
+    }
 })

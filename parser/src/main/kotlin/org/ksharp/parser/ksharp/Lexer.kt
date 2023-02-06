@@ -61,6 +61,8 @@ enum class KSharpTokenType : TokenType {
     BeginBlock,
     EndBlock,
 
+    UnitValue,
+
     //?Keywords
     If,
     Then,
@@ -353,6 +355,9 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
     }
 }
 
+private fun isUnitToken(current: Token, newToken: Token): Boolean =
+    current.type == KSharpTokenType.OpenParenthesis && newToken.type == KSharpTokenType.CloseParenthesis
+
 private fun KSharpLexerIterator.canCollapseTokens(current: Token, newToken: Token): Boolean {
     var collapseDotOperatorRule = false
     val allowedToken = when (current.type) {
@@ -556,6 +561,16 @@ fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
                     break
                 }
                 token = lastToken
+                lastToken = null
+                continue
+            }
+
+            if (isUnitToken(token!!, lastToken!!)) {
+                token = token!!.collapse(
+                    KSharpTokenType.UnitValue,
+                    "()",
+                    lastToken!!
+                )
                 lastToken = null
                 continue
             }
