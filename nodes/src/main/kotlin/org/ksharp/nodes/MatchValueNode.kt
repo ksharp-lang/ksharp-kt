@@ -27,3 +27,12 @@ data class MatchListValueNode(
         get() = sequenceOf(head, listOf(tail)).flatten()
 
 }
+
+data class MatchAssignNode(
+    val matchValue: MatchValueNode,
+    val expression: NodeData,
+    override val location: Location
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(matchValue, expression)
+}
