@@ -12,6 +12,7 @@ enum class LiteralValueType {
     OctalInteger,
     Decimal,
     Binding,
+    Label,
     OperatorBinding
 }
 
