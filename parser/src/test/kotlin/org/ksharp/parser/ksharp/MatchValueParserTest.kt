@@ -195,4 +195,33 @@ class MatchValueParserTest : StringSpec({
                 )
             )
     }
+    "Match assignment" {
+        "x, y = 1, 2".kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeMatchAssignment()
+            .map { it.value }
+            .shouldBeRight(
+                MatchAssignNode(
+                    MatchValueNode(
+                        MatchValueType.Expression,
+                        LiteralCollectionNode(
+                            listOf(
+                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                            ),
+                            LiteralCollectionType.Tuple, Location.NoProvided
+                        ),
+                        Location.NoProvided
+                    ),
+                    LiteralCollectionNode(
+                        listOf(
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided)
+                        ),
+                        LiteralCollectionType.Tuple, Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
 })

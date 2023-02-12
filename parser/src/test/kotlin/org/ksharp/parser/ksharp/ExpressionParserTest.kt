@@ -816,4 +816,45 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "let expression" {
+        """let x = 10
+           |   y = 20
+           |then x + y
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LetExpressionNode(
+                    listOf(
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
 })

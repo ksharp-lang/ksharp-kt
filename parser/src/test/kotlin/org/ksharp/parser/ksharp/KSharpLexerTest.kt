@@ -522,6 +522,40 @@ class KSharpLexerTest : StringSpec({
                 )
             )
     }
+    "let then  mapLetThenKeyword enabled" {
+        "let then"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .enableMapThenKeywords {
+                it.asSequence().toList()
+            }
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.Let,
+                    token = TextToken(text = "let", startOffset = 0, endOffset = 2)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Then,
+                    token = TextToken(text = "then", startOffset = 4, endOffset = 7)
+                )
+            )
+    }
+    "let then  mapLetThenKeyword disabled" {
+        "let then"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence().toList()
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.Let,
+                    token = TextToken(text = "let", startOffset = 0, endOffset = 2)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.LowerCaseWord,
+                    token = TextToken(text = "then", startOffset = 4, endOffset = 7)
+                )
+            )
+    }
 })
 
 private fun Sequence<Token>.asStringSequence() = map {
@@ -717,12 +751,12 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "NewLine",
                                 "EndBlock",
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
@@ -769,12 +803,12 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "EndBlock",
 
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
@@ -826,13 +860,13 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "EndBlock",
 
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
 
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
@@ -849,7 +883,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "EndBlock",
 
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:sum",
                                 "LowerCaseWord:a",
                                 "LowerCaseWord:b",
@@ -1017,7 +1051,7 @@ class KSharpLexerExpressionBlocks : StringSpec({
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
                         "BeginBlock",
-                        "LowerCaseWord:let",
+                        "Let:let",
                         "LowerCaseWord:x",
                         "AssignOperator:=",
                         "Integer:10",
