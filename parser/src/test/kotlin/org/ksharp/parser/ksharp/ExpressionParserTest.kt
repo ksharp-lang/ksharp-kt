@@ -528,4 +528,333 @@ class ExpressionParserTest : StringSpec({
                 ),
             )
     }
+    "block expressions" {
+        """sum 10
+           |   20
+           |        30 + 15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "sum",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralValueNode(
+                            "10",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        LiteralValueNode(
+                            "20",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        OperatorNode(
+                            "+",
+                            LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "function and operators in block expressions" {
+        """10 +
+           |   sum 5
+           |       30 + 15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "+",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    FunctionCallNode(
+                        "sum",
+                        FunctionType.Function,
+                        listOf(
+                            LiteralValueNode(
+                                "5",
+                                LiteralValueType.Integer,
+                                Location.NoProvided
+                            ),
+                            OperatorNode(
+                                "+",
+                                LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "function and operator expressions" {
+        """sum 10 20 30 + 15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                OperatorNode(
+                    "+",
+                    FunctionCallNode(
+                        "sum",
+                        FunctionType.Function,
+                        listOf(
+                            LiteralValueNode(
+                                "10",
+                                LiteralValueType.Integer,
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode(
+                                "20",
+                                LiteralValueType.Integer,
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
+                        ),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                ),
+            )
+    }
+    "complete if expression" {
+        "if 4 > a then 10 else 20"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "complete if without else expression" {
+        "if 4 > a then 10"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "complete if in block expression" {
+        """if 4 > a 
+           |    then 10
+           |    else 20""".trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "function with if expressions" {
+        """sum 10
+           |   if 1 != 2 
+           |      then 1
+           |      else 2
+           |   15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "sum",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralValueNode(
+                            "10",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        IfNode(
+                            OperatorNode(
+                                "!=",
+                                LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        LiteralValueNode(
+                            "15",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "function with if without else expressions" {
+        """sum 10
+           |   if 1 != 2 
+           |      then 1
+           |   15
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "sum",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralValueNode(
+                            "10",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                        IfNode(
+                            OperatorNode(
+                                "!=",
+                                LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                                LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            UnitNode(Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        LiteralValueNode(
+                            "15",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        ),
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "if with unit expression" {
+        "if 4 > a then () else ()"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    UnitNode(Location.NoProvided),
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Type instance with labels" {
+        "Username label1: x label2: 20"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "Username",
+                    FunctionType.TypeInstance,
+                    listOf(
+                        LiteralValueNode("label1:", LiteralValueType.Label, Location.NoProvided),
+                        LiteralValueNode("x", LiteralValueType.Binding, Location.NoProvided),
+                        LiteralValueNode("label2:", LiteralValueType.Label, Location.NoProvided),
+                        LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "let expression" {
+        """let x = 10
+           |   y = 20
+           |then x + y
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LetExpressionNode(
+                    listOf(
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
 })

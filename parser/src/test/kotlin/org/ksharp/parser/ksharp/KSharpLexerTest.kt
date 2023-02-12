@@ -456,6 +456,106 @@ class KSharpLexerTest : StringSpec({
             .toList()
             .shouldBeEmpty()
     }
+    "Given a lexer, unit value" {
+        "() ( 1 )"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence().toList()
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.UnitValue,
+                    token = TextToken(text = "()", startOffset = 0, endOffset = 1)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.OpenParenthesis,
+                    token = TextToken(text = "(", startOffset = 3, endOffset = 3)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Integer,
+                    token = TextToken(text = "1", startOffset = 5, endOffset = 5)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.CloseParenthesis,
+                    token = TextToken(text = ")", startOffset = 7, endOffset = 7)
+                ),
+            )
+    }
+    "if then else mapIfThenKeyword disabled" {
+        "if then else"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence().toList()
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.If,
+                    token = TextToken(text = "if", startOffset = 0, endOffset = 1)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.LowerCaseWord,
+                    token = TextToken(text = "then", startOffset = 3, endOffset = 6)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.LowerCaseWord,
+                    token = TextToken(text = "else", startOffset = 8, endOffset = 11)
+                )
+            )
+    }
+    "if then else mapIfThenKeyword enabled" {
+        "if then else"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .enableMapElseThenKeywords {
+                it.asSequence().toList()
+            }
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.If,
+                    token = TextToken(text = "if", startOffset = 0, endOffset = 1)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Then,
+                    token = TextToken(text = "then", startOffset = 3, endOffset = 6)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Else,
+                    token = TextToken(text = "else", startOffset = 8, endOffset = 11)
+                )
+            )
+    }
+    "let then  mapLetThenKeyword enabled" {
+        "let then"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .enableMapThenKeywords {
+                it.asSequence().toList()
+            }
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.Let,
+                    token = TextToken(text = "let", startOffset = 0, endOffset = 2)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.Then,
+                    token = TextToken(text = "then", startOffset = 4, endOffset = 7)
+                )
+            )
+    }
+    "let then  mapLetThenKeyword disabled" {
+        "let then"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence().toList()
+            .shouldContainAll(
+                LexerToken(
+                    type = KSharpTokenType.Let,
+                    token = TextToken(text = "let", startOffset = 0, endOffset = 2)
+                ),
+                LexerToken(
+                    type = KSharpTokenType.LowerCaseWord,
+                    token = TextToken(text = "then", startOffset = 4, endOffset = 7)
+                )
+            )
+    }
 })
 
 private fun Sequence<Token>.asStringSequence() = map {
@@ -651,12 +751,12 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "NewLine",
                                 "EndBlock",
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
@@ -703,12 +803,12 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "EndBlock",
 
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
@@ -760,13 +860,13 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "EndBlock",
 
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
 
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
@@ -783,7 +883,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "EndBlock",
 
                                 "BeginBlock",
-                                "LowerCaseWord:let",
+                                "Let:let",
                                 "LowerCaseWord:sum",
                                 "LowerCaseWord:a",
                                 "LowerCaseWord:b",
@@ -832,6 +932,149 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                         )
                     )
                 }
+            }
+    }
+})
+
+class KSharpLexerExpressionBlocks : StringSpec({
+    val endExpression: (TokenType) -> LexerToken = {
+        LexerToken(
+            type = it,
+            token = TextToken("", 0, 0)
+        )
+    }
+    "Block Expression" {
+        """
+            10 +
+            |   calc 10 20
+        """.trimMargin()
+            .also { println(it) }
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks(endExpression)
+            .apply {
+                asSequence().asStringSequence().toList().printTokens().shouldBe(
+                    listOf(
+                        "BeginBlock",
+                        "Integer:10",
+                        "Operator10:+",
+                        "BeginBlock",
+                        "LowerCaseWord:calc",
+                        "Integer:10",
+                        "Integer:20",
+                        "NewLine",
+                        "EndBlock",
+                        "NewLine",
+                        "EndBlock",
+                    )
+                )
+            }
+    }
+    "Many Expression in block" {
+        """
+            10 + 
+            |   calc 10 20 + 
+            |   inc 2
+        """.trimMargin()
+            .also { println(it) }
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks(endExpression)
+            .apply {
+                asSequence().asStringSequence().toList().printTokens().shouldBe(
+                    listOf(
+                        "BeginBlock",
+                        "Integer:10",
+                        "Operator10:+",
+                        "BeginBlock",
+                        "LowerCaseWord:calc",
+                        "Integer:10",
+                        "Integer:20",
+                        "Operator10:+",
+                        "NewLine",
+                        "LowerCaseWord:inc",
+                        "Integer:2",
+                        "NewLine",
+                        "EndBlock",
+                        "NewLine",
+                        "EndBlock",
+                    )
+                )
+            }
+    }
+    "If-then-else Expression" {
+        """
+            |if true 
+            |   then 10 + 20 
+            |   else 30 + 40
+        """.trimMargin()
+            .also { println(it) }
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks(endExpression)
+            .apply {
+                asSequence().asStringSequence().toList().printTokens().shouldBe(
+                    listOf(
+                        "BeginBlock",
+                        "If:if",
+                        "LowerCaseWord:true",
+                        "BeginBlock",
+                        "LowerCaseWord:then",
+                        "Integer:10",
+                        "Operator10:+",
+                        "Integer:20",
+                        "NewLine",
+                        "LowerCaseWord:else",
+                        "Integer:30",
+                        "Operator10:+",
+                        "Integer:40",
+                        "NewLine",
+                        "EndBlock",
+                        "NewLine",
+                        "EndBlock",
+                    )
+                )
+            }
+    }
+    "Let Expression" {
+        """
+            |let x = 10
+            |    y = 20
+            |    z = 30
+            |    x + y + z
+        """.trimMargin()
+            .also { println(it) }
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks(endExpression)
+            .apply {
+                asSequence().asStringSequence().toList().printTokens().shouldBe(
+                    listOf(
+                        "BeginBlock",
+                        "Let:let",
+                        "LowerCaseWord:x",
+                        "AssignOperator:=",
+                        "Integer:10",
+                        "BeginBlock",
+                        "LowerCaseWord:y",
+                        "AssignOperator:=",
+                        "Integer:20",
+                        "NewLine",
+                        "LowerCaseWord:z",
+                        "AssignOperator:=",
+                        "Integer:30",
+                        "NewLine",
+                        "LowerCaseWord:x",
+                        "Operator10:+",
+                        "LowerCaseWord:y",
+                        "Operator10:+",
+                        "LowerCaseWord:z",
+                        "NewLine",
+                        "EndBlock",
+                        "NewLine",
+                        "EndBlock",
+                    )
+                )
             }
     }
 })

@@ -9,6 +9,13 @@ data class LookAHeadResult<T, S>(
     val remainTokens: BaseLexerIterator<S>
 )
 
+fun <T : Any, S> ParserResult<T, S>.asLookAHeadResult(): ErrorOrValue<LookAHeadResult<T, S>> =
+    when (this) {
+        is Either.Left -> value.error.asLookAHeadResult()
+        is Either.Right -> value.value.asLookAHeadResult(value.remainTokens)
+    }
+
+
 fun <T : Any, S> Error.asLookAHeadResult(): ErrorOrValue<LookAHeadResult<T, S>> =
     Either.Left(this)
 
