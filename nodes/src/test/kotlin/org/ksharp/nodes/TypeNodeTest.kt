@@ -262,6 +262,26 @@ class TypeNodeTest : StringSpec({
             children.toList().shouldBeEmpty()
         }
     }
+    "Test Node Interface over ConstrainedTypeNode" {
+        ConstrainedTypeNode(
+            ConcreteTypeNode("Int", testLocation),
+            UnitNode(testLocation),
+            testLocation
+        ).node.apply {
+            cast<ConstrainedTypeNode>().apply {
+                type.shouldBe(ConcreteTypeNode("Int", testLocation))
+                expression.shouldBe(UnitNode(testLocation))
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation)),
+                    Node(this, testLocation, UnitNode(testLocation))
+                )
+            )
+        }
+    }
     "Test Node Interface over TypeNode" {
         TypeNode(
             false,
