@@ -85,6 +85,15 @@ data class TupleTypeNode(
         get() = types.asSequence().cast()
 }
 
+data class ConstrainedTypeNode(
+    val type: TypeExpression,
+    val expression: NodeData,
+    override val location: Location
+) : NodeData(), TypeExpression {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(type, expression).cast()
+}
+
 data class InvalidSetTypeNode(
     override val location: Location
 ) : NodeData() {
