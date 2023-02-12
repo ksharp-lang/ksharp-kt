@@ -9,7 +9,8 @@ data class KSharpLexerState(
     val discardBlockTokens: Boolean = false,
     val discardNewLineToken: Boolean = false,
     val collapseDotOperatorRule: Boolean = true,
-    val mapThenElseKeywords: Boolean = false
+    val mapThenElseKeywords: Boolean = false,
+    val mapThenKeywords: Boolean = false
 )
 
 typealias KSharpLexer = Lexer<KSharpLexerState>
@@ -65,6 +66,7 @@ enum class KSharpTokenType : TokenType {
 
     //?Keywords
     If,
+    Let,
     Then,
     Else
 }
@@ -82,6 +84,10 @@ private val mappings = mapOf(
 private val ifKeywordsMapping = mapOf(
     "then" to KSharpTokenType.Then,
     "else" to KSharpTokenType.Else
+)
+
+private val letKeywordsMapping = mapOf(
+    "then" to KSharpTokenType.Then
 )
 
 private val operators = "+-*/%><=!&$#^?.\\|:".toSet()
@@ -180,6 +186,14 @@ fun <R> KSharpLexerIterator.enableMapElseThenKeywords(code: (KSharpLexerIterator
         state.update(state.value.copy(mapThenElseKeywords = true))
         code(this).also {
             state.update(state.value.copy(mapThenElseKeywords = initValue))
+        }
+    }
+
+fun <R> KSharpLexerIterator.enableMapThenKeywords(code: (KSharpLexerIterator) -> R): R =
+    state.value.mapThenKeywords.let { initValue ->
+        state.update(state.value.copy(mapThenKeywords = true))
+        code(this).also {
+            state.update(state.value.copy(mapThenKeywords = initValue))
         }
     }
 
@@ -516,13 +530,21 @@ private fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {
     }
 }
 
+private fun Token.checkKeywordsCollection(keywords: Map<String, KSharpTokenType>): Token {
+    val type = keywords[text]
+    return if (type != null) new(type)
+    else this
+}
+
 private fun Token.mapToKeyword(state: KSharpLexerState): Token =
     if (text == "if") {
         new(KSharpTokenType.If)
+    } else if (text == "let") {
+        new(KSharpTokenType.Let)
     } else if (state.mapThenElseKeywords) {
-        val type = ifKeywordsMapping[text]
-        if (type != null) new(type)
-        else this
+        checkKeywordsCollection(ifKeywordsMapping)
+    } else if (state.mapThenKeywords) {
+        checkKeywordsCollection(letKeywordsMapping)
     } else this
 
 private fun KSharpLexerIterator.mapKeywords(): KSharpLexerIterator =
