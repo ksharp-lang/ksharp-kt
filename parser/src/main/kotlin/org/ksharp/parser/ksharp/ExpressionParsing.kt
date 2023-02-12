@@ -64,6 +64,25 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
             )
         }
 
+fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
+    consume(KSharpTokenType.Let, false)
+        .enableLetKeywords { l ->
+            l.thenLoop {
+                it.consumeMatchAssignment()
+                    .resume()
+                    .then(KSharpTokenType.NewLine, true)
+                    .thenOptional(KSharpTokenType.EndBlock, true)
+                    .build { items -> items.first().cast<NodeData>() }
+            }
+                .then(KSharpTokenType.Then, true)
+                .consume { it.consumeExpression() }
+        }.build {
+            val letToken = it.first().cast<Token>()
+            val expr = it.last().cast<NodeData>()
+            val matches = it.asSequence().filterIsInstance<MatchAssignNode>().toList()
+            LetExpressionNode(matches, expr, letToken.location)
+        }
+
 internal fun KSharpLexerIterator.consumeExpressionValue(
     tupleWithoutParenthesis: Boolean = true,
     withBindings: Boolean = false
@@ -83,6 +102,7 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
         }
     }.or { it.consumeLiteral(withBindings) }
         .or { it.consumeIfExpression() }
+        .or { it.consumeLetExpression() }
 
     val withFunctionCall = if (!withBindings) literal.or { it.consumeFunctionCall() } else literal
 
