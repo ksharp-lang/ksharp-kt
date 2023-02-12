@@ -571,4 +571,36 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Constrained type" {
+        "type Age = Int => (it > 0) && (it < 70)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false, "Age", listOf(), ConstrainedTypeNode(
+                        ConcreteTypeNode("Int", Location.NoProvided),
+                        OperatorNode(
+                            "&&",
+                            OperatorNode(
+                                ">",
+                                FunctionCallNode("it", FunctionType.Function, listOf(), Location.NoProvided),
+                                LiteralValueNode("0", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            OperatorNode(
+                                "<",
+                                FunctionCallNode("it", FunctionType.Function, listOf(), Location.NoProvided),
+                                LiteralValueNode("70", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        Location.NoProvided
+                    ), Location.NoProvided
+                )
+            )
+    }
 })
