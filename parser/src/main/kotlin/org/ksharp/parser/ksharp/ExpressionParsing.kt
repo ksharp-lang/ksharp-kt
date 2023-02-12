@@ -29,7 +29,11 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
             FunctionCallNode(
                 fnName.text,
                 fnName.functionType,
-                it.drop(1).cast(),
+                it.drop(1).map { arg ->
+                    if (arg is LiteralValueNode && arg.type == LiteralValueType.Binding && arg.value.endsWith(":")) {
+                        arg.copy(type = LiteralValueType.Label)
+                    } else arg as NodeData
+                },
                 fnName.location
             )
         }
@@ -80,8 +84,10 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
     }.or { it.consumeLiteral(withBindings) }
         .or { it.consumeIfExpression() }
 
-    val withTuple = if (tupleWithoutParenthesis) {
-        literal
+    val withFunctionCall = if (!withBindings) literal.or { it.consumeFunctionCall() } else literal
+
+    return if (tupleWithoutParenthesis) {
+        withFunctionCall
             .resume()
             .thenLoop {
                 it.consume(KSharpTokenType.Comma, true)
@@ -91,9 +97,7 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
                 if (it.size == 1) it.first().cast<NodeData>()
                 else LiteralCollectionNode(it.cast(), LiteralCollectionType.Tuple, it.first().cast<NodeData>().location)
             }
-    } else literal
-
-    return if (!withBindings) withTuple.or { it.consumeFunctionCall() } else withTuple
+    } else withFunctionCall
 }
 
 private fun KSharpConsumeResult.buildOperatorExpression(): KSharpParserResult =

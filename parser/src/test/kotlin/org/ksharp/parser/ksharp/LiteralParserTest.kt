@@ -160,6 +160,21 @@ class LiteralParserTest : StringSpec({
                 )
             )
     }
+    "Tuples with function calls" {
+        "x, y"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LiteralCollectionNode(
+                    listOf(
+                        FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
+                        FunctionCallNode("y", FunctionType.Function, emptyList(), Location.NoProvided),
+                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                )
+            )
+    }
     "List of tuples" {
         "[(1, 2), (2, 3)]"
             .kSharpLexer()

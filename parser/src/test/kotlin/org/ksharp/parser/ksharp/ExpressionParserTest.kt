@@ -796,4 +796,24 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "Type instance with labels" {
+        "Username label1: x label2: 20"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "Username",
+                    FunctionType.TypeInstance,
+                    listOf(
+                        LiteralValueNode("label1:", LiteralValueType.Label, Location.NoProvided),
+                        LiteralValueNode("x", LiteralValueType.Binding, Location.NoProvided),
+                        LiteralValueNode("label2:", LiteralValueType.Label, Location.NoProvided),
+                        LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
 })
