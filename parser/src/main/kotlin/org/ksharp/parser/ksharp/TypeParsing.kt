@@ -228,7 +228,17 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResu
                         TypeNode(internal, name.text, params, it.last().cast(), name.location)
                             .cast<NodeData>()
                     }
-            }
+            }.resume()
+                .thenIf(KSharpTokenType.Operator7, "=>", true) { l ->
+                    l.consume { it.consumeExpression() }
+                }.build {
+                    val type = it.first().cast<TypeNode>()
+                    if (it.size == 1) type as NodeData
+                    else {
+                        val expr = it.last().cast<NodeData>()
+                        type.copy(expr = ConstrainedTypeNode(type.expr.cast(), expr, expr.location))
+                    }
+                }
         }.or {
             it.consumeTrait(internal)
         }
