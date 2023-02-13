@@ -115,6 +115,11 @@ private fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =
             .then(KSharpTokenType.CloseParenthesis, true)
             .thenJoinType()
     }.or {
+        it.consume(KSharpTokenType.UnitValue)
+            .build { i -> UnitTypeNode(i.first().cast<Token>().location) }
+            .resume()
+            .thenJoinType()
+    }.or {
         it.consume(KSharpTokenType.Label)
             .thenTypeVariable()
             .thenLoop { i -> i.consumeTypeValue() }
@@ -248,4 +253,20 @@ fun KSharpLexerIterator.consumeTypeDeclaration(): KSharpParserResult =
         it.consumeType(true)
     }.or {
         it.collect().consumeType(false)
+    }
+
+internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserResult =
+    lookAHead {
+        it.consume(KSharpTokenType.LowerCaseWord)
+            .then(KSharpTokenType.Operator, "::", true)
+            .enableDiscardBlockAndNewLineTokens { lx ->
+                lx.consume { l -> l.consumeTypeValue() }
+            }.build { i ->
+                val name = i.first().cast<Token>()
+                TypeDeclarationNode(
+                    name.text,
+                    i.last().cast(),
+                    name.location
+                ) as NodeData
+            }.asLookAHeadResult()
     }
