@@ -45,6 +45,13 @@ data class LabelTypeNode(
         get() = sequenceOf(expr.cast())
 }
 
+data class UnitTypeNode(
+    override val location: Location
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = emptySequence()
+}
+
 data class ConcreteTypeNode(
     val name: String,
     override val location: Location
@@ -138,4 +145,13 @@ data class TypeNode(
 ) : NodeData() {
     override val children: Sequence<NodeData>
         get() = sequenceOf(expr)
+}
+
+data class TypeDeclarationNode(
+    val name: String,
+    val params: List<TypeExpression>,
+    override val location: Location
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = params.asSequence().cast()
 }
