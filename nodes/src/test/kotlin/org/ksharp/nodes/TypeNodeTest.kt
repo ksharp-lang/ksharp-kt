@@ -305,4 +305,35 @@ class TypeNodeTest : StringSpec({
             )
         }
     }
+    "Test Node interface on UnitTypeNode" {
+        UnitTypeNode(
+            testLocation
+        ).node.apply {
+            cast<UnitTypeNode>().apply {
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBeEmpty()
+        }
+    }
+    "Test Node interface on TypeDeclarationNode" {
+        TypeDeclarationNode(
+            "sum",
+            listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)),
+            testLocation
+        ).node.apply {
+            cast<TypeDeclarationNode>().apply {
+                name.shouldBe("sum")
+                params.shouldBe(listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)))
+                location.shouldBe(testLocation)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation)),
+                    Node(this, testLocation, ConcreteTypeNode("Int", testLocation))
+                )
+            )
+        }
+    }
 })
