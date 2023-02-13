@@ -1,6 +1,7 @@
 package org.ksharp.nodes
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
@@ -19,6 +20,7 @@ class ModuleNodeTest : StringSpec({
             imports = mapOf("n" to ImportNode("ksharp.num", "n", testLocation)),
             mapOf("Age" to TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)),
             mapOf("sum" to TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)),
+            mapOf(),
             testLocation
         ).node.apply {
             cast<ModuleNode>().apply {
@@ -34,6 +36,7 @@ class ModuleNodeTest : StringSpec({
                         "Age" to TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)
                     )
                 )
+                functions.shouldBeEmpty()
                 location.shouldBe(testLocation)
             }
             parent.shouldBeNull()
