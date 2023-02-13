@@ -13,7 +13,7 @@ class ModuleParserTest : StringSpec({
         "File", mapOf(
             "text" to ImportNode("ksharp.text", "text", Location.NoProvided),
             "math" to ImportNode("ksharp.math", "math", Location.NoProvided)
-        ), mapOf(), mapOf(), Location.NoProvided
+        ), mapOf(), mapOf(), mapOf(), Location.NoProvided
     )
     val expectedModuleWithLocations: (String) -> ModuleNode = {
         ModuleNode(
@@ -28,7 +28,7 @@ class ModuleParserTest : StringSpec({
                     "math",
                     Location(context = it, position = Line(value = 2) to Offset(value = 0))
                 )
-            ), mapOf(), mapOf(), Location(context = it, position = Line(value = 1) to Offset(value = 0))
+            ), mapOf(), mapOf(), mapOf(), Location(context = it, position = Line(value = 1) to Offset(value = 0))
         )
     }
     "Parse a module with imports" {
@@ -77,7 +77,7 @@ class ModuleParserTest : StringSpec({
                 ModuleNode(
                     "File", mapOf(
                         "text" to ImportNode("ksharp.text", "text", Location.NoProvided)
-                    ), mapOf(), mapOf(), Location.NoProvided
+                    ), mapOf(), mapOf(), mapOf(), Location.NoProvided
                 )
             )
     }
@@ -101,7 +101,7 @@ class ModuleParserTest : StringSpec({
                             ),
                             Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), mapOf(), Location.NoProvided
                 )
             )
     }
@@ -120,7 +120,7 @@ class ModuleParserTest : StringSpec({
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided
                         )
-                    ), mapOf(), Location.NoProvided
+                    ), mapOf(), mapOf(), Location.NoProvided
                 )
             )
     }
@@ -158,7 +158,7 @@ class ModuleParserTest : StringSpec({
                             ),
                             Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), mapOf(), Location.NoProvided
                 )
             )
     }
