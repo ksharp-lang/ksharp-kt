@@ -1,7 +1,6 @@
 package org.ksharp.nodes
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
@@ -18,20 +17,40 @@ class ModuleNodeTest : StringSpec({
         ModuleNode(
             name = "ksharp.math",
             imports = mapOf("n" to ImportNode("ksharp.num", "n", testLocation)),
-            mapOf(),
-            mapOf(),
+            mapOf("Age" to TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)),
+            mapOf("sum" to TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)),
             testLocation
         ).node.apply {
             cast<ModuleNode>().apply {
                 name.shouldBe("ksharp.math")
                 imports.shouldBe(mapOf("n" to ImportNode("ksharp.num", "n", testLocation)))
-                typeDeclarations.shouldBeEmpty()
-                types.shouldBeEmpty()
+                typeDeclarations.shouldBe(
+                    mapOf(
+                        "sum" to TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)
+                    )
+                )
+                types.shouldBe(
+                    mapOf(
+                        "Age" to TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)
+                    )
+                )
                 location.shouldBe(testLocation)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
-                listOf(Node(this, testLocation, ImportNode("ksharp.num", "n", testLocation)))
+                listOf(
+                    Node(this, testLocation, ImportNode("ksharp.num", "n", testLocation)),
+                    Node(
+                        this,
+                        testLocation,
+                        TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)
+                    ),
+                    Node(
+                        this,
+                        testLocation,
+                        TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)
+                    )
+                )
             )
         }
     }
