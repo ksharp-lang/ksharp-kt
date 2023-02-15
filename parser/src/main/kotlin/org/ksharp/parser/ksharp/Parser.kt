@@ -52,6 +52,14 @@ fun <R> KSharpConsumeResult.enableDiscardBlockAndNewLineTokens(code: (KSharpCons
         }
     }
 
+fun <R> KSharpConsumeResult.disableExpressionStartingNewLine(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
+    flatMap { collector ->
+        val result = this@disableExpressionStartingNewLine
+        collector.tokens.disableExpressionStartingNewLine {
+            code(result)
+        }
+    }
+
 fun KSharpLexerIterator.consumeBlock(action: (KSharpLexerIterator) -> KSharpParserResult): KSharpParserResult =
     consume(KSharpTokenType.BeginBlock, true).flatMap { collector ->
         action(collector.tokens).endBlock()

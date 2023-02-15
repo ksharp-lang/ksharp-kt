@@ -35,7 +35,6 @@ internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
     }.or {
         it.consumeExpressionValue()
             .map { value ->
-                println(value.value)
                 ParserValue(
                     MatchValueNode(MatchValueType.Expression, value.value, value.value.location),
                     value.remainTokens
@@ -47,7 +46,9 @@ internal fun KSharpLexerIterator.consumeMatchAssignment() =
     consumeMatchValue()
         .resume()
         .thenAssignOperator()
-        .consume { it.consumeExpression() }
+        .disableExpressionStartingNewLine {
+            it.consume { l -> l.consumeExpression() }
+        }
         .build {
             val match = it.first().cast<MatchValueNode>()
             MatchAssignNode(
