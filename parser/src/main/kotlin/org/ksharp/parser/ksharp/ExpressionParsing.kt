@@ -64,17 +64,33 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
             )
         }
 
+private fun KSharpConsumeResult.discardBlanks() =
+    map {
+        val lexer = it.tokens
+        while (lexer.hasNext()) {
+            val token = lexer.next()
+            if (token.type == KSharpTokenType.NewLine || token.type == KSharpTokenType.EndBlock) {
+                continue
+            }
+            return@map NodeCollector(
+                it.collection,
+                lexer.cons(token)
+            )
+        }
+        it
+    }
+
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
     consume(KSharpTokenType.Let, false)
         .enableLetKeywords { l ->
             l.thenLoop {
                 it.consumeMatchAssignment()
                     .resume()
-                    .then(KSharpTokenType.NewLine, true)
-                    .thenOptional(KSharpTokenType.EndBlock, true)
-                    .build { items -> items.first().cast<NodeData>() }
-            }
-                .then(KSharpTokenType.Then, true)
+                    .discardBlanks()
+                    .build { items ->
+                        items.first().cast<NodeData>()
+                    }
+            }.then(KSharpTokenType.Then, true)
                 .consume { it.consumeExpression() }
         }.build {
             val letToken = it.first().cast<Token>()
@@ -87,24 +103,36 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
     tupleWithoutParenthesis: Boolean = true,
     withBindings: Boolean = false
 ): KSharpParserResult {
-    val literal = ifConsume(KSharpTokenType.OpenParenthesis, true) {
-        it.consume { l -> l.consumeExpression() }
-            .then(KSharpTokenType.CloseParenthesis, true)
+    val groupExpression = ifConsume(KSharpTokenType.OpenParenthesis, true) {
+        it.consume { l ->
+            l.enableExpressionStartingNewLine { nL ->
+                nL.consumeExpression()
+            }
+        }.then(KSharpTokenType.CloseParenthesis, true)
             .build { l ->
                 l.first().cast<NodeData>()
             }
-    }.or { l ->
-        l.ifConsume(KSharpTokenType.NewLine, true) {
-            it.consume { l -> l.consumeExpression() }
-                .build { l ->
-                    l.first().cast()
-                }
+    }
+
+    val newLineExpression = if (state.value.enableExpressionStartingNewLine) {
+        groupExpression.or {
+            it.ifConsume(KSharpTokenType.NewLine, true) { ifL ->
+                ifL.discardBlanks()
+                    .consume { l -> l.consumeExpression() }
+                    .build { l -> l.first().cast<NodeData>() }
+            }
         }
-    }.or { it.consumeLiteral(withBindings) }
-        .or { it.consumeIfExpression() }
+    } else groupExpression
+
+    val literal = newLineExpression.or {
+        it.consumeLiteral(withBindings)
+    }.or { it.consumeIfExpression() }
         .or { it.consumeLetExpression() }
 
-    val withFunctionCall = if (!withBindings) literal.or { it.consumeFunctionCall() } else literal
+    val withFunctionCall =
+        if (!withBindings) literal.or {
+            it.consumeFunctionCall()
+        } else literal
 
     return if (tupleWithoutParenthesis) {
         withFunctionCall

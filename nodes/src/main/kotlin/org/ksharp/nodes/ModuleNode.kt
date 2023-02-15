@@ -8,6 +8,7 @@ data class ModuleNode(
     val imports: Map<String, ImportNode>,
     val types: Map<String, TypeNode>,
     val typeDeclarations: Map<String, TypeDeclarationNode>,
+    val functions: Map<String, FunctionNode>,
     override val location: Location
 ) : NodeData() {
 
@@ -15,7 +16,8 @@ data class ModuleNode(
         get() = sequenceOf(
             imports.values.asSequence(),
             types.values.asSequence(),
-            typeDeclarations.values.asSequence()
+            typeDeclarations.values.asSequence(),
+            functions.values.asSequence()
         ).flatten().cast()
 
 }

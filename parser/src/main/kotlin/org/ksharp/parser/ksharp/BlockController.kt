@@ -18,7 +18,7 @@ class BlockController(private val builder: (TokenType) -> Token) {
     private fun addEndBlockTokens(untilLevel: Int) {
         while (true) {
             val level = register.removeLast()
-            if (level == untilLevel) {
+            if (level <= untilLevel) {
                 pendingToken.push(builder(KSharpTokenType.NewLine))
                 if (untilLevel != 1) {
                     register.push(level)

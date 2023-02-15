@@ -10,7 +10,8 @@ data class KSharpLexerState(
     val discardNewLineToken: Boolean = false,
     val collapseDotOperatorRule: Boolean = true,
     val mapThenElseKeywords: Boolean = false,
-    val mapThenKeywords: Boolean = false
+    val mapThenKeywords: Boolean = false,
+    val enableExpressionStartingNewLine: Boolean = true
 )
 
 typealias KSharpLexer = Lexer<KSharpLexerState>
@@ -144,6 +145,23 @@ private inline fun KSharpLexer.loopChar(
     endToken: TokenType
 ): LexerToken = loopChar(predicate, endToken) { token(endToken, 1) }
 
+fun <R> KSharpLexerIterator.disableExpressionStartingNewLine(code: (KSharpLexerIterator) -> R): R =
+    state.value.enableExpressionStartingNewLine.let { initValue ->
+        state.update(state.value.copy(enableExpressionStartingNewLine = false))
+        code(this).also {
+            state.update(state.value.copy(enableExpressionStartingNewLine = initValue))
+        }
+    }
+
+fun <R> KSharpLexerIterator.enableExpressionStartingNewLine(code: (KSharpLexerIterator) -> R): R =
+    state.value.enableExpressionStartingNewLine.let { initValue ->
+        state.update(state.value.copy(enableExpressionStartingNewLine = true))
+        code(this).also {
+            state.update(state.value.copy(enableExpressionStartingNewLine = initValue))
+        }
+    }
+
+
 fun <R> KSharpLexerIterator.disableCollapseDotOperatorRule(code: (KSharpLexerIterator) -> R): R =
     state.value.collapseDotOperatorRule.let { initValue ->
         state.update(state.value.copy(collapseDotOperatorRule = false))
@@ -171,6 +189,14 @@ fun <R> KSharpLexerIterator.enableDiscardBlocksTokens(code: (KSharpLexerIterator
 fun <R> KSharpLexerIterator.enableDiscardNewLineToken(code: (KSharpLexerIterator) -> R): R =
     state.value.discardNewLineToken.let { initValue ->
         state.update(state.value.copy(discardNewLineToken = true))
+        code(this).also {
+            state.update(state.value.copy(discardNewLineToken = initValue))
+        }
+    }
+
+fun <R> KSharpLexerIterator.disableDiscardNewLineToken(code: (KSharpLexerIterator) -> R): R =
+    state.value.discardNewLineToken.let { initValue ->
+        state.update(state.value.copy(discardNewLineToken = false))
         code(this).also {
             state.update(state.value.copy(discardNewLineToken = initValue))
         }
