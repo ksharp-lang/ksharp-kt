@@ -124,13 +124,39 @@ class ModuleParserTest : StringSpec({
                 )
             )
     }
-    "Parse a module with imports, types and type declarations" {
+    "Parse a module with function" {
+        """
+            sum a b = a + b
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File", mapOf(), mapOf(), mapOf(), mapOf(
+                        "sum" to FunctionNode(
+                            false,
+                            "sum",
+                            listOf("a", "b"),
+                            OperatorNode(
+                                "+",
+                                FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                                FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                )
+            )
+    }
+    "Parse a module with imports, types and type declarations and functions" {
         """
             import ksharp.text as text
             
             type Age = Int
             
             sum :: Int -> Int -> Int
+            
+            pub sum a b = a + b
         """.trimIndent()
             .parseModule("File", false)
             .shouldBeRight(
@@ -158,7 +184,20 @@ class ModuleParserTest : StringSpec({
                             ),
                             Location.NoProvided
                         )
-                    ), mapOf(), Location.NoProvided
+                    ), mapOf(
+                        "sum" to FunctionNode(
+                            true,
+                            "sum",
+                            listOf("a", "b"),
+                            OperatorNode(
+                                "+",
+                                FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                                FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    ), Location.NoProvided
                 )
             )
     }
