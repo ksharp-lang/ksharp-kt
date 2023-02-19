@@ -2,9 +2,7 @@ package org.ksharp.parser.ksharp
 
 import org.ksharp.common.Location
 import org.ksharp.common.cast
-import org.ksharp.nodes.ImportNode
-import org.ksharp.nodes.ModuleNode
-import org.ksharp.nodes.NodeData
+import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
 fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KSharpLexerState> =
@@ -12,10 +10,15 @@ fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KS
         .thenLoop { then ->
             then.consumeBlock {
                 it.consumeImport()
-                    .or { consumeTypeDeclaration() }
+                    .or { l -> l.consumeFunctionTypeDeclaration() }
+                    .or { l -> l.consumeTypeDeclaration() }
+                    .or { l -> l.consumeFunction() }
             }
         }.build {
             val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
-            val imports = it.filterIsInstance<ImportNode>()
-            ModuleNode(name, imports, location)
+            val imports = it.filterIsInstance<ImportNode>().associateBy { t -> t.key }
+            val types = it.filterIsInstance<TypeNode>().associateBy { t -> t.name }
+            val typeDeclarations = it.filterIsInstance<TypeDeclarationNode>().associateBy { t -> t.name }
+            val functions = it.filterIsInstance<FunctionNode>().associateBy { t -> t.name }
+            ModuleNode(name, imports, types, typeDeclarations, functions, location)
         }

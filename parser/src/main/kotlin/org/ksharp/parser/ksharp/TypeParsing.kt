@@ -115,6 +115,11 @@ private fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =
             .then(KSharpTokenType.CloseParenthesis, true)
             .thenJoinType()
     }.or {
+        it.consume(KSharpTokenType.UnitValue)
+            .build { i -> UnitTypeNode(i.first().cast<Token>().location) }
+            .resume()
+            .thenJoinType()
+    }.or {
         it.consume(KSharpTokenType.Label)
             .thenTypeVariable()
             .thenLoop { i -> i.consumeTypeValue() }
@@ -228,7 +233,17 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResu
                         TypeNode(internal, name.text, params, it.last().cast(), name.location)
                             .cast<NodeData>()
                     }
-            }
+            }.resume()
+                .thenIf(KSharpTokenType.Operator7, "=>", true) { l ->
+                    l.consume { it.consumeExpression() }
+                }.build {
+                    val type = it.first().cast<TypeNode>()
+                    if (it.size == 1) type as NodeData
+                    else {
+                        val expr = it.last().cast<NodeData>()
+                        type.copy(expr = ConstrainedTypeNode(type.expr.cast(), expr, expr.location))
+                    }
+                }
         }.or {
             it.consumeTrait(internal)
         }
@@ -238,4 +253,20 @@ fun KSharpLexerIterator.consumeTypeDeclaration(): KSharpParserResult =
         it.consumeType(true)
     }.or {
         it.collect().consumeType(false)
+    }
+
+internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserResult =
+    lookAHead {
+        it.consume(KSharpTokenType.LowerCaseWord)
+            .then(KSharpTokenType.Operator, "::", true)
+            .enableDiscardBlockAndNewLineTokens { lx ->
+                lx.consume { l -> l.consumeTypeValue() }
+            }.build { i ->
+                val name = i.first().cast<Token>()
+                TypeDeclarationNode(
+                    name.text,
+                    i.last().cast(),
+                    name.location
+                ) as NodeData
+            }.asLookAHeadResult()
     }

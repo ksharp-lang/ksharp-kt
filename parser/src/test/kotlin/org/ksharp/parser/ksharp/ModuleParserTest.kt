@@ -4,32 +4,31 @@ import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Line
 import org.ksharp.common.Location
 import org.ksharp.common.Offset
-import org.ksharp.nodes.ImportNode
-import org.ksharp.nodes.ModuleNode
+import org.ksharp.nodes.*
 import org.ksharp.test.shouldBeRight
 import java.nio.file.Paths
 
 class ModuleParserTest : StringSpec({
     val expectedModule = ModuleNode(
-        "File", listOf(
-            ImportNode("ksharp.text", "text", Location.NoProvided),
-            ImportNode("ksharp.math", "math", Location.NoProvided)
-        ), Location.NoProvided
+        "File", mapOf(
+            "text" to ImportNode("ksharp.text", "text", Location.NoProvided),
+            "math" to ImportNode("ksharp.math", "math", Location.NoProvided)
+        ), mapOf(), mapOf(), mapOf(), Location.NoProvided
     )
     val expectedModuleWithLocations: (String) -> ModuleNode = {
         ModuleNode(
-            it, listOf(
-                ImportNode(
+            it, mapOf(
+                "text" to ImportNode(
                     "ksharp.text",
                     "text",
                     Location(context = it, position = Line(value = 1) to Offset(value = 0))
                 ),
-                ImportNode(
+                "math" to ImportNode(
                     "ksharp.math",
                     "math",
                     Location(context = it, position = Line(value = 2) to Offset(value = 0))
                 )
-            ), Location(context = it, position = Line(value = 1) to Offset(value = 0))
+            ), mapOf(), mapOf(), mapOf(), Location(context = it, position = Line(value = 1) to Offset(value = 0))
         )
     }
     "Parse a module with imports" {
@@ -76,8 +75,128 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", listOf(
-                        ImportNode("ksharp.text", "text", Location.NoProvided)
+                    "File", mapOf(
+                        "text" to ImportNode("ksharp.text", "text", Location.NoProvided)
+                    ), mapOf(), mapOf(), mapOf(), Location.NoProvided
+                )
+            )
+    }
+    "Parse a module with function type declaration" {
+        """
+            sum :: Int -> Int -> Int
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File", mapOf(), mapOf(), mapOf(
+                        "sum" to TypeDeclarationNode(
+                            "sum",
+                            FunctionTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Int", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    ), mapOf(), Location.NoProvided
+                )
+            )
+    }
+    "Parse a module with types" {
+        """
+            type Age = Int
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File", mapOf(), mapOf(
+                        "Age" to TypeNode(
+                            false,
+                            "Age",
+                            listOf(),
+                            ConcreteTypeNode("Int", Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ), mapOf(), mapOf(), Location.NoProvided
+                )
+            )
+    }
+    "Parse a module with function" {
+        """
+            sum a b = a + b
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File", mapOf(), mapOf(), mapOf(), mapOf(
+                        "sum" to FunctionNode(
+                            false,
+                            "sum",
+                            listOf("a", "b"),
+                            OperatorNode(
+                                "+",
+                                FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                                FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                )
+            )
+    }
+    "Parse a module with imports, types and type declarations and functions" {
+        """
+            import ksharp.text as text
+            
+            type Age = Int
+            
+            sum :: Int -> Int -> Int
+            
+            pub sum a b = a + b
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File", mapOf(
+                        "text" to ImportNode("ksharp.text", "text", Location.NoProvided),
+                    ), mapOf(
+                        "Age" to TypeNode(
+                            false,
+                            "Age",
+                            listOf(),
+                            ConcreteTypeNode("Int", Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ), mapOf(
+                        "sum" to TypeDeclarationNode(
+                            "sum",
+                            FunctionTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Int", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    ), mapOf(
+                        "sum" to FunctionNode(
+                            true,
+                            "sum",
+                            listOf("a", "b"),
+                            OperatorNode(
+                                "+",
+                                FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                                FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
                     ), Location.NoProvided
                 )
             )

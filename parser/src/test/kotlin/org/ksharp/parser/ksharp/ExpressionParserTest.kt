@@ -857,4 +857,130 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "let expression 2" {
+        """let x = sum 10       
+           |   y = 20
+           |then x + y
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LetExpressionNode(
+                    listOf(
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            FunctionCallNode(
+                                "sum", FunctionType.Function, listOf(
+                                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
+                                ), Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "nested let expression" {
+        """let x = let a2 = a * 2
+          |            b2 = b * 2
+          |        then a2 + b2
+          |then x + 2
+        """.trimMargin()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LetExpressionNode(
+                    listOf(
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LetExpressionNode(
+                                listOf(
+                                    MatchAssignNode(
+                                        MatchValueNode(
+                                            MatchValueType.Expression,
+                                            FunctionCallNode(
+                                                "a2",
+                                                FunctionType.Function,
+                                                listOf(),
+                                                Location.NoProvided
+                                            ),
+                                            Location.NoProvided
+                                        ),
+                                        OperatorNode(
+                                            "*",
+                                            FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                            Location.NoProvided
+                                        ),
+                                        Location.NoProvided
+                                    ),
+                                    MatchAssignNode(
+                                        MatchValueNode(
+                                            MatchValueType.Expression,
+                                            FunctionCallNode(
+                                                "b2",
+                                                FunctionType.Function,
+                                                listOf(),
+                                                Location.NoProvided
+                                            ),
+                                            Location.NoProvided
+                                        ),
+                                        OperatorNode(
+                                            "*",
+                                            FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                            Location.NoProvided
+                                        ),
+                                        Location.NoProvided
+                                    )
+                                ),
+                                OperatorNode(
+                                    "+",
+                                    FunctionCallNode("a2", FunctionType.Function, listOf(), Location.NoProvided),
+                                    FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    ),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                        LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
 })
