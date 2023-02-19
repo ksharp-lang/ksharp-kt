@@ -1,8 +1,11 @@
 package org.ksharp.typesystem
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.sequences.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import org.ksharp.typesystem.annotations.annotation
 import org.ksharp.typesystem.types.*
 
 class TypeTest : StringSpec({
@@ -14,6 +17,13 @@ class TypeTest : StringSpec({
     }
     "Given a labeled type, should get the labeled type as term in the sequence" {
         Concrete("Int").labeled("x").terms
+            .toList()
+            .shouldBe(listOf(Concrete("Int")))
+    }
+    "Given an annotated type, should get the annotated type as term in the sequence" {
+        Concrete("Int").annotated(
+            listOf(annotation("pure"))
+        ).terms
             .toList()
             .shouldBe(listOf(Concrete("Int")))
     }
@@ -57,5 +67,14 @@ class TypeTest : StringSpec({
                 Parameter("b")
             )
         ).terms.toList().shouldBe(listOf(Concrete("Int"), Parameter("a"), Parameter("b")))
+    }
+    "Check extension function label on types" {
+        Concrete("Int").label.shouldBeNull()
+        Concrete("Int").labeled("x").label.shouldBe("x")
+    }
+    "Check extension function annotations on types" {
+        Concrete("Int").annotations.shouldBeEmpty()
+        Concrete("Int").annotated(listOf(annotation("pure")))
+            .annotations.shouldBe(listOf(annotation("pure")))
     }
 })

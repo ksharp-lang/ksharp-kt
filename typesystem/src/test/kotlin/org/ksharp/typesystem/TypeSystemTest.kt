@@ -3,9 +3,10 @@ package org.ksharp.typesystem
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
-import ksharp.test.shouldBeLeft
-import ksharp.test.shouldBeRight
 import org.ksharp.common.new
+import org.ksharp.test.shouldBeLeft
+import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.annotations.annotation
 import org.ksharp.typesystem.types.*
 
 fun ErrorOrType.shouldBeType(type: Type, repr: String) =
@@ -16,6 +17,45 @@ fun ErrorOrType.shouldBeType(type: Type, repr: String) =
 
 class TypeSystemTest : ShouldSpec({
     context("Given a type system. Check:") {
+        context("Annotated types") {
+            val annotations = listOf(
+                annotation("impure") {
+                    set("lang", "kotlin")
+                }
+            )
+            typeSystem {
+                type("Int", annotations)
+                alias("Integer", annotations) {
+                    type("Int")
+                }
+                parametricType("List", annotations) {
+                    parameter("a")
+                }
+            }.apply {
+                context("Should contains the following types:") {
+                    should("Int type") {
+                        get("Int").shouldBeType(Annotated(annotations, Concrete("Int")), "@impure(lang=kotlin) Int")
+                    }
+                    should("Integer type") {
+                        get("Integer").shouldBeType(Annotated(annotations, Concrete("Int")), "@impure(lang=kotlin) Int")
+                    }
+                    should("List type") {
+                        get("List").shouldBeType(
+                            Annotated(
+                                annotations,
+                                ParametricType(Concrete("List"), listOf(Parameter("a")))
+                            ), "@impure(lang=kotlin) List a"
+                        )
+                    }
+                }
+                should("Should have 3 types") {
+                    size.shouldBe(3)
+                }
+                should("Shouldn't have errors") {
+                    errors.shouldBeEmpty()
+                }
+            }
+        }
         context("Concrete, Aliases, Parametric and Function Types") {
             typeSystem {
                 type("Int")
@@ -422,6 +462,131 @@ class TypeSystemTest : ShouldSpec({
                 }
             }
         }
+        context("Trait types") {
+            typeSystem {
+                trait("Num", "a") {
+                    method("(+)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                    method("(-)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
+                trait("num", "a") {
+                    method("(+)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
+                trait("Functor", "F") {
+                    method("map") {
+                        functionType {
+                            parameter("a")
+                            parameter("b")
+                        }
+                        parameter("b")
+                    }
+                }
+                trait("Monad", "m") {
+                    method("map ing") {
+                        functionType {
+                            parameter("a")
+                            parameter("b")
+                        }
+                        parameter("b")
+                    }
+                }
+            }.apply {
+                context("Should contains the following types:") {
+                    should("Num trait") {
+                        get("Num").shouldBeType(
+                            TraitType(
+                                "Num", "a", mapOf(
+                                    "(+)" to TraitType.MethodType(
+                                        "(+)",
+                                        listOf(Parameter("a"), Parameter("a"), Parameter("a"))
+                                    ),
+                                    "(-)" to TraitType.MethodType(
+                                        "(-)",
+                                        listOf(Parameter("a"), Parameter("a"), Parameter("a"))
+                                    )
+                                )
+                            ), "trait Num a =\n" +
+                                    "    (+) :: a -> a -> a\n" +
+                                    "    (-) :: a -> a -> a"
+                        )
+                    }
+                }
+                should("Should have 1 type") {
+                    size.shouldBe(1)
+                }
+                should("Shouldn't have errors") {
+                    errors.shouldBe(
+                        listOf(
+                            TypeSystemErrorCode.TypeNameShouldStartWithUpperCase.new("name" to "num"),
+                            TypeSystemErrorCode.TypeParamNameShouldStartWithLowerCase.new("name" to "F"),
+                            TypeSystemErrorCode.FunctionNameShouldntHaveSpaces.new("name" to "map ing"),
+                        )
+                    )
+                }
+            }
+        }
+        context("Intersection types") {
+            typeSystem {
+                type("Int")
+                type("Char")
+                alias("OrdNum") {
+                    intersectionType {
+                        type("Num")
+                        type("Ord")
+                    }
+                }
+                trait("Num", "a") {
+                    method("(+)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
+                trait("Ord", "a") {
+                    method("(<=)") {
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
+                alias("Str") {
+                    intersectionType {
+                        type("Int")
+                        type("Char")
+                    }
+                }
+            }.apply {
+                context("Should contains the following types:") {
+                    should("OrdNum intersection type") {
+                        get("OrdNum").shouldBeType(
+                            IntersectionType(listOf(Concrete("Num"), Concrete("Ord"))),
+                            "(Num & Ord)"
+                        )
+                    }
+                }
+                should("Should have 5 types") {
+                    size.shouldBe(5)
+                }
+                should("Should have errors") {
+                    errors.shouldBe(
+                        listOf(
+                            TypeSystemErrorCode.IntersectionTypeShouldBeTraits.new("name" to "Int"),
+                            TypeSystemErrorCode.IntersectionTypeShouldBeTraits.new("name" to "Char"),
+                        )
+                    )
+                }
+            }
+        }
         context("Error validations") {
             typeSystem {
                 type("int")
@@ -579,7 +744,7 @@ class TypeSystemTest : ShouldSpec({
                     should("(Some value: v | None) type") {
                         get("Option").shouldBeType(
                             UnionType(
-                                mutableMapOf(
+                                mapOf(
                                     "Some" to UnionType.ClassType(
                                         "Some",
                                         listOf(Parameter("v").labeled("value"))

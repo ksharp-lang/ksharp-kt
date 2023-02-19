@@ -11,7 +11,9 @@ enum class TypeSystemErrorCode(override val description: String) : ErrorCode {
     TypeAlreadyRegistered("Type '{type}' already registered"),
     TypeNameShouldStartWithUpperCase("Type name should start with a Uppercase letter: '{name}'"),
     TypeParamNameShouldStartWithLowerCase("Type param should start with a lowercase letter: '{name}'"),
-    InvalidFunctionType("Functions should have at least one argument and a return type")
+    FunctionNameShouldntHaveSpaces("Function names shouldn't have spaces: '{name}'"),
+    InvalidFunctionType("Functions should have at least one argument and a return type"),
+    IntersectionTypeShouldBeTraits("Intersection type should be Traits: '{name}'")
 }
 
 private fun validateRestName(name: String): ErrorOrValue<String> {
@@ -41,4 +43,18 @@ fun validateTypeParamName(name: String): ErrorOrValue<String> {
             .isLowerCase()
     ) return Either.Left(TypeSystemErrorCode.TypeParamNameShouldStartWithLowerCase.new("name" to name))
     return validateRestName(name)
+}
+
+fun validateFunctionName(name: String): ErrorOrValue<String> {
+    val right = Either.Right(name)
+    return name.asSequence()
+        .map { c ->
+            right.takeIf { !c.isWhitespace() } ?: Either.Left(
+                TypeSystemErrorCode.FunctionNameShouldntHaveSpaces.new(
+                    "name" to name
+                )
+            )
+        }
+        .dropWhile { it.isRight }
+        .firstOrNull() ?: right
 }

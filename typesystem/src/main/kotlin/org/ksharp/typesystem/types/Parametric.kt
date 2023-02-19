@@ -1,9 +1,11 @@
 package org.ksharp.typesystem.types
 
-import org.ksharp.common.Either
-import org.ksharp.common.ErrorOrValue
-import org.ksharp.common.new
-import org.ksharp.typesystem.*
+import org.ksharp.common.*
+import org.ksharp.typesystem.TypeItemBuilder
+import org.ksharp.typesystem.TypeSystemBuilder
+import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.validateTypeParamName
 
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
@@ -27,43 +29,45 @@ data class ParametricType internal constructor(
 class ParametricTypeFactory(
     private val builder: TypeItemBuilder
 ) {
-    private var result: ErrorOrValue<MutableList<Type>> = Either.Right(mutableListOf())
+    private var result: ErrorOrValue<ListBuilder<Type>> = Either.Right(listBuilder())
 
-    fun add(typeFactory: TypeFactoryBuilder) {
+    fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->
-            val type = builder.typeFactory()
-            type.map {
-                params.add(it)
+            validateTypeParamName(name).map {
+                params.add(Parameter(it).labeled(label))
                 params
             }
         }
     }
 
-    fun parameter(name: String, label: String? = null) = add {
-        validateTypeParamName(name).map {
-            Parameter(it).labeled(label)
+    fun type(name: String, label: String? = null) {
+        result = result.flatMap { params ->
+            builder.type(name).map {
+                params.add(it.labeled(label))
+                params
+            }
         }
     }
 
-    fun type(name: String, label: String? = null) = add {
-        builder.type(name).map {
-            it.labeled(label)
+    fun parametricType(name: String, label: String? = null, builder: ParametricTypeFactoryBuilder) {
+        result = result.flatMap { params ->
+            this.builder.parametricType(name, builder).map {
+                params.add(it.labeled(label))
+                params
+            }
         }
     }
 
-    fun parametricType(name: String, label: String? = null, builder: ParametricTypeFactoryBuilder) = add {
-        this@ParametricTypeFactory.builder.parametricType(name, builder).map {
-            it.labeled(label)
+    fun functionType(label: String? = null, builder: ParametricTypeFactoryBuilder) {
+        result = result.flatMap { params ->
+            this.builder.functionType(builder).map {
+                params.add(it.labeled(label))
+                params
+            }
         }
     }
 
-    fun functionType(label: String? = null, builder: ParametricTypeFactoryBuilder) = add {
-        this@ParametricTypeFactory.builder.functionType(builder).map {
-            it.labeled(label)
-        }
-    }
-
-    internal fun build(): ErrorOrValue<List<Type>> = result.map { it.toList() }
+    internal fun build(): ErrorOrValue<List<Type>> = result.map { it.build() }
 }
 
 fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryBuilder) =
@@ -99,7 +103,11 @@ fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryB
         }
 
 
-fun TypeSystemBuilder.parametricType(name: String, factory: ParametricTypeFactoryBuilder) =
-    item(name) {
+fun TypeSystemBuilder.parametricType(
+    name: String,
+    annotations: List<Annotation> = listOf(),
+    factory: ParametricTypeFactoryBuilder
+) =
+    item(name, annotations) {
         this.parametricType(name, factory)
     }

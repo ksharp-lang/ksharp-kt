@@ -1,9 +1,9 @@
 package org.ksharp.typesystem
 
 import io.kotest.core.spec.style.StringSpec
-import ksharp.test.shouldBeLeft
-import ksharp.test.shouldBeRight
 import org.ksharp.common.new
+import org.ksharp.test.shouldBeLeft
+import org.ksharp.test.shouldBeRight
 
 class ValidationsTest : StringSpec({
     "Test valid type names" {
@@ -36,6 +36,19 @@ class ValidationsTest : StringSpec({
     "Type param name shouldn't use invalid characters" {
         validateTypeParamName("int-10")
             .shouldBeLeft(TypeSystemErrorCode.InvalidName.new("name" to "int-10"))
+    }
+
+    "Function names shouldn't contains spaces" {
+        validateFunctionName("++ sum")
+            .shouldBeLeft(TypeSystemErrorCode.FunctionNameShouldntHaveSpaces.new("name" to "++ sum"))
+    }
+
+    "Valid function names" {
+        sequenceOf("++", "sum", "(+)")
+            .forEach {
+                validateFunctionName(it)
+                    .shouldBeRight(it)
+            }
     }
 
 })

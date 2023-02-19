@@ -6,6 +6,7 @@ import org.ksharp.common.new
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.annotations.Annotation
 
 interface Type {
     val compound: Boolean get() = true
@@ -33,7 +34,7 @@ fun TypeItemBuilder.type(name: String): ErrorOrValue<TypeVariable> =
         }
     }
 
-fun TypeSystemBuilder.type(name: String) =
-    item(name) {
+fun TypeSystemBuilder.type(name: String, annotations: List<Annotation> = listOf()) =
+    item(name, annotations) {
         Either.Right(Concrete(name))
     }

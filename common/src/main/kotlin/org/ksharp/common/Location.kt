@@ -1,11 +1,20 @@
 package org.ksharp.common
 
-typealias Line = Int
-typealias Offset = Int
+@JvmInline
+value class Line(val value: Int)
+
+@JvmInline
+value class Offset(val value: Int)
+
 typealias Position = Pair<Line, Offset>
+
+val ZeroPosition = Line(0) to Offset(0)
 
 data class Location(
     val context: String,
-    val start: Position,
-    val end: Position
-)
+    val position: Position,
+) {
+    companion object {
+        val NoProvided = Location("", ZeroPosition)
+    }
+}
