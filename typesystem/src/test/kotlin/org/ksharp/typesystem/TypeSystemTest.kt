@@ -793,5 +793,24 @@ class TypeSystemTest : ShouldSpec({
                 }
             }
         }
+        context("Hierarchical type system") {
+            typeSystem(typeSystem {
+                type("Int")
+            }) {
+                parametricType("List") {
+                    type("Int")
+                }
+            }.apply {
+                should("No have errors") {
+                    errors.shouldBeEmpty()
+                }
+                should("Can find Int") {
+                    get("Int").shouldBeType(Concrete("Int"), "Int")
+                }
+                should("Can find List Int") {
+                    get("List").shouldBeType(ParametricType(Concrete("List"), listOf(Concrete("Int"))), "(List Int)")
+                }
+            }
+        }
     }
 })

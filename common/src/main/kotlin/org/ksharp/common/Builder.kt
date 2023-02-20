@@ -8,7 +8,12 @@ typealias ToValueAction<State, Value> = (state: State) -> Value
 typealias ListBuilder<Item> = Builder<MutableList<Item>, List<Item>>
 typealias MapBuilder<Key, Value> = Builder<MutableMap<Key, Value>, Map<Key, Value>>
 
-class MapView<K, V> internal constructor(private val builder: MapBuilder<K, V>) {
+interface MapView<K, V> {
+    operator fun get(key: K): V?
+    fun containsKey(key: K): Boolean?
+}
+
+class MapViewImpl<K, V> internal constructor(private val builder: MapBuilder<K, V>) {
     operator fun get(key: K) = builder.get(key)
 
     fun containsKey(key: K) = builder.containsKey(key)
@@ -79,4 +84,4 @@ fun <K, V> MapBuilder<K, V>.get(key: K) = execute {
     it[key]
 }
 
-val <K, V> MapBuilder<K, V>.view get() = MapView(this)
+val <K, V> MapBuilder<K, V>.view get() = MapViewImpl(this)

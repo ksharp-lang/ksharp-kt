@@ -9,7 +9,7 @@ data class PartialBuilderResult<Instance>(
     val value: Instance,
     val errors: List<Error>
 ) {
-    val isPartial: Boolean by lazy { !errors.isEmpty() }
+    val isPartial: Boolean by lazy { errors.isNotEmpty() }
 }
 
 data class PartialItem<Value>(

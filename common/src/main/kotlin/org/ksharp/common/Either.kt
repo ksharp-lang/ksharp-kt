@@ -20,7 +20,13 @@ sealed class Either<out L, out R> {
         is Right -> f(value)
         is Left -> this as Either<Lp, Nothing>
     }
-    
+
+    val valueOrNull
+        get(): R? =
+            when (this) {
+                is Right -> this.value
+                is Left -> null
+            }
 }
 
 val Either<*, *>.isRight: Boolean
