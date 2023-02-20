@@ -1,11 +1,8 @@
 package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.TypeItemBuilder
-import org.ksharp.typesystem.TypeSystemBuilder
-import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.*
 import org.ksharp.typesystem.annotations.Annotation
-import org.ksharp.typesystem.validateTypeParamName
 
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
@@ -30,6 +27,16 @@ class ParametricTypeFactory(
     private val builder: TypeItemBuilder
 ) {
     private var result: ErrorOrValue<ListBuilder<Type>> = Either.Right(listBuilder())
+
+    fun add(typeFactory: TypeFactoryBuilder) {
+        result = result.flatMap { params ->
+            val type = builder.typeFactory()
+            type.map {
+                params.add(it)
+                params
+            }
+        }
+    }
 
     fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->
