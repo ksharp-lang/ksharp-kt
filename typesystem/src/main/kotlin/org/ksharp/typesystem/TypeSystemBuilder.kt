@@ -37,7 +37,7 @@ class TypeSystemBuilder(
             store.get(key) ?: parent?.get(key)?.valueOrNull
 
         override fun containsKey(key: String): Boolean =
-            if (store.containsKey(key) == true) true else (parent?.get(key)?.valueOrNull != null)
+            store.containsKey(key) == true || (parent?.get(key)?.valueOrNull != null)
 
     }
 
