@@ -819,6 +819,7 @@ class TypeSystemTest : ShouldSpec({
                     type("Array")
                 }
             }) {
+                type("Int")
                 parametricType("List") {
                     type("Int")
                 }
@@ -827,6 +828,7 @@ class TypeSystemTest : ShouldSpec({
                     errors.shouldBe(
                         listOf(
                             TypeSystemErrorCode.TypeNotFound.new("type" to "Array"),
+                            TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "Int"),
                         )
                     )
                 }
