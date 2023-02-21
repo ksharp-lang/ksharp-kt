@@ -880,6 +880,7 @@ class TypeSystemTest : ShouldSpec({
         context("Module type system with parent and errors") {
             moduleTypeSystem(typeSystem {
                 type("List")
+                type("List")
             }) {
                 register("num", typeSystem {
                     type("Int")
@@ -892,6 +893,7 @@ class TypeSystemTest : ShouldSpec({
             }.apply {
                 errors.shouldBe(
                     listOf(
+                        TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "List"),
                         TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "Int"),
                     )
                 )
