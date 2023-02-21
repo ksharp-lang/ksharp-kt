@@ -902,6 +902,7 @@ class TypeSystemTest : ShouldSpec({
                 get("num.Int").shouldBeType(Concrete("Int"), "Int")
                 get("BigInt").shouldBeLeft()
                 get("num.BigDec").shouldBeLeft()
+                get("txt.String").shouldBeLeft()
             }
         }
     }
