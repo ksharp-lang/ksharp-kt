@@ -844,5 +844,66 @@ class TypeSystemTest : ShouldSpec({
                 }
             }
         }
+        context("Module type system") {
+            moduleTypeSystem {
+                register("num", typeSystem {
+                    type("Int")
+                    type("Float")
+                })
+                register("str", typeSystem {
+                    type("String")
+                })
+            }.apply {
+                errors.shouldBeEmpty()
+                size.shouldBe(0)
+                get("num.Int").shouldBeType(Concrete("Int"), "Int")
+            }
+        }
+        context("Module type system with parent") {
+            moduleTypeSystem(typeSystem {
+                type("List")
+            }) {
+                register("num", typeSystem {
+                    type("Int")
+                    type("Float")
+                })
+                register("str", typeSystem {
+                    type("String")
+                })
+            }.apply {
+                errors.shouldBeEmpty()
+                size.shouldBe(0)
+                get("List").shouldBeType(Concrete("List"), "List")
+                get("num.Int").shouldBeType(Concrete("Int"), "Int")
+            }
+        }
+        context("Module type system with parent and errors") {
+            moduleTypeSystem(typeSystem {
+                type("List")
+                type("List")
+            }) {
+                register("num", typeSystem {
+                    type("Int")
+                    type("Int")
+                    type("Float")
+                })
+                register("str", typeSystem {
+                    type("String")
+                })
+            }.apply {
+                errors.shouldBe(
+                    listOf(
+                        TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "List"),
+                        TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "Int"),
+                    )
+                )
+                size.shouldBe(0)
+                get("List").shouldBeType(Concrete("List"), "List")
+                get("num.Int").shouldBeType(Concrete("Int"), "Int")
+                get("BigInt").shouldBeLeft()
+                get("num.BigDec").shouldBeLeft()
+                get("txt.String").shouldBeLeft()
+            }
+        }
     }
 })
