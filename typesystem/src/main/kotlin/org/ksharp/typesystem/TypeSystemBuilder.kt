@@ -33,11 +33,15 @@ class TypeSystemBuilder(
 
     private val mapView = object : MapView<String, Type> {
 
+        private fun getFromParent(key: String): Type? =
+            if (parent != null) parent[key].valueOrNull
+            else null
+
         override fun get(key: String): Type? =
-            store.get(key) ?: parent?.get(key)?.valueOrNull
+            store.get(key) ?: getFromParent(key)
 
         override fun containsKey(key: String): Boolean =
-            if (store.containsKey(key) == true) true else (parent?.get(key)?.valueOrNull != null)
+            store.containsKey(key) == true || (getFromParent(key) != null)
 
     }
 
