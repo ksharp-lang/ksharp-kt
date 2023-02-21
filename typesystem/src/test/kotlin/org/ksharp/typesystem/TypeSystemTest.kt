@@ -898,6 +898,8 @@ class TypeSystemTest : ShouldSpec({
                 size.shouldBe(0)
                 get("List").shouldBeType(Concrete("List"), "List")
                 get("num.Int").shouldBeType(Concrete("Int"), "Int")
+                get("BigInt").shouldBeLeft()
+                get("num.BigDec").shouldBeLeft()
             }
         }
     }
