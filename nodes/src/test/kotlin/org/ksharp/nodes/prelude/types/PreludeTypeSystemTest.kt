@@ -1,6 +1,9 @@
 package org.ksharp.nodes.prelude.types
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.sequences.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.get
 
@@ -21,6 +24,20 @@ class PreludeTypeSystemTest : StringSpec({
             get("List").map { it.toString() }.shouldBeRight("List v")
             get("Set").map { it.toString() }.shouldBeRight("Set v")
             get("Map").map { it.toString() }.shouldBeRight("Map k v")
+        }
+    }
+    "Check charType members" {
+        charType.apply {
+            compound.shouldBeFalse()
+            terms.shouldBeEmpty()
+            representation.shouldBe("char<Char>")
+        }
+    }
+    "Check numeric types" {
+        NumericType(Numeric.Int).apply {
+            compound.shouldBeFalse()
+            terms.shouldBeEmpty()
+            representation.shouldBe("numeric<Int>")
         }
     }
 })
