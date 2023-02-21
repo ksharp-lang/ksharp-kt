@@ -5,12 +5,17 @@ import org.ksharp.typesystem.types.Type
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
 
-class TypeSystem(
+interface TypeSystem {
+    val size: Int
+    operator fun get(name: String): ErrorOrType
+}
+
+private class TypeSystemImpl(
     private val parent: TypeSystem?,
     private val types: Map<String, Type>
-) {
-    val size: Int = types.size
-    operator fun get(name: String): ErrorOrType =
+) : TypeSystem {
+    override val size: Int = types.size
+    override operator fun get(name: String): ErrorOrType =
         types[name]?.let { Either.Right(it) }
             ?: parent?.get(name)
             ?: Either.Left(
@@ -28,7 +33,7 @@ fun typeSystem(parent: PartialTypeSystem? = null, block: TypeSystemBuilder.() ->
         parent?.value,
         store = mapBuilder(),
         builder = partialBuilder {
-            TypeSystem(parent?.value, it.toMap())
+            TypeSystemImpl(parent?.value, it.toMap())
         }
     ).apply(block)
         .build().let {
