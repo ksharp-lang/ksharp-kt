@@ -26,9 +26,24 @@ class TypeItemBuilder(
 }
 
 class TypeSystemBuilder(
+    private val parent: TypeSystem?,
     private val store: MapBuilder<String, Type>,
     private val builder: PartialBuilder<TypeEntry, TypeSystem>
 ) {
+
+    private val mapView = object : MapView<String, Type> {
+
+        private fun getFromParent(key: String): Type? =
+            if (parent != null) parent[key].valueOrNull
+            else null
+
+        override fun get(key: String): Type? =
+            store.get(key) ?: getFromParent(key)
+
+        override fun containsKey(key: String): Boolean =
+            store.containsKey(key) == true || (getFromParent(key) != null)
+
+    }
 
     fun item(
         name: String,
@@ -36,7 +51,7 @@ class TypeSystemBuilder(
         factory: TypeFactoryBuilder
     ) {
         builder.item {
-            TypeItemBuilder(name, store.view, this).apply {
+            TypeItemBuilder(name, mapView, this).apply {
                 validateTypeName(name).flatMap {
                     if (isTypeNameTaken(it)) {
                         Either.Left(TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to it))

@@ -793,5 +793,56 @@ class TypeSystemTest : ShouldSpec({
                 }
             }
         }
+        context("Hierarchical type system") {
+            typeSystem(typeSystem {
+                type("Int")
+            }) {
+                parametricType("List") {
+                    type("Int")
+                }
+            }.apply {
+                should("No have errors") {
+                    errors.shouldBeEmpty()
+                }
+                should("Can find Int") {
+                    get("Int").shouldBeType(Concrete("Int"), "Int")
+                }
+                should("Can find List Int") {
+                    get("List").shouldBeType(ParametricType(Concrete("List"), listOf(Concrete("Int"))), "(List Int)")
+                }
+            }
+        }
+        context("Hierarchical type system with Errors") {
+            typeSystem(typeSystem {
+                type("Int")
+                parametricType("String") {
+                    type("Array")
+                }
+            }) {
+                type("Int")
+                parametricType("Set") {
+                    type("String")
+                }
+                parametricType("List") {
+                    type("Int")
+                }
+            }.apply {
+                should("Should have one errors") {
+                    errors.shouldBe(
+                        listOf(
+                            TypeSystemErrorCode.TypeNotFound.new("type" to "Array"),
+                            TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "Int"),
+                            TypeSystemErrorCode.TypeNotFound.new("type" to "String"),
+                        )
+                    )
+                }
+                should("Can find Int") {
+                    get("Int").shouldBeType(Concrete("Int"), "Int")
+                }
+                should("Can find List Int") {
+                    get("List").shouldBeType(ParametricType(Concrete("List"), listOf(Concrete("Int"))), "(List Int)")
+                }
+            }
+        }
     }
 })
