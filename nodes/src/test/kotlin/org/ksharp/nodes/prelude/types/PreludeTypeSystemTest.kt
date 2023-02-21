@@ -1,4 +1,4 @@
-package ksharp.nodes.prelude.types
+package org.ksharp.nodes.prelude.types
 
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.test.shouldBeRight

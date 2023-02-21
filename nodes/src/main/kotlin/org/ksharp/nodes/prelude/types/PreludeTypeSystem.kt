@@ -1,4 +1,4 @@
-package ksharp.nodes.prelude.types
+package org.ksharp.nodes.prelude.types
 
 import org.ksharp.common.Either
 import org.ksharp.typesystem.TypeSystemBuilder
