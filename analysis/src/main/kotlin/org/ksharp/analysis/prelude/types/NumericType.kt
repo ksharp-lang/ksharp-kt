@@ -1,4 +1,4 @@
-package org.ksharp.nodes.prelude.types
+package org.ksharp.analysis.prelude.types
 
 import org.ksharp.common.Either
 import org.ksharp.typesystem.types.ParametricTypeFactory
