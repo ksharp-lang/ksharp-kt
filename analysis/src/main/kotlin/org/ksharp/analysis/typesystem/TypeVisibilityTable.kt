@@ -1,5 +1,6 @@
 package org.ksharp.analysis.typesystem
 
+import org.ksharp.analysis.errors.ErrorCollector
 import org.ksharp.common.*
 
 enum class TypeVisibilityErrorCode(override val description: String) : ErrorCode {
@@ -16,7 +17,7 @@ class TypeVisibilityTable(private val visibility: Map<String, TypeVisibility>) {
 
 }
 
-class TypeVisibilityTableBuilder {
+class TypeVisibilityTableBuilder(private val collector: ErrorCollector) {
     private val visibility = mapBuilder<String, TypeVisibility>()
 
     fun register(
@@ -27,7 +28,9 @@ class TypeVisibilityTableBuilder {
         if (this.visibility.containsKey(type) != true) {
             this.visibility.put(type, visibility)
             Either.Right(true)
-        } else Either.Left(TypeVisibilityErrorCode.AlreadyDefined.new(location, "type" to type))
+        } else collector.collect(
+            Either.Left(TypeVisibilityErrorCode.AlreadyDefined.new(location, "type" to type))
+        )
 
     fun build(): TypeVisibilityTable = TypeVisibilityTable(visibility.build())
 }

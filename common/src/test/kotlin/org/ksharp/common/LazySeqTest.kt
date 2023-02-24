@@ -3,7 +3,7 @@ package org.ksharp.common
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
-class ValidatorTest : StringSpec({
+class LazySeqTest : StringSpec({
     "Test lazy seq with some not null values" {
         lazySeqBuilder<String>().apply {
             add { "Hello" }
