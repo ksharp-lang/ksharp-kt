@@ -1,6 +1,7 @@
 package org.ksharp.analysis.typesystem
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import org.ksharp.common.Location
@@ -18,13 +19,15 @@ class TypeVisibilityTableTest : StringSpec({
             )
         }.build().apply {
             this["Int"]
-                .shouldNotBeNull()
-                .isPublic
-                .shouldBeTrue()
+                .shouldNotBeNull().apply {
+                    isPublic.shouldBeTrue()
+                    isInternal.shouldBeFalse()
+                }
             this["Double"]
-                .shouldNotBeNull()
-                .isInternal
-                .shouldBeTrue()
+                .shouldNotBeNull().apply {
+                    isInternal.shouldBeTrue()
+                    isPublic.shouldBeFalse()
+                }
         }
     }
 })
