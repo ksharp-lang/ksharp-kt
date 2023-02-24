@@ -1,7 +1,6 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.cast
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
@@ -48,7 +47,7 @@ private fun Token.toTypeExpression(): TypeExpression =
 
 private fun Token.toValueTypes(it: List<Any>): List<TypeExpression> {
     val hasLabel = this.type == KSharpTokenType.Label
-    val valueTypes = mutableListOf<TypeExpression>()
+    val valueTypes = listBuilder<TypeExpression>()
     it.asSequence()
         .drop(if (hasLabel) 1 else 0)
         .forEach { item ->
@@ -70,7 +69,7 @@ private fun Token.toValueTypes(it: List<Any>): List<TypeExpression> {
             valueTypes.add(result)
         }
 
-    return valueTypes
+    return valueTypes.build()
 }
 
 private fun List<Any>.toFunctionType(separator: Token): NodeData {

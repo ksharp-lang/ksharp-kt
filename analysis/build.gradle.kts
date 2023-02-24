@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":test"))
     implementation(project(":typesystem"))
+    implementation(project(":nodes"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
     testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
