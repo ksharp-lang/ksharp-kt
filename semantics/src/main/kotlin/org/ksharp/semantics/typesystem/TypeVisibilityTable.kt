@@ -1,7 +1,7 @@
-package org.ksharp.analysis.typesystem
+package org.ksharp.semantics.typesystem
 
-import org.ksharp.analysis.errors.ErrorCollector
 import org.ksharp.common.*
+import org.ksharp.semantics.errors.ErrorCollector
 
 enum class TypeVisibilityErrorCode(override val description: String) : ErrorCode {
     AlreadyDefined("Type already defined: {type}"),

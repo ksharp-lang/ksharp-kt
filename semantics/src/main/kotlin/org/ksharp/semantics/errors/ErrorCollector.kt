@@ -1,4 +1,4 @@
-package org.ksharp.analysis.errors
+package org.ksharp.semantics.errors
 
 import org.ksharp.common.*
 

@@ -1,4 +1,4 @@
-package org.ksharp.analysis.prelude.types
+package org.ksharp.semantics.prelude.types
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeFalse
