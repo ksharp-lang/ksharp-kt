@@ -24,6 +24,7 @@ class PreludeTypeSystemTest : StringSpec({
             get("List").map { it.toString() }.shouldBeRight("List v")
             get("Set").map { it.toString() }.shouldBeRight("Set v")
             get("Map").map { it.toString() }.shouldBeRight("Map k v")
+            get("Unit").map { it.toString() }.shouldBeRight("Unit")
         }
     }
     "Check charType members" {

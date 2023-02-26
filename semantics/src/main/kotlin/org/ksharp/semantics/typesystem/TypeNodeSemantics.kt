@@ -113,6 +113,7 @@ private fun UnionTypeFactory.register(node: NodeData) {
 fun TypeItemBuilder.register(node: NodeData) =
     when (node) {
         is ConcreteTypeNode -> type(node.name)
+        is UnitTypeNode -> type("Unit")
 
         is TupleTypeNode -> tupleType {
             node.types.forEach {

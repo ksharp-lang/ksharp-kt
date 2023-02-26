@@ -44,6 +44,20 @@ class TypeSystemSemanticsTest : StringSpec({
             typeSystem["Integer"].map { it.representation }.shouldBeRight("Int")
         }
     }
+    "Alias semantics with Unit" {
+        module(
+            TypeNode(
+                false,
+                "Unidad",
+                listOf(),
+                UnitTypeNode(Location.NoProvided),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Unidad"].map { it.representation }.shouldBeRight("Unit")
+        }
+    }
     "Tuple semantics" {
         module(
             TypeNode(

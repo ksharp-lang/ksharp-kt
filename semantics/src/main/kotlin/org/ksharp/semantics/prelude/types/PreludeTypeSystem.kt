@@ -5,6 +5,7 @@ import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.parametricType
+import org.ksharp.typesystem.types.type
 
 private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
     alias(alias) {
@@ -14,6 +15,7 @@ private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
     }
 
 private fun createPreludeTypeSystem() = typeSystem {
+    type("Unit")
     alias("Char") { Either.Right(charType) }
     parametricType("Num") {
         parameter("a")
