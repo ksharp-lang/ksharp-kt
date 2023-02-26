@@ -5,14 +5,15 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Either
 import org.ksharp.common.new
 import org.ksharp.semantics.errors.ErrorCollector
+import org.ksharp.semantics.scopes.TableErrorCode
 
 class ErrorCollectorTest : StringSpec({
     "Error collector test" {
         ErrorCollector().apply {
-            collect(Either.Left(TypeVisibilityErrorCode.AlreadyDefined.new("type" to "Int")))
+            collect(Either.Left(TableErrorCode.AlreadyDefined.new("name" to "Int", "classifier" to "Type")))
             collect(Either.Right(true))
         }.build().apply {
-            shouldBe(listOf(TypeVisibilityErrorCode.AlreadyDefined.new("type" to "Int")))
+            shouldBe(listOf(TableErrorCode.AlreadyDefined.new("name" to "Int", "classifier" to "Type")))
         }
     }
 })
