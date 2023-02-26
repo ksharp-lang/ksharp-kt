@@ -38,4 +38,31 @@ class TypeSystemSemanticsTest : StringSpec({
             typeSystem["Integer"].map { it.representation }.shouldBeRight("Int")
         }
     }
+    "Type already defined" {
+        ModuleNode(
+            "module",
+            listOf(),
+            listOf(
+                TypeNode(
+                    false,
+                    "Integer",
+                    listOf(),
+                    ConcreteTypeNode("Int", Location.NoProvided),
+                    Location.NoProvided
+                )
+            ),
+            listOf(),
+            listOf(),
+            Location.NoProvided
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystemTable["Integer"]!!
+                .apply {
+                    isInternal.shouldBeFalse()
+                    isPublic.shouldBeTrue()
+                }
+            typeSystem["Int"].map { it.representation }.shouldBeRight("(Num numeric<Int>)")
+            typeSystem["Integer"].map { it.representation }.shouldBeRight("Int")
+        }
+    }
 })
