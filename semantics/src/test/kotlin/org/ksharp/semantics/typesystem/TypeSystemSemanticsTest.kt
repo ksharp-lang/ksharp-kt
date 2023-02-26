@@ -304,6 +304,42 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         }
     }
+    "Type semantics parameters not used" {
+        module(
+            TypeNode(
+                false,
+                "Maybe",
+                listOf("a", "b", "c"),
+                UnionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode(
+                                    "Just", Location.NoProvided
+                                ), ParameterTypeNode(
+                                    "a", Location.NoProvided
+                                )
+                            ), Location.NoProvided
+                        ),
+                        ConcreteTypeNode(
+                            "Nothing", Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.ParametersNotUsed.new(
+                        Location.NoProvided,
+                        "params" to "b, c",
+                        "type" to "Maybe"
+                    )
+                )
+            )
+        }
+    }
     "check Type already defined" {
         module(
             TypeNode(
