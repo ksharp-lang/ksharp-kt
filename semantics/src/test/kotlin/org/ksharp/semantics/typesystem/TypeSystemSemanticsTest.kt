@@ -166,6 +166,53 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         }
     }
+    "Union semantics invalid arm" {
+        module(
+            TypeNode(
+                false,
+                "Maybe",
+                listOf("a"),
+                UnionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode(
+                                    "Just", Location.NoProvided
+                                ), ParameterTypeNode(
+                                    "a", Location.NoProvided
+                                )
+                            ), Location.NoProvided
+                        ),
+                        TupleTypeNode(
+                            listOf(
+                                ConcreteTypeNode(
+                                    "Nothing", Location.NoProvided
+                                ),
+                                ConcreteTypeNode(
+                                    "Name", Location.NoProvided
+                                )
+                            ),
+                            Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.InvalidUnionArm.new(
+                        Location.NoProvided
+                    )
+                )
+            )
+            typeSystem["Maybe"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Maybe"
+                )
+            )
+        }
+    }
     "check Type already defined" {
         module(
             TypeNode(

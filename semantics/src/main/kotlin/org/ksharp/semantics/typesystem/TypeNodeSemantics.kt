@@ -13,7 +13,7 @@ import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.*
 
 enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode {
-    InvalidUnionArm("Invalid union arm '{arm}'"),
+    InvalidUnionArm("Invalid union arm"),
     UnionTypeArmShouldStartWithName("Union type should start with a name not a parameter. e.g Just a"),
     ParametersNotUsed("Parameters '{params}' not used in the type '{type}'"),
     ParamNameAlreadyDefined("Param '{name}' already defined in type '{type}'"),
@@ -104,8 +104,7 @@ private fun UnionTypeFactory.register(node: NodeData) {
 
         else -> error(
             TypeSemanticsErrorCode.InvalidUnionArm.new(
-                node.location,
-                "arm" to node.javaClass.simpleName
+                node.location
             )
         )
     }
