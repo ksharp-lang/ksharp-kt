@@ -495,6 +495,38 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Union type 5" {
+        "type Maybe = Just a | Nothing"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Maybe",
+                    listOf(),
+                    UnionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode(
+                                        "Just", Location.NoProvided
+                                    ), ParameterTypeNode(
+                                        "a", Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "Nothing", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Invalid Set type 2" {
         "type Bool = True | False & NoDefined"
             .kSharpLexer()

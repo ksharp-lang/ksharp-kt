@@ -125,6 +125,47 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         }
     }
+    "Union semantics param not defined" {
+        module(
+            TypeNode(
+                false,
+                "Maybe",
+                listOf(),
+                UnionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode(
+                                    "Just", Location.NoProvided
+                                ), ParameterTypeNode(
+                                    "a", Location.NoProvided
+                                )
+                            ), Location.NoProvided
+                        ),
+                        ConcreteTypeNode(
+                            "Nothing", Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.ParamNameNoDefined.new(
+                        Location.NoProvided,
+                        "name" to "a",
+                        "type" to "Maybe"
+                    )
+                )
+            )
+            typeSystem["Maybe"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Maybe"
+                )
+            )
+        }
+    }
     "check Type already defined" {
         module(
             TypeNode(
