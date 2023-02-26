@@ -16,9 +16,9 @@ fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KS
             }
         }.build {
             val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
-            val imports = it.filterIsInstance<ImportNode>().associateBy { t -> t.key }
-            val types = it.filterIsInstance<TypeNode>().associateBy { t -> t.name }
-            val typeDeclarations = it.filterIsInstance<TypeDeclarationNode>().associateBy { t -> t.name }
-            val functions = it.filterIsInstance<FunctionNode>().associateBy { t -> t.name }
+            val imports = it.filterIsInstance<ImportNode>()
+            val types = it.filterIsInstance<TypeNode>()
+            val typeDeclarations = it.filterIsInstance<TypeDeclarationNode>()
+            val functions = it.filterIsInstance<FunctionNode>()
             ModuleNode(name, imports, types, typeDeclarations, functions, location)
         }

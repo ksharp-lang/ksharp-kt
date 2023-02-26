@@ -1,7 +1,7 @@
 package org.ksharp.nodes
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
@@ -17,24 +17,20 @@ class ModuleNodeTest : StringSpec({
     "Test Node Interface over ModuleNode" {
         ModuleNode(
             name = "ksharp.math",
-            imports = mapOf("n" to ImportNode("ksharp.num", "n", testLocation)),
-            mapOf("Age" to TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)),
-            mapOf("sum" to TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)),
-            mapOf(),
+            listOf(ImportNode("ksharp.num", "n", testLocation)),
+            listOf(TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)),
+            listOf(TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)),
+            listOf(),
             testLocation
         ).node.apply {
             cast<ModuleNode>().apply {
                 name.shouldBe("ksharp.math")
-                imports.shouldBe(mapOf("n" to ImportNode("ksharp.num", "n", testLocation)))
+                imports.shouldBe(listOf(ImportNode("ksharp.num", "n", testLocation)))
                 typeDeclarations.shouldBe(
-                    mapOf(
-                        "sum" to TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)
-                    )
+                    listOf(TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation))
                 )
                 types.shouldBe(
-                    mapOf(
-                        "Age" to TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)
-                    )
+                    listOf(TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation))
                 )
                 functions.shouldBeEmpty()
                 location.shouldBe(testLocation)

@@ -5,19 +5,19 @@ import org.ksharp.common.cast
 
 data class ModuleNode(
     val name: String,
-    val imports: Map<String, ImportNode>,
-    val types: Map<String, TypeNode>,
-    val typeDeclarations: Map<String, TypeDeclarationNode>,
-    val functions: Map<String, FunctionNode>,
+    val imports: List<ImportNode>,
+    val types: List<TypeNode>,
+    val typeDeclarations: List<TypeDeclarationNode>,
+    val functions: List<FunctionNode>,
     override val location: Location
 ) : NodeData() {
 
     override val children: Sequence<NodeData>
         get() = sequenceOf(
-            imports.values.asSequence(),
-            types.values.asSequence(),
-            typeDeclarations.values.asSequence(),
-            functions.values.asSequence()
+            imports.asSequence(),
+            types.asSequence(),
+            typeDeclarations.asSequence(),
+            functions.asSequence()
         ).flatten().cast()
 
 }
