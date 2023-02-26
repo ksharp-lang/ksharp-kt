@@ -14,9 +14,9 @@ import org.ksharp.test.shouldBeRight
 class TypeVisibilityTableTest : StringSpec({
     "Create type visibility table" {
         TypeVisibilityTableBuilder(ErrorCollector()).apply {
-            register("Int", TypeVisibility.Public).shouldBeRight(true)
-            register("Double", TypeVisibility.Internal).shouldBeRight(true)
-            register("Int", TypeVisibility.Internal).shouldBeLeft(
+            register("Int", TypeVisibility.Public, Location.NoProvided).shouldBeRight(true)
+            register("Double", TypeVisibility.Internal, Location.NoProvided).shouldBeRight(true)
+            register("Int", TypeVisibility.Internal, Location.NoProvided).shouldBeLeft(
                 TableErrorCode.AlreadyDefined.new(Location.NoProvided, "classifier" to "Type", "name" to "Int")
             )
         }.build().apply {

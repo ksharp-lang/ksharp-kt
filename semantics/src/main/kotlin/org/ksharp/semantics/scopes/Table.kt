@@ -13,7 +13,7 @@ open class TableBuilder<Value>(private val collector: ErrorCollector, private va
     fun register(
         name: String,
         value: Value,
-        location: Location = Location.NoProvided
+        location: Location
     ): ErrorOrValue<Boolean> =
         if (this.table.containsKey(name) != true) {
             this.table.put(name, value)

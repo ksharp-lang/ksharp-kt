@@ -15,5 +15,9 @@ class ErrorCollector {
             else -> result
         }
 
+    fun collectAll(errors: List<Error>) {
+        this.errors.addAll(errors)
+    }
+
     fun build() = errors.build()
 }
