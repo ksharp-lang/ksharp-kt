@@ -213,6 +213,47 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         }
     }
+    "Union semantics parametric arm starting with parameter" {
+        module(
+            TypeNode(
+                false,
+                "Maybe",
+                listOf("a"),
+                UnionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode(
+                                    "Just", Location.NoProvided
+                                ), ParameterTypeNode(
+                                    "a", Location.NoProvided
+                                )
+                            ), Location.NoProvided
+                        ),
+                        ParametricTypeNode(
+                            listOf(
+                                ParameterTypeNode(
+                                    "a", Location.NoProvided
+                                ),
+                                ConcreteTypeNode(
+                                    "Name", Location.NoProvided
+                                )
+                            ),
+                            Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
+            typeSystem["Maybe"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Maybe"
+                )
+            )
+        }
+    }
     "check Type already defined" {
         module(
             TypeNode(
