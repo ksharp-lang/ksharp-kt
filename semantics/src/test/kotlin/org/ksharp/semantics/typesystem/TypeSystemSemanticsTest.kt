@@ -268,6 +268,42 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         }
     }
+    "Type semantics param already defined" {
+        module(
+            TypeNode(
+                false,
+                "Maybe",
+                listOf("a", "a"),
+                UnionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode(
+                                    "Just", Location.NoProvided
+                                ), ParameterTypeNode(
+                                    "a", Location.NoProvided
+                                )
+                            ), Location.NoProvided
+                        ),
+                        ConcreteTypeNode(
+                            "Nothing", Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.ParamNameAlreadyDefined.new(
+                        Location.NoProvided,
+                        "name" to "a",
+                        "type" to "Maybe"
+                    )
+                )
+            )
+        }
+    }
     "check Type already defined" {
         module(
             TypeNode(
