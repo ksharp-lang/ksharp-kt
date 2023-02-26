@@ -15,6 +15,10 @@ class ErrorCollector {
             else -> result
         }
 
+    fun collect(error: Error) {
+        errors.add(error)
+    }
+    
     fun collectAll(errors: List<Error>) {
         this.errors.addAll(errors)
     }

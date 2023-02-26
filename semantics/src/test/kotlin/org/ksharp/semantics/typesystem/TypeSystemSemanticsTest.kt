@@ -7,29 +7,32 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 import org.ksharp.common.new
-import org.ksharp.nodes.ConcreteTypeNode
-import org.ksharp.nodes.ModuleNode
-import org.ksharp.nodes.TypeNode
+import org.ksharp.nodes.*
 import org.ksharp.semantics.scopes.TableErrorCode
+import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.TypeSystemErrorCode
+
+private fun module(vararg types: TypeNode) =
+    ModuleNode(
+        "module",
+        listOf(),
+        listOf(*types),
+        listOf(),
+        listOf(),
+        Location.NoProvided
+    )
 
 class TypeSystemSemanticsTest : StringSpec({
-    "TypeSystem semantics" {
-        ModuleNode(
-            "module",
-            listOf(),
-            listOf(
-                TypeNode(
-                    false,
-                    "Integer",
-                    listOf(),
-                    ConcreteTypeNode("Int", Location.NoProvided),
-                    Location.NoProvided
-                )
-            ),
-            listOf(),
-            listOf(),
-            Location.NoProvided
+    "Alias semantics" {
+        module(
+            TypeNode(
+                false,
+                "Integer",
+                listOf(),
+                ConcreteTypeNode("Int", Location.NoProvided),
+                Location.NoProvided
+            )
         ).checkSemantics().apply {
             errors.shouldBeEmpty()
             typeSystemTable["Integer"]!!
@@ -41,29 +44,103 @@ class TypeSystemSemanticsTest : StringSpec({
             typeSystem["Integer"].map { it.representation }.shouldBeRight("Int")
         }
     }
-    "check Type already defined" {
-        ModuleNode(
-            "module",
-            listOf(),
-            listOf(
-                TypeNode(
-                    false,
-                    "Integer",
-                    listOf(),
-                    ConcreteTypeNode("Int", Location.NoProvided),
+    "Tuple semantics" {
+        module(
+            TypeNode(
+                true,
+                "Point",
+                listOf(),
+                TupleTypeNode(
+                    listOf(
+                        ConcreteTypeNode("Double", Location.NoProvided),
+                        ConcreteTypeNode("Double", Location.NoProvided)
+                    ),
                     Location.NoProvided
                 ),
-                TypeNode(
-                    true,
-                    "Integer",
-                    listOf(),
-                    ConcreteTypeNode("Long", Location.NoProvided),
-                    Location.NoProvided
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystemTable["Point"]!!
+                .apply {
+                    isInternal.shouldBeTrue()
+                    isPublic.shouldBeFalse()
+                }
+            typeSystem["Point"].map { it.representation }.shouldBeRight("(Double, Double)")
+        }
+    }
+    "Union semantics" {
+        module(
+            TypeNode(
+                false,
+                "Maybe",
+                listOf("a"),
+                UnionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode(
+                                    "Just", Location.NoProvided
+                                ), ParameterTypeNode(
+                                    "a", Location.NoProvided
+                                )
+                            ), Location.NoProvided
+                        ),
+                        ConcreteTypeNode(
+                            "Nothing", Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Maybe"].map { it.representation }.shouldBeRight("Just a\n|Nothing")
+        }
+    }
+    "Union semantics arm not starting with concrete type " {
+        module(
+            TypeNode(
+                false,
+                "Maybe",
+                listOf("a"),
+                UnionTypeNode(
+                    listOf(
+                        ParameterTypeNode(
+                            "a", Location.NoProvided
+                        ),
+                        ConcreteTypeNode(
+                            "Nothing", Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
+            typeSystem["Maybe"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Maybe"
                 )
+            )
+        }
+    }
+    "check Type already defined" {
+        module(
+            TypeNode(
+                false,
+                "Integer",
+                listOf(),
+                ConcreteTypeNode("Int", Location.NoProvided),
+                Location.NoProvided
             ),
-            listOf(),
-            listOf(),
-            Location.NoProvided
+            TypeNode(
+                true,
+                "Integer",
+                listOf(),
+                ConcreteTypeNode("Long", Location.NoProvided),
+                Location.NoProvided
+            )
         ).checkSemantics().apply {
             errors.shouldBe(
                 listOf(
