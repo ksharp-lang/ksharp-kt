@@ -8,6 +8,7 @@ import org.ksharp.common.Location
 import org.ksharp.nodes.ConcreteTypeNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.TypeNode
+import org.ksharp.test.shouldBeRight
 
 class TypeSystemSemanticsTest : StringSpec({
     "TypeSystem semantics" {
@@ -33,6 +34,8 @@ class TypeSystemSemanticsTest : StringSpec({
                     isInternal.shouldBeFalse()
                     isPublic.shouldBeTrue()
                 }
+            typeSystem["Int"].map { it.representation }.shouldBeRight("(Num numeric<Int>)")
+            typeSystem["Integer"].map { it.representation }.shouldBeRight("Int")
         }
     }
 })
