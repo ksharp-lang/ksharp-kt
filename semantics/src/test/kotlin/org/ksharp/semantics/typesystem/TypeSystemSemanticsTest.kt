@@ -370,4 +370,74 @@ class TypeSystemSemanticsTest : StringSpec({
             typeSystem["Integer"].map { it.representation }.shouldBeRight("Int")
         }
     }
+    "Parametric semantics" {
+        module(
+            TypeNode(
+                false,
+                "KVStore",
+                listOf("k", "v"),
+                ParametricTypeNode(
+                    listOf(
+                        ConcreteTypeNode("Map", Location.NoProvided),
+                        ParameterTypeNode("k", Location.NoProvided),
+                        ParameterTypeNode("v", Location.NoProvided)
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["KVStore"].map { it.representation }.shouldBeRight("(Map k v)")
+        }
+    }
+    "Parametric Semantics should start with a concrete type" {
+        module(
+            TypeNode(
+                false,
+                "Number",
+                listOf("n"),
+                ParameterTypeNode("n", Location.NoProvided),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.TypeShouldStartWithName.new(Location.NoProvided)
+                )
+            )
+            typeSystem["Number"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Number"
+                )
+            )
+        }
+    }
+    "Parametric Semantics should start with a concrete type 2" {
+        module(
+            TypeNode(
+                false,
+                "Number",
+                listOf("n"),
+                ParametricTypeNode(
+                    listOf(
+                        ParameterTypeNode("n", Location.NoProvided),
+                        ConcreteTypeNode("String", Location.NoProvided)
+                    ),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.TypeShouldStartWithName.new(Location.NoProvided)
+                )
+            )
+            typeSystem["Number"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Number"
+                )
+            )
+        }
+    }
 })

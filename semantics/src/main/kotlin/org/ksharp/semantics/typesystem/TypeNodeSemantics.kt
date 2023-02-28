@@ -6,10 +6,7 @@ import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.prelude.types.preludeTypeSystem
 import org.ksharp.semantics.scopes.ModuleSemanticNode
 import org.ksharp.semantics.scopes.Table
-import org.ksharp.typesystem.PartialTypeSystem
-import org.ksharp.typesystem.TypeItemBuilder
-import org.ksharp.typesystem.TypeSystemBuilder
-import org.ksharp.typesystem.typeSystem
+import org.ksharp.typesystem.*
 import org.ksharp.typesystem.types.*
 
 enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode {
@@ -17,7 +14,8 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     UnionTypeArmShouldStartWithName("Union type should start with a name not a parameter. e.g Just a"),
     ParametersNotUsed("Parameters '{params}' not used in the type '{type}'"),
     ParamNameAlreadyDefined("Param '{name}' already defined in type '{type}'"),
-    ParamNameNoDefined("Param '{name}' not defined in type '{type}'")
+    ParamNameNoDefined("Param '{name}' not defined in type '{type}'"),
+    TypeShouldStartWithName("Type should start with a name not a parameter"),
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -110,7 +108,7 @@ private fun UnionTypeFactory.register(node: NodeData) {
     }
 }
 
-fun TypeItemBuilder.register(node: NodeData) =
+fun TypeItemBuilder.register(node: NodeData): ErrorOrType =
     when (node) {
         is ConcreteTypeNode -> type(node.name)
         is UnitTypeNode -> type("Unit")
@@ -127,7 +125,25 @@ fun TypeItemBuilder.register(node: NodeData) =
             }
         }
 
-        else -> TODO()
+        is ParametricTypeNode -> {
+            val params = node.variables
+            val firstNode = params.first() as NodeData
+            if (firstNode is ConcreteTypeNode) {
+                parametricType(firstNode.name) {
+                    params.asSequence()
+                        .drop(1)
+                        .forEach { register(it as NodeData) }
+                }
+            } else TypeSemanticsErrorCode.TypeShouldStartWithName.new(
+                firstNode.location
+            ).let { Either.Left(it) }
+        }
+
+        is ParameterTypeNode -> TypeSemanticsErrorCode.TypeShouldStartWithName.new(
+            node.location
+        ).let { Either.Left(it) }
+
+        else -> TODO("$node")
     }
 
 private fun TypeSystemBuilder.register(node: TypeNode) =

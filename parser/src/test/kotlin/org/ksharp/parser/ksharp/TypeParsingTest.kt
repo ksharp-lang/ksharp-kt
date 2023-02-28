@@ -289,6 +289,29 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Parametric type 3" {
+        "type Num n = n String"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Num",
+                    listOf("n"),
+                    ParametricTypeNode(
+                        listOf(
+                            ParameterTypeNode("n", Location.NoProvided),
+                            ConcreteTypeNode("String", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Function type" {
         "type Sum a = a -> a -> a"
             .kSharpLexer()
