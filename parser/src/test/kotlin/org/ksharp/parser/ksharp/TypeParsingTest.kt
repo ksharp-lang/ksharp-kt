@@ -707,6 +707,32 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Intersection type 2" {
+        "type Num = a & Ord"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Num",
+                    listOf(),
+                    IntersectionTypeNode(
+                        listOf(
+                            ParameterTypeNode(
+                                "a", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "Ord", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Trait types" {
         """
             trait Num a =

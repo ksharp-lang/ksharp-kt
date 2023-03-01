@@ -28,6 +28,10 @@ class IntersectionTypeFactory() {
         }
     }
 
+    fun error(error: Error) {
+        result = Either.Left(error)
+    }
+    
     internal fun build() = result.map { it.build() }
 }
 

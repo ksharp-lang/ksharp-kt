@@ -747,4 +747,143 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         }
     }
+    "Interceptor types semantics" {
+        module(
+            TraitNode(
+                false,
+                "EqTest",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "eq",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ConcreteTypeNode("Bool", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            ),
+            TraitNode(
+                false,
+                "OrdTest",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "eq",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            ),
+            TypeNode(
+                false,
+                "Number",
+                listOf(),
+                IntersectionTypeNode(
+                    listOf(
+                        ConcreteTypeNode(
+                            "EqTest", Location.NoProvided
+                        ),
+                        ConcreteTypeNode(
+                            "OrdTest", Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Number"].map { it.representation }.shouldBeRight("(EqTest & OrdTest)")
+        }
+    }
+    "Interceptor types semantics invalid type arm" {
+        module(
+            TraitNode(
+                false,
+                "EqTest",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "eq",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ConcreteTypeNode("Bool", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            ),
+            TraitNode(
+                false,
+                "OrdTest",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "eq",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            ),
+            TypeNode(
+                false,
+                "Number",
+                listOf("a"),
+                IntersectionTypeNode(
+                    listOf(
+                        ConcreteTypeNode(
+                            "EqTest", Location.NoProvided
+                        ),
+                        ConcreteTypeNode(
+                            "OrdTest", Location.NoProvided
+                        ),
+                        ParameterTypeNode("a", Location.NoProvided),
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.InterceptorTypeWithInvalidType.new(Location.NoProvided, "name" to "Number")
+                )
+            )
+            typeSystem["Number"].shouldBeLeft(TypeSystemErrorCode.TypeNotFound.new("type" to "Number"))
+        }
+    }
 })

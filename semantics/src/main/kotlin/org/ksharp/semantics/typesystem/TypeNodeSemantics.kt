@@ -21,6 +21,7 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     ParamNameAlreadyDefinedInMethod("Param '{name}' already defined in method '{type}'"),
     ParametersNotUsedInMethod("Parameters '{params}' not used in the method '{type}'"),
     TraitWithInvalidMethod("Trait '{name}' has invalid methods"),
+    InterceptorTypeWithInvalidType("Interceptor type '{name}' has invalid type arm"),
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -117,7 +118,7 @@ private fun UnionTypeFactory.register(node: NodeData) {
     }
 }
 
-fun TypeItemBuilder.register(node: NodeData): ErrorOrType =
+fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
     when (node) {
         is ConcreteTypeNode -> type(node.name)
         is UnitTypeNode -> type("Unit")
@@ -158,12 +159,23 @@ fun TypeItemBuilder.register(node: NodeData): ErrorOrType =
             }
         }
 
+        is IntersectionTypeNode -> intersectionType {
+            node.types.forEach {
+                when (it) {
+                    is ConcreteTypeNode -> type(it.name)
+                    else -> {
+                        error(TypeSemanticsErrorCode.InterceptorTypeWithInvalidType.new(node.location, "name" to name))
+                    }
+                }
+            }
+        }
+
         else -> TODO("$node")
     }
 
 private fun TypeSystemBuilder.register(node: TypeNode) =
     alias(node.name, listOf()) {
-        this.register(node.expr)
+        this.register(node.name, node.expr)
     }
 
 private fun TypeNode.checkSemantics(
