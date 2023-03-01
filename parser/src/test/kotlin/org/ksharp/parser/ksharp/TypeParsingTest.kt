@@ -853,7 +853,7 @@ class TypeParserTest : StringSpec({
     }
     "Trait types 4" {
         """
-            trait Num a  =
+            internal trait Num a  =
                 sum :: Int -> Int -> Int
         """.trimIndent()
             .kSharpLexer()
@@ -863,7 +863,7 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TraitNode(
-                    false,
+                    true,
                     "Num",
                     listOf("a"),
                     TraitFunctionsNode(

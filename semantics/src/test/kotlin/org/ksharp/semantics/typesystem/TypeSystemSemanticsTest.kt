@@ -481,7 +481,7 @@ class TypeSystemSemanticsTest : StringSpec({
             typeSystem["ToString"].map { it.representation }.shouldBeRight("(a -> String)")
         }
     }
-    "Trait Semantics" {
+    "public Trait Semantics" {
         module(
             TraitNode(
                 false,
@@ -519,6 +519,61 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkSemantics().apply {
             errors.shouldBeEmpty()
+            typeSystemTable["Number"]!!.apply {
+                isInternal.shouldBeFalse()
+                isPublic.shouldBeTrue()
+            }
+            typeSystem["Number"].map { it.representation }.shouldBeRight(
+                """
+                |trait Number a =
+                |    sum :: a -> a -> a
+                |    prod :: a -> a -> a
+            """.trimMargin()
+            )
+        }
+    }
+    "internal Trait Semantics" {
+        module(
+            TraitNode(
+                true,
+                "Number",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "sum",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        TraitFunctionNode(
+                            "prod",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystemTable["Number"]!!.apply {
+                isInternal.shouldBeTrue()
+                isPublic.shouldBeFalse()
+            }
             typeSystem["Number"].map { it.representation }.shouldBeRight(
                 """
                 |trait Number a =
