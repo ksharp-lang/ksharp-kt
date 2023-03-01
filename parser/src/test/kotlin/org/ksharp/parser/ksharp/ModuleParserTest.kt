@@ -124,6 +124,49 @@ class ModuleParserTest : StringSpec({
                 )
             )
     }
+    "Parse a module with traits" {
+        """
+         type Age = Int
+         trait Num a  =
+            sum :: Int -> Int -> Int
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File", listOf(), listOf(
+                        TypeNode(
+                            false,
+                            "Age",
+                            listOf(),
+                            ConcreteTypeNode("Int", Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        TraitNode(
+                            false,
+                            "Num",
+                            listOf("a"),
+                            TraitFunctionsNode(
+                                listOf(
+                                    TraitFunctionNode(
+                                        "sum",
+                                        FunctionTypeNode(
+                                            listOf(
+                                                ConcreteTypeNode("Int", Location.NoProvided),
+                                                ConcreteTypeNode("Int", Location.NoProvided),
+                                                ConcreteTypeNode("Int", Location.NoProvided)
+                                            ),
+                                            Location.NoProvided
+                                        ),
+                                        Location.NoProvided
+                                    )
+                                )
+                            ),
+                            Location.NoProvided
+                        )
+                    ), listOf(), listOf(), Location.NoProvided
+                )
+            )
+    }
     "Parse a module with function" {
         """
             sum a b = a + b
