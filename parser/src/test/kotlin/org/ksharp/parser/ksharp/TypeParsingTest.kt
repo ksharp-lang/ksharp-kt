@@ -755,6 +755,137 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Trait types 2" {
+        """
+            trait Num a b =
+                sum :: a -> a -> a
+                prod :: a -> a -> a
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TraitNode(
+                    false,
+                    "Num",
+                    listOf("a", "b"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "sum",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ),
+                            TraitFunctionNode(
+                                "prod",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            )
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Trait types 3" {
+        """
+            trait Num a  =
+                sum :: a -> b -> a
+                prod :: a -> a -> a
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TraitNode(
+                    false,
+                    "Num",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "sum",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("b", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ),
+                            TraitFunctionNode(
+                                "prod",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            )
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Trait types 4" {
+        """
+            trait Num a  =
+                sum :: Int -> Int -> Int
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TraitNode(
+                    false,
+                    "Num",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "sum",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ConcreteTypeNode("Int", Location.NoProvided),
+                                        ConcreteTypeNode("Int", Location.NoProvided),
+                                        ConcreteTypeNode("Int", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            )
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Labels on parametric types" {
         "type KVStore k v = Map key: k value: v"
             .kSharpLexer()

@@ -6,7 +6,7 @@ import org.ksharp.common.cast
 data class ModuleNode(
     val name: String,
     val imports: List<ImportNode>,
-    val types: List<TypeNode>,
+    val types: List<NodeData>,
     val typeDeclarations: List<TypeDeclarationNode>,
     val functions: List<FunctionNode>,
     override val location: Location

@@ -13,7 +13,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 
-private fun module(vararg types: TypeNode) =
+private fun module(vararg types: NodeData) =
     ModuleNode(
         "module",
         listOf(),
@@ -431,6 +431,258 @@ class TypeSystemSemanticsTest : StringSpec({
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.TypeShouldStartWithName.new(Location.NoProvided)
+                )
+            )
+            typeSystem["Number"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Number"
+                )
+            )
+        }
+    }
+    "Function Semantics" {
+        module(
+            TypeNode(
+                false,
+                "Sum",
+                listOf("a"),
+                FunctionTypeNode(
+                    listOf(
+                        ParameterTypeNode("a", Location.NoProvided),
+                        ParameterTypeNode("a", Location.NoProvided),
+                        ParameterTypeNode("a", Location.NoProvided)
+                    ),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Sum"].map { it.representation }.shouldBeRight("(a -> a -> a)")
+        }
+    }
+    "Function Semantics with concrete types" {
+        module(
+            TypeNode(
+                false,
+                "ToString",
+                listOf("a"),
+                FunctionTypeNode(
+                    listOf(
+                        ParameterTypeNode("a", Location.NoProvided),
+                        ConcreteTypeNode("String", Location.NoProvided)
+                    ),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["ToString"].map { it.representation }.shouldBeRight("(a -> String)")
+        }
+    }
+    "Trait Semantics" {
+        module(
+            TraitNode(
+                false,
+                "Number",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "sum",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        TraitFunctionNode(
+                            "prod",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Number"].map { it.representation }.shouldBeRight(
+                """
+                |trait Number a =
+                |    sum :: a -> a -> a
+                |    prod :: a -> a -> a
+            """.trimMargin()
+            )
+        }
+    }
+    "Trait Semantics should have just one parameter" {
+        module(
+            TraitNode(
+                false,
+                "Number",
+                listOf("a", "b"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "sum",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        TraitFunctionNode(
+                            "prod",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.TraitShouldHaveJustOneParameter
+                        .new(Location.NoProvided, "name" to "Number")
+                )
+            )
+            typeSystem["Number"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Number"
+                )
+            )
+        }
+    }
+    "Trait Semantics method fails checkParameters" {
+        module(
+            TraitNode(
+                false,
+                "Number",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "sum",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("b", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        TraitFunctionNode(
+                            "prod",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.ParamNameNoDefinedInMethod.new(
+                        Location.NoProvided,
+                        "name" to "b",
+                        "type" to "sum"
+                    ),
+                    TypeSemanticsErrorCode.TraitWithInvalidMethod.new(
+                        Location.NoProvided,
+                        "name" to "Number"
+                    )
+                )
+            )
+            typeSystem["Number"].shouldBeLeft(
+                TypeSystemErrorCode.TypeNotFound.new(
+                    "type" to "Number"
+                )
+            )
+        }
+    }
+    "Trait Semantics method fails parameter not used" {
+        module(
+            TraitNode(
+                false,
+                "Number",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "sum",
+                            FunctionTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Int", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        TraitFunctionNode(
+                            "prod",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.ParametersNotUsedInMethod.new(
+                        Location.NoProvided,
+                        "params" to "a",
+                        "type" to "sum"
+                    ),
+                    TypeSemanticsErrorCode.TraitWithInvalidMethod.new(
+                        Location.NoProvided,
+                        "name" to "Number"
+                    )
                 )
             )
             typeSystem["Number"].shouldBeLeft(
