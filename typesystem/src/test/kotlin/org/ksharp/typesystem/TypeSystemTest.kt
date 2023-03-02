@@ -365,7 +365,7 @@ class TypeSystemTest : ShouldSpec({
                         parametricType("Num") {
                             parameter("x")
                         }
-                        tupleType(null) {
+                        tupleType("point") {
                             type("String")
                             parameter("x")
                         }
@@ -396,19 +396,21 @@ class TypeSystemTest : ShouldSpec({
                             "((Num x), (Num x))"
                         )
                     }
-                    should("NestedTuple ((Num x), (String, x)) type") {
+                    should("NestedTuple ((Num x), point: (String, x)) type") {
                         get("NestedTuple").shouldBeType(
                             TupleType(
                                 listOf(
                                     ParametricType(
                                         Concrete("Num"), listOf(Parameter("x"))
                                     ),
-                                    TupleType(
-                                        listOf(Concrete("String"), Parameter("x"))
+                                    Labeled(
+                                        "point", TupleType(
+                                            listOf(Concrete("String"), Parameter("x"))
+                                        )
                                     ),
                                 )
                             ),
-                            "((Num x), (String, x))"
+                            "((Num x), point: (String, x))"
                         )
                     }
                 }
@@ -752,7 +754,7 @@ class TypeSystemTest : ShouldSpec({
                                     ParametricType(Concrete("Num"), listOf(Parameter("n"))).labeled("y")
                                 )
                             ),
-                            "(x: Num n, y: Num n)"
+                            "(x: (Num n), y: (Num n))"
                         )
                     }
                     should("(a: Int -> b -> result: Int) Type") {

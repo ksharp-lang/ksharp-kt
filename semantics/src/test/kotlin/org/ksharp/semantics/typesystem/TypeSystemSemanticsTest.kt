@@ -955,7 +955,40 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkSemantics().apply {
             errors.shouldBeEmpty()
-            typeSystem["Composite"].map { it.representation }.shouldBeRight("((Num a), (x: Double, y: Double))")
+            typeSystem["Composite"].map { it.representation }
+                .shouldBeRight("(n: (Num a), point: (x: Double, y: Double))")
+        }
+    }
+    "Composite semantics with Unit type" {
+        module(
+            TypeNode(
+                false, "Composite", listOf(), TupleTypeNode(
+                    listOf(
+                        LabelTypeNode(
+                            "n", UnitTypeNode(Location.NoProvided), Location.NoProvided
+                        ),
+                        LabelTypeNode(
+                            "point", TupleTypeNode(
+                                listOf(
+                                    LabelTypeNode(
+                                        "x",
+                                        ConcreteTypeNode("Double", Location.NoProvided),
+                                        Location.NoProvided
+                                    ),
+                                    LabelTypeNode(
+                                        "y",
+                                        ConcreteTypeNode("Double", Location.NoProvided),
+                                        Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ), Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ), Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Composite"].map { it.representation }.shouldBeRight("(n: Unit, point: (x: Double, y: Double))")
         }
     }
 })

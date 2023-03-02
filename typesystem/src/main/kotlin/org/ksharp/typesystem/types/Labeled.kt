@@ -10,7 +10,7 @@ data class Labeled internal constructor(
     override val representation: String
         get() = toString()
 
-    override fun toString(): String = "$label: $type"
+    override fun toString(): String = "$label: ${type.representation}"
 }
 
 internal fun Type.labeled(label: String?) = label?.let { Labeled(it, this) } ?: this

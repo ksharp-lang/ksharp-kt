@@ -88,7 +88,7 @@ private fun ParametricTypeFactory.register(node: NodeData, label: String? = null
             val variables = node.variables
             val firstNode = variables.first() as NodeData
             if (firstNode is ConcreteTypeNode) {
-                parametricType(firstNode.name) {
+                parametricType(firstNode.name, label) {
                     variables.asSequence()
                         .drop(1)
                         .forEach { register(it as NodeData) }
@@ -100,11 +100,13 @@ private fun ParametricTypeFactory.register(node: NodeData, label: String? = null
             )
         }
 
-        is TupleTypeNode -> tupleType(null) {
+        is TupleTypeNode -> tupleType(label) {
             node.types.forEach {
                 register(it as NodeData)
             }
         }
+
+        is UnitTypeNode -> type("Unit", label)
 
         else -> TODO("$node")
     }
