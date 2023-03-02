@@ -78,10 +78,11 @@ private fun NodeData.checkParams(name: String, location: Location, params: Seque
     return Either.Right(true)
 }
 
-private fun ParametricTypeFactory.register(node: NodeData) =
+private fun ParametricTypeFactory.register(node: NodeData, label: String? = null): Unit =
     when (node) {
-        is ConcreteTypeNode -> type(node.name)
-        is ParameterTypeNode -> parameter(node.name)
+        is ConcreteTypeNode -> type(node.name, label)
+        is ParameterTypeNode -> parameter(node.name, label)
+        is LabelTypeNode -> register(node.expr as NodeData, node.name)
         else -> TODO()
     }
 

@@ -953,6 +953,81 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Labels with composite types" {
+        "type Composite a = n: (Num a), point: (x: Double, y: Double)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false, "Composite", listOf("a"), TupleTypeNode(
+                        listOf(
+                            LabelTypeNode(
+                                "n", ParametricTypeNode(
+                                    listOf(
+                                        ConcreteTypeNode("Num", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            ),
+                            LabelTypeNode(
+                                "point", TupleTypeNode(
+                                    listOf(
+                                        LabelTypeNode(
+                                            "x",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        ),
+                                        LabelTypeNode(
+                                            "y",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        )
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ), Location.NoProvided
+                )
+            )
+    }
+    "Labels with composite types 2 " {
+        "type Composite a = n: (), point: (x: Double, y: Double)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false, "Composite", listOf("a"), TupleTypeNode(
+                        listOf(
+                            LabelTypeNode(
+                                "n", UnitTypeNode(Location.NoProvided), Location.NoProvided
+                            ),
+                            LabelTypeNode(
+                                "point", TupleTypeNode(
+                                    listOf(
+                                        LabelTypeNode(
+                                            "x",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        ),
+                                        LabelTypeNode(
+                                            "y",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        )
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ), Location.NoProvided
+                )
+            )
+    }
     "Constrained type" {
         "type Age = Int => (it > 0) && (it < 70)"
             .kSharpLexer()

@@ -886,4 +886,39 @@ class TypeSystemSemanticsTest : StringSpec({
             typeSystem["Number"].shouldBeLeft(TypeSystemErrorCode.TypeNotFound.new("type" to "Number"))
         }
     }
+    "Label semantics" {
+        module(
+            TypeNode(
+                false,
+                "KVStore",
+                listOf("k", "v"),
+                ParametricTypeNode(
+                    listOf(
+                        ConcreteTypeNode("Map", Location.NoProvided),
+                        LabelTypeNode("key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided),
+                        LabelTypeNode("value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided)
+                    ), Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["KVStore"].map { it.representation }.shouldBeRight("(Map key: k value: v)")
+        }
+    }
+    "Label semantics on tuples" {
+        module(
+            TypeNode(
+                false, "Point2D", listOf(), TupleTypeNode(
+                    listOf(
+                        LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
+                        LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
+                    ), Location.NoProvided
+                ), Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Point2D"].map { it.representation }.shouldBeRight("(x: Double, y: Double)")
+        }
+    }
 })

@@ -1,6 +1,9 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.*
+import org.ksharp.common.add
+import org.ksharp.common.addAll
+import org.ksharp.common.cast
+import org.ksharp.common.listBuilder
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
@@ -10,16 +13,10 @@ private enum class SetType {
     Intersection
 }
 
+
 private fun KSharpLexerIterator.consumeTypeVariable() =
     consume({
         it.type == KSharpTokenType.LowerCaseWord || it.type == KSharpTokenType.UpperCaseWord
-    })
-
-private fun KSharpConsumeResult.thenTypeVariable() =
-    then({
-        it.type == KSharpTokenType.LowerCaseWord || it.type == KSharpTokenType.UpperCaseWord
-    }, {
-        BaseParserErrorCode.ExpectingToken.new("token" to "<Word>", "received-token" to "${it.type}:${it.text}")
     })
 
 private fun KSharpConsumeResult.thenIfTypeValueSeparator(block: (KSharpConsumeResult) -> KSharpConsumeResult) =
@@ -45,10 +42,10 @@ private fun Token.toTypeExpression(): TypeExpression =
         ConcreteTypeNode(text, location)
     else ParameterTypeNode(text, location)
 
-private fun Token.toValueTypes(it: List<Any>): List<TypeExpression> {
-    val hasLabel = this.type == KSharpTokenType.Label
+private fun List<Any>.toValueTypes(token: Token?): NodeData {
+    val hasLabel = token?.type == KSharpTokenType.Label
     val valueTypes = listBuilder<TypeExpression>()
-    it.asSequence()
+    asSequence()
         .drop(if (hasLabel) 1 else 0)
         .forEach { item ->
             if (item is TypeExpression) {
@@ -58,18 +55,14 @@ private fun Token.toValueTypes(it: List<Any>): List<TypeExpression> {
             }
             val result = (item as Token)
                 .toTypeExpression()
-                .let {
-                    if (hasLabel) LabelTypeNode(
-                        text.substring(0, text.length - 1),
-                        it,
-                        location
-                    )
-                    else it
-                }
             valueTypes.add(result)
         }
 
-    return valueTypes.build()
+    val result = valueTypes.build()
+    val firstNode = result.first().cast<NodeData>()
+
+    return if (result.size == 1) firstNode
+    else ParametricTypeNode(result, firstNode.location)
 }
 
 private fun List<Any>.toFunctionType(separator: Token): NodeData {
@@ -88,17 +81,23 @@ private fun List<Any>.toTupleType(separator: Token): NodeData {
     } else TupleTypeNode(listOf(first, last), separator.location)
 }
 
+private fun List<Any>.toLabelOrValueType(): NodeData {
+    val node = first()
+    val type = this.toValueTypes(if (node is Token) node.cast<Token>() else null)
+    return if (node is Token && node.type == KSharpTokenType.Label) {
+        LabelTypeNode(
+            node.text.let { t -> t.substring(0, t.length - 1) },
+            type.cast<TypeExpression>(),
+            node.location
+        )
+    } else type
+}
+
 private fun KSharpConsumeResult.thenJoinType() =
     appendNode {
-        val node = it.first()
-        if (node is NodeData) return@appendNode node
-        node as Token
-        val valueTypes = node.toValueTypes(it)
-        if (valueTypes.size == 1) {
-            valueTypes.first().cast()
-        } else ParametricTypeNode(valueTypes.toList(), node.location)
+        it.toLabelOrValueType()
     }.thenIfTypeValueSeparator { i ->
-        i.consume { it.consumeTypeValue() }
+        i.consume { it.consumeTypeValue(true) }
     }.build {
         if (it.size == 1) return@build it.first().cast()
         val separator = it[1] as Token
@@ -108,25 +107,45 @@ private fun KSharpConsumeResult.thenJoinType() =
         it.toTupleType(separator)
     }
 
-private fun KSharpLexerIterator.consumeTypeValue(): KSharpParserResult =
+private fun KSharpLexerIterator.consumeTypeValue(allowLabel: Boolean): KSharpParserResult =
     ifConsume(KSharpTokenType.OpenParenthesis, true) {
-        it.consume { i -> i.consumeTypeValue() }
+        it.consume { i -> i.consumeTypeValue(true) }
             .then(KSharpTokenType.CloseParenthesis, true)
-            .thenJoinType()
+            .let { l ->
+                if (allowLabel) l.thenJoinType()
+                else l.build { items ->
+                    items.toLabelOrValueType()
+                }
+            }
     }.or {
-        it.consume(KSharpTokenType.UnitValue)
-            .build { i -> UnitTypeNode(i.first().cast<Token>().location) }
-            .resume()
-            .thenJoinType()
-    }.or {
-        it.consume(KSharpTokenType.Label)
-            .thenTypeVariable()
-            .thenLoop { i -> i.consumeTypeValue() }
-            .thenJoinType()
-    }.or {
-        it.consumeTypeVariable()
-            .thenLoop { i -> i.consumeTypeValue() }
-            .thenJoinType()
+        it.ifConsume(KSharpTokenType.UnitValue) { l ->
+            l.build { i -> UnitTypeNode(i.first().cast<Token>().location).cast<NodeData>() }
+                .let { result ->
+                    if (allowLabel) result.resume()
+                        .thenJoinType()
+                    else result
+                }
+        }
+    }.let { result ->
+        if (allowLabel) {
+            result.or {
+                it.ifConsume(KSharpTokenType.Label) { l ->
+                    l.consume {
+                        consumeTypeValue(false)
+                    }.build { items -> items.toLabelOrValueType() }
+                        .resume()
+                        .thenLoop { i -> i.consumeTypeValue(true) }
+                        .thenJoinType()
+                }
+            }.or {
+                it.consumeTypeVariable()
+                    .thenLoop { i -> i.consumeTypeValue(true) }
+                    .thenJoinType()
+            }
+        } else result.or {
+            it.consumeTypeVariable()
+                .build { items -> items.toLabelOrValueType() }
+        }
     }
 
 private fun List<Any>.calculateSetType(): SetType {
@@ -152,11 +171,11 @@ private fun List<Any>.asTypeExpressionList(): List<TypeExpression> =
     }
 
 private fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
-    consumeTypeValue()
+    consumeTypeValue(true)
         .resume()
         .thenLoop {
             it.consumeTypeSetSeparator()
-                .consume { i -> i.consumeTypeValue() }
+                .consume { i -> i.consumeTypeValue(true) }
                 .build { i ->
                     val setOperator = i.first() as Token
                     SetElement(
@@ -181,7 +200,7 @@ private fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
 private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
     consumeLowerCaseWord()
         .then(KSharpTokenType.Operator, "::", true)
-        .consume { it.consumeTypeValue() }
+        .consume { it.consumeTypeValue(true) }
         .thenNewLine()
         .build {
             val name = it.first().cast<Token>()
@@ -259,7 +278,7 @@ internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserR
         it.consume(KSharpTokenType.LowerCaseWord)
             .then(KSharpTokenType.Operator, "::", true)
             .enableDiscardBlockAndNewLineTokens { lx ->
-                lx.consume { l -> l.consumeTypeValue() }
+                lx.consume { l -> l.consumeTypeValue(true) }
             }.build { i ->
                 val name = i.first().cast<Token>()
                 TypeDeclarationNode(
