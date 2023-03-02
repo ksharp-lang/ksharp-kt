@@ -22,6 +22,7 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     ParametersNotUsedInMethod("Parameters '{params}' not used in the method '{type}'"),
     TraitWithInvalidMethod("Trait '{name}' has invalid methods"),
     InterceptorTypeWithInvalidType("Interceptor type '{name}' has invalid type arm"),
+    ParametricTypeShouldStartWithName("Parametric type should start with a name not a parameter. e.g Num a")
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -83,7 +84,29 @@ private fun ParametricTypeFactory.register(node: NodeData, label: String? = null
         is ConcreteTypeNode -> type(node.name, label)
         is ParameterTypeNode -> parameter(node.name, label)
         is LabelTypeNode -> register(node.expr as NodeData, node.name)
-        else -> TODO()
+        is ParametricTypeNode -> {
+            val variables = node.variables
+            val firstNode = variables.first() as NodeData
+            if (firstNode is ConcreteTypeNode) {
+                parametricType(firstNode.name) {
+                    variables.asSequence()
+                        .drop(1)
+                        .forEach { register(it as NodeData) }
+                }
+            } else error(
+                TypeSemanticsErrorCode.ParametricTypeShouldStartWithName.new(
+                    firstNode.location
+                )
+            )
+        }
+
+        is TupleTypeNode -> tupleType(null) {
+            node.types.forEach {
+                register(it as NodeData)
+            }
+        }
+
+        else -> TODO("$node")
     }
 
 private fun UnionTypeFactory.register(node: NodeData) {

@@ -921,4 +921,41 @@ class TypeSystemSemanticsTest : StringSpec({
             typeSystem["Point2D"].map { it.representation }.shouldBeRight("(x: Double, y: Double)")
         }
     }
+    "Label semantics on composite types" {
+        module(
+            TypeNode(
+                false, "Composite", listOf("a"), TupleTypeNode(
+                    listOf(
+                        LabelTypeNode(
+                            "n", ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ), Location.NoProvided
+                            ), Location.NoProvided
+                        ),
+                        LabelTypeNode(
+                            "point", TupleTypeNode(
+                                listOf(
+                                    LabelTypeNode(
+                                        "x",
+                                        ConcreteTypeNode("Double", Location.NoProvided),
+                                        Location.NoProvided
+                                    ),
+                                    LabelTypeNode(
+                                        "y",
+                                        ConcreteTypeNode("Double", Location.NoProvided),
+                                        Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ), Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ), Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Composite"].map { it.representation }.shouldBeRight("((Num a), (x: Double, y: Double))")
+        }
+    }
 })
