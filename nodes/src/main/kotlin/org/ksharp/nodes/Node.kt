@@ -32,7 +32,7 @@ class Node(
 
 }
 
-sealed class NodeData {
+abstract class NodeData {
     abstract val location: Location
     protected abstract val children: Sequence<NodeData>
     val node: Node get() = Node(null, location, this)

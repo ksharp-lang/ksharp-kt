@@ -81,7 +81,7 @@ class TypeNodeTest : StringSpec({
                 internal.shouldBeTrue()
                 name.shouldBe("Num")
                 params.shouldBe(listOf("a"))
-                function.shouldBe(TraitFunctionsNode(listOf()))
+                definition.shouldBe(TraitFunctionsNode(listOf()))
                 location.shouldBe(testLocation)
             }
             parent.shouldBeNull()

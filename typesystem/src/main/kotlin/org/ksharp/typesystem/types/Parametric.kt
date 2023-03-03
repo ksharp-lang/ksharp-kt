@@ -74,6 +74,20 @@ class ParametricTypeFactory(
         }
     }
 
+    fun tupleType(label: String?, builder: ParametricTypeFactoryBuilder) {
+        result = result.flatMap { params ->
+            this.builder.tupleType(builder).map {
+                params.add(it.labeled(label))
+                params
+            }
+        }
+    }
+
+    fun error(error: Error) {
+        result = Either.Left(error)
+    }
+
+
     internal fun build(): ErrorOrValue<List<Type>> = result.map { it.build() }
 }
 

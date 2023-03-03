@@ -61,6 +61,13 @@ fun <V> ListBuilder<V>.add(value: V) =
         it
     }
 
+fun <V> ListBuilder<V>.addAll(value: List<V>) =
+    this.mutate {
+        it.addAll(value)
+        it
+    }
+
+
 fun <V> ListBuilder<V>.size() =
     execute {
         it.size

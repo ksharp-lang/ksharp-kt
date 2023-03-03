@@ -289,6 +289,29 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Parametric type 3" {
+        "type Num n = n String"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Num",
+                    listOf("n"),
+                    ParametricTypeNode(
+                        listOf(
+                            ParameterTypeNode("n", Location.NoProvided),
+                            ConcreteTypeNode("String", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Function type" {
         "type Sum a = a -> a -> a"
             .kSharpLexer()
@@ -437,6 +460,208 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Union type 3" {
+        "type Maybe a = Just a | Nothing"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Maybe",
+                    listOf("a"),
+                    UnionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode(
+                                        "Just", Location.NoProvided
+                                    ), ParameterTypeNode(
+                                        "a", Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "Nothing", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Union type 4" {
+        "type Maybe a = a | Nothing"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Maybe",
+                    listOf("a"),
+                    UnionTypeNode(
+                        listOf(
+                            ParameterTypeNode(
+                                "a", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "Nothing", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Union type 5" {
+        "type Maybe = Just a | Nothing"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Maybe",
+                    listOf(),
+                    UnionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode(
+                                        "Just", Location.NoProvided
+                                    ), ParameterTypeNode(
+                                        "a", Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "Nothing", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Union type 6" {
+        "type Maybe = Just a | Nothing, Name"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Maybe",
+                    listOf(),
+                    UnionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode(
+                                        "Just", Location.NoProvided
+                                    ), ParameterTypeNode(
+                                        "a", Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ),
+                            TupleTypeNode(
+                                listOf(
+                                    ConcreteTypeNode(
+                                        "Nothing", Location.NoProvided
+                                    ),
+                                    ConcreteTypeNode(
+                                        "Name", Location.NoProvided
+                                    )
+                                ),
+                                Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Union type 7" {
+        "type Maybe = Just a | a Name"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Maybe",
+                    listOf(),
+                    UnionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode(
+                                        "Just", Location.NoProvided
+                                    ), ParameterTypeNode(
+                                        "a", Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                listOf(
+                                    ParameterTypeNode(
+                                        "a", Location.NoProvided
+                                    ),
+                                    ConcreteTypeNode(
+                                        "Name", Location.NoProvided
+                                    )
+                                ),
+                                Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Union type 8" {
+        "type Maybe a a = Just a | Nothing"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Maybe",
+                    listOf("a", "a"),
+                    UnionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode(
+                                        "Just", Location.NoProvided
+                                    ), ParameterTypeNode(
+                                        "a", Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "Nothing", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Invalid Set type 2" {
         "type Bool = True | False & NoDefined"
             .kSharpLexer()
@@ -472,6 +697,32 @@ class TypeParserTest : StringSpec({
                         listOf(
                             ConcreteTypeNode(
                                 "Eq", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "Ord", Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Intersection type 2" {
+        "type Num = a & Ord"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    "Num",
+                    listOf(),
+                    IntersectionTypeNode(
+                        listOf(
+                            ParameterTypeNode(
+                                "a", Location.NoProvided
                             ),
                             ConcreteTypeNode(
                                 "Ord", Location.NoProvided
@@ -530,6 +781,137 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Trait types 2" {
+        """
+            trait Num a b =
+                sum :: a -> a -> a
+                prod :: a -> a -> a
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TraitNode(
+                    false,
+                    "Num",
+                    listOf("a", "b"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "sum",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ),
+                            TraitFunctionNode(
+                                "prod",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            )
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Trait types 3" {
+        """
+            trait Num a  =
+                sum :: a -> b -> a
+                prod :: a -> a -> a
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TraitNode(
+                    false,
+                    "Num",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "sum",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("b", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ),
+                            TraitFunctionNode(
+                                "prod",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            )
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Trait types 4" {
+        """
+            internal trait Num a  =
+                sum :: Int -> Int -> Int
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TraitNode(
+                    true,
+                    "Num",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "sum",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ConcreteTypeNode("Int", Location.NoProvided),
+                                        ConcreteTypeNode("Int", Location.NoProvided),
+                                        ConcreteTypeNode("Int", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            )
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Labels on parametric types" {
         "type KVStore k v = Map key: k value: v"
             .kSharpLexer()
@@ -566,6 +948,121 @@ class TypeParserTest : StringSpec({
                         listOf(
                             LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
                             LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
+                        ), Location.NoProvided
+                    ), Location.NoProvided
+                )
+            )
+    }
+    "Labels with composite types" {
+        "type Composite a = n: (Num a), point: (x: Double, y: Double)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false, "Composite", listOf("a"), TupleTypeNode(
+                        listOf(
+                            LabelTypeNode(
+                                "n", ParametricTypeNode(
+                                    listOf(
+                                        ConcreteTypeNode("Num", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided)
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            ),
+                            LabelTypeNode(
+                                "point", TupleTypeNode(
+                                    listOf(
+                                        LabelTypeNode(
+                                            "x",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        ),
+                                        LabelTypeNode(
+                                            "y",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        )
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ), Location.NoProvided
+                )
+            )
+    }
+    "Labels with composite types 2 " {
+        "type Composite a = n: (), point: (x: Double, y: Double)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false, "Composite", listOf("a"), TupleTypeNode(
+                        listOf(
+                            LabelTypeNode(
+                                "n", UnitTypeNode(Location.NoProvided), Location.NoProvided
+                            ),
+                            LabelTypeNode(
+                                "point", TupleTypeNode(
+                                    listOf(
+                                        LabelTypeNode(
+                                            "x",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        ),
+                                        LabelTypeNode(
+                                            "y",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        )
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            )
+                        ), Location.NoProvided
+                    ), Location.NoProvided
+                )
+            )
+    }
+    "Labels with composite types 3" {
+        "type Composite a = n: (Int -> Int), point: (x: Double, y: Double)"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false, "Composite", listOf("a"), TupleTypeNode(
+                        listOf(
+                            LabelTypeNode(
+                                "n", FunctionTypeNode(
+                                    listOf(
+                                        ConcreteTypeNode("Int", Location.NoProvided),
+                                        ConcreteTypeNode("Int", Location.NoProvided)
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            ),
+                            LabelTypeNode(
+                                "point", TupleTypeNode(
+                                    listOf(
+                                        LabelTypeNode(
+                                            "x",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        ),
+                                        LabelTypeNode(
+                                            "y",
+                                            ConcreteTypeNode("Double", Location.NoProvided),
+                                            Location.NoProvided
+                                        )
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            )
                         ), Location.NoProvided
                     ), Location.NoProvided
                 )

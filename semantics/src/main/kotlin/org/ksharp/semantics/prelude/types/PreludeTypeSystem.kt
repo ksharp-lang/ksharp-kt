@@ -1,10 +1,12 @@
-package org.ksharp.analysis.prelude.types
+package org.ksharp.semantics.prelude.types
 
 import org.ksharp.common.Either
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.parametricType
+import org.ksharp.typesystem.types.type
+import org.ksharp.typesystem.types.unionType
 
 private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
     alias(alias) {
@@ -14,6 +16,7 @@ private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
     }
 
 private fun createPreludeTypeSystem() = typeSystem {
+    type("Unit")
     alias("Char") { Either.Right(charType) }
     parametricType("Num") {
         parameter("a")
@@ -42,6 +45,13 @@ private fun createPreludeTypeSystem() = typeSystem {
     alias("String") {
         parametricType("List") {
             type("Char")
+        }
+    }
+
+    alias("Bool") {
+        unionType {
+            clazz("True")
+            clazz("False")
         }
     }
 }

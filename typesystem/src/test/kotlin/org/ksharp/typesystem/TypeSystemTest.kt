@@ -360,6 +360,17 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
+                alias("NestedTuple") {
+                    tupleType {
+                        parametricType("Num") {
+                            parameter("x")
+                        }
+                        tupleType("point") {
+                            type("String")
+                            parameter("x")
+                        }
+                    }
+                }
             }.apply {
                 context("Should contains the following types:") {
                     should("User (String, String) type") {
@@ -385,9 +396,26 @@ class TypeSystemTest : ShouldSpec({
                             "((Num x), (Num x))"
                         )
                     }
+                    should("NestedTuple ((Num x), point: (String, x)) type") {
+                        get("NestedTuple").shouldBeType(
+                            TupleType(
+                                listOf(
+                                    ParametricType(
+                                        Concrete("Num"), listOf(Parameter("x"))
+                                    ),
+                                    Labeled(
+                                        "point", TupleType(
+                                            listOf(Concrete("String"), Parameter("x"))
+                                        )
+                                    ),
+                                )
+                            ),
+                            "((Num x), point: (String, x))"
+                        )
+                    }
                 }
                 should("Should have 4 types") {
-                    size.shouldBe(4)
+                    size.shouldBe(5)
                 }
                 should("Shouldn't have errors") {
                     errors.shouldBeEmpty()
@@ -726,7 +754,7 @@ class TypeSystemTest : ShouldSpec({
                                     ParametricType(Concrete("Num"), listOf(Parameter("n"))).labeled("y")
                                 )
                             ),
-                            "(x: Num n, y: Num n)"
+                            "(x: (Num n), y: (Num n))"
                         )
                     }
                     should("(a: Int -> b -> result: Int) Type") {

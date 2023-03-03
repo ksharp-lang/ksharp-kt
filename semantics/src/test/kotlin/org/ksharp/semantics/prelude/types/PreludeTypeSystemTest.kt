@@ -1,4 +1,4 @@
-package org.ksharp.analysis.prelude.types
+package org.ksharp.semantics.prelude.types
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -24,6 +24,8 @@ class PreludeTypeSystemTest : StringSpec({
             get("List").map { it.toString() }.shouldBeRight("List v")
             get("Set").map { it.toString() }.shouldBeRight("Set v")
             get("Map").map { it.toString() }.shouldBeRight("Map k v")
+            get("Unit").map { it.toString() }.shouldBeRight("Unit")
+            get("Bool").map { it.toString() }.shouldBeRight("True\n|False")
         }
     }
     "Check charType members" {

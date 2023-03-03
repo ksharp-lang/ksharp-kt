@@ -28,11 +28,11 @@ data class TraitNode(
     val internal: Boolean,
     val name: String,
     val params: List<String>,
-    val function: TraitFunctionsNode,
+    val definition: TraitFunctionsNode,
     override val location: Location
 ) : NodeData() {
     override val children: Sequence<NodeData>
-        get() = sequenceOf(function)
+        get() = sequenceOf(definition)
 
 }
 

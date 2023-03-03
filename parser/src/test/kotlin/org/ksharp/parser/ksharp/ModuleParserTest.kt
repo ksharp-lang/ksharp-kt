@@ -10,25 +10,25 @@ import java.nio.file.Paths
 
 class ModuleParserTest : StringSpec({
     val expectedModule = ModuleNode(
-        "File", mapOf(
-            "text" to ImportNode("ksharp.text", "text", Location.NoProvided),
-            "math" to ImportNode("ksharp.math", "math", Location.NoProvided)
-        ), mapOf(), mapOf(), mapOf(), Location.NoProvided
+        "File", listOf(
+            ImportNode("ksharp.text", "text", Location.NoProvided),
+            ImportNode("ksharp.math", "math", Location.NoProvided)
+        ), listOf(), listOf(), listOf(), Location.NoProvided
     )
     val expectedModuleWithLocations: (String) -> ModuleNode = {
         ModuleNode(
-            it, mapOf(
-                "text" to ImportNode(
+            it, listOf(
+                ImportNode(
                     "ksharp.text",
                     "text",
                     Location(context = it, position = Line(value = 1) to Offset(value = 0))
                 ),
-                "math" to ImportNode(
+                ImportNode(
                     "ksharp.math",
                     "math",
                     Location(context = it, position = Line(value = 2) to Offset(value = 0))
                 )
-            ), mapOf(), mapOf(), mapOf(), Location(context = it, position = Line(value = 1) to Offset(value = 0))
+            ), listOf(), listOf(), listOf(), Location(context = it, position = Line(value = 1) to Offset(value = 0))
         )
     }
     "Parse a module with imports" {
@@ -75,9 +75,9 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", mapOf(
-                        "text" to ImportNode("ksharp.text", "text", Location.NoProvided)
-                    ), mapOf(), mapOf(), mapOf(), Location.NoProvided
+                    "File", listOf(
+                        ImportNode("ksharp.text", "text", Location.NoProvided)
+                    ), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -88,8 +88,8 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", mapOf(), mapOf(), mapOf(
-                        "sum" to TypeDeclarationNode(
+                    "File", listOf(), listOf(), listOf(
+                        TypeDeclarationNode(
                             "sum",
                             FunctionTypeNode(
                                 listOf(
@@ -101,7 +101,7 @@ class ModuleParserTest : StringSpec({
                             ),
                             Location.NoProvided
                         )
-                    ), mapOf(), Location.NoProvided
+                    ), listOf(), Location.NoProvided
                 )
             )
     }
@@ -112,15 +112,58 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", mapOf(), mapOf(
-                        "Age" to TypeNode(
+                    "File", listOf(), listOf(
+                        TypeNode(
                             false,
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided
                         )
-                    ), mapOf(), mapOf(), Location.NoProvided
+                    ), listOf(), listOf(), Location.NoProvided
+                )
+            )
+    }
+    "Parse a module with traits" {
+        """
+         type Age = Int
+         trait Num a  =
+            sum :: Int -> Int -> Int
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File", listOf(), listOf(
+                        TypeNode(
+                            false,
+                            "Age",
+                            listOf(),
+                            ConcreteTypeNode("Int", Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        TraitNode(
+                            false,
+                            "Num",
+                            listOf("a"),
+                            TraitFunctionsNode(
+                                listOf(
+                                    TraitFunctionNode(
+                                        "sum",
+                                        FunctionTypeNode(
+                                            listOf(
+                                                ConcreteTypeNode("Int", Location.NoProvided),
+                                                ConcreteTypeNode("Int", Location.NoProvided),
+                                                ConcreteTypeNode("Int", Location.NoProvided)
+                                            ),
+                                            Location.NoProvided
+                                        ),
+                                        Location.NoProvided
+                                    )
+                                )
+                            ),
+                            Location.NoProvided
+                        )
+                    ), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -131,8 +174,8 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", mapOf(), mapOf(), mapOf(), mapOf(
-                        "sum" to FunctionNode(
+                    "File", listOf(), listOf(), listOf(), listOf(
+                        FunctionNode(
                             false,
                             "sum",
                             listOf("a", "b"),
@@ -161,18 +204,17 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", mapOf(
-                        "text" to ImportNode("ksharp.text", "text", Location.NoProvided),
-                    ), mapOf(
-                        "Age" to TypeNode(
+                    "File", listOf(ImportNode("ksharp.text", "text", Location.NoProvided)),
+                    listOf(
+                        TypeNode(
                             false,
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided
                         )
-                    ), mapOf(
-                        "sum" to TypeDeclarationNode(
+                    ), listOf(
+                        TypeDeclarationNode(
                             "sum",
                             FunctionTypeNode(
                                 listOf(
@@ -184,8 +226,8 @@ class ModuleParserTest : StringSpec({
                             ),
                             Location.NoProvided
                         )
-                    ), mapOf(
-                        "sum" to FunctionNode(
+                    ), listOf(
+                        FunctionNode(
                             true,
                             "sum",
                             listOf("a", "b"),
