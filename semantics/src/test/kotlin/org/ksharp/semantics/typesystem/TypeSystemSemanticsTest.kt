@@ -23,6 +23,16 @@ private fun module(vararg types: NodeData) =
         Location.NoProvided
     )
 
+private fun moduleWithDeclarations(vararg declarations: TypeDeclarationNode) =
+    ModuleNode(
+        "module",
+        listOf(),
+        listOf(),
+        listOf(*declarations),
+        listOf(),
+        Location.NoProvided
+    )
+
 class TypeSystemSemanticsTest : StringSpec({
     "Alias semantics" {
         module(
@@ -1064,6 +1074,23 @@ class TypeSystemSemanticsTest : StringSpec({
         ).checkSemantics().apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.ParametricTypeShouldStartWithName.new(Location.NoProvided)))
             typeSystem["Composite"].shouldBeLeft(TypeSystemErrorCode.TypeNotFound.new("type" to "Composite"))
+        }
+    }
+    "Function declaration semantics" {
+        moduleWithDeclarations(
+            TypeDeclarationNode(
+                "ten",
+                listOf(),
+                FunctionTypeNode(
+                    listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Decl__ten"].map { it.representation }
+                .shouldBeRight("(Unit -> Int)")
         }
     }
 })

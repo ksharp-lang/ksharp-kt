@@ -263,13 +263,28 @@ private fun TraitNode.checkSemantics(
 
 }
 
-private fun List<NodeData>.checkSemantics(errors: ErrorCollector): Pair<Table<TypeVisibility>, PartialTypeSystem> {
+private fun TypeDeclarationNode.checkSemantics(
+    errors: ErrorCollector,
+    table: TypeVisibilityTableBuilder,
+    builder: TypeSystemBuilder
+) = table.register(
+    name,
+    TypeVisibility.Internal,
+    location
+).map {
+    errors.collect(type.cast<NodeData>().checkParams(name, location, params.asSequence())).map {
+        //builder.register(this)
+    }
+}
+
+private fun Sequence<NodeData>.checkSemantics(errors: ErrorCollector): Pair<Table<TypeVisibility>, PartialTypeSystem> {
     val table = TypeVisibilityTableBuilder(errors)
     val typeSystem = typeSystem(preludeTypeSystem) {
         this@checkSemantics.forEach {
             when (it) {
                 is TypeNode -> it.checkSemantics(errors, table, this)
                 is TraitNode -> it.checkSemantics(errors, table, this)
+                is TypeDeclarationNode -> it.checkSemantics(errors, table, this)
                 else -> TODO("$it")
             }
         }
@@ -279,7 +294,10 @@ private fun List<NodeData>.checkSemantics(errors: ErrorCollector): Pair<Table<Ty
 
 fun ModuleNode.checkSemantics(): ModuleSemanticNode {
     val errors = ErrorCollector()
-    val (typeTable, typeSystem) = types.checkSemantics(errors)
+    val (typeTable, typeSystem) = sequenceOf(
+        types.asSequence(),
+        typeDeclarations.asSequence()
+    ).flatten().checkSemantics(errors)
     errors.collectAll(typeSystem.errors)
     return ModuleSemanticNode(
         errors.build(),

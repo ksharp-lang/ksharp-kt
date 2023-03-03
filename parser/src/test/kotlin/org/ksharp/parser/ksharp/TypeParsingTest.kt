@@ -1123,6 +1123,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeDeclarationNode(
                     "ten",
+                    listOf(),
                     FunctionTypeNode(
                         listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
                         Location.NoProvided
@@ -1141,10 +1142,46 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeDeclarationNode(
                     "sum",
+                    listOf(),
                     FunctionTypeNode(
                         listOf(
                             ConcreteTypeNode("Int", Location.NoProvided),
                             ConcreteTypeNode("Int", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Type declaration with params" {
+        "sum a :: (Num a) -> (Num a) -> Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    "sum",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ),
                         Location.NoProvided
