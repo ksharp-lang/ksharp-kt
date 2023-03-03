@@ -83,6 +83,11 @@ class ParametricTypeFactory(
         }
     }
 
+    fun error(error: Error) {
+        result = Either.Left(error)
+    }
+
+
     internal fun build(): ErrorOrValue<List<Type>> = result.map { it.build() }
 }
 

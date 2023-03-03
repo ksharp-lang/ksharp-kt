@@ -1029,4 +1029,41 @@ class TypeSystemSemanticsTest : StringSpec({
                 .shouldBeRight("(n: (Int -> Int), point: (x: Double, y: Double))")
         }
     }
+    "Composite semantics parametric type starting with parameter" {
+        module(
+            TypeNode(
+                false, "Composite", listOf("a"), TupleTypeNode(
+                    listOf(
+                        LabelTypeNode(
+                            "n", ParametricTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ConcreteTypeNode("Int", Location.NoProvided)
+                                ), Location.NoProvided
+                            ), Location.NoProvided
+                        ),
+                        LabelTypeNode(
+                            "point", TupleTypeNode(
+                                listOf(
+                                    LabelTypeNode(
+                                        "x",
+                                        ConcreteTypeNode("Double", Location.NoProvided),
+                                        Location.NoProvided
+                                    ),
+                                    LabelTypeNode(
+                                        "y",
+                                        ConcreteTypeNode("Double", Location.NoProvided),
+                                        Location.NoProvided
+                                    )
+                                ), Location.NoProvided
+                            ), Location.NoProvided
+                        )
+                    ), Location.NoProvided
+                ), Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(listOf(TypeSemanticsErrorCode.ParametricTypeShouldStartWithName.new(Location.NoProvided)))
+            typeSystem["Composite"].shouldBeLeft(TypeSystemErrorCode.TypeNotFound.new("type" to "Composite"))
+        }
+    }
 })
