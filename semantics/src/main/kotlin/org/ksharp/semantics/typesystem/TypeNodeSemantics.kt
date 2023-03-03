@@ -108,6 +108,12 @@ private fun ParametricTypeFactory.register(node: NodeData, label: String? = null
 
         is UnitTypeNode -> type("Unit", label)
 
+        is FunctionTypeNode -> functionType(label) {
+            node.params.forEach {
+                register(it as NodeData)
+            }
+        }
+
         else -> TODO("$node")
     }
 
