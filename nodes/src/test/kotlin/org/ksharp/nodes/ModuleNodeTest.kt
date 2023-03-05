@@ -19,7 +19,7 @@ class ModuleNodeTest : StringSpec({
             name = "ksharp.math",
             listOf(ImportNode("ksharp.num", "n", testLocation)),
             listOf(TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)),
-            listOf(TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)),
+            listOf(TypeDeclarationNode("sum", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)),
             listOf(),
             testLocation
         ).node.apply {
@@ -27,7 +27,7 @@ class ModuleNodeTest : StringSpec({
                 name.shouldBe("ksharp.math")
                 imports.shouldBe(listOf(ImportNode("ksharp.num", "n", testLocation)))
                 typeDeclarations.shouldBe(
-                    listOf(TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation))
+                    listOf(TypeDeclarationNode("sum", listOf(), ConcreteTypeNode("Int", testLocation), testLocation))
                 )
                 types.shouldBe(
                     listOf(TypeNode(false, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation))
@@ -47,7 +47,7 @@ class ModuleNodeTest : StringSpec({
                     Node(
                         this,
                         testLocation,
-                        TypeDeclarationNode("sum", ConcreteTypeNode("Int", testLocation), testLocation)
+                        TypeDeclarationNode("sum", listOf(), ConcreteTypeNode("Int", testLocation), testLocation)
                     )
                 )
             )
