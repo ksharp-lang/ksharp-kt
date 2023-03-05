@@ -149,6 +149,7 @@ data class TypeNode(
 
 data class TypeDeclarationNode(
     val name: String,
+    val params: List<String>,
     val type: TypeExpression,
     override val location: Location
 ) : NodeData() {

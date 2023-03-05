@@ -319,6 +319,7 @@ class TypeNodeTest : StringSpec({
     "Test Node interface on TypeDeclarationNode" {
         TypeDeclarationNode(
             "sum",
+            listOf(),
             ConcreteTypeNode("Int", testLocation),
             testLocation
         ).node.apply {

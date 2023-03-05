@@ -91,6 +91,7 @@ class ModuleParserTest : StringSpec({
                     "File", listOf(), listOf(), listOf(
                         TypeDeclarationNode(
                             "sum",
+                            listOf(),
                             FunctionTypeNode(
                                 listOf(
                                     ConcreteTypeNode("Int", Location.NoProvided),
@@ -216,6 +217,7 @@ class ModuleParserTest : StringSpec({
                     ), listOf(
                         TypeDeclarationNode(
                             "sum",
+                            listOf(),
                             FunctionTypeNode(
                                 listOf(
                                     ConcreteTypeNode("Int", Location.NoProvided),

@@ -23,6 +23,16 @@ private fun module(vararg types: NodeData) =
         Location.NoProvided
     )
 
+private fun moduleWithDeclarations(vararg declarations: TypeDeclarationNode) =
+    ModuleNode(
+        "module",
+        listOf(),
+        listOf(),
+        listOf(*declarations),
+        listOf(),
+        Location.NoProvided
+    )
+
 class TypeSystemSemanticsTest : StringSpec({
     "Alias semantics" {
         module(
@@ -33,7 +43,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ConcreteTypeNode("Int", Location.NoProvided),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystemTable["Integer"]!!
                 .apply {
@@ -53,7 +63,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 UnitTypeNode(Location.NoProvided),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["Unidad"].map { it.representation }.shouldBeRight("Unit")
         }
@@ -73,7 +83,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystemTable["Point"]!!
                 .apply {
@@ -107,7 +117,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["Maybe"].map { it.representation }.shouldBeRight("Just a\n|Nothing")
         }
@@ -130,7 +140,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
             typeSystem["Maybe"].shouldBeLeft(
                 TypeSystemErrorCode.TypeNotFound.new(
@@ -163,7 +173,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParamNameNoDefined.new(
@@ -212,7 +222,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.InvalidUnionArm.new(
@@ -259,7 +269,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
             typeSystem["Maybe"].shouldBeLeft(
                 TypeSystemErrorCode.TypeNotFound.new(
@@ -292,7 +302,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParamNameAlreadyDefined.new(
@@ -328,7 +338,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParametersNotUsed.new(
@@ -356,7 +366,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ConcreteTypeNode("Long", Location.NoProvided),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TableErrorCode.AlreadyDefined.new(Location.NoProvided, "classifier" to "Type", "name" to "Integer")
@@ -385,7 +395,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["KVStore"].map { it.representation }.shouldBeRight("(Map k v)")
         }
@@ -399,7 +409,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ParameterTypeNode("n", Location.NoProvided),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.TypeShouldStartWithName.new(Location.NoProvided)
@@ -427,7 +437,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.TypeShouldStartWithName.new(Location.NoProvided)
@@ -456,7 +466,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["Sum"].map { it.representation }.shouldBeRight("(a -> a -> a)")
         }
@@ -476,7 +486,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["ToString"].map { it.representation }.shouldBeRight("(a -> String)")
         }
@@ -517,7 +527,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystemTable["Number"]!!.apply {
                 isInternal.shouldBeFalse()
@@ -568,7 +578,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystemTable["Number"]!!.apply {
                 isInternal.shouldBeTrue()
@@ -619,7 +629,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.TraitShouldHaveJustOneParameter
@@ -669,7 +679,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParamNameNoDefinedInMethod.new(
@@ -726,7 +736,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParametersNotUsedInMethod.new(
@@ -809,7 +819,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representation }.shouldBeRight("(EqTest & OrdTest)")
         }
@@ -877,7 +887,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.InterceptorTypeWithInvalidType.new(Location.NoProvided, "name" to "Number")
@@ -901,7 +911,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["KVStore"].map { it.representation }.shouldBeRight("(Map key: k value: v)")
         }
@@ -916,7 +926,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     ), Location.NoProvided
                 ), Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["Point2D"].map { it.representation }.shouldBeRight("(x: Double, y: Double)")
         }
@@ -953,7 +963,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     ), Location.NoProvided
                 ), Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["Composite"].map { it.representation }
                 .shouldBeRight("(n: (Num a), point: (x: Double, y: Double))")
@@ -986,7 +996,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     ), Location.NoProvided
                 ), Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["Composite"].map { it.representation }.shouldBeRight("(n: Unit, point: (x: Double, y: Double))")
         }
@@ -1023,7 +1033,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     ), Location.NoProvided
                 ), Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["Composite"].map { it.representation }
                 .shouldBeRight("(n: (Int -> Int), point: (x: Double, y: Double))")
@@ -1061,9 +1071,78 @@ class TypeSystemSemanticsTest : StringSpec({
                     ), Location.NoProvided
                 ), Location.NoProvided
             )
-        ).checkSemantics().apply {
+        ).checkTypeSemantics().apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.ParametricTypeShouldStartWithName.new(Location.NoProvided)))
             typeSystem["Composite"].shouldBeLeft(TypeSystemErrorCode.TypeNotFound.new("type" to "Composite"))
+        }
+    }
+    "Function declaration semantics" {
+        moduleWithDeclarations(
+            TypeDeclarationNode(
+                "ten",
+                listOf(),
+                FunctionTypeNode(
+                    listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkTypeSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Decl__ten"].map { it.representation }
+                .shouldBeRight("(Unit -> Int)")
+        }
+    }
+    "Function declaration semantics no function literal" {
+        moduleWithDeclarations(
+            TypeDeclarationNode(
+                "ten",
+                listOf(),
+                ConcreteTypeNode("Int", Location.NoProvided),
+                Location.NoProvided
+            )
+        ).checkTypeSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.FunctionDeclarationShouldBeAFunctionType.new(
+                        Location.NoProvided,
+                        "name" to "ten"
+                    )
+                )
+            )
+        }
+    }
+    "Function declaration with params" {
+        moduleWithDeclarations(
+            TypeDeclarationNode(
+                "sum",
+                listOf("a"),
+                FunctionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode("Num", Location.NoProvided),
+                                ParameterTypeNode("a", Location.NoProvided),
+                            ),
+                            Location.NoProvided
+                        ),
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode("Num", Location.NoProvided),
+                                ParameterTypeNode("a", Location.NoProvided),
+                            ),
+                            Location.NoProvided
+                        ),
+                        ConcreteTypeNode("Int", Location.NoProvided)
+                    ),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkTypeSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Decl__sum"].map { it.representation }
+                .shouldBeRight("((Num a) -> (Num a) -> Int)")
         }
     }
 })

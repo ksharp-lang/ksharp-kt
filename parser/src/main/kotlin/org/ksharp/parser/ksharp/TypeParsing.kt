@@ -276,13 +276,22 @@ fun KSharpLexerIterator.consumeTypeDeclaration(): KSharpParserResult =
 internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserResult =
     lookAHead {
         it.consume(KSharpTokenType.LowerCaseWord)
+            .thenLoop { p ->
+                p.consumeLowerCaseWord()
+                    .build { param -> param.last().cast<LexerValue>().text }
+            }
             .then(KSharpTokenType.Operator, "::", true)
             .enableDiscardBlockAndNewLineTokens { lx ->
                 lx.consume { l -> l.consumeTypeValue(true) }
             }.build { i ->
                 val name = i.first().cast<Token>()
+                val params = i.asSequence()
+                    .drop(1)
+                    .takeWhile { v -> v !is NodeData }
+                    .map { v -> v as String }
                 TypeDeclarationNode(
                     name.text,
+                    params.toList(),
                     i.last().cast(),
                     name.location
                 ) as NodeData
