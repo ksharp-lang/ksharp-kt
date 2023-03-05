@@ -22,7 +22,8 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     ParametersNotUsedInMethod("Parameters '{params}' not used in the method '{type}'"),
     TraitWithInvalidMethod("Trait '{name}' has invalid methods"),
     InterceptorTypeWithInvalidType("Interceptor type '{name}' has invalid type arm"),
-    ParametricTypeShouldStartWithName("Parametric type should start with a name not a parameter. e.g Num a")
+    ParametricTypeShouldStartWithName("Parametric type should start with a name not a parameter. e.g Num a"),
+    FunctionDeclarationShouldBeAFunctionType("Function declaration '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int")
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -273,7 +274,15 @@ private fun TypeDeclarationNode.checkSemantics(
     location
 ).map {
     errors.collect(type.cast<NodeData>().checkParams(name, location, params.asSequence())).map {
-        //builder.register(this)
+        if (type !is FunctionTypeNode)
+            errors.collect(
+                TypeSemanticsErrorCode
+                    .FunctionDeclarationShouldBeAFunctionType
+                    .new(location, "name" to name)
+            )
+        else builder.alias("Decl__$name", listOf()) {
+            this.register(name, type.cast())
+        }
     }
 }
 

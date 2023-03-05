@@ -1093,4 +1093,56 @@ class TypeSystemSemanticsTest : StringSpec({
                 .shouldBeRight("(Unit -> Int)")
         }
     }
+    "Function declaration semantics no function literal" {
+        moduleWithDeclarations(
+            TypeDeclarationNode(
+                "ten",
+                listOf(),
+                ConcreteTypeNode("Int", Location.NoProvided),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBe(
+                listOf(
+                    TypeSemanticsErrorCode.FunctionDeclarationShouldBeAFunctionType.new(
+                        Location.NoProvided,
+                        "name" to "ten"
+                    )
+                )
+            )
+        }
+    }
+    "Function declaration with params" {
+        moduleWithDeclarations(
+            TypeDeclarationNode(
+                "sum",
+                listOf("a"),
+                FunctionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode("Num", Location.NoProvided),
+                                ParameterTypeNode("a", Location.NoProvided),
+                            ),
+                            Location.NoProvided
+                        ),
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode("Num", Location.NoProvided),
+                                ParameterTypeNode("a", Location.NoProvided),
+                            ),
+                            Location.NoProvided
+                        ),
+                        ConcreteTypeNode("Int", Location.NoProvided)
+                    ),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Decl__sum"].map { it.representation }
+                .shouldBeRight("((Num a) -> (Num a) -> Int)")
+        }
+    }
 })
