@@ -5,7 +5,6 @@ import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.prelude.types.preludeTypeSystem
 import org.ksharp.semantics.scopes.ModuleSemanticNode
-import org.ksharp.semantics.scopes.Table
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.types.*
 
@@ -286,7 +285,7 @@ private fun TypeDeclarationNode.checkTypeSemantics(
     }
 }
 
-private fun Sequence<NodeData>.checkTypeSemantics(errors: ErrorCollector): Pair<Table<TypeVisibility>, PartialTypeSystem> {
+private fun Sequence<NodeData>.checkTypeSemantics(errors: ErrorCollector): Pair<TypeVisibilityTable, PartialTypeSystem> {
     val table = TypeVisibilityTableBuilder(errors)
     val typeSystem = typeSystem(preludeTypeSystem) {
         this@checkTypeSemantics.forEach {

@@ -9,9 +9,14 @@ enum class TableErrorCode(override val description: String) : ErrorCode {
 
 typealias TableValue<V> = Pair<V, Location>
 
-open class TableBuilder<Value>(private val collector: ErrorCollector, private val classifier: String) {
+open class TableBuilder<Value, Summary>(
+    private val parent: Table<Value, Summary>?,
+    private val collector: ErrorCollector,
+    private val classifier: String
+) {
 
     private val table = mapBuilder<String, TableValue<Value>>()
+
     fun register(
         name: String,
         value: Value,
@@ -24,11 +29,15 @@ open class TableBuilder<Value>(private val collector: ErrorCollector, private va
             Either.Left(TableErrorCode.AlreadyDefined.new(location, "classifier" to classifier, "name" to name))
         )
 
-    open fun build() = Table(table.build())
+    open fun summary(): Summary? = null
+    open fun build() = Table(parent, table.build(), summary())
 
 }
 
-class Table<Value>(private val table: Map<String, TableValue<Value>>) {
-    operator fun get(type: String): TableValue<Value>? = table[type]
-
+class Table<Value, Summary>(
+    private val parent: Table<Value, Summary>?,
+    private val table: Map<String, TableValue<Value>>,
+    val summary: Summary?
+) {
+    operator fun get(type: String): TableValue<Value>? = table[type] ?: parent?.get(type)
 }

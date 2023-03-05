@@ -1,18 +1,19 @@
 package org.ksharp.semantics.prelude.types
 
 import org.ksharp.common.Either
+import org.ksharp.semantics.expressions.RecordSize
 import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.Type
 
-enum class Numeric(val size: kotlin.Int, val isInteger: Boolean) {
-    Byte(8, true),
-    Short(16, true),
-    Int(32, true),
-    Long(64, true),
-    BigInt(128, true),
-    Float(32, false),
-    Double(64, false),
-    BigDecimal(128, false)
+enum class Numeric(val size: kotlin.Int, val isInteger: Boolean, val recordSize: RecordSize) {
+    Byte(8, true, RecordSize.Single),
+    Short(16, true, RecordSize.Single),
+    Int(32, true, RecordSize.Single),
+    Long(64, true, RecordSize.Double),
+    BigInt(128, true, RecordSize.Single),
+    Float(32, false, RecordSize.Single),
+    Double(64, false, RecordSize.Double),
+    BigDecimal(128, false, RecordSize.Single)
 }
 
 data class NumericType internal constructor(
