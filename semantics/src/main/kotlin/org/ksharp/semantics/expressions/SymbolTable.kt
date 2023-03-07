@@ -61,3 +61,4 @@ class SymbolTableBuilder(parent: Table<Symbol, SymbolSummary>?, private val coll
 
 }
 
+typealias SymbolTable = Table<Symbol, SymbolSummary>
