@@ -84,4 +84,28 @@ class SymbolTableTest : StringSpec({
             }
         }
     }
+    "Accessing parent symbol" {
+        val typeSystem = preludeTypeSystem.value
+        SymbolTableBuilder(null, ErrorCollector()).apply {
+            register(
+                "a", typeSystem["Int"], Location.NoProvided
+            ).shouldBeRight()
+        }.build().apply {
+            SymbolTableBuilder(this, ErrorCollector()).apply {
+                register("b", typeSystem["Long"], Location.NoProvided)
+            }.build().apply {
+                summary.shouldBe(SymbolSummary(3))
+                this["a"]!!.apply {
+                    first.shouldBe(
+                        Symbol(
+                            typeSystem["Int"].valueOrNull!!,
+                            0,
+                            RecordSize.Single
+                        )
+                    )
+                    second.shouldBe(Location.NoProvided)
+                }
+            }
+        }
+    }
 })
