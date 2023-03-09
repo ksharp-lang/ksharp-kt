@@ -1,9 +1,12 @@
 package org.ksharp.semantics.expressions
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
+import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
@@ -43,6 +46,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 preludeTypeSystem.value
             )
         ).apply {
+            errors.shouldBeEmpty()
             functionTable["sum"]
                 .shouldNotBeNull()
                 .apply {
@@ -91,6 +95,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 typeSystem
             )
         ).apply {
+            errors.shouldBeEmpty()
             functionTable["sum"]
                 .shouldNotBeNull()
                 .apply {
@@ -126,6 +131,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 typeSystem
             )
         ).apply {
+            errors.shouldBeEmpty()
             functionTable["ten"]
                 .shouldNotBeNull()
                 .apply {
@@ -141,6 +147,49 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     )
                     second.shouldBe(Location.NoProvided)
                 }
+        }
+    }
+    "table: function with declaration mismatch" {
+        val typeSystem = typeSystem(preludeTypeSystem) {
+            alias("Decl__sum") {
+                functionType {
+                    type("Int")
+                    type("Int")
+                }
+            }
+        }.value
+        module(
+            FunctionNode(
+                true,
+                "sum",
+                listOf("a", "b"),
+                OperatorNode(
+                    "+",
+                    FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                    FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                typeSystem
+            )
+        ).apply {
+            errors.shouldBe(
+                listOf(
+                    FunctionSemanticsErrorCode.WrongNumberOfParameters.new(
+                        Location.NoProvided,
+                        "name" to "sum",
+                        "fnParams" to 3,
+                        "declParams" to 2
+                    )
+                )
+            )
+            functionTable["sum"]
+                .shouldBeNull()
         }
     }
 })

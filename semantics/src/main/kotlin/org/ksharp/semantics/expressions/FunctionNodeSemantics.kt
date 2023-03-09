@@ -27,7 +27,7 @@ private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<Type
     val unitParams = node.parameters.isEmpty()
     val parameters = if (unitParams) 2 else node.parameters.size + 1
     if (arguments.size != parameters) {
-        Either.Left(
+        return Either.Left(
             FunctionSemanticsErrorCode.WrongNumberOfParameters.new(
                 node.location,
                 "name" to node.name,
@@ -37,11 +37,13 @@ private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<Type
         )
     }
     if (unitParams && arguments.first().representation != "Unit") {
-        FunctionSemanticsErrorCode.ParamMismatch.new(
-            node.location,
-            "name" to node.name,
-            "fnParam" to "()",
-            "declParam" to arguments.first().representation
+        return Either.Left(
+            FunctionSemanticsErrorCode.ParamMismatch.new(
+                node.location,
+                "name" to node.name,
+                "fnParam" to "()",
+                "declParam" to arguments.first().representation
+            )
         )
     }
 
