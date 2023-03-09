@@ -6,7 +6,7 @@ import org.ksharp.typesystem.annotations.Annotation
 
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
-data class Parameter internal constructor(
+data class Parameter(
     val name: String,
 ) : TypeVariable {
     override fun toString(): String = name

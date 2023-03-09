@@ -4,7 +4,6 @@ import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.prelude.types.preludeTypeSystem
-import org.ksharp.semantics.scopes.ModuleSemanticNode
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.types.*
 
@@ -210,7 +209,7 @@ private fun TypeSystemBuilder.register(node: TypeNode) =
         this.register(node.name, node.expr)
     }
 
-private fun TypeNode.checkTypeSemantics(
+private fun TypeNode.checkTypesSemantics(
     errors: ErrorCollector,
     table: TypeVisibilityTableBuilder,
     builder: TypeSystemBuilder
@@ -224,7 +223,7 @@ private fun TypeNode.checkTypeSemantics(
     }
 }
 
-private fun TraitNode.checkTypeSemantics(
+private fun TraitNode.checkTypesSemantics(
     errors: ErrorCollector,
     table: TypeVisibilityTableBuilder,
     builder: TypeSystemBuilder
@@ -263,7 +262,7 @@ private fun TraitNode.checkTypeSemantics(
 
 }
 
-private fun TypeDeclarationNode.checkTypeSemantics(
+private fun TypeDeclarationNode.checkTypesSemantics(
     errors: ErrorCollector,
     table: TypeVisibilityTableBuilder,
     builder: TypeSystemBuilder
@@ -285,14 +284,14 @@ private fun TypeDeclarationNode.checkTypeSemantics(
     }
 }
 
-private fun Sequence<NodeData>.checkTypeSemantics(errors: ErrorCollector): Pair<TypeVisibilityTable, PartialTypeSystem> {
+private fun Sequence<NodeData>.checkTypesSemantics(errors: ErrorCollector): Pair<TypeVisibilityTable, PartialTypeSystem> {
     val table = TypeVisibilityTableBuilder(errors)
     val typeSystem = typeSystem(preludeTypeSystem) {
-        this@checkTypeSemantics.forEach {
+        this@checkTypesSemantics.forEach {
             when (it) {
-                is TypeNode -> it.checkTypeSemantics(errors, table, this)
-                is TraitNode -> it.checkTypeSemantics(errors, table, this)
-                is TypeDeclarationNode -> it.checkTypeSemantics(errors, table, this)
+                is TypeNode -> it.checkTypesSemantics(errors, table, this)
+                is TraitNode -> it.checkTypesSemantics(errors, table, this)
+                is TypeDeclarationNode -> it.checkTypesSemantics(errors, table, this)
                 else -> TODO("$it")
             }
         }
@@ -300,14 +299,14 @@ private fun Sequence<NodeData>.checkTypeSemantics(errors: ErrorCollector): Pair<
     return table.build() to typeSystem
 }
 
-fun ModuleNode.checkTypeSemantics(): ModuleSemanticNode {
+fun ModuleNode.checkTypesSemantics(): ModuleTypeSystemInfo {
     val errors = ErrorCollector()
     val (typeTable, typeSystem) = sequenceOf(
         types.asSequence(),
         typeDeclarations.asSequence()
-    ).flatten().checkTypeSemantics(errors)
+    ).flatten().checkTypesSemantics(errors)
     errors.collectAll(typeSystem.errors)
-    return ModuleSemanticNode(
+    return ModuleTypeSystemInfo(
         errors.build(),
         typeTable,
         typeSystem.value

@@ -14,7 +14,7 @@ enum class FunctionVisibility {
 data class Function(
     val visibility: FunctionVisibility,
     val name: String,
-    val type: TypePromise
+    val type: List<TypePromise>
 )
 
 class FunctionTableBuilder(collector: ErrorCollector) :

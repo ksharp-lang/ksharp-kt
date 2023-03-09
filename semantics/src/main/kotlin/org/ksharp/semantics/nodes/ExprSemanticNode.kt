@@ -1,4 +1,4 @@
-package org.ksharp.semantics.scopes
+package org.ksharp.semantics.nodes
 
 import org.ksharp.nodes.NodeData
 import org.ksharp.typesystem.types.Type
