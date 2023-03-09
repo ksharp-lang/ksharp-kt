@@ -192,4 +192,48 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 .shouldBeNull()
         }
     }
+
+    "table: function with declaration mismatch 2" {
+        val typeSystem = typeSystem(preludeTypeSystem) {
+            alias("Decl__sum") {
+                functionType {
+                    type("Int")
+                    type("Int")
+                }
+            }
+        }.value
+        module(
+            FunctionNode(
+                true,
+                "sum",
+                listOf(),
+                OperatorNode(
+                    "+",
+                    FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                    FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                typeSystem
+            )
+        ).apply {
+            errors.shouldBe(
+                listOf(
+                    FunctionSemanticsErrorCode.ParamMismatch.new(
+                        Location.NoProvided,
+                        "name" to "sum",
+                        "fnParam" to "()",
+                        "declParam" to "Int"
+                    )
+                )
+            )
+            functionTable["sum"]
+                .shouldBeNull()
+        }
+    }
 })
