@@ -9,9 +9,7 @@ import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.inference.TypePromise
 import org.ksharp.semantics.typesystem.ModuleTypeSystemInfo
 import org.ksharp.typesystem.TypeSystem
-import org.ksharp.typesystem.types.Concrete
 import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.Type
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
@@ -25,13 +23,7 @@ private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> 
         MaybePolymorphicTypePromise(param, "@param_${ix + 1}")
     }) + MaybePolymorphicTypePromise("return", "@param_${parameters.size + 1}")
 
-private fun Type.resolve(typeSystem: TypeSystem): Type =
-    when (this) {
-        is Concrete -> typeSystem[name].valueOrNull!!
-        else -> this
-    }
-
-private fun FunctionType.typePromise(node: FunctionNode, typeSystem: TypeSystem): ErrorOrValue<List<TypePromise>> {
+private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> {
     val unitParams = node.parameters.isEmpty()
     val parameters = if (unitParams) 2 else node.parameters.size + 1
     if (arguments.size != parameters) {
@@ -54,7 +46,7 @@ private fun FunctionType.typePromise(node: FunctionNode, typeSystem: TypeSystem)
     }
 
     return Either.Right(arguments.map {
-        ResolvedTypePromise(it.resolve(typeSystem))
+        ResolvedTypePromise(it)
     })
 }
 
@@ -65,7 +57,7 @@ private fun ModuleNode.buildFunctionTable(errors: ErrorCollector, typeSystem: Ty
             errors.collect(typeSystem["Decl__${f.name}"]
                 .valueOrNull
                 .let { type ->
-                    type?.cast<FunctionType>()?.typePromise(f, typeSystem) ?: Either.Right(f.typePromise(typeSystem))
+                    type?.cast<FunctionType>()?.typePromise(f) ?: Either.Right(f.typePromise(typeSystem))
                 }).map { type ->
                 table.register(
                     f.name,

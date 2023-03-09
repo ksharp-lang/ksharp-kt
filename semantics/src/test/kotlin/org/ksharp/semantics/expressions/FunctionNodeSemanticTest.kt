@@ -12,6 +12,7 @@ import org.ksharp.semantics.prelude.types.preludeTypeSystem
 import org.ksharp.semantics.typesystem.ModuleTypeSystemInfo
 import org.ksharp.semantics.typesystem.TypeVisibilityTableBuilder
 import org.ksharp.typesystem.typeSystem
+import org.ksharp.typesystem.types.Concrete
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.functionType
 
@@ -98,9 +99,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                             FunctionVisibility.Public,
                             "sum",
                             listOf(
-                                ResolvedTypePromise(typeSystem["Int"].valueOrNull!!),
-                                ResolvedTypePromise(typeSystem["Int"].valueOrNull!!),
-                                ResolvedTypePromise(typeSystem["Int"].valueOrNull!!),
+                                ResolvedTypePromise(Concrete("Int")),
+                                ResolvedTypePromise(Concrete("Int")),
+                                ResolvedTypePromise(Concrete("Int")),
                             )
                         )
                     )

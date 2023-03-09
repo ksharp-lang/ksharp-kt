@@ -19,7 +19,7 @@ sealed interface TypeVariable : Type {
     override val terms: Sequence<Type> get() = emptySequence()
 }
 
-data class Concrete internal constructor(
+data class Concrete(
     val name: String,
 ) : TypeVariable {
     override fun toString(): String = name
