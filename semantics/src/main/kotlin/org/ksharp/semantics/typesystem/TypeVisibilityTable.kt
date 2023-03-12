@@ -11,7 +11,7 @@ enum class TypeVisibility {
 }
 
 class TypeVisibilityTableBuilder(collector: ErrorCollector) :
-    TableBuilder<TypeVisibility, Unit>(null, collector, "Type")
+    TableBuilder<TypeVisibility>(null, collector, "Type")
 
 val TableValue<TypeVisibility>.isInternal get() = first.isInternal
 
@@ -20,4 +20,4 @@ val TableValue<TypeVisibility>.isPublic get() = first.isPublic
 val TypeVisibility.isInternal get() = this == TypeVisibility.Internal
 val TypeVisibility.isPublic get() = this == TypeVisibility.Public
 
-typealias TypeVisibilityTable = Table<TypeVisibility, Unit>
+typealias TypeVisibilityTable = Table<TypeVisibility>

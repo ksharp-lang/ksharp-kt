@@ -53,8 +53,12 @@ private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<Type
 }
 
 
-private fun ModuleNode.buildFunctionTable(errors: ErrorCollector, typeSystem: TypeSystem) =
+private fun ModuleNode.buildFunctionTable(
+    errors: ErrorCollector,
+    typeSystem: TypeSystem
+): Pair<FunctionTable, List<FunctionNode>> =
     FunctionTableBuilder(errors).let { table ->
+        val listBuilder = listBuilder<FunctionNode>()
         functions.forEach { f ->
             errors.collect(typeSystem["Decl__${f.name}"]
                 .valueOrNull
@@ -68,15 +72,24 @@ private fun ModuleNode.buildFunctionTable(errors: ErrorCollector, typeSystem: Ty
                         f.name,
                         type
                     ), f.location
-                )
+                ).map { listBuilder.add(f) }
             }
         }
-        table.build()
+        table.build() to listBuilder.build()
     }
+
+private fun FunctionNode.checkSemantics(errors: ErrorCollector, function: Function, typeSystem: TypeSystem) {
+    val symbolTable = SymbolTableBuilder(null, errors)
+    val typesIter = function.type.iterator()
+    println(function)
+}
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
     val errors = ErrorCollector()
-    val functionTable = buildFunctionTable(errors, moduleTypeSystemInfo.typeSystem)
+    val (functionTable, functionNodes) = buildFunctionTable(errors, moduleTypeSystemInfo.typeSystem)
+    functionNodes.map {
+        it.checkSemantics(errors, functionTable[it.name]!!.first, moduleTypeSystemInfo.typeSystem)
+    }
     return ModuleFunctionInfo(
         errors = errors.build(),
         functionTable = functionTable

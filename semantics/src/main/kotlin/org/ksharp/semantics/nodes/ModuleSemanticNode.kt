@@ -10,5 +10,5 @@ data class ModuleSemanticNode(
     val errors: List<Error>,
     val typeSystemTable: TypeVisibilityTable,
     val typeSystem: TypeSystem,
-    val functionTable: FunctionTable = FunctionTable(null, mapOf(), null)
+    val functionTable: FunctionTable = FunctionTable(null, mapOf())
 )
