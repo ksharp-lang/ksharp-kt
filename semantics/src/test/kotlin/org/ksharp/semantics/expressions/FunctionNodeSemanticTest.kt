@@ -7,13 +7,14 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 import org.ksharp.common.new
+import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
-import org.ksharp.semantics.prelude.types.preludeTypeSystem
 import org.ksharp.semantics.typesystem.ModuleTypeSystemInfo
 import org.ksharp.semantics.typesystem.TypeVisibilityTableBuilder
+import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.Concrete
 import org.ksharp.typesystem.types.alias
@@ -43,7 +44,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             ModuleTypeSystemInfo(
                 listOf(),
                 TypeVisibilityTableBuilder(ErrorCollector()).build(),
-                preludeTypeSystem.value
+                preludeModule.typeSystem
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -66,7 +67,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         }
     }
     "table: function with declaration" {
-        val typeSystem = typeSystem(preludeTypeSystem) {
+        val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
             alias("Decl__sum") {
                 functionType {
                     type("Int")
@@ -115,7 +116,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         }
     }
     "table: function with unit parameters" {
-        val typeSystem = preludeTypeSystem.value
+        val typeSystem = preludeModule.typeSystem
         module(
             FunctionNode(
                 true,
@@ -150,7 +151,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         }
     }
     "table: function with declaration mismatch" {
-        val typeSystem = typeSystem(preludeTypeSystem) {
+        val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
             alias("Decl__sum") {
                 functionType {
                     type("Int")
@@ -194,7 +195,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
 
     "table: function with declaration mismatch 2" {
-        val typeSystem = typeSystem(preludeTypeSystem) {
+        val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
             alias("Decl__sum") {
                 functionType {
                     type("Int")

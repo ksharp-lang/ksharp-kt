@@ -7,13 +7,14 @@ import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.inference.TypePromise
+import org.ksharp.semantics.nodes.AbstractionSemanticNode
 import org.ksharp.semantics.typesystem.ModuleTypeSystemInfo
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
-    ParamMismatch("Param mismatch for '{name}'. {fnParam} != {declParam}"),
+    ParamMismatch("Param mismatch for '{name}'. {fnParam} != {declParam}")
 }
 
 private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> =
@@ -78,20 +79,42 @@ private fun ModuleNode.buildFunctionTable(
         table.build() to listBuilder.build()
     }
 
-private fun FunctionNode.checkSemantics(errors: ErrorCollector, function: Function, typeSystem: TypeSystem) {
-    val symbolTable = SymbolTableBuilder(null, errors)
-    val typesIter = function.type.iterator()
-    println(function)
-}
+private fun FunctionNode.checkSemantics(
+    errors: ErrorCollector,
+    function: Function,
+    typeSystem: TypeSystem
+): Either<Boolean, AbstractionSemanticNode> =
+    SymbolTableBuilder(null, errors).let { st ->
+        val typesIter = function.type.iterator()
+        val invalidSymbolTable = Flag()
+
+        for (param in parameters) {
+            if (invalidSymbolTable.enabled) break
+            st.register(param, typesIter.next(), location).mapLeft {
+                invalidSymbolTable.activate()
+            }
+        }
+
+        if (invalidSymbolTable.enabled) Either.Left(false)
+        else Either.Right(st.build())
+    }.map { symbolTable ->
+        println(symbolTable)
+        AbstractionSemanticNode("None")
+    }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
     val errors = ErrorCollector()
     val (functionTable, functionNodes) = buildFunctionTable(errors, moduleTypeSystemInfo.typeSystem)
-    functionNodes.map {
-        it.checkSemantics(errors, functionTable[it.name]!!.first, moduleTypeSystemInfo.typeSystem)
-    }
     return ModuleFunctionInfo(
         errors = errors.build(),
-        functionTable = functionTable
+        functionTable = functionTable,
+        abstractions = functionNodes
+            .asSequence()
+            .map {
+                it.checkSemantics(errors, functionTable[it.name]!!.first, moduleTypeSystemInfo.typeSystem)
+            }
+            .filter { it.isRight }
+            .map { (it as Either.Right).value }
+            .toList()
     )
 }

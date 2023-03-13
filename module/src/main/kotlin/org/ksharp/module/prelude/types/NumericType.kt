@@ -1,7 +1,7 @@
-package org.ksharp.semantics.prelude.types
+package org.ksharp.module.prelude.types
 
 import org.ksharp.common.Either
-import org.ksharp.semantics.expressions.RecordSize
+import org.ksharp.module.RecordSize
 import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.Type
 

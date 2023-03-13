@@ -31,19 +31,19 @@ class SymbolTableTest : StringSpec({
         }.build().apply {
             this["a"]!!.apply {
                 first.shouldBe(
-                    TestTypePromise("Int")
+                    Symbol(TestTypePromise("Int"))
                 )
                 second.shouldBe(Location.NoProvided)
             }
             this["b"]!!.apply {
                 first.shouldBe(
-                    TestTypePromise("Long")
+                    Symbol(TestTypePromise("Long"))
                 )
                 second.shouldBe(Location.NoProvided)
             }
             this["c"]!!.apply {
                 first.shouldBe(
-                    TestTypePromise("String")
+                    Symbol(TestTypePromise("String"))
                 )
                 second.shouldBe(Location.NoProvided)
             }
@@ -60,7 +60,7 @@ class SymbolTableTest : StringSpec({
             }.build().apply {
                 this["a"]!!.apply {
                     first.shouldBe(
-                        TestTypePromise("Long")
+                        Symbol(TestTypePromise("Long"))
                     )
                     second.shouldBe(Location.NoProvided)
                 }
@@ -78,7 +78,7 @@ class SymbolTableTest : StringSpec({
             }.build().apply {
                 this["a"]!!.apply {
                     first.shouldBe(
-                        TestTypePromise("Int")
+                        Symbol(TestTypePromise("Int"))
                     )
                     second.shouldBe(Location.NoProvided)
                 }
@@ -102,7 +102,7 @@ class SymbolTableTest : StringSpec({
         }.build().apply {
             this["a"]!!.apply {
                 first.shouldBe(
-                    TestTypePromise("KeyMap")
+                    Symbol(TestTypePromise("KeyMap"))
                 )
                 second.shouldBe(Location.NoProvided)
             }

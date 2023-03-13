@@ -38,4 +38,11 @@ class Table<Value>(
     private val table: Map<String, TableValue<Value>>,
 ) {
     operator fun get(type: String): TableValue<Value>? = table[type] ?: parent?.get(type)
+
+    override fun toString(): String {
+        if (parent != null) {
+            return "parent: $parent\n$table"
+        }
+        return table.toString()
+    }
 }
