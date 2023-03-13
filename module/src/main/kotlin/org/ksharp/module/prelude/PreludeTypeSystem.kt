@@ -1,6 +1,9 @@
-package org.ksharp.semantics.prelude.types
+package org.ksharp.module.prelude
 
 import org.ksharp.common.Either
+import org.ksharp.module.prelude.types.Numeric
+import org.ksharp.module.prelude.types.charType
+import org.ksharp.module.prelude.types.numeric
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.alias
@@ -56,4 +59,4 @@ private fun createPreludeTypeSystem() = typeSystem {
     }
 }
 
-val preludeTypeSystem = createPreludeTypeSystem()
+internal val preludeTypeSystem = createPreludeTypeSystem()

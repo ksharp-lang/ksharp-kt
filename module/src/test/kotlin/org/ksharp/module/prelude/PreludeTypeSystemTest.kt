@@ -1,9 +1,12 @@
-package org.ksharp.semantics.prelude.types
+package org.ksharp.module.prelude
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.sequences.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import org.ksharp.module.prelude.types.Numeric
+import org.ksharp.module.prelude.types.NumericType
+import org.ksharp.module.prelude.types.charType
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.get
 

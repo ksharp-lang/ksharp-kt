@@ -1,4 +1,4 @@
-package org.ksharp.semantics.prelude.types
+package org.ksharp.module.prelude.types
 
 import org.ksharp.typesystem.types.Type
 
