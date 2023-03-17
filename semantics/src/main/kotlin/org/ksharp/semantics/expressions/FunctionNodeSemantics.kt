@@ -3,11 +3,12 @@ package org.ksharp.semantics.expressions
 import org.ksharp.common.*
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
+import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.VarNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.nodes.AbstractionSemanticNode
 import org.ksharp.semantics.typesystem.ModuleTypeSystemInfo
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
@@ -83,7 +84,7 @@ private fun FunctionNode.checkSemantics(
     errors: ErrorCollector,
     function: Function,
     typeSystem: TypeSystem
-): Either<Boolean, AbstractionSemanticNode> =
+): Either<Boolean, AbstractionNode<String>> =
     SymbolTableBuilder(null, errors).let { st ->
         val typesIter = function.type.iterator()
         val invalidSymbolTable = Flag()
@@ -99,7 +100,7 @@ private fun FunctionNode.checkSemantics(
         else Either.Right(st.build())
     }.map { symbolTable ->
         println(symbolTable)
-        AbstractionSemanticNode("None")
+        AbstractionNode("Test", VarNode("a", "varInfo", Location.NoProvided), "Info", Location.NoProvided)
     }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
