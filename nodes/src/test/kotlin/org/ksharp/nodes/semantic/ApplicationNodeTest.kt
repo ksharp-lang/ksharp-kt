@@ -1,0 +1,53 @@
+package org.ksharp.nodes.semantic
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import org.ksharp.common.Location
+import org.ksharp.nodes.Node
+
+class ApplicationNodeTest : StringSpec({
+    "Test Node Interface over ApplicationNode" {
+        ApplicationNode(
+            "sum5",
+            listOf(
+                VarNode(
+                    "a",
+                    "VarInfo",
+                    Location.NoProvided
+                )
+            ),
+            "AppInfo",
+            Location.NoProvided
+        ).node.apply {
+            cast<ApplicationNode<String>>().apply {
+                functionName.shouldBe("sum5")
+                info.shouldBe("AppInfo")
+                arguments.shouldBe(
+                    listOf(
+                        VarNode(
+                            "a",
+                            "VarInfo",
+                            Location.NoProvided
+                        )
+                    )
+                )
+                location.shouldBe(Location.NoProvided)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(
+                        this,
+                        Location.NoProvided,
+                        VarNode(
+                            "a",
+                            "VarInfo",
+                            Location.NoProvided
+                        )
+                    )
+                )
+            )
+        }
+    }
+})
