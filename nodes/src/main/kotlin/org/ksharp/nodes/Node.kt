@@ -40,3 +40,5 @@ abstract class NodeData {
         Node(parent, location, it)
     }
 }
+
+sealed interface ExpressionParserNode
