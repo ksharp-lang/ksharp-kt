@@ -1,5 +1,7 @@
 package org.ksharp.semantics.expressions
 
+import io.kotest.core.Tuple4
+import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -9,10 +11,14 @@ import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
+import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.ConstantNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
+import org.ksharp.semantics.nodes.EmptySemanticInfo
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
+import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionVisibility
 import org.ksharp.semantics.scopes.TypeVisibilityTableBuilder
@@ -240,45 +246,54 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
 })
 
-class FunctionNodeSemanticTransformSemanticNodeTest : StringSpec({
-    "table: constant function" {
-        module(
-            FunctionNode(
-                true,
-                "sum",
-                listOf("a", "b"),
-                OperatorNode(
-                    "+",
-                    FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
-                    FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                    Location.NoProvided
-                ),
-                Location.NoProvided
-            )
-        ).checkFunctionSemantics(
-            ModuleTypeSystemInfo(
-                listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
-                preludeModule.typeSystem
-            )
-        ).apply {
-            errors.shouldBeEmpty()
-            functionTable["sum"]
-                .shouldNotBeNull()
-                .apply {
-                    first.shouldBe(
-                        Function(
-                            FunctionVisibility.Public,
-                            "sum",
-                            listOf(
-                                MaybePolymorphicTypePromise("a", "@param_1"),
-                                MaybePolymorphicTypePromise("b", "@param_2"),
-                                MaybePolymorphicTypePromise("return", "@param_3"),
+class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
+    context("Semantic node: constant function") {
+        listOf<Tuple4<LiteralValueType, String, String, Any>>(
+            Tuple4(LiteralValueType.Integer, "Long", "10", 10.toLong()),
+            Tuple4(LiteralValueType.BinaryInteger, "Long", "0b0001", 1.toLong()),
+            Tuple4(LiteralValueType.HexInteger, "Long", "0xFF", 255.toLong()),
+            Tuple4(LiteralValueType.OctalInteger, "Long", "0o01", 1.toLong()),
+            Tuple4(LiteralValueType.Decimal, "Double", "1.5", 1.5.toDouble()),
+            Tuple4(LiteralValueType.String, "String", "\"Hello\"", "Hello"),
+            Tuple4(LiteralValueType.MultiLineString, "String", "\"\"\"Hello\nWorld\"\"\"", "Hello\nWorld"),
+            Tuple4(LiteralValueType.Character, "Char", "'c'", 'c'),
+        ).forEach { (literalType, expectedType, value, expectedValue) ->
+            context("value type $literalType") {
+                module(
+                    FunctionNode(
+                        true,
+                        "n",
+                        listOf(),
+                        LiteralValueNode(value, literalType, Location.NoProvided),
+                        Location.NoProvided
+                    )
+                ).checkFunctionSemantics(
+                    ModuleTypeSystemInfo(
+                        listOf(),
+                        TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                        preludeModule.typeSystem
+                    )
+                ).apply {
+                    errors.shouldBeEmpty()
+                    abstractions.shouldBe(
+                        listOf(
+                            AbstractionNode(
+                                "n", ConstantNode(
+                                    expectedValue,
+                                    TypeSemanticInfo(
+                                        ResolvedTypePromise(
+                                            preludeModule.typeSystem[expectedType].valueOrNull!!
+                                        )
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                EmptySemanticInfo,
+                                Location.NoProvided
                             )
                         )
                     )
-                    second.shouldBe(Location.NoProvided)
                 }
+            }
         }
     }
 })

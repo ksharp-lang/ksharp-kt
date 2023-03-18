@@ -1,16 +1,15 @@
 package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
+import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.nodes.semantic.VarNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.nodes.ModuleFunctionInfo
-import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
+import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.typesystem.TypeSystem
@@ -87,7 +86,7 @@ private fun FunctionNode.checkSemantics(
     errors: ErrorCollector,
     function: Function,
     typeSystem: TypeSystem
-): Either<Boolean, AbstractionNode<String>> =
+): Either<Boolean, AbstractionNode<SemanticInfo>> =
     SymbolTableBuilder(null, errors).let { st ->
         val typesIter = function.type.iterator()
         val invalidSymbolTable = Flag()
@@ -102,9 +101,10 @@ private fun FunctionNode.checkSemantics(
         if (invalidSymbolTable.enabled) Either.Left(false)
         else Either.Right(st.build())
     }.map { symbolTable ->
-        println(symbolTable)
-        println(expression)
-        AbstractionNode("Test", VarNode("a", "varInfo", Location.NoProvided), "Info", Location.NoProvided)
+        val info = FunctionSemanticInfo(symbolTable)
+        val semanticNode = expression.cast<ExpressionParserNode>()
+            .toSemanticNode(info, typeSystem)
+        AbstractionNode(name, semanticNode, EmptySemanticInfo, location)
     }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {

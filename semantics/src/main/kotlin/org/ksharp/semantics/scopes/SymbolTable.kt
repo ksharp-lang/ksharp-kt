@@ -15,4 +15,4 @@ class SymbolTableBuilder(parent: Table<Symbol>?, collector: ErrorCollector) :
         register(name, Symbol(type), location)
 }
 
-typealias SymbolTable = Table<TypePromise>
+typealias SymbolTable = Table<Symbol>

@@ -8,5 +8,5 @@ import org.ksharp.semantics.scopes.Table
 data class ModuleFunctionInfo(
     val errors: List<Error>,
     val functionTable: Table<Function>,
-    val abstractions: List<AbstractionNode<String>>
+    val abstractions: List<AbstractionNode<SemanticInfo>>
 )
