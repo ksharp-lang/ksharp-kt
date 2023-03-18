@@ -1,9 +1,6 @@
-package org.ksharp.semantics.typesystem
+package org.ksharp.semantics.scopes
 
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.scopes.Table
-import org.ksharp.semantics.scopes.TableBuilder
-import org.ksharp.semantics.scopes.TableValue
 
 enum class TypeVisibility {
     Internal,

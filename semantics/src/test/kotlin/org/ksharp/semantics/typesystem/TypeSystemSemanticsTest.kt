@@ -9,6 +9,8 @@ import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.semantics.scopes.TableErrorCode
+import org.ksharp.semantics.scopes.isInternal
+import org.ksharp.semantics.scopes.isPublic
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode

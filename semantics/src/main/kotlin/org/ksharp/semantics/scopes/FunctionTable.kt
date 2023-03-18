@@ -1,10 +1,7 @@
-package org.ksharp.semantics.expressions
+package org.ksharp.semantics.scopes
 
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.scopes.Table
-import org.ksharp.semantics.scopes.TableBuilder
-import org.ksharp.semantics.scopes.TableValue
 
 enum class FunctionVisibility {
     Internal,

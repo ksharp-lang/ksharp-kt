@@ -1,11 +1,9 @@
-package org.ksharp.semantics.expressions
+package org.ksharp.semantics.scopes
 
 import org.ksharp.common.Flag
 import org.ksharp.common.Location
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.scopes.Table
-import org.ksharp.semantics.scopes.TableBuilder
 
 data class Symbol(val type: TypePromise) {
     val used: Flag = Flag()

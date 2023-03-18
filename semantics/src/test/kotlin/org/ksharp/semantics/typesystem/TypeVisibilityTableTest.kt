@@ -7,7 +7,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.scopes.TableErrorCode
+import org.ksharp.semantics.scopes.*
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 

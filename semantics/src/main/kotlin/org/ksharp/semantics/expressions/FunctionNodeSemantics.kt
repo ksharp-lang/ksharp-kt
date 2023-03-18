@@ -9,7 +9,10 @@ import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.typesystem.ModuleTypeSystemInfo
+import org.ksharp.semantics.nodes.ModuleFunctionInfo
+import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
+import org.ksharp.semantics.scopes.*
+import org.ksharp.semantics.scopes.Function
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
 

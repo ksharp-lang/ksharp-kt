@@ -12,8 +12,10 @@ import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
-import org.ksharp.semantics.typesystem.ModuleTypeSystemInfo
-import org.ksharp.semantics.typesystem.TypeVisibilityTableBuilder
+import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
+import org.ksharp.semantics.scopes.Function
+import org.ksharp.semantics.scopes.FunctionVisibility
+import org.ksharp.semantics.scopes.TypeVisibilityTableBuilder
 import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.Concrete
