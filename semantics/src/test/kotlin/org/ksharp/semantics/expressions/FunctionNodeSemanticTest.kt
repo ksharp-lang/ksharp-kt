@@ -195,7 +195,6 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 .shouldBeNull()
         }
     }
-
     "table: function with declaration mismatch 2" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
             alias("Decl__sum") {
@@ -237,6 +236,49 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
             functionTable["sum"]
                 .shouldBeNull()
+        }
+    }
+})
+
+class FunctionNodeSemanticTransformSemanticNodeTest : StringSpec({
+    "table: constant function" {
+        module(
+            FunctionNode(
+                true,
+                "sum",
+                listOf("a", "b"),
+                OperatorNode(
+                    "+",
+                    FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                    FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                preludeModule.typeSystem
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            functionTable["sum"]
+                .shouldNotBeNull()
+                .apply {
+                    first.shouldBe(
+                        Function(
+                            FunctionVisibility.Public,
+                            "sum",
+                            listOf(
+                                MaybePolymorphicTypePromise("a", "@param_1"),
+                                MaybePolymorphicTypePromise("b", "@param_2"),
+                                MaybePolymorphicTypePromise("return", "@param_3"),
+                            )
+                        )
+                    )
+                    second.shouldBe(Location.NoProvided)
+                }
         }
     }
 })
