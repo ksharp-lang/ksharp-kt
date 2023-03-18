@@ -1,4 +1,4 @@
-package org.ksharp.semantics.expressions
+package org.ksharp.semantics.scopes
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.nulls.shouldBeNull
@@ -7,13 +7,11 @@ import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.scopes.Symbol
-import org.ksharp.semantics.scopes.SymbolTableBuilder
-import org.ksharp.semantics.scopes.TableErrorCode
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
 private data class TestTypePromise(val value: String) : TypePromise
+
 
 class SymbolTableTest : StringSpec({
     "Create symbol table" {

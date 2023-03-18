@@ -1,4 +1,4 @@
-package org.ksharp.semantics.expressions
+package org.ksharp.semantics.scopes
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -9,8 +9,6 @@ import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
-import org.ksharp.semantics.scopes.*
-import org.ksharp.semantics.scopes.Function
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 

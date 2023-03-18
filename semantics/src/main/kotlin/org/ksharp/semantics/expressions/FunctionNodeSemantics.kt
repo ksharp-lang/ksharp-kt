@@ -103,6 +103,7 @@ private fun FunctionNode.checkSemantics(
         else Either.Right(st.build())
     }.map { symbolTable ->
         println(symbolTable)
+        println(expression)
         AbstractionNode("Test", VarNode("a", "varInfo", Location.NoProvided), "Info", Location.NoProvided)
     }
 
