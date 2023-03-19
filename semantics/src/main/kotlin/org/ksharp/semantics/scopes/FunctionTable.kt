@@ -24,4 +24,4 @@ val TableValue<Function>.isPublic get() = first.isPublic
 val Function.isInternal get() = this.visibility == FunctionVisibility.Internal
 val Function.isPublic get() = this.visibility == FunctionVisibility.Public
 
-typealias FunctionTable = Table<Function>
+typealias FunctionTable = TableImpl<Function>

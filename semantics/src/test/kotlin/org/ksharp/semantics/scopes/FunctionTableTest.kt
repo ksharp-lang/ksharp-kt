@@ -13,7 +13,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
 class FunctionTableTest : StringSpec({
-    val mockType = MaybePolymorphicTypePromise("a", "param_1")
+    val mockType = MaybePolymorphicTypePromise("a")
     "Add function into symbol table" {
         FunctionTableBuilder(ErrorCollector()).apply {
             register(

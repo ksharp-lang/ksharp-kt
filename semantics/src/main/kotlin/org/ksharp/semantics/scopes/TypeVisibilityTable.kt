@@ -17,4 +17,4 @@ val TableValue<TypeVisibility>.isPublic get() = first.isPublic
 val TypeVisibility.isInternal get() = this == TypeVisibility.Internal
 val TypeVisibility.isPublic get() = this == TypeVisibility.Public
 
-typealias TypeVisibilityTable = Table<TypeVisibility>
+typealias TypeVisibilityTable = TableImpl<TypeVisibility>

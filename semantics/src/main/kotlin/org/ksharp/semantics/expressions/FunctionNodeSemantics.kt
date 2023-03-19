@@ -23,9 +23,9 @@ enum class FunctionSemanticsErrorCode(override val description: String) : ErrorC
 private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> =
     (if (parameters.isEmpty()) {
         listOf(ResolvedTypePromise(typeSystem["Unit"].valueOrNull!!))
-    } else parameters.mapIndexed { ix, param ->
-        MaybePolymorphicTypePromise(param, "@param_${ix + 1}")
-    }) + MaybePolymorphicTypePromise("return", "@param_${parameters.size + 1}")
+    } else parameters.map { param ->
+        MaybePolymorphicTypePromise(param)
+    }) + MaybePolymorphicTypePromise("return")
 
 private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> {
     val unitParams = node.parameters.isEmpty()
@@ -101,9 +101,9 @@ private fun FunctionNode.checkSemantics(
         if (invalidSymbolTable.enabled) Either.Left(false)
         else Either.Right(st.build())
     }.map { symbolTable ->
-        val info = FunctionSemanticInfo(symbolTable)
+        val info = SymbolTableSemanticInfo(symbolTable)
         val semanticNode = expression.cast<ExpressionParserNode>()
-            .toSemanticNode(info, typeSystem)
+            .toSemanticNode(errors, info, typeSystem)
         AbstractionNode(name, semanticNode, EmptySemanticInfo, location)
     }
 

@@ -12,12 +12,17 @@ import org.ksharp.common.new
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.ApplicationNode
 import org.ksharp.nodes.semantic.ConstantNode
+import org.ksharp.nodes.semantic.VarNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
+import org.ksharp.semantics.inference.TypePromise
+import org.ksharp.semantics.inference.getTypePromise
 import org.ksharp.semantics.nodes.EmptySemanticInfo
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
+import org.ksharp.semantics.nodes.Symbol
 import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionVisibility
@@ -64,9 +69,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                             FunctionVisibility.Public,
                             "sum",
                             listOf(
-                                MaybePolymorphicTypePromise("a", "@param_1"),
-                                MaybePolymorphicTypePromise("b", "@param_2"),
-                                MaybePolymorphicTypePromise("return", "@param_3"),
+                                MaybePolymorphicTypePromise("a"),
+                                MaybePolymorphicTypePromise("b"),
+                                MaybePolymorphicTypePromise("return"),
                             )
                         )
                     )
@@ -150,7 +155,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                             "ten",
                             listOf(
                                 ResolvedTypePromise(typeSystem["Unit"].valueOrNull!!),
-                                MaybePolymorphicTypePromise("return", "@param_1")
+                                MaybePolymorphicTypePromise("return")
                             )
                         )
                     )
@@ -247,18 +252,22 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
 })
 
 class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
+    val ts = preludeModule.typeSystem
+    val longTypePromise = ts.getTypePromise("Long")
+    val strTypePromise = ts.getTypePromise("String")
+    val unitTypePromise = ts.getTypePromise("Unit")
     context("Semantic node: constant function") {
-        listOf<Tuple4<LiteralValueType, String, String, Any>>(
-            Tuple4(LiteralValueType.Integer, "Long", "10", 10.toLong()),
-            Tuple4(LiteralValueType.BinaryInteger, "Long", "0b0001", 1.toLong()),
-            Tuple4(LiteralValueType.HexInteger, "Long", "0xFF", 255.toLong()),
-            Tuple4(LiteralValueType.OctalInteger, "Long", "0o01", 1.toLong()),
-            Tuple4(LiteralValueType.Decimal, "Double", "1.5", 1.5.toDouble()),
-            Tuple4(LiteralValueType.String, "String", "\"Hello\"", "Hello"),
-            Tuple4(LiteralValueType.MultiLineString, "String", "\"\"\"Hello\nWorld\"\"\"", "Hello\nWorld"),
-            Tuple4(LiteralValueType.Character, "Char", "'c'", 'c'),
+        listOf<Tuple4<LiteralValueType, TypePromise, String, Any>>(
+            Tuple4(LiteralValueType.Integer, longTypePromise, "10", 10.toLong()),
+            Tuple4(LiteralValueType.BinaryInteger, longTypePromise, "0b0001", 1.toLong()),
+            Tuple4(LiteralValueType.HexInteger, longTypePromise, "0xFF", 255.toLong()),
+            Tuple4(LiteralValueType.OctalInteger, longTypePromise, "0o01", 1.toLong()),
+            Tuple4(LiteralValueType.Decimal, ts.getTypePromise("Double"), "1.5", 1.5.toDouble()),
+            Tuple4(LiteralValueType.String, strTypePromise, "\"Hello\"", "Hello"),
+            Tuple4(LiteralValueType.MultiLineString, strTypePromise, "\"\"\"Hello\nWorld\"\"\"", "Hello\nWorld"),
+            Tuple4(LiteralValueType.Character, ts.getTypePromise("Char"), "'c'", 'c'),
         ).forEach { (literalType, expectedType, value, expectedValue) ->
-            context("value type $literalType") {
+            should("value type $literalType") {
                 module(
                     FunctionNode(
                         true,
@@ -271,7 +280,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     ModuleTypeSystemInfo(
                         listOf(),
                         TypeVisibilityTableBuilder(ErrorCollector()).build(),
-                        preludeModule.typeSystem
+                        ts
                     )
                 ).apply {
                     errors.shouldBeEmpty()
@@ -280,11 +289,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             AbstractionNode(
                                 "n", ConstantNode(
                                     expectedValue,
-                                    TypeSemanticInfo(
-                                        ResolvedTypePromise(
-                                            preludeModule.typeSystem[expectedType].valueOrNull!!
-                                        )
-                                    ),
+                                    TypeSemanticInfo(expectedType),
                                     Location.NoProvided
                                 ),
                                 EmptySemanticInfo,
@@ -294,6 +299,252 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     )
                 }
             }
+        }
+    }
+    should("Semantic node: operator") {
+        module(
+            FunctionNode(
+                true,
+                "n",
+                listOf(),
+                OperatorNode(
+                    "**",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        "n",
+                        ApplicationNode(
+                            "(**)",
+                            listOf(
+                                ConstantNode(
+                                    10.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    2.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                )
+                            ),
+                            TypeSemanticInfo(MaybePolymorphicTypePromise("app-return")),
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo,
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: if with else") {
+        module(
+            FunctionNode(
+                true,
+                "n",
+                listOf("a"),
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        "n",
+                        ApplicationNode(
+                            "if",
+                            listOf(
+                                ApplicationNode(
+                                    "(>)",
+                                    listOf(
+                                        ConstantNode(
+                                            4.toLong(),
+                                            TypeSemanticInfo(longTypePromise),
+                                            Location.NoProvided
+                                        ),
+                                        VarNode(
+                                            "a",
+                                            Symbol(MaybePolymorphicTypePromise("a")),
+                                            Location.NoProvided
+                                        )
+                                    ),
+                                    TypeSemanticInfo(MaybePolymorphicTypePromise("app-return")),
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    10.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    20.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                ),
+                            ),
+                            TypeSemanticInfo(MaybePolymorphicTypePromise("if-return")),
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo,
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: if without else") {
+        module(
+            FunctionNode(
+                true,
+                "n",
+                listOf("a"),
+                IfNode(
+                    OperatorNode(
+                        ">",
+                        LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        "n",
+                        ApplicationNode(
+                            "if",
+                            listOf(
+                                ApplicationNode(
+                                    "(>)",
+                                    listOf(
+                                        ConstantNode(
+                                            4.toLong(),
+                                            TypeSemanticInfo(longTypePromise),
+                                            Location.NoProvided
+                                        ),
+                                        VarNode(
+                                            "a",
+                                            Symbol(MaybePolymorphicTypePromise("a")),
+                                            Location.NoProvided
+                                        )
+                                    ),
+                                    TypeSemanticInfo(MaybePolymorphicTypePromise("app-return")),
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    10.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    Unit,
+                                    TypeSemanticInfo(unitTypePromise),
+                                    Location.NoProvided
+                                ),
+                            ),
+                            TypeSemanticInfo(MaybePolymorphicTypePromise("if-return")),
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo,
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: let") {
+        module(
+            FunctionNode(
+                true,
+                "n",
+                listOf(),
+                LetExpressionNode(
+                    listOf(
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            FunctionCallNode(
+                                "sum", FunctionType.Function, listOf(
+                                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
+                                ), Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        MatchAssignNode(
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            println(abstractions)
         }
     }
 })

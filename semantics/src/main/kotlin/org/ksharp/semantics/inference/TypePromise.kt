@@ -16,8 +16,7 @@ data class ResolvedTypePromise(
 ) : TypePromise
 
 data class MaybePolymorphicTypePromise(
-    val name: String,
-    val paramName: String,
+    val name: String
 ) : TypePromise
 
 fun TypeSystem.getTypePromise(name: String) =
