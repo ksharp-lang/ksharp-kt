@@ -9,7 +9,11 @@ import org.ksharp.nodes.Node
 class LetNodeTest : StringSpec({
     "Test Node Interface over LetBindingNode" {
         LetBindingNode(
-            "a",
+            VarNode(
+                "b",
+                "VarInfo",
+                Location.NoProvided
+            ),
             VarNode(
                 "a",
                 "VarInfo",
@@ -19,7 +23,13 @@ class LetNodeTest : StringSpec({
             Location.NoProvided
         ).node.apply {
             cast<LetBindingNode<String>>().apply {
-                name.shouldBe("a")
+                match.shouldBe(
+                    VarNode(
+                        "b",
+                        "VarInfo",
+                        Location.NoProvided
+                    )
+                )
                 info.shouldBe("BindingInfo")
                 expression.shouldBe(
                     VarNode(
@@ -50,7 +60,11 @@ class LetNodeTest : StringSpec({
         LetNode(
             listOf(
                 LetBindingNode(
-                    "a",
+                    VarNode(
+                        "b",
+                        "VarInfo",
+                        Location.NoProvided
+                    ),
                     VarNode(
                         "a",
                         "VarInfo",
@@ -73,7 +87,11 @@ class LetNodeTest : StringSpec({
                 bindings.shouldBe(
                     listOf(
                         LetBindingNode(
-                            "a",
+                            VarNode(
+                                "b",
+                                "VarInfo",
+                                Location.NoProvided
+                            ),
                             VarNode(
                                 "a",
                                 "VarInfo",
@@ -100,7 +118,11 @@ class LetNodeTest : StringSpec({
                         this,
                         Location.NoProvided,
                         LetBindingNode(
-                            "a",
+                            VarNode(
+                                "b",
+                                "VarInfo",
+                                Location.NoProvided
+                            ),
                             VarNode(
                                 "a",
                                 "VarInfo",

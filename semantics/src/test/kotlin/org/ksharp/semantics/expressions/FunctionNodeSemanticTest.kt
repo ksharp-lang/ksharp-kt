@@ -11,10 +11,7 @@ import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
-import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.nodes.semantic.ApplicationNode
-import org.ksharp.nodes.semantic.ConstantNode
-import org.ksharp.nodes.semantic.VarNode
+import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
@@ -328,7 +325,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     AbstractionNode(
                         "n",
                         ApplicationNode(
-                            "(**)",
+                            ApplicationName(name = "(**)"),
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
@@ -383,10 +380,10 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     AbstractionNode(
                         "n",
                         ApplicationNode(
-                            "if",
+                            ApplicationName("::prelude", "if"),
                             listOf(
                                 ApplicationNode(
-                                    "(>)",
+                                    ApplicationName(name = "(>)"),
                                     listOf(
                                         ConstantNode(
                                             4.toLong(),
@@ -455,10 +452,10 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     AbstractionNode(
                         "n",
                         ApplicationNode(
-                            "if",
+                            ApplicationName("::prelude", "if"),
                             listOf(
                                 ApplicationNode(
-                                    "(>)",
+                                    ApplicationName(name = "(>)"),
                                     listOf(
                                         ConstantNode(
                                             4.toLong(),
@@ -486,6 +483,263 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 ),
                             ),
                             TypeSemanticInfo(MaybePolymorphicTypePromise("if-return")),
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo,
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: list literal") {
+        module(
+            FunctionNode(
+                true,
+                "n",
+                listOf(),
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        OperatorNode(
+                            "+",
+                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ), LiteralCollectionType.List, Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        "n",
+                        ApplicationNode(
+                            ApplicationName("::prelude", "listOf"),
+                            listOf(
+                                ConstantNode(
+                                    10.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                ),
+                                ApplicationNode(
+                                    ApplicationName(name = "(+)"),
+                                    listOf(
+                                        ConstantNode(
+                                            2.toLong(),
+                                            TypeSemanticInfo(longTypePromise),
+                                            Location.NoProvided
+                                        ),
+                                        ConstantNode(
+                                            1.toLong(),
+                                            TypeSemanticInfo(longTypePromise),
+                                            Location.NoProvided
+                                        )
+                                    ),
+                                    TypeSemanticInfo(MaybePolymorphicTypePromise("app-return")),
+                                    Location.NoProvided
+                                )
+                            ),
+                            TypeSemanticInfo(
+                                MaybePolymorphicTypePromise("app-return")
+                            ),
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo,
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: set literal") {
+        module(
+            FunctionNode(
+                true,
+                "n",
+                listOf(),
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
+                    ),
+                    LiteralCollectionType.Set,
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        "n",
+                        ApplicationNode(
+                            ApplicationName("::prelude", "setOf"),
+                            listOf(
+                                ConstantNode(
+                                    1.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    2.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    3.toLong(),
+                                    TypeSemanticInfo(longTypePromise),
+                                    Location.NoProvided
+                                )
+                            ),
+                            TypeSemanticInfo(
+                                MaybePolymorphicTypePromise("app-return")
+                            ),
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo,
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: tuple literal") {
+        module(
+            FunctionNode(
+                true,
+                "n",
+                listOf("y"),
+                LiteralCollectionNode(
+                    listOf(
+                        FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
+                        FunctionCallNode("y", FunctionType.Function, emptyList(), Location.NoProvided),
+                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        "n",
+                        ApplicationNode(
+                            ApplicationName("::prelude", "tupleOf"),
+                            listOf(
+                                VarNode(
+                                    "x",
+                                    TypeSemanticInfo(
+                                        MaybePolymorphicTypePromise("x")
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                VarNode(
+                                    "y",
+                                    Symbol(
+                                        MaybePolymorphicTypePromise("y")
+                                    ),
+                                    Location.NoProvided
+                                )
+                            ),
+                            TypeSemanticInfo(
+                                MaybePolymorphicTypePromise("app-return")
+                            ),
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo,
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: map literal") {
+        module(
+            FunctionNode(
+                true,
+                "n",
+                listOf(),
+                LiteralCollectionNode(
+                    listOf(
+                        LiteralMapEntryNode(
+                            LiteralValueNode("\"key1\"", LiteralValueType.String, Location.NoProvided),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        LiteralMapEntryNode(
+                            LiteralValueNode("\"key2\"", LiteralValueType.String, Location.NoProvided),
+                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ), LiteralCollectionType.Map, Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        "n",
+                        ApplicationNode(
+                            ApplicationName("::prelude", "mapOf"),
+                            listOf(
+                                ApplicationNode(
+                                    ApplicationName("::prelude", "pair"),
+                                    listOf(
+                                        ConstantNode("key1", TypeSemanticInfo(strTypePromise), Location.NoProvided),
+                                        ConstantNode(1.toLong(), TypeSemanticInfo(longTypePromise), Location.NoProvided)
+                                    ),
+                                    TypeSemanticInfo(
+                                        MaybePolymorphicTypePromise("app-return")
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                ApplicationNode(
+                                    ApplicationName("::prelude", "pair"),
+                                    listOf(
+                                        ConstantNode("key2", TypeSemanticInfo(strTypePromise), Location.NoProvided),
+                                        ConstantNode(2.toLong(), TypeSemanticInfo(longTypePromise), Location.NoProvided)
+                                    ),
+                                    TypeSemanticInfo(
+                                        MaybePolymorphicTypePromise("app-return")
+                                    ),
+                                    Location.NoProvided
+                                )
+                            ),
+                            TypeSemanticInfo(
+                                MaybePolymorphicTypePromise("app-return")
+                            ),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -544,7 +798,77 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            println(abstractions)
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        "n",
+                        LetNode(
+                            listOf(
+                                LetBindingNode(
+                                    VarNode(
+                                        "x",
+                                        Symbol(MaybePolymorphicTypePromise("x")),
+                                        Location.NoProvided
+                                    ),
+                                    ApplicationNode(
+                                        ApplicationName(name = "sum"),
+                                        listOf(
+                                            ConstantNode(
+                                                10.toLong(),
+                                                TypeSemanticInfo(longTypePromise),
+                                                Location.NoProvided
+                                            )
+                                        ),
+                                        TypeSemanticInfo(
+                                            MaybePolymorphicTypePromise("app-return")
+                                        ),
+                                        Location.NoProvided
+                                    ),
+                                    EmptySemanticInfo,
+                                    Location.NoProvided
+                                ),
+                                LetBindingNode(
+                                    VarNode(
+                                        "y",
+                                        Symbol(MaybePolymorphicTypePromise("y")),
+                                        Location.NoProvided
+                                    ),
+                                    ConstantNode(
+                                        20.toLong(),
+                                        TypeSemanticInfo(longTypePromise),
+                                        Location.NoProvided
+                                    ),
+                                    EmptySemanticInfo,
+                                    Location.NoProvided
+                                )
+                            ),
+                            ApplicationNode(
+                                ApplicationName(name = "(+)"),
+                                listOf(
+                                    VarNode(
+                                        "x",
+                                        Symbol(MaybePolymorphicTypePromise("x")),
+                                        Location.NoProvided
+                                    ),
+                                    VarNode(
+                                        "y",
+                                        Symbol(MaybePolymorphicTypePromise("y")),
+                                        Location.NoProvided
+                                    )
+                                ),
+                                TypeSemanticInfo(
+                                    MaybePolymorphicTypePromise("app-return")
+                                ),
+                                Location.NoProvided
+                            ),
+                            EmptySemanticInfo,
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo,
+                        Location.NoProvided
+                    )
+                )
+            )
         }
     }
 })

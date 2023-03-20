@@ -1,14 +1,31 @@
 package org.ksharp.semantics.expressions
 
+import org.ksharp.common.ErrorCode
+import org.ksharp.common.Location
 import org.ksharp.common.cast
+import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
+import org.ksharp.semantics.inference.ErrorTypePromise
 import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.typesystem.TypeSystem
+
+enum class ExpressionSemanticsErrorCode(override val description: String) : ErrorCode {
+    SymbolAlreadyUsed("Symbol already used '{name}'")
+}
+
+private val LiteralCollectionType.applicationName
+    get(): ApplicationName =
+        when (this) {
+            LiteralCollectionType.List -> ApplicationName("::prelude", "listOf")
+            LiteralCollectionType.Map -> ApplicationName("::prelude", "mapOf")
+            LiteralCollectionType.Tuple -> ApplicationName("::prelude", "tupleOf")
+            LiteralCollectionType.Set -> ApplicationName("::prelude", "setOf")
+        }
 
 private fun LiteralValueType.toSemanticInfo(typeSystem: TypeSystem) =
     when (this) {
@@ -38,6 +55,22 @@ private fun String.toValue(type: LiteralValueType): Any =
         else -> TODO("Literal value type $type: $this")
     }
 
+private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location): SemanticInfo =
+    if (this is MatchSemanticInfo) {
+        this.table.register(name, MaybePolymorphicTypePromise(name), location)
+        table[name]?.first ?: TypeSemanticInfo(
+            ErrorTypePromise(
+                ExpressionSemanticsErrorCode.SymbolAlreadyUsed.new(location, "name" to name)
+            )
+        )
+    } else cast<SymbolResolver>().getSymbol(name)
+        ?: TypeSemanticInfo(MaybePolymorphicTypePromise(name))
+
+private fun SemanticInfo.callSemanticInfo(): SemanticInfo =
+    if (this is MatchSemanticInfo) {
+        LetSemanticInfo(table)
+    } else this
+
 internal fun ExpressionParserNode.toSemanticNode(
     errors: ErrorCollector,
     info: SemanticInfo,
@@ -51,7 +84,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         )
 
         is OperatorNode -> ApplicationNode(
-            "($operator)",
+            ApplicationName(null, "($operator)"),
             listOf(
                 left.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 right.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
@@ -63,7 +96,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         )
 
         is IfNode -> ApplicationNode(
-            "if",
+            ApplicationName("::prelude", "if"),
             listOf(
                 condition.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 trueExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
@@ -78,11 +111,22 @@ internal fun ExpressionParserNode.toSemanticNode(
         is FunctionCallNode -> if (arguments.isEmpty()) {
             VarNode(
                 name,
-                info.cast<SymbolResolver>().getSymbol(name)
-                    ?: TypeSemanticInfo(MaybePolymorphicTypePromise(name)),
+                info.getVarSemanticInfo(name, location),
                 location
             )
-        } else TODO("Call with parameters")
+        } else {
+            val callInfo = info.callSemanticInfo()
+            ApplicationNode(
+                ApplicationName(name = name),
+                arguments.map {
+                    it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
+                },
+                TypeSemanticInfo(
+                    MaybePolymorphicTypePromise("app-return")
+                ),
+                location
+            )
+        }
 
         is UnitNode -> ConstantNode(
             Unit,
@@ -90,15 +134,64 @@ internal fun ExpressionParserNode.toSemanticNode(
             location
         )
 
+        is LiteralCollectionNode -> {
+            val expressions = values.map {
+                it.cast<ExpressionParserNode>()
+                    .toSemanticNode(errors, info, typeSystem)
+            }
+            ApplicationNode(
+                type.applicationName,
+                expressions,
+                TypeSemanticInfo(
+                    MaybePolymorphicTypePromise("app-return")
+                ),
+                location
+            )
+        }
+
+        is LiteralMapEntryNode -> {
+            ApplicationNode(
+                ApplicationName("::prelude", "pair"),
+                listOf(
+                    key.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+                    value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+                ),
+                TypeSemanticInfo(
+                    MaybePolymorphicTypePromise("app-return")
+                ),
+                location
+            )
+        }
+
         is LetExpressionNode -> {
             val table = SymbolTableBuilder(info.cast<SymbolTable>(), errors)
             val letInfo = LetSemanticInfo(table)
+            val bindings = matches.map {
+                it.toSemanticNode(errors, letInfo, typeSystem)
+                    .cast<LetBindingNode<SemanticInfo>>()
+            }
             LetNode(
-                listOf(),
+                bindings,
                 expression.cast<ExpressionParserNode>().toSemanticNode(errors, letInfo, typeSystem),
                 EmptySemanticInfo,
                 location
             )
+        }
+
+        is MatchAssignNode -> {
+            val letInfo = info.cast<LetSemanticInfo>()
+            val matchInfo = MatchSemanticInfo(letInfo.table)
+            LetBindingNode(
+                matchValue.toSemanticNode(errors, matchInfo, typeSystem),
+                expression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+                EmptySemanticInfo,
+                location
+            )
+        }
+
+        is MatchValueNode -> when (type) {
+            MatchValueType.Expression -> value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
+            else -> TODO()
         }
 
         else -> TODO("No supported $this")

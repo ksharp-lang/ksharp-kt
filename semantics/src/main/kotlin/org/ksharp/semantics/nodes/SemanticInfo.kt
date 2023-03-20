@@ -26,13 +26,17 @@ data class SymbolTableSemanticInfo(
 }
 
 data class LetSemanticInfo(
-    private val table: SymbolTableBuilder,
+    val table: SymbolTableBuilder,
 ) : SemanticInfo(), SymbolResolver, Table<Symbol> {
     override fun getSymbol(name: String): Symbol? =
         table[name]?.first?.also { it.used.activate() }
 
     override fun get(name: String): TableValue<Symbol>? = table[name]
 }
+
+data class MatchSemanticInfo(
+    val table: SymbolTableBuilder,
+) : SemanticInfo()
 
 data class TypeSemanticInfo(
     val type: TypePromise
