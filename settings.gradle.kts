@@ -2,10 +2,10 @@ rootProject.name = "ksharp-kt"
 
 pluginManagement {
     plugins {
-        kotlin("jvm") version "1.7.21" apply false
-        kotlin("kapt") version "1.7.21" apply false
-        kotlin("plugin.serialization") version "1.7.21" apply false
-        id("org.sonarqube") version "3.5.0.2730"
+        kotlin("jvm") version "1.8.10" apply false
+        kotlin("kapt") version "1.8.10" apply false
+        kotlin("plugin.serialization") version "1.8.10" apply false
+        id("org.sonarqube") version "4.0.0.2929"
         jacoco
     }
 }
