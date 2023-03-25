@@ -8,12 +8,12 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
+import org.ksharp.semantics.inference.paramTypePromise
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
 class FunctionTableTest : StringSpec({
-    val mockType = MaybePolymorphicTypePromise("a")
+    val mockType = paramTypePromise("a")
     "Add function into symbol table" {
         FunctionTableBuilder(ErrorCollector()).apply {
             register(

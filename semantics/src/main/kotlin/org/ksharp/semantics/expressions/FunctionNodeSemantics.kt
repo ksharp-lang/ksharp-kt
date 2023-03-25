@@ -6,9 +6,9 @@ import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.inference.TypePromise
+import org.ksharp.semantics.inference.paramTypePromise
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
@@ -24,8 +24,8 @@ private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> 
     (if (parameters.isEmpty()) {
         listOf(ResolvedTypePromise(typeSystem["Unit"].valueOrNull!!))
     } else parameters.map { param ->
-        MaybePolymorphicTypePromise(param)
-    }) + MaybePolymorphicTypePromise("return")
+        paramTypePromise(param)
+    }) + paramTypePromise("return")
 
 private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> {
     val unitParams = node.parameters.isEmpty()

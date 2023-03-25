@@ -13,10 +13,10 @@ import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.inference.TypePromise
 import org.ksharp.semantics.inference.getTypePromise
+import org.ksharp.semantics.inference.paramTypePromise
 import org.ksharp.semantics.nodes.EmptySemanticInfo
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
 import org.ksharp.semantics.nodes.Symbol
@@ -66,9 +66,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                             FunctionVisibility.Public,
                             "sum",
                             listOf(
-                                MaybePolymorphicTypePromise("a"),
-                                MaybePolymorphicTypePromise("b"),
-                                MaybePolymorphicTypePromise("return"),
+                                paramTypePromise("a"),
+                                paramTypePromise("b"),
+                                paramTypePromise("return"),
                             )
                         )
                     )
@@ -152,7 +152,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                             "ten",
                             listOf(
                                 ResolvedTypePromise(typeSystem["Unit"].valueOrNull!!),
-                                MaybePolymorphicTypePromise("return")
+                                paramTypePromise("return")
                             )
                         )
                     )
@@ -338,7 +338,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            TypeSemanticInfo(MaybePolymorphicTypePromise("app-return")),
+                            TypeSemanticInfo(paramTypePromise("app-return")),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -392,11 +392,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         ),
                                         VarNode(
                                             "a",
-                                            Symbol(MaybePolymorphicTypePromise("a")),
+                                            Symbol(paramTypePromise("a")),
                                             Location.NoProvided
                                         )
                                     ),
-                                    TypeSemanticInfo(MaybePolymorphicTypePromise("app-return")),
+                                    TypeSemanticInfo(paramTypePromise("app-return")),
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
@@ -410,7 +410,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                             ),
-                            TypeSemanticInfo(MaybePolymorphicTypePromise("if-return")),
+                            TypeSemanticInfo(paramTypePromise("if-return")),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -464,11 +464,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         ),
                                         VarNode(
                                             "a",
-                                            Symbol(MaybePolymorphicTypePromise("a")),
+                                            Symbol(paramTypePromise("a")),
                                             Location.NoProvided
                                         )
                                     ),
-                                    TypeSemanticInfo(MaybePolymorphicTypePromise("app-return")),
+                                    TypeSemanticInfo(paramTypePromise("app-return")),
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
@@ -482,7 +482,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                             ),
-                            TypeSemanticInfo(MaybePolymorphicTypePromise("if-return")),
+                            TypeSemanticInfo(paramTypePromise("if-return")),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -545,12 +545,12 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    TypeSemanticInfo(MaybePolymorphicTypePromise("app-return")),
+                                    TypeSemanticInfo(paramTypePromise("app-return")),
                                     Location.NoProvided
                                 )
                             ),
                             TypeSemanticInfo(
-                                MaybePolymorphicTypePromise("app-return")
+                                paramTypePromise("app-return")
                             ),
                             Location.NoProvided
                         ),
@@ -610,7 +610,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 )
                             ),
                             TypeSemanticInfo(
-                                MaybePolymorphicTypePromise("app-return")
+                                paramTypePromise("app-return")
                             ),
                             Location.NoProvided
                         ),
@@ -653,20 +653,20 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 VarNode(
                                     "x",
                                     TypeSemanticInfo(
-                                        MaybePolymorphicTypePromise("x")
+                                        paramTypePromise("x")
                                     ),
                                     Location.NoProvided
                                 ),
                                 VarNode(
                                     "y",
                                     Symbol(
-                                        MaybePolymorphicTypePromise("y")
+                                        paramTypePromise("y")
                                     ),
                                     Location.NoProvided
                                 )
                             ),
                             TypeSemanticInfo(
-                                MaybePolymorphicTypePromise("app-return")
+                                paramTypePromise("app-return")
                             ),
                             Location.NoProvided
                         ),
@@ -721,7 +721,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         ConstantNode(1.toLong(), TypeSemanticInfo(longTypePromise), Location.NoProvided)
                                     ),
                                     TypeSemanticInfo(
-                                        MaybePolymorphicTypePromise("app-return")
+                                        paramTypePromise("app-return")
                                     ),
                                     Location.NoProvided
                                 ),
@@ -732,13 +732,13 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         ConstantNode(2.toLong(), TypeSemanticInfo(longTypePromise), Location.NoProvided)
                                     ),
                                     TypeSemanticInfo(
-                                        MaybePolymorphicTypePromise("app-return")
+                                        paramTypePromise("app-return")
                                     ),
                                     Location.NoProvided
                                 )
                             ),
                             TypeSemanticInfo(
-                                MaybePolymorphicTypePromise("app-return")
+                                paramTypePromise("app-return")
                             ),
                             Location.NoProvided
                         ),
@@ -807,7 +807,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 LetBindingNode(
                                     VarNode(
                                         "x",
-                                        Symbol(MaybePolymorphicTypePromise("x")),
+                                        Symbol(paramTypePromise("x")),
                                         Location.NoProvided
                                     ),
                                     ApplicationNode(
@@ -820,7 +820,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             )
                                         ),
                                         TypeSemanticInfo(
-                                            MaybePolymorphicTypePromise("app-return")
+                                            paramTypePromise("app-return")
                                         ),
                                         Location.NoProvided
                                     ),
@@ -830,7 +830,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 LetBindingNode(
                                     VarNode(
                                         "y",
-                                        Symbol(MaybePolymorphicTypePromise("y")),
+                                        Symbol(paramTypePromise("y")),
                                         Location.NoProvided
                                     ),
                                     ConstantNode(
@@ -847,17 +847,17 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 listOf(
                                     VarNode(
                                         "x",
-                                        Symbol(MaybePolymorphicTypePromise("x")),
+                                        Symbol(paramTypePromise("x")),
                                         Location.NoProvided
                                     ),
                                     VarNode(
                                         "y",
-                                        Symbol(MaybePolymorphicTypePromise("y")),
+                                        Symbol(paramTypePromise("y")),
                                         Location.NoProvided
                                     )
                                 ),
                                 TypeSemanticInfo(
-                                    MaybePolymorphicTypePromise("app-return")
+                                    paramTypePromise("app-return")
                                 ),
                                 Location.NoProvided
                             ),

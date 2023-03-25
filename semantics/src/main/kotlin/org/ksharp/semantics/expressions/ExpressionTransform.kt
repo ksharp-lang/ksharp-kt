@@ -8,7 +8,7 @@ import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.ErrorTypePromise
-import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
+import org.ksharp.semantics.inference.paramTypePromise
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
@@ -57,14 +57,14 @@ private fun String.toValue(type: LiteralValueType): Any =
 
 private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location): SemanticInfo =
     if (this is MatchSemanticInfo) {
-        this.table.register(name, MaybePolymorphicTypePromise(name), location)
+        this.table.register(name, paramTypePromise(name), location)
         table[name]?.first ?: TypeSemanticInfo(
             ErrorTypePromise(
                 ExpressionSemanticsErrorCode.SymbolAlreadyUsed.new(location, "name" to name)
             )
         )
     } else cast<SymbolResolver>().getSymbol(name)
-        ?: TypeSemanticInfo(MaybePolymorphicTypePromise(name))
+        ?: TypeSemanticInfo(paramTypePromise(name))
 
 private fun SemanticInfo.callSemanticInfo(): SemanticInfo =
     if (this is MatchSemanticInfo) {
@@ -90,7 +90,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 right.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
             ),
             TypeSemanticInfo(
-                MaybePolymorphicTypePromise("app-return")
+                paramTypePromise("app-return")
             ),
             location
         )
@@ -103,7 +103,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 falseExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
             ),
             TypeSemanticInfo(
-                MaybePolymorphicTypePromise("if-return")
+                paramTypePromise("if-return")
             ),
             location
         )
@@ -122,7 +122,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
                 },
                 TypeSemanticInfo(
-                    MaybePolymorphicTypePromise("app-return")
+                    paramTypePromise("app-return")
                 ),
                 location
             )
@@ -143,7 +143,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 type.applicationName,
                 expressions,
                 TypeSemanticInfo(
-                    MaybePolymorphicTypePromise("app-return")
+                    paramTypePromise("app-return")
                 ),
                 location
             )
@@ -157,7 +157,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                     value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 ),
                 TypeSemanticInfo(
-                    MaybePolymorphicTypePromise("app-return")
+                    paramTypePromise("app-return")
                 ),
                 location
             )
