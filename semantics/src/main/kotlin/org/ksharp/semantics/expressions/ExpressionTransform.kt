@@ -3,9 +3,11 @@ package org.ksharp.semantics.expressions
 import org.ksharp.common.ErrorCode
 import org.ksharp.common.Location
 import org.ksharp.common.cast
+import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
+import org.ksharp.semantics.inference.ErrorTypePromise
 import org.ksharp.semantics.inference.paramTypePromise
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.SymbolTable
@@ -55,13 +57,12 @@ private fun String.toValue(type: LiteralValueType): Any =
 
 private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location): SemanticInfo =
     if (this is MatchSemanticInfo) {
-        TODO()
-//        table.register(name, paramTypePromise(), location)
-//        table[name]?.first ?: TypeSemanticInfo(
-//            ErrorTypePromise(
-//                ExpressionSemanticsErrorCode.SymbolAlreadyUsed.new(location, "name" to name)
-//            )
-//        )
+        table.register(name, paramTypePromise(), location)
+        table[name]?.first ?: TypeSemanticInfo(
+            ErrorTypePromise(
+                ExpressionSemanticsErrorCode.SymbolAlreadyUsed.new(location, "name" to name)
+            )
+        )
     } else cast<SymbolResolver>().getSymbol(name)
         ?: TypeSemanticInfo(paramTypePromise())
 
