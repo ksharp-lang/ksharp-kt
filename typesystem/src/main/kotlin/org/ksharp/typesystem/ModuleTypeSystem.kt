@@ -4,26 +4,31 @@ import org.ksharp.common.*
 
 class ModuleTypeSystem(
     val parent: TypeSystem?,
-    val imports: Map<String, TypeSystem>
+    private val imports: Map<String, TypeSystem>
 ) : TypeSystem {
-    override val size: Int
-        get() = 0
 
-    override fun get(name: String): ErrorOrType {
+    private fun lookup(name: String): Either<Error, Pair<String, TypeSystem>> {
         val ix = name.indexOf('.')
-        return (if (ix != -1) {
+        val (type, typeSystem) = if (ix != -1) {
             val key = name.substring(0, ix)
             val type = name.substring(ix + 1)
-            imports[key]?.let {
-                it[type]
-            }
-        } else parent?.get(name)) ?: Either.Left(
+            type to imports[key]
+        } else name to parent
+        return typeSystem?.let { Either.Right(type to it) } ?: Either.Left(
             TypeSystemErrorCode.TypeNotFound.new(
                 "type" to name
             )
         )
     }
 
+    override val size: Int
+        get() = 0
+
+    override fun get(name: String): ErrorOrType =
+        lookup(name).flatMap { (type, typeSystem) ->
+            typeSystem[type]
+        }
+    
 }
 
 class ModuleTypeSystemBuilder(

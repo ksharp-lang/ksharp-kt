@@ -133,6 +133,25 @@ class TypeSystemTest : ShouldSpec({
                 }
             }
         }
+        context("Get concrete type and resolve the type against the typeSystem") {
+            typeSystem {
+                type("Int")
+                parametricType("Map") {
+                    type("Int")
+                    type("Int")
+                }
+            }.apply {
+                should("Type exists so should create an alias type") {
+                    value.alias("Map").shouldBeType(Concrete("Map"), "Map")
+                }
+                should("Resolve alias type should returns the parametric type") {
+                    value(Alias("Map")).shouldBeType(
+                        ParametricType(Concrete("Map"), listOf(Concrete("Int"), Concrete("Int"))),
+                        "(Map Int Int)"
+                    )
+                }
+            }
+        }
         context("Parametric Types") {
             typeSystem {
                 parametricType("Map") {
@@ -206,6 +225,10 @@ class TypeSystemTest : ShouldSpec({
                     )
                 }
             }
+        }
+        context("Intermediate Parameter") {
+            newParameter().shouldBe(Parameter("@0"))
+            newParameter().shouldBe(Parameter("@1"))
         }
         context("Function types") {
             typeSystem {

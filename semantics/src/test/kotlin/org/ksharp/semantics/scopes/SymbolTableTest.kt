@@ -1,52 +1,53 @@
 package org.ksharp.semantics.scopes
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.test.TestCase
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.ResolvedTypePromise
-import org.ksharp.semantics.inference.paramTypePromise
 import org.ksharp.semantics.nodes.Symbol
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
-import org.ksharp.typesystem.types.Parameter
+import org.ksharp.typesystem.types.newParameterForTesting
+import org.ksharp.typesystem.types.resetParameterCounterForTesting
 
-private fun testTypePromise(name: String) = paramTypePromise(name)
+private fun testTypePromise(id: Int) = ResolvedTypePromise(newParameterForTesting(id))
 
 
 class SymbolTableTest : StringSpec({
     "Create symbol table" {
         SymbolTableBuilder(null, ErrorCollector()).apply {
             register(
-                "a", testTypePromise("Int"), Location.NoProvided
+                "a", testTypePromise(1), Location.NoProvided
             ).shouldBeRight()
             register(
-                "b", testTypePromise("Long"), Location.NoProvided
+                "b", testTypePromise(2), Location.NoProvided
             ).shouldBeRight()
             register(
-                "c", testTypePromise("String"), Location.NoProvided
+                "c", testTypePromise(3), Location.NoProvided
             ).shouldBeRight()
-            register("a", testTypePromise("Long"), Location.NoProvided).shouldBeLeft(
+            register("a", testTypePromise(4), Location.NoProvided).shouldBeLeft(
                 TableErrorCode.AlreadyDefined.new(Location.NoProvided, "classifier" to "Variable", "name" to "a")
             )
         }.build().apply {
             this["a"]!!.apply {
                 first.shouldBe(
-                    Symbol(testTypePromise("Int"))
+                    Symbol("a", testTypePromise(1))
                 )
                 second.shouldBe(Location.NoProvided)
             }
             this["b"]!!.apply {
                 first.shouldBe(
-                    Symbol(testTypePromise("Long"))
+                    Symbol("b", testTypePromise(2))
                 )
                 second.shouldBe(Location.NoProvided)
             }
             this["c"]!!.apply {
                 first.shouldBe(
-                    Symbol(testTypePromise("String"))
+                    Symbol("c", testTypePromise(3))
                 )
                 second.shouldBe(Location.NoProvided)
             }
@@ -55,15 +56,15 @@ class SymbolTableTest : StringSpec({
     "Hiding variable in nexted symbol table" {
         SymbolTableBuilder(null, ErrorCollector()).apply {
             register(
-                "a", testTypePromise("Int"), Location.NoProvided
+                "a", testTypePromise(1), Location.NoProvided
             ).shouldBeRight()
         }.build().apply {
             SymbolTableBuilder(this, ErrorCollector()).apply {
-                register("a", testTypePromise("Long"), Location.NoProvided)
+                register("a", testTypePromise(2), Location.NoProvided)
             }.build().apply {
                 this["a"]!!.apply {
                     first.shouldBe(
-                        Symbol(testTypePromise("Long"))
+                        Symbol("a", testTypePromise(2))
                     )
                     second.shouldBe(Location.NoProvided)
                 }
@@ -73,15 +74,15 @@ class SymbolTableTest : StringSpec({
     "Accessing parent symbol" {
         SymbolTableBuilder(null, ErrorCollector()).apply {
             register(
-                "a", testTypePromise("Int"), Location.NoProvided
+                "a", testTypePromise(1), Location.NoProvided
             ).shouldBeRight()
         }.build().apply {
             SymbolTableBuilder(this, ErrorCollector()).apply {
-                register("b", testTypePromise("Long"), Location.NoProvided)
+                register("b", testTypePromise(2), Location.NoProvided)
             }.build().apply {
                 this["a"]!!.apply {
                     first.shouldBe(
-                        Symbol(testTypePromise("Int"))
+                        Symbol("a", testTypePromise(1))
                     )
                     second.shouldBe(Location.NoProvided)
                 }
@@ -91,7 +92,7 @@ class SymbolTableTest : StringSpec({
     "Accessing no registered symbol" {
         SymbolTableBuilder(null, ErrorCollector()).apply {
             register(
-                "a", testTypePromise("Int"), Location.NoProvided
+                "a", testTypePromise(1), Location.NoProvided
             ).shouldBeRight()
         }.build().apply {
             this["c"].shouldBeNull()
@@ -100,15 +101,20 @@ class SymbolTableTest : StringSpec({
     "Symbol table with compound types" {
         SymbolTableBuilder(null, ErrorCollector()).apply {
             register(
-                "a", testTypePromise("KeyMap"), Location.NoProvided
+                "a", testTypePromise(1), Location.NoProvided
             ).shouldBeRight()
         }.build().apply {
             this["a"]!!.apply {
                 first.shouldBe(
-                    Symbol(testTypePromise("KeyMap"))
+                    Symbol("a", testTypePromise(1))
                 )
                 second.shouldBe(Location.NoProvided)
             }
         }
     }
-})
+}) {
+    override suspend fun beforeEach(testCase: TestCase) {
+        super.beforeEach(testCase)
+        resetParameterCounterForTesting()
+    }
+}

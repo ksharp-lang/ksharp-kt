@@ -3,8 +3,8 @@ package org.ksharp.semantics.inference
 import org.ksharp.common.Either
 import org.ksharp.common.Error
 import org.ksharp.typesystem.TypeSystem
-import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.newParameter
 
 sealed interface TypePromise
 
@@ -24,4 +24,4 @@ fun TypeSystem.getTypePromise(name: String) =
         }
     }
 
-fun paramTypePromise(name: String) = ResolvedTypePromise(Parameter(name))
+fun paramTypePromise() = ResolvedTypePromise(newParameter())

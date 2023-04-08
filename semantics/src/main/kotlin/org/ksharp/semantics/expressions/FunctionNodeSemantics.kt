@@ -23,9 +23,9 @@ enum class FunctionSemanticsErrorCode(override val description: String) : ErrorC
 private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> =
     (if (parameters.isEmpty()) {
         listOf(ResolvedTypePromise(typeSystem["Unit"].valueOrNull!!))
-    } else parameters.map { param ->
-        paramTypePromise(param)
-    }) + paramTypePromise("return")
+    } else parameters.map { _ ->
+        paramTypePromise()
+    }) + paramTypePromise()
 
 private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> {
     val unitParams = node.parameters.isEmpty()
