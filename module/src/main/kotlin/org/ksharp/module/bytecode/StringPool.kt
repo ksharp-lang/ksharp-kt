@@ -3,6 +3,7 @@ package org.ksharp.module.bytecode
 import org.ksharp.common.*
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
+import org.ksharp.common.io.StringTable
 import java.io.OutputStream
 
 typealias Position = Int
@@ -14,7 +15,7 @@ private const val Size = 4
 /**
  *  Calling methods after the buffer is written produce an exception
  */
-class StringPoolBuilder {
+class StringPoolBuilder: StringTable {
     private var lastPosition: Position = -1
     private var lastSize: Int = 0
     private val dictionary = mapBuilder<String, Int>()
@@ -23,7 +24,7 @@ class StringPoolBuilder {
     }
     private val pool = BufferWriterImpl()
     val size: Int get() = indices.size + pool.size
-    fun add(value: String): Position =
+    override fun add(value: String): Position =
         dictionary.get(value) ?: run {
             val size = pool.add(value)
             indices.apply {
