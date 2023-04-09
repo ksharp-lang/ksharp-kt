@@ -25,12 +25,23 @@ interface BufferView {
     fun readInt(index: Int): Int
 
     fun readString(index: Int, size: Int): String
+
+    fun bufferFrom(offset: Int) = OffsetBufferView(offset, this)
+}
+
+class OffsetBufferView(private val offset: Int, private val bufferView: BufferView) : BufferView {
+
+    override fun readInt(index: Int): Int = bufferView.readInt(offset + index)
+    override fun readString(index: Int, size: Int): String = bufferView.readString(offset + index, size)
+
 }
 
 /**
  * Calling methods after the buffer is written produce an exception
  */
-private class BufferWriterImpl : BufferWriter {
+private
+
+class BufferWriterImpl : BufferWriter {
     private val buffer: ByteBuf = allocator.directBuffer()
 
     override val size: Int get() = buffer.readableBytes()

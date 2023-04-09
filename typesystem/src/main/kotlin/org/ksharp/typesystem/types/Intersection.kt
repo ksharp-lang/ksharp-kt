@@ -3,6 +3,8 @@ package org.ksharp.typesystem.types
 import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.serializer.TypeSerializer
+import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.validateTypeName
 
 typealias IntersectionTypeFactoryBuilder = IntersectionTypeFactory.() -> Unit
@@ -10,6 +12,8 @@ typealias IntersectionTypeFactoryBuilder = IntersectionTypeFactory.() -> Unit
 data class IntersectionType internal constructor(
     val params: List<Alias>
 ) : Type {
+    override val serializer: TypeSerializer
+        get() = TypeSerializers.NoDefined
     override val terms: Sequence<Type>
         get() = params.asSequence()
 

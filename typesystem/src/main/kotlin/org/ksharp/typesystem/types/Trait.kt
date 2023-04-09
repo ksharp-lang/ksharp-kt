@@ -4,6 +4,8 @@ import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.serializer.TypeSerializer
+import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.validateFunctionName
 import org.ksharp.typesystem.validateTypeParamName
 
@@ -17,10 +19,16 @@ data class TraitType internal constructor(
     val methods: Map<String, MethodType>,
 ) : Type, IsTrait {
 
+    override val serializer: TypeSerializer
+        get() = TypeSerializers.NoDefined
+
     data class MethodType internal constructor(
         val name: String,
         val arguments: List<Type>,
     ) : Type {
+
+        override val serializer: TypeSerializer
+            get() = TypeSerializers.NoDefined
 
         override val compound: Boolean
             get() = false

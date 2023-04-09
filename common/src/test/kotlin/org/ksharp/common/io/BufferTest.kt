@@ -26,6 +26,23 @@ class BufferTest : StringSpec({
             it.readString(8, 5).shouldBe("Hello")
             it.readInt(13).shouldBe(6)
         }.shouldNotBeNull()
-
+    }
+    "Test buffer view with offset" {
+        val output = ByteArrayOutputStream()
+        newBufferWriter().apply {
+            add(1)
+            add(5)
+            add("Hello")
+            add(6)
+            set(0, 78)
+            size.shouldBe(17)
+            transferTo(output)
+        }
+        val bytes = output.toByteArray()
+        bytes.size.shouldBe(17)
+        ByteArrayInputStream(bytes).bufferView {
+            it.bufferFrom(8)
+                .readString(0, 5).shouldBe("Hello")
+        }.shouldNotBeNull()
     }
 })
