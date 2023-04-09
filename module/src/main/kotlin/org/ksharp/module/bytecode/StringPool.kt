@@ -13,7 +13,7 @@ private const val Size = 4
  *  Calling methods after the buffer is written produce an exception
  */
 class StringPoolBuilder {
-    private var lastPosition: Position = 0
+    private var lastPosition: Position = -1
     private var lastSize: Int = 0
     private val dictionary = mapBuilder<String, Int>()
     private val indices = BufferWriter().apply {
@@ -35,7 +35,7 @@ class StringPoolBuilder {
         }
 
     fun writeTo(output: OutputStream) {
-        indices.set(0, lastPosition)
+        indices.set(0, lastPosition + 1)
         indices.writeTo(output)
         pool.writeTo(output)
     }
@@ -46,7 +46,9 @@ class StringPoolView internal constructor(
     private val buffer: BufferView
 ) {
 
-    private val poolIndex: Int = buffer.readInt(index) * StringPositionSize + Size
+    val size: Int  = buffer.readInt(index)
+
+    private val poolIndex: Int = size * StringPositionSize + Size
 
     operator fun get(index: Int): String {
         val nIndex = Size + (index * StringPositionSize)

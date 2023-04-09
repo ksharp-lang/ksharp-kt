@@ -11,13 +11,15 @@ class StringPoolTest : StringSpec({
     "Create StringPoolBuilder and StringPoolView" {
         val output = ByteArrayOutputStream()
         StringPoolBuilder().apply {
-            add("Hello")
-            add("World")
+            add("Hello").shouldBe(0)
+            add("World").shouldBe(1)
+            add("Hello").shouldBe(0)
             writeTo(output)
         }
         val bytes = output.toByteArray()
         val buffer = Unpooled.buffer().apply { writeBytes(ByteArrayInputStream(bytes), bytes.size) }
         StringPoolView(0, BufferView(buffer)).apply {
+            size.shouldBe(2)
             this[0].shouldBe("Hello")
             this[1].shouldBe("World")
         }
