@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.netty.buffer.Unpooled
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.OutputStream
 
 class StringPoolTest : StringSpec({
     "Create StringPoolBuilder and StringPoolView" {

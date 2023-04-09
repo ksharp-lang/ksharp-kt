@@ -3,7 +3,6 @@ package org.ksharp.module.bytecode
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.PooledByteBufAllocator
 import java.io.OutputStream
-import java.nio.ByteBuffer
 
 private val allocator = PooledByteBufAllocator.DEFAULT
 
