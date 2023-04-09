@@ -30,9 +30,7 @@ class ModuleTypeSystem(
             typeSystem[type]
         }
 
-    override fun forEach(action: (alias: String, type: Type) -> Unit) {
-        //no apply
-    }
+    override fun asSequence(): Sequence<Pair<String, Type>> = emptySequence()
 }
 
 class ModuleTypeSystemBuilder(

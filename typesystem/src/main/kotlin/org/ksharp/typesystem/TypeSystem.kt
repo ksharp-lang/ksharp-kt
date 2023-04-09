@@ -11,7 +11,7 @@ interface TypeSystem {
 
     val parent: TypeSystem?
 
-    fun forEach(action: (alias:String, type:Type) -> Unit)
+    fun asSequence(): Sequence<Pair<String, Type>>
 
     /**
      * return the type value resolved
@@ -31,8 +31,8 @@ class TypeSystemImpl(
 ) : TypeSystem {
     override val size: Int = types.size
 
-    override fun forEach(action: (alias:String, type:Type) -> Unit) {
-        types.forEach(action)
+    override fun asSequence(): Sequence<Pair<String, Type>> = types.asSequence().map {
+        it.key to it.value
     }
 
     override fun get(name: String): ErrorOrType =

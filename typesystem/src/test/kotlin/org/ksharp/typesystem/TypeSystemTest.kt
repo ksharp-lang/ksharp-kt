@@ -977,11 +977,12 @@ class TypeSystemTest : ShouldSpec({
                 type("Int")
                 type("String")
             }.apply {
-                val names = mutableSetOf<String>()
-                value.forEach { alias, _ ->
-                    names.add(alias)
-                }
-                names.shouldBe(setOf("Int", "String"))
+                value.asSequence()
+                    .toList()
+                    .shouldBe(listOf(
+                        "Int" to Concrete("Int"),
+                        "String" to Concrete("String")
+                    ))
             }
         }
     }
