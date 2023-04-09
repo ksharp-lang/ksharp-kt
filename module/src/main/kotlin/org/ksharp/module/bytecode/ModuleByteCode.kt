@@ -1,6 +1,6 @@
 package org.ksharp.module.bytecode
 
-import org.ksharp.common.io.BufferWriter
+import org.ksharp.common.io.newBufferWriter
 import org.ksharp.typesystem.TypeSystem
 import java.io.OutputStream
 
@@ -12,7 +12,7 @@ class ModuleByteCode(
         val stringPoolSize = stringPool.size
         val typeSize = 0
         val abstractionsSize = 0
-        BufferWriterImpl().apply {
+        newBufferWriter().apply {
             add(stringPoolSize)
             add(typeSize)
             add(abstractionsSize)
@@ -20,10 +20,10 @@ class ModuleByteCode(
         }
         stringPool.writeTo(output)
 
-        BufferWriterImpl().apply {
+        newBufferWriter().apply {
             writeTo(output)
         }
-        BufferWriterImpl().apply {
+        newBufferWriter().apply {
             writeTo(output)
         }
     }
