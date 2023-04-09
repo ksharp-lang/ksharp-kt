@@ -18,10 +18,10 @@ class StringPoolBuilder {
     private var lastPosition: Position = -1
     private var lastSize: Int = 0
     private val dictionary = mapBuilder<String, Int>()
-    private val indices = BufferWriter().apply {
+    private val indices = BufferWriterImpl().apply {
         add(0)
     }
-    private val pool = BufferWriter()
+    private val pool = BufferWriterImpl()
     val size: Int get() = indices.size + pool.size
     fun add(value: String): Position =
         dictionary.get(value) ?: run {

@@ -12,7 +12,7 @@ class ModuleByteCode(
         val stringPoolSize = stringPool.size
         val typeSize = 0
         val abstractionsSize = 0
-        BufferWriter().apply {
+        BufferWriterImpl().apply {
             add(stringPoolSize)
             add(typeSize)
             add(abstractionsSize)
@@ -20,10 +20,10 @@ class ModuleByteCode(
         }
         stringPool.writeTo(output)
 
-        BufferWriter().apply {
+        BufferWriterImpl().apply {
             writeTo(output)
         }
-        BufferWriter().apply {
+        BufferWriterImpl().apply {
             writeTo(output)
         }
     }
