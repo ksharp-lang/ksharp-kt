@@ -13,7 +13,7 @@ class StringPoolTest : StringSpec({
             add("Hello").shouldBe(0)
             add("World").shouldBe(1)
             add("Hello").shouldBe(0)
-            writeTo(output)
+            writeTo(output).shouldBe(30)
         }
         val bytes = output.toByteArray()
         val buffer = Unpooled.buffer().apply { writeBytes(ByteArrayInputStream(bytes), bytes.size) }

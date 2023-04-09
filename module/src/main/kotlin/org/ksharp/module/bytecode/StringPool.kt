@@ -34,10 +34,9 @@ class StringPoolBuilder {
             lastPosition
         }
 
-    fun writeTo(output: OutputStream) {
+    fun writeTo(output: OutputStream) : Int {
         indices.set(0, lastPosition + 1)
-        indices.writeTo(output)
-        pool.writeTo(output)
+        return indices.writeTo(output) + pool.writeTo(output)
     }
 }
 
