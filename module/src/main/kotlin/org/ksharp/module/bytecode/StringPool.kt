@@ -9,7 +9,6 @@ import org.ksharp.common.put
 import java.io.OutputStream
 
 typealias Position = Int
-typealias StringPosition = Pair<Position, Position>
 
 private const val StringPositionSize = 8
 private const val Size = 4
