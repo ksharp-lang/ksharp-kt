@@ -2,8 +2,7 @@ package org.ksharp.module.bytecode
 
 import org.ksharp.common.*
 import org.ksharp.common.io.BufferView
-import org.ksharp.common.io.BufferWriter
-import org.ksharp.common.io.StringTable
+import org.ksharp.common.io.BinaryTable
 import java.io.OutputStream
 
 typealias Position = Int
@@ -15,7 +14,7 @@ private const val Size = 4
 /**
  *  Calling methods after the buffer is written produce an exception
  */
-class StringPoolBuilder: StringTable {
+class StringPoolBuilder: BinaryTable {
     private var lastPosition: Position = -1
     private var lastSize: Int = 0
     private val dictionary = mapBuilder<String, Int>()

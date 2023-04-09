@@ -1,6 +1,6 @@
 package org.ksharp.common.io
 
-interface StringTable {
+interface BinaryTable {
     fun add(name: String): Int
 
 }
