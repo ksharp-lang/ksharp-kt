@@ -19,7 +19,7 @@ class StringPoolTest : StringSpec({
         }
         val bytes = output.toByteArray()
         val buffer = Unpooled.buffer().apply { writeBytes(ByteArrayInputStream(bytes), bytes.size) }
-        StringPoolView(0, BufferView(buffer)).apply {
+        StringPoolView(0, BufferViewImpl(buffer)).apply {
             size.shouldBe(2)
             this[0].shouldBe("Hello")
             this[1].shouldBe("World")
