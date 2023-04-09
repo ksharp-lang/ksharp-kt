@@ -12,7 +12,7 @@ data class Alias internal constructor(
     val name: String
 ) : TypeVariable {
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.Alias
 
     override fun toString(): String {
         return name

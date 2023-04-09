@@ -9,6 +9,7 @@ import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.typesystem.serializer.readTypeFrom
 import org.ksharp.typesystem.serializer.writeTo
+import org.ksharp.typesystem.types.Alias
 import org.ksharp.typesystem.types.Concrete
 import org.ksharp.typesystem.types.Type
 import java.io.ByteArrayInputStream
@@ -47,5 +48,8 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
 class TypeSystemSerializerTest : StringSpec({
     "Serialize Concrete Types" {
         Concrete("Int").shouldBeSerializable()
+    }
+    "Serialize Alias Types" {
+        Alias("Int").shouldBeSerializable()
     }
 })
