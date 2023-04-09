@@ -15,7 +15,7 @@ data class Parameter internal constructor(
     val name: String,
 ) : TypeVariable {
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.Parameter
     val intermediate: Boolean get() = name.startsWith("@")
     override fun toString(): String = name
 }
@@ -30,7 +30,7 @@ data class ParametricType internal constructor(
     val params: List<Type>
 ) : Type {
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.ParametricType
     override val terms: Sequence<Type>
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()
 

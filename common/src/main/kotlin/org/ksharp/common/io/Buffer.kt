@@ -9,6 +9,7 @@ import java.io.OutputStream
 private val allocator = PooledByteBufAllocator.DEFAULT
 
 interface BufferWriter {
+
     val size: Int
     fun add(value: String): Int
     fun set(index: Int, value: Int)
@@ -18,21 +19,29 @@ interface BufferWriter {
      * Once the buffer is transferred it is destroyed
      */
     fun transferTo(output: OutputStream)
+
+    /**
+     * Once the buffer is transferred it is destroyed
+     */
+    fun transferTo(buffer: BufferWriter)
 }
 
 interface BufferView {
+    val offset: Int get() = 0
 
     fun readInt(index: Int): Int
 
     fun readString(index: Int, size: Int): String
 
     fun bufferFrom(offset: Int) = OffsetBufferView(offset, this)
+
 }
 
-class OffsetBufferView(private val offset: Int, private val bufferView: BufferView) : BufferView {
+class OffsetBufferView(override val offset: Int, private val bufferView: BufferView) : BufferView {
 
     override fun readInt(index: Int): Int = bufferView.readInt(offset + index)
     override fun readString(index: Int, size: Int): String = bufferView.readString(offset + index, size)
+    override fun bufferFrom(offset: Int) = OffsetBufferView(offset + this.offset, bufferView)
 
 }
 
@@ -58,6 +67,13 @@ class BufferWriterImpl : BufferWriter {
     override fun transferTo(output: OutputStream) {
         buffer.readBytes(output, buffer.readableBytes())
         buffer.release()
+    }
+
+    override fun transferTo(buffer: BufferWriter) {
+        when (buffer) {
+            is BufferWriterImpl -> buffer.buffer.writeBytes(this.buffer)
+        }
+        this.buffer.release()
     }
 
 }

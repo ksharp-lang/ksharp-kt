@@ -9,9 +9,7 @@ import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.typesystem.serializer.readTypeFrom
 import org.ksharp.typesystem.serializer.writeTo
-import org.ksharp.typesystem.types.Alias
-import org.ksharp.typesystem.types.Concrete
-import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.*
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicInteger
@@ -51,5 +49,17 @@ class TypeSystemSerializerTest : StringSpec({
     }
     "Serialize Alias Types" {
         Alias("Int").shouldBeSerializable()
+    }
+    "Serialize Parameter Types" {
+        Parameter("Int").shouldBeSerializable()
+    }
+    "Serialize Parametric Types" {
+        ParametricType(
+            Alias("Map"),
+            listOf(
+                Concrete("String"),
+                Concrete("Double")
+            )
+        ).shouldBeSerializable()
     }
 })

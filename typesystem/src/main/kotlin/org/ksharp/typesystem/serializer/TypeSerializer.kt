@@ -12,6 +12,8 @@ enum class TypeSerializers(
 ) : TypeSerializer {
     Concrete(ConcreteSerializer()),
     Alias(AliasSerializer()),
+    Parameter(ParameterSerializer()),
+    ParametricType(ParametricTypeSerializer()),
     NoDefined(object : SerializerWriter<Type> {
         override fun write(input: Type, buffer: BufferWriter, table: BinaryTable) {
             TODO("Not yet implemented")
@@ -23,10 +25,11 @@ enum class TypeSerializers(
 fun Type.writeTo(buffer: BufferWriter, table: BinaryTable) {
     val serializer = this.serializer.writer as SerializerWriter<Type>
     val writerType = serializer.javaClass.name
+    val bufferStartPosition = buffer.size
     buffer.add(0)
     buffer.add(table.add(writerType))
     serializer.write(this, buffer, table)
-    buffer.set(0, buffer.size)
+    buffer.set(bufferStartPosition, buffer.size)
 }
 
 @Suppress("UNCHECKED_CAST")
