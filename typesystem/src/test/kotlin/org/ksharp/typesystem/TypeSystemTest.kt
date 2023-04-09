@@ -152,6 +152,12 @@ class TypeSystemTest : ShouldSpec({
                         "(Map Int Int)"
                     )
                 }
+                context("Not alias types should resolve to themself") {
+                    value(Concrete("Int")).shouldBeType(
+                        Concrete("Int"),
+                        "Int"
+                    )
+                }
             }
         }
         context("Parametric Types") {
