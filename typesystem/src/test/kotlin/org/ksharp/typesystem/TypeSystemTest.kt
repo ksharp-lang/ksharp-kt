@@ -228,13 +228,17 @@ class TypeSystemTest : ShouldSpec({
                 }
             }
         }
-        context("Intermediate Parameter") {
-            newParameter().apply {
-                shouldBe(Parameter("@0"))
-                intermediate.shouldBeTrue()
+        context("Parameters") {
+            context("Intermediate") {
+                newParameter().apply {
+                    shouldBe(Parameter("@0"))
+                    intermediate.shouldBeTrue()
+                }
+                newParameter().shouldBe(Parameter("@1"))
             }
-            newParameter().shouldBe(Parameter("@1"))
-            Parameter("a").intermediate.shouldBeFalse()
+            context("Normal parameters aren't intermediate") {
+                Parameter("a").intermediate.shouldBeFalse()
+            }
         }
         context("Function types") {
             typeSystem {
