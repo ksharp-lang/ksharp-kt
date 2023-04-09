@@ -1,21 +1,33 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
+import org.ksharp.typesystem.types.Alias
 import org.ksharp.typesystem.types.Type
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
 
 interface TypeSystem {
     val size: Int
+
+    /**
+     * return the type value resolved
+     */
     operator fun get(name: String): ErrorOrType
+
+    operator fun invoke(type: Type): ErrorOrType =
+        when (type) {
+            is Alias -> this[type.name]
+            else -> Either.Right(type)
+        }
 }
 
-private class TypeSystemImpl(
+class TypeSystemImpl(
     private val parent: TypeSystem?,
     private val types: Map<String, Type>
 ) : TypeSystem {
     override val size: Int = types.size
-    override operator fun get(name: String): ErrorOrType =
+
+    override fun get(name: String): ErrorOrType =
         types[name]?.let { Either.Right(it) }
             ?: parent?.get(name)
             ?: Either.Left(

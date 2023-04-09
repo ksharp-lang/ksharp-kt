@@ -13,7 +13,7 @@ data class FunctionCallNode(
     val type: FunctionType,
     val arguments: List<NodeData>,
     override val location: Location
-) : NodeData() {
+) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = arguments.asSequence()
 }

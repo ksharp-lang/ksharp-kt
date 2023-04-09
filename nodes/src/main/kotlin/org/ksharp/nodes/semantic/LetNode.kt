@@ -4,7 +4,7 @@ import org.ksharp.common.Location
 import org.ksharp.nodes.NodeData
 
 data class LetBindingNode<SemanticInfo>(
-    val name: String,
+    val match: SemanticNode<SemanticInfo>,
     val expression: SemanticNode<SemanticInfo>,
     override val info: SemanticInfo,
     override val location: Location,

@@ -4,6 +4,10 @@ import org.ksharp.common.*
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
+import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
+import org.ksharp.semantics.scopes.TypeVisibility
+import org.ksharp.semantics.scopes.TypeVisibilityTable
+import org.ksharp.semantics.scopes.TypeVisibilityTableBuilder
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.types.*
 

@@ -8,7 +8,7 @@ import org.ksharp.typesystem.validateTypeName
 typealias IntersectionTypeFactoryBuilder = IntersectionTypeFactory.() -> Unit
 
 data class IntersectionType internal constructor(
-    val params: List<Concrete>
+    val params: List<Alias>
 ) : Type {
     override val terms: Sequence<Type>
         get() = params.asSequence()
@@ -17,12 +17,12 @@ data class IntersectionType internal constructor(
 }
 
 class IntersectionTypeFactory() {
-    private var result: ErrorOrValue<ListBuilder<Concrete>> = Either.Right(listBuilder())
+    private var result: ErrorOrValue<ListBuilder<Alias>> = Either.Right(listBuilder())
 
     fun type(name: String) {
         result = result.flatMap { params ->
             validateTypeName(name).map {
-                params.add(Concrete(it))
+                params.add(Alias(it))
                 params
             }
         }
@@ -31,7 +31,7 @@ class IntersectionTypeFactory() {
     fun error(error: Error) {
         result = Either.Left(error)
     }
-    
+
     internal fun build() = result.map { it.build() }
 }
 

@@ -19,14 +19,17 @@ sealed interface TypeVariable : Type {
     override val terms: Sequence<Type> get() = emptySequence()
 }
 
-data class Concrete(
-    val name: String,
-) : TypeVariable {
+data class Concrete internal constructor(
+    val name: String
+) : Type {
+    override val compound: Boolean get() = false
+    override val terms: Sequence<Type> get() = emptySequence()
     override fun toString(): String = name
 }
 
+
 fun TypeItemBuilder.type(name: String): ErrorOrValue<TypeVariable> =
-    Either.Right(Concrete(name)).also {
+    Either.Right(Alias(name)).also {
         validation {
             if (it(name) == null)
                 TypeSystemErrorCode.TypeNotFound.new("type" to name)

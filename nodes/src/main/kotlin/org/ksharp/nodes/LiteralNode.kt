@@ -27,7 +27,7 @@ data class LiteralMapEntryNode(
     val key: NodeData,
     val value: NodeData,
     override val location: Location
-) : NodeData() {
+) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = sequenceOf(key, value)
 }
@@ -36,7 +36,7 @@ data class LiteralValueNode(
     val value: String,
     val type: LiteralValueType,
     override val location: Location
-) : NodeData() {
+) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = emptySequence()
 
@@ -46,13 +46,13 @@ data class LiteralCollectionNode(
     val values: List<NodeData>,
     val type: LiteralCollectionType,
     override val location: Location
-) : NodeData() {
+) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = values.asSequence()
 
 }
 
-data class UnitNode(override val location: Location) : NodeData() {
+data class UnitNode(override val location: Location) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = emptySequence()
 }

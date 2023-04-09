@@ -9,7 +9,7 @@ import org.ksharp.nodes.Node
 class ApplicationNodeTest : StringSpec({
     "Test Node Interface over ApplicationNode" {
         ApplicationNode(
-            "sum5",
+            ApplicationName(name = "sum5"),
             listOf(
                 VarNode(
                     "a",
@@ -21,7 +21,7 @@ class ApplicationNodeTest : StringSpec({
             Location.NoProvided
         ).node.apply {
             cast<ApplicationNode<String>>().apply {
-                functionName.shouldBe("sum5")
+                functionName.shouldBe(ApplicationName(name = "sum5"))
                 info.shouldBe("AppInfo")
                 arguments.shouldBe(
                     listOf(

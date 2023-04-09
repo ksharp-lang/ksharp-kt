@@ -3,14 +3,23 @@ package org.ksharp.typesystem.types
 import org.ksharp.common.*
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.annotations.Annotation
+import java.util.concurrent.atomic.AtomicInteger
+
+private var parameterIdCounter = AtomicInteger(-1)
 
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
-data class Parameter(
+data class Parameter internal constructor(
     val name: String,
 ) : TypeVariable {
+    val intermediate: Boolean get() = name.startsWith("@")
     override fun toString(): String = name
 }
+
+fun resetParameterCounterForTesting() = parameterIdCounter.set(-1)
+fun newParameterForTesting(id: Int) = Parameter("@${id}")
+
+fun newParameter() = Parameter("@${parameterIdCounter.incrementAndGet()}")
 
 data class ParametricType internal constructor(
     val type: TypeVariable,
@@ -99,7 +108,7 @@ fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryB
                     TypeSystemErrorCode.ParametricTypeWithoutParameters.new("type" to name)
                 )
             } else
-                Either.Right(ParametricType(Concrete(name), it))
+                Either.Right(ParametricType(Alias(name), it))
         }
     } else
         type(name).flatMap { pType ->

@@ -6,7 +6,7 @@ data class LetExpressionNode(
     val matches: List<MatchAssignNode>,
     val expression: NodeData,
     override val location: Location
-) : NodeData() {
+) : NodeData(), ExpressionParserNode {
 
     override val children: Sequence<NodeData>
         get() = sequenceOf(matches, listOf(expression)).flatten()

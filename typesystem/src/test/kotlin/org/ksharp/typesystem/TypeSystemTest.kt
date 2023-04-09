@@ -1,6 +1,8 @@
 package org.ksharp.typesystem
 
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.new
@@ -37,13 +39,13 @@ class TypeSystemTest : ShouldSpec({
                         get("Int").shouldBeType(Annotated(annotations, Concrete("Int")), "@impure(lang=kotlin) Int")
                     }
                     should("Integer type") {
-                        get("Integer").shouldBeType(Annotated(annotations, Concrete("Int")), "@impure(lang=kotlin) Int")
+                        get("Integer").shouldBeType(Annotated(annotations, Alias("Int")), "@impure(lang=kotlin) Int")
                     }
                     should("List type") {
                         get("List").shouldBeType(
                             Annotated(
                                 annotations,
-                                ParametricType(Concrete("List"), listOf(Parameter("a")))
+                                ParametricType(Alias("List"), listOf(Parameter("a")))
                             ), "@impure(lang=kotlin) List a"
                         )
                     }
@@ -89,12 +91,12 @@ class TypeSystemTest : ShouldSpec({
                         get("String").shouldBeType(Concrete("String"), "String")
                     }
                     should("Integer alias type") {
-                        get("Integer").shouldBeType(Concrete("Int"), "Int")
+                        get("Integer").shouldBeType(Alias("Int"), "Int")
                     }
                     should("(Map a b) parametric type") {
                         get("Map").shouldBeType(
                             ParametricType(
-                                Concrete("Map"),
+                                Alias("Map"),
                                 listOf(
                                     Parameter("a"),
                                     Parameter("b")
@@ -105,9 +107,9 @@ class TypeSystemTest : ShouldSpec({
                     should("StringMap should be alias of (Map String b)") {
                         get("StringMap").shouldBeType(
                             ParametricType(
-                                Concrete("Map"),
+                                Alias("Map"),
                                 listOf(
-                                    Concrete("String"),
+                                    Alias("String"),
                                     Parameter("b")
                                 )
                             ), "(Map String b)"
@@ -117,9 +119,9 @@ class TypeSystemTest : ShouldSpec({
                         get("Sum").shouldBeType(
                             FunctionType(
                                 listOf(
-                                    Concrete("Int"),
-                                    Concrete("Int"),
-                                    Concrete("Int")
+                                    Alias("Int"),
+                                    Alias("Int"),
+                                    Alias("Int")
                                 )
                             ), "(Int -> Int -> Int)"
                         )
@@ -130,6 +132,31 @@ class TypeSystemTest : ShouldSpec({
                 }
                 should("Shouldn't have errors") {
                     errors.shouldBeEmpty()
+                }
+            }
+        }
+        context("Get alias type and resolve the type against the typeSystem") {
+            typeSystem {
+                type("Int")
+                parametricType("Map") {
+                    type("Int")
+                    type("Int")
+                }
+            }.apply {
+                should("Type exists so should create an alias type") {
+                    value.alias("Map").shouldBeType(Alias("Map"), "Map")
+                }
+                should("Resolve alias type should returns the parametric type") {
+                    value(Alias("Map")).shouldBeType(
+                        ParametricType(Alias("Map"), listOf(Alias("Int"), Alias("Int"))),
+                        "(Map Int Int)"
+                    )
+                }
+                context("Not alias types should resolve to themself") {
+                    value(Concrete("Int")).shouldBeType(
+                        Concrete("Int"),
+                        "Int"
+                    )
                 }
             }
         }
@@ -158,7 +185,7 @@ class TypeSystemTest : ShouldSpec({
                     should("(Map a b) type") {
                         get("Map").shouldBeType(
                             ParametricType(
-                                Concrete("Map"),
+                                Alias("Map"),
                                 listOf(Parameter("a"), Parameter("b"))
                             ),
                             "(Map a b)"
@@ -167,11 +194,11 @@ class TypeSystemTest : ShouldSpec({
                     should("Recursive: (Either a (Either a b)) type") {
                         get("Either").shouldBeType(
                             ParametricType(
-                                Concrete("Either"),
+                                Alias("Either"),
                                 listOf(
                                     Parameter("a"),
                                     ParametricType(
-                                        Concrete("Either"),
+                                        Alias("Either"),
                                         listOf(Parameter("a"), Parameter("b"))
                                     )
                                 )
@@ -188,7 +215,7 @@ class TypeSystemTest : ShouldSpec({
                         listOf(
                             TypeSystemErrorCode.InvalidNumberOfParameters.new(
                                 "type" to ParametricType(
-                                    Concrete("Map"),
+                                    Alias("Map"),
                                     listOf(
                                         Parameter("a"),
                                         Parameter("b")
@@ -196,7 +223,7 @@ class TypeSystemTest : ShouldSpec({
                                 ),
                                 "number" to 2,
                                 "configuredType" to ParametricType(
-                                    Concrete("Map"),
+                                    Alias("Map"),
                                     listOf(
                                         Parameter("a")
                                     )
@@ -205,6 +232,18 @@ class TypeSystemTest : ShouldSpec({
                         )
                     )
                 }
+            }
+        }
+        context("Parameters") {
+            context("Intermediate") {
+                newParameter().apply {
+                    shouldBe(Parameter("@0"))
+                    intermediate.shouldBeTrue()
+                }
+                newParameter().shouldBe(Parameter("@1"))
+            }
+            context("Normal parameters aren't intermediate") {
+                Parameter("a").intermediate.shouldBeFalse()
             }
         }
         context("Function types") {
@@ -265,7 +304,7 @@ class TypeSystemTest : ShouldSpec({
                     should("(List a) type") {
                         get("List").shouldBeType(
                             ParametricType(
-                                Concrete("List"),
+                                Alias("List"),
                                 listOf(Parameter("a"))
                             ),
                             "(List a)"
@@ -274,14 +313,14 @@ class TypeSystemTest : ShouldSpec({
                     should("(Int -> Int -> Int) type") {
                         get("Sum").shouldBeType(
                             FunctionType(
-                                listOf(Concrete("Int"), Concrete("Int"), Concrete("Int"))
+                                listOf(Alias("Int"), Alias("Int"), Alias("Int"))
                             ),
                             "(Int -> Int -> Int)"
                         )
                     }
                     should("(a -> Int) type") {
                         get("Abs").shouldBeType(
-                            FunctionType(listOf(Parameter("a"), Concrete("Int"))),
+                            FunctionType(listOf(Parameter("a"), Alias("Int"))),
                             "(a -> Int)"
                         )
                     }
@@ -291,10 +330,10 @@ class TypeSystemTest : ShouldSpec({
                                 FunctionType(
                                     listOf(
                                         ParametricType(
-                                            Concrete("List"),
-                                            listOf(Concrete("Int"))
+                                            Alias("List"),
+                                            listOf(Alias("Int"))
                                         ),
-                                        Concrete("Int")
+                                        Alias("Int")
                                     )
                                 ),
                                 "((List Int) -> Int)"
@@ -306,7 +345,7 @@ class TypeSystemTest : ShouldSpec({
                                 FunctionType(
                                     listOf(
                                         ParametricType(
-                                            Concrete("List"),
+                                            Alias("List"),
                                             listOf(Parameter("a"))
                                         ),
                                         FunctionType(
@@ -316,7 +355,7 @@ class TypeSystemTest : ShouldSpec({
                                             )
                                         ),
                                         ParametricType(
-                                            Concrete("List"),
+                                            Alias("List"),
                                             listOf(Parameter("b"))
                                         ),
                                     )
@@ -376,7 +415,7 @@ class TypeSystemTest : ShouldSpec({
                     should("User (String, String) type") {
                         get("User").shouldBeType(
                             TupleType(
-                                listOf(Concrete("String"), Concrete("String"))
+                                listOf(Alias("String"), Alias("String"))
                             ),
                             "(String, String)"
                         )
@@ -386,10 +425,10 @@ class TypeSystemTest : ShouldSpec({
                             TupleType(
                                 listOf(
                                     ParametricType(
-                                        Concrete("Num"), listOf(Parameter("x"))
+                                        Alias("Num"), listOf(Parameter("x"))
                                     ),
                                     ParametricType(
-                                        Concrete("Num"), listOf(Parameter("x"))
+                                        Alias("Num"), listOf(Parameter("x"))
                                     ),
                                 )
                             ),
@@ -401,11 +440,11 @@ class TypeSystemTest : ShouldSpec({
                             TupleType(
                                 listOf(
                                     ParametricType(
-                                        Concrete("Num"), listOf(Parameter("x"))
+                                        Alias("Num"), listOf(Parameter("x"))
                                     ),
                                     Labeled(
                                         "point", TupleType(
-                                            listOf(Concrete("String"), Parameter("x"))
+                                            listOf(Alias("String"), Parameter("x"))
                                         )
                                     ),
                                 )
@@ -453,8 +492,8 @@ class TypeSystemTest : ShouldSpec({
                     should("(Dict String b) type") {
                         get("Dict").shouldBeType(
                             ParametricType(
-                                Concrete("Dict"),
-                                listOf(Concrete("String"), Parameter("b"))
+                                Alias("Dict"),
+                                listOf(Alias("String"), Parameter("b"))
                             ),
                             "(Dict String b)"
                         )
@@ -597,7 +636,7 @@ class TypeSystemTest : ShouldSpec({
                 context("Should contains the following types:") {
                     should("OrdNum intersection type") {
                         get("OrdNum").shouldBeType(
-                            IntersectionType(listOf(Concrete("Num"), Concrete("Ord"))),
+                            IntersectionType(listOf(Alias("Num"), Alias("Ord"))),
                             "(Num & Ord)"
                         )
                     }
@@ -711,12 +750,12 @@ class TypeSystemTest : ShouldSpec({
                         get("Int").shouldBeType(Concrete("Int"), "Int")
                     }
                     should("(Num x) type") {
-                        get("Num").shouldBeType(ParametricType(Concrete("Num"), listOf(Parameter("x"))), "(Num x)")
+                        get("Num").shouldBeType(ParametricType(Alias("Num"), listOf(Parameter("x"))), "(Num x)")
                     }
                     should("(Map key: k value: v) type") {
                         get("Map").shouldBeType(
                             ParametricType(
-                                Concrete("Map"),
+                                Alias("Map"),
                                 listOf(
                                     Parameter("k").labeled("key"),
                                     Parameter("v").labeled("value")
@@ -728,8 +767,8 @@ class TypeSystemTest : ShouldSpec({
                         get("User").shouldBeType(
                             TupleType(
                                 listOf(
-                                    Concrete("String").labeled("name"),
-                                    Concrete("String").labeled("password")
+                                    Alias("String").labeled("name"),
+                                    Alias("String").labeled("password")
                                 )
                             ),
                             "(name: String, password: String)"
@@ -750,8 +789,8 @@ class TypeSystemTest : ShouldSpec({
                         get("Point2D").shouldBeType(
                             TupleType(
                                 listOf(
-                                    ParametricType(Concrete("Num"), listOf(Parameter("n"))).labeled("x"),
-                                    ParametricType(Concrete("Num"), listOf(Parameter("n"))).labeled("y")
+                                    ParametricType(Alias("Num"), listOf(Parameter("n"))).labeled("x"),
+                                    ParametricType(Alias("Num"), listOf(Parameter("n"))).labeled("y")
                                 )
                             ),
                             "(x: (Num n), y: (Num n))"
@@ -761,9 +800,9 @@ class TypeSystemTest : ShouldSpec({
                         get("Sum").shouldBeType(
                             FunctionType(
                                 listOf(
-                                    Concrete("Int").labeled("a"),
+                                    Alias("Int").labeled("a"),
                                     Parameter("b"),
-                                    Concrete("Int").labeled("result")
+                                    Alias("Int").labeled("result")
                                 )
                             ),
                             "(a: Int -> b -> result: Int)"
@@ -808,7 +847,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                     should("Int -> Int type") {
                         get("Abs").shouldBeType(
-                            FunctionType(listOf(Concrete("Int"), Concrete("Int"))),
+                            FunctionType(listOf(Alias("Int"), Alias("Int"))),
                             "(Int -> Int)"
                         )
                     }
@@ -836,7 +875,7 @@ class TypeSystemTest : ShouldSpec({
                     get("Int").shouldBeType(Concrete("Int"), "Int")
                 }
                 should("Can find List Int") {
-                    get("List").shouldBeType(ParametricType(Concrete("List"), listOf(Concrete("Int"))), "(List Int)")
+                    get("List").shouldBeType(ParametricType(Alias("List"), listOf(Alias("Int"))), "(List Int)")
                 }
             }
         }
@@ -868,7 +907,7 @@ class TypeSystemTest : ShouldSpec({
                     get("Int").shouldBeType(Concrete("Int"), "Int")
                 }
                 should("Can find List Int") {
-                    get("List").shouldBeType(ParametricType(Concrete("List"), listOf(Concrete("Int"))), "(List Int)")
+                    get("List").shouldBeType(ParametricType(Alias("List"), listOf(Alias("Int"))), "(List Int)")
                 }
             }
         }

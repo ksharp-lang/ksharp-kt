@@ -1,15 +1,17 @@
 package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
+import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.nodes.semantic.VarNode
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.MaybePolymorphicTypePromise
 import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.typesystem.ModuleTypeSystemInfo
+import org.ksharp.semantics.inference.paramTypePromise
+import org.ksharp.semantics.nodes.*
+import org.ksharp.semantics.scopes.*
+import org.ksharp.semantics.scopes.Function
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
 
@@ -21,9 +23,9 @@ enum class FunctionSemanticsErrorCode(override val description: String) : ErrorC
 private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> =
     (if (parameters.isEmpty()) {
         listOf(ResolvedTypePromise(typeSystem["Unit"].valueOrNull!!))
-    } else parameters.mapIndexed { ix, param ->
-        MaybePolymorphicTypePromise(param, "@param_${ix + 1}")
-    }) + MaybePolymorphicTypePromise("return", "@param_${parameters.size + 1}")
+    } else parameters.map { _ ->
+        paramTypePromise()
+    }) + paramTypePromise()
 
 private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> {
     val unitParams = node.parameters.isEmpty()
@@ -84,7 +86,7 @@ private fun FunctionNode.checkSemantics(
     errors: ErrorCollector,
     function: Function,
     typeSystem: TypeSystem
-): Either<Boolean, AbstractionNode<String>> =
+): Either<Boolean, AbstractionNode<SemanticInfo>> =
     SymbolTableBuilder(null, errors).let { st ->
         val typesIter = function.type.iterator()
         val invalidSymbolTable = Flag()
@@ -99,8 +101,10 @@ private fun FunctionNode.checkSemantics(
         if (invalidSymbolTable.enabled) Either.Left(false)
         else Either.Right(st.build())
     }.map { symbolTable ->
-        println(symbolTable)
-        AbstractionNode("Test", VarNode("a", "varInfo", Location.NoProvided), "Info", Location.NoProvided)
+        val info = SymbolTableSemanticInfo(symbolTable)
+        val semanticNode = expression.cast<ExpressionParserNode>()
+            .toSemanticNode(errors, info, typeSystem)
+        AbstractionNode(name, semanticNode, EmptySemanticInfo, location)
     }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
