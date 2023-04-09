@@ -1,5 +1,6 @@
 package org.ksharp.module.bytecode
 
+import org.ksharp.common.io.BufferWriter
 import org.ksharp.typesystem.TypeSystem
 import java.io.OutputStream
 

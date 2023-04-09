@@ -1,6 +1,8 @@
 package org.ksharp.module.bytecode
 
 import org.ksharp.common.*
+import org.ksharp.common.io.BufferView
+import org.ksharp.common.io.BufferWriter
 import java.io.OutputStream
 
 typealias Position = Int

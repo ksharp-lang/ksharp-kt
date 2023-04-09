@@ -3,6 +3,7 @@ package org.ksharp.module.bytecode
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.netty.buffer.Unpooled
+import org.ksharp.common.io.BufferView
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 

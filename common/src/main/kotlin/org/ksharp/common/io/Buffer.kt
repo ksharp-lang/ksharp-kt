@@ -1,4 +1,4 @@
-package org.ksharp.module.bytecode
+package org.ksharp.common.io
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.PooledByteBufAllocator
@@ -10,7 +10,7 @@ private val allocator = PooledByteBufAllocator.DEFAULT
 /**
  * Calling methods after the buffer is written produce an exception
  */
-class BufferWriter internal constructor() {
+class BufferWriter() {
     private val buffer: ByteBuf  = allocator.directBuffer()
 
     val size: Int get() = buffer.readableBytes()
@@ -31,7 +31,7 @@ class BufferWriter internal constructor() {
 
 }
 
-class BufferView internal constructor (private val byteBuf: ByteBuf){
+class BufferView(private val byteBuf: ByteBuf){
     fun readInt(index: Int) = byteBuf.getInt(index)
 
     fun readString(index: Int, size: Int): String = byteBuf.toString(index, size, Charsets.UTF_8)
