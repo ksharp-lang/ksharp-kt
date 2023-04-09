@@ -972,5 +972,17 @@ class TypeSystemTest : ShouldSpec({
                 get("txt.String").shouldBeLeft()
             }
         }
+        context("Check list all types on the typeSystem"){
+            typeSystem {
+                type("Int")
+                type("String")
+            }.apply {
+                val names = mutableSetOf<String>()
+                value.forEach { alias, _ ->
+                    names.add(alias)
+                }
+                names.shouldBe(setOf("Int", "String"))
+            }
+        }
     }
 })

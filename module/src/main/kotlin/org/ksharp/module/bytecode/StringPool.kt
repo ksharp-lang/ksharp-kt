@@ -20,7 +20,7 @@ class StringPoolBuilder {
         add(0)
     }
     private val pool = BufferWriter()
-
+    val size: Int get() = indices.size + pool.size
     fun add(value: String): Position =
         dictionary.get(value) ?: run {
             val size = pool.add(value)

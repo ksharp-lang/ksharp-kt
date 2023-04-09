@@ -13,6 +13,7 @@ class StringPoolTest : StringSpec({
             add("Hello").shouldBe(0)
             add("World").shouldBe(1)
             add("Hello").shouldBe(0)
+            size.shouldBe(30)
             writeTo(output).shouldBe(30)
         }
         val bytes = output.toByteArray()

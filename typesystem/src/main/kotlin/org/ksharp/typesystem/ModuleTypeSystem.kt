@@ -1,9 +1,10 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
+import org.ksharp.typesystem.types.Type
 
 class ModuleTypeSystem(
-    val parent: TypeSystem?,
+    override val parent: TypeSystem?,
     private val imports: Map<String, TypeSystem>
 ) : TypeSystem {
 
@@ -28,7 +29,10 @@ class ModuleTypeSystem(
         lookup(name).flatMap { (type, typeSystem) ->
             typeSystem[type]
         }
-    
+
+    override fun forEach(action: (alias: String, type: Type) -> Unit) {
+        //no apply
+    }
 }
 
 class ModuleTypeSystemBuilder(

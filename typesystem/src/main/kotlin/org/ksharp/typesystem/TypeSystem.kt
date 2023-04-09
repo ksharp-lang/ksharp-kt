@@ -9,6 +9,10 @@ typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
 interface TypeSystem {
     val size: Int
 
+    val parent: TypeSystem?
+
+    fun forEach(action: (alias:String, type:Type) -> Unit)
+
     /**
      * return the type value resolved
      */
@@ -22,10 +26,14 @@ interface TypeSystem {
 }
 
 class TypeSystemImpl(
-    private val parent: TypeSystem?,
+    override val parent: TypeSystem?,
     private val types: Map<String, Type>
 ) : TypeSystem {
     override val size: Int = types.size
+
+    override fun forEach(action: (alias:String, type:Type) -> Unit) {
+        types.forEach(action)
+    }
 
     override fun get(name: String): ErrorOrType =
         types[name]?.let { Either.Right(it) }

@@ -12,6 +12,8 @@ private val allocator = PooledByteBufAllocator.DEFAULT
  */
 class BufferWriter internal constructor() {
     private val buffer: ByteBuf  = allocator.directBuffer()
+
+    val size: Int get() = buffer.readableBytes()
     fun add(value: String): Int = buffer.writeCharSequence(value, Charsets.UTF_8)
 
     fun set(index: Int, value: Int) {
@@ -25,6 +27,8 @@ class BufferWriter internal constructor() {
             buffer.readBytes(output, this)
             buffer.release()
         }
+
+
 }
 
 class BufferView internal constructor (private val byteBuf: ByteBuf){
