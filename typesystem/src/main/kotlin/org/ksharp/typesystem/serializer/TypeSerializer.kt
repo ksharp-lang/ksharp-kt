@@ -14,6 +14,7 @@ enum class TypeSerializers(
     Alias(AliasSerializer()),
     Parameter(ParameterSerializer()),
     ParametricType(ParametricTypeSerializer()),
+    Labeled(LabeledSerializer()),
     NoDefined(object : SerializerWriter<Type> {
         override fun write(input: Type, buffer: BufferWriter, table: BinaryTable) {
             TODO("Not yet implemented")

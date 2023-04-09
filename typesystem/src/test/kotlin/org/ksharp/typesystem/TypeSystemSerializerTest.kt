@@ -62,4 +62,10 @@ class TypeSystemSerializerTest : StringSpec({
             )
         ).shouldBeSerializable()
     }
+    "Serialize Labeled Types" {
+        Labeled(
+            "Label",
+            Concrete("String")
+        ).shouldBeSerializable()
+    }
 })
