@@ -108,7 +108,7 @@ fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryB
                     TypeSystemErrorCode.ParametricTypeWithoutParameters.new("type" to name)
                 )
             } else
-                Either.Right(ParametricType(Concrete(name), it))
+                Either.Right(ParametricType(Alias(name), it))
         }
     } else
         type(name).flatMap { pType ->

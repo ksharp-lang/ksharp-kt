@@ -55,9 +55,9 @@ class TypeTest : StringSpec({
     }
     "Given a Parametric type, should get the parameters as terms in the sequence" {
         ParametricType(
-            Concrete("List"),
+            Alias("List"),
             listOf(Parameter("a"))
-        ).terms.toList().shouldBe(listOf(Concrete("List"), Parameter("a")))
+        ).terms.toList().shouldBe(listOf(Alias("List"), Parameter("a")))
     }
     "Given a function type, should get the arguments and return terms in the sequence" {
         FunctionType(
