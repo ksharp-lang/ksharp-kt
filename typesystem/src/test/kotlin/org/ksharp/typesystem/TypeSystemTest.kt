@@ -1,6 +1,8 @@
 package org.ksharp.typesystem
 
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.new
@@ -227,8 +229,12 @@ class TypeSystemTest : ShouldSpec({
             }
         }
         context("Intermediate Parameter") {
-            newParameter().shouldBe(Parameter("@0"))
+            newParameter().apply {
+                shouldBe(Parameter("@0"))
+                intermediate.shouldBeTrue()
+            }
             newParameter().shouldBe(Parameter("@1"))
+            Parameter("a").intermediate.shouldBeFalse()
         }
         context("Function types") {
             typeSystem {
