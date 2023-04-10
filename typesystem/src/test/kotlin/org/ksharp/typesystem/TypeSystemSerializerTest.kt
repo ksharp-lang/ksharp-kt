@@ -131,4 +131,14 @@ class TypeSystemSerializerTest : StringSpec({
             )
         ).shouldBeSerializable()
     }
+    "Serialize Trait Types" {
+        TraitType(
+            "Num",
+            "a",
+            mapOf(
+                "sum" to TraitType.MethodType("sum", listOf(Parameter("a"), Parameter("a"), Parameter("a"))),
+                "sub" to TraitType.MethodType("sub", listOf(Parameter("a"), Parameter("a"), Parameter("a")))
+            )
+        ).shouldBeSerializable()
+    }
 })

@@ -20,7 +20,7 @@ data class TraitType internal constructor(
 ) : Type, IsTrait {
 
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.TraitType
 
     data class MethodType internal constructor(
         val name: String,
@@ -28,7 +28,7 @@ data class TraitType internal constructor(
     ) : Type {
 
         override val serializer: TypeSerializer
-            get() = TypeSerializers.NoDefined
+            get() = TypeSerializers.MethodType
 
         override val compound: Boolean
             get() = false

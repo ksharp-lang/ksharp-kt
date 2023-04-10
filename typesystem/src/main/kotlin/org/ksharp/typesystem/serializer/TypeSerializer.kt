@@ -22,6 +22,8 @@ enum class TypeSerializers(
     TupleType(TupleSerializer()),
     ClassType(ClassTypeSerializer()),
     UnionType(UnionTypeSerializer()),
+    MethodType(MethodTypeSerializer()),
+    TraitType(TraitSerializer()),
     NoDefined(object : SerializerWriter<Type> {
         override fun write(input: Type, buffer: BufferWriter, table: BinaryTable) {
             TODO("Not yet implemented")
