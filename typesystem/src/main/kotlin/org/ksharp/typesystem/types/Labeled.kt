@@ -1,9 +1,16 @@
 package org.ksharp.typesystem.types
 
+import org.ksharp.typesystem.serializer.TypeSerializer
+import org.ksharp.typesystem.serializer.TypeSerializers
+
 data class Labeled internal constructor(
     val label: String,
     val type: Type
 ) : Type by type {
+
+    override val serializer: TypeSerializer
+        get() = TypeSerializers.Labeled
+
     override val terms: Sequence<Type>
         get() = sequenceOf(type)
 

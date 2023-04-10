@@ -9,6 +9,10 @@ typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
 interface TypeSystem {
     val size: Int
 
+    val parent: TypeSystem?
+
+    fun asSequence(): Sequence<Pair<String, Type>>
+
     /**
      * return the type value resolved
      */
@@ -21,11 +25,15 @@ interface TypeSystem {
         }
 }
 
-class TypeSystemImpl(
-    private val parent: TypeSystem?,
+class TypeSystemImpl internal constructor(
+    override val parent: TypeSystem?,
     private val types: Map<String, Type>
 ) : TypeSystem {
     override val size: Int = types.size
+
+    override fun asSequence(): Sequence<Pair<String, Type>> = types.asSequence().map {
+        it.key to it.value
+    }
 
     override fun get(name: String): ErrorOrType =
         types[name]?.let { Either.Right(it) }

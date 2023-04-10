@@ -2,6 +2,7 @@ package org.ksharp.module
 
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
+import org.ksharp.typesystem.ModuleTypeSystem
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 

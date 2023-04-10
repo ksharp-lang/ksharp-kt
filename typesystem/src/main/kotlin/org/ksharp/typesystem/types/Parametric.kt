@@ -3,6 +3,8 @@ package org.ksharp.typesystem.types
 import org.ksharp.common.*
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.serializer.TypeSerializer
+import org.ksharp.typesystem.serializer.TypeSerializers
 import java.util.concurrent.atomic.AtomicInteger
 
 private var parameterIdCounter = AtomicInteger(-1)
@@ -12,6 +14,8 @@ typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 data class Parameter internal constructor(
     val name: String,
 ) : TypeVariable {
+    override val serializer: TypeSerializer
+        get() = TypeSerializers.Parameter
     val intermediate: Boolean get() = name.startsWith("@")
     override fun toString(): String = name
 }
@@ -25,6 +29,8 @@ data class ParametricType internal constructor(
     val type: TypeVariable,
     val params: List<Type>
 ) : Type {
+    override val serializer: TypeSerializer
+        get() = TypeSerializers.ParametricType
     override val terms: Sequence<Type>
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()
 

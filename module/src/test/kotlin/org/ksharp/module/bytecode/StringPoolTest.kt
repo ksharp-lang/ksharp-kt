@@ -1,8 +1,9 @@
 package org.ksharp.module.bytecode
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.netty.buffer.Unpooled
+import org.ksharp.common.io.bufferView
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
@@ -13,14 +14,16 @@ class StringPoolTest : StringSpec({
             add("Hello").shouldBe(0)
             add("World").shouldBe(1)
             add("Hello").shouldBe(0)
-            writeTo(output).shouldBe(30)
+            size.shouldBe(30)
+            writeTo(output)
         }
         val bytes = output.toByteArray()
-        val buffer = Unpooled.buffer().apply { writeBytes(ByteArrayInputStream(bytes), bytes.size) }
-        StringPoolView(0, BufferView(buffer)).apply {
-            size.shouldBe(2)
-            this[0].shouldBe("Hello")
-            this[1].shouldBe("World")
-        }
+        ByteArrayInputStream(bytes).bufferView { view ->
+            StringPoolView(0, view).apply {
+                size.shouldBe(2)
+                this[0].shouldBe("Hello")
+                this[1].shouldBe("World")
+            }
+        }.shouldNotBeNull()
     }
 })

@@ -2,6 +2,8 @@ package org.ksharp.module.prelude.types
 
 import org.ksharp.common.Either
 import org.ksharp.module.RecordSize
+import org.ksharp.module.prelude.serializer.TypeSerializers
+import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.Type
 
@@ -19,6 +21,8 @@ enum class Numeric(val size: kotlin.Int, val isInteger: Boolean, val recordSize:
 data class NumericType internal constructor(
     val type: Numeric
 ) : Type {
+    override val serializer: TypeSerializer
+        get() = TypeSerializers.NumericType
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()
     override val representation: String = "numeric<${type}>"

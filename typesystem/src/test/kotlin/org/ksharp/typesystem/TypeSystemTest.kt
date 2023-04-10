@@ -972,5 +972,18 @@ class TypeSystemTest : ShouldSpec({
                 get("txt.String").shouldBeLeft()
             }
         }
+        context("Check list all types on the typeSystem"){
+            typeSystem {
+                type("Int")
+                type("String")
+            }.apply {
+                value.asSequence()
+                    .toList()
+                    .shouldBe(listOf(
+                        "Int" to Concrete("Int"),
+                        "String" to Concrete("String")
+                    ))
+            }
+        }
     }
 })

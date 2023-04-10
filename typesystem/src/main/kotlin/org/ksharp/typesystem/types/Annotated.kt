@@ -1,11 +1,15 @@
 package org.ksharp.typesystem.types
 
 import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.serializer.TypeSerializer
+import org.ksharp.typesystem.serializer.TypeSerializers
 
 data class Annotated internal constructor(
     internal val annotations: List<Annotation>,
     val type: Type
 ) : Type by type {
+    override val serializer: TypeSerializer
+        get() = TypeSerializers.NoDefined
     override val terms: Sequence<Type>
         get() = sequenceOf(type)
 
