@@ -122,4 +122,13 @@ class TypeSystemSerializerTest : StringSpec({
             listOf(Alias("String"), Alias("Int"))
         ).shouldBeSerializable()
     }
+    "Serialize Union Types" {
+        UnionType(
+            mapOf(
+                "String" to UnionType.ClassType("String", listOf(Parameter("a"))),
+                "Int" to UnionType.ClassType("Int", listOf(Parameter("b"))),
+                "Map" to UnionType.ClassType("Map", listOf(Concrete("Int"), Parameter("c")))
+            )
+        ).shouldBeSerializable()
+    }
 })

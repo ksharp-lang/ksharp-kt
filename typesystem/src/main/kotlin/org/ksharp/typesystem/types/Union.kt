@@ -12,7 +12,7 @@ data class UnionType internal constructor(
     val arguments: Map<String, ClassType>,
 ) : Type {
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.UnionType
 
     override val terms: Sequence<Type>
         get() = arguments.values.asSequence()
@@ -27,8 +27,8 @@ data class UnionType internal constructor(
         val params: List<Type>
     ) : Type {
         override val serializer: TypeSerializer
-            get() = TypeSerializers.NoDefined
-        
+            get() = TypeSerializers.ClassType
+
         override val terms: Sequence<Type>
             get() = params.asSequence()
 
