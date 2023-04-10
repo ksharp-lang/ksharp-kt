@@ -8,6 +8,7 @@ import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.typesystem.serializer.readTypeFrom
+import org.ksharp.typesystem.serializer.readTypeSystemFrom
 import org.ksharp.typesystem.serializer.writeTo
 import org.ksharp.typesystem.types.*
 import java.io.ByteArrayInputStream
@@ -34,7 +35,7 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
     val buffer = newBufferWriter()
     val table = mockStringTable(stringPool)
     val output = ByteArrayOutputStream()
-    this.writeTo(buffer, table)
+    writeTo(buffer, table)
     buffer.transferTo(output)
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
@@ -43,7 +44,41 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
     }.shouldBe(this)
 }
 
+private fun TypeSystem.shouldBeSerializable(): TypeSystem {
+    val stringPool = listBuilder<String>()
+    val buffer = newBufferWriter()
+    val table = mockStringTable(stringPool)
+    val output = ByteArrayOutputStream()
+    writeTo(buffer, table)
+    buffer.transferTo(output)
+    val stringPoolView = mockStringTableView(stringPool.build())
+    val input = ByteArrayInputStream(output.toByteArray())
+    return input.bufferView {
+        readTypeSystemFrom(it, stringPoolView).also { t -> println(t) }
+    }
+}
+
 class TypeSystemSerializerTest : StringSpec({
+    "Serialize TypeSystem" {
+        typeSystem {
+            type("Int")
+            type("String")
+            parametricType("Map") {
+                type("Int")
+                type("Int")
+            }
+        }.value
+            .shouldBeSerializable()
+            .apply {
+                size.shouldBe(3)
+                get("Int").shouldBeType(Concrete("Int"), "Int")
+                get("String").shouldBeType(Concrete("String"), "String")
+                get("Map").shouldBeType(
+                    ParametricType(Alias("Map"), listOf(Alias("Int"), Alias("Int"))),
+                    "(Map Int Int)"
+                )
+            }
+    }
     "Serialize Concrete Types" {
         Concrete("Int").shouldBeSerializable()
     }
@@ -66,6 +101,15 @@ class TypeSystemSerializerTest : StringSpec({
         Labeled(
             "Label",
             Concrete("String")
+        ).shouldBeSerializable()
+    }
+    "Serialize Function Types" {
+        FunctionType(
+            listOf(
+                Concrete("Int"),
+                Concrete("Int2"),
+                Concrete("Int3")
+            )
         ).shouldBeSerializable()
     }
 })

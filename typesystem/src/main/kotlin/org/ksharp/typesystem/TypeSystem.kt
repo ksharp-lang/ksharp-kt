@@ -25,7 +25,7 @@ interface TypeSystem {
         }
 }
 
-class TypeSystemImpl(
+class TypeSystemImpl internal constructor(
     override val parent: TypeSystem?,
     private val types: Map<String, Type>
 ) : TypeSystem {

@@ -1,6 +1,10 @@
 package org.ksharp.typesystem.serializer
 
 import org.ksharp.common.io.*
+import org.ksharp.common.mapBuilder
+import org.ksharp.common.put
+import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.TypeSystemImpl
 import org.ksharp.typesystem.types.Type
 
 interface TypeSerializer {
@@ -15,6 +19,7 @@ enum class TypeSerializers(
     Parameter(ParameterSerializer()),
     ParametricType(ParametricTypeSerializer()),
     Labeled(LabeledSerializer()),
+    FunctionType(FunctionSerializer()),
     NoDefined(object : SerializerWriter<Type> {
         override fun write(input: Type, buffer: BufferWriter, table: BinaryTable) {
             TODO("Not yet implemented")
@@ -40,4 +45,28 @@ inline fun <reified T> readTypeFrom(buffer: BufferView, table: BinaryTableView):
         .getDeclaredConstructor()
         .newInstance() as SerializerReader<T>
     return serializer.read(buffer.bufferFrom(8), table)
+}
+
+fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
+    buffer.add(size)
+    asSequence().forEach { (name, type) ->
+        buffer.add(table.add(name))
+        type.writeTo(buffer, table)
+    }
+}
+
+fun readTypeSystemFrom(buffer: BufferView, table: BinaryTableView): TypeSystem {
+    val paramsSize = buffer.readInt(0)
+    val types = mapBuilder<String, Type>()
+    var position = 4
+    repeat(paramsSize) {
+        val typeBuffer = buffer.bufferFrom(position)
+        val key = table[typeBuffer.readInt(0)]
+        position = typeBuffer.readInt(4) - buffer.offset
+        types.put(
+            key,
+            readTypeFrom(typeBuffer.bufferFrom(4), table)
+        )
+    }
+    return TypeSystemImpl(null, types.build())
 }

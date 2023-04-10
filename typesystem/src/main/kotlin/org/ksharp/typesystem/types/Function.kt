@@ -12,7 +12,7 @@ data class FunctionType internal constructor(
     val arguments: List<Type>,
 ) : Type {
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.FunctionType
     override val terms: Sequence<Type>
         get() = arguments.asSequence()
 
