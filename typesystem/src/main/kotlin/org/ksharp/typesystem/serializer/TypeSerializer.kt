@@ -20,6 +20,8 @@ enum class TypeSerializers(
     ParametricType(ParametricTypeSerializer()),
     Labeled(LabeledSerializer()),
     FunctionType(FunctionSerializer()),
+    IntersectionType(IntersectionSerializer()),
+    TupleType(TupleSerializer()),
     NoDefined(object : SerializerWriter<Type> {
         override fun write(input: Type, buffer: BufferWriter, table: BinaryTable) {
             TODO("Not yet implemented")

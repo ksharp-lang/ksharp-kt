@@ -112,4 +112,14 @@ class TypeSystemSerializerTest : StringSpec({
             )
         ).shouldBeSerializable()
     }
+    "Serialize Intersection Types" {
+        IntersectionType(
+            listOf(Alias("String"), Alias("Int"))
+        ).shouldBeSerializable()
+    }
+    "Serialize Tuple Types" {
+        TupleType(
+            listOf(Alias("String"), Alias("Int"))
+        ).shouldBeSerializable()
+    }
 })

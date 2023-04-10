@@ -13,7 +13,7 @@ data class IntersectionType internal constructor(
     val params: List<Alias>
 ) : Type {
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.IntersectionType
     override val terms: Sequence<Type>
         get() = params.asSequence()
 

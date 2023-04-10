@@ -8,7 +8,7 @@ data class TupleType internal constructor(
     val elements: List<Type>,
 ) : Type {
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.TupleType
     override val terms: Sequence<Type>
         get() = elements.asSequence()
 
