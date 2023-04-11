@@ -23,7 +23,7 @@ class ParametricTypeSerializer : SerializerWriter<ParametricType>, SerializerRea
 
     override fun read(buffer: BufferView, table: BinaryTableView): ParametricType {
         val paramsOffset = buffer.readInt(0)
-        val type = readTypeFrom<TypeVariable>(buffer, table)
+        val type = buffer.readTypeFrom<TypeVariable>(table)
         val types = buffer
             .bufferFrom(paramsOffset - buffer.offset)
             .readListOfTypes(table)

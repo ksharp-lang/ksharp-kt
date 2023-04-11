@@ -43,18 +43,18 @@ fun Type.writeTo(buffer: BufferWriter, table: BinaryTable) {
 }
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> readTypeFrom(buffer: BufferView, table: BinaryTableView): T {
-    val serializerName = table[buffer.readInt(4)]
+inline fun <reified T> BufferView.readTypeFrom(table: BinaryTableView): T {
+    val serializerName = table[readInt(4)]
     val serializer = Class.forName(serializerName)
         .getDeclaredConstructor()
         .newInstance() as SerializerReader<T>
-    return serializer.read(buffer.bufferFrom(8), table)
+    return serializer.read(bufferFrom(8), table)
 }
 
 fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
     asSequence().writeTo(size, buffer, table)
 }
 
-fun readTypeSystemFrom(buffer: BufferView, table: BinaryTableView): TypeSystem {
-    return TypeSystemImpl(null, buffer.readMapOfTypes(table))
+fun BufferView.readTypeSystemFrom(table: BinaryTableView): TypeSystem {
+    return TypeSystemImpl(null, readMapOfTypes(table))
 }

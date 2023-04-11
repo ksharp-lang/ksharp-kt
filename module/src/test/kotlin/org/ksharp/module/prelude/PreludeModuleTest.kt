@@ -6,7 +6,7 @@ import org.ksharp.module.FunctionInfo
 
 private val FunctionInfo.representation: String
     get() = "$name :: ${
-        type.joinToString(" -> ") {
+        types.joinToString(" -> ") {
             it.representation
         }
     }"

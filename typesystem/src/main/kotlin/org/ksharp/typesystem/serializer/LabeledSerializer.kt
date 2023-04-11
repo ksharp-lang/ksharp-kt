@@ -12,7 +12,7 @@ class LabeledSerializer : SerializerWriter<Labeled>, SerializerReader<Labeled> {
 
     override fun read(buffer: BufferView, table: BinaryTableView): Labeled {
         val label = table[buffer.readInt(0)]
-        val type = readTypeFrom<Type>(buffer.bufferFrom(4), table)
+        val type = buffer.bufferFrom(4).readTypeFrom<Type>(table)
         return Labeled(label, type)
     }
 }

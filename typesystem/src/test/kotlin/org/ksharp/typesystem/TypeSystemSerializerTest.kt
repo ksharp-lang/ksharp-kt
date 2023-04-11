@@ -40,7 +40,7 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
     input.bufferView {
-        readTypeFrom<T>(it, stringPoolView).also { t -> println(t) }
+        it.readTypeFrom<T>(stringPoolView).also { t -> println(t) }
     }.shouldBe(this)
 }
 
@@ -54,7 +54,7 @@ private fun TypeSystem.shouldBeSerializable(): TypeSystem {
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
     return input.bufferView {
-        readTypeSystemFrom(it, stringPoolView).also { t -> println(t) }
+        it.readTypeSystemFrom(stringPoolView)
     }
 }
 
