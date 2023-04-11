@@ -17,7 +17,7 @@ fun BufferView.readListOfTypes(tableView: BinaryTableView): List<Type> {
     repeat(paramsSize) {
         val typeBuffer = bufferFrom(position)
         position = readInt(position) - offset
-        result.add(readTypeFrom(typeBuffer, tableView))
+        result.add(typeBuffer.readTypeFrom(tableView))
     }
     return result.build()
 }
@@ -32,7 +32,7 @@ fun BufferView.readMapOfTypes(table: BinaryTableView): Map<String, Type> {
         position = typeBuffer.readInt(4) - offset
         types.put(
             key,
-            readTypeFrom(typeBuffer.bufferFrom(4), table)
+            typeBuffer.bufferFrom(4).readTypeFrom(table)
         )
     }
     return types.build()

@@ -4,5 +4,5 @@ import org.ksharp.typesystem.types.Type
 
 data class FunctionInfo(
     val name: String,
-    val type: List<Type>
+    val types: List<Type>
 )
