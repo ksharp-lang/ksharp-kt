@@ -43,6 +43,7 @@ class TypeSystemImpl internal constructor(
                     "type" to name
                 )
             )
+    
 }
 
 val PartialTypeSystem.size get() = value.size

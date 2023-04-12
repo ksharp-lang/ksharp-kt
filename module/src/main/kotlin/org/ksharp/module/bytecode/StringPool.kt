@@ -2,6 +2,7 @@ package org.ksharp.module.bytecode
 
 import org.ksharp.common.get
 import org.ksharp.common.io.BinaryTable
+import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.common.mapBuilder
@@ -46,18 +47,17 @@ class StringPoolBuilder : BinaryTable {
 }
 
 class StringPoolView internal constructor(
-    private val index: Int,
     private val buffer: BufferView
-) {
+) : BinaryTableView {
 
-    val size: Int = buffer.readInt(index)
+    val size: Int = buffer.readInt(0)
 
     private val poolIndex: Int = size * StringPositionSize + Size
 
-    operator fun get(index: Int): String {
+    override operator fun get(index: Int): String {
         val nIndex = Size + (index * StringPositionSize)
-        val start = buffer.readInt(this.index + nIndex)
-        val size = buffer.readInt(this.index + nIndex + Size)
+        val start = buffer.readInt(nIndex)
+        val size = buffer.readInt(nIndex + Size)
         return buffer.readString(this.poolIndex + start, size)
     }
 

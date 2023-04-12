@@ -1,9 +1,6 @@
 package org.ksharp.module.bytecode
 
-import org.ksharp.common.io.BinaryTable
-import org.ksharp.common.io.BinaryTableView
-import org.ksharp.common.io.BufferView
-import org.ksharp.common.io.BufferWriter
+import org.ksharp.common.io.*
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 import org.ksharp.module.FunctionInfo
@@ -11,11 +8,13 @@ import org.ksharp.typesystem.serializer.readListOfTypes
 import org.ksharp.typesystem.serializer.writeTo
 
 fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
-    val bufferStartPosition = buffer.size
-    buffer.add(0)
-    buffer.add(table.add(name))
-    types.writeTo(buffer, table)
-    buffer.set(bufferStartPosition, buffer.size)
+    newBufferWriter().apply {
+        add(0)
+        add(table.add(name))
+        types.writeTo(this, table)
+        set(0, size)
+        transferTo(buffer)
+    }
 }
 
 fun BufferView.readFunctionInfo(table: BinaryTableView): FunctionInfo {
@@ -39,7 +38,7 @@ fun BufferView.readFunctionInfoTable(table: BinaryTableView): Map<String, Functi
     repeat(paramsSize) {
         val typeBuffer = bufferFrom(position)
         val key = table[typeBuffer.readInt(0)]
-        position = typeBuffer.readInt(4) - offset
+        position += typeBuffer.readInt(4) + 4
         types.put(
             key,
             typeBuffer.bufferFrom(4).readFunctionInfo(table)

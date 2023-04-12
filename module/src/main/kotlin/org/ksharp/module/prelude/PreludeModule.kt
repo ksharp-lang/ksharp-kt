@@ -8,6 +8,7 @@ private fun createPreludeModule(): ModuleInfo = preludeTypeSystem
     .let { ts ->
         val numType = ts["Num"].valueOrNull!!
         ModuleInfo(
+            listOf(),
             typeSystem = ts,
             functions = moduleFunctions {
                 add("(+)", numType, numType, numType)

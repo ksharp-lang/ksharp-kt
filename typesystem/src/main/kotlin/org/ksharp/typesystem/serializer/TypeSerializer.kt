@@ -35,15 +35,17 @@ enum class TypeSerializers(
 fun Type.writeTo(buffer: BufferWriter, table: BinaryTable) {
     val serializer = this.serializer.writer as SerializerWriter<Type>
     val writerType = serializer.javaClass.name
-    val bufferStartPosition = buffer.size
-    buffer.add(0)
-    buffer.add(table.add(writerType))
-    serializer.write(this, buffer, table)
-    buffer.set(bufferStartPosition, buffer.size)
+    newBufferWriter().apply {
+        add(0)
+        add(table.add(writerType))
+        serializer.write(this@writeTo, this, table)
+        set(0, size)
+        transferTo(buffer)
+    }
 }
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> BufferView.readTypeFrom(table: BinaryTableView): T {
+inline fun <reified T> BufferView.readType(table: BinaryTableView): T {
     val serializerName = table[readInt(4)]
     val serializer = Class.forName(serializerName)
         .getDeclaredConstructor()
@@ -55,6 +57,6 @@ fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
     asSequence().writeTo(size, buffer, table)
 }
 
-fun BufferView.readTypeSystemFrom(table: BinaryTableView): TypeSystem {
+fun BufferView.readTypeSystem(table: BinaryTableView): TypeSystem {
     return TypeSystemImpl(null, readMapOfTypes(table))
 }

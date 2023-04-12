@@ -2,11 +2,11 @@ package org.ksharp.module
 
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
-import org.ksharp.typesystem.ModuleTypeSystem
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 
 data class ModuleInfo(
+    val dependencies: List<String>,
     val typeSystem: TypeSystem,
     val functions: Map<String, FunctionInfo>
 )
