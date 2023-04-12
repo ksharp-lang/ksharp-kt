@@ -7,8 +7,8 @@ import org.ksharp.common.io.BinaryTable
 import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
-import org.ksharp.typesystem.serializer.readTypeFrom
-import org.ksharp.typesystem.serializer.readTypeSystemFrom
+import org.ksharp.typesystem.serializer.readType
+import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
 import org.ksharp.typesystem.types.*
 import java.io.ByteArrayInputStream
@@ -40,7 +40,7 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
     input.bufferView {
-        it.readTypeFrom<T>(stringPoolView).also { t -> println(t) }
+        it.readType<T>(stringPoolView).also { t -> println(t) }
     }.shouldBe(this)
 }
 
@@ -54,7 +54,7 @@ private fun TypeSystem.shouldBeSerializable(): TypeSystem {
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
     return input.bufferView {
-        it.readTypeSystemFrom(stringPoolView)
+        it.readTypeSystem(stringPoolView)
     }
 }
 

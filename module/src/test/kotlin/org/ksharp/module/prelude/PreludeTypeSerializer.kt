@@ -10,7 +10,7 @@ import org.ksharp.module.bytecode.mockStringTableView
 import org.ksharp.module.prelude.types.Numeric
 import org.ksharp.module.prelude.types.NumericType
 import org.ksharp.module.prelude.types.charType
-import org.ksharp.typesystem.serializer.readTypeFrom
+import org.ksharp.typesystem.serializer.readType
 import org.ksharp.typesystem.serializer.writeTo
 import org.ksharp.typesystem.types.Type
 import java.io.ByteArrayInputStream
@@ -27,7 +27,7 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
     input.bufferView {
-        it.readTypeFrom<T>(stringPoolView)
+        it.readType<T>(stringPoolView)
     }.shouldBe(this)
 }
 

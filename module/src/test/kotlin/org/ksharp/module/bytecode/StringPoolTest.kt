@@ -19,7 +19,7 @@ class StringPoolTest : StringSpec({
         }
         val bytes = output.toByteArray()
         ByteArrayInputStream(bytes).bufferView { view ->
-            StringPoolView(0, view).apply {
+            StringPoolView(view).apply {
                 size.shouldBe(2)
                 this[0].shouldBe("Hello")
                 this[1].shouldBe("World")
