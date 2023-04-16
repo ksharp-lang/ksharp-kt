@@ -34,13 +34,23 @@ class ModuleInfoSerializerTest : StringSpec({
                 type("String")
             }.value,
             mapOf(
-                "sum" to FunctionInfo(
-                    "sum",
-                    listOf(newParameter(), newParameter())
+                "sum" to listOf(
+                    FunctionInfo(
+                        null,
+                        "sum",
+                        listOf(newParameter(), newParameter())
+                    ), FunctionInfo(
+                        "math",
+                        "sum",
+                        listOf(newParameter(), newParameter(), newParameter())
+                    )
                 ),
-                "sub" to FunctionInfo(
-                    "sub",
-                    listOf(newParameter(), newParameter())
+                "sub" to listOf(
+                    FunctionInfo(
+                        null,
+                        "sub",
+                        listOf(newParameter(), newParameter())
+                    )
                 )
             )
         ).shouldBeSerializable()

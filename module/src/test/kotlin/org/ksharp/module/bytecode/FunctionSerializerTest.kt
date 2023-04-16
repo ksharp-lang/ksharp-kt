@@ -24,7 +24,7 @@ private fun FunctionInfo.shouldBeSerializable() {
     }.shouldBe(this)
 }
 
-private fun Map<String, FunctionInfo>.shouldBeSerializable() {
+private fun Map<String, List<FunctionInfo>>.shouldBeSerializable() {
     val stringPool = listBuilder<String>()
     val buffer = newBufferWriter()
     val table = mockStringTable(stringPool)
@@ -39,21 +39,35 @@ private fun Map<String, FunctionInfo>.shouldBeSerializable() {
 }
 
 class FunctionSerializerTest : StringSpec({
+    "Serialize FunctionInfo with dependency = null" {
+        FunctionInfo(
+            null,
+            "sum",
+            listOf(newParameter(), newParameter())
+        ).shouldBeSerializable()
+    }
     "Serialize FunctionInfo" {
         FunctionInfo(
+            "math",
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
     }
     "Serialize FunctionInfoTable" {
         mapOf(
-            "sum" to FunctionInfo(
-                "sum",
-                listOf(newParameter(), newParameter())
+            "sum" to listOf(
+                FunctionInfo(
+                    null,
+                    "sum",
+                    listOf(newParameter(), newParameter())
+                )
             ),
-            "sub" to FunctionInfo(
-                "sub",
-                listOf(newParameter(), newParameter())
+            "sub" to listOf(
+                FunctionInfo(
+                    null,
+                    "sub",
+                    listOf(newParameter(), newParameter())
+                )
             )
         ).shouldBeSerializable()
     }
