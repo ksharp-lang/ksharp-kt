@@ -9,9 +9,12 @@ import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.unification.TypeUnification
+import org.ksharp.typesystem.unification.TypeUnifications
 
 interface Type {
     val serializer: TypeSerializer
+    val unification: TypeUnification
     val compound: Boolean get() = true
 
     val terms: Sequence<Type>
@@ -28,7 +31,10 @@ data class Concrete internal constructor(
 ) : Type {
     override val serializer: TypeSerializer
         get() = TypeSerializers.Concrete
-    
+
+    override val unification: TypeUnification
+        get() = TypeUnifications.NoDefined
+
     override val compound: Boolean get() = false
     override val terms: Sequence<Type> get() = emptySequence()
     override fun toString(): String = name

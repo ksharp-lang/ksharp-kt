@@ -7,12 +7,17 @@ import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.unification.TypeUnification
+import org.ksharp.typesystem.unification.TypeUnifications
 
 data class Alias internal constructor(
     val name: String
 ) : TypeVariable {
     override val serializer: TypeSerializer
         get() = TypeSerializers.Alias
+
+    override val unification: TypeUnification
+        get() = TypeUnifications.NoDefined
 
     override fun toString(): String {
         return name
