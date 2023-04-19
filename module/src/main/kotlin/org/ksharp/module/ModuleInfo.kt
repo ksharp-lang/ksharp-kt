@@ -41,3 +41,4 @@ class ModuleInfoBuilder {
 
 fun moduleFunctions(body: ModuleInfoBuilder.() -> Unit): Map<String, List<FunctionInfo>> =
     ModuleInfoBuilder().apply(body).build()
+

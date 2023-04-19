@@ -1,9 +1,6 @@
 package org.ksharp.semantics.nodes
 
-import org.ksharp.common.Either
-import org.ksharp.common.add
-import org.ksharp.common.isLeft
-import org.ksharp.common.listBuilder
+import org.ksharp.common.*
 import org.ksharp.semantics.inference.TypePromise
 import org.ksharp.semantics.inference.getTypePromise
 import org.ksharp.semantics.inference.type
@@ -60,11 +57,15 @@ val SemanticInfo.type: ErrorOrType
         }
 
 val List<SemanticInfo>.types
+    get() =
+        asSequence().types
+
+val Sequence<SemanticInfo>.types: ErrorOrValue<List<Type>>
     get() = run {
         val builder = listBuilder<Type>()
         for (info in this) {
             val type = info.type
-            if (type.isLeft) return@run type
+            if (type.isLeft) return@run type.cast<ErrorOrValue<List<Type>>>()
             else builder.add(type.valueOrNull!!)
         }
         Either.Right(builder.build())

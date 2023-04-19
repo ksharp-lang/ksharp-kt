@@ -2,6 +2,7 @@ package org.ksharp.semantics.inference
 
 import org.ksharp.common.Either
 import org.ksharp.common.Error
+import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.newParameter
@@ -25,3 +26,10 @@ fun TypeSystem.getTypePromise(name: String) =
     }
 
 fun paramTypePromise() = ResolvedTypePromise(newParameter())
+
+val TypePromise.type: ErrorOrType
+    get() =
+        when (this) {
+            is ResolvedTypePromise -> Either.Right(this.type)
+            is ErrorTypePromise -> Either.Left(this.error)
+        }
