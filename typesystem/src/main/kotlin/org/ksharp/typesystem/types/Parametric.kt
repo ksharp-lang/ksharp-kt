@@ -20,7 +20,7 @@ data class Parameter internal constructor(
         get() = TypeSerializers.Parameter
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Parameter
 
     val intermediate: Boolean get() = name.startsWith("@")
     override fun toString(): String = name
@@ -40,7 +40,7 @@ data class ParametricType internal constructor(
 
     override val unification: TypeUnification
         get() = TypeUnifications.NoDefined
-    
+
     override val terms: Sequence<Type>
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()
 

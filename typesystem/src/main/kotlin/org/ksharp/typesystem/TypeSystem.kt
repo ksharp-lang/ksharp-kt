@@ -2,6 +2,8 @@ package org.ksharp.typesystem
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.types.Alias
+import org.ksharp.typesystem.types.Annotated
+import org.ksharp.typesystem.types.Labeled
 import org.ksharp.typesystem.types.Type
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
@@ -21,6 +23,14 @@ interface TypeSystem {
     operator fun invoke(type: Type): ErrorOrType =
         when (type) {
             is Alias -> this[type.name]
+            is Labeled -> this(type.type).map {
+                Labeled(type.label, it)
+            }
+
+            is Annotated -> this(type.type).map {
+                Annotated(type.annotations, it)
+            }
+
             else -> Either.Right(type)
         }
 }
@@ -43,7 +53,7 @@ class TypeSystemImpl internal constructor(
                     "type" to name
                 )
             )
-    
+
 }
 
 val PartialTypeSystem.size get() = value.size

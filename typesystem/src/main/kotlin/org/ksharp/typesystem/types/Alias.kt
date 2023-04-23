@@ -17,7 +17,7 @@ data class Alias internal constructor(
         get() = TypeSerializers.Alias
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Alias
 
     override fun toString(): String {
         return name

@@ -14,7 +14,7 @@ data class Labeled internal constructor(
         get() = TypeSerializers.Labeled
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Default
 
     override val terms: Sequence<Type>
         get() = sequenceOf(type)

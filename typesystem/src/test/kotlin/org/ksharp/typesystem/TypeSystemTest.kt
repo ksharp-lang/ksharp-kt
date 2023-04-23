@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.new
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.annotations.annotation
 import org.ksharp.typesystem.types.*
 
@@ -156,6 +157,31 @@ class TypeSystemTest : ShouldSpec({
                     value(Concrete("Int")).shouldBeType(
                         Concrete("Int"),
                         "Int"
+                    )
+                }
+                context("Resolve a Labeled alias") {
+                    value(
+                        Labeled(
+                            "n",
+                            Alias("Map")
+                        )
+                    ).shouldBeType(
+                        Labeled("n", ParametricType(Alias("Map"), listOf(Alias("Int"), Alias("Int")))),
+                        "n: (Map Int Int)"
+                    )
+                }
+                context("Resolve a Annotated alias") {
+                    value(
+                        Annotated(
+                            listOf(Annotation("anno", mapOf("key" to "value"))),
+                            Alias("Map")
+                        )
+                    ).shouldBeType(
+                        Annotated(
+                            listOf(Annotation("anno", mapOf("key" to "value"))),
+                            ParametricType(Alias("Map"), listOf(Alias("Int"), Alias("Int")))
+                        ),
+                        "@anno(key=value) Map Int Int"
                     )
                 }
             }
@@ -972,17 +998,19 @@ class TypeSystemTest : ShouldSpec({
                 get("txt.String").shouldBeLeft()
             }
         }
-        context("Check list all types on the typeSystem"){
+        context("Check list all types on the typeSystem") {
             typeSystem {
                 type("Int")
                 type("String")
             }.apply {
                 value.asSequence()
                     .toList()
-                    .shouldBe(listOf(
-                        "Int" to Concrete("Int"),
-                        "String" to Concrete("String")
-                    ))
+                    .shouldBe(
+                        listOf(
+                            "Int" to Concrete("Int"),
+                            "String" to Concrete("String")
+                        )
+                    )
             }
         }
     }

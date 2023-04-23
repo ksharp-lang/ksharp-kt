@@ -33,7 +33,7 @@ data class Concrete internal constructor(
         get() = TypeSerializers.Concrete
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Default
 
     override val compound: Boolean get() = false
     override val terms: Sequence<Type> get() = emptySequence()
