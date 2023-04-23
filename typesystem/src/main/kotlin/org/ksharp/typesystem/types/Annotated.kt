@@ -13,7 +13,7 @@ data class Annotated internal constructor(
     override val serializer: TypeSerializer
         get() = TypeSerializers.NoDefined
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Default
 
     override val terms: Sequence<Type>
         get() = sequenceOf(type)
