@@ -17,6 +17,7 @@ interface TypeUnification {
 enum class TypeUnifications(override val algo: UnificationAlgo<out Type>) : TypeUnification {
     Alias(AliasUnification()),
     Default(DefaultUnification()),
+    Function(FunctionUnification()),
     Parameter(ParameterUnification()),
     Parametric(ParametricUnification()),
     Tuple(TupleUnification()),

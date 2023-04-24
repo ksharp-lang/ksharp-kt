@@ -125,6 +125,18 @@ class TypeUnificationTest : StringSpec({
                 )
             )
     }
+    "Incompatible parametric types 2" {
+        val type1 = typeSystem["Map"].valueOrNull!!
+        val type2 = Concrete("Int")
+        typeSystem.unify(Location.NoProvided, type1, type2)
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to type1.representation,
+                    "type2" to type2.representation
+                )
+            )
+    }
     "Incompatible parametric types by variable" {
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
@@ -191,6 +203,52 @@ class TypeUnificationTest : StringSpec({
         )
         val type2 = TupleType(
             listOf(
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        typeSystem.unify(Location.NoProvided, type1, type2)
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to type1.representation,
+                    "type2" to type2.representation
+                )
+            )
+    }
+    "Compatible function type" {
+        val type1 = FunctionType(
+            listOf(
+                typeSystem["Int"].valueOrNull!!,
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        val type2 = FunctionType(
+            listOf(
+                typeSystem["Integer"].valueOrNull!!,
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        typeSystem.unify(Location.NoProvided, type1, type2)
+            .shouldBeRight(
+                FunctionType(
+                    listOf(
+                        typeSystem["Int"].valueOrNull!!,
+                        typeSystem["Long"].valueOrNull!!
+                    )
+                )
+            )
+    }
+    "Incompatible function type" {
+        val type1 = FunctionType(
+            listOf(
+                typeSystem["Int"].valueOrNull!!,
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        val type2 = FunctionType(
+            listOf(
+                typeSystem["Integer"].valueOrNull!!,
+                typeSystem["Long"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
             )
         )

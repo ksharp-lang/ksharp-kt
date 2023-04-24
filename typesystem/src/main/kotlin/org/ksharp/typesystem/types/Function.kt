@@ -17,8 +17,8 @@ data class FunctionType internal constructor(
         get() = TypeSerializers.FunctionType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
-    
+        get() = TypeUnifications.Function
+
     override val terms: Sequence<Type>
         get() = arguments.asSequence()
 
