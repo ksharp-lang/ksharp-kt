@@ -5,6 +5,8 @@ import org.ksharp.typesystem.*
 import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.unification.TypeUnification
+import org.ksharp.typesystem.unification.TypeUnifications
 import java.util.concurrent.atomic.AtomicInteger
 
 private var parameterIdCounter = AtomicInteger(-1)
@@ -16,6 +18,10 @@ data class Parameter internal constructor(
 ) : TypeVariable {
     override val serializer: TypeSerializer
         get() = TypeSerializers.Parameter
+
+    override val unification: TypeUnification
+        get() = TypeUnifications.Parameter
+
     val intermediate: Boolean get() = name.startsWith("@")
     override fun toString(): String = name
 }
@@ -31,6 +37,10 @@ data class ParametricType internal constructor(
 ) : Type {
     override val serializer: TypeSerializer
         get() = TypeSerializers.ParametricType
+
+    override val unification: TypeUnification
+        get() = TypeUnifications.Parametric
+
     override val terms: Sequence<Type>
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()
 
