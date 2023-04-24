@@ -21,9 +21,11 @@ class TypeUnificationTest : StringSpec({
             parameter("a")
             parameter("b")
         }
-        parametricType("LongMap") {
-            type("Long")
-            parameter("b")
+        alias("LongMap") {
+            parametricType("Map") {
+                type("Long")
+                parameter("b")
+            }
         }
     }.apply {
         errors.shouldBeEmpty()
@@ -114,6 +116,36 @@ class TypeUnificationTest : StringSpec({
         val type2 = ParametricType(
             Alias("Map"), listOf(
                 typeSystem["Int"].valueOrNull!!
+            )
+        )
+        typeSystem.unify(Location.NoProvided, type1, type2)
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to type1.representation,
+                    "type2" to type2.representation
+                )
+            )
+    }
+    "Compatible parametric types by types" {
+        val type1 = typeSystem["LongMap"].valueOrNull!!
+        val type2 = ParametricType(
+            Alias("Map"), listOf(
+                typeSystem["Long"].valueOrNull!!,
+                typeSystem["Int"].valueOrNull!!
+            )
+        )
+        typeSystem.unify(Location.NoProvided, type1, type2)
+            .shouldBeRight(
+                type2
+            )
+    }
+    "Incompatible parametric types by types" {
+        val type1 = typeSystem["LongMap"].valueOrNull!!
+        val type2 = ParametricType(
+            Alias("Map"), listOf(
+                typeSystem["Int"].valueOrNull!!,
+                typeSystem["Long"].valueOrNull!!
             )
         )
         typeSystem.unify(Location.NoProvided, type1, type2)
