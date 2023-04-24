@@ -141,6 +141,7 @@ class TypeUnificationTest : StringSpec({
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
             Alias("List"), listOf(
+                typeSystem["Int"].valueOrNull!!,
                 typeSystem["Int"].valueOrNull!!
             )
         )
