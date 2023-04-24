@@ -18,6 +18,7 @@ enum class TypeUnifications(override val algo: UnificationAlgo<out Type>) : Type
     Alias(AliasUnification()),
     Default(DefaultUnification()),
     Parameter(ParameterUnification()),
+    Parametric(ParametricUnification()),
     NoDefined(object : UnificationAlgo<Type> {
         override fun unify(location: Location, typeSystem: TypeSystem, type1: Type, type2: Type): ErrorOrType {
             TODO("Not yet implemented")

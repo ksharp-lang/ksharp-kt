@@ -39,7 +39,7 @@ data class ParametricType internal constructor(
         get() = TypeSerializers.ParametricType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Parametric
 
     override val terms: Sequence<Type>
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()

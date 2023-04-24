@@ -11,6 +11,13 @@ import org.ksharp.typesystem.types.Labeled
 import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.Type
 
+fun incompatibleType(location: Location, type1: Type, type2: Type): ErrorOrType =
+    TypeSystemErrorCode.IncompatibleTypes.new(
+        location,
+        "type1" to type1.representation,
+        "type2" to type2.representation
+    ).let { Either.Left(it) }
+
 val Type.innerType: Type
     get() =
         when (this) {
@@ -24,14 +31,10 @@ class DefaultUnification : UnificationAlgo<Type> {
         typeSystem(type1).flatMap { lType ->
             val innerLType = lType.innerType
             typeSystem(type2).flatMap { rType ->
-                when (rType.innerType) {
+                when (val innerRType = rType.innerType) {
                     is Parameter -> Either.Right(lType)
-                    innerLType -> Either.Right(rType)
-                    else -> TypeSystemErrorCode.IncompatibleTypes.new(
-                        location,
-                        "type1" to type1.representation,
-                        "type2" to type2.representation
-                    ).let { Either.Left(it) }
+                    innerLType -> Either.Right(innerRType)
+                    else -> incompatibleType(location, type1, type2)
                 }
             }
         }
