@@ -4,6 +4,8 @@ import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.unification.TypeUnification
+import org.ksharp.typesystem.unification.TypeUnifications
 import org.ksharp.typesystem.validateTypeName
 
 typealias UnionTypeFactoryBuilder = UnionTypeFactory.() -> Unit
@@ -13,6 +15,9 @@ data class UnionType internal constructor(
 ) : Type {
     override val serializer: TypeSerializer
         get() = TypeSerializers.UnionType
+
+    override val unification: TypeUnification
+        get() = TypeUnifications.NoDefined
 
     override val terms: Sequence<Type>
         get() = arguments.values.asSequence()
@@ -28,6 +33,9 @@ data class UnionType internal constructor(
     ) : Type {
         override val serializer: TypeSerializer
             get() = TypeSerializers.ClassType
+
+        override val unification: TypeUnification
+            get() = TypeUnifications.NoDefined
 
         override val terms: Sequence<Type>
             get() = params.asSequence()

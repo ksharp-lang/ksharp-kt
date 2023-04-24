@@ -13,7 +13,8 @@ enum class TypeSystemErrorCode(override val description: String) : ErrorCode {
     TypeParamNameShouldStartWithLowerCase("Type param should start with a lowercase letter: '{name}'"),
     FunctionNameShouldntHaveSpaces("Function names shouldn't have spaces: '{name}'"),
     InvalidFunctionType("Functions should have at least one argument and a return type"),
-    IntersectionTypeShouldBeTraits("Intersection type should be Traits: '{name}'")
+    IntersectionTypeShouldBeTraits("Intersection type should be Traits: '{name}'"),
+    IncompatibleTypes("Type {type1} is not compatible with {type2}")
 }
 
 private fun validateRestName(name: String): ErrorOrValue<String> {

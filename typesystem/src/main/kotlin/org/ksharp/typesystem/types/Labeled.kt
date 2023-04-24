@@ -2,6 +2,8 @@ package org.ksharp.typesystem.types
 
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.unification.TypeUnification
+import org.ksharp.typesystem.unification.TypeUnifications
 
 data class Labeled internal constructor(
     val label: String,
@@ -10,6 +12,9 @@ data class Labeled internal constructor(
 
     override val serializer: TypeSerializer
         get() = TypeSerializers.Labeled
+
+    override val unification: TypeUnification
+        get() = TypeUnifications.Default
 
     override val terms: Sequence<Type>
         get() = sequenceOf(type)

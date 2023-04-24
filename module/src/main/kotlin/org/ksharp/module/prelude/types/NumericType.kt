@@ -6,6 +6,8 @@ import org.ksharp.module.prelude.serializer.TypeSerializers
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.unification.TypeUnification
+import org.ksharp.typesystem.unification.TypeUnifications
 
 enum class Numeric(val size: kotlin.Int, val isInteger: Boolean, val recordSize: RecordSize) {
     Byte(8, true, RecordSize.Single),
@@ -23,6 +25,10 @@ data class NumericType internal constructor(
 ) : Type {
     override val serializer: TypeSerializer
         get() = TypeSerializers.NumericType
+
+    override val unification: TypeUnification
+        get() = TypeUnifications.NoDefined
+
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()
     override val representation: String = "numeric<${type}>"
