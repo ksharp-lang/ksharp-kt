@@ -96,6 +96,19 @@ class TypeUnificationTest : StringSpec({
                 )
             )
     }
+    "Compatible parametric type 2" {
+        val type1 = typeSystem["Map"].valueOrNull!!
+        val type2 = newParameter()
+        typeSystem.unify(Location.NoProvided, type1, type2)
+            .shouldBeRight(
+                ParametricType(
+                    Alias("Map"), listOf(
+                        Parameter("a"),
+                        Parameter("b"),
+                    )
+                )
+            )
+    }
     "Incompatible parametric types" {
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
@@ -128,12 +141,57 @@ class TypeUnificationTest : StringSpec({
                 )
             )
     }
-    "Incompatible parametric types by param" {
-        val type1 = typeSystem["LongMap"].valueOrNull!!
-        val type2 = ParametricType(
-            Alias("LongMap"), listOf(
+    "Compatible tuples type" {
+        val type1 = TupleType(
+            listOf(
+                typeSystem["Int"].valueOrNull!!,
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        val type2 = TupleType(
+            listOf(
                 typeSystem["Integer"].valueOrNull!!,
-                typeSystem["Int"].valueOrNull!!
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        typeSystem.unify(Location.NoProvided, type1, type2)
+            .shouldBeRight(
+                TupleType(
+                    listOf(
+                        typeSystem["Int"].valueOrNull!!,
+                        typeSystem["Long"].valueOrNull!!
+                    )
+                )
+            )
+    }
+    "Compatible tuples type 2" {
+        val type1 = TupleType(
+            listOf(
+                typeSystem["Int"].valueOrNull!!,
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        val type2 = newParameter()
+        typeSystem.unify(Location.NoProvided, type1, type2)
+            .shouldBeRight(
+                TupleType(
+                    listOf(
+                        typeSystem["Int"].valueOrNull!!,
+                        typeSystem["Long"].valueOrNull!!
+                    )
+                )
+            )
+    }
+    "Incompatible tuples type byt size" {
+        val type1 = TupleType(
+            listOf(
+                typeSystem["Int"].valueOrNull!!,
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        val type2 = TupleType(
+            listOf(
+                typeSystem["Long"].valueOrNull!!
             )
         )
         typeSystem.unify(Location.NoProvided, type1, type2)

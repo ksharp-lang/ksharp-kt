@@ -13,8 +13,8 @@ data class TupleType internal constructor(
         get() = TypeSerializers.TupleType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
-    
+        get() = TypeUnifications.Tuple
+
     override val terms: Sequence<Type>
         get() = elements.asSequence()
 
