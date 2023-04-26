@@ -261,6 +261,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     val longTypePromise = ts.getTypePromise("Long")
     val byteTypePromise = ts.getTypePromise("Byte")
     val shortTypePromise = ts.getTypePromise("Short")
+    val intTypePromise = ts.getTypePromise("Int")
     val strTypePromise = ts.getTypePromise("String")
     val unitTypePromise = ts.getTypePromise("Unit")
     context("Semantic node: constant function") {
@@ -268,6 +269,8 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             Tuple4(LiteralValueType.Integer, byteTypePromise, "10", 10.toLong()),
             Tuple4(LiteralValueType.BinaryInteger, byteTypePromise, "0b0001", 1.toLong()),
             Tuple4(LiteralValueType.HexInteger, shortTypePromise, "0xFF", 255.toLong()),
+            Tuple4(LiteralValueType.Integer, intTypePromise, "500000", 500000.toLong()),
+            Tuple4(LiteralValueType.Integer, longTypePromise, "5000000000", 5000000000),
             Tuple4(LiteralValueType.OctalInteger, byteTypePromise, "0o01", 1.toLong()),
             Tuple4(LiteralValueType.Decimal, ts.getTypePromise("Double"), "1.5", 1.5.toDouble()),
             Tuple4(LiteralValueType.String, strTypePromise, "\"Hello\"", "Hello"),
