@@ -13,6 +13,7 @@ import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.typesystem.TypeSystem
+import kotlin.math.pow
 
 enum class ExpressionSemanticsErrorCode(override val description: String) : ErrorCode {
     SymbolAlreadyUsed("Symbol already used '{name}'")
@@ -27,12 +28,22 @@ private val LiteralCollectionType.applicationName
             LiteralCollectionType.Set -> ApplicationName("::prelude", "setOf")
         }
 
-private fun LiteralValueType.toSemanticInfo(typeSystem: TypeSystem) =
+private fun integer2Type(value: Long): String =
+    when {
+        value < 255 -> "Byte"
+        value < 2.0.pow(16.0) -> "Short"
+        value < 2.0.pow(32.0) -> "Int"
+        else -> "Long"
+    }
+
+private fun LiteralValueType.toSemanticInfo(typeSystem: TypeSystem, value: Any) =
     when (this) {
         LiteralValueType.Integer,
         LiteralValueType.HexInteger,
         LiteralValueType.OctalInteger,
-        LiteralValueType.BinaryInteger -> typeSystem.getTypeSemanticInfo("Long")
+        LiteralValueType.BinaryInteger -> {
+            typeSystem.getTypeSemanticInfo(integer2Type(value as Long))
+        }
 
         LiteralValueType.Decimal -> typeSystem.getTypeSemanticInfo("Double")
         LiteralValueType.String -> typeSystem.getTypeSemanticInfo("String")
@@ -77,11 +88,13 @@ internal fun ExpressionParserNode.toSemanticNode(
     typeSystem: TypeSystem
 ): SemanticNode<SemanticInfo> =
     when (this) {
-        is LiteralValueNode -> ConstantNode(
-            value.toValue(type),
-            type.toSemanticInfo(typeSystem),
-            location
-        )
+        is LiteralValueNode -> with(value.toValue(type)) {
+            ConstantNode(
+                this,
+                type.toSemanticInfo(typeSystem, this),
+                location
+            )
+        }
 
         is OperatorNode -> ApplicationNode(
             ApplicationName(null, "($operator)"),
