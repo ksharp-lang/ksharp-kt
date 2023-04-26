@@ -11,7 +11,7 @@ class CharType : Type {
         get() = TypeSerializers.CharType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Default
 
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()

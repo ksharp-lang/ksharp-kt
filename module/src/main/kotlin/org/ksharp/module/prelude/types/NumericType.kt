@@ -3,11 +3,11 @@ package org.ksharp.module.prelude.types
 import org.ksharp.common.Either
 import org.ksharp.module.RecordSize
 import org.ksharp.module.prelude.serializer.TypeSerializers
+import org.ksharp.module.prelude.unification.TypeUnifications
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.TypeUnification
-import org.ksharp.typesystem.unification.TypeUnifications
 
 enum class Numeric(val size: kotlin.Int, val isInteger: Boolean, val recordSize: RecordSize) {
     Byte(8, true, RecordSize.Single),
@@ -27,7 +27,7 @@ data class NumericType internal constructor(
         get() = TypeSerializers.NumericType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Numeric
 
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()
