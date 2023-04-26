@@ -2,7 +2,6 @@ package org.ksharp.module.prelude.unification
 
 import org.ksharp.common.Either
 import org.ksharp.common.Location
-import org.ksharp.module.prelude.types.Numeric
 import org.ksharp.module.prelude.types.NumericType
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
@@ -18,11 +17,13 @@ class NumericUnification : UnificationAlgo<NumericType> {
             when (val innerRType = rType.innerType) {
                 is Parameter -> Either.Right(type1)
                 is NumericType -> {
-                    if(innerRType.type.isInteger == type1.type.isInteger
-                        && innerRType.type.size <= type1.type.size)
+                    if (innerRType.type.isInteger == type1.type.isInteger
+                        && innerRType.type.size <= type1.type.size
+                    )
                         Either.Right(type1)
                     else incompatibleType(location, type1, type2)
                 }
+
                 else -> incompatibleType(location, type1, type2)
             }
         }
