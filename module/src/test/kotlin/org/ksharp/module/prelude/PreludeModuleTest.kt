@@ -1,7 +1,7 @@
 package org.ksharp.module.prelude
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldBeEmpty
 import org.ksharp.module.FunctionInfo
 
 private val FunctionInfo.representation: String
@@ -16,10 +16,6 @@ class PreludeModuleTest : StringSpec({
         preludeModule.functions.values
             .flatten()
             .map { it.representation }
-            .shouldBe(
-                listOf(
-                    "(+) :: (Num a) -> (Num a) -> (Num a)"
-                )
-            )
+            .shouldBeEmpty()
     }
 })
