@@ -31,3 +31,5 @@ fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
             Left(InvalidFunctionType.new())
         } else Right(FunctionType(args))
     }
+
+fun List<Type>.toFunctionType() = FunctionType(this)

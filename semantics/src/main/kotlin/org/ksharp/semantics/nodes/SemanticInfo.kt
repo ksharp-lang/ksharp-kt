@@ -1,6 +1,6 @@
 package org.ksharp.semantics.nodes
 
-import org.ksharp.common.*
+import org.ksharp.common.Flag
 import org.ksharp.semantics.inference.TypePromise
 import org.ksharp.semantics.inference.getTypePromise
 import org.ksharp.semantics.inference.type
@@ -10,10 +10,12 @@ import org.ksharp.semantics.scopes.Table
 import org.ksharp.semantics.scopes.TableValue
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
-import org.ksharp.typesystem.types.Type
 
 
-sealed class SemanticInfo
+sealed class SemanticInfo {
+    internal val inferFlag: Flag by lazy { Flag() }
+}
+
 object EmptySemanticInfo : SemanticInfo()
 
 interface SymbolResolver {
@@ -55,18 +57,3 @@ val SemanticInfo.type: ErrorOrType
             is TypeSemanticInfo -> type.type
             else -> TODO()
         }
-
-val List<SemanticInfo>.types
-    get() =
-        asSequence().types
-
-val Sequence<SemanticInfo>.types: ErrorOrValue<List<Type>>
-    get() = run {
-        val builder = listBuilder<Type>()
-        for (info in this) {
-            val type = info.type
-            if (type.isLeft) return@run type.cast<ErrorOrValue<List<Type>>>()
-            else builder.add(type.valueOrNull!!)
-        }
-        Either.Right(builder.build())
-    }
