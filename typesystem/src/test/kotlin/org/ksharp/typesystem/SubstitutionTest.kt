@@ -10,10 +10,7 @@ import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.substitution.SubstitutionContext
 import org.ksharp.typesystem.substitution.extract
 import org.ksharp.typesystem.substitution.substitute
-import org.ksharp.typesystem.types.Concrete
-import org.ksharp.typesystem.types.Parameter
-import org.ksharp.typesystem.types.newParameter
-import org.ksharp.typesystem.types.type
+import org.ksharp.typesystem.types.*
 
 class SubstitutionContextTest : StringSpec({
     "Substitution adding mappings" {
@@ -147,5 +144,14 @@ class SubstitutionText : StringSpec({
                 parameter.name to intType
             )
         )
+    }
+    "Alias substitution" {
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, Alias("Int"), intType)
+            .shouldBeRight(false)
+        context.substitute(Location.NoProvided, Alias("Int"), intType)
+            .shouldBeRight(intType)
+        context.errors.build().shouldBeEmpty()
+        context.mappings.build().shouldBeEmpty()
     }
 })

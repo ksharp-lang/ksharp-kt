@@ -22,7 +22,7 @@ data class Alias internal constructor(
         get() = TypeUnifications.Alias
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Alias
 
     override fun toString(): String {
         return name
