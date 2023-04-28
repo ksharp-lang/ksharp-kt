@@ -18,7 +18,7 @@ data class Annotated internal constructor(
         get() = TypeUnifications.Default
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Annotated
 
     override val terms: Sequence<Type>
         get() = sequenceOf(type)

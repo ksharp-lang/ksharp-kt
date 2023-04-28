@@ -168,4 +168,22 @@ class SubstitutionText : StringSpec({
             )
         )
     }
+    "Annotated substitution" {
+        val context = SubstitutionContext(ts)
+        val parameter = newParameter()
+        val annotation = Annotated(
+            listOf(),
+            parameter
+        )
+        context.extract(Location.NoProvided, annotation, intType)
+            .shouldBeRight(true)
+        context.substitute(Location.NoProvided, annotation, intType)
+            .shouldBeRight(intType)
+        context.errors.build().shouldBeEmpty()
+        context.mappings.build().shouldBe(
+            mapOf(
+                parameter.name to intType
+            )
+        )
+    }
 })
