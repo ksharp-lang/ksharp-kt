@@ -3,6 +3,8 @@ package org.ksharp.typesystem.types
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.substitution.Substitution
+import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
@@ -14,6 +16,9 @@ data class TupleType internal constructor(
 
     override val unification: TypeUnification
         get() = TypeUnifications.Tuple
+
+    override val substitution: Substitution
+        get() = Substitutions.NoDefined
 
     override val terms: Sequence<Type>
         get() = elements.asSequence()

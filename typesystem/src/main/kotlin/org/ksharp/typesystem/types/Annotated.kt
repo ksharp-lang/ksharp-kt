@@ -3,6 +3,8 @@ package org.ksharp.typesystem.types
 import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.substitution.Substitution
+import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
@@ -14,6 +16,9 @@ data class Annotated internal constructor(
         get() = TypeSerializers.NoDefined
     override val unification: TypeUnification
         get() = TypeUnifications.Default
+
+    override val substitution: Substitution
+        get() = Substitutions.NoDefined
 
     override val terms: Sequence<Type>
         get() = sequenceOf(type)

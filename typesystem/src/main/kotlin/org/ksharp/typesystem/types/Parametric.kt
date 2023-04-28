@@ -5,6 +5,8 @@ import org.ksharp.typesystem.*
 import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.substitution.Substitution
+import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 import java.util.concurrent.atomic.AtomicInteger
@@ -21,6 +23,9 @@ data class Parameter internal constructor(
 
     override val unification: TypeUnification
         get() = TypeUnifications.Parameter
+
+    override val substitution: Substitution
+        get() = Substitutions.Parameter
 
     val intermediate: Boolean get() = name.startsWith("@")
     override fun toString(): String = name
@@ -40,6 +45,9 @@ data class ParametricType internal constructor(
 
     override val unification: TypeUnification
         get() = TypeUnifications.Parametric
+
+    override val substitution: Substitution
+        get() = Substitutions.NoDefined
 
     override val terms: Sequence<Type>
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()
@@ -157,3 +165,7 @@ fun TypeSystemBuilder.parametricType(
     item(name, annotations) {
         this.parametricType(name, factory)
     }
+
+val Type.parameters: Sequence<Parameter>
+    get() = if (this is Parameter) sequenceOf(this)
+    else this.terms.map { it.parameters }.flatten()

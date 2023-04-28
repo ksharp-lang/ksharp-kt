@@ -5,6 +5,8 @@ import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.substitution.Substitution
+import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 import org.ksharp.typesystem.validateTypeName
@@ -19,6 +21,9 @@ data class IntersectionType internal constructor(
 
     override val unification: TypeUnification
         get() = TypeUnifications.NoDefined
+
+    override val substitution: Substitution
+        get() = Substitutions.NoDefined
 
     override val terms: Sequence<Type>
         get() = params.asSequence()
