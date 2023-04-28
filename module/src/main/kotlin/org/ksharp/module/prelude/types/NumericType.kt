@@ -32,7 +32,7 @@ data class NumericType internal constructor(
         get() = TypeUnifications.Numeric
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Identity
 
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()

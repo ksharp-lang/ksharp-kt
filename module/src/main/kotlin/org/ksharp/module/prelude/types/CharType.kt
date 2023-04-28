@@ -16,7 +16,7 @@ class CharType : Type {
         get() = TypeUnifications.Default
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Identity
 
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()
