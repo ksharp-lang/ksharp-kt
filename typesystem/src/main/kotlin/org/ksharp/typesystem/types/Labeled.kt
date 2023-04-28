@@ -19,7 +19,7 @@ data class Labeled internal constructor(
         get() = TypeUnifications.Default
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Labeled
 
     override val terms: Sequence<Type>
         get() = sequenceOf(type)

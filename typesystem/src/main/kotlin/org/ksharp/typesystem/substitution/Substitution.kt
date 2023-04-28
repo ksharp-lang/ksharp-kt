@@ -17,9 +17,10 @@ interface Substitution {
 }
 
 enum class Substitutions(override val algo: SubstitutionAlgo<out Type>) : Substitution {
-    Identity(IdentitySubstitution()),
-    Parameter(ParameterSubstitution()),
     Alias(AliasSubstitution()),
+    Identity(IdentitySubstitution()),
+    Labeled(LabeledSubstitution()),
+    Parameter(ParameterSubstitution()),
     NoDefined(object : SubstitutionAlgo<Type> {
         override fun extract(
             context: SubstitutionContext,

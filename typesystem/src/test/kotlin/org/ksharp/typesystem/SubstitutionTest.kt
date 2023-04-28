@@ -154,4 +154,18 @@ class SubstitutionText : StringSpec({
         context.errors.build().shouldBeEmpty()
         context.mappings.build().shouldBeEmpty()
     }
+    "Labeled substitution" {
+        val context = SubstitutionContext(ts)
+        val parameter = newParameter()
+        context.extract(Location.NoProvided, Labeled("lbl", parameter), intType)
+            .shouldBeRight(true)
+        context.substitute(Location.NoProvided, Labeled("lbl", parameter), intType)
+            .shouldBeRight(intType)
+        context.errors.build().shouldBeEmpty()
+        context.mappings.build().shouldBe(
+            mapOf(
+                parameter.name to intType
+            )
+        )
+    }
 })
