@@ -37,6 +37,8 @@ class SubstitutionTest : StringSpec({
             .shouldBeRight(true)
         context.extract(Location.NoProvided, parameter, longType)
             .shouldBeRight(true)
+        context.extract(Location.NoProvided, parameter, intType)
+            .shouldBeRight(true)
         context.substitute(Location.NoProvided, parameter, intType)
             .shouldBeRight(longType)
     }
