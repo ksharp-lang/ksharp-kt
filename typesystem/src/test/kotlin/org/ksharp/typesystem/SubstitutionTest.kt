@@ -112,4 +112,40 @@ class SubstitutionText : StringSpec({
             )
         )
     }
+    "No compatible parameters" {
+        val context = SubstitutionContext(ts)
+        val parameter = newParameter()
+        context.extract(Location.NoProvided, parameter, intType)
+            .shouldBeRight(true)
+        context.extract(Location.NoProvided, parameter, Concrete("String"))
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to "String",
+                    "type2" to "Int"
+                )
+            )
+        context.substitute(Location.NoProvided, parameter, intType)
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to "String",
+                    "type2" to "Int"
+                )
+            )
+        context.errors.build().shouldBe(
+            mapOf(
+                parameter.name to TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to "String",
+                    "type2" to "Int"
+                )
+            )
+        )
+        context.mappings.build().shouldBe(
+            mapOf(
+                parameter.name to intType
+            )
+        )
+    }
 })
