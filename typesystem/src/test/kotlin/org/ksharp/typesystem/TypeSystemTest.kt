@@ -1,6 +1,7 @@
 package org.ksharp.typesystem
 
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.core.test.TestCase
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -1014,4 +1015,10 @@ class TypeSystemTest : ShouldSpec({
             }
         }
     }
-})
+}) {
+    override suspend fun beforeAny(testCase: TestCase) {
+        super.beforeAny(testCase)
+        resetParameterCounterForTesting()
+    }
+    
+}

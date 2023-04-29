@@ -7,6 +7,8 @@ import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode.InvalidFunctionType
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.substitution.Substitution
+import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
@@ -18,6 +20,9 @@ data class FunctionType internal constructor(
 
     override val unification: TypeUnification
         get() = TypeUnifications.Function
+
+    override val substitution: Substitution
+        get() = Substitutions.Function
 
     override val terms: Sequence<Type>
         get() = arguments.asSequence()
