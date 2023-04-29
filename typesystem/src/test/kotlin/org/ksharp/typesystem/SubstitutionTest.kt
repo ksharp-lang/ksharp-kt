@@ -70,7 +70,7 @@ class SubstitutionContextTest : StringSpec({
     }
 })
 
-class SubstitutionText : StringSpec({
+class SubstitutionTest : StringSpec({
     val ts = typeSystem {
         type("Int")
         type("String")
@@ -243,5 +243,37 @@ class SubstitutionText : StringSpec({
                     "type2" to "Int"
                 )
             )
+    }
+    "Function substitution" {
+        val function1 = FunctionType(
+            listOf(
+                Concrete("Int"), newParameter()
+            )
+        )
+        val function2 = FunctionType(
+            listOf(
+                Concrete("Int"), Concrete("String")
+            )
+        )
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, function1, function2).shouldBeRight(true)
+        context.substitute(Location.NoProvided, function1, Concrete("Int"))
+            .shouldBeRight(function2)
+    }
+    "Intersection substitution" {
+        val type1 = IntersectionType(
+            listOf(
+                Concrete("Int"), newParameter()
+            )
+        )
+        val type2 = IntersectionType(
+            listOf(
+                Concrete("Int"), Concrete("String")
+            )
+        )
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
+        context.substitute(Location.NoProvided, type1, Concrete("Int"))
+            .shouldBeRight(type2)
     }
 })

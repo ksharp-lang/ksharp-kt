@@ -22,7 +22,7 @@ data class FunctionType internal constructor(
         get() = TypeUnifications.Function
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Function
 
     override val terms: Sequence<Type>
         get() = arguments.asSequence()

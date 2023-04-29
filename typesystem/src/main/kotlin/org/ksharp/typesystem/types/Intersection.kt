@@ -14,7 +14,7 @@ import org.ksharp.typesystem.validateTypeName
 typealias IntersectionTypeFactoryBuilder = IntersectionTypeFactory.() -> Unit
 
 data class IntersectionType internal constructor(
-    val params: List<Alias>
+    val params: List<Type>
 ) : Type {
     override val serializer: TypeSerializer
         get() = TypeSerializers.IntersectionType
@@ -23,7 +23,7 @@ data class IntersectionType internal constructor(
         get() = TypeUnifications.NoDefined
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Intersection
 
     override val terms: Sequence<Type>
         get() = params.asSequence()
