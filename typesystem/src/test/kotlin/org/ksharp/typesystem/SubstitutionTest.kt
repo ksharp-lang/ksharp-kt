@@ -186,4 +186,62 @@ class SubstitutionText : StringSpec({
             )
         )
     }
+    "Tuple substitution" {
+        val tuple1 = TupleType(
+            listOf(
+                Concrete("Int"), newParameter()
+            )
+        )
+        val tuple2 = TupleType(
+            listOf(
+                Concrete("Int"), Concrete("String")
+            )
+        )
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, tuple1, tuple2).shouldBeRight(true)
+        context.substitute(Location.NoProvided, tuple1, Concrete("Int"))
+            .shouldBeRight(tuple2)
+    }
+    "Tuple substitution error" {
+        val tuple1 = TupleType(
+            listOf(
+                Concrete("Int"), newParameter()
+            )
+        )
+        val tuple2 = TupleType(
+            listOf(
+                Concrete("Int"), Concrete("String")
+            )
+        )
+        val tuple3 = TupleType(
+            listOf(
+                Concrete("Int"), Concrete("Int")
+            )
+        )
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, tuple1, tuple2).shouldBeRight(true)
+        context.extract(Location.NoProvided, tuple1, tuple3).shouldBeLeft(
+            TypeSystemErrorCode.IncompatibleTypes.new(Location.NoProvided, "type1" to "Int", "type2" to "String")
+        )
+        context.substitute(Location.NoProvided, tuple1, Concrete("Int"))
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(Location.NoProvided, "type1" to "Int", "type2" to "String")
+            )
+    }
+    "Compound type substitution incompatible error" {
+        val tuple1 = TupleType(
+            listOf(
+                Concrete("Int"), newParameter()
+            )
+        )
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, tuple1, Concrete("Int"))
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to tuple1.representation,
+                    "type2" to "Int"
+                )
+            )
+    }
 })

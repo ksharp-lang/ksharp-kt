@@ -18,7 +18,7 @@ data class TupleType internal constructor(
         get() = TypeUnifications.Tuple
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Tuple
 
     override val terms: Sequence<Type>
         get() = elements.asSequence()

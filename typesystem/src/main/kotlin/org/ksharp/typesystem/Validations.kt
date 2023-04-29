@@ -1,6 +1,7 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
+import org.ksharp.typesystem.types.Type
 
 enum class TypeSystemErrorCode(override val description: String) : ErrorCode {
     InvalidName("Name should contains [a-zA-Z0-9_]: {name}"),
@@ -60,3 +61,10 @@ fun validateFunctionName(name: String): ErrorOrValue<String> {
         .dropWhile { it.isRight }
         .firstOrNull() ?: right
 }
+
+fun <T> incompatibleType(location: Location, type1: Type, type2: Type): ErrorOrValue<T> =
+    TypeSystemErrorCode.IncompatibleTypes.new(
+        location,
+        "type1" to type1.representation,
+        "type2" to type2.representation
+    ).let { Either.Left(it) }

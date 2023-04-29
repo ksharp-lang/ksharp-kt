@@ -22,6 +22,7 @@ enum class Substitutions(override val algo: SubstitutionAlgo<out Type>) : Substi
     Identity(IdentitySubstitution()),
     Labeled(LabeledSubstitution()),
     Parameter(ParameterSubstitution()),
+    Tuple(TupleSubstitution()),
     NoDefined(object : SubstitutionAlgo<Type> {
         override fun extract(
             context: SubstitutionContext,
