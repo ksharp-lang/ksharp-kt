@@ -25,6 +25,7 @@ enum class Substitutions(override val algo: SubstitutionAlgo<out Type>) : Substi
     Intersection(IntersectionSubstitution()),
     Labeled(LabeledSubstitution()),
     Parameter(ParameterSubstitution()),
+    Parametric(ParametricSubstitution()),
     Tuple(TupleSubstitution()),
     Union(UnionSubstitution()),
     NoDefined(object : SubstitutionAlgo<Type> {

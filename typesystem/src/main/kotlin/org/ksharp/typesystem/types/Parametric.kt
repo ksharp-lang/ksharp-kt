@@ -37,7 +37,7 @@ fun newParameterForTesting(id: Int) = Parameter("@${id}")
 fun newParameter() = Parameter("@${parameterIdCounter.incrementAndGet()}")
 
 data class ParametricType internal constructor(
-    val type: TypeVariable,
+    val type: Type,
     val params: List<Type>
 ) : Type {
     override val serializer: TypeSerializer
@@ -47,7 +47,7 @@ data class ParametricType internal constructor(
         get() = TypeUnifications.Parametric
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Parametric
 
     override val terms: Sequence<Type>
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()

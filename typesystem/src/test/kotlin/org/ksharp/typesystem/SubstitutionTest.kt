@@ -295,7 +295,8 @@ class SubstitutionTest : StringSpec({
             .shouldBeRight(type2)
     }
     "Union substitution incompatible error" {
-        val clsType = UnionType.ClassType("Some", listOf(newParameter()))
+        val param = newParameter()
+        val clsType = UnionType.ClassType("Some", listOf(param))
         val type1 = UnionType(
             mapOf(
                 "Some" to clsType,
@@ -320,9 +321,27 @@ class SubstitutionTest : StringSpec({
             .shouldBeLeft(
                 TypeSystemErrorCode.SubstitutionNotFound.new(
                     Location.NoProvided,
-                    "param" to "@0",
+                    "param" to param.representation,
                     "type" to "Int"
                 )
             )
+    }
+    "Parametric type substitution" {
+        val type1 = ParametricType(
+            Concrete("Map"),
+            listOf(
+                Concrete("Int"), newParameter()
+            )
+        )
+        val type2 = ParametricType(
+            Concrete("Map"),
+            listOf(
+                Concrete("Int"), Concrete("String")
+            )
+        )
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
+        context.substitute(Location.NoProvided, type1, Concrete("Int"))
+            .shouldBeRight(type2)
     }
 })
