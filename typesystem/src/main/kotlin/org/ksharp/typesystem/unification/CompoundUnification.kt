@@ -3,6 +3,7 @@ package org.ksharp.typesystem.unification
 import org.ksharp.common.*
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.Type
 
@@ -38,7 +39,7 @@ abstract class CompoundUnification<T : Type> : UnificationAlgo<T> {
             val item2 = type2Params.next()
             val unifyItem = typeSystem.unify(location, item1, item2)
             if (unifyItem.isLeft) {
-                result = incompatibleType(location, type1, type2).cast<Either.Left<Error>>()
+                result = incompatibleType<Type>(location, type1, type2).cast<Either.Left<Error>>()
                 break
             }
             params.add(unifyItem.cast<Either.Right<Type>>().value)

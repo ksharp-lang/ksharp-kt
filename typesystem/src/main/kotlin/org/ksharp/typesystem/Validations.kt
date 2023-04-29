@@ -1,6 +1,7 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
+import org.ksharp.typesystem.types.Type
 
 enum class TypeSystemErrorCode(override val description: String) : ErrorCode {
     InvalidName("Name should contains [a-zA-Z0-9_]: {name}"),
@@ -14,7 +15,8 @@ enum class TypeSystemErrorCode(override val description: String) : ErrorCode {
     FunctionNameShouldntHaveSpaces("Function names shouldn't have spaces: '{name}'"),
     InvalidFunctionType("Functions should have at least one argument and a return type"),
     IntersectionTypeShouldBeTraits("Intersection type should be Traits: '{name}'"),
-    IncompatibleTypes("Type {type1} is not compatible with {type2}")
+    IncompatibleTypes("Type {type1} is not compatible with {type2}"),
+    SubstitutionNotFound("Substitution param '{param}' not found for '{type}'")
 }
 
 private fun validateRestName(name: String): ErrorOrValue<String> {
@@ -59,3 +61,10 @@ fun validateFunctionName(name: String): ErrorOrValue<String> {
         .dropWhile { it.isRight }
         .firstOrNull() ?: right
 }
+
+fun <T> incompatibleType(location: Location, type1: Type, type2: Type): ErrorOrValue<T> =
+    TypeSystemErrorCode.IncompatibleTypes.new(
+        location,
+        "type1" to type1.representation,
+        "type2" to type2.representation
+    ).let { Either.Left(it) }

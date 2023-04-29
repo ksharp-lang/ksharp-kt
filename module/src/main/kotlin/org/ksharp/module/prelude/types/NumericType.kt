@@ -5,6 +5,8 @@ import org.ksharp.module.RecordSize
 import org.ksharp.module.prelude.serializer.TypeSerializers
 import org.ksharp.module.prelude.unification.TypeUnifications
 import org.ksharp.typesystem.serializer.TypeSerializer
+import org.ksharp.typesystem.substitution.Substitution
+import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.TypeUnification
@@ -28,6 +30,9 @@ data class NumericType internal constructor(
 
     override val unification: TypeUnification
         get() = TypeUnifications.Numeric
+
+    override val substitution: Substitution
+        get() = Substitutions.Identity
 
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()

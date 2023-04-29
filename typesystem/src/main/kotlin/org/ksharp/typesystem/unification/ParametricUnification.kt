@@ -4,6 +4,7 @@ import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.ParametricType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.TypeVariable

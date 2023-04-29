@@ -6,6 +6,8 @@ import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.substitution.Substitution
+import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 import org.ksharp.typesystem.validateFunctionName
@@ -27,6 +29,9 @@ data class TraitType internal constructor(
     override val unification: TypeUnification
         get() = TypeUnifications.NoDefined
 
+    override val substitution: Substitution
+        get() = Substitutions.NoDefined
+
     data class MethodType internal constructor(
         val name: String,
         val arguments: List<Type>,
@@ -37,7 +42,10 @@ data class TraitType internal constructor(
 
         override val unification: TypeUnification
             get() = TypeUnifications.NoDefined
-        
+
+        override val substitution: Substitution
+            get() = Substitutions.NoDefined
+
         override val compound: Boolean
             get() = false
         override val terms: Sequence<Type>

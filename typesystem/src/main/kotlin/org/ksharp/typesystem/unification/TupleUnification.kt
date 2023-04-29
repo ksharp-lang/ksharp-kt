@@ -3,6 +3,7 @@ package org.ksharp.typesystem.unification
 import org.ksharp.common.Location
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.TupleType
 import org.ksharp.typesystem.types.Type
 
