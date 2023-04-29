@@ -13,12 +13,19 @@ abstract class CompoundSubstitution<T : Type> : SubstitutionAlgo<T> {
         location: Location,
         type: List<Type>
     ): ErrorOrValue<Boolean> =
-        this.asSequence().zip(type.asSequence()) { type1, type2 ->
+        this.asSequence().extract(context, location, type.asSequence())
+
+    protected fun Sequence<Type>.extract(
+        context: SubstitutionContext,
+        location: Location,
+        type: Sequence<Type>
+    ): ErrorOrValue<Boolean> =
+        this.zip(type) { type1, type2 ->
             context.extract(location, type1, type2)
         }.firstOrNull { it.isLeft }
             ?: Either.Right(true)
 
-    protected fun List<Type>.substitute(
+    protected fun Iterable<Type>.substitute(
         context: SubstitutionContext,
         location: Location,
         typeContext: Type

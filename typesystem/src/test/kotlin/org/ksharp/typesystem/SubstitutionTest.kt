@@ -276,4 +276,53 @@ class SubstitutionTest : StringSpec({
         context.substitute(Location.NoProvided, type1, Concrete("Int"))
             .shouldBeRight(type2)
     }
+    "Union substitution" {
+        val type1 = UnionType(
+            mapOf(
+                "Some" to UnionType.ClassType("Some", listOf(newParameter())),
+                "None" to UnionType.ClassType("None", emptyList()),
+            )
+        )
+        val type2 = UnionType(
+            mapOf(
+                "Some" to UnionType.ClassType("Some", listOf(Concrete("Int"))),
+                "None" to UnionType.ClassType("None", emptyList()),
+            )
+        )
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
+        context.substitute(Location.NoProvided, type1, Concrete("Int"))
+            .shouldBeRight(type2)
+    }
+    "Union substitution incompatible error" {
+        val clsType = UnionType.ClassType("Some", listOf(newParameter()))
+        val type1 = UnionType(
+            mapOf(
+                "Some" to clsType,
+                "None" to UnionType.ClassType("None", emptyList()),
+            )
+        )
+        val type2 = UnionType(
+            mapOf(
+                "Some" to UnionType.ClassType("AnotherSome", listOf(Concrete("Int"))),
+                "None" to UnionType.ClassType("None", emptyList()),
+            )
+        )
+        val context = SubstitutionContext(ts)
+        context.extract(Location.NoProvided, type1, type2).shouldBeLeft(
+            TypeSystemErrorCode.IncompatibleTypes.new(
+                Location.NoProvided,
+                "type1" to clsType.representation,
+                "type2" to UnionType.ClassType("AnotherSome", listOf(Concrete("Int"))).representation
+            )
+        )
+        context.substitute(Location.NoProvided, type1, Concrete("Int"))
+            .shouldBeLeft(
+                TypeSystemErrorCode.SubstitutionNotFound.new(
+                    Location.NoProvided,
+                    "param" to "@0",
+                    "type" to "Int"
+                )
+            )
+    }
 })

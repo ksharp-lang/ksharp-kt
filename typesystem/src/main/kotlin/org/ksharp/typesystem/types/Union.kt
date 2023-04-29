@@ -22,7 +22,7 @@ data class UnionType internal constructor(
         get() = TypeUnifications.NoDefined
 
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Union
 
     override val terms: Sequence<Type>
         get() = arguments.values.asSequence()
@@ -43,8 +43,8 @@ data class UnionType internal constructor(
             get() = TypeUnifications.NoDefined
 
         override val substitution: Substitution
-            get() = Substitutions.NoDefined
-        
+            get() = Substitutions.ClassType
+
         override val terms: Sequence<Type>
             get() = params.asSequence()
 
