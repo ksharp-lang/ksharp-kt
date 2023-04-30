@@ -20,10 +20,10 @@ sealed interface TypePromise {
 sealed class SemanticInfo {
     private var inferredType: ErrorOrType? = null
 
-    fun isInferredType(): Boolean = inferredType != null
+    fun hasInferredType(): Boolean = inferredType != null
 
     internal fun setInferredType(type: ErrorOrType) {
-        if (inferredType == null) inferredType = type
+        inferredType = type
     }
 
     fun getInferredType(location: Location): ErrorOrType =
@@ -67,7 +67,7 @@ fun TypeSystem.getTypeSemanticInfo(name: String) =
 
 fun SemanticInfo.getType(location: Location): ErrorOrType =
     when (this) {
-        is TypeSemanticInfo -> if (isInferredType()) getInferredType(location) else type
+        is TypeSemanticInfo -> if (hasInferredType()) getInferredType(location) else type
         else -> getInferredType(location)
     }
 

@@ -75,7 +75,8 @@ class InferenceTest : StringSpec({
         ).inferType(module).apply {
             shouldBeRight(
                 (0 until 3)
-                    .map { longTypePromise.type.valueOrNull!! }.toFunctionType()
+                    .map { longTypePromise.type.valueOrNull!! }
+                    .toFunctionType()
             )
         }
     }

@@ -21,15 +21,16 @@ private fun Sequence<ErrorOrType>.collect(): ErrorOrValue<List<Type>> = run {
 }
 
 fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
-    when (this) {
-        is AbstractionNode -> infer(info)
-        is ApplicationNode -> infer(info)
-        is ConstantNode -> infer()
-        is VarNode -> TODO()
-        is LetNode -> TODO()
-        is LetBindingNode -> TODO()
-    }.also {
-        this.info.setInferredType(it)
+    if (this.info.hasInferredType()) this.info.getInferredType(location)
+    else {
+        when (this) {
+            is AbstractionNode -> infer(info)
+            is ApplicationNode -> infer(info)
+            is ConstantNode -> infer()
+            is VarNode -> TODO()
+            is LetNode -> TODO()
+            is LetBindingNode -> TODO()
+        }.also { this.info.setInferredType(it) }
     }
 
 private fun AbstractionNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
