@@ -8,19 +8,15 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.Either
 import org.ksharp.common.Location
+import org.ksharp.common.cast
 import org.ksharp.common.new
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.ResolvedTypePromise
-import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.inference.getTypePromise
-import org.ksharp.semantics.nodes.EmptySemanticInfo
-import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
-import org.ksharp.semantics.nodes.Symbol
-import org.ksharp.semantics.nodes.TypeSemanticInfo
+import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionVisibility
 import org.ksharp.semantics.scopes.TypeVisibilityTableBuilder
@@ -31,7 +27,7 @@ import org.ksharp.typesystem.types.functionType
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.resetParameterCounterForTesting
 
-private fun typeParameterForTesting(id: Int) = ResolvedTypePromise(newParameterForTesting(id))
+private fun typeParameterForTesting(id: Int) = TypeSemanticInfo(Either.Right(newParameterForTesting(id)))
 
 private fun module(vararg functions: FunctionNode) =
     ModuleNode(
@@ -69,9 +65,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                             FunctionVisibility.Public,
                             "sum",
                             listOf(
-                                ResolvedTypePromise(newParameterForTesting(0)),
-                                ResolvedTypePromise(newParameterForTesting(1)),
-                                ResolvedTypePromise(newParameterForTesting(2)),
+                                TypeSemanticInfo(Either.Right(newParameterForTesting(0))),
+                                TypeSemanticInfo(Either.Right(newParameterForTesting(1))),
+                                TypeSemanticInfo(Either.Right(newParameterForTesting(2))),
                             )
                         )
                     )
@@ -118,9 +114,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                             FunctionVisibility.Public,
                             "sum",
                             listOf(
-                                ResolvedTypePromise(typeSystem.alias("Int").valueOrNull!!),
-                                ResolvedTypePromise(typeSystem.alias("Int").valueOrNull!!),
-                                ResolvedTypePromise(typeSystem.alias("Int").valueOrNull!!),
+                                TypeSemanticInfo(typeSystem.alias("Int")),
+                                TypeSemanticInfo(typeSystem.alias("Int")),
+                                TypeSemanticInfo(typeSystem.alias("Int")),
                             )
                         )
                     )
@@ -154,8 +150,8 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                             FunctionVisibility.Public,
                             "ten",
                             listOf(
-                                ResolvedTypePromise(typeSystem["Unit"].valueOrNull!!),
-                                ResolvedTypePromise(newParameterForTesting(0)),
+                                TypeSemanticInfo(typeSystem["Unit"]),
+                                TypeSemanticInfo(Either.Right(newParameterForTesting(0))),
                             )
                         )
                     )
@@ -258,12 +254,12 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
 
 class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     val ts = preludeModule.typeSystem
-    val longTypePromise = ts.getTypePromise("Long")
-    val byteTypePromise = ts.getTypePromise("Byte")
-    val shortTypePromise = ts.getTypePromise("Short")
-    val intTypePromise = ts.getTypePromise("Int")
-    val strTypePromise = ts.getTypePromise("String")
-    val unitTypePromise = ts.getTypePromise("Unit")
+    val longTypePromise = ts.getTypeSemanticInfo("Long")
+    val byteTypePromise = ts.getTypeSemanticInfo("Byte")
+    val shortTypePromise = ts.getTypeSemanticInfo("Short")
+    val intTypePromise = ts.getTypeSemanticInfo("Int")
+    val strTypePromise = ts.getTypeSemanticInfo("String")
+    val unitTypePromise = ts.getTypeSemanticInfo("Unit")
     context("Semantic node: constant function") {
         listOf<Tuple4<LiteralValueType, TypePromise, String, Any>>(
             Tuple4(LiteralValueType.Integer, byteTypePromise, "10", 10.toLong()),
@@ -272,10 +268,10 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             Tuple4(LiteralValueType.Integer, intTypePromise, "500000", 500000.toLong()),
             Tuple4(LiteralValueType.Integer, longTypePromise, "5000000000", 5000000000),
             Tuple4(LiteralValueType.OctalInteger, byteTypePromise, "0o01", 1.toLong()),
-            Tuple4(LiteralValueType.Decimal, ts.getTypePromise("Double"), "1.5", 1.5.toDouble()),
+            Tuple4(LiteralValueType.Decimal, ts.getTypeSemanticInfo("Double"), "1.5", 1.5.toDouble()),
             Tuple4(LiteralValueType.String, strTypePromise, "\"Hello\"", "Hello"),
             Tuple4(LiteralValueType.MultiLineString, strTypePromise, "\"\"\"Hello\nWorld\"\"\"", "Hello\nWorld"),
-            Tuple4(LiteralValueType.Character, ts.getTypePromise("Char"), "'c'", 'c'),
+            Tuple4(LiteralValueType.Character, ts.getTypeSemanticInfo("Char"), "'c'", 'c'),
         ).forEach { (literalType, expectedType, value, expectedValue) ->
             should("value type $literalType") {
                 module(
@@ -299,7 +295,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             AbstractionNode(
                                 "n", ConstantNode(
                                     expectedValue,
-                                    TypeSemanticInfo(expectedType),
+                                    expectedType.cast(),
                                     Location.NoProvided
                                 ),
                                 EmptySemanticInfo,
@@ -342,16 +338,16 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     2.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 )
                             ),
-                            TypeSemanticInfo(typeParameterForTesting(1)),
+                            typeParameterForTesting(1),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -400,7 +396,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     listOf(
                                         ConstantNode(
                                             4.toLong(),
-                                            TypeSemanticInfo(byteTypePromise),
+                                            byteTypePromise,
                                             Location.NoProvided
                                         ),
                                         VarNode(
@@ -409,21 +405,21 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    TypeSemanticInfo(typeParameterForTesting(2)),
+                                    typeParameterForTesting(2),
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     10.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     20.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 ),
                             ),
-                            TypeSemanticInfo(typeParameterForTesting(3)),
+                            typeParameterForTesting(3),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -472,7 +468,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     listOf(
                                         ConstantNode(
                                             4.toLong(),
-                                            TypeSemanticInfo(byteTypePromise),
+                                            byteTypePromise,
                                             Location.NoProvided
                                         ),
                                         VarNode(
@@ -481,21 +477,21 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    TypeSemanticInfo(typeParameterForTesting(2)),
+                                    typeParameterForTesting(2),
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     10.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     Unit,
-                                    TypeSemanticInfo(unitTypePromise),
+                                    (unitTypePromise),
                                     Location.NoProvided
                                 ),
                             ),
-                            TypeSemanticInfo(typeParameterForTesting(3)),
+                            (typeParameterForTesting(3)),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -541,7 +537,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 ),
                                 ApplicationNode(
@@ -549,22 +545,20 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     listOf(
                                         ConstantNode(
                                             2.toLong(),
-                                            TypeSemanticInfo(byteTypePromise),
+                                            byteTypePromise,
                                             Location.NoProvided
                                         ),
                                         ConstantNode(
                                             1.toLong(),
-                                            TypeSemanticInfo(byteTypePromise),
+                                            byteTypePromise,
                                             Location.NoProvided
                                         )
                                     ),
-                                    TypeSemanticInfo(typeParameterForTesting(1)),
+                                    (typeParameterForTesting(1)),
                                     Location.NoProvided
                                 )
                             ),
-                            TypeSemanticInfo(
-                                typeParameterForTesting(2)
-                            ),
+                            typeParameterForTesting(2),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -608,23 +602,21 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     1.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     2.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     3.toLong(),
-                                    TypeSemanticInfo(byteTypePromise),
+                                    byteTypePromise,
                                     Location.NoProvided
                                 )
                             ),
-                            TypeSemanticInfo(
-                                typeParameterForTesting(1)
-                            ),
+                            typeParameterForTesting(1),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -665,9 +657,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 VarNode(
                                     "x",
-                                    TypeSemanticInfo(
-                                        typeParameterForTesting(2)
-                                    ),
+                                    typeParameterForTesting(2),
                                     Location.NoProvided
                                 ),
                                 VarNode(
@@ -678,9 +668,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            TypeSemanticInfo(
-                                typeParameterForTesting(3)
-                            ),
+                            typeParameterForTesting(3),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -730,29 +718,23 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 ApplicationNode(
                                     ApplicationName("::prelude", "pair"),
                                     listOf(
-                                        ConstantNode("key1", TypeSemanticInfo(strTypePromise), Location.NoProvided),
-                                        ConstantNode(1.toLong(), TypeSemanticInfo(byteTypePromise), Location.NoProvided)
+                                        ConstantNode("key1", strTypePromise, Location.NoProvided),
+                                        ConstantNode(1.toLong(), byteTypePromise, Location.NoProvided)
                                     ),
-                                    TypeSemanticInfo(
-                                        typeParameterForTesting(1)
-                                    ),
+                                    typeParameterForTesting(1),
                                     Location.NoProvided
                                 ),
                                 ApplicationNode(
                                     ApplicationName("::prelude", "pair"),
                                     listOf(
-                                        ConstantNode("key2", TypeSemanticInfo(strTypePromise), Location.NoProvided),
-                                        ConstantNode(2.toLong(), TypeSemanticInfo(byteTypePromise), Location.NoProvided)
+                                        ConstantNode("key2", strTypePromise, Location.NoProvided),
+                                        ConstantNode(2.toLong(), byteTypePromise, Location.NoProvided)
                                     ),
-                                    TypeSemanticInfo(
-                                        typeParameterForTesting(2)
-                                    ),
+                                    typeParameterForTesting(2),
                                     Location.NoProvided
                                 )
                             ),
-                            TypeSemanticInfo(
-                                typeParameterForTesting(3)
-                            ),
+                            typeParameterForTesting(3),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo,
@@ -828,13 +810,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         listOf(
                                             ConstantNode(
                                                 10.toLong(),
-                                                TypeSemanticInfo(byteTypePromise),
+                                                byteTypePromise,
                                                 Location.NoProvided
                                             )
                                         ),
-                                        TypeSemanticInfo(
-                                            typeParameterForTesting(2)
-                                        ),
+                                        typeParameterForTesting(2),
                                         Location.NoProvided
                                     ),
                                     EmptySemanticInfo,
@@ -848,7 +828,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     ),
                                     ConstantNode(
                                         20.toLong(),
-                                        TypeSemanticInfo(byteTypePromise),
+                                        byteTypePromise,
                                         Location.NoProvided
                                     ),
                                     EmptySemanticInfo,
@@ -869,9 +849,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         Location.NoProvided
                                     )
                                 ),
-                                TypeSemanticInfo(
-                                    typeParameterForTesting(4)
-                                ),
+                                typeParameterForTesting(4),
                                 Location.NoProvided
                             ),
                             EmptySemanticInfo,

@@ -6,9 +6,9 @@ import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.unification.incompatibleType
 import org.ksharp.typesystem.unification.unify
 
 
@@ -32,7 +32,7 @@ internal fun Parameter.substitute(
                 else paramUnification
             } ?: Either.Right(item2)
             if (substitutionType.isLeft) {
-                result = incompatibleType(location, item1, item2)
+                result = incompatibleType<List<Type>>(location, item1, item2)
                     .cast<Either.Left<org.ksharp.common.Error>>()
                 break
             }
@@ -73,7 +73,7 @@ internal fun FunctionInfo.unify(
             val item2 = argumentsIter.next()
             val unifyItem = typeSystem.unify(location, item1, item2)
             if (unifyItem.isLeft) {
-                result = incompatibleType(location, item1, item2)
+                result = incompatibleType<List<Type>>(location, item1, item2)
                     .cast<Either.Left<org.ksharp.common.Error>>()
                 break
             }

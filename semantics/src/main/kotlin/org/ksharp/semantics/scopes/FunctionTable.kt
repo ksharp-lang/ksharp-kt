@@ -1,7 +1,7 @@
 package org.ksharp.semantics.scopes
 
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.TypePromise
+import org.ksharp.semantics.nodes.TypePromise
 
 enum class FunctionVisibility {
     Internal,

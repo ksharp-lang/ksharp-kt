@@ -2,12 +2,13 @@ import org.ksharp.common.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.nodes.SemanticInfo
-import org.ksharp.semantics.nodes.type
+import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.toFunctionType
 
 enum class InferenceErrorCode(override val description: String) : ErrorCode {
+    TypeNotInferred("Type not inferred"),
     FunctionNotFound("Function '{function}' not found")
 }
 
@@ -20,9 +21,6 @@ private fun Sequence<ErrorOrType>.collect(): ErrorOrValue<List<Type>> = run {
     Either.Right(builder.build())
 }
 
-
-val SemanticNode<SemanticInfo>.infered: Boolean get() = this.info.inferFlag.enabled
-
 fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
     when (this) {
         is AbstractionNode -> infer(info)
@@ -32,14 +30,14 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
         is LetNode -> TODO()
         is LetBindingNode -> TODO()
     }.also {
-        this.info.inferFlag.activate()
+        this.info.setInferredType(it)
     }
 
 private fun AbstractionNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
     expression.inferType(info)
 
 private fun ConstantNode<SemanticInfo>.infer(): ErrorOrType =
-    info.type
+    info.getType(location)
 
 private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
     arguments.asSequence()

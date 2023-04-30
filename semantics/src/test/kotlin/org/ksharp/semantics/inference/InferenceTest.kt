@@ -2,6 +2,7 @@ package org.ksharp.semantics.inference
 
 import inferType
 import io.kotest.core.spec.style.StringSpec
+import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.moduleFunctions
@@ -12,6 +13,7 @@ import org.ksharp.nodes.semantic.ApplicationNode
 import org.ksharp.nodes.semantic.ConstantNode
 import org.ksharp.semantics.nodes.EmptySemanticInfo
 import org.ksharp.semantics.nodes.TypeSemanticInfo
+import org.ksharp.semantics.nodes.getTypeSemanticInfo
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.newParameter
@@ -32,14 +34,14 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
 class InferenceTest : StringSpec({
     val ts = preludeModule.typeSystem
     val module = createInferenceInfo(ts)
-    val longTypePromise = ts.getTypePromise("Long")
-    val intTypePromise = ts.getTypePromise("Int")
+    val longTypePromise = ts.getTypeSemanticInfo("Long")
+    val intTypePromise = ts.getTypeSemanticInfo("Int")
 
     "Inference type over constants" {
         AbstractionNode(
             "ten", ConstantNode(
                 10.toLong(),
-                TypeSemanticInfo(longTypePromise),
+                longTypePromise,
                 Location.NoProvided
             ),
             EmptySemanticInfo,
@@ -56,16 +58,16 @@ class InferenceTest : StringSpec({
                 listOf(
                     ConstantNode(
                         10.toLong(),
-                        TypeSemanticInfo(longTypePromise),
+                        (longTypePromise),
                         Location.NoProvided
                     ),
                     ConstantNode(
                         2.toLong(),
-                        TypeSemanticInfo(longTypePromise),
+                        (longTypePromise),
                         Location.NoProvided
                     )
                 ),
-                TypeSemanticInfo(ResolvedTypePromise(newParameter())),
+                TypeSemanticInfo(Either.Right(newParameter())),
                 Location.NoProvided
             ),
             EmptySemanticInfo,
@@ -85,16 +87,16 @@ class InferenceTest : StringSpec({
                 listOf(
                     ConstantNode(
                         10.toLong(),
-                        TypeSemanticInfo(intTypePromise),
+                        (intTypePromise),
                         Location.NoProvided
                     ),
                     ConstantNode(
                         2.toLong(),
-                        TypeSemanticInfo(longTypePromise),
+                        (longTypePromise),
                         Location.NoProvided
                     )
                 ),
-                TypeSemanticInfo(ResolvedTypePromise(newParameter())),
+                TypeSemanticInfo(Either.Right(newParameter())),
                 Location.NoProvided
             ),
             EmptySemanticInfo,
