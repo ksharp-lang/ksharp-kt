@@ -5,7 +5,6 @@ import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.toFunctionType
 
 enum class InferenceErrorCode(override val description: String) : ErrorCode {
     TypeNotInferred("Type not inferred"),
@@ -45,7 +44,5 @@ private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrTyp
         .collect()
         .flatMap {
             info.findFunction(location, functionName, it)
-        }.map {
-            it.toFunctionType()
         }
 
