@@ -4,6 +4,7 @@ import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
+import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
 
 enum class InferenceErrorCode(override val description: String) : ErrorCode {
@@ -48,6 +49,16 @@ private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrTyp
         .map { it.inferType(info) }
         .collect()
         .flatMap {
-            info.findFunction(location, functionName, it)
+            info.findFunction(location, functionName, it).map { fn ->
+                val inferredFn = fn.cast<FunctionType>()
+                val fnArgs = inferredFn.arguments.iterator()
+                val args = arguments.iterator()
+                while (fnArgs.hasNext() && args.hasNext()) {
+                    val fnArg = fnArgs.next()
+                    val arg = args.next()
+                    arg.info.setInferredType(Either.Right(fnArg))
+                }
+                inferredFn
+            }
         }
 

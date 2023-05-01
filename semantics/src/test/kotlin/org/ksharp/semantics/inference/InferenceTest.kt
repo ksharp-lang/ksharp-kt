@@ -10,6 +10,7 @@ import org.ksharp.module.moduleFunctions
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.nodes.EmptySemanticInfo
+import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.semantics.nodes.getTypeSemanticInfo
 import org.ksharp.test.shouldBeRight
@@ -116,7 +117,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val param = module.module.functions["(+)"]!!.first().types.first().cast<Parameter>()
-        AbstractionNode(
+        val abstraction = AbstractionNode(
             "n",
             ApplicationNode(
                 ApplicationName(name = "(+)"),
@@ -137,11 +138,15 @@ class InferenceTest : StringSpec({
             ),
             EmptySemanticInfo(),
             Location.NoProvided
-        ).inferType(module).apply {
+        )
+        abstraction.inferType(module).apply {
             shouldBeRight(
                 (0 until 3)
                     .map { longTypePromise.type.valueOrNull!! }.toFunctionType()
             )
         }
+        abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
+            .arguments.first().info.getInferredType(Location.NoProvided)
+            .shouldBeRight(longTypePromise.type.valueOrNull!!)
     }
 })
