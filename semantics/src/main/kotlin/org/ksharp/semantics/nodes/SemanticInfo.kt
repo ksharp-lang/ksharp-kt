@@ -30,16 +30,9 @@ sealed class SemanticInfo {
         inferredType ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
 }
 
-class EmptySemanticInfo : SemanticInfo() {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        return javaClass == other?.javaClass
-    }
+data class AbstractionSemanticInfo(val parameters: List<SemanticInfo>) : SemanticInfo()
 
-    override fun hashCode(): Int {
-        return javaClass.hashCode()
-    }
-}
+data class EmptySemanticInfo(private val nothing: Unit = Unit) : SemanticInfo()
 
 interface SymbolResolver {
     fun getSymbol(name: String): Symbol?

@@ -23,4 +23,34 @@ class EitherTest : StringSpec({
                 isRight.shouldBe(false)
             }
     }
+    "Unwrap with a left Either" {
+        listOf<Either<Boolean, String>>(
+            Either.Right("He"),
+            Either.Right("llo"),
+            Either.Left(false)
+        ).unwrap().shouldBe(Either.Left(false))
+    }
+    "Unwrap with Either" {
+        listOf<Either<Boolean, String>>(
+            Either.Right("He"),
+            Either.Right("llo"),
+        ).unwrap().shouldBe(Either.Right(listOf("He", "llo")))
+    }
+    "Unwrap and transform with a left Either" {
+        listOf<Either<Boolean, String>>(
+            Either.Right("He"),
+            Either.Right("llo"),
+            Either.Left(false)
+        ).transformAndUnwrap {
+            it.length
+        }.shouldBe(Either.Left(false))
+    }
+    "Unwrap and transform with Either" {
+        listOf<Either<Boolean, String>>(
+            Either.Right("He"),
+            Either.Right("llo"),
+        ).transformAndUnwrap {
+            it.length
+        }.shouldBe(Either.Right(listOf(2, 3)))
+    }
 })

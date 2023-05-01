@@ -101,7 +101,12 @@ private fun FunctionNode.checkSemantics(
         val info = SymbolTableSemanticInfo(symbolTable)
         val semanticNode = expression.cast<ExpressionParserNode>()
             .toSemanticNode(errors, info, typeSystem)
-        AbstractionNode(name, semanticNode, EmptySemanticInfo(), location)
+        AbstractionNode(
+            name,
+            semanticNode,
+            AbstractionSemanticInfo(parameters.map { symbolTable[it]!!.first }.toList()),
+            location
+        )
     }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {

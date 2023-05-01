@@ -38,3 +38,29 @@ val Either<*, *>.isRight: Boolean
 val Either<*, *>.isLeft: Boolean
     get() = !isRight
 
+
+fun <L, R> Sequence<Either<L, R>>.unwrap(): Either<L, List<R>> {
+    val result = listBuilder<R>()
+    return onEach {
+        if (it.isRight) {
+            result.add(it.cast<Either.Right<R>>().value)
+        }
+    }.firstOrNull { it.isLeft }?.cast<Either.Left<L>>()
+        ?: Either.Right(result.build())
+}
+
+fun <L, R, NR> Sequence<Either<L, R>>.transformAndUnwrap(transform: (r: R) -> NR): Either<L, List<NR>> {
+    val result = listBuilder<NR>()
+    return onEach {
+        if (it.isRight) {
+            result.add(transform(it.cast<Either.Right<R>>().value))
+        }
+    }.firstOrNull { it.isLeft }?.cast<Either.Left<L>>()
+        ?: Either.Right(result.build())
+}
+
+fun <L, R> List<Either<L, R>>.unwrap(): Either<L, List<R>> =
+    asSequence().unwrap()
+
+fun <L, R, NR> List<Either<L, R>>.transformAndUnwrap(transform: (r: R) -> NR): Either<L, List<NR>> =
+    asSequence().transformAndUnwrap(transform)
