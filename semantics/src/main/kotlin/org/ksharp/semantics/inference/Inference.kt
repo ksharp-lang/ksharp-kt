@@ -51,13 +51,10 @@ private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrTyp
         .flatMap {
             info.findFunction(location, functionName, it).map { fn ->
                 val inferredFn = fn.cast<FunctionType>()
-                val fnArgs = inferredFn.arguments.iterator()
-                val args = arguments.iterator()
-                while (fnArgs.hasNext() && args.hasNext()) {
-                    val fnArg = fnArgs.next()
-                    val arg = args.next()
-                    arg.info.setInferredType(Either.Right(fnArg))
-                }
+                inferredFn.arguments.asSequence()
+                    .zip(arguments.asSequence()) { fnArg, arg ->
+                        arg.info.setInferredType(Either.Right(fnArg))
+                    }.last()
                 inferredFn
             }
         }

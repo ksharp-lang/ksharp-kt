@@ -23,21 +23,14 @@ internal fun FunctionInfo.substitute(
     arguments: List<Type>
 ): ErrorOrType {
     val context = SubstitutionContext(typeSystem)
-    val typesIter = types.iterator()
-    val argumentsIter = arguments.iterator()
-    var result: ErrorOrType? = null
-    while (argumentsIter.hasNext() && typesIter.hasNext()) {
-        val item1 = typesIter.next()
-        val item2 = argumentsIter.next()
+    val result: ErrorOrValue<Boolean>? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
         val substitutionResult = context.extract(location, item1, item2)
         if (substitutionResult.isLeft) {
-            result = incompatibleType<List<Type>>(location, item1, item2)
-                .cast<Either.Left<Error>>()
-            break
-        }
-    }
+            incompatibleType<List<Type>>(location, item1, item2).cast<Either.Left<Error>>()
+        } else substitutionResult
+    }.firstOrNull { it.isLeft }
     val fnType = types.toFunctionType()
-    return result ?: context.substitute(location, fnType, fnType)
+    return result?.cast<ErrorOrType>() ?: context.substitute(location, fnType, fnType)
 }
 
 internal fun FunctionInfo.unify(
@@ -46,21 +39,15 @@ internal fun FunctionInfo.unify(
     arguments: List<Type>
 ): ErrorOrType {
     return typeSystem(types.last()).flatMap { returnType ->
-        val typesIter = types.iterator()
-        val argumentsIter = arguments.iterator()
-        var result: ErrorOrValue<FunctionType>? = null
         val params = listBuilder<Type>()
-        while (argumentsIter.hasNext() && typesIter.hasNext()) {
-            val item1 = typesIter.next()
-            val item2 = argumentsIter.next()
+        val result = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
             val unifyItem = typeSystem.unify(location, item1, item2)
             if (unifyItem.isLeft) {
-                result = incompatibleType<FunctionType>(location, item1, item2)
+                incompatibleType<FunctionType>(location, item1, item2)
                     .cast<Either.Left<Error>>()
-                break
-            }
-            params.add(unifyItem.cast<Either.Right<Type>>().value)
-        }
+            } else unifyItem
+        }.onEach { params.add(it.cast<Either.Right<Type>>().value) }
+            .firstOrNull { it.isLeft }
         result ?: run {
             if (returnType.parameters.firstOrNull() != null) {
                 val argumentsUnified = params.build()
