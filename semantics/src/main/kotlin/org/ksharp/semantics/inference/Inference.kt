@@ -28,7 +28,7 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
             is AbstractionNode -> infer(info)
             is ApplicationNode -> infer(info)
             is ConstantNode -> infer()
-            is VarNode -> TODO()
+            is VarNode -> infer()
             is LetNode -> TODO()
             is LetBindingNode -> TODO()
         }.also { this.info.setInferredType(it) }
@@ -38,6 +38,9 @@ private fun AbstractionNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrTyp
     expression.inferType(info)
 
 private fun ConstantNode<SemanticInfo>.infer(): ErrorOrType =
+    info.getType(location)
+
+private fun VarNode<SemanticInfo>.infer(): ErrorOrType =
     info.getType(location)
 
 private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
