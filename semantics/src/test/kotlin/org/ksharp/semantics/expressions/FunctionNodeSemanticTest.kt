@@ -298,7 +298,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     expectedType.cast(),
                                     Location.NoProvided
                                 ),
-                                EmptySemanticInfo,
+                                EmptySemanticInfo(),
                                 Location.NoProvided
                             )
                         )
@@ -350,7 +350,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(1),
                             Location.NoProvided
                         ),
-                        EmptySemanticInfo,
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     )
                 )
@@ -422,7 +422,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(3),
                             Location.NoProvided
                         ),
-                        EmptySemanticInfo,
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     )
                 )
@@ -494,7 +494,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             (typeParameterForTesting(3)),
                             Location.NoProvided
                         ),
-                        EmptySemanticInfo,
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     )
                 )
@@ -561,7 +561,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(2),
                             Location.NoProvided
                         ),
-                        EmptySemanticInfo,
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     )
                 )
@@ -619,7 +619,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(1),
                             Location.NoProvided
                         ),
-                        EmptySemanticInfo,
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     )
                 )
@@ -671,7 +671,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(3),
                             Location.NoProvided
                         ),
-                        EmptySemanticInfo,
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     )
                 )
@@ -737,7 +737,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(3),
                             Location.NoProvided
                         ),
-                        EmptySemanticInfo,
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     )
                 )
@@ -817,7 +817,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         typeParameterForTesting(2),
                                         Location.NoProvided
                                     ),
-                                    EmptySemanticInfo,
+                                    EmptySemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 LetBindingNode(
@@ -831,7 +831,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         byteTypePromise,
                                         Location.NoProvided
                                     ),
-                                    EmptySemanticInfo,
+                                    EmptySemanticInfo(),
                                     Location.NoProvided
                                 )
                             ),
@@ -852,10 +852,10 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 typeParameterForTesting(4),
                                 Location.NoProvided
                             ),
-                            EmptySemanticInfo,
+                            EmptySemanticInfo(),
                             Location.NoProvided
                         ),
-                        EmptySemanticInfo,
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     )
                 )

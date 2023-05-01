@@ -171,7 +171,7 @@ internal fun ExpressionParserNode.toSemanticNode(
             LetNode(
                 bindings,
                 expression.cast<ExpressionParserNode>().toSemanticNode(errors, letInfo, typeSystem),
-                EmptySemanticInfo,
+                EmptySemanticInfo(),
                 location
             )
         }
@@ -182,7 +182,7 @@ internal fun ExpressionParserNode.toSemanticNode(
             LetBindingNode(
                 matchValue.toSemanticNode(errors, matchInfo, typeSystem),
                 expression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
-                EmptySemanticInfo,
+                EmptySemanticInfo(),
                 location
             )
         }

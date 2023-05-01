@@ -33,24 +33,25 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
 
 class InferenceTest : StringSpec({
     val ts = preludeModule.typeSystem
-    val module = createInferenceInfo(ts)
-    val longTypePromise = ts.getTypeSemanticInfo("Long")
-    val intTypePromise = ts.getTypeSemanticInfo("Int")
 
     "Inference type over constants" {
+        val module = createInferenceInfo(ts)
+        val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
             "ten", ConstantNode(
                 10.toLong(),
                 longTypePromise,
                 Location.NoProvided
             ),
-            EmptySemanticInfo,
+            EmptySemanticInfo(),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeRight(longTypePromise.type.valueOrNull!!)
         }
     }
     "Inference type over operators" {
+        val module = createInferenceInfo(ts)
+        val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
             "n",
             ApplicationNode(
@@ -70,7 +71,7 @@ class InferenceTest : StringSpec({
                 TypeSemanticInfo(Either.Right(newParameter())),
                 Location.NoProvided
             ),
-            EmptySemanticInfo,
+            EmptySemanticInfo(),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeRight(
@@ -81,6 +82,9 @@ class InferenceTest : StringSpec({
         }
     }
     "Inference type over operators with substitution" {
+        val module = createInferenceInfo(ts)
+        val longTypePromise = ts.getTypeSemanticInfo("Long")
+        val intTypePromise = ts.getTypeSemanticInfo("Int")
         AbstractionNode(
             "n",
             ApplicationNode(
@@ -100,7 +104,7 @@ class InferenceTest : StringSpec({
                 TypeSemanticInfo(Either.Right(newParameter())),
                 Location.NoProvided
             ),
-            EmptySemanticInfo,
+            EmptySemanticInfo(),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeRight(

@@ -30,7 +30,7 @@ sealed class SemanticInfo {
         inferredType ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
 }
 
-object EmptySemanticInfo : SemanticInfo()
+class EmptySemanticInfo : SemanticInfo()
 
 interface SymbolResolver {
     fun getSymbol(name: String): Symbol?
