@@ -61,10 +61,9 @@ data class InferenceInfo(
     private val cache = cacheOf<Pair<String, List<Type>>, Either<String, Type>>()
 
     private fun ModuleInfo.findFunction(name: String, numParams: Int): Sequence<FunctionInfo>? =
-        functions.asSequence().find {
-            it.key == name
-        }?.value?.asSequence()
-            ?.filter { it.types.size == numParams }
+        functions[name]?.let { fns ->
+            fns.asSequence().filter { it.types.size == numParams }
+        }
 
     private fun functionName(name: String, arguments: List<Type>) =
         "$name ${
