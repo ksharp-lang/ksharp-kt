@@ -94,9 +94,9 @@ data class InferenceInfo(
             val name = appName.name
             cache.get(name to arguments) {
                 module.findFunction(name, numArguments + 1)
-                    ?.unify(module.typeSystem, location, arguments)
+                    .unify(module.typeSystem, location, arguments)
                     ?: prelude.findFunction(name, numArguments + 1)
-                        ?.unify(prelude.typeSystem, location, arguments)
+                        .unify(prelude.typeSystem, location, arguments)
                     ?: Either.Left(functionName(name, arguments))
             }.mapLeft {
                 InferenceErrorCode.FunctionNotFound.new(
