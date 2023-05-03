@@ -237,4 +237,46 @@ class InferenceTest : StringSpec({
             )
         }
     }
+    "Inference let binding with binding error" {
+        val module = createInferenceInfo(ts)
+        val longTypePromise = ts.getTypeSemanticInfo("Long")
+        val parameter = TypeSemanticInfo(Either.Right(newParameter()))
+        val abstraction = AbstractionNode(
+            "n",
+            LetNode(
+                listOf(
+                    LetBindingNode(
+                        VarNode("x", parameter, Location.NoProvided),
+                        ApplicationNode(
+                            ApplicationName(name = "not-found"),
+                            listOf(
+                                ConstantNode(
+                                    2.toLong(),
+                                    longTypePromise,
+                                    Location.NoProvided
+                                )
+                            ),
+                            TypeSemanticInfo(Either.Right(newParameter())),
+                            Location.NoProvided
+                        ),
+                        EmptySemanticInfo(),
+                        Location.NoProvided
+                    )
+                ),
+                VarNode("x", parameter, Location.NoProvided),
+                EmptySemanticInfo(),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(listOf()),
+            Location.NoProvided
+        )
+        abstraction.inferType(module).apply {
+            shouldBeLeft(
+                InferenceErrorCode.FunctionNotFound.new(
+                    Location.NoProvided,
+                    "function" to "not-found (Num numeric<Long>)"
+                )
+            )
+        }
+    }
 })

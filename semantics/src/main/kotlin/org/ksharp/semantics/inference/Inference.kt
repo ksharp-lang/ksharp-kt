@@ -29,11 +29,8 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
 
 private fun LetBindingNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
     expression.inferType(info).map {
-        val type = if (it is FunctionType) {
-            it.arguments.last()
-        } else it
-        match.info.setInferredType(Either.Right(type))
-        type
+        match.info.setInferredType(Either.Right(it))
+        it
     }
 
 private fun LetNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
