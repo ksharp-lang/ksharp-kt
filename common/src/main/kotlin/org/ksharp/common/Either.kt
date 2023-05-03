@@ -55,7 +55,7 @@ fun <L, R, NR> Sequence<Either<L, R>>.transformAndUnwrap(transform: (r: R) -> NR
         if (it.isRight) {
             result.add(transform(it.cast<Either.Right<R>>().value))
         }
-    }.firstOrNull { it.isLeft }?.cast<Either.Left<L>>()
+    }.firstOrNull { it.isLeft } as? Either.Left<L>
         ?: Either.Right(result.build())
 }
 
