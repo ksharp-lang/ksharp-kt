@@ -6,21 +6,11 @@ import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.toFunctionType
 
 enum class InferenceErrorCode(override val description: String) : ErrorCode {
     TypeNotInferred("Type not inferred"),
     FunctionNotFound("Function '{function}' not found")
-}
-
-private fun Sequence<ErrorOrType>.collect(): ErrorOrValue<List<Type>> = run {
-    val builder = listBuilder<Type>()
-    for (info in this) {
-        if (info.isLeft) return@run info.cast<ErrorOrValue<List<Type>>>()
-        else builder.add(info.cast<Either.Right<Type>>().value)
-    }
-    Either.Right(builder.build())
 }
 
 fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
@@ -79,7 +69,7 @@ private fun VarNode<SemanticInfo>.infer(): ErrorOrType =
 private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
     arguments.asSequence()
         .map { it.inferType(info) }
-        .collect()
+        .unwrap()
         .flatMap {
             info.findFunction(location, functionName, it).map { fn ->
                 val inferredFn = fn.cast<FunctionType>()

@@ -1,15 +1,18 @@
 package org.ksharp.semantics.inference
 
+import InferenceErrorCode
 import inferType
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cast
+import org.ksharp.common.new
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.moduleFunctions
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.nodes.*
+import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.newParameter
@@ -21,7 +24,7 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
         listOf(),
         typeSystem = typeSystem,
         functions = moduleFunctions {
-            add("(+)", a, a, a)
+            add("(test+)", a, a, a)
         }
     )
     return InferenceInfo(preludeModule, testModule)
@@ -57,7 +60,7 @@ class InferenceTest : StringSpec({
         AbstractionNode(
             "n",
             ApplicationNode(
-                ApplicationName(name = "(+)"),
+                ApplicationName(name = "(test+)"),
                 listOf(
                     ConstantNode(
                         10.toLong(),
@@ -91,7 +94,7 @@ class InferenceTest : StringSpec({
         AbstractionNode(
             "n",
             ApplicationNode(
-                ApplicationName(name = "(+)"),
+                ApplicationName(name = "(test+)"),
                 listOf(
                     ConstantNode(
                         10.toLong(),
@@ -125,7 +128,7 @@ class InferenceTest : StringSpec({
         val abstraction = AbstractionNode(
             "n",
             ApplicationNode(
-                ApplicationName(name = "(+)"),
+                ApplicationName(name = "(test+)"),
                 listOf(
                     VarNode(
                         "x",
@@ -158,7 +161,6 @@ class InferenceTest : StringSpec({
             .arguments.first().info.getInferredType(Location.NoProvided)
             .shouldBeRight(longTypePromise.type.valueOrNull!!)
     }
-
     "Inference let binding" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
@@ -170,7 +172,7 @@ class InferenceTest : StringSpec({
                     LetBindingNode(
                         VarNode("x", parameter, Location.NoProvided),
                         ApplicationNode(
-                            ApplicationName(name = "(+)"),
+                            ApplicationName(name = "(test+)"),
                             listOf(
                                 ConstantNode(
                                     2.toLong(),
@@ -203,6 +205,35 @@ class InferenceTest : StringSpec({
                     unitTypePromise.type.valueOrNull!!,
                     longTypePromise.type.valueOrNull!!
                 ).toFunctionType()
+            )
+        }
+    }
+    "Inference test function doesn't exists" {
+        val module = createInferenceInfo(ts)
+        val longTypePromise = ts.getTypeSemanticInfo("Long")
+        val intTypePromise = ts.getTypeSemanticInfo("Int")
+        AbstractionNode(
+            "n",
+            ApplicationNode(
+                ApplicationName(name = "not-found"),
+                listOf(
+                    ConstantNode(
+                        10.toLong(),
+                        (intTypePromise),
+                        Location.NoProvided
+                    )
+                ),
+                TypeSemanticInfo(Either.Right(newParameter())),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(listOf()),
+            Location.NoProvided
+        ).inferType(module).apply {
+            shouldBeLeft(
+                InferenceErrorCode.FunctionNotFound.new(
+                    Location.NoProvided,
+                    "function" to "not-found (Num numeric<Int>)"
+                )
             )
         }
     }

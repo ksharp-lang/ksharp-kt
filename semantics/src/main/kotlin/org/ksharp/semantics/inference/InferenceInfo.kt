@@ -23,14 +23,14 @@ internal fun FunctionInfo.substitute(
     arguments: List<Type>
 ): ErrorOrType {
     val context = SubstitutionContext(typeSystem)
-    val result: ErrorOrValue<Boolean>? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
+    val result: ErrorOrType? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
         val substitutionResult = context.extract(location, item1, item2)
         if (substitutionResult.isLeft) {
             incompatibleType<List<Type>>(location, item1, item2).cast<Either.Left<Error>>()
         } else substitutionResult
-    }.firstOrNull { it.isLeft }
+    }.firstNotNullOfOrNull { if (it.isLeft) it.cast<ErrorOrType>() else null }
     val fnType = types.toFunctionType()
-    return result?.cast<ErrorOrType>() ?: context.substitute(location, fnType, fnType)
+    return result ?: context.substitute(location, fnType, fnType)
 }
 
 internal fun FunctionInfo.unify(
@@ -39,24 +39,17 @@ internal fun FunctionInfo.unify(
     arguments: List<Type>
 ): ErrorOrType {
     return typeSystem(types.last()).flatMap { returnType ->
-        val params = listBuilder<Type>()
-        val result = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
-            val unifyItem = typeSystem.unify(location, item1, item2)
-            if (unifyItem.isLeft) {
-                incompatibleType<FunctionType>(location, item1, item2)
-                    .cast<Either.Left<Error>>()
-            } else unifyItem
-        }.onEach { params.add(it.cast<Either.Right<Type>>().value) }
-            .firstOrNull { it.isLeft }
-        result ?: run {
-            if (returnType.parameters.firstOrNull() != null) {
-                val argumentsUnified = params.build()
-                substitute(typeSystem, location, argumentsUnified)
-            } else {
-                params.add(returnType)
-                Either.Right(params.build().toFunctionType())
-            }
+        types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
+            typeSystem.unify(location, item1, item2)
         }
+            .unwrap()
+            .flatMap { params ->
+                if (returnType.parameters.firstOrNull() != null) {
+                    substitute(typeSystem, location, params)
+                } else {
+                    Either.Right((params + returnType).toFunctionType())
+                }
+            }
     }
 }
 
@@ -80,14 +73,17 @@ data class InferenceInfo(
             }
         }"
 
+    @Suppress("UNCHECKED_CAST")
     private fun Sequence<FunctionInfo>?.unify(
         typeSystem: TypeSystem,
         location: Location,
         arguments: List<Type>
     ): Either.Right<FunctionType>? =
-        this?.map { it.unify(typeSystem, location, arguments) }
-            ?.firstOrNull { it.isRight }
-            ?.cast<Either.Right<FunctionType>>()
+        if (this != null)
+            this.map { it.unify(typeSystem, location, arguments) }
+                .firstOrNull { it.isRight }
+                    as? Either.Right<FunctionType>
+        else null
 
     fun findFunction(
         location: Location,

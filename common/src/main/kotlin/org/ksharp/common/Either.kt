@@ -45,7 +45,7 @@ fun <L, R> Sequence<Either<L, R>>.unwrap(): Either<L, List<R>> {
         if (it.isRight) {
             result.add(it.cast<Either.Right<R>>().value)
         }
-    }.firstOrNull { it.isLeft }?.cast<Either.Left<L>>()
+    }.firstOrNull { it.isLeft } as? Either.Left<L>
         ?: Either.Right(result.build())
 }
 
