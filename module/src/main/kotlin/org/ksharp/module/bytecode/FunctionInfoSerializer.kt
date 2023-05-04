@@ -1,6 +1,8 @@
 package org.ksharp.module.bytecode
 
+import org.ksharp.common.add
 import org.ksharp.common.io.*
+import org.ksharp.common.listBuilder
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 import org.ksharp.module.FunctionInfo
@@ -10,6 +12,9 @@ import org.ksharp.typesystem.serializer.writeTo
 fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
         add(0)
+        if (dependency == null) {
+            add(-1)
+        } else add(table.add(dependency))
         add(table.add(name))
         types.writeTo(this, table)
         set(0, size)
@@ -18,12 +23,23 @@ fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
 }
 
 fun BufferView.readFunctionInfo(table: BinaryTableView): FunctionInfo {
-    val name = table[readInt(4)]
-    val types = bufferFrom(8).readListOfTypes(table)
-    return FunctionInfo(name, types)
+    val dependency = readInt(4).let {
+        if (it == -1) null
+        else table[it]
+    }
+    val name = table[readInt(8)]
+    val types = bufferFrom(12).readListOfTypes(table)
+    return FunctionInfo(dependency, name, types)
 }
 
-fun Map<String, FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) {
+fun List<FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) {
+    buffer.add(size)
+    forEach {
+        it.writeTo(buffer, table)
+    }
+}
+
+fun Map<String, List<FunctionInfo>>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     buffer.add(size)
     forEach { (name, function) ->
         buffer.add(table.add(name))
@@ -31,18 +47,31 @@ fun Map<String, FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) 
     }
 }
 
-fun BufferView.readFunctionInfoTable(table: BinaryTableView): Map<String, FunctionInfo> {
+fun BufferView.readFunctionList(table: BinaryTableView): Pair<Int, List<FunctionInfo>> {
+    val size = readInt(0)
+    val result = listBuilder<FunctionInfo>()
+    var position = 4
+    repeat(size) {
+        val functionBuffer = bufferFrom(position)
+        position += functionBuffer.readInt(0)
+        result.add(functionBuffer.readFunctionInfo(table))
+    }
+    return position to result.build()
+}
+
+fun BufferView.readFunctionInfoTable(table: BinaryTableView): Map<String, List<FunctionInfo>> {
     val paramsSize = readInt(0)
-    val types = mapBuilder<String, FunctionInfo>()
+    val types = mapBuilder<String, List<FunctionInfo>>()
     var position = 4
     repeat(paramsSize) {
         val typeBuffer = bufferFrom(position)
         val key = table[typeBuffer.readInt(0)]
-        position += typeBuffer.readInt(4) + 4
+        val (newPosition, functions) = typeBuffer.bufferFrom(4).readFunctionList(table)
         types.put(
             key,
-            typeBuffer.bufferFrom(4).readFunctionInfo(table)
+            functions
         )
+        position += newPosition + 4
     }
     return types.build()
 }

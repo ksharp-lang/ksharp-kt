@@ -4,17 +4,18 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.core.test.TestCase
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.ResolvedTypePromise
 import org.ksharp.semantics.nodes.Symbol
+import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.resetParameterCounterForTesting
 
-private fun testTypePromise(id: Int) = ResolvedTypePromise(newParameterForTesting(id))
+private fun testTypePromise(id: Int) = TypeSemanticInfo(Either.Right(newParameterForTesting(id)))
 
 
 class SymbolTableTest : StringSpec({

@@ -1,16 +1,38 @@
 package org.ksharp.semantics.nodes
 
-import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.inference.getTypePromise
+import InferenceErrorCode
+import org.ksharp.common.Either
+import org.ksharp.common.Error
+import org.ksharp.common.Location
+import org.ksharp.common.new
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.semantics.scopes.Table
 import org.ksharp.semantics.scopes.TableValue
+import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.types.newParameter
 
+sealed interface TypePromise {
+    val type: ErrorOrType
+}
 
-sealed class SemanticInfo
-object EmptySemanticInfo : SemanticInfo()
+sealed class SemanticInfo {
+    private var inferredType: ErrorOrType? = null
+
+    fun hasInferredType(): Boolean = inferredType != null
+
+    internal fun setInferredType(type: ErrorOrType) {
+        inferredType = type
+    }
+
+    fun getInferredType(location: Location): ErrorOrType =
+        inferredType ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
+}
+
+data class AbstractionSemanticInfo(val parameters: List<SemanticInfo>) : SemanticInfo()
+
+data class EmptySemanticInfo(private val nothing: Unit = Unit) : SemanticInfo()
 
 interface SymbolResolver {
     fun getSymbol(name: String): Symbol?
@@ -39,8 +61,18 @@ data class MatchSemanticInfo(
 ) : SemanticInfo()
 
 data class TypeSemanticInfo(
-    val type: TypePromise
-) : SemanticInfo()
+    override val type: ErrorOrType
+) : SemanticInfo(), TypePromise
 
 fun TypeSystem.getTypeSemanticInfo(name: String) =
-    TypeSemanticInfo(getTypePromise(name))
+    TypeSemanticInfo(get(name))
+
+fun SemanticInfo.getType(location: Location): ErrorOrType =
+    when (this) {
+        is TypeSemanticInfo -> if (hasInferredType()) getInferredType(location) else type
+        else -> getInferredType(location)
+    }
+
+fun paramTypePromise() = TypeSemanticInfo(Either.Right(newParameter()))
+
+fun Error.toTypePromise() = TypeSemanticInfo(Either.Left(this))

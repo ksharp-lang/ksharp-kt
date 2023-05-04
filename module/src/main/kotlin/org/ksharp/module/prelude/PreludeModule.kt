@@ -1,7 +1,6 @@
 package org.ksharp.module.prelude
 
 import org.ksharp.module.ModuleInfo
-import org.ksharp.module.moduleFunctions
 
 private fun createPreludeModule(): ModuleInfo = preludeTypeSystem
     .value
@@ -10,9 +9,7 @@ private fun createPreludeModule(): ModuleInfo = preludeTypeSystem
         ModuleInfo(
             listOf(),
             typeSystem = ts,
-            functions = moduleFunctions {
-                add("(+)", numType, numType, numType)
-            }
+            functions = mapOf()
         )
     }
 

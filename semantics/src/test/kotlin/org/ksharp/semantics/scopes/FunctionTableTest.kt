@@ -5,16 +5,17 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.ResolvedTypePromise
+import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.types.newParameterForTesting
 
 class FunctionTableTest : StringSpec({
-    val mockType = ResolvedTypePromise(newParameterForTesting(0))
+    val mockType = TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
     "Add function into symbol table" {
         FunctionTableBuilder(ErrorCollector()).apply {
             register(

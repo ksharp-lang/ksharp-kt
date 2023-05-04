@@ -9,7 +9,8 @@ data class AbstractionNode<SemanticInfo>(
     override val info: SemanticInfo,
     override val location: Location
 ) : SemanticNode<SemanticInfo>() {
+
     override val children: Sequence<NodeData>
         get() = sequenceOf(expression)
-    
+
 }

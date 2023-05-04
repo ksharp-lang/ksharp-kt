@@ -6,9 +6,6 @@ import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.ResolvedTypePromise
-import org.ksharp.semantics.inference.TypePromise
-import org.ksharp.semantics.inference.paramTypePromise
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
@@ -22,7 +19,7 @@ enum class FunctionSemanticsErrorCode(override val description: String) : ErrorC
 
 private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> =
     (if (parameters.isEmpty()) {
-        listOf(ResolvedTypePromise(typeSystem["Unit"].valueOrNull!!))
+        listOf(TypeSemanticInfo(typeSystem["Unit"]))
     } else parameters.map { _ ->
         paramTypePromise()
     }) + paramTypePromise()
@@ -52,7 +49,7 @@ private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<Type
     }
 
     return Either.Right(arguments.map {
-        ResolvedTypePromise(it)
+        TypeSemanticInfo(Either.Right(it))
     })
 }
 
@@ -104,7 +101,12 @@ private fun FunctionNode.checkSemantics(
         val info = SymbolTableSemanticInfo(symbolTable)
         val semanticNode = expression.cast<ExpressionParserNode>()
             .toSemanticNode(errors, info, typeSystem)
-        AbstractionNode(name, semanticNode, EmptySemanticInfo, location)
+        AbstractionNode(
+            name,
+            semanticNode,
+            AbstractionSemanticInfo(parameters.map { symbolTable[it]!!.first }.toList()),
+            location
+        )
     }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {

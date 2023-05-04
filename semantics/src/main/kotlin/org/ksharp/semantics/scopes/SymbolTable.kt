@@ -3,8 +3,8 @@ package org.ksharp.semantics.scopes
 import org.ksharp.common.Location
 import org.ksharp.common.get
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.TypePromise
 import org.ksharp.semantics.nodes.Symbol
+import org.ksharp.semantics.nodes.TypePromise
 
 class SymbolTableBuilder(private val parent: Table<Symbol>?, collector: ErrorCollector) :
     TableBuilder<Symbol>(parent, collector, "Variable") {

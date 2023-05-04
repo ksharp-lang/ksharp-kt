@@ -7,12 +7,11 @@ import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.ErrorTypePromise
-import org.ksharp.semantics.inference.paramTypePromise
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.typesystem.TypeSystem
+import kotlin.math.pow
 
 enum class ExpressionSemanticsErrorCode(override val description: String) : ErrorCode {
     SymbolAlreadyUsed("Symbol already used '{name}'")
@@ -27,12 +26,22 @@ private val LiteralCollectionType.applicationName
             LiteralCollectionType.Set -> ApplicationName("::prelude", "setOf")
         }
 
-private fun LiteralValueType.toSemanticInfo(typeSystem: TypeSystem) =
+private fun integer2Type(value: Long): String =
+    when {
+        value < 255 -> "Byte"
+        value < 2.0.pow(16.0) -> "Short"
+        value < 2.0.pow(32.0) -> "Int"
+        else -> "Long"
+    }
+
+private fun LiteralValueType.toSemanticInfo(typeSystem: TypeSystem, value: Any) =
     when (this) {
         LiteralValueType.Integer,
         LiteralValueType.HexInteger,
         LiteralValueType.OctalInteger,
-        LiteralValueType.BinaryInteger -> typeSystem.getTypeSemanticInfo("Long")
+        LiteralValueType.BinaryInteger -> {
+            typeSystem.getTypeSemanticInfo(integer2Type(value as Long))
+        }
 
         LiteralValueType.Decimal -> typeSystem.getTypeSemanticInfo("Double")
         LiteralValueType.String -> typeSystem.getTypeSemanticInfo("String")
@@ -58,13 +67,10 @@ private fun String.toValue(type: LiteralValueType): Any =
 private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location): SemanticInfo =
     if (this is MatchSemanticInfo) {
         table.register(name, paramTypePromise(), location)
-        table[name]?.first ?: TypeSemanticInfo(
-            ErrorTypePromise(
-                ExpressionSemanticsErrorCode.SymbolAlreadyUsed.new(location, "name" to name)
-            )
-        )
+        table[name]?.first ?: ExpressionSemanticsErrorCode.SymbolAlreadyUsed.new(location, "name" to name)
+            .toTypePromise()
     } else cast<SymbolResolver>().getSymbol(name)
-        ?: TypeSemanticInfo(paramTypePromise())
+        ?: paramTypePromise()
 
 private fun SemanticInfo.callSemanticInfo(): SemanticInfo =
     if (this is MatchSemanticInfo) {
@@ -77,11 +83,13 @@ internal fun ExpressionParserNode.toSemanticNode(
     typeSystem: TypeSystem
 ): SemanticNode<SemanticInfo> =
     when (this) {
-        is LiteralValueNode -> ConstantNode(
-            value.toValue(type),
-            type.toSemanticInfo(typeSystem),
-            location
-        )
+        is LiteralValueNode -> with(value.toValue(type)) {
+            ConstantNode(
+                this,
+                type.toSemanticInfo(typeSystem, this),
+                location
+            )
+        }
 
         is OperatorNode -> ApplicationNode(
             ApplicationName(null, "($operator)"),
@@ -89,9 +97,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 left.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 right.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
             ),
-            TypeSemanticInfo(
-                paramTypePromise()
-            ),
+            paramTypePromise(),
             location
         )
 
@@ -102,9 +108,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 trueExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 falseExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
             ),
-            TypeSemanticInfo(
-                paramTypePromise()
-            ),
+            paramTypePromise(),
             location
         )
 
@@ -121,9 +125,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 arguments.map {
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
                 },
-                TypeSemanticInfo(
-                    paramTypePromise()
-                ),
+                paramTypePromise(),
                 location
             )
         }
@@ -142,9 +144,7 @@ internal fun ExpressionParserNode.toSemanticNode(
             ApplicationNode(
                 type.applicationName,
                 expressions,
-                TypeSemanticInfo(
-                    paramTypePromise()
-                ),
+                paramTypePromise(),
                 location
             )
         }
@@ -156,9 +156,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                     key.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                     value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 ),
-                TypeSemanticInfo(
-                    paramTypePromise()
-                ),
+                paramTypePromise(),
                 location
             )
         }
@@ -173,7 +171,7 @@ internal fun ExpressionParserNode.toSemanticNode(
             LetNode(
                 bindings,
                 expression.cast<ExpressionParserNode>().toSemanticNode(errors, letInfo, typeSystem),
-                EmptySemanticInfo,
+                EmptySemanticInfo(),
                 location
             )
         }
@@ -184,7 +182,7 @@ internal fun ExpressionParserNode.toSemanticNode(
             LetBindingNode(
                 matchValue.toSemanticNode(errors, matchInfo, typeSystem),
                 expression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
-                EmptySemanticInfo,
+                EmptySemanticInfo(),
                 location
             )
         }

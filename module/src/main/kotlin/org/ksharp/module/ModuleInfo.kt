@@ -1,22 +1,31 @@
 package org.ksharp.module
 
-import org.ksharp.common.mapBuilder
-import org.ksharp.common.put
+import org.ksharp.common.*
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 
 data class ModuleInfo(
     val dependencies: List<String>,
     val typeSystem: TypeSystem,
-    val functions: Map<String, FunctionInfo>
+    val functions: Map<String, List<FunctionInfo>>
 )
 
 class ModuleInfoBuilder {
-    private var functions = mapBuilder<String, FunctionInfo>()
+    private var functions = mapBuilder<String, ListBuilder<FunctionInfo>>()
 
     fun add(name: String, vararg types: Type) {
-        functions.put(
-            name, FunctionInfo(
+        add(null, name, *types)
+    }
+
+    fun add(dependency: String?, name: String, vararg types: Type) {
+        val functionsList = functions.get(name) ?: run {
+            val functionList = listBuilder<FunctionInfo>()
+            functions.put(name, functionList)
+            functionList
+        }
+        functionsList.add(
+            FunctionInfo(
+                dependency,
                 name,
                 types.toList()
             )
@@ -24,7 +33,12 @@ class ModuleInfoBuilder {
     }
 
     internal fun build() = functions.build()
+        .asSequence()
+        .associate {
+            it.key to it.value.build()
+        }
 }
 
-fun moduleFunctions(body: ModuleInfoBuilder.() -> Unit) =
+fun moduleFunctions(body: ModuleInfoBuilder.() -> Unit): Map<String, List<FunctionInfo>> =
     ModuleInfoBuilder().apply(body).build()
+
