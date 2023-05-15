@@ -586,6 +586,18 @@ class TypeSystemTest : ShouldSpec({
                         )
                     )
                 }
+                should("Resolve type constructor types") {
+                    value(TypeConstructor("True", "Bool"))
+                        .shouldBeType(
+                            UnionType(
+                                mapOf(
+                                    "True" to UnionType.ClassType("True", listOf()),
+                                    "False" to UnionType.ClassType("False", listOf())
+                                )
+                            ),
+                            "True\n|False"
+                        )
+                }
             }
         }
         context("Trait types") {
