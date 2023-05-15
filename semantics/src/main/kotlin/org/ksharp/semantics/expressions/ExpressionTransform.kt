@@ -17,13 +17,15 @@ enum class ExpressionSemanticsErrorCode(override val description: String) : Erro
     SymbolAlreadyUsed("Symbol already used '{name}'")
 }
 
+private const val PRELUDE_FLAG = "::prelude"
+
 private val LiteralCollectionType.applicationName
     get(): ApplicationName =
         when (this) {
-            LiteralCollectionType.List -> ApplicationName("::prelude", "listOf")
-            LiteralCollectionType.Map -> ApplicationName("::prelude", "mapOf")
-            LiteralCollectionType.Tuple -> ApplicationName("::prelude", "tupleOf")
-            LiteralCollectionType.Set -> ApplicationName("::prelude", "setOf")
+            LiteralCollectionType.List -> ApplicationName(PRELUDE_FLAG, "listOf")
+            LiteralCollectionType.Map -> ApplicationName(PRELUDE_FLAG, "mapOf")
+            LiteralCollectionType.Tuple -> ApplicationName(PRELUDE_FLAG, "tupleOf")
+            LiteralCollectionType.Set -> ApplicationName(PRELUDE_FLAG, "setOf")
         }
 
 private fun integer2Type(value: Long): String =
@@ -102,7 +104,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         )
 
         is IfNode -> ApplicationNode(
-            ApplicationName("::prelude", "if"),
+            ApplicationName(PRELUDE_FLAG, "if"),
             listOf(
                 condition.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 trueExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
@@ -151,7 +153,7 @@ internal fun ExpressionParserNode.toSemanticNode(
 
         is LiteralMapEntryNode -> {
             ApplicationNode(
-                ApplicationName("::prelude", "pair"),
+                ApplicationName(PRELUDE_FLAG, "pair"),
                 listOf(
                     key.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                     value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),

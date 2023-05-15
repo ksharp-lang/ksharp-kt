@@ -29,7 +29,7 @@ internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
                         location
                     ),
                     location
-                ) as NodeData
+                ).cast<NodeData>()
             }
             .asLookAHeadResult()
     }.or {

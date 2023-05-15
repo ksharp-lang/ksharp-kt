@@ -6,7 +6,7 @@ import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 
-interface UnificationAlgo<T : Type> {
+fun interface UnificationAlgo<T : Type> {
     fun unify(location: Location, typeSystem: TypeSystem, type1: T, type2: Type): ErrorOrType
 }
 

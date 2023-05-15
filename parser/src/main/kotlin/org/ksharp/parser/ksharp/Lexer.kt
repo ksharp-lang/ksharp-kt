@@ -563,15 +563,25 @@ private fun Token.checkKeywordsCollection(keywords: Map<String, KSharpTokenType>
 }
 
 private fun Token.mapToKeyword(state: KSharpLexerState): Token =
-    if (text == "if") {
-        new(KSharpTokenType.If)
-    } else if (text == "let") {
-        new(KSharpTokenType.Let)
-    } else if (state.mapThenElseKeywords) {
-        checkKeywordsCollection(ifKeywordsMapping)
-    } else if (state.mapThenKeywords) {
-        checkKeywordsCollection(letKeywordsMapping)
-    } else this
+    when {
+        text == "if" -> {
+            new(KSharpTokenType.If)
+        }
+
+        text == "let" -> {
+            new(KSharpTokenType.Let)
+        }
+
+        state.mapThenElseKeywords -> {
+            checkKeywordsCollection(ifKeywordsMapping)
+        }
+
+        state.mapThenKeywords -> {
+            checkKeywordsCollection(letKeywordsMapping)
+        }
+
+        else -> this
+    }
 
 private fun KSharpLexerIterator.mapKeywords(): KSharpLexerIterator =
     generateLexerIterator(state) {
