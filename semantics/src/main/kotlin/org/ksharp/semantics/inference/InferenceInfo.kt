@@ -16,7 +16,6 @@ import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.parameters
 import org.ksharp.typesystem.types.toFunctionType
 import org.ksharp.typesystem.unification.unify
-import kotlin.Error
 
 internal fun FunctionInfo.substitute(
     typeSystem: TypeSystem,
