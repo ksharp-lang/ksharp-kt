@@ -68,12 +68,14 @@ private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrTyp
         .map { it.inferType(info) }
         .unwrap()
         .flatMap {
-            info.findFunction(location, functionName, it).map { fn ->
-                val inferredFn = fn.cast<FunctionType>()
-                inferredFn.arguments.asSequence()
-                    .zip(arguments.asSequence()) { fnArg, arg ->
-                        arg.info.setInferredType(Either.Right(fnArg))
-                    }.last()
-                inferredFn.arguments.last()
+            info.findAppType(location, functionName, it).map { fn ->
+                if (fn is FunctionType) {
+                    val inferredFn = fn.cast<FunctionType>()
+                    inferredFn.arguments.asSequence()
+                        .zip(arguments.asSequence()) { fnArg, arg ->
+                            arg.info.setInferredType(Either.Right(fnArg))
+                        }.last()
+                    inferredFn.arguments.last()
+                } else fn
             }
         }

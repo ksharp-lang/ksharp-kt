@@ -203,6 +203,53 @@ class InferenceTest : StringSpec({
             .arguments.first().info.getInferredType(Location.NoProvided)
             .shouldBeRight(intTypePromise.type.valueOrNull!!)
     }
+    "Inference prelude if function" {
+        val module = createInferenceInfo(ts)
+        val intTypePromise = ts.getTypeSemanticInfo("Int")
+        val trueTypePromise = ts.getTypeSemanticInfo("True")
+        val variable = TypeSemanticInfo(Either.Right(newParameter()))
+        val abstraction = AbstractionNode(
+            "n",
+            ApplicationNode(
+                ApplicationName("::prelude", "if"),
+                listOf(
+                    ApplicationNode(
+                        ApplicationName(name = "True"),
+                        listOf(),
+                        TypeSemanticInfo(Either.Right(newParameter())),
+                        Location.NoProvided
+                    ),
+                    ConstantNode(
+                        10.toLong(),
+                        intTypePromise,
+                        Location.NoProvided
+                    ),
+                    ConstantNode(
+                        20.toLong(),
+                        intTypePromise,
+                        Location.NoProvided
+                    ),
+                ),
+                TypeSemanticInfo(Either.Right(newParameter())),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(
+                listOf()
+            ),
+            Location.NoProvided
+        )
+        abstraction.inferType(module).apply {
+            shouldBeRight(
+                listOf(
+                    unitTypePromise.type.valueOrNull!!,
+                    intTypePromise.type.valueOrNull!!
+                ).toFunctionType()
+            )
+        }
+        abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
+            .arguments.first().info.getInferredType(Location.NoProvided)
+            .shouldBeRight(intTypePromise.type.valueOrNull!!)
+    }
     "Inference let binding" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
