@@ -894,7 +894,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
     val ts = preludeModule.typeSystem
     val unitTypePromise = ts.getTypeSemanticInfo("Unit")
     val longTypePromise = ts.getTypeSemanticInfo("Long")
-
+    val boolTypePromise = ts.getTypeSemanticInfo("Bool")
     "Check inference" {
         val errors = ErrorCollector()
         val functionTable = FunctionTableBuilder(errors)
@@ -925,5 +925,49 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                 .info.getInferredType(Location.NoProvided)
                 .shouldBeRight(listOf(ts["Unit"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType())
         }
+    }
+    "Check inference - abstraction with arguments" {
+        val errors = ErrorCollector()
+        val functionTable = FunctionTableBuilder(errors)
+        val param = newParameter()
+        val symbol = Symbol("a", TypeSemanticInfo(Either.Right(param)))
+        val info = ModuleFunctionInfo(
+            errors.build(),
+            functionTable.build(),
+            listOf(
+                AbstractionNode(
+                    "n",
+                    ApplicationNode(
+                        ApplicationName("::prelude", "if"),
+                        listOf(
+                            ApplicationNode(
+                                ApplicationName(name = "True"),
+                                listOf(),
+                                typeParameterForTesting(2),
+                                Location.NoProvided
+                            ),
+                            ConstantNode(
+                                10.toLong(),
+                                longTypePromise,
+                                Location.NoProvided
+                            ),
+                            VarNode(
+                                "a",
+                                symbol,
+                                Location.NoProvided
+                            ),
+                        ),
+                        typeParameterForTesting(3),
+                        Location.NoProvided
+                    ),
+                    AbstractionSemanticInfo(
+                        listOf(
+                            symbol
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+        )
     }
 })

@@ -13,16 +13,34 @@ typealias TypeValidation = (getType: GetType) -> Error?
 
 class TypeItemBuilder(
     val name: String,
-    private val store: MapView<String, Type>,
-    private val builder: PartialItemBuilder<TypeEntry>
+    private val storeView: MapView<String, Type>,
+    private val store: MapBuilder<String, Type>,
+    private val builder: PartialItemBuilder<TypeEntry>,
+    private val partialBuilder: PartialBuilder<TypeEntry, TypeSystem>
 ) {
-    operator fun get(key: String): Type? = store[key]
+    operator fun get(key: String): Type? = storeView[key]
 
-    fun isTypeNameTaken(name: String) = store.containsKey(name)!!
+    fun isTypeNameTaken(name: String) = storeView.containsKey(name)!!
 
     fun validation(rule: TypeValidation) = builder.validation {
         rule(::get)
     }
+
+    fun add(name: String, type: Type) =
+        validateTypeName(name).flatMap {
+            if (isTypeNameTaken(it)) {
+                Either.Left(TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to it))
+            } else {
+                Either.Right(type)
+            }
+        }.map { t ->
+            store.put(name, t)
+            partialBuilder.item {
+                value(name to t)
+            }
+        }.mapLeft { error ->
+            validation { error }
+        }
 }
 
 class TypeSystemBuilder(
@@ -51,7 +69,7 @@ class TypeSystemBuilder(
         factory: TypeFactoryBuilder
     ) {
         builder.item {
-            TypeItemBuilder(name, mapView, this).apply {
+            TypeItemBuilder(name, mapView, store, this, builder).apply {
                 validateTypeName(name).flatMap {
                     if (isTypeNameTaken(it)) {
                         Either.Left(TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to it))

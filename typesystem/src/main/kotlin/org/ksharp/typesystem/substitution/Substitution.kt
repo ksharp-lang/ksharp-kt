@@ -28,6 +28,7 @@ enum class Substitutions(override val algo: SubstitutionAlgo<out Type>) : Substi
     Parametric(ParametricSubstitution()),
     Tuple(TupleSubstitution()),
     Union(UnionSubstitution()),
+    TypeConstructor(TypeConstructorSubstitution()),
     NoDefined(object : SubstitutionAlgo<Type> {
         override fun extract(
             context: SubstitutionContext,

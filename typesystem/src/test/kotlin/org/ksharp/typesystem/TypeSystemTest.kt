@@ -511,6 +511,17 @@ class TypeSystemTest : ShouldSpec({
                         clazz("Sunday")
                     }
                 }
+                alias("Bool") {
+                    unionType {
+                        clazz("True")
+                        clazz("False")
+                    }
+                }
+                alias("Bool2") {
+                    unionType {
+                        clazz("True")
+                    }
+                }
             }.apply {
                 context("Should contains the following types:") {
                     should("String type") {
@@ -547,12 +558,33 @@ class TypeSystemTest : ShouldSpec({
                             "Saturday\n|Sunday"
                         )
                     }
+                    should("True|False type") {
+                        get("Bool").shouldBeType(
+                            UnionType(
+                                mapOf(
+                                    "True" to UnionType.ClassType("True", listOf()),
+                                    "False" to UnionType.ClassType("False", listOf())
+                                )
+                            ),
+                            "True\n|False"
+                        )
+                    }
+                    should("True type") {
+                        get("True").shouldBeType(
+                            TypeConstructor("True", "Bool"),
+                            "True"
+                        )
+                    }
                 }
-                should("Should have 4 types") {
-                    size.shouldBe(4)
+                should("Should have 7 types") {
+                    size.shouldBe(11)
                 }
-                should("Shouldn't have errors") {
-                    errors.shouldBeEmpty()
+                should("Should have already registered errors") {
+                    errors.shouldBe(
+                        listOf(
+                            TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "True")
+                        )
+                    )
                 }
             }
         }
@@ -850,8 +882,8 @@ class TypeSystemTest : ShouldSpec({
                         )
                     }
                 }
-                should("Should have 9 types") {
-                    size.shouldBe(9)
+                should("Should have 11 types") {
+                    size.shouldBe(11)
                 }
                 should("Shouldn't have errors") {
                     errors.shouldBeEmpty()
@@ -1020,5 +1052,5 @@ class TypeSystemTest : ShouldSpec({
         super.beforeAny(testCase)
         resetParameterCounterForTesting()
     }
-    
+
 }

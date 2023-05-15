@@ -23,6 +23,7 @@ enum class TypeSerializers(
     ClassType(ClassTypeSerializer()),
     UnionType(UnionTypeSerializer()),
     MethodType(MethodTypeSerializer()),
+    NoType(NoSerializer()),
     TraitType(TraitSerializer()),
     NoDefined(object : SerializerWriter<Type> {
         override fun write(input: Type, buffer: BufferWriter, table: BinaryTable) {
