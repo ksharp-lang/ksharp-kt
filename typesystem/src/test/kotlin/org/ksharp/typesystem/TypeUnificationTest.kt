@@ -294,4 +294,39 @@ class TypeUnificationTest : StringSpec({
                 )
             )
     }
+    "Compatible type constructor and union type" {
+        val union = UnionType(
+            mapOf(
+                "True" to UnionType.ClassType("True", listOf()),
+                "False" to UnionType.ClassType("True", listOf())
+            )
+        )
+        val typeConstructor = TypeConstructor("True", "Bool")
+        typeSystem.unify(Location.NoProvided, union, typeConstructor)
+            .shouldBeRight(union)
+        typeSystem.unify(
+            Location.NoProvided, union, UnionType(
+                mapOf(
+                    "True" to UnionType.ClassType("True", listOf()),
+                    "False" to UnionType.ClassType("True", listOf())
+                )
+            )
+        ).shouldBeRight(union)
+        typeSystem.unify(Location.NoProvided, union, Concrete("Int"))
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to union.representation,
+                    "type2" to "Int"
+                )
+            )
+        typeSystem.unify(Location.NoProvided, union, TypeConstructor("Other", "Bool"))
+            .shouldBeLeft(
+                TypeSystemErrorCode.IncompatibleTypes.new(
+                    Location.NoProvided,
+                    "type1" to union.representation,
+                    "type2" to "Other"
+                )
+            )
+    }
 })

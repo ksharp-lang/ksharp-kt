@@ -84,7 +84,18 @@ data class InferenceInfo(
                     as? Either.Right<FunctionType>
         else null
 
-    fun findFunction(
+    fun findAppType(
+        location: Location,
+        appName: ApplicationName,
+        arguments: List<Type>
+    ): ErrorOrType =
+        appName.name.let {
+            if (it.first().isUpperCase()) {
+                findConstructorType(location, appName, arguments)
+            } else findFunctionType(location, appName, arguments)
+        }
+
+    private fun findFunctionType(
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
@@ -104,4 +115,28 @@ data class InferenceInfo(
                 )
             }
         }
+
+    private fun findConstructorType(
+        location: Location,
+        appName: ApplicationName,
+        arguments: List<Type>
+    ): ErrorOrType =
+        arguments.size.let { _ ->
+            val name = appName.name
+            cache.get(name to arguments) {
+                val type = module.typeSystem[name]
+                val result = if (type.isLeft) {
+                    prelude.typeSystem[name]
+                } else type
+                result.mapLeft {
+                    functionName(name, arguments)
+                }
+            }.mapLeft {
+                InferenceErrorCode.FunctionNotFound.new(
+                    location,
+                    "function" to it
+                )
+            }
+        }
+
 }

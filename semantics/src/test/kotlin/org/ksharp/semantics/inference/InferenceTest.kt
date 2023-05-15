@@ -20,11 +20,13 @@ import org.ksharp.typesystem.types.toFunctionType
 
 private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
     val a = newParameter()
+    val intType = typeSystem["Int"].valueOrNull!!
     val testModule = ModuleInfo(
         listOf(),
         typeSystem = typeSystem,
         functions = moduleFunctions {
             add("(test+)", a, a, a)
+            add("(test*)", intType, intType, intType)
         }
     )
     return InferenceInfo(preludeModule, testModule)
@@ -160,6 +162,90 @@ class InferenceTest : StringSpec({
         abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
             .arguments.first().info.getInferredType(Location.NoProvided)
             .shouldBeRight(longTypePromise.type.valueOrNull!!)
+    }
+    "Inference type over operators and variables with substitution with function that is not parametric" {
+        val module = createInferenceInfo(ts)
+        val intTypePromise = ts.getTypeSemanticInfo("Int")
+        val variable = TypeSemanticInfo(Either.Right(newParameter()))
+        val abstraction = AbstractionNode(
+            "n",
+            ApplicationNode(
+                ApplicationName(name = "(test*)"),
+                listOf(
+                    VarNode(
+                        "x",
+                        variable,
+                        Location.NoProvided
+                    ),
+                    VarNode(
+                        "x",
+                        variable,
+                        Location.NoProvided
+                    ),
+                ),
+                TypeSemanticInfo(Either.Right(newParameter())),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(
+                listOf(variable)
+            ),
+            Location.NoProvided
+        )
+        abstraction.inferType(module).apply {
+            shouldBeRight(
+                listOf(
+                    intTypePromise.type.valueOrNull!!,
+                    intTypePromise.type.valueOrNull!!
+                ).toFunctionType()
+            )
+        }
+        abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
+            .arguments.first().info.getInferredType(Location.NoProvided)
+            .shouldBeRight(intTypePromise.type.valueOrNull!!)
+    }
+    "Inference prelude if function" {
+        val module = createInferenceInfo(ts)
+        val intTypePromise = ts.getTypeSemanticInfo("Int")
+        val trueTypePromise = ts.getTypeSemanticInfo("True")
+        val variable = TypeSemanticInfo(Either.Right(newParameter()))
+        val abstraction = AbstractionNode(
+            "n",
+            ApplicationNode(
+                ApplicationName("::prelude", "if"),
+                listOf(
+                    ApplicationNode(
+                        ApplicationName(name = "True"),
+                        listOf(),
+                        TypeSemanticInfo(Either.Right(newParameter())),
+                        Location.NoProvided
+                    ),
+                    ConstantNode(
+                        10.toLong(),
+                        intTypePromise,
+                        Location.NoProvided
+                    ),
+                    ConstantNode(
+                        20.toLong(),
+                        intTypePromise,
+                        Location.NoProvided
+                    ),
+                ),
+                TypeSemanticInfo(Either.Right(newParameter())),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(
+                listOf()
+            ),
+            Location.NoProvided
+        )
+        abstraction.inferType(module).apply {
+            shouldBeRight(
+                listOf(
+                    unitTypePromise.type.valueOrNull!!,
+                    intTypePromise.type.valueOrNull!!
+                ).toFunctionType()
+            )
+        }
     }
     "Inference let binding" {
         val module = createInferenceInfo(ts)

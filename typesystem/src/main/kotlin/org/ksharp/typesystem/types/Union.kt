@@ -19,7 +19,7 @@ data class UnionType internal constructor(
         get() = TypeSerializers.UnionType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Union
 
     override val substitution: Substitution
         get() = Substitutions.Union
@@ -55,7 +55,9 @@ data class UnionType internal constructor(
     }
 }
 
+
 class UnionTypeFactory(
+    private val unionType: String,
     private val factory: TypeItemBuilder
 ) {
     private var result: ErrorOrValue<MapBuilder<String, UnionType.ClassType>> = Either.Right(mapBuilder())
@@ -63,6 +65,7 @@ class UnionTypeFactory(
     fun clazz(label: String, parameters: ParametricTypeFactoryBuilder = {}) {
         result = result.flatMap { params ->
             validateTypeName(label).flatMap {
+                factory.add(label, TypeConstructor(label, unionType))
                 ParametricTypeFactory(factory).apply(parameters).build().map { args ->
                     params.put(
                         label, UnionType.ClassType(
@@ -84,6 +87,6 @@ class UnionTypeFactory(
 }
 
 fun TypeItemBuilder.unionType(factory: UnionTypeFactoryBuilder) =
-    UnionTypeFactory(this).apply(factory).build().map {
+    UnionTypeFactory(name, this).apply(factory).build().map {
         UnionType(it)
     }

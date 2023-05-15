@@ -1,6 +1,7 @@
 package org.ksharp.typesystem
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.sequences.shouldBeEmpty
@@ -76,5 +77,12 @@ class TypeTest : StringSpec({
         Concrete("Int").annotations.shouldBeEmpty()
         Concrete("Int").annotated(listOf(annotation("pure")))
             .annotations.shouldBe(listOf(annotation("pure")))
+    }
+    "Check type constructor" {
+        TypeConstructor("True", "Bool").apply {
+            terms.shouldBeEmpty()
+            representation.shouldBe("True")
+            compound.shouldBeFalse()
+        }
     }
 })

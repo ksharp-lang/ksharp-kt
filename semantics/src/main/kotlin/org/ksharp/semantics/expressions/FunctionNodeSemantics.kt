@@ -1,16 +1,22 @@
 package org.ksharp.semantics.expressions
 
+import inferType
 import org.ksharp.common.*
+import org.ksharp.module.FunctionInfo
+import org.ksharp.module.ModuleInfo
+import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
+import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.newParameter
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
@@ -112,16 +118,55 @@ private fun FunctionNode.checkSemantics(
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
     val errors = ErrorCollector()
     val (functionTable, functionNodes) = buildFunctionTable(errors, moduleTypeSystemInfo.typeSystem)
+    val abstractions = functionNodes
+        .asSequence()
+        .map {
+            it.checkSemantics(errors, functionTable[it.name]!!.first, moduleTypeSystemInfo.typeSystem)
+        }
+        .filter { it.isRight }
+        .map { (it as Either.Right).value }
+        .toList()
     return ModuleFunctionInfo(
         errors = errors.build(),
         functionTable = functionTable,
-        abstractions = functionNodes
-            .asSequence()
-            .map {
-                it.checkSemantics(errors, functionTable[it.name]!!.first, moduleTypeSystemInfo.typeSystem)
-            }
-            .filter { it.isRight }
-            .map { (it as Either.Right).value }
-            .toList()
+        abstractions = abstractions
+    )
+}
+
+fun ModuleFunctionInfo.checkInferenceSemantics(
+    moduleTypeSystemInfo: ModuleTypeSystemInfo
+): ModuleFunctionInfo {
+    val errors = ErrorCollector()
+    errors.collectAll(this.errors)
+    val inferenceInfo = InferenceInfo(
+        preludeModule,
+        ModuleInfo(
+            emptyList(),
+            moduleTypeSystemInfo.typeSystem,
+            abstractions.asSequence().map {
+                val arguments = it.info.cast<AbstractionSemanticInfo>()
+                    .parameters.map { i ->
+                        when (val iType = i.getInferredType(it.location)) {
+                            is Either.Right -> iType.value
+                            is Either.Left -> newParameter()
+                        }
+                    }
+                FunctionInfo(null, it.name, arguments)
+            }.groupBy { it.name }
+        ),
+        emptyMap()
+    )
+    abstractions.map { it.inferType(inferenceInfo) }
+    val abstractions = abstractions.filter {
+        val iType = it.info.getInferredType(it.location)
+        if (iType.isLeft) {
+            errors.collect(iType.cast<Either.Left<Error>>().value)
+            false
+        } else true
+    }
+    return ModuleFunctionInfo(
+        errors = errors.build(),
+        functionTable = functionTable,
+        abstractions = abstractions
     )
 }
