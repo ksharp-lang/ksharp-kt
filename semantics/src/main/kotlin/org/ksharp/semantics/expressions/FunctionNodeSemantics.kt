@@ -157,15 +157,16 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
         emptyMap()
     )
     abstractions.map { it.inferType(inferenceInfo) }
+    val abstractions = abstractions.filter {
+        val iType = it.info.getInferredType(it.location)
+        if (iType.isLeft) {
+            errors.collect(iType.cast<Either.Left<Error>>().value)
+            false
+        } else true
+    }
     return ModuleFunctionInfo(
         errors = errors.build(),
         functionTable = functionTable,
-        abstractions = abstractions.filter {
-            val iType = it.info.getInferredType(it.location)
-            if (iType.isLeft) {
-                errors.collect(iType.cast<Either.Left<Error>>().value)
-                false
-            } else true
-        }
+        abstractions = abstractions
     )
 }

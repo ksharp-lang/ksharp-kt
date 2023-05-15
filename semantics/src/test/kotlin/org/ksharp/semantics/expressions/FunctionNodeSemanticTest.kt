@@ -1,5 +1,6 @@
 package org.ksharp.semantics.expressions
 
+import InferenceErrorCode
 import io.kotest.core.Tuple4
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.core.spec.style.StringSpec
@@ -980,6 +981,67 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             this.abstractions.first()
                 .info.getInferredType(Location.NoProvided)
                 .shouldBeRight(listOf(ts["Long"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType())
+        }
+    }
+    "Check inference - abstraction with error" {
+        val errors = ErrorCollector()
+        val functionTable = FunctionTableBuilder(errors)
+        val param = newParameter()
+        val symbol = Symbol("a", TypeSemanticInfo(Either.Right(param)))
+        val info = ModuleFunctionInfo(
+            errors.build(),
+            functionTable.build(),
+            listOf(
+                AbstractionNode(
+                    "n",
+                    ApplicationNode(
+                        ApplicationName("::prelude", "no-function"),
+                        listOf(
+                            ApplicationNode(
+                                ApplicationName(name = "True"),
+                                listOf(),
+                                typeParameterForTesting(2),
+                                Location.NoProvided
+                            ),
+                            ConstantNode(
+                                10.toLong(),
+                                longTypePromise,
+                                Location.NoProvided
+                            ),
+                            VarNode(
+                                "a",
+                                symbol,
+                                Location.NoProvided
+                            ),
+                        ),
+                        typeParameterForTesting(3),
+                        Location.NoProvided
+                    ),
+                    AbstractionSemanticInfo(
+                        listOf(
+                            symbol
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+        )
+        info.checkInferenceSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            this.abstractions.shouldBeEmpty()
+            this.errors.shouldBe(
+                listOf(
+                    InferenceErrorCode.FunctionNotFound.new(
+                        Location.NoProvided,
+                        "function" to "no-function True (Num numeric<Long>) @0"
+                    )
+                )
+            )
         }
     }
 })
