@@ -121,7 +121,7 @@ data class InferenceInfo(
         appName: ApplicationName,
         arguments: List<Type>
     ): ErrorOrType =
-        arguments.size.let { numArguments ->
+        arguments.size.let { _ ->
             val name = appName.name
             cache.get(name to arguments) {
                 val type = module.typeSystem[name]

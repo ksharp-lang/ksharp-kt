@@ -141,4 +141,10 @@ class TypeSystemSerializerTest : StringSpec({
             )
         ).shouldBeSerializable()
     }
+    "Serialize TypeConstructor Types" {
+        TypeConstructor(
+            "True",
+            "Bool"
+        ).shouldBeSerializable()
+    }
 })
