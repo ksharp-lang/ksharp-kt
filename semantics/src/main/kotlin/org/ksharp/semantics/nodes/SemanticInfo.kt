@@ -1,10 +1,7 @@
 package org.ksharp.semantics.nodes
 
 import InferenceErrorCode
-import org.ksharp.common.Either
-import org.ksharp.common.Error
-import org.ksharp.common.Location
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.semantics.scopes.Table
@@ -70,7 +67,14 @@ fun TypeSystem.getTypeSemanticInfo(name: String) =
 fun SemanticInfo.getType(location: Location): ErrorOrType =
     when (this) {
         is TypeSemanticInfo -> if (hasInferredType()) getInferredType(location) else type
+        is Symbol -> if (hasInferredType()) getInferredType(location) else type.getType(location)
         else -> getInferredType(location)
+    }
+
+fun TypePromise.getType(location: Location): ErrorOrType =
+    when (this) {
+        is SemanticInfo -> this.cast<SemanticInfo>().getType(location)
+        else -> type
     }
 
 fun paramTypePromise() = TypeSemanticInfo(Either.Right(newParameter()))

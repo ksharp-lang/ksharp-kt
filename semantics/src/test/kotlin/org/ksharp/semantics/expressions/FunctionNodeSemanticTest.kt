@@ -969,5 +969,17 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                 )
             )
         )
+        info.checkInferenceSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            this.shouldBe(info)
+            this.abstractions.first()
+                .info.getInferredType(Location.NoProvided)
+                .shouldBeRight(listOf(ts["Long"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType())
+        }
     }
 })
