@@ -256,7 +256,7 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResu
                     l.consume { it.consumeExpression() }
                 }.build {
                     val type = it.first().cast<TypeNode>()
-                    if (it.size == 1) type as NodeData
+                    if (it.size == 1) type.cast<NodeData>()
                     else {
                         val expr = it.last().cast<NodeData>()
                         type.copy(expr = ConstrainedTypeNode(type.expr.cast(), expr, expr.location))
@@ -294,6 +294,6 @@ internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserR
                     params.toList(),
                     i.last().cast(),
                     name.location
-                ) as NodeData
+                ).cast<NodeData>()
             }.asLookAHeadResult()
     }

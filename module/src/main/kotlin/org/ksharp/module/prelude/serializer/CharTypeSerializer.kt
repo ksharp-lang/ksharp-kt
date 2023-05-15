@@ -8,5 +8,6 @@ class CharTypeSerializer : SerializerWriter<CharType>, SerializerReader<CharType
     override fun read(buffer: BufferView, table: BinaryTableView): CharType = charType
 
     override fun write(input: CharType, buffer: BufferWriter, table: BinaryTable) {
+        //This type is static, so just the default serializer header is enough
     }
 }

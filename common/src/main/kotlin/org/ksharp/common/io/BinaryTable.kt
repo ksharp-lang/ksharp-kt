@@ -1,10 +1,10 @@
 package org.ksharp.common.io
 
-interface BinaryTable {
+fun interface BinaryTable {
     fun add(name: String): Int
 
 }
 
-interface BinaryTableView {
+fun interface BinaryTableView {
     operator fun get(index: Int): String
 }

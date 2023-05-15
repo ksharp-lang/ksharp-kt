@@ -31,7 +31,7 @@ data class AbstractionSemanticInfo(val parameters: List<SemanticInfo>) : Semanti
 
 data class EmptySemanticInfo(private val nothing: Unit = Unit) : SemanticInfo()
 
-interface SymbolResolver {
+fun interface SymbolResolver {
     fun getSymbol(name: String): Symbol?
 }
 

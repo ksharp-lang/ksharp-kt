@@ -36,7 +36,7 @@ private fun KSharpConsumeResult.thenFunction(pub: Boolean): KSharpParserResult =
                         arguments,
                         expr,
                         name.location
-                    ) as NodeData
+                    )
                 }
         }
 

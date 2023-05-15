@@ -9,7 +9,7 @@ enum class TableErrorCode(override val description: String) : ErrorCode {
 
 typealias TableValue<V> = Pair<V, Location>
 
-interface Table<Value> {
+fun interface Table<Value> {
     operator fun get(name: String): TableValue<Value>?
 }
 
