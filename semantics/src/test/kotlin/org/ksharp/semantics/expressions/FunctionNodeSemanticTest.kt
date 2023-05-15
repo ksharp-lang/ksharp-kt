@@ -1044,4 +1044,9 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             )
         }
     }
-})
+}) {
+    override suspend fun beforeAny(testCase: TestCase) {
+        super.beforeAny(testCase)
+        resetParameterCounterForTesting()
+    }
+}
