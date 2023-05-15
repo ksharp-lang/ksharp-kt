@@ -36,6 +36,8 @@ fun newParameterForTesting(id: Int) = Parameter("@${id}")
 
 fun newParameter() = Parameter("@${parameterIdCounter.incrementAndGet()}")
 
+fun newNamedParameter(name: String) = Parameter(name)
+
 data class ParametricType internal constructor(
     val type: Type,
     val params: List<Type>

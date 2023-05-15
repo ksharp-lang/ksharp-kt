@@ -14,18 +14,18 @@ import org.ksharp.common.cast
 import org.ksharp.common.new
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
+import org.ksharp.nodes.FunctionType
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
+import org.ksharp.semantics.scopes.FunctionTableBuilder
 import org.ksharp.semantics.scopes.FunctionVisibility
 import org.ksharp.semantics.scopes.TypeVisibilityTableBuilder
+import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.typeSystem
-import org.ksharp.typesystem.types.alias
-import org.ksharp.typesystem.types.functionType
-import org.ksharp.typesystem.types.newParameterForTesting
-import org.ksharp.typesystem.types.resetParameterCounterForTesting
+import org.ksharp.typesystem.types.*
 
 private fun typeParameterForTesting(id: Int) = TypeSemanticInfo(Either.Right(newParameterForTesting(id)))
 
@@ -889,3 +889,41 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         resetParameterCounterForTesting()
     }
 }
+
+class FunctionNodeSemanticCheckInferenceTest : StringSpec({
+    val ts = preludeModule.typeSystem
+    val unitTypePromise = ts.getTypeSemanticInfo("Unit")
+    val longTypePromise = ts.getTypeSemanticInfo("Long")
+
+    "Check inference" {
+        val errors = ErrorCollector()
+        val functionTable = FunctionTableBuilder(errors)
+        val info = ModuleFunctionInfo(
+            errors.build(),
+            functionTable.build(),
+            listOf(
+                AbstractionNode(
+                    "ten", ConstantNode(
+                        10.toLong(),
+                        longTypePromise,
+                        Location.NoProvided
+                    ),
+                    AbstractionSemanticInfo(listOf()),
+                    Location.NoProvided
+                )
+            )
+        )
+        info.checkInferenceSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                TypeVisibilityTableBuilder(ErrorCollector()).build(),
+                ts
+            )
+        ).apply {
+            this.shouldBe(info)
+            this.abstractions.first()
+                .info.getInferredType(Location.NoProvided)
+                .shouldBeRight(listOf(ts["Unit"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType())
+        }
+    }
+})
