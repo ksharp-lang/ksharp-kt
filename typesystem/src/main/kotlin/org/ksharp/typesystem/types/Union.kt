@@ -19,7 +19,7 @@ data class UnionType internal constructor(
         get() = TypeSerializers.UnionType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Union
 
     override val substitution: Substitution
         get() = Substitutions.Union

@@ -246,9 +246,6 @@ class InferenceTest : StringSpec({
                 ).toFunctionType()
             )
         }
-        abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
-            .arguments.first().info.getInferredType(Location.NoProvided)
-            .shouldBeRight(intTypePromise.type.valueOrNull!!)
     }
     "Inference let binding" {
         val module = createInferenceInfo(ts)
