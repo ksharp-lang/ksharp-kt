@@ -25,11 +25,7 @@ enum class TypeSerializers(
     MethodType(MethodTypeSerializer()),
     NoType(TypeConstructorSerializer()),
     TraitType(TraitSerializer()),
-    NoDefined(object : SerializerWriter<Type> {
-        override fun write(input: Type, buffer: BufferWriter, table: BinaryTable) {
-            TODO("Not yet implemented")
-        }
-    })
+    NoDefined(SerializerWriter { _, _, _ -> TODO("Not yet implemented") })
 }
 
 @Suppress("UNCHECKED_CAST")
