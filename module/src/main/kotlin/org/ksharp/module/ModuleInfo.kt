@@ -25,6 +25,7 @@ class ModuleInfoBuilder {
         }
         functionsList.add(
             FunctionInfo(
+                FunctionVisibility.Public,
                 dependency,
                 name,
                 types.toList()

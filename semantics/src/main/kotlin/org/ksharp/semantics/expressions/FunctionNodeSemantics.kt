@@ -3,6 +3,7 @@ package org.ksharp.semantics.expressions
 import inferType
 import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
+import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.ExpressionParserNode
@@ -12,8 +13,10 @@ import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.nodes.*
-import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
+import org.ksharp.semantics.scopes.FunctionTable
+import org.ksharp.semantics.scopes.FunctionTableBuilder
+import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.newParameter
@@ -60,7 +63,7 @@ private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<Type
 }
 
 
-private fun ModuleNode.buildFunctionTable(
+internal fun ModuleNode.buildFunctionTable(
     errors: ErrorCollector,
     typeSystem: TypeSystem
 ): Pair<FunctionTable, List<FunctionNode>> =
@@ -110,7 +113,10 @@ private fun FunctionNode.checkSemantics(
         AbstractionNode(
             name,
             semanticNode,
-            AbstractionSemanticInfo(parameters.map { symbolTable[it]!!.first }.toList()),
+            AbstractionSemanticInfo(
+                function.visibility,
+                parameters.map { symbolTable[it]!!.first }.toList()
+            ),
             location
         )
     }
@@ -128,7 +134,6 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
         .toList()
     return ModuleFunctionInfo(
         errors = errors.build(),
-        functionTable = functionTable,
         abstractions = abstractions
     )
 }
@@ -144,14 +149,15 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
             emptyList(),
             moduleTypeSystemInfo.typeSystem,
             abstractions.asSequence().map {
-                val arguments = it.info.cast<AbstractionSemanticInfo>()
+                val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
+                val arguments = semanticInfo
                     .parameters.map { i ->
                         when (val iType = i.getInferredType(it.location)) {
                             is Either.Right -> iType.value
-                            is Either.Left -> newParameter()
+                            else -> newParameter()
                         }
                     }
-                FunctionInfo(null, it.name, arguments)
+                FunctionInfo(semanticInfo.visibility, null, it.name, arguments)
             }.groupBy { it.name }
         ),
         emptyMap()
@@ -166,7 +172,6 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     }
     return ModuleFunctionInfo(
         errors = errors.build(),
-        functionTable = functionTable,
         abstractions = abstractions
     )
 }

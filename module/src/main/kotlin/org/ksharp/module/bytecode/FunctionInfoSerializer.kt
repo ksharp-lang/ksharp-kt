@@ -6,12 +6,14 @@ import org.ksharp.common.listBuilder
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 import org.ksharp.module.FunctionInfo
+import org.ksharp.module.FunctionVisibility
 import org.ksharp.typesystem.serializer.readListOfTypes
 import org.ksharp.typesystem.serializer.writeTo
 
 fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
         add(0)
+        add(visibility.ordinal)
         if (dependency == null) {
             add(-1)
         } else add(table.add(dependency))
@@ -23,13 +25,14 @@ fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
 }
 
 fun BufferView.readFunctionInfo(table: BinaryTableView): FunctionInfo {
-    val dependency = readInt(4).let {
+    val visibility = readInt(4).let { FunctionVisibility.values()[it] }
+    val dependency = readInt(8).let {
         if (it == -1) null
         else table[it]
     }
-    val name = table[readInt(8)]
-    val types = bufferFrom(12).readListOfTypes(table)
-    return FunctionInfo(dependency, name, types)
+    val name = table[readInt(12)]
+    val types = bufferFrom(16).readListOfTypes(table)
+    return FunctionInfo(visibility, dependency, name, types)
 }
 
 fun List<FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) {
