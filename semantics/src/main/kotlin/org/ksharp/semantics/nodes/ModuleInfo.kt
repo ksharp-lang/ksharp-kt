@@ -20,7 +20,11 @@ fun ModuleNode.toModuleInfo(): ModuleInfo {
     val moduleSemantics = this.checkFunctionSemantics(typeSemantics)
         .checkInferenceSemantics(typeSemantics)
     return ModuleInfo(
-        name,
+        name.let {
+            val ix = name.indexOf(".")
+            if (ix != -1) name.substring(0, ix)
+            else name
+        },
         typeSemantics.errors + moduleSemantics.errors,
         typeSemantics.typeSystem,
         moduleSemantics.abstractions
