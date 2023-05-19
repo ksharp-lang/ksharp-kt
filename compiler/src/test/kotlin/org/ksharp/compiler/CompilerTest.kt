@@ -1,16 +1,19 @@
 package org.ksharp.compiler
 
+import InferenceErrorCode
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
 import org.ksharp.common.Location
 import org.ksharp.common.Offset
+import org.ksharp.common.new
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.ConstantNode
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.TypeSemanticInfo
+import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import java.io.File
 import kotlin.io.path.Path
@@ -151,5 +154,19 @@ class CompilerTestModuleInfo : StringSpec({
                     )
                 }
             }
+    }
+    "Create a moduleinfo from a String with error" {
+        """
+        |ten = no-exist-fun 10
+        """.trimMargin()
+            .moduleInfo("file1.ff")
+            .shouldBeLeft(
+                listOf(
+                    InferenceErrorCode.FunctionNotFound.new(
+                        Location("file1.ff", Line(1) to Offset(0)),
+                        "function" to "no-exist-fun (Num numeric<Byte>)"
+                    )
+                )
+            )
     }
 })
