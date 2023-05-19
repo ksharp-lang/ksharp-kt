@@ -61,9 +61,9 @@ private fun TypeSystem.shouldBeSerializable(): TypeSystem {
 class TypeSystemSerializerTest : StringSpec({
     "Serialize TypeSystem" {
         typeSystem {
-            type("Int")
-            type("String")
-            parametricType("Map") {
+            type(TypeVisibility.Public, "Int")
+            type(TypeVisibility.Public, "String")
+            parametricType(TypeVisibility.Public, "Map") {
                 type("Int")
                 type("Int")
             }
@@ -71,78 +71,117 @@ class TypeSystemSerializerTest : StringSpec({
             .shouldBeSerializable()
             .apply {
                 size.shouldBe(3)
-                get("Int").shouldBeType(Concrete("Int"), "Int")
-                get("String").shouldBeType(Concrete("String"), "String")
+                get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                get("String").shouldBeType(Concrete(TypeVisibility.Public, "String"), "String")
                 get("Map").shouldBeType(
-                    ParametricType(Alias("Map"), listOf(Alias("Int"), Alias("Int"))),
+                    ParametricType(
+                        TypeVisibility.Public,
+                        Alias(TypeVisibility.Public, "Map"),
+                        listOf(Alias(TypeVisibility.Public, "Int"), Alias(TypeVisibility.Public, "Int"))
+                    ),
                     "(Map Int Int)"
                 )
             }
     }
     "Serialize Concrete Types" {
-        Concrete("Int").shouldBeSerializable()
+        Concrete(TypeVisibility.Public, "Int").shouldBeSerializable()
     }
     "Serialize Alias Types" {
-        Alias("Int").shouldBeSerializable()
+        Alias(TypeVisibility.Public, "Int").shouldBeSerializable()
     }
     "Serialize Parameter Types" {
-        Parameter("Int").shouldBeSerializable()
+        Parameter(TypeVisibility.Public, "Int").shouldBeSerializable()
     }
     "Serialize Parametric Types" {
         ParametricType(
-            Alias("Map"),
+            TypeVisibility.Public,
+            Alias(TypeVisibility.Public, "Map"),
             listOf(
-                Concrete("String"),
-                Concrete("Double")
+                Concrete(TypeVisibility.Public, "String"),
+                Concrete(TypeVisibility.Public, "Double")
             )
         ).shouldBeSerializable()
     }
     "Serialize Labeled Types" {
         Labeled(
             "Label",
-            Concrete("String")
+            Concrete(TypeVisibility.Public, "String")
         ).shouldBeSerializable()
     }
     "Serialize Function Types" {
         FunctionType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"),
-                Concrete("Int2"),
-                Concrete("Int3")
+                Concrete(TypeVisibility.Internal, "Int"),
+                Concrete(TypeVisibility.Public, "Int2"),
+                Concrete(TypeVisibility.Public, "Int3")
             )
         ).shouldBeSerializable()
     }
     "Serialize Intersection Types" {
         IntersectionType(
-            listOf(Alias("String"), Alias("Int"))
+            TypeVisibility.Internal,
+            listOf(Alias(TypeVisibility.Public, "String"), Alias(TypeVisibility.Internal, "Int"))
         ).shouldBeSerializable()
     }
     "Serialize Tuple Types" {
         TupleType(
-            listOf(Alias("String"), Alias("Int"))
+            TypeVisibility.Internal,
+            listOf(Alias(TypeVisibility.Internal, "String"), Alias(TypeVisibility.Internal, "Int"))
         ).shouldBeSerializable()
     }
     "Serialize Union Types" {
         UnionType(
+            TypeVisibility.Internal,
             mapOf(
-                "String" to UnionType.ClassType("String", listOf(Parameter("a"))),
-                "Int" to UnionType.ClassType("Int", listOf(Parameter("b"))),
-                "Map" to UnionType.ClassType("Map", listOf(Concrete("Int"), Parameter("c")))
+                "String" to UnionType.ClassType(
+                    TypeVisibility.Internal,
+                    "String",
+                    listOf(Parameter(TypeVisibility.Internal, "a"))
+                ),
+                "Int" to UnionType.ClassType(
+                    TypeVisibility.Internal,
+                    "Int",
+                    listOf(Parameter(TypeVisibility.Internal, "b"))
+                ),
+                "Map" to UnionType.ClassType(
+                    TypeVisibility.Internal,
+                    "Map",
+                    listOf(Concrete(TypeVisibility.Internal, "Int"), Parameter(TypeVisibility.Internal, "c"))
+                )
             )
         ).shouldBeSerializable()
     }
     "Serialize Trait Types" {
         TraitType(
+            TypeVisibility.Internal,
             "Num",
             "a",
             mapOf(
-                "sum" to TraitType.MethodType("sum", listOf(Parameter("a"), Parameter("a"), Parameter("a"))),
-                "sub" to TraitType.MethodType("sub", listOf(Parameter("a"), Parameter("a"), Parameter("a")))
+                "sum" to TraitType.MethodType(
+                    TypeVisibility.Public,
+                    "sum",
+                    listOf(
+                        Parameter(TypeVisibility.Public, "a"),
+                        Parameter(TypeVisibility.Public, "a"),
+                        Parameter(TypeVisibility.Public, "a")
+                    )
+                ),
+                "sub" to TraitType.MethodType(
+                    TypeVisibility.Public,
+                    "sub",
+                    listOf(
+                        Parameter(TypeVisibility.Public, "a"),
+                        Parameter(TypeVisibility.Public, "a"),
+                        Parameter(TypeVisibility.Public, "a")
+                    )
+                )
             )
         ).shouldBeSerializable()
     }
     "Serialize TypeConstructor Types" {
         TypeConstructor(
+            TypeVisibility.Public,
             "True",
             "Bool"
         ).shouldBeSerializable()

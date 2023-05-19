@@ -21,7 +21,7 @@ class TupleUnification : CompoundUnification<TupleType>() {
         if (type1.elements.size != type2.elements.size) incompatibleType(location, type1, type2)
         else {
             unifyListOfTypes(location, typeSystem, type1, type2, type1.elements, type2.elements).map { params ->
-                TupleType(params)
+                TupleType(type1.visibility, params)
             }
         }
 }

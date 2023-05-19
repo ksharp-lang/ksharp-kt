@@ -6,6 +6,7 @@ import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.common.listBuilder
 import org.ksharp.module.FunctionInfo
+import org.ksharp.module.FunctionVisibility
 import org.ksharp.typesystem.types.newParameter
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -41,6 +42,7 @@ private fun Map<String, List<FunctionInfo>>.shouldBeSerializable() {
 class FunctionSerializerTest : StringSpec({
     "Serialize FunctionInfo with dependency = null" {
         FunctionInfo(
+            FunctionVisibility.Public,
             null,
             "sum",
             listOf(newParameter(), newParameter())
@@ -48,6 +50,7 @@ class FunctionSerializerTest : StringSpec({
     }
     "Serialize FunctionInfo" {
         FunctionInfo(
+            FunctionVisibility.Internal,
             "math",
             "sum",
             listOf(newParameter(), newParameter())
@@ -57,6 +60,7 @@ class FunctionSerializerTest : StringSpec({
         mapOf(
             "sum" to listOf(
                 FunctionInfo(
+                    FunctionVisibility.Public,
                     null,
                     "sum",
                     listOf(newParameter(), newParameter())
@@ -64,6 +68,7 @@ class FunctionSerializerTest : StringSpec({
             ),
             "sub" to listOf(
                 FunctionInfo(
+                    FunctionVisibility.Public,
                     null,
                     "sub",
                     listOf(newParameter(), newParameter())

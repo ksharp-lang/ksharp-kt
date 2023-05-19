@@ -7,6 +7,7 @@ import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.common.new
+import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.moduleFunctions
 import org.ksharp.module.prelude.preludeModule
@@ -45,7 +46,7 @@ class InferenceTest : StringSpec({
                 longTypePromise,
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(listOf()),
+            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeRight(
@@ -78,7 +79,7 @@ class InferenceTest : StringSpec({
                 TypeSemanticInfo(Either.Right(newParameter())),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(listOf()),
+            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeRight(
@@ -112,7 +113,7 @@ class InferenceTest : StringSpec({
                 TypeSemanticInfo(Either.Right(newParameter())),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(listOf()),
+            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeRight(
@@ -147,6 +148,7 @@ class InferenceTest : StringSpec({
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
+                FunctionVisibility.Public,
                 listOf(variable)
             ),
             Location.NoProvided
@@ -187,6 +189,7 @@ class InferenceTest : StringSpec({
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
+                FunctionVisibility.Public,
                 listOf(variable)
             ),
             Location.NoProvided
@@ -206,8 +209,6 @@ class InferenceTest : StringSpec({
     "Inference prelude if function" {
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
-        val trueTypePromise = ts.getTypeSemanticInfo("True")
-        val variable = TypeSemanticInfo(Either.Right(newParameter()))
         val abstraction = AbstractionNode(
             "n",
             ApplicationNode(
@@ -234,6 +235,7 @@ class InferenceTest : StringSpec({
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
+                FunctionVisibility.Public,
                 listOf()
             ),
             Location.NoProvided
@@ -282,7 +284,7 @@ class InferenceTest : StringSpec({
                 EmptySemanticInfo(),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(listOf()),
+            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
             Location.NoProvided
         )
         abstraction.inferType(module).apply {
@@ -296,7 +298,6 @@ class InferenceTest : StringSpec({
     }
     "Inference test function doesn't exists" {
         val module = createInferenceInfo(ts)
-        val longTypePromise = ts.getTypeSemanticInfo("Long")
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         AbstractionNode(
             "n",
@@ -312,7 +313,7 @@ class InferenceTest : StringSpec({
                 TypeSemanticInfo(Either.Right(newParameter())),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(listOf()),
+            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeLeft(
@@ -353,7 +354,7 @@ class InferenceTest : StringSpec({
                 EmptySemanticInfo(),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(listOf()),
+            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
             Location.NoProvided
         )
         abstraction.inferType(module).apply {

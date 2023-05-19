@@ -18,6 +18,7 @@ typealias TraitTypeFactoryBuilder = TraitTypeFactory.() -> Unit
 interface IsTrait
 
 data class TraitType internal constructor(
+    override val visibility: TypeVisibility,
     val name: String,
     val param: String,
     val methods: Map<String, MethodType>,
@@ -33,6 +34,7 @@ data class TraitType internal constructor(
         get() = Substitutions.NoDefined
 
     data class MethodType internal constructor(
+        override val visibility: TypeVisibility,
         val name: String,
         val arguments: List<Type>,
     ) : Type {
@@ -78,6 +80,7 @@ class TraitTypeFactory(
                 ParametricTypeFactory(factory).apply(arguments).build().map { args ->
                     params.put(
                         name, TraitType.MethodType(
+                            factory.visibility,
                             name,
                             args
                         )
@@ -96,15 +99,16 @@ class TraitTypeFactory(
 }
 
 fun TypeSystemBuilder.trait(
+    visibility: TypeVisibility,
     name: String,
     paramName: String,
     annotations: List<Annotation> = listOf(),
     factory: TraitTypeFactoryBuilder
 ) =
-    item(name, annotations) {
+    item(visibility, name, annotations) {
         validateTypeParamName(paramName).flatMap {
             TraitTypeFactory(this).apply(factory).build().map {
-                TraitType(name, paramName, it)
+                TraitType(visibility, name, paramName, it)
             }
         }
     }

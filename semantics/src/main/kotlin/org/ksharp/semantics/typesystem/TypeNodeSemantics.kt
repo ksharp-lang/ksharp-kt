@@ -5,9 +5,6 @@ import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
-import org.ksharp.semantics.scopes.TypeVisibility
-import org.ksharp.semantics.scopes.TypeVisibilityTable
-import org.ksharp.semantics.scopes.TypeVisibilityTableBuilder
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.types.*
 
@@ -209,110 +206,90 @@ fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
     }
 
 private fun TypeSystemBuilder.register(node: TypeNode) =
-    alias(node.name, listOf()) {
+    alias(if (node.internal) TypeVisibility.Internal else TypeVisibility.Public, node.name, listOf()) {
         this.register(node.name, node.expr)
     }
 
 private fun TypeNode.checkTypesSemantics(
     errors: ErrorCollector,
-    table: TypeVisibilityTableBuilder,
     builder: TypeSystemBuilder
-) = table.register(
-    name,
-    if (internal) TypeVisibility.Internal else TypeVisibility.Public,
-    location
-).map {
-    errors.collect(expr.checkParams(name, location, params.asSequence())).map {
-        builder.register(this)
-    }
+) = errors.collect(expr.checkParams(name, location, params.asSequence())).map {
+    builder.register(this)
 }
 
 private fun TraitNode.checkTypesSemantics(
     errors: ErrorCollector,
-    table: TypeVisibilityTableBuilder,
     builder: TypeSystemBuilder
-) = table.register(
-    name,
-    if (internal) TypeVisibility.Internal else TypeVisibility.Public,
-    location
-).map {
-    (if (params.size != 1) Either.Left(
-        TypeSemanticsErrorCode.TraitShouldHaveJustOneParameter.new(location, "name" to name)
-    )
-    else Either.Right(true))
-        .let { errors.collect(it) }
-        .map {
-            builder.trait(name, params.first(), listOf()) {
-                definition.functions.forEach { f ->
-                    errors.collect(f.checkParams(f.name, f.location, params.asSequence()))
-                        .let { paramsCheckResult ->
-                            paramsCheckResult.mapLeft {
-                                error(TypeSemanticsErrorCode.TraitWithInvalidMethod.new(location, "name" to name))
-                            }
-                            paramsCheckResult.map {
-                                method(f.name) {
-                                    f.type
-                                        .cast<FunctionTypeNode>()
-                                        .params
-                                        .forEach {
-                                            register(it as NodeData)
-                                        }
-                                }
+) = (if (params.size != 1) Either.Left(
+    TypeSemanticsErrorCode.TraitShouldHaveJustOneParameter.new(location, "name" to name)
+) else Either.Right(true))
+    .let { errors.collect(it) }
+    .map {
+        builder.trait(
+            if (internal) TypeVisibility.Internal else TypeVisibility.Public,
+            name,
+            params.first(),
+            listOf()
+        ) {
+            definition.functions.forEach { f ->
+                errors.collect(f.checkParams(f.name, f.location, params.asSequence()))
+                    .let { paramsCheckResult ->
+                        paramsCheckResult.mapLeft {
+                            error(TypeSemanticsErrorCode.TraitWithInvalidMethod.new(location, "name" to name))
+                        }
+                        paramsCheckResult.map {
+                            method(f.name) {
+                                f.type
+                                    .cast<FunctionTypeNode>()
+                                    .params
+                                    .forEach {
+                                        register(it as NodeData)
+                                    }
                             }
                         }
-                }
+                    }
             }
         }
-
-}
+    }
 
 private fun TypeDeclarationNode.checkTypesSemantics(
     errors: ErrorCollector,
-    table: TypeVisibilityTableBuilder,
     builder: TypeSystemBuilder
-) = table.register(
-    name,
-    TypeVisibility.Internal,
-    location
-).map {
-    errors.collect(type.cast<NodeData>().checkParams(name, location, params.asSequence())).map {
-        if (type !is FunctionTypeNode)
-            errors.collect(
-                TypeSemanticsErrorCode
-                    .FunctionDeclarationShouldBeAFunctionType
-                    .new(location, "name" to name)
-            )
-        else builder.alias("Decl__$name", listOf()) {
-            this.register(name, type.cast())
-        }
+) = errors.collect(type.cast<NodeData>().checkParams(name, location, params.asSequence())).map {
+    if (type !is FunctionTypeNode)
+        errors.collect(
+            TypeSemanticsErrorCode
+                .FunctionDeclarationShouldBeAFunctionType
+                .new(location, "name" to name)
+        )
+    else builder.alias(TypeVisibility.Internal, "Decl__$name", listOf()) {
+        this.register(name, type.cast())
     }
 }
 
-private fun Sequence<NodeData>.checkTypesSemantics(errors: ErrorCollector): Pair<TypeVisibilityTable, PartialTypeSystem> {
-    val table = TypeVisibilityTableBuilder(errors)
+private fun Sequence<NodeData>.checkTypesSemantics(errors: ErrorCollector): PartialTypeSystem {
     val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
         this@checkTypesSemantics.forEach {
             when (it) {
-                is TypeNode -> it.checkTypesSemantics(errors, table, this)
-                is TraitNode -> it.checkTypesSemantics(errors, table, this)
-                is TypeDeclarationNode -> it.checkTypesSemantics(errors, table, this)
+                is TypeNode -> it.checkTypesSemantics(errors, this)
+                is TraitNode -> it.checkTypesSemantics(errors, this)
+                is TypeDeclarationNode -> it.checkTypesSemantics(errors, this)
                 else -> TODO("$it")
             }
         }
     }
-    return table.build() to typeSystem
+    return typeSystem
 }
 
 fun ModuleNode.checkTypesSemantics(): ModuleTypeSystemInfo {
     val errors = ErrorCollector()
-    val (typeTable, typeSystem) = sequenceOf(
+    val typeSystem = sequenceOf(
         types.asSequence(),
         typeDeclarations.asSequence()
     ).flatten().checkTypesSemantics(errors)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(
         errors.build(),
-        typeTable,
         typeSystem.value
     )
 }

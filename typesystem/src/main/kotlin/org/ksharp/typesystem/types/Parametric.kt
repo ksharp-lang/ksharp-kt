@@ -16,6 +16,7 @@ private var parameterIdCounter = AtomicInteger(-1)
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
 data class Parameter internal constructor(
+    override val visibility: TypeVisibility,
     val name: String,
 ) : TypeVariable {
     override val serializer: TypeSerializer
@@ -32,13 +33,14 @@ data class Parameter internal constructor(
 }
 
 fun resetParameterCounterForTesting() = parameterIdCounter.set(-1)
-fun newParameterForTesting(id: Int) = Parameter("@${id}")
+fun newParameterForTesting(id: Int) = Parameter(TypeVisibility.Internal, "@${id}")
 
-fun newParameter() = Parameter("@${parameterIdCounter.incrementAndGet()}")
+fun newParameter() = Parameter(TypeVisibility.Internal, "@${parameterIdCounter.incrementAndGet()}")
 
-fun newNamedParameter(name: String) = Parameter(name)
+fun newNamedParameter(name: String) = Parameter(TypeVisibility.Internal, name)
 
 data class ParametricType internal constructor(
+    override val visibility: TypeVisibility,
     val type: Type,
     val params: List<Type>
 ) : Type {
@@ -76,7 +78,7 @@ class ParametricTypeFactory(
     fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->
             validateTypeParamName(name).map {
-                params.add(Parameter(it).labeled(label))
+                params.add(Parameter(builder.visibility, it).labeled(label))
                 params
             }
         }
@@ -134,7 +136,7 @@ fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryB
                     TypeSystemErrorCode.ParametricTypeWithoutParameters.new("type" to name)
                 )
             } else
-                Either.Right(ParametricType(Alias(name), it))
+                Either.Right(ParametricType(visibility, Alias(visibility, name), it))
         }
     } else
         type(name).flatMap { pType ->
@@ -150,21 +152,22 @@ fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryB
                         TypeSystemErrorCode.InvalidNumberOfParameters.new(
                             "type" to type,
                             "number" to type.params.size,
-                            "configuredType" to ParametricType(type.type, types)
+                            "configuredType" to ParametricType(visibility, type.type, types)
                         )
                     } else null
                 }
-                Either.Right(ParametricType(pType, types))
+                Either.Right(ParametricType(visibility, pType, types))
             }
         }
 
 
 fun TypeSystemBuilder.parametricType(
+    visibility: TypeVisibility,
     name: String,
     annotations: List<Annotation> = listOf(),
     factory: ParametricTypeFactoryBuilder
 ) =
-    item(name, annotations) {
+    item(visibility, name, annotations) {
         this.parametricType(name, factory)
     }
 

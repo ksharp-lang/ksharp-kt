@@ -4,8 +4,10 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.io.bufferView
 import org.ksharp.module.FunctionInfo
+import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
 import org.ksharp.typesystem.typeSystem
+import org.ksharp.typesystem.types.TypeVisibility
 import org.ksharp.typesystem.types.newParameter
 import org.ksharp.typesystem.types.type
 import java.io.ByteArrayInputStream
@@ -30,16 +32,18 @@ class ModuleInfoSerializerTest : StringSpec({
         ModuleInfo(
             listOf("module1", "module2"),
             typeSystem {
-                type("Int")
-                type("String")
+                type(TypeVisibility.Public, "Int")
+                type(TypeVisibility.Public, "String")
             }.value,
             mapOf(
                 "sum" to listOf(
                     FunctionInfo(
+                        FunctionVisibility.Public,
                         null,
                         "sum",
                         listOf(newParameter(), newParameter())
                     ), FunctionInfo(
+                        FunctionVisibility.Public,
                         "math",
                         "sum",
                         listOf(newParameter(), newParameter(), newParameter())
@@ -47,6 +51,7 @@ class ModuleInfoSerializerTest : StringSpec({
                 ),
                 "sub" to listOf(
                     FunctionInfo(
+                        FunctionVisibility.Public,
                         null,
                         "sub",
                         listOf(newParameter(), newParameter())

@@ -15,8 +15,8 @@ import org.ksharp.typesystem.types.*
 class SubstitutionContextTest : StringSpec({
     "Substitution adding mappings" {
         val ts = typeSystem {
-            type("Int")
-            type("String")
+            type(TypeVisibility.Public, "Int")
+            type(TypeVisibility.Public, "String")
         }.value
         val context = SubstitutionContext(ts)
         val intType = ts["Int"].valueOrNull!!
@@ -27,8 +27,8 @@ class SubstitutionContextTest : StringSpec({
     }
     "Substitution mapping can't unify" {
         val ts = typeSystem {
-            type("Int")
-            type("String")
+            type(TypeVisibility.Public, "Int")
+            type(TypeVisibility.Public, "String")
         }.value
         val context = SubstitutionContext(ts)
         val intType = ts["Int"].valueOrNull!!
@@ -54,8 +54,8 @@ class SubstitutionContextTest : StringSpec({
     }
     "Substitution not registered" {
         val ts = typeSystem {
-            type("Int")
-            type("String")
+            type(TypeVisibility.Public, "Int")
+            type(TypeVisibility.Public, "String")
         }.value
         val param = newParameter()
         val context = SubstitutionContext(ts)
@@ -72,8 +72,8 @@ class SubstitutionContextTest : StringSpec({
 
 class SubstitutionTest : StringSpec({
     val ts = typeSystem {
-        type("Int")
-        type("String")
+        type(TypeVisibility.Public, "Int")
+        type(TypeVisibility.Public, "String")
     }.value
     val intType = ts["Int"].valueOrNull!!
     "Concrete type substitution" {
@@ -90,11 +90,11 @@ class SubstitutionTest : StringSpec({
         val parameter = newParameter()
         context.extract(Location.NoProvided, parameter, intType)
             .shouldBeRight(true)
-        context.substitute(Location.NoProvided, Concrete("String"), intType)
-            .shouldBeRight(Concrete("String"))
+        context.substitute(Location.NoProvided, Concrete(TypeVisibility.Public, "String"), intType)
+            .shouldBeRight(Concrete(TypeVisibility.Public, "String"))
         context.substitute(Location.NoProvided, parameter, intType)
             .shouldBeRight(intType)
-        context.substitute(Location.NoProvided, Parameter("b"), intType)
+        context.substitute(Location.NoProvided, Parameter(TypeVisibility.Public, "b"), intType)
             .shouldBeLeft(
                 TypeSystemErrorCode.SubstitutionNotFound.new(
                     Location.NoProvided,
@@ -114,7 +114,7 @@ class SubstitutionTest : StringSpec({
         val parameter = newParameter()
         context.extract(Location.NoProvided, parameter, intType)
             .shouldBeRight(true)
-        context.extract(Location.NoProvided, parameter, Concrete("String"))
+        context.extract(Location.NoProvided, parameter, Concrete(TypeVisibility.Public, "String"))
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -147,9 +147,9 @@ class SubstitutionTest : StringSpec({
     }
     "Alias substitution" {
         val context = SubstitutionContext(ts)
-        context.extract(Location.NoProvided, Alias("Int"), intType)
+        context.extract(Location.NoProvided, Alias(TypeVisibility.Public, "Int"), intType)
             .shouldBeRight(false)
-        context.substitute(Location.NoProvided, Alias("Int"), intType)
+        context.substitute(Location.NoProvided, Alias(TypeVisibility.Public, "Int"), intType)
             .shouldBeRight(intType)
         context.errors.build().shouldBeEmpty()
         context.mappings.build().shouldBeEmpty()
@@ -188,34 +188,39 @@ class SubstitutionTest : StringSpec({
     }
     "Tuple substitution" {
         val tuple1 = TupleType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), newParameter()
+                Concrete(TypeVisibility.Public, "Int"), newParameter()
             )
         )
         val tuple2 = TupleType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), Concrete("String")
+                Concrete(TypeVisibility.Public, "Int"), Concrete(TypeVisibility.Public, "String")
             )
         )
         val context = SubstitutionContext(ts)
         context.extract(Location.NoProvided, tuple1, tuple2).shouldBeRight(true)
-        context.substitute(Location.NoProvided, tuple1, Concrete("Int"))
+        context.substitute(Location.NoProvided, tuple1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeRight(tuple2)
     }
     "Tuple substitution error" {
         val tuple1 = TupleType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), newParameter()
+                Concrete(TypeVisibility.Public, "Int"), newParameter()
             )
         )
         val tuple2 = TupleType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), Concrete("String")
+                Concrete(TypeVisibility.Public, "Int"), Concrete(TypeVisibility.Public, "String")
             )
         )
         val tuple3 = TupleType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), Concrete("Int")
+                Concrete(TypeVisibility.Public, "Int"), Concrete(TypeVisibility.Public, "Int")
             )
         )
         val context = SubstitutionContext(ts)
@@ -223,19 +228,20 @@ class SubstitutionTest : StringSpec({
         context.extract(Location.NoProvided, tuple1, tuple3).shouldBeLeft(
             TypeSystemErrorCode.IncompatibleTypes.new(Location.NoProvided, "type1" to "Int", "type2" to "String")
         )
-        context.substitute(Location.NoProvided, tuple1, Concrete("Int"))
+        context.substitute(Location.NoProvided, tuple1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(Location.NoProvided, "type1" to "Int", "type2" to "String")
             )
     }
     "Compound type substitution incompatible error" {
         val tuple1 = TupleType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), newParameter()
+                Concrete(TypeVisibility.Public, "Int"), newParameter()
             )
         )
         val context = SubstitutionContext(ts)
-        context.extract(Location.NoProvided, tuple1, Concrete("Int"))
+        context.extract(Location.NoProvided, tuple1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -246,67 +252,83 @@ class SubstitutionTest : StringSpec({
     }
     "Function substitution" {
         val function1 = FunctionType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), newParameter()
+                Concrete(TypeVisibility.Public, "Int"), newParameter()
             )
         )
         val function2 = FunctionType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), Concrete("String")
+                Concrete(TypeVisibility.Public, "Int"), Concrete(TypeVisibility.Public, "String")
             )
         )
         val context = SubstitutionContext(ts)
         context.extract(Location.NoProvided, function1, function2).shouldBeRight(true)
-        context.substitute(Location.NoProvided, function1, Concrete("Int"))
+        context.substitute(Location.NoProvided, function1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeRight(function2)
     }
     "Intersection substitution" {
         val type1 = IntersectionType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), newParameter()
+                Concrete(TypeVisibility.Public, "Int"), newParameter()
             )
         )
         val type2 = IntersectionType(
+            TypeVisibility.Public,
             listOf(
-                Concrete("Int"), Concrete("String")
+                Concrete(TypeVisibility.Public, "Int"), Concrete(TypeVisibility.Public, "String")
             )
         )
         val context = SubstitutionContext(ts)
         context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
-        context.substitute(Location.NoProvided, type1, Concrete("Int"))
+        context.substitute(Location.NoProvided, type1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeRight(type2)
     }
     "Union substitution" {
         val type1 = UnionType(
+            TypeVisibility.Public,
             mapOf(
-                "Some" to UnionType.ClassType("Some", listOf(newParameter())),
-                "None" to UnionType.ClassType("None", emptyList()),
+                "Some" to UnionType.ClassType(TypeVisibility.Public, "Some", listOf(newParameter())),
+                "None" to UnionType.ClassType(TypeVisibility.Public, "None", emptyList()),
             )
         )
         val type2 = UnionType(
+            TypeVisibility.Public,
             mapOf(
-                "Some" to UnionType.ClassType("Some", listOf(Concrete("Int"))),
-                "None" to UnionType.ClassType("None", emptyList()),
+                "Some" to UnionType.ClassType(
+                    TypeVisibility.Public,
+                    "Some",
+                    listOf(Concrete(TypeVisibility.Public, "Int"))
+                ),
+                "None" to UnionType.ClassType(TypeVisibility.Public, "None", emptyList()),
             )
         )
         val context = SubstitutionContext(ts)
         context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
-        context.substitute(Location.NoProvided, type1, Concrete("Int"))
+        context.substitute(Location.NoProvided, type1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeRight(type2)
     }
     "Union substitution incompatible error" {
         val param = newParameter()
-        val clsType = UnionType.ClassType("Some", listOf(param))
+        val clsType = UnionType.ClassType(TypeVisibility.Public, "Some", listOf(param))
         val type1 = UnionType(
+            TypeVisibility.Public,
             mapOf(
                 "Some" to clsType,
-                "None" to UnionType.ClassType("None", emptyList()),
+                "None" to UnionType.ClassType(TypeVisibility.Public, "None", emptyList()),
             )
         )
         val type2 = UnionType(
+            TypeVisibility.Public,
             mapOf(
-                "Some" to UnionType.ClassType("AnotherSome", listOf(Concrete("Int"))),
-                "None" to UnionType.ClassType("None", emptyList()),
+                "Some" to UnionType.ClassType(
+                    TypeVisibility.Public,
+                    "AnotherSome",
+                    listOf(Concrete(TypeVisibility.Public, "Int"))
+                ),
+                "None" to UnionType.ClassType(TypeVisibility.Public, "None", emptyList()),
             )
         )
         val context = SubstitutionContext(ts)
@@ -314,10 +336,14 @@ class SubstitutionTest : StringSpec({
             TypeSystemErrorCode.IncompatibleTypes.new(
                 Location.NoProvided,
                 "type1" to clsType.representation,
-                "type2" to UnionType.ClassType("AnotherSome", listOf(Concrete("Int"))).representation
+                "type2" to UnionType.ClassType(
+                    TypeVisibility.Public,
+                    "AnotherSome",
+                    listOf(Concrete(TypeVisibility.Public, "Int"))
+                ).representation
             )
         )
-        context.substitute(Location.NoProvided, type1, Concrete("Int"))
+        context.substitute(Location.NoProvided, type1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeLeft(
                 TypeSystemErrorCode.SubstitutionNotFound.new(
                     Location.NoProvided,
@@ -328,20 +354,22 @@ class SubstitutionTest : StringSpec({
     }
     "Parametric type substitution" {
         val type1 = ParametricType(
-            Concrete("Map"),
+            TypeVisibility.Public,
+            Concrete(TypeVisibility.Public, "Map"),
             listOf(
-                Concrete("Int"), newParameter()
+                Concrete(TypeVisibility.Public, "Int"), newParameter()
             )
         )
         val type2 = ParametricType(
-            Concrete("Map"),
+            TypeVisibility.Public,
+            Concrete(TypeVisibility.Public, "Map"),
             listOf(
-                Concrete("Int"), Concrete("String")
+                Concrete(TypeVisibility.Public, "Int"), Concrete(TypeVisibility.Public, "String")
             )
         )
         val context = SubstitutionContext(ts)
         context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
-        context.substitute(Location.NoProvided, type1, Concrete("Int"))
+        context.substitute(Location.NoProvided, type1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeRight(type2)
     }
 })

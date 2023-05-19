@@ -29,7 +29,7 @@ class ParametricSubstitution : CompoundSubstitution<ParametricType>() {
     ): ErrorOrType =
         context.substitute(location, type.type, typeContext).flatMap { tp ->
             type.params.substitute(context, location, typeContext).map {
-                ParametricType(tp, it)
+                ParametricType(type.visibility, tp, it)
             }
         }
 

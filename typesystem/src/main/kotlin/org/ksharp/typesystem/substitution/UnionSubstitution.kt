@@ -30,7 +30,7 @@ class UnionSubstitution : CompoundSubstitution<UnionType>() {
         type.arguments.values
             .substitute(context, location, typeContext)
             .map {
-                UnionType(it.associate { tp ->
+                UnionType(type.visibility, it.associate { tp ->
                     tp.cast<UnionType.ClassType>().let { clsType ->
                         clsType.label to clsType
                     }
@@ -59,6 +59,6 @@ class ClassSubstitution : CompoundSubstitution<UnionType.ClassType>() {
     ): ErrorOrType =
         type.params.substitute(context, location, typeContext)
             .map {
-                UnionType.ClassType(type.label, it)
+                UnionType.ClassType(type.visibility, type.label, it)
             }
 }

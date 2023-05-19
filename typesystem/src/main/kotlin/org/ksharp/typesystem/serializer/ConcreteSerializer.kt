@@ -5,10 +5,11 @@ import org.ksharp.typesystem.types.Concrete
 
 class ConcreteSerializer : SerializerWriter<Concrete>, SerializerReader<Concrete> {
     override fun write(input: Concrete, buffer: BufferWriter, table: BinaryTable) {
+        buffer.writeTypeVisibility(input)
         buffer.add(table.add(input.name))
     }
 
     override fun read(buffer: BufferView, table: BinaryTableView): Concrete =
-        Concrete(table[buffer.readInt(0)])
+        Concrete(buffer.readTypeVisibility(0), table[buffer.readInt(4)])
 
 }

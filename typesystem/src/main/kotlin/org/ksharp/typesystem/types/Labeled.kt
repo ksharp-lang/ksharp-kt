@@ -12,6 +12,9 @@ data class Labeled internal constructor(
     val type: Type
 ) : Type by type {
 
+    override val visibility: TypeVisibility
+        get() = type.visibility
+
     override val serializer: TypeSerializer
         get() = TypeSerializers.Labeled
 

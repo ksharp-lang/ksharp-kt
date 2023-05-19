@@ -12,6 +12,8 @@ data class Annotated internal constructor(
     internal val annotations: List<Annotation>,
     val type: Type
 ) : Type by type {
+    override val visibility: TypeVisibility
+        get() = type.visibility
     override val serializer: TypeSerializer
         get() = TypeSerializers.NoDefined
     override val unification: TypeUnification

@@ -2,6 +2,7 @@ package org.ksharp.semantics.nodes
 
 import InferenceErrorCode
 import org.ksharp.common.*
+import org.ksharp.module.FunctionVisibility
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.semantics.scopes.Table
@@ -27,7 +28,10 @@ sealed class SemanticInfo {
         inferredType ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
 }
 
-data class AbstractionSemanticInfo(val parameters: List<SemanticInfo>) : SemanticInfo()
+data class AbstractionSemanticInfo(
+    val visibility: FunctionVisibility,
+    val parameters: List<SemanticInfo>
+) : SemanticInfo()
 
 data class EmptySemanticInfo(private val nothing: Unit = Unit) : SemanticInfo()
 

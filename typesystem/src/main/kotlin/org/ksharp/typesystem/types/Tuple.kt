@@ -9,6 +9,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class TupleType internal constructor(
+    override val visibility: TypeVisibility,
     val elements: List<Type>,
 ) : Type {
     override val serializer: TypeSerializer
@@ -29,5 +30,5 @@ data class TupleType internal constructor(
 
 fun TypeItemBuilder.tupleType(factory: ParametricTypeFactoryBuilder) =
     ParametricTypeFactory(this).apply(factory).build().map {
-        TupleType(it)
+        TupleType(visibility, it)
     }

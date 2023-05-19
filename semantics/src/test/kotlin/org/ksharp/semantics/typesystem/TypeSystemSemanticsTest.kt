@@ -1,19 +1,15 @@
 package org.ksharp.semantics.typesystem
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.booleans.shouldBeFalse
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.nodes.*
-import org.ksharp.semantics.scopes.TableErrorCode
-import org.ksharp.semantics.scopes.isInternal
-import org.ksharp.semantics.scopes.isPublic
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.types.Type
 
 private fun module(vararg types: NodeData) =
     ModuleNode(
@@ -35,6 +31,8 @@ private fun moduleWithDeclarations(vararg declarations: TypeDeclarationNode) =
         Location.NoProvided
     )
 
+private val Type.representationWithVisibility get() = "${visibility.name}-${representation}"
+
 class TypeSystemSemanticsTest : StringSpec({
     "Alias semantics" {
         module(
@@ -47,13 +45,9 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics().apply {
             errors.shouldBeEmpty()
-            typeSystemTable["Integer"]!!
-                .apply {
-                    isInternal.shouldBeFalse()
-                    isPublic.shouldBeTrue()
-                }
             typeSystem["Int"].map { it.representation }.shouldBeRight("(Num numeric<Int>)")
-            typeSystem["Integer"].map { it.representation }.shouldBeRight("Int")
+            typeSystem["Integer"].map { it.representationWithVisibility }
+                .shouldBeRight("Public-Int")
         }
     }
     "Alias semantics with Unit" {
@@ -67,7 +61,8 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics().apply {
             errors.shouldBeEmpty()
-            typeSystem["Unidad"].map { it.representation }.shouldBeRight("Unit")
+            typeSystem["Unidad"].map { it.representationWithVisibility }
+                .shouldBeRight("Public-Unit")
         }
     }
     "Tuple semantics" {
@@ -87,12 +82,8 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics().apply {
             errors.shouldBeEmpty()
-            typeSystemTable["Point"]!!
-                .apply {
-                    isInternal.shouldBeTrue()
-                    isPublic.shouldBeFalse()
-                }
-            typeSystem["Point"].map { it.representation }.shouldBeRight("(Double, Double)")
+            typeSystem["Point"].map { it.representationWithVisibility }
+                .shouldBeRight("Internal-(Double, Double)")
         }
     }
     "Union semantics" {
@@ -121,7 +112,9 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics().apply {
             errors.shouldBeEmpty()
-            typeSystem["Maybe"].map { it.representation }.shouldBeRight("Just a\n|Nothing")
+            typeSystem["Maybe"]
+                .map { it.representationWithVisibility }
+                .shouldBeRight("Public-Just a\n|Nothing")
         }
     }
     "Union semantics arm not starting with concrete type " {
@@ -371,15 +364,12 @@ class TypeSystemSemanticsTest : StringSpec({
         ).checkTypesSemantics().apply {
             errors.shouldBe(
                 listOf(
-                    TableErrorCode.AlreadyDefined.new(Location.NoProvided, "classifier" to "Type", "name" to "Integer")
+                    TypeSystemErrorCode.TypeAlreadyRegistered.new(
+                        "type" to "Integer"
+                    )
                 )
             )
-            typeSystemTable["Integer"]!!
-                .apply {
-                    isInternal.shouldBeFalse()
-                    isPublic.shouldBeTrue()
-                }
-            typeSystem["Integer"].map { it.representation }.shouldBeRight("Int")
+            typeSystem["Integer"].map { it.representationWithVisibility }.shouldBeRight("Public-Int")
         }
     }
     "Parametric semantics" {
@@ -531,13 +521,9 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics().apply {
             errors.shouldBeEmpty()
-            typeSystemTable["Number"]!!.apply {
-                isInternal.shouldBeFalse()
-                isPublic.shouldBeTrue()
-            }
-            typeSystem["Number"].map { it.representation }.shouldBeRight(
+            typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
-                |trait Number a =
+                |Public-trait Number a =
                 |    sum :: a -> a -> a
                 |    prod :: a -> a -> a
             """.trimMargin()
@@ -582,13 +568,9 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics().apply {
             errors.shouldBeEmpty()
-            typeSystemTable["Number"]!!.apply {
-                isInternal.shouldBeTrue()
-                isPublic.shouldBeFalse()
-            }
-            typeSystem["Number"].map { it.representation }.shouldBeRight(
+            typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
-                |trait Number a =
+                |Internal-trait Number a =
                 |    sum :: a -> a -> a
                 |    prod :: a -> a -> a
             """.trimMargin()

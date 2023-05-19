@@ -9,10 +9,8 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.Either
-import org.ksharp.common.Location
-import org.ksharp.common.cast
-import org.ksharp.common.new
+import org.ksharp.common.*
+import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
 import org.ksharp.nodes.FunctionType
@@ -20,13 +18,16 @@ import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
-import org.ksharp.semantics.scopes.FunctionTableBuilder
-import org.ksharp.semantics.scopes.FunctionVisibility
-import org.ksharp.semantics.scopes.TypeVisibilityTableBuilder
+import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.*
+
+private data class FunctionTableResult(
+    val errors: List<Error>,
+    val functionTable: FunctionTable
+)
 
 private fun typeParameterForTesting(id: Int) = TypeSemanticInfo(Either.Right(newParameterForTesting(id)))
 
@@ -34,6 +35,16 @@ private fun module(vararg functions: FunctionNode) =
     ModuleNode(
         "module", listOf(), listOf(), listOf(), listOf(*functions), Location.NoProvided
     )
+
+
+private fun ModuleNode.buildFunctionTable(moduleTypeSystemInfo: ModuleTypeSystemInfo): FunctionTableResult {
+    val errors = ErrorCollector()
+    val (functionTable, _) = buildFunctionTable(errors, moduleTypeSystemInfo.typeSystem)
+    return FunctionTableResult(
+        errors.build(),
+        functionTable
+    )
+}
 
 class FunctionNodeSemanticFunctionTableTest : StringSpec({
     "table: function without declaration" {
@@ -50,10 +61,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkFunctionSemantics(
+        ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 preludeModule.typeSystem
             )
         ).apply {
@@ -78,7 +88,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            alias("Decl__sum") {
+            alias(TypeVisibility.Internal, "Decl__sum") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -99,10 +109,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkFunctionSemantics(
+        ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 typeSystem
             )
         ).apply {
@@ -135,10 +144,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                 Location.NoProvided
             )
-        ).checkFunctionSemantics(
+        ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 typeSystem
             )
         ).apply {
@@ -162,7 +170,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration mismatch" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            alias("Decl__sum") {
+            alias(TypeVisibility.Internal, "Decl__sum") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -182,10 +190,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkFunctionSemantics(
+        ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 typeSystem
             )
         ).apply {
@@ -205,7 +212,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration mismatch 2" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            alias("Decl__sum") {
+            alias(TypeVisibility.Internal, "Decl__sum") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -225,10 +232,9 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 ),
                 Location.NoProvided
             )
-        ).checkFunctionSemantics(
+        ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 typeSystem
             )
         ).apply {
@@ -269,7 +275,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             Tuple4(LiteralValueType.Integer, intTypePromise, "500000", 500000.toLong()),
             Tuple4(LiteralValueType.Integer, longTypePromise, "5000000000", 5000000000),
             Tuple4(LiteralValueType.OctalInteger, byteTypePromise, "0o01", 1.toLong()),
-            Tuple4(LiteralValueType.Decimal, ts.getTypeSemanticInfo("Double"), "1.5", 1.5.toDouble()),
+            Tuple4(LiteralValueType.Decimal, ts.getTypeSemanticInfo("Double"), "1.5", 1.5),
             Tuple4(LiteralValueType.String, strTypePromise, "\"Hello\"", "Hello"),
             Tuple4(LiteralValueType.MultiLineString, strTypePromise, "\"\"\"Hello\nWorld\"\"\"", "Hello\nWorld"),
             Tuple4(LiteralValueType.Character, ts.getTypeSemanticInfo("Char"), "'c'", 'c'),
@@ -286,7 +292,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 ).checkFunctionSemantics(
                     ModuleTypeSystemInfo(
                         listOf(),
-                        TypeVisibilityTableBuilder(ErrorCollector()).build(),
                         ts
                     )
                 ).apply {
@@ -299,7 +304,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     expectedType.cast(),
                                     Location.NoProvided
                                 ),
-                                AbstractionSemanticInfo(listOf()),
+                                AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
                                 Location.NoProvided
                             )
                         )
@@ -325,7 +330,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -351,7 +355,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(1),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(listOf()),
+                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
                         Location.NoProvided
                     )
                 )
@@ -380,7 +384,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -424,6 +427,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
+                            FunctionVisibility.Public,
                             listOf(
                                 Symbol(
                                     "a",
@@ -440,7 +444,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: if without else") {
         module(
             FunctionNode(
-                true,
+                false,
                 "n",
                 listOf("a"),
                 IfNode(
@@ -459,7 +463,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -503,6 +506,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
+                            FunctionVisibility.Internal,
                             listOf(
                                 Symbol(
                                     "a",
@@ -538,7 +542,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -576,7 +579,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(2),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(listOf()),
+                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
                         Location.NoProvided
                     )
                 )
@@ -603,7 +606,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -634,7 +636,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(1),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(listOf()),
+                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
                         Location.NoProvided
                     )
                 )
@@ -658,7 +660,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -687,6 +688,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
+                            FunctionVisibility.Public,
                             listOf(
                                 Symbol(
                                     "y",
@@ -725,7 +727,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -759,7 +760,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(3),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(listOf()),
+                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
                         Location.NoProvided
                     )
                 )
@@ -810,7 +811,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -877,7 +877,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             EmptySemanticInfo(),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(listOf()),
+                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
                         Location.NoProvided
                     )
                 )
@@ -893,15 +893,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
 
 class FunctionNodeSemanticCheckInferenceTest : StringSpec({
     val ts = preludeModule.typeSystem
-    val unitTypePromise = ts.getTypeSemanticInfo("Unit")
     val longTypePromise = ts.getTypeSemanticInfo("Long")
-    val boolTypePromise = ts.getTypeSemanticInfo("Bool")
     "Check inference" {
         val errors = ErrorCollector()
-        val functionTable = FunctionTableBuilder(errors)
         val info = ModuleFunctionInfo(
             errors.build(),
-            functionTable.build(),
             listOf(
                 AbstractionNode(
                     "ten", ConstantNode(
@@ -909,7 +905,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                         longTypePromise,
                         Location.NoProvided
                     ),
-                    AbstractionSemanticInfo(listOf()),
+                    AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
                     Location.NoProvided
                 )
             )
@@ -917,7 +913,6 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -929,12 +924,10 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
     }
     "Check inference - abstraction with arguments" {
         val errors = ErrorCollector()
-        val functionTable = FunctionTableBuilder(errors)
         val param = newParameter()
         val symbol = Symbol("a", TypeSemanticInfo(Either.Right(param)))
         val info = ModuleFunctionInfo(
             errors.build(),
-            functionTable.build(),
             listOf(
                 AbstractionNode(
                     "n",
@@ -962,6 +955,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                         Location.NoProvided
                     ),
                     AbstractionSemanticInfo(
+                        FunctionVisibility.Public,
                         listOf(
                             symbol
                         )
@@ -973,7 +967,6 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -985,12 +978,10 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
     }
     "Check inference - abstraction with error" {
         val errors = ErrorCollector()
-        val functionTable = FunctionTableBuilder(errors)
         val param = newParameter()
         val symbol = Symbol("a", TypeSemanticInfo(Either.Right(param)))
         val info = ModuleFunctionInfo(
             errors.build(),
-            functionTable.build(),
             listOf(
                 AbstractionNode(
                     "n",
@@ -1018,6 +1009,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                         Location.NoProvided
                     ),
                     AbstractionSemanticInfo(
+                        FunctionVisibility.Public,
                         listOf(
                             symbol
                         )
@@ -1029,7 +1021,6 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {

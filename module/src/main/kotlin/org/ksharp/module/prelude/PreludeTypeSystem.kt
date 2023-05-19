@@ -6,22 +6,19 @@ import org.ksharp.module.prelude.types.charType
 import org.ksharp.module.prelude.types.numeric
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.typeSystem
-import org.ksharp.typesystem.types.alias
-import org.ksharp.typesystem.types.parametricType
-import org.ksharp.typesystem.types.type
-import org.ksharp.typesystem.types.unionType
+import org.ksharp.typesystem.types.*
 
 private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
-    alias(alias) {
+    alias(TypeVisibility.Public, alias) {
         parametricType("Num") {
             numeric(type)
         }
     }
 
 private fun createPreludeTypeSystem() = typeSystem {
-    type("Unit")
-    alias("Char") { Either.Right(charType) }
-    parametricType("Num") {
+    type(TypeVisibility.Public, "Unit")
+    alias(TypeVisibility.Public, "Char") { Either.Right(charType) }
+    parametricType(TypeVisibility.Public, "Num") {
         parameter("a")
     }
 
@@ -34,24 +31,24 @@ private fun createPreludeTypeSystem() = typeSystem {
     number("Double", Numeric.Double)
     number("BigDecimal", Numeric.BigDecimal)
 
-    parametricType("List") {
+    parametricType(TypeVisibility.Public, "List") {
         parameter("v")
     }
-    parametricType("Set") {
+    parametricType(TypeVisibility.Public, "Set") {
         parameter("v")
     }
-    parametricType("Map") {
+    parametricType(TypeVisibility.Public, "Map") {
         parameter("k")
         parameter("v")
     }
 
-    alias("String") {
+    alias(TypeVisibility.Public, "String") {
         parametricType("List") {
             type("Char")
         }
     }
 
-    alias("Bool") {
+    alias(TypeVisibility.Public, "Bool") {
         unionType {
             clazz("True")
             clazz("False")

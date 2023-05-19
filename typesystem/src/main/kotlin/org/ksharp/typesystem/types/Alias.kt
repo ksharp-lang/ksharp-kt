@@ -13,6 +13,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class Alias internal constructor(
+    override val visibility: TypeVisibility,
     val name: String
 ) : TypeVariable {
     override val serializer: TypeSerializer
@@ -31,11 +32,16 @@ data class Alias internal constructor(
 
 fun TypeSystem.alias(name: String): ErrorOrType =
     this[name].map {
-        Alias(name)
+        Alias(TypeVisibility.Internal, name)
     }
 
 
-fun TypeSystemBuilder.alias(name: String, annotations: List<Annotation> = listOf(), factory: TypeFactoryBuilder) =
-    item(name, annotations) {
+fun TypeSystemBuilder.alias(
+    visibility: TypeVisibility,
+    name: String,
+    annotations: List<Annotation> = listOf(),
+    factory: TypeFactoryBuilder
+) =
+    item(visibility, name, annotations) {
         factory()
     }
