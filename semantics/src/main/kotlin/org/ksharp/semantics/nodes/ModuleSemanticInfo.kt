@@ -8,18 +8,18 @@ import org.ksharp.semantics.expressions.checkInferenceSemantics
 import org.ksharp.semantics.typesystem.checkTypesSemantics
 import org.ksharp.typesystem.TypeSystem
 
-data class ModuleInfo(
+data class ModuleSemanticInfo(
     val name: String,
     val errors: List<Error>,
     val typeSystem: TypeSystem,
     val abstractions: List<AbstractionNode<SemanticInfo>>
 )
 
-fun ModuleNode.toModuleInfo(): ModuleInfo {
+fun ModuleNode.toModuleSemanticInfo(): ModuleSemanticInfo {
     val typeSemantics = this.checkTypesSemantics()
     val moduleSemantics = this.checkFunctionSemantics(typeSemantics)
         .checkInferenceSemantics(typeSemantics)
-    return ModuleInfo(
+    return ModuleSemanticInfo(
         name.let {
             val ix = name.indexOf(".")
             if (ix != -1) name.substring(0, ix)
