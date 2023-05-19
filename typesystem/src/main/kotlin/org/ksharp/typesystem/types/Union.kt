@@ -13,6 +13,7 @@ import org.ksharp.typesystem.validateTypeName
 typealias UnionTypeFactoryBuilder = UnionTypeFactory.() -> Unit
 
 data class UnionType internal constructor(
+    override val visibility: TypeVisibility,
     val arguments: Map<String, ClassType>,
 ) : Type {
     override val serializer: TypeSerializer
@@ -33,6 +34,7 @@ data class UnionType internal constructor(
             .joinToString("\n|")
 
     data class ClassType internal constructor(
+        override val visibility: TypeVisibility,
         val label: String,
         val params: List<Type>
     ) : Type {
@@ -65,10 +67,11 @@ class UnionTypeFactory(
     fun clazz(label: String, parameters: ParametricTypeFactoryBuilder = {}) {
         result = result.flatMap { params ->
             validateTypeName(label).flatMap {
-                factory.add(label, TypeConstructor(label, unionType))
+                factory.add(label, TypeConstructor(factory.visibility, label, unionType))
                 ParametricTypeFactory(factory).apply(parameters).build().map { args ->
                     params.put(
                         label, UnionType.ClassType(
+                            factory.visibility,
                             label = label,
                             params = args
                         )
@@ -88,5 +91,5 @@ class UnionTypeFactory(
 
 fun TypeItemBuilder.unionType(factory: UnionTypeFactoryBuilder) =
     UnionTypeFactory(name, this).apply(factory).build().map {
-        UnionType(it)
+        UnionType(visibility, it)
     }

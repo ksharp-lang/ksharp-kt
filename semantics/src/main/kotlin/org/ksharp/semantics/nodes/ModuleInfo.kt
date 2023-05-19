@@ -5,16 +5,14 @@ import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.expressions.checkFunctionSemantics
 import org.ksharp.semantics.expressions.checkInferenceSemantics
-import org.ksharp.semantics.scopes.TypeVisibilityTable
 import org.ksharp.semantics.typesystem.checkTypesSemantics
 import org.ksharp.typesystem.TypeSystem
 
 data class ModuleInfo(
     val name: String,
     val errors: List<Error>,
-    val typeSystemTable: TypeVisibilityTable,
     val typeSystem: TypeSystem,
-    val abstractions: List<AbstractionNode<SemanticInfo>> = emptyList()
+    val abstractions: List<AbstractionNode<SemanticInfo>>
 )
 
 fun ModuleNode.toModuleInfo(): ModuleInfo {
@@ -24,7 +22,6 @@ fun ModuleNode.toModuleInfo(): ModuleInfo {
     return ModuleInfo(
         name,
         typeSemantics.errors + moduleSemantics.errors,
-        typeSemantics.typeSystemTable,
         typeSemantics.typeSystem,
         moduleSemantics.abstractions
     )

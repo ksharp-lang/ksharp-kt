@@ -13,6 +13,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class FunctionType internal constructor(
+    override val visibility: TypeVisibility,
     val arguments: List<Type>,
 ) : Type {
     override val serializer: TypeSerializer
@@ -34,7 +35,7 @@ fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
     ParametricTypeFactory(this).apply(factory).build().flatMap { args ->
         if (args.size < 2) {
             Left(InvalidFunctionType.new())
-        } else Right(FunctionType(args))
+        } else Right(FunctionType(visibility, args))
     }
 
-fun List<Type>.toFunctionType() = FunctionType(this)
+fun List<Type>.toFunctionType() = FunctionType(TypeVisibility.Internal, this)

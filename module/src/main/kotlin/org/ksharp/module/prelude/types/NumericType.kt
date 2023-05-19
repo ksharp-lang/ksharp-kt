@@ -9,6 +9,7 @@ import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.TypeVisibility
 import org.ksharp.typesystem.unification.TypeUnification
 
 enum class Numeric(val size: kotlin.Int, val isInteger: Boolean, val recordSize: RecordSize) {
@@ -25,6 +26,10 @@ enum class Numeric(val size: kotlin.Int, val isInteger: Boolean, val recordSize:
 data class NumericType internal constructor(
     val type: Numeric
 ) : Type {
+
+    override val visibility: TypeVisibility
+        get() = TypeVisibility.Public
+    
     override val serializer: TypeSerializer
         get() = TypeSerializers.NumericType
 

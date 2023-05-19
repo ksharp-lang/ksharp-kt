@@ -19,7 +19,6 @@ import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
-import org.ksharp.semantics.scopes.TypeVisibilityTableBuilder
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.typeSystem
@@ -65,7 +64,6 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 preludeModule.typeSystem
             )
         ).apply {
@@ -90,7 +88,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            alias("Decl__sum") {
+            alias(TypeVisibility.Internal, "Decl__sum") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -114,7 +112,6 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 typeSystem
             )
         ).apply {
@@ -150,7 +147,6 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 typeSystem
             )
         ).apply {
@@ -174,7 +170,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration mismatch" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            alias("Decl__sum") {
+            alias(TypeVisibility.Internal, "Decl__sum") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -197,7 +193,6 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 typeSystem
             )
         ).apply {
@@ -217,7 +212,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration mismatch 2" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            alias("Decl__sum") {
+            alias(TypeVisibility.Internal, "Decl__sum") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -240,7 +235,6 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 typeSystem
             )
         ).apply {
@@ -298,7 +292,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 ).checkFunctionSemantics(
                     ModuleTypeSystemInfo(
                         listOf(),
-                        TypeVisibilityTableBuilder(ErrorCollector()).build(),
                         ts
                     )
                 ).apply {
@@ -337,7 +330,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -392,7 +384,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -472,7 +463,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -552,7 +542,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -617,7 +606,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -672,7 +660,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -740,7 +727,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -825,7 +811,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -928,7 +913,6 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -983,7 +967,6 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {
@@ -1038,7 +1021,6 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                TypeVisibilityTableBuilder(ErrorCollector()).build(),
                 ts
             )
         ).apply {

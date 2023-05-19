@@ -7,6 +7,7 @@ import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
 import org.ksharp.typesystem.typeSystem
+import org.ksharp.typesystem.types.TypeVisibility
 import org.ksharp.typesystem.types.newParameter
 import org.ksharp.typesystem.types.type
 import java.io.ByteArrayInputStream
@@ -31,8 +32,8 @@ class ModuleInfoSerializerTest : StringSpec({
         ModuleInfo(
             listOf("module1", "module2"),
             typeSystem {
-                type("Int")
-                type("String")
+                type(TypeVisibility.Public, "Int")
+                type(TypeVisibility.Public, "String")
             }.value,
             mapOf(
                 "sum" to listOf(

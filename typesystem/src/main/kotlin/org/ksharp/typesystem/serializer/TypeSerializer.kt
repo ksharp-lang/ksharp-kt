@@ -4,6 +4,7 @@ import org.ksharp.common.io.*
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemImpl
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.TypeVisibility
 
 interface TypeSerializer {
     val writer: SerializerWriter<out Type>
@@ -56,4 +57,12 @@ fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
 
 fun BufferView.readTypeSystem(table: BinaryTableView): TypeSystem {
     return TypeSystemImpl(null, readMapOfTypes(table))
+}
+
+fun BufferView.readTypeVisibility(index: Int): TypeVisibility {
+    return readInt(index).let { TypeVisibility.values()[it] }
+}
+
+fun BufferWriter.writeTypeVisibility(type: Type) {
+    add(type.visibility.ordinal)
 }

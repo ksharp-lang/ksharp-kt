@@ -8,6 +8,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class TypeConstructor(
+    override val visibility: TypeVisibility,
     val name: String,
     val alias: String
 ) : Type {

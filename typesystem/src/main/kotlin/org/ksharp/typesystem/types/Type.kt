@@ -14,13 +14,18 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
+enum class TypeVisibility {
+    Internal,
+    Public
+}
+
 interface Type {
     val serializer: TypeSerializer
     val unification: TypeUnification
     val substitution: Substitution
     val compound: Boolean get() = true
-
     val terms: Sequence<Type>
+    val visibility: TypeVisibility
     val representation: String get() = toString().let { s -> if (compound) "($s)" else s }
 }
 
@@ -30,7 +35,8 @@ sealed interface TypeVariable : Type {
 }
 
 data class Concrete internal constructor(
-    val name: String
+    override val visibility: TypeVisibility,
+    val name: String,
 ) : Type {
     override val serializer: TypeSerializer
         get() = TypeSerializers.Concrete
@@ -48,7 +54,7 @@ data class Concrete internal constructor(
 
 
 fun TypeItemBuilder.type(name: String): ErrorOrValue<TypeVariable> =
-    Either.Right(Alias(name)).also {
+    Either.Right(Alias(visibility, name)).also {
         validation {
             if (it(name) == null)
                 TypeSystemErrorCode.TypeNotFound.new("type" to name)
@@ -56,7 +62,7 @@ fun TypeItemBuilder.type(name: String): ErrorOrValue<TypeVariable> =
         }
     }
 
-fun TypeSystemBuilder.type(name: String, annotations: List<Annotation> = listOf()) =
-    item(name, annotations) {
-        Either.Right(Concrete(name))
+fun TypeSystemBuilder.type(visibility: TypeVisibility, name: String, annotations: List<Annotation> = listOf()) =
+    item(visibility, name, annotations) {
+        Either.Right(Concrete(visibility, name))
     }

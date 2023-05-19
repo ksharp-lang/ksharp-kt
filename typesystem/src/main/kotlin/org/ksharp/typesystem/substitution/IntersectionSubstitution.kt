@@ -27,5 +27,5 @@ class IntersectionSubstitution : CompoundSubstitution<IntersectionType>() {
     ): ErrorOrType =
         type.params
             .substitute(context, location, typeContext)
-            .map { IntersectionType(it) }
+            .map { IntersectionType(type.visibility, it) }
 }
