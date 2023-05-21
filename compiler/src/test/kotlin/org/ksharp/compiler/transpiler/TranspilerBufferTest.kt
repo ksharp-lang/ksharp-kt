@@ -49,7 +49,6 @@ class TranspilerBufferTest : StringSpec({
         result.shouldBe("\t\tHello\n")
     }
 
-
     "Given a buffer add content an then create a new buffer and add content the expected result is only the new content" {
         val buffer = TranspilerBuffer(indent = "\t")
         val result = buffer.append("Hello")
@@ -58,5 +57,22 @@ class TranspilerBufferTest : StringSpec({
             }.toString()
         result.shouldBe("\tWorld")
         buffer.toString().shouldBe("\tHello")
+    }
+
+    "Given a buffer add content an then create a new buffer and add content then merge the later buffer" {
+        val buffer = TranspilerBuffer(indent = "\t")
+        buffer.append("Hello")
+        buffer.merge(buffer.new {
+            append("World")
+        })
+        val result = buffer.toString()
+        result.shouldBe("\tHello\tWorld")
+    }
+
+    "Given a buffer add content with custom indent" {
+        val buffer = TranspilerBuffer(indent = "\t")
+        buffer.append("Hello", "")
+        val result = buffer.toString()
+        result.shouldBe("Hello")
     }
 })
