@@ -75,4 +75,12 @@ class TranspilerBufferTest : StringSpec({
         val result = buffer.toString()
         result.shouldBe("Hello")
     }
+
+    "Given a buffer add two lines" {
+        val buffer = TranspilerBuffer(indent = "\t")
+        buffer.append("Hello").endLn().append("World")
+        val result = buffer.toString()
+        result.shouldBe("\tHello\n\tWorld")
+    }
+
 })
