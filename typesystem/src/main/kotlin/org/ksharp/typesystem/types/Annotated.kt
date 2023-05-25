@@ -15,7 +15,7 @@ data class Annotated internal constructor(
     override val visibility: TypeVisibility
         get() = type.visibility
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.Annotated
     override val unification: TypeUnification
         get() = TypeUnifications.Default
 
