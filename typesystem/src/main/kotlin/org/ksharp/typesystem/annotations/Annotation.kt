@@ -11,6 +11,4 @@ data class Annotation internal constructor(
             }.takeIf { it.isNotEmpty() }?.let { "($it)" } ?: ""
         }"
     }
-    
 }
-

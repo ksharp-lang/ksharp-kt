@@ -14,6 +14,7 @@ enum class TypeSerializers(
     override val writer: SerializerWriter<out Type>
 ) : TypeSerializer {
     Concrete(ConcreteSerializer()),
+    Annotated(AnnotatedSerializer()),
     Alias(AliasSerializer()),
     Parameter(ParameterSerializer()),
     ParametricType(ParametricTypeSerializer()),
