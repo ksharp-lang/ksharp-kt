@@ -11,7 +11,10 @@ class ResettableBuilderTest : StringSpec({
         builder.update {
             it.add("Hello")
         }
-        builder.build().shouldBe(listOf("Hello"))
+        builder.update {
+            it.add("World")
+        }
+        builder.build().shouldBe(listOf("Hello", "World"))
     }
     "Resettable List Builder Empty" {
         val builder = resettableListBuilder<String>()
