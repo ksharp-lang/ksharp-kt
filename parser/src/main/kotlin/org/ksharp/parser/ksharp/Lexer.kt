@@ -1,10 +1,13 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.ResettableListBuilder
+import org.ksharp.common.resettableListBuilder
 import org.ksharp.parser.*
 import java.io.Reader
 import java.util.concurrent.atomic.AtomicInteger
 
 data class KSharpLexerState(
+    val annotations: ResettableListBuilder<Annotation> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
     val discardBlockTokens: Boolean = false,
     val discardNewLineToken: Boolean = false,

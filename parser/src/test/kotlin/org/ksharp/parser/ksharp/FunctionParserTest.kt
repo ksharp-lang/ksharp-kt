@@ -110,4 +110,48 @@ class FunctionParserTest : StringSpec({
                 )
             )
     }
+    "operator function" {
+        "(+) a b = a + b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    false,
+                    "(+)",
+                    listOf("a", "b"),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "complex function names" {
+        "internal->wire a b = a + b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    false,
+                    "internal->wire",
+                    listOf("a", "b"),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
 })

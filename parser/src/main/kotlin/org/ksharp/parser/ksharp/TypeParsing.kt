@@ -275,7 +275,7 @@ fun KSharpLexerIterator.consumeTypeDeclaration(): KSharpParserResult =
 
 internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserResult =
     lookAHead {
-        it.consume(KSharpTokenType.LowerCaseWord)
+        it.consumeFunctionName()
             .thenLoop { p ->
                 p.consumeLowerCaseWord()
                     .build { param -> param.last().cast<LexerValue>().text }
