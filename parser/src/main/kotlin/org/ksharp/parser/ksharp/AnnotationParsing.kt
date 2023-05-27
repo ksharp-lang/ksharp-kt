@@ -18,35 +18,36 @@ private fun KSharpAnnotationValueResult.orAnnotationValue(
 ): KSharpAnnotationValueResult =
     or { it.ifConsume(type, false, createValue) }
 
-private fun KSharpConsumeResult.buildAnnotationValue(): KSharpAnnotationValueResult =
-    build { it.first() }
-
 private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueResult =
-    ifConsume(KSharpTokenType.Alt) { it ->
+    ifConsume(KSharpTokenType.Alt, true) { it ->
         it.thenAnnotation().cast<KSharpAnnotationValueResult>()
-    }.orAnnotationValue(KSharpTokenType.String) { it.buildAnnotationValue() }
-        .orAnnotationValue({
-            it.type == KSharpTokenType.UpperCaseWord && when (it.text) {
-                "True" -> true
-                "False" -> true
-                else -> false
-            }
-        }) { it.buildAnnotationValue() }
+    }.orAnnotationValue(KSharpTokenType.String) {
+        it.build {
+            it.first().cast<Token>().text.let { it.substring(1, it.length - 1) }
+        }
+    }.orAnnotationValue({
+        it.type == KSharpTokenType.UpperCaseWord && when (it.text) {
+            "True" -> true
+            "False" -> true
+            else -> false
+        }
+    }) { it.build { it.first().cast<Token>().text == "True" } }
         .orAnnotationValue(KSharpTokenType.OpenBracket) {
             it.thenLoop { tl -> tl.consumeAnnotationValue() }
-                .then(KSharpTokenType.CloseBracket)
-                .build { v -> v }
+                .then(KSharpTokenType.CloseBracket, true)
+                .build { v -> v.drop(1) }
         }
 
 private fun KSharpLexerIterator.consumeAnnotationKeyValue(): KSharpAnnotationValueResult =
     ifConsume(KSharpTokenType.LowerCaseWord) { l ->
-        l.consume {
-            it.consumeAnnotationValue()
-        }.build {
-            val key = it.first().cast<Token>().text
-            val value = it.last()
-            (key to value) as Any
-        }
+        l.thenAssignOperator()
+            .consume {
+                it.consumeAnnotationValue()
+            }.build {
+                val key = it.first().cast<Token>().text
+                val value = it.last()
+                (key to value) as Any
+            }
     }.or {
         it.consumeAnnotationValue()
     }
