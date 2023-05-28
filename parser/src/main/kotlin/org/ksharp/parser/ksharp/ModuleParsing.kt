@@ -13,6 +13,7 @@ fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KS
                     .or { l -> l.consumeFunctionTypeDeclaration() }
                     .or { l -> l.consumeTypeDeclaration() }
                     .or { l -> l.consumeFunction() }
+                    .or { l -> l.consumeAnnotation() }
             }
         }.build {
             val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided

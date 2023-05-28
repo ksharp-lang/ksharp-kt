@@ -90,6 +90,7 @@ class ModuleParserTest : StringSpec({
                 ModuleNode(
                     "File", listOf(), listOf(), listOf(
                         TypeDeclarationNode(
+                            null,
                             "sum",
                             listOf(),
                             FunctionTypeNode(
@@ -116,6 +117,7 @@ class ModuleParserTest : StringSpec({
                     "File", listOf(), listOf(
                         TypeNode(
                             false,
+                            null,
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
@@ -137,6 +139,7 @@ class ModuleParserTest : StringSpec({
                     "File", listOf(), listOf(
                         TypeNode(
                             false,
+                            null,
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
@@ -144,6 +147,7 @@ class ModuleParserTest : StringSpec({
                         ),
                         TraitNode(
                             false,
+                            null,
                             "Num",
                             listOf("a"),
                             TraitFunctionsNode(
@@ -178,6 +182,7 @@ class ModuleParserTest : StringSpec({
                     "File", listOf(), listOf(), listOf(), listOf(
                         FunctionNode(
                             false,
+                            null,
                             "sum",
                             listOf("a", "b"),
                             OperatorNode(
@@ -209,6 +214,7 @@ class ModuleParserTest : StringSpec({
                     listOf(
                         TypeNode(
                             false,
+                            null,
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
@@ -216,6 +222,7 @@ class ModuleParserTest : StringSpec({
                         )
                     ), listOf(
                         TypeDeclarationNode(
+                            null,
                             "sum",
                             listOf(),
                             FunctionTypeNode(
@@ -231,6 +238,7 @@ class ModuleParserTest : StringSpec({
                     ), listOf(
                         FunctionNode(
                             true,
+                            null,
                             "sum",
                             listOf("a", "b"),
                             OperatorNode(

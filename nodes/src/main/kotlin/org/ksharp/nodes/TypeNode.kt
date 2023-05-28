@@ -26,6 +26,7 @@ data class TraitFunctionsNode(
 
 data class TraitNode(
     val internal: Boolean,
+    val annotations: List<AnnotationNode>?,
     val name: String,
     val params: List<String>,
     val definition: TraitFunctionsNode,
@@ -138,6 +139,7 @@ data class IntersectionTypeNode(
 
 data class TypeNode(
     val internal: Boolean,
+    val annotations: List<AnnotationNode>?,
     val name: String,
     val params: List<String>,
     val expr: NodeData,
@@ -148,6 +150,7 @@ data class TypeNode(
 }
 
 data class TypeDeclarationNode(
+    val annotations: List<AnnotationNode>?,
     val name: String,
     val params: List<String>,
     val type: TypeExpression,

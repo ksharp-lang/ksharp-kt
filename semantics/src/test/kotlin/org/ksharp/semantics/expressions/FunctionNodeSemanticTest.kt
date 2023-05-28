@@ -51,6 +51,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "sum",
                 listOf("a", "b"),
                 OperatorNode(
@@ -99,6 +100,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "sum",
                 listOf("a", "b"),
                 OperatorNode(
@@ -139,6 +141,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "ten",
                 listOf(),
                 LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
@@ -180,6 +183,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "sum",
                 listOf("a", "b"),
                 OperatorNode(
@@ -222,6 +226,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "sum",
                 listOf(),
                 OperatorNode(
@@ -284,6 +289,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 module(
                     FunctionNode(
                         true,
+                        null,
                         "n",
                         listOf(),
                         LiteralValueNode(value, literalType, Location.NoProvided),
@@ -317,6 +323,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "n",
                 listOf(),
                 OperatorNode(
@@ -366,6 +373,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "n",
                 listOf("a"),
                 IfNode(
@@ -445,6 +453,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         module(
             FunctionNode(
                 false,
+                null,
                 "n",
                 listOf("a"),
                 IfNode(
@@ -524,6 +533,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "n",
                 listOf(),
                 LiteralCollectionNode(
@@ -590,6 +600,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "n",
                 listOf(),
                 LiteralCollectionNode(
@@ -647,6 +658,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "n",
                 listOf("y"),
                 LiteralCollectionNode(
@@ -706,6 +718,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "n",
                 listOf(),
                 LiteralCollectionNode(
@@ -771,6 +784,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         module(
             FunctionNode(
                 true,
+                null,
                 "n",
                 listOf(),
                 LetExpressionNode(

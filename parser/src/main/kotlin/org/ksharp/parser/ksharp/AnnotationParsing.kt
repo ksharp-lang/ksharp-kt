@@ -1,10 +1,18 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.add
 import org.ksharp.common.cast
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.parser.*
 
 typealias KSharpAnnotationValueResult = ParserResult<Any, KSharpLexerState>
+
+private val String.isBooleanLiteral
+    get() = when (this) {
+        "True" -> true
+        "False" -> true
+        else -> false
+    }
 
 private fun KSharpAnnotationValueResult.orAnnotationValue(
     type: KSharpTokenType,
@@ -26,11 +34,7 @@ private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueR
             it.first().cast<Token>().text.let { it.substring(1, it.length - 1) }
         }
     }.orAnnotationValue({
-        it.type == KSharpTokenType.UpperCaseWord && when (it.text) {
-            "True" -> true
-            "False" -> true
-            else -> false
-        }
+        it.type == KSharpTokenType.UpperCaseWord && it.text.isBooleanLiteral
     }) { it.build { it.first().cast<Token>().text == "True" } }
         .orAnnotationValue(KSharpTokenType.OpenBracket) {
             it.thenLoop { tl -> tl.consumeAnnotationValue() }
@@ -39,7 +43,14 @@ private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueR
         }
 
 private fun KSharpLexerIterator.consumeAnnotationKeyValue(): KSharpAnnotationValueResult =
-    ifConsume(KSharpTokenType.LowerCaseWord) { l ->
+    ifConsume({
+        when (it.type) {
+            KSharpTokenType.LowerCaseWord -> true
+            KSharpTokenType.FunctionName -> true
+            KSharpTokenType.UpperCaseWord -> !it.text.isBooleanLiteral
+            else -> false
+        }
+    }, false) { l ->
         l.thenAssignOperator()
             .consume {
                 it.consumeAnnotationValue()
@@ -72,9 +83,18 @@ private fun KSharpConsumeResult.thenAnnotation(): KSharpParserResult =
                     }.cast(),
                 annotationName.location
             )
-        }
+        }.map {
+            it.remainTokens.state.value.annotations.update { list ->
+                list.add(it.value)
+            }
+            it
+        }.cast()
 
 internal fun KSharpLexerIterator.consumeAnnotation(): KSharpParserResult =
-    ifConsume(KSharpTokenType.Alt, true) {
-        it.thenAnnotation()
+    ifConsume(KSharpTokenType.Alt, true) { l ->
+        l.enableDiscardBlockAndNewLineTokens { dbL ->
+            dbL.disableCollapseAssignOperatorRule {
+                it.thenAnnotation()
+            }
+        }
     }

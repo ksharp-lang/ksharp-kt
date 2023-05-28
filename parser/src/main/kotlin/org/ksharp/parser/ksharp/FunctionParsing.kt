@@ -50,10 +50,17 @@ private fun KSharpConsumeResult.thenFunction(pub: Boolean): KSharpParserResult =
                     val arguments = it.filterIsInstance<String>()
                     FunctionNode(
                         pub,
+                        null,
                         name.text,
                         arguments,
                         expr,
                         name.location
+                    )
+                }.map {
+                    ParserValue(
+                        it.value.cast<FunctionNode>()
+                            .copy(annotations = it.remainTokens.state.value.annotations.build()),
+                        it.remainTokens
                     )
                 }
         }

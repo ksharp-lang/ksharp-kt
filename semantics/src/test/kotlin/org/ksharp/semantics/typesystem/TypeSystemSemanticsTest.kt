@@ -38,6 +38,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Integer",
                 listOf(),
                 ConcreteTypeNode("Int", Location.NoProvided),
@@ -54,6 +55,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Unidad",
                 listOf(),
                 UnitTypeNode(Location.NoProvided),
@@ -69,6 +71,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 true,
+                null,
                 "Point",
                 listOf(),
                 TupleTypeNode(
@@ -90,6 +93,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Maybe",
                 listOf("a"),
                 UnionTypeNode(
@@ -121,6 +125,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Maybe",
                 listOf("a"),
                 UnionTypeNode(
@@ -148,6 +153,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Maybe",
                 listOf(),
                 UnionTypeNode(
@@ -189,6 +195,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Maybe",
                 listOf("a"),
                 UnionTypeNode(
@@ -236,6 +243,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Maybe",
                 listOf("a"),
                 UnionTypeNode(
@@ -277,6 +285,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Maybe",
                 listOf("a", "a"),
                 UnionTypeNode(
@@ -313,6 +322,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Maybe",
                 listOf("a", "b", "c"),
                 UnionTypeNode(
@@ -349,6 +359,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Integer",
                 listOf(),
                 ConcreteTypeNode("Int", Location.NoProvided),
@@ -356,6 +367,7 @@ class TypeSystemSemanticsTest : StringSpec({
             ),
             TypeNode(
                 true,
+                null,
                 "Integer",
                 listOf(),
                 ConcreteTypeNode("Long", Location.NoProvided),
@@ -376,6 +388,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "KVStore",
                 listOf("k", "v"),
                 ParametricTypeNode(
@@ -396,6 +409,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Number",
                 listOf("n"),
                 ParameterTypeNode("n", Location.NoProvided),
@@ -418,6 +432,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Number",
                 listOf("n"),
                 ParametricTypeNode(
@@ -446,6 +461,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "Sum",
                 listOf("a"),
                 FunctionTypeNode(
@@ -467,6 +483,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "ToString",
                 listOf("a"),
                 FunctionTypeNode(
@@ -487,6 +504,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TraitNode(
                 false,
+                null,
                 "Number",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -534,6 +552,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TraitNode(
                 true,
+                null,
                 "Number",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -581,6 +600,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TraitNode(
                 false,
+                null,
                 "Number",
                 listOf("a", "b"),
                 TraitFunctionsNode(
@@ -631,6 +651,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TraitNode(
                 false,
+                null,
                 "Number",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -688,6 +709,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TraitNode(
                 false,
+                null,
                 "Number",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -745,6 +767,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TraitNode(
                 false,
+                null,
                 "EqTest",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -767,6 +790,7 @@ class TypeSystemSemanticsTest : StringSpec({
             ),
             TraitNode(
                 false,
+                null,
                 "OrdTest",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -789,6 +813,7 @@ class TypeSystemSemanticsTest : StringSpec({
             ),
             TypeNode(
                 false,
+                null,
                 "Number",
                 listOf(),
                 IntersectionTypeNode(
@@ -812,6 +837,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TraitNode(
                 false,
+                null,
                 "EqTest",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -834,6 +860,7 @@ class TypeSystemSemanticsTest : StringSpec({
             ),
             TraitNode(
                 false,
+                null,
                 "OrdTest",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -856,6 +883,7 @@ class TypeSystemSemanticsTest : StringSpec({
             ),
             TypeNode(
                 false,
+                null,
                 "Number",
                 listOf("a"),
                 IntersectionTypeNode(
@@ -884,6 +912,7 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
+                null,
                 "KVStore",
                 listOf("k", "v"),
                 ParametricTypeNode(
@@ -903,7 +932,8 @@ class TypeSystemSemanticsTest : StringSpec({
     "Label semantics on tuples" {
         module(
             TypeNode(
-                false, "Point2D", listOf(), TupleTypeNode(
+                false,
+                null, "Point2D", listOf(), TupleTypeNode(
                     listOf(
                         LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
                         LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
@@ -918,7 +948,8 @@ class TypeSystemSemanticsTest : StringSpec({
     "Label semantics on composite types" {
         module(
             TypeNode(
-                false, "Composite", listOf("a"), TupleTypeNode(
+                false,
+                null, "Composite", listOf("a"), TupleTypeNode(
                     listOf(
                         LabelTypeNode(
                             "n", ParametricTypeNode(
@@ -956,7 +987,8 @@ class TypeSystemSemanticsTest : StringSpec({
     "Composite semantics with Unit type" {
         module(
             TypeNode(
-                false, "Composite", listOf(), TupleTypeNode(
+                false,
+                null, "Composite", listOf(), TupleTypeNode(
                     listOf(
                         LabelTypeNode(
                             "n", UnitTypeNode(Location.NoProvided), Location.NoProvided
@@ -988,7 +1020,8 @@ class TypeSystemSemanticsTest : StringSpec({
     "Composite semantics with function types" {
         module(
             TypeNode(
-                false, "Composite", listOf(), TupleTypeNode(
+                false,
+                null, "Composite", listOf(), TupleTypeNode(
                     listOf(
                         LabelTypeNode(
                             "n", FunctionTypeNode(
@@ -1026,7 +1059,8 @@ class TypeSystemSemanticsTest : StringSpec({
     "Composite semantics parametric type starting with parameter" {
         module(
             TypeNode(
-                false, "Composite", listOf("a"), TupleTypeNode(
+                false,
+                null, "Composite", listOf("a"), TupleTypeNode(
                     listOf(
                         LabelTypeNode(
                             "n", ParametricTypeNode(
@@ -1063,6 +1097,7 @@ class TypeSystemSemanticsTest : StringSpec({
     "Function declaration semantics" {
         moduleWithDeclarations(
             TypeDeclarationNode(
+                null,
                 "ten",
                 listOf(),
                 FunctionTypeNode(
@@ -1080,6 +1115,7 @@ class TypeSystemSemanticsTest : StringSpec({
     "Function declaration semantics no function literal" {
         moduleWithDeclarations(
             TypeDeclarationNode(
+                null,
                 "ten",
                 listOf(),
                 ConcreteTypeNode("Int", Location.NoProvided),
@@ -1099,6 +1135,7 @@ class TypeSystemSemanticsTest : StringSpec({
     "Function declaration with params" {
         moduleWithDeclarations(
             TypeDeclarationNode(
+                null,
                 "sum",
                 listOf("a"),
                 FunctionTypeNode(

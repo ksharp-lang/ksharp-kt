@@ -18,6 +18,7 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     true,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     OperatorNode(
@@ -40,6 +41,7 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     false,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     OperatorNode(
@@ -65,6 +67,7 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     false,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     LetExpressionNode(
@@ -120,6 +123,7 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     false,
+                    null,
                     "(+)",
                     listOf("a", "b"),
                     OperatorNode(
@@ -142,6 +146,7 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     false,
+                    null,
                     "internal->wire",
                     listOf("a", "b"),
                     OperatorNode(

@@ -27,7 +27,7 @@ class AnnotationParserTest : StringSpec({
             .shouldBeRight(AnnotationNode("native", mapOf(), Location.NoProvided))
     }
     "Annotation with attributes" {
-        "@native(True for = [\"java\" \"c#\"] test = @native(\"String\") flag = False)"
+        "@native(True for=[\"java\" \"c#\"] wire->internal=@native(\"String\") Flag=False)"
             .kSharpLexer()
             .collapseKSharpTokens()
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
@@ -38,8 +38,28 @@ class AnnotationParserTest : StringSpec({
                     "native", mapOf(
                         "default" to true,
                         "for" to listOf("java", "c#"),
-                        "test" to AnnotationNode("native", mapOf("default" to "String"), Location.NoProvided),
-                        "flag" to false
+                        "wire->internal" to AnnotationNode("native", mapOf("default" to "String"), Location.NoProvided),
+                        "Flag" to false
+                    ), Location.NoProvided
+                )
+            )
+    }
+    "Annotation with attributes and block" {
+        """
+        @native(
+            for=True
+            Flag=False)
+        """.trimIndent()
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeAnnotation)
+            .map { it.value.also { println(it) } }
+            .shouldBeRight(
+                AnnotationNode(
+                    "native", mapOf(
+                        "for" to true,
+                        "Flag" to false
                     ), Location.NoProvided
                 )
             )
