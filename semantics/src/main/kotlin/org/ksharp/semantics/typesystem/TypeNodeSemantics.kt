@@ -206,7 +206,7 @@ fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
         else -> TODO("$node")
     }
 
-private fun AnnotationNode.toAnnotation(): Annotation =
+fun AnnotationNode.toAnnotation(): Annotation =
     Annotation(
         name,
         attrs.entries.associate {
@@ -215,7 +215,7 @@ private fun AnnotationNode.toAnnotation(): Annotation =
         }
     )
 
-fun List<AnnotationNode>?.checkAnnotations(): List<Annotation> =
+private fun List<AnnotationNode>?.checkAnnotations(): List<Annotation> =
     this?.map { it.toAnnotation() } ?: emptyList()
 
 private fun TypeSystemBuilder.register(node: TypeNode) =

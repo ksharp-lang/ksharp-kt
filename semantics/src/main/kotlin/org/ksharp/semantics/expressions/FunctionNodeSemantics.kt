@@ -6,6 +6,7 @@ import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
+import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
@@ -17,8 +18,9 @@ import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.semantics.scopes.FunctionTableBuilder
 import org.ksharp.semantics.scopes.SymbolTableBuilder
-import org.ksharp.semantics.typesystem.checkAnnotations
+import org.ksharp.semantics.typesystem.toAnnotation
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.newParameter
 
@@ -88,6 +90,9 @@ internal fun ModuleNode.buildFunctionTable(
         }
         table.build() to listBuilder.build()
     }
+
+private fun List<AnnotationNode>?.checkAnnotations(): List<Annotation>? =
+    this?.map { it.toAnnotation() }
 
 private fun FunctionNode.checkSemantics(
     errors: ErrorCollector,
