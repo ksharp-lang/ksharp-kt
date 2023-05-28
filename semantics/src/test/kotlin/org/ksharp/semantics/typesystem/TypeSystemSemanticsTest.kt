@@ -34,6 +34,23 @@ private fun moduleWithDeclarations(vararg declarations: TypeDeclarationNode) =
 private val Type.representationWithVisibility get() = "${visibility.name}-${representation}"
 
 class TypeSystemSemanticsTest : StringSpec({
+    "Type annotation semantics" {
+        module(
+            TypeNode(
+                false,
+                listOf(AnnotationNode("native", mapOf("flag" to true), Location.NoProvided)),
+                "Integer",
+                listOf(),
+                ConcreteTypeNode("Int", Location.NoProvided),
+                Location.NoProvided
+            )
+        ).checkTypesSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Int"].map { it.representation }.shouldBeRight("(Num numeric<Int>)")
+            typeSystem["Integer"].map { it.representationWithVisibility }
+                .shouldBeRight("Public-@native(flag=true) Int")
+        }
+    }
     "Alias semantics" {
         module(
             TypeNode(
@@ -498,6 +515,41 @@ class TypeSystemSemanticsTest : StringSpec({
         ).checkTypesSemantics().apply {
             errors.shouldBeEmpty()
             typeSystem["ToString"].map { it.representation }.shouldBeRight("(a -> String)")
+        }
+    }
+    "Trait with Annotations Semantics" {
+        module(
+            TraitNode(
+                false,
+                listOf(AnnotationNode("native", mapOf(), Location.NoProvided)),
+                "Number",
+                listOf("a"),
+                TraitFunctionsNode(
+                    listOf(
+                        TraitFunctionNode(
+                            "sum",
+                            FunctionTypeNode(
+                                listOf(
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided)
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        )
+                    )
+                ),
+                Location.NoProvided
+            )
+        ).checkTypesSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
+                """
+                |Public-@native trait Number a =
+                |    sum :: a -> a -> a
+            """.trimMargin()
+            )
         }
     }
     "public Trait Semantics" {
@@ -1092,6 +1144,24 @@ class TypeSystemSemanticsTest : StringSpec({
         ).checkTypesSemantics().apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.ParametricTypeShouldStartWithName.new(Location.NoProvided)))
             typeSystem["Composite"].shouldBeLeft(TypeSystemErrorCode.TypeNotFound.new("type" to "Composite"))
+        }
+    }
+    "Function declaration with annotation semantics" {
+        moduleWithDeclarations(
+            TypeDeclarationNode(
+                listOf(AnnotationNode("Test", mapOf(), Location.NoProvided)),
+                "ten",
+                listOf(),
+                FunctionTypeNode(
+                    listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkTypesSemantics().apply {
+            errors.shouldBeEmpty()
+            typeSystem["Decl__ten"].map { it.representation }
+                .shouldBeRight("@Test Unit -> Int")
         }
     }
     "Function declaration semantics" {
