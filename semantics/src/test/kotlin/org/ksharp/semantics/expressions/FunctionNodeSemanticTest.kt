@@ -21,6 +21,7 @@ import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.PartialTypeSystem
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.*
 
@@ -75,6 +76,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     first.shouldBe(
                         Function(
                             FunctionVisibility.Public,
+                            null,
                             "sum",
                             listOf(
                                 TypeSemanticInfo(Either.Right(newParameterForTesting(0))),
@@ -124,6 +126,57 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     first.shouldBe(
                         Function(
                             FunctionVisibility.Public,
+                            null,
+                            "sum",
+                            listOf(
+                                TypeSemanticInfo(typeSystem.alias("Int")),
+                                TypeSemanticInfo(typeSystem.alias("Int")),
+                                TypeSemanticInfo(typeSystem.alias("Int")),
+                            )
+                        )
+                    )
+                    second.shouldBe(Location.NoProvided)
+                }
+        }
+    }
+    "table: function with declaration 2" {
+        val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
+            alias(TypeVisibility.Internal, "Decl__sum", listOf(Annotation("native", mapOf()))) {
+                functionType {
+                    type("Int")
+                    type("Int")
+                    type("Int")
+                }
+            }
+        }.value
+        module(
+            FunctionNode(
+                true,
+                null,
+                "sum",
+                listOf("a", "b"),
+                OperatorNode(
+                    "+",
+                    FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                    FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).buildFunctionTable(
+            ModuleTypeSystemInfo(
+                listOf(),
+                typeSystem
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            functionTable["sum"]
+                .shouldNotBeNull()
+                .apply {
+                    first.shouldBe(
+                        Function(
+                            FunctionVisibility.Public,
+                            listOf(Annotation("native", mapOf())),
                             "sum",
                             listOf(
                                 TypeSemanticInfo(typeSystem.alias("Int")),
@@ -160,6 +213,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     first.shouldBe(
                         Function(
                             FunctionVisibility.Public,
+                            null,
                             "ten",
                             listOf(
                                 TypeSemanticInfo(typeSystem["Unit"]),
@@ -362,6 +416,116 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 )
                             ),
                             typeParameterForTesting(1),
+                            Location.NoProvided
+                        ),
+                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: operator with annotation") {
+        module(
+            FunctionNode(
+                true,
+                listOf(AnnotationNode("native", mapOf(), Location.NoProvided)),
+                "n",
+                listOf(),
+                OperatorNode(
+                    "**",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        listOf(Annotation("native", mapOf())),
+                        "n",
+                        ApplicationNode(
+                            ApplicationName(name = "(**)"),
+                            listOf(
+                                ConstantNode(
+                                    10.toLong(),
+                                    byteTypePromise,
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    2.toLong(),
+                                    byteTypePromise,
+                                    Location.NoProvided
+                                )
+                            ),
+                            typeParameterForTesting(1),
+                            Location.NoProvided
+                        ),
+                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: operator with function declaration") {
+        val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
+            alias(TypeVisibility.Public, "Decl__n", listOf(Annotation("native", mapOf()))) {
+                functionType {
+                    type("Unit")
+                    type("Long")
+                }
+            }
+        }
+        module(
+            FunctionNode(
+                true,
+                null,
+                "n",
+                listOf(),
+                OperatorNode(
+                    "**",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                nTs.value
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        listOf(Annotation("native", mapOf())),
+                        "n",
+                        ApplicationNode(
+                            ApplicationName(name = "(**)"),
+                            listOf(
+                                ConstantNode(
+                                    10.toLong(),
+                                    byteTypePromise,
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    2.toLong(),
+                                    byteTypePromise,
+                                    Location.NoProvided
+                                )
+                            ),
+                            typeParameterForTesting(0),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
