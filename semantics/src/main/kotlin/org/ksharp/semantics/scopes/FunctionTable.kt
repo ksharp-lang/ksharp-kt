@@ -3,9 +3,11 @@ package org.ksharp.semantics.scopes
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.TypePromise
+import org.ksharp.typesystem.annotations.Annotation
 
 data class Function(
     val visibility: FunctionVisibility,
+    val annotations: List<Annotation>?,
     val name: String,
     val type: List<TypePromise>,
 )

@@ -18,6 +18,7 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     true,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     OperatorNode(
@@ -40,6 +41,7 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     false,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     OperatorNode(
@@ -65,6 +67,7 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     false,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     LetExpressionNode(
@@ -104,6 +107,52 @@ class FunctionParserTest : StringSpec({
                             FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
                             Location.NoProvided
                         ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "operator function" {
+        "(+) a b = a + b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    false,
+                    null,
+                    "(+)",
+                    listOf("a", "b"),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "complex function names" {
+        "internal->wire a b = a + b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    false,
+                    null,
+                    "internal->wire",
+                    listOf("a", "b"),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                         Location.NoProvided
                     ),
                     Location.NoProvided

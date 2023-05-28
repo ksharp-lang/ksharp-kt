@@ -72,6 +72,7 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over TraitNode" {
         TraitNode(
             true,
+            emptyList(),
             "Num",
             listOf("a"),
             TraitFunctionsNode(listOf()),
@@ -79,6 +80,7 @@ class TypeNodeTest : StringSpec({
         ).node.apply {
             cast<TraitNode>().apply {
                 internal.shouldBeTrue()
+                annotations.shouldBeEmpty()
                 name.shouldBe("Num")
                 params.shouldBe(listOf("a"))
                 definition.shouldBe(TraitFunctionsNode(listOf()))
@@ -285,6 +287,7 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over TypeNode" {
         TypeNode(
             false,
+            null,
             "Num",
             listOf("a"),
             ConcreteTypeNode("Int", testLocation),
@@ -292,6 +295,7 @@ class TypeNodeTest : StringSpec({
         ).node.apply {
             cast<TypeNode>().apply {
                 internal.shouldBeFalse()
+                annotations.shouldBeNull()
                 name.shouldBe("Num")
                 params.shouldBe(listOf("a"))
                 expr.shouldBe(ConcreteTypeNode("Int", testLocation))
@@ -318,6 +322,7 @@ class TypeNodeTest : StringSpec({
     }
     "Test Node interface on TypeDeclarationNode" {
         TypeDeclarationNode(
+            null,
             "sum",
             listOf(),
             ConcreteTypeNode("Int", testLocation),

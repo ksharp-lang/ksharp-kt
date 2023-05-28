@@ -1,14 +1,19 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.ResettableListBuilder
+import org.ksharp.common.resettableListBuilder
+import org.ksharp.nodes.AnnotationNode
 import org.ksharp.parser.*
 import java.io.Reader
 import java.util.concurrent.atomic.AtomicInteger
 
 data class KSharpLexerState(
+    val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
     val discardBlockTokens: Boolean = false,
     val discardNewLineToken: Boolean = false,
     val collapseDotOperatorRule: Boolean = true,
+    val collapseAssignOperatorRule: Boolean = true,
     val mapThenElseKeywords: Boolean = false,
     val mapThenKeywords: Boolean = false,
     val enableExpressionStartingNewLine: Boolean = true
@@ -167,6 +172,14 @@ fun <R> KSharpLexerIterator.disableCollapseDotOperatorRule(code: (KSharpLexerIte
         state.update(state.value.copy(collapseDotOperatorRule = false))
         code(this).also {
             state.update(state.value.copy(collapseDotOperatorRule = initValue))
+        }
+    }
+
+fun <R> KSharpLexerIterator.disableCollapseAssignOperatorRule(code: (KSharpLexerIterator) -> R): R =
+    state.value.collapseAssignOperatorRule.let { initValue ->
+        state.update(state.value.copy(collapseAssignOperatorRule = false))
+        code(this).also {
+            state.update(state.value.copy(collapseAssignOperatorRule = initValue))
         }
     }
 
@@ -413,7 +426,11 @@ private fun KSharpLexerIterator.canCollapseTokens(current: Token, newToken: Toke
     if (!allowedToken) return false
     return when (newToken.type) {
         KSharpTokenType.Operator -> {
-            collapseDotOperatorRule || newToken.text != "."
+            when {
+                !state.value.collapseAssignOperatorRule && newToken.text == "=" -> false
+                collapseDotOperatorRule || newToken.text != "." -> true
+                else -> false
+            }
         }
 
         KSharpTokenType.LowerCaseWord -> true

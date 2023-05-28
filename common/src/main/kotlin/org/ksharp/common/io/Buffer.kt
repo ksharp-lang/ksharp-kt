@@ -48,10 +48,8 @@ class OffsetBufferView(override val offset: Int, private val bufferView: BufferV
 /**
  * Calling methods after the buffer is written produce an exception
  */
-private
-
-class BufferWriterImpl : BufferWriter {
-    private val buffer: ByteBuf = allocator.directBuffer()
+private class BufferWriterImpl : BufferWriter {
+    private val buffer: ByteBuf = allocator.heapBuffer()
 
     override val size: Int get() = buffer.readableBytes()
     override fun add(value: String): Int = buffer.writeCharSequence(value, Charsets.UTF_8)

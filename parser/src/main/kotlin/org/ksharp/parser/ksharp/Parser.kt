@@ -60,6 +60,14 @@ fun <R> KSharpConsumeResult.disableExpressionStartingNewLine(code: (KSharpConsum
         }
     }
 
+fun <R> KSharpConsumeResult.disableCollapseAssignOperatorRule(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
+    flatMap { collector ->
+        val result = this@disableCollapseAssignOperatorRule
+        collector.tokens.disableCollapseAssignOperatorRule {
+            code(result)
+        }
+    }
+
 fun KSharpLexerIterator.consumeBlock(action: (KSharpLexerIterator) -> KSharpParserResult): KSharpParserResult =
     consume(KSharpTokenType.BeginBlock, true).flatMap { collector ->
         action(collector.tokens).endBlock()

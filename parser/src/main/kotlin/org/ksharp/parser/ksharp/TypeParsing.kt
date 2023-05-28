@@ -221,13 +221,19 @@ private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserRes
                 .thenLoop { it.consumeTraitFunction() }
                 .build { TraitFunctionsNode(it.cast()) }
         }
-        .build {
+        .build<NodeData, KSharpLexerState> {
             val name = it.first().cast<LexerValue>()
             val params = if (it.size == 2) {
                 listOf<String>()
             } else it.subList(1, it.size - 1).cast()
-            TraitNode(internal, name.text, params, it.last().cast(), name.location)
+            TraitNode(internal, null, name.text, params, it.last().cast(), name.location)
                 .cast()
+        }.map {
+            ParserValue(
+                it.value.cast<TraitNode>()
+                    .copy(annotations = it.remainTokens.state.value.annotations.build()),
+                it.remainTokens
+            )
         }
 
 private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResult =
@@ -248,8 +254,14 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResu
                         val params = if (it.size == 2) {
                             listOf<String>()
                         } else it.subList(1, it.size - 1).cast()
-                        TypeNode(internal, name.text, params, it.last().cast(), name.location)
+                        TypeNode(internal, null, name.text, params, it.last().cast(), name.location)
                             .cast<NodeData>()
+                    }.map {
+                        ParserValue(
+                            it.value.cast<TypeNode>()
+                                .copy(annotations = it.remainTokens.state.value.annotations.build()),
+                            it.remainTokens
+                        )
                     }
             }.resume()
                 .thenIf(KSharpTokenType.Operator7, "=>", true) { l ->
@@ -275,7 +287,7 @@ fun KSharpLexerIterator.consumeTypeDeclaration(): KSharpParserResult =
 
 internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserResult =
     lookAHead {
-        it.consume(KSharpTokenType.LowerCaseWord)
+        it.consumeFunctionName()
             .thenLoop { p ->
                 p.consumeLowerCaseWord()
                     .build { param -> param.last().cast<LexerValue>().text }
@@ -290,10 +302,17 @@ internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserR
                     .takeWhile { v -> v !is NodeData }
                     .map { v -> v as String }
                 TypeDeclarationNode(
+                    null,
                     name.text,
                     params.toList(),
                     i.last().cast(),
                     name.location
                 ).cast<NodeData>()
             }.asLookAHeadResult()
+    }.map {
+        ParserValue(
+            it.value.cast<TypeDeclarationNode>()
+                .copy(annotations = it.remainTokens.state.value.annotations.build()),
+            it.remainTokens
+        )
     }

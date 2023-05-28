@@ -7,6 +7,7 @@ import org.ksharp.common.io.newBufferWriter
 import org.ksharp.common.listBuilder
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.types.newParameter
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -21,7 +22,7 @@ private fun FunctionInfo.shouldBeSerializable() {
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
     input.bufferView {
-        it.readFunctionInfo(stringPoolView)
+        it.readFunctionInfo(stringPoolView).also { println(it) }
     }.shouldBe(this)
 }
 
@@ -44,6 +45,7 @@ class FunctionSerializerTest : StringSpec({
         FunctionInfo(
             FunctionVisibility.Public,
             null,
+            null,
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
@@ -52,6 +54,25 @@ class FunctionSerializerTest : StringSpec({
         FunctionInfo(
             FunctionVisibility.Internal,
             "math",
+            null,
+            "sum",
+            listOf(newParameter(), newParameter())
+        ).shouldBeSerializable()
+    }
+    "Serialize FunctionInfo with annotations" {
+        FunctionInfo(
+            FunctionVisibility.Internal,
+            null,
+            listOf(Annotation("native", mapOf("flag" to true))),
+            "sum",
+            listOf(newParameter(), newParameter())
+        ).shouldBeSerializable()
+    }
+    "Serialize FunctionInfo complete" {
+        FunctionInfo(
+            FunctionVisibility.Internal,
+            "temp",
+            listOf(Annotation("native", mapOf("flag" to true))),
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
@@ -62,6 +83,7 @@ class FunctionSerializerTest : StringSpec({
                 FunctionInfo(
                     FunctionVisibility.Public,
                     null,
+                    null,
                     "sum",
                     listOf(newParameter(), newParameter())
                 )
@@ -69,6 +91,7 @@ class FunctionSerializerTest : StringSpec({
             "sub" to listOf(
                 FunctionInfo(
                     FunctionVisibility.Public,
+                    null,
                     null,
                     "sub",
                     listOf(newParameter(), newParameter())

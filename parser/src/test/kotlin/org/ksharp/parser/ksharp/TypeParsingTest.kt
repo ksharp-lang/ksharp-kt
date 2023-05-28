@@ -121,6 +121,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ListOfInt",
                     listOf(),
                     ParametricTypeNode(
@@ -143,6 +144,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ListOfInt",
                     listOf(),
                     FunctionTypeNode(
@@ -173,6 +175,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ListOfInt",
                     listOf(),
                     FunctionTypeNode(
@@ -203,6 +206,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Integer",
                     listOf(),
                     ConcreteTypeNode("Int", Location.NoProvided),
@@ -220,6 +224,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     true,
+                    null,
                     "Integer",
                     listOf(),
                     ConcreteTypeNode("Int", Location.NoProvided),
@@ -237,6 +242,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ListOfInt",
                     listOf(),
                     ParametricTypeNode(
@@ -259,6 +265,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "KVStore",
                     listOf("k", "v"),
                     ParametricTypeNode(
@@ -282,6 +289,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Num",
                     listOf("n"),
                     ParameterTypeNode("n", Location.NoProvided),
@@ -299,6 +307,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Num",
                     listOf("n"),
                     ParametricTypeNode(
@@ -322,6 +331,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Sum",
                     listOf("a"),
                     FunctionTypeNode(
@@ -346,6 +356,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ToString",
                     listOf("a"),
                     FunctionTypeNode(
@@ -369,6 +380,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Point",
                     listOf(),
                     TupleTypeNode(
@@ -392,6 +404,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     true,
+                    null,
                     "ToString",
                     listOf("a"),
                     FunctionTypeNode(
@@ -415,6 +428,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Bool",
                     listOf(),
                     UnionTypeNode(
@@ -441,6 +455,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Bool",
                     listOf(),
                     UnionTypeNode(
@@ -470,6 +485,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf("a"),
                     UnionTypeNode(
@@ -502,6 +518,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf("a"),
                     UnionTypeNode(
@@ -528,6 +545,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf(),
                     UnionTypeNode(
@@ -560,6 +578,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf(),
                     UnionTypeNode(
@@ -600,6 +619,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf(),
                     UnionTypeNode(
@@ -640,6 +660,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf("a", "a"),
                     UnionTypeNode(
@@ -672,6 +693,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Bool",
                     listOf(),
                     InvalidSetTypeNode(
@@ -691,6 +713,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Num",
                     listOf(),
                     IntersectionTypeNode(
@@ -717,6 +740,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Num",
                     listOf(),
                     IntersectionTypeNode(
@@ -747,6 +771,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TraitNode(
                     false,
+                    null,
                     "Num",
                     listOf("a"),
                     TraitFunctionsNode(
@@ -795,6 +820,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TraitNode(
                     false,
+                    null,
                     "Num",
                     listOf("a", "b"),
                     TraitFunctionsNode(
@@ -843,6 +869,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TraitNode(
                     false,
+                    null,
                     "Num",
                     listOf("a"),
                     TraitFunctionsNode(
@@ -890,6 +917,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TraitNode(
                     true,
+                    null,
                     "Num",
                     listOf("a"),
                     TraitFunctionsNode(
@@ -922,6 +950,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "KVStore",
                     listOf("k", "v"),
                     ParametricTypeNode(
@@ -944,7 +973,8 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Point2D", listOf(), TupleTypeNode(
+                    false, null,
+                    "Point2D", listOf(), TupleTypeNode(
                         listOf(
                             LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
                             LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
@@ -962,7 +992,8 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Composite", listOf("a"), TupleTypeNode(
+                    false, null,
+                    "Composite", listOf("a"), TupleTypeNode(
                         listOf(
                             LabelTypeNode(
                                 "n", ParametricTypeNode(
@@ -1002,7 +1033,8 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Composite", listOf("a"), TupleTypeNode(
+                    false, null,
+                    "Composite", listOf("a"), TupleTypeNode(
                         listOf(
                             LabelTypeNode(
                                 "n", UnitTypeNode(Location.NoProvided), Location.NoProvided
@@ -1037,7 +1069,8 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Composite", listOf("a"), TupleTypeNode(
+                    false, null,
+                    "Composite", listOf("a"), TupleTypeNode(
                         listOf(
                             LabelTypeNode(
                                 "n", FunctionTypeNode(
@@ -1077,7 +1110,8 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Age", listOf(), ConstrainedTypeNode(
+                    false, null,
+                    "Age", listOf(), ConstrainedTypeNode(
                         ConcreteTypeNode("Int", Location.NoProvided),
                         OperatorNode(
                             "&&",
@@ -1109,7 +1143,8 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Unit", listOf(), UnitTypeNode(Location.NoProvided), Location.NoProvided
+                    false, null,
+                    "Unit", listOf(), UnitTypeNode(Location.NoProvided), Location.NoProvided
                 )
             )
     }
@@ -1122,6 +1157,7 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
+                    null,
                     "ten",
                     listOf(),
                     FunctionTypeNode(
@@ -1141,6 +1177,7 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
+                    null,
                     "sum",
                     listOf(),
                     FunctionTypeNode(
@@ -1164,7 +1201,80 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
+                    null,
                     "sum",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Type declaration with operators" {
+        "(+) a :: (Num a) -> (Num a) -> Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "(+)",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Type declaration with complex function names" {
+        "wire->internal a :: (Num a) -> (Num a) -> Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "wire->internal",
                     listOf("a"),
                     FunctionTypeNode(
                         listOf(

@@ -2,6 +2,7 @@ package org.ksharp.module
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.types.Type
 
 
@@ -14,11 +15,11 @@ data class ModuleInfo(
 class ModuleInfoBuilder {
     private var functions = mapBuilder<String, ListBuilder<FunctionInfo>>()
 
-    fun add(name: String, vararg types: Type) {
-        add(null, name, *types)
+    fun add(annotations: List<Annotation>, name: String, vararg types: Type) {
+        add(null, annotations, name, *types)
     }
 
-    fun add(dependency: String?, name: String, vararg types: Type) {
+    fun add(dependency: String?, annotations: List<Annotation>, name: String, vararg types: Type) {
         val functionsList = functions.get(name) ?: run {
             val functionList = listBuilder<FunctionInfo>()
             functions.put(name, functionList)
@@ -28,6 +29,7 @@ class ModuleInfoBuilder {
             FunctionInfo(
                 FunctionVisibility.Public,
                 dependency,
+                annotations,
                 name,
                 types.toList()
             )
@@ -43,4 +45,3 @@ class ModuleInfoBuilder {
 
 fun moduleFunctions(body: ModuleInfoBuilder.() -> Unit): Map<String, List<FunctionInfo>> =
     ModuleInfoBuilder().apply(body).build()
-

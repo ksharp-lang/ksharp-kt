@@ -7,16 +7,21 @@ import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
+import org.ksharp.typesystem.annotations.readAnnotations
+import org.ksharp.typesystem.annotations.writeTo
 import org.ksharp.typesystem.serializer.readListOfTypes
 import org.ksharp.typesystem.serializer.writeTo
 
 fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
-        add(0)
-        add(visibility.ordinal)
+        add(0) // 0
+        add(visibility.ordinal) //4
         if (dependency == null) {
             add(-1)
-        } else add(table.add(dependency))
+        } else add(table.add(dependency)) //8
+        if (annotations == null) {
+            add(-1)
+        } else annotations.writeTo(this, table) //12
         add(table.add(name))
         types.writeTo(this, table)
         set(0, size)
@@ -30,9 +35,13 @@ fun BufferView.readFunctionInfo(table: BinaryTableView): FunctionInfo {
         if (it == -1) null
         else table[it]
     }
-    val name = table[readInt(12)]
-    val types = bufferFrom(16).readListOfTypes(table)
-    return FunctionInfo(visibility, dependency, name, types)
+    val (annotationsOffset, annotations) = readInt(12).let {
+        if (it == -1) 4 to null
+        else it to bufferFrom(12).readAnnotations(table)
+    }
+    val name = table[readInt(12 + annotationsOffset)]
+    val types = bufferFrom(16 + annotationsOffset).readListOfTypes(table)
+    return FunctionInfo(visibility, dependency, annotations, name, types)
 }
 
 fun List<FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) {

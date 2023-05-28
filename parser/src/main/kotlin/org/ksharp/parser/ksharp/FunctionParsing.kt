@@ -13,13 +13,31 @@ private fun Token.isTypeKeyword(): Boolean =
         else -> true
     }
 
-private fun KSharpConsumeResult.thenFunction(pub: Boolean): KSharpParserResult =
-    then({ it.isTypeKeyword() }, {
+fun KSharpConsumeResult.thenFunctionName(): KSharpConsumeResult =
+    then({
+        when (it.type) {
+            KSharpTokenType.OperatorFunctionName -> true
+            KSharpTokenType.FunctionName -> true
+            else -> it.isTypeKeyword()
+        }
+    }, {
         BaseParserErrorCode.ExpectingToken.new(
-            "token" to "LowerCaseWord different internal, type",
+            "token" to "LowerCaseWord, Operator different internal, type",
             "received-token" to "${it.type}:${it.text}"
         )
     }, false)
+
+fun KSharpLexerIterator.consumeFunctionName(): KSharpConsumeResult =
+    consume({
+        when (it.type) {
+            KSharpTokenType.OperatorFunctionName -> true
+            KSharpTokenType.FunctionName -> true
+            else -> it.isTypeKeyword()
+        }
+    }, false)
+
+private fun KSharpConsumeResult.thenFunction(pub: Boolean): KSharpParserResult =
+    thenFunctionName()
         .enableDiscardBlockAndNewLineTokens { lx ->
             lx.thenLoop {
                 it.consume(KSharpTokenType.LowerCaseWord)
@@ -32,10 +50,17 @@ private fun KSharpConsumeResult.thenFunction(pub: Boolean): KSharpParserResult =
                     val arguments = it.filterIsInstance<String>()
                     FunctionNode(
                         pub,
+                        null,
                         name.text,
                         arguments,
                         expr,
                         name.location
+                    )
+                }.map {
+                    ParserValue(
+                        it.value.cast<FunctionNode>()
+                            .copy(annotations = it.remainTokens.state.value.annotations.build()),
+                        it.remainTokens
                     )
                 }
         }

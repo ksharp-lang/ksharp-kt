@@ -6,6 +6,7 @@ import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
 import org.ksharp.typesystem.*
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.types.*
 
 enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode {
@@ -205,8 +206,24 @@ fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
         else -> TODO("$node")
     }
 
+fun AnnotationNode.toAnnotation(): Annotation =
+    Annotation(
+        name,
+        attrs.entries.associate {
+            val value = it.value
+            it.key to if (value is AnnotationNode) value.toAnnotation() else value
+        }
+    )
+
+private fun List<AnnotationNode>?.checkAnnotations(): List<Annotation> =
+    this?.map { it.toAnnotation() } ?: emptyList()
+
 private fun TypeSystemBuilder.register(node: TypeNode) =
-    alias(if (node.internal) TypeVisibility.Internal else TypeVisibility.Public, node.name, listOf()) {
+    alias(
+        if (node.internal) TypeVisibility.Internal else TypeVisibility.Public,
+        node.name,
+        node.annotations.checkAnnotations()
+    ) {
         this.register(node.name, node.expr)
     }
 
@@ -229,7 +246,7 @@ private fun TraitNode.checkTypesSemantics(
             if (internal) TypeVisibility.Internal else TypeVisibility.Public,
             name,
             params.first(),
-            listOf()
+            this.annotations.checkAnnotations()
         ) {
             definition.functions.forEach { f ->
                 errors.collect(f.checkParams(f.name, f.location, params.asSequence()))
@@ -262,7 +279,7 @@ private fun TypeDeclarationNode.checkTypesSemantics(
                 .FunctionDeclarationShouldBeAFunctionType
                 .new(location, "name" to name)
         )
-    else builder.alias(TypeVisibility.Internal, "Decl__$name", listOf()) {
+    else builder.alias(TypeVisibility.Internal, "Decl__$name", annotations.checkAnnotations()) {
         this.register(name, type.cast())
     }
 }
