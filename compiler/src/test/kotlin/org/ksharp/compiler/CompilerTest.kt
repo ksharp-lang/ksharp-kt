@@ -15,12 +15,14 @@ import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.annotations.Annotation
 import java.io.File
 import kotlin.io.path.Path
 
 class CompilerTestModuleInfo : StringSpec({
     "Create a moduleinfo from a String" {
         """
+        |@native 
         |ten = 10
         """.trimMargin()
             .moduleInfo("file1.ff")
@@ -32,13 +34,13 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
-                                annotations = null,
+                                annotations = listOf(Annotation("native", mapOf())),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
                                     info = TypeSemanticInfo(type = it.typeSystem.get("Byte")),
                                     location = Location(
-                                        context = "file1.ff", position = Line(value = 1) to Offset(value = 0)
+                                        context = "file1.ff", position = Line(value = 2) to Offset(value = 0)
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
@@ -47,7 +49,7 @@ class CompilerTestModuleInfo : StringSpec({
                                 ),
                                 location = Location(
                                     context = "file1.ff",
-                                    position = Line(value = 1) to Offset(value = 0)
+                                    position = Line(value = 2) to Offset(value = 0)
                                 )
                             )
                         )
