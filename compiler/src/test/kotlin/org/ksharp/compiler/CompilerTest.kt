@@ -32,6 +32,7 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
+                                annotations = null,
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
@@ -67,6 +68,7 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
+                                annotations = null,
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
@@ -100,6 +102,7 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
+                                annotations = null,
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
@@ -133,6 +136,7 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
+                                annotations = null,
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),

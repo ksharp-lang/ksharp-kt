@@ -305,6 +305,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
+                                null,
                                 "n", ConstantNode(
                                     expectedValue,
                                     expectedType.cast(),
@@ -344,6 +345,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        null,
                         "n",
                         ApplicationNode(
                             ApplicationName(name = "(**)"),
@@ -399,6 +401,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        null,
                         "n",
                         ApplicationNode(
                             ApplicationName("::prelude", "if"),
@@ -479,6 +482,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        null,
                         "n",
                         ApplicationNode(
                             ApplicationName("::prelude", "if"),
@@ -559,6 +563,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        null,
                         "n",
                         ApplicationNode(
                             ApplicationName("::prelude", "listOf"),
@@ -624,6 +629,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        null,
                         "n",
                         ApplicationNode(
                             ApplicationName("::prelude", "setOf"),
@@ -679,6 +685,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        null,
                         "n",
                         ApplicationNode(
                             ApplicationName("::prelude", "tupleOf"),
@@ -747,6 +754,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        null,
                         "n",
                         ApplicationNode(
                             ApplicationName("::prelude", "mapOf"),
@@ -832,6 +840,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        null,
                         "n",
                         LetNode(
                             listOf(
@@ -914,6 +923,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             errors.build(),
             listOf(
                 AbstractionNode(
+                    null,
                     "ten", ConstantNode(
                         10.toLong(),
                         longTypePromise,
@@ -944,6 +954,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             errors.build(),
             listOf(
                 AbstractionNode(
+                    null,
                     "n",
                     ApplicationNode(
                         ApplicationName("::prelude", "if"),
@@ -998,6 +1009,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             errors.build(),
             listOf(
                 AbstractionNode(
+                    null,
                     "n",
                     ApplicationNode(
                         ApplicationName("::prelude", "no-function"),

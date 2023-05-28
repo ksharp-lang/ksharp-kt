@@ -26,8 +26,8 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
         listOf(),
         typeSystem = typeSystem,
         functions = moduleFunctions {
-            add("(test+)", a, a, a)
-            add("(test*)", intType, intType, intType)
+            add(emptyList(), "(test+)", a, a, a)
+            add(emptyList(), "(test*)", intType, intType, intType)
         }
     )
     return InferenceInfo(preludeModule, testModule)
@@ -41,6 +41,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
+            emptyList(),
             "ten", ConstantNode(
                 10.toLong(),
                 longTypePromise,
@@ -61,6 +62,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
+            emptyList(),
             "n",
             ApplicationNode(
                 ApplicationName(name = "(test+)"),
@@ -95,6 +97,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         AbstractionNode(
+            emptyList(),
             "n",
             ApplicationNode(
                 ApplicationName(name = "(test+)"),
@@ -129,6 +132,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val variable = TypeSemanticInfo(Either.Right(newParameter()))
         val abstraction = AbstractionNode(
+            emptyList(),
             "n",
             ApplicationNode(
                 ApplicationName(name = "(test+)"),
@@ -170,6 +174,7 @@ class InferenceTest : StringSpec({
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         val variable = TypeSemanticInfo(Either.Right(newParameter()))
         val abstraction = AbstractionNode(
+            emptyList(),
             "n",
             ApplicationNode(
                 ApplicationName(name = "(test*)"),
@@ -210,6 +215,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         val abstraction = AbstractionNode(
+            emptyList(),
             "n",
             ApplicationNode(
                 ApplicationName("::prelude", "if"),
@@ -254,6 +260,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val parameter = TypeSemanticInfo(Either.Right(newParameter()))
         val abstraction = AbstractionNode(
+            emptyList(),
             "n",
             LetNode(
                 listOf(
@@ -300,6 +307,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         AbstractionNode(
+            emptyList(),
             "n",
             ApplicationNode(
                 ApplicationName(name = "not-found"),
@@ -329,6 +337,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val parameter = TypeSemanticInfo(Either.Right(newParameter()))
         val abstraction = AbstractionNode(
+            emptyList(),
             "n",
             LetNode(
                 listOf(

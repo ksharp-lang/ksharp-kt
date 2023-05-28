@@ -17,6 +17,7 @@ import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.semantics.scopes.FunctionTableBuilder
 import org.ksharp.semantics.scopes.SymbolTableBuilder
+import org.ksharp.semantics.typesystem.checkAnnotations
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.newParameter
@@ -111,6 +112,7 @@ private fun FunctionNode.checkSemantics(
         val semanticNode = expression.cast<ExpressionParserNode>()
             .toSemanticNode(errors, info, typeSystem)
         AbstractionNode(
+            annotations.checkAnnotations(),
             name,
             semanticNode,
             AbstractionSemanticInfo(
@@ -157,7 +159,7 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
                             else -> newParameter()
                         }
                     }
-                FunctionInfo(semanticInfo.visibility, null, it.name, arguments)
+                FunctionInfo(semanticInfo.visibility, null, it.annotations, it.name, arguments)
             }.groupBy { it.name }
         ),
         emptyMap()

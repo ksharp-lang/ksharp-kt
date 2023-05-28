@@ -13,7 +13,7 @@ private fun createPreludeModule(): ModuleInfo = preludeTypeSystem
             listOf(),
             typeSystem = ts,
             functions = moduleFunctions {
-                add("if", boolType, parameter, parameter, parameter)
+                add(emptyList(), "if", boolType, parameter, parameter, parameter)
             }
         )
     }
