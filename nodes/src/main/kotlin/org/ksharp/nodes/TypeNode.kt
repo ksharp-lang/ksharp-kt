@@ -3,7 +3,9 @@ package org.ksharp.nodes
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 
-interface TypeExpression
+interface TypeExpression {
+    val representation: String
+}
 
 data class TraitFunctionNode(
     val name: String,
@@ -44,6 +46,9 @@ data class LabelTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = sequenceOf(expr.cast())
+
+    override val representation: String
+        get() = "$name: ${expr.representation}"
 }
 
 data class UnitTypeNode(
@@ -51,6 +56,9 @@ data class UnitTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = emptySequence()
+
+    override val representation: String
+        get() = "()"
 }
 
 data class ConcreteTypeNode(
@@ -59,6 +67,9 @@ data class ConcreteTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = emptySequence()
+
+    override val representation: String
+        get() = name
 }
 
 data class ParameterTypeNode(
@@ -67,6 +78,9 @@ data class ParameterTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = emptySequence()
+
+    override val representation: String
+        get() = name
 }
 
 data class ParametricTypeNode(
@@ -75,6 +89,9 @@ data class ParametricTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = variables.asSequence().cast()
+
+    override val representation: String
+        get() = "(${variables.joinToString(" ") { it.representation }})"
 }
 
 data class FunctionTypeNode(
@@ -83,6 +100,9 @@ data class FunctionTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = params.asSequence().cast()
+
+    override val representation: String
+        get() = "(${params.joinToString(" -> ") { it.representation }})"
 }
 
 data class TupleTypeNode(
@@ -91,6 +111,9 @@ data class TupleTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = types.asSequence().cast()
+
+    override val representation: String
+        get() = "(${types.joinToString(", ") { it.representation }})"
 }
 
 data class ConstrainedTypeNode(
@@ -100,6 +123,9 @@ data class ConstrainedTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = sequenceOf(type, expression).cast()
+
+    override val representation: String
+        get() = type.representation
 }
 
 data class InvalidSetTypeNode(
@@ -126,6 +152,8 @@ data class UnionTypeNode(
     override val children: Sequence<NodeData>
         get() = types.asSequence().cast()
 
+    override val representation: String
+        get() = "(${types.joinToString(" | ") { it.representation }})"
 }
 
 data class IntersectionTypeNode(
@@ -134,6 +162,9 @@ data class IntersectionTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = types.asSequence().cast()
+
+    override val representation: String
+        get() = "(${types.joinToString(" & ") { it.representation }})"
 
 }
 

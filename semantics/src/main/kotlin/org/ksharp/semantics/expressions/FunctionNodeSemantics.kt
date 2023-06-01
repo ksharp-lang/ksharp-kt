@@ -5,7 +5,6 @@ import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
-import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
@@ -124,16 +123,34 @@ private fun FunctionNode.checkSemantics(
         val semanticNode = expression.cast<ExpressionParserNode>()
             .toSemanticNode(errors, info, typeSystem)
         AbstractionNode(
+            native,
             function.annotations ?: annotations.checkAnnotations(),
             name,
             semanticNode,
             AbstractionSemanticInfo(
                 function.visibility,
-                parameters.map { symbolTable[it]!!.first }.toList()
+                parameters.map { symbolTable[it]!!.first }.toList(),
+                function.type.last()
             ),
             location
         )
     }
+
+internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
+    this.asSequence().map {
+        val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
+        val arguments = semanticInfo
+            .parameters.map { i ->
+                when (val iType = i.getInferredType(it.location)) {
+                    is Either.Right -> iType.value
+                    else -> newParameter()
+                }
+            }
+        val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
+        if (returnType != null) {
+            FunctionInfo(it.native, semanticInfo.visibility, null, it.annotations, it.name, arguments + returnType)
+        } else FunctionInfo(it.native, semanticInfo.visibility, null, it.annotations, it.name, arguments)
+    }.groupBy { it.name }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
     val errors = ErrorCollector()
@@ -153,7 +170,8 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
 }
 
 fun ModuleFunctionInfo.checkInferenceSemantics(
-    moduleTypeSystemInfo: ModuleTypeSystemInfo
+    moduleTypeSystemInfo: ModuleTypeSystemInfo,
+    preludeModule: ModuleInfo
 ): ModuleFunctionInfo {
     val errors = ErrorCollector()
     errors.collectAll(this.errors)
@@ -162,17 +180,7 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
         ModuleInfo(
             emptyList(),
             moduleTypeSystemInfo.typeSystem,
-            abstractions.asSequence().map {
-                val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
-                val arguments = semanticInfo
-                    .parameters.map { i ->
-                        when (val iType = i.getInferredType(it.location)) {
-                            is Either.Right -> iType.value
-                            else -> newParameter()
-                        }
-                    }
-                FunctionInfo(semanticInfo.visibility, null, it.annotations, it.name, arguments)
-            }.groupBy { it.name }
+            abstractions.toFunctionInfoMap()
         ),
         emptyMap()
     )

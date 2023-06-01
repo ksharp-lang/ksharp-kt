@@ -39,12 +39,14 @@ class ModuleInfoSerializerTest : StringSpec({
             mapOf(
                 "sum" to listOf(
                     FunctionInfo(
+                        true,
                         FunctionVisibility.Public,
                         null,
                         listOf(Annotation("native", mapOf("flag" to true))),
                         "sum",
                         listOf(newParameter(), newParameter())
                     ), FunctionInfo(
+                        false,
                         FunctionVisibility.Public,
                         "math",
                         listOf(),
@@ -54,6 +56,7 @@ class ModuleInfoSerializerTest : StringSpec({
                 ),
                 "sub" to listOf(
                     FunctionInfo(
+                        false,
                         FunctionVisibility.Public,
                         null,
                         listOf(Annotation("native", mapOf("flag" to true))),

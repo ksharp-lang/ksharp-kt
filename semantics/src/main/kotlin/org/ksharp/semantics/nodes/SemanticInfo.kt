@@ -30,7 +30,8 @@ sealed class SemanticInfo {
 
 data class AbstractionSemanticInfo(
     val visibility: FunctionVisibility,
-    val parameters: List<SemanticInfo>
+    val parameters: List<SemanticInfo>,
+    val returnType: TypePromise? = null
 ) : SemanticInfo()
 
 data class EmptySemanticInfo(private val nothing: Unit = Unit) : SemanticInfo()

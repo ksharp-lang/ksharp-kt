@@ -5,6 +5,7 @@ import org.ksharp.nodes.NodeData
 import org.ksharp.typesystem.annotations.Annotation
 
 data class AbstractionNode<SemanticInfo>(
+    val native: Boolean,
     val annotations: List<Annotation>?,
     val name: String,
     val expression: SemanticNode<SemanticInfo>,

@@ -285,6 +285,7 @@ class ModuleParserTest : StringSpec({
                     "File", listOf(), listOf(), listOf(), listOf(
                         FunctionNode(
                             false,
+                            false,
                             null,
                             "sum",
                             listOf("a", "b"),
@@ -310,6 +311,7 @@ class ModuleParserTest : StringSpec({
                 ModuleNode(
                     "File", listOf(), listOf(), listOf(), listOf(
                         FunctionNode(
+                            false,
                             false,
                             listOf(AnnotationNode("native", mapOf("flag" to false), Location.NoProvided)),
                             "sum",
@@ -366,6 +368,7 @@ class ModuleParserTest : StringSpec({
                         )
                     ), listOf(
                         FunctionNode(
+                            false,
                             true,
                             null,
                             "sum",

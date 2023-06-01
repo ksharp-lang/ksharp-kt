@@ -9,6 +9,7 @@ enum class FunctionVisibility {
 }
 
 data class FunctionInfo(
+    val native: Boolean,
     val visibility: FunctionVisibility,
     val dependency: String?,
     val annotations: List<Annotation>?,

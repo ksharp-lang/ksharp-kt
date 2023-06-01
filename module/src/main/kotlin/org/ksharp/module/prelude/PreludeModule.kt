@@ -1,21 +1,29 @@
 package org.ksharp.module.prelude
 
+import org.ksharp.common.io.bufferView
 import org.ksharp.module.ModuleInfo
-import org.ksharp.module.moduleFunctions
-import org.ksharp.typesystem.types.newNamedParameter
+import org.ksharp.module.bytecode.readModuleInfo
 
-private fun createPreludeModule(): ModuleInfo = preludeTypeSystem
+/**
+ * Kernel module contains the minimal types and functions required to compile ks code
+ */
+private fun createKernelModule(): ModuleInfo = kernelTypeSystem
     .value
     .let { ts ->
-        val boolType = ts["Bool"].valueOrNull!!
-        val parameter = newNamedParameter("_a_")
         ModuleInfo(
             listOf(),
             typeSystem = ts,
-            functions = moduleFunctions {
-                add(emptyList(), "if", boolType, parameter, parameter, parameter)
-            }
+            functions = mapOf()
         )
     }
 
-val preludeModule = createPreludeModule()
+val kernelModule = createKernelModule()
+
+val preludeModule: ModuleInfo
+    get() =
+        String.Companion::class.java.getResourceAsStream("/org/ksharp/module/prelude.ksm")!!
+            .use { input ->
+                input.bufferView {
+                    it.readModuleInfo()
+                }
+            }

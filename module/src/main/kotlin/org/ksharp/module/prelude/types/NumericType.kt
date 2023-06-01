@@ -7,7 +7,6 @@ import org.ksharp.module.prelude.unification.TypeUnifications
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
-import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.TypeVisibility
 import org.ksharp.typesystem.unification.TypeUnification
@@ -29,7 +28,7 @@ data class NumericType internal constructor(
 
     override val visibility: TypeVisibility
         get() = TypeVisibility.Public
-    
+
     override val serializer: TypeSerializer
         get() = TypeSerializers.NumericType
 
@@ -42,7 +41,8 @@ data class NumericType internal constructor(
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()
     override val representation: String = "numeric<${type}>"
+
+    override fun toString(): String = representation
 }
 
-fun ParametricTypeFactory.numeric(type: Numeric) =
-    add { Either.Right(NumericType(type)) }
+fun numeric(type: Numeric) = Either.Right(NumericType(type))

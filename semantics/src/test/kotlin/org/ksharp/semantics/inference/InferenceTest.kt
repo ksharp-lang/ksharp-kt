@@ -7,9 +7,9 @@ import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.common.new
+import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
-import org.ksharp.module.moduleFunctions
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.nodes.*
@@ -17,6 +17,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.newParameter
+import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
 
 private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
@@ -25,10 +26,28 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
     val testModule = ModuleInfo(
         listOf(),
         typeSystem = typeSystem,
-        functions = moduleFunctions {
-            add(emptyList(), "(test+)", a, a, a)
-            add(emptyList(), "(test*)", intType, intType, intType)
-        }
+        functions = mapOf(
+            "(test+)" to listOf(
+                FunctionInfo(
+                    false,
+                    FunctionVisibility.Public,
+                    null,
+                    null,
+                    "(test+)",
+                    listOf(a, a, a)
+                )
+            ),
+            "(test*)" to listOf(
+                FunctionInfo(
+                    false,
+                    FunctionVisibility.Public,
+                    null,
+                    null,
+                    "(test+)",
+                    listOf(intType, intType, intType)
+                )
+            )
+        )
     )
     return InferenceInfo(preludeModule, testModule)
 }
@@ -41,6 +60,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
+            false,
             emptyList(),
             "ten", ConstantNode(
                 10.toLong(),
@@ -58,10 +78,39 @@ class InferenceTest : StringSpec({
             )
         }
     }
+    "Inference type over native abstraction" {
+        val module = createInferenceInfo(ts)
+        val longTypePromise = ts.getTypeSemanticInfo("Long")
+        AbstractionNode(
+            true,
+            emptyList(),
+            "ten", ConstantNode(
+                10.toLong(),
+                longTypePromise,
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(
+                FunctionVisibility.Public, listOf(), TypeSemanticInfo(
+                    Either.Right(
+                        newParameterForTesting(0)
+                    )
+                )
+            ),
+            Location.NoProvided
+        ).inferType(module).apply {
+            shouldBeRight(
+                listOf(
+                    unitTypePromise.type.valueOrNull!!,
+                    newParameterForTesting(0)
+                ).toFunctionType()
+            )
+        }
+    }
     "Inference type over operators" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
+            false,
             emptyList(),
             "n",
             ApplicationNode(
@@ -84,12 +133,8 @@ class InferenceTest : StringSpec({
             AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
             Location.NoProvided
         ).inferType(module).apply {
-            shouldBeRight(
-                listOf(
-                    unitTypePromise.type.valueOrNull!!,
-                    longTypePromise.type.valueOrNull!!
-                ).toFunctionType()
-            )
+            map { it.representation }
+                .shouldBeRight("(KernelUnit -> (Num numeric<Long>))")
         }
     }
     "Inference type over operators with substitution" {
@@ -97,6 +142,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         AbstractionNode(
+            false,
             emptyList(),
             "n",
             ApplicationNode(
@@ -119,19 +165,16 @@ class InferenceTest : StringSpec({
             AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
             Location.NoProvided
         ).inferType(module).apply {
-            shouldBeRight(
-                listOf(
-                    unitTypePromise.type.valueOrNull!!,
-                    longTypePromise.type.valueOrNull!!
-                ).toFunctionType()
-            )
+            map { it.representation }
+                .shouldBeRight("(KernelUnit -> (Num numeric<Long>))")
         }
     }
     "Inference type over operators and variables with substitution" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
-        val variable = TypeSemanticInfo(Either.Right(newParameter()))
+        val variable = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
         val abstraction = AbstractionNode(
+            false,
             emptyList(),
             "n",
             ApplicationNode(
@@ -158,12 +201,8 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         )
         abstraction.inferType(module).apply {
-            shouldBeRight(
-                listOf(
-                    longTypePromise.type.valueOrNull!!,
-                    longTypePromise.type.valueOrNull!!
-                ).toFunctionType()
-            )
+            map { it.representation }
+                .shouldBeRight("((Num NativeLong) -> (Num NativeLong))")
         }
         abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
             .arguments.first().info.getInferredType(Location.NoProvided)
@@ -172,8 +211,9 @@ class InferenceTest : StringSpec({
     "Inference type over operators and variables with substitution with function that is not parametric" {
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
-        val variable = TypeSemanticInfo(Either.Right(newParameter()))
+        val variable = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
         val abstraction = AbstractionNode(
+            false,
             emptyList(),
             "n",
             ApplicationNode(
@@ -200,12 +240,8 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         )
         abstraction.inferType(module).apply {
-            shouldBeRight(
-                listOf(
-                    intTypePromise.type.valueOrNull!!,
-                    intTypePromise.type.valueOrNull!!
-                ).toFunctionType()
-            )
+            map { it.representation }
+                .shouldBeRight("((Num NativeInt) -> (Num NativeInt))")
         }
         abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
             .arguments.first().info.getInferredType(Location.NoProvided)
@@ -215,10 +251,11 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         val abstraction = AbstractionNode(
+            false,
             emptyList(),
             "n",
             ApplicationNode(
-                ApplicationName("::prelude", "if"),
+                ApplicationName(null, "if"),
                 listOf(
                     ApplicationNode(
                         ApplicationName(name = "True"),
@@ -247,19 +284,16 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         )
         abstraction.inferType(module).apply {
-            shouldBeRight(
-                listOf(
-                    unitTypePromise.type.valueOrNull!!,
-                    intTypePromise.type.valueOrNull!!
-                ).toFunctionType()
-            )
+            map { it.representation }
+                .shouldBeRight("(KernelUnit -> (Num numeric<Int>))")
         }
     }
     "Inference let binding" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
-        val parameter = TypeSemanticInfo(Either.Right(newParameter()))
+        val parameter = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
         val abstraction = AbstractionNode(
+            false,
             emptyList(),
             "n",
             LetNode(
@@ -295,18 +329,15 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         )
         abstraction.inferType(module).apply {
-            shouldBeRight(
-                listOf(
-                    unitTypePromise.type.valueOrNull!!,
-                    longTypePromise.type.valueOrNull!!
-                ).toFunctionType()
-            )
+            map { it.representation }
+                .shouldBeRight("(KernelUnit -> (Num numeric<Long>))")
         }
     }
     "Inference test function doesn't exists" {
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         AbstractionNode(
+            false,
             emptyList(),
             "n",
             ApplicationNode(
@@ -327,7 +358,7 @@ class InferenceTest : StringSpec({
             shouldBeLeft(
                 InferenceErrorCode.FunctionNotFound.new(
                     Location.NoProvided,
-                    "function" to "not-found (Num numeric<Int>)"
+                    "function" to "not-found (Num NativeInt)"
                 )
             )
         }
@@ -337,6 +368,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val parameter = TypeSemanticInfo(Either.Right(newParameter()))
         val abstraction = AbstractionNode(
+            false,
             emptyList(),
             "n",
             LetNode(
@@ -370,7 +402,7 @@ class InferenceTest : StringSpec({
             shouldBeLeft(
                 InferenceErrorCode.FunctionNotFound.new(
                     Location.NoProvided,
-                    "function" to "not-found (Num numeric<Long>)"
+                    "function" to "not-found (Num NativeLong)"
                 )
             )
         }
