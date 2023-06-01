@@ -15,13 +15,14 @@ import org.ksharp.typesystem.serializer.writeTo
 fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
         add(0) // 0
-        add(visibility.ordinal) //4
+        add(if (native) 1 else 0) // 4
+        add(visibility.ordinal) // 8
         if (dependency == null) {
             add(-1)
-        } else add(table.add(dependency)) //8
+        } else add(table.add(dependency)) //12
         if (annotations == null) {
             add(-1)
-        } else annotations.writeTo(this, table) //12
+        } else annotations.writeTo(this, table) //16
         add(table.add(name))
         types.writeTo(this, table)
         set(0, size)
@@ -30,18 +31,19 @@ fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
 }
 
 fun BufferView.readFunctionInfo(table: BinaryTableView): FunctionInfo {
-    val visibility = readInt(4).let { FunctionVisibility.values()[it] }
-    val dependency = readInt(8).let {
+    val native = readInt(4) == 1
+    val visibility = readInt(8).let { FunctionVisibility.values()[it] }
+    val dependency = readInt(12).let {
         if (it == -1) null
         else table[it]
     }
-    val (annotationsOffset, annotations) = readInt(12).let {
+    val (annotationsOffset, annotations) = readInt(16).let {
         if (it == -1) 4 to null
-        else it to bufferFrom(12).readAnnotations(table)
+        else it to bufferFrom(16).readAnnotations(table)
     }
-    val name = table[readInt(12 + annotationsOffset)]
-    val types = bufferFrom(16 + annotationsOffset).readListOfTypes(table)
-    return FunctionInfo(visibility, dependency, annotations, name, types)
+    val name = table[readInt(16 + annotationsOffset)]
+    val types = bufferFrom(20 + annotationsOffset).readListOfTypes(table)
+    return FunctionInfo(native, visibility, dependency, annotations, name, types)
 }
 
 fun List<FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) {

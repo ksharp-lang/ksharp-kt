@@ -104,7 +104,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         )
 
         is IfNode -> ApplicationNode(
-            ApplicationName(PRELUDE_FLAG, "if"),
+            ApplicationName(null, "if"),
             listOf(
                 condition.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 trueExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
@@ -115,11 +115,22 @@ internal fun ExpressionParserNode.toSemanticNode(
         )
 
         is FunctionCallNode -> if (arguments.isEmpty()) {
-            VarNode(
-                name,
-                info.getVarSemanticInfo(name, location),
-                location
-            )
+            val varInfo = info.getVarSemanticInfo(name, location)
+            if (varInfo is Symbol) {
+                VarNode(
+                    name,
+                    varInfo,
+                    location
+                )
+            } else {
+                val callInfo = info.callSemanticInfo()
+                ApplicationNode(
+                    ApplicationName(name = name),
+                    listOf(UnitNode(location).toSemanticNode(errors, callInfo, typeSystem)),
+                    paramTypePromise(),
+                    location
+                )
+            }
         } else {
             val callInfo = info.callSemanticInfo()
             ApplicationNode(
@@ -153,7 +164,7 @@ internal fun ExpressionParserNode.toSemanticNode(
 
         is LiteralMapEntryNode -> {
             ApplicationNode(
-                ApplicationName(PRELUDE_FLAG, "pair"),
+                ApplicationName(null, "pair"),
                 listOf(
                     key.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                     value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),

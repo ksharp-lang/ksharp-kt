@@ -38,6 +38,7 @@ fun validateTypeName(name: String): ErrorOrValue<String> {
     if (!name.first()
             .isUpperCase()
     ) return Either.Left(TypeSystemErrorCode.TypeNameShouldStartWithUpperCase.new("name" to name))
+    if (name.startsWith("Decl__")) return Either.Right(name)
     return validateRestName(name)
 }
 

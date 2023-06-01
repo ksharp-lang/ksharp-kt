@@ -1168,6 +1168,26 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "If on function type declaration" {
+        "if :: () -> Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "if",
+                    listOf(),
+                    FunctionTypeNode(
+                        listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Type declaration 2" {
         "sum :: Int -> Int -> Int"
             .kSharpLexer()

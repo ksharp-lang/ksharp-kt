@@ -1,6 +1,7 @@
 package org.ksharp.nodes.semantic
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -10,6 +11,7 @@ import org.ksharp.nodes.Node
 class AbstractionNodeTest : StringSpec({
     "Test Node Interface over AbstractionNode" {
         AbstractionNode(
+            true,
             listOf(),
             "id",
             VarNode(
@@ -21,6 +23,7 @@ class AbstractionNodeTest : StringSpec({
             Location.NoProvided
         ).node.apply {
             cast<AbstractionNode<String>>().apply {
+                native.shouldBeTrue()
                 annotations.shouldBeEmpty()
                 name.shouldBe("id")
                 info.shouldBe("AbstractionNode")

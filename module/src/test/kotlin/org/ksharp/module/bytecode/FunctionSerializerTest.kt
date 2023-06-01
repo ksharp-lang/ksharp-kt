@@ -43,6 +43,7 @@ private fun Map<String, List<FunctionInfo>>.shouldBeSerializable() {
 class FunctionSerializerTest : StringSpec({
     "Serialize FunctionInfo with dependency = null" {
         FunctionInfo(
+            true,
             FunctionVisibility.Public,
             null,
             null,
@@ -52,6 +53,7 @@ class FunctionSerializerTest : StringSpec({
     }
     "Serialize FunctionInfo" {
         FunctionInfo(
+            false,
             FunctionVisibility.Internal,
             "math",
             null,
@@ -61,6 +63,7 @@ class FunctionSerializerTest : StringSpec({
     }
     "Serialize FunctionInfo with annotations" {
         FunctionInfo(
+            true,
             FunctionVisibility.Internal,
             null,
             listOf(Annotation("native", mapOf("flag" to true))),
@@ -70,6 +73,7 @@ class FunctionSerializerTest : StringSpec({
     }
     "Serialize FunctionInfo complete" {
         FunctionInfo(
+            false,
             FunctionVisibility.Internal,
             "temp",
             listOf(Annotation("native", mapOf("flag" to true))),
@@ -81,6 +85,7 @@ class FunctionSerializerTest : StringSpec({
         mapOf(
             "sum" to listOf(
                 FunctionInfo(
+                    true,
                     FunctionVisibility.Public,
                     null,
                     null,
@@ -90,6 +95,7 @@ class FunctionSerializerTest : StringSpec({
             ),
             "sub" to listOf(
                 FunctionInfo(
+                    false,
                     FunctionVisibility.Public,
                     null,
                     null,

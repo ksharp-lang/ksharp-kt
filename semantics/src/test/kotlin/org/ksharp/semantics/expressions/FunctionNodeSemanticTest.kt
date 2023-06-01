@@ -20,6 +20,7 @@ import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.typeSystem
@@ -51,6 +52,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     "table: function without declaration" {
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "sum",
@@ -101,6 +103,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         }.value
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "sum",
@@ -151,6 +154,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         }.value
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "sum",
@@ -193,6 +197,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         val typeSystem = preludeModule.typeSystem
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "ten",
@@ -236,6 +241,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         }.value
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "sum",
@@ -279,6 +285,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         }.value
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "sum",
@@ -342,6 +349,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             should("value type $literalType") {
                 module(
                     FunctionNode(
+                        false,
                         true,
                         null,
                         "n",
@@ -359,13 +367,18 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
+                                false,
                                 null,
                                 "n", ConstantNode(
                                     expectedValue,
                                     expectedType.cast(),
                                     Location.NoProvided
                                 ),
-                                AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                                AbstractionSemanticInfo(
+                                    FunctionVisibility.Public,
+                                    listOf(),
+                                    TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
+                                ),
                                 Location.NoProvided
                             )
                         )
@@ -377,6 +390,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: operator") {
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "n",
@@ -399,6 +413,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         null,
                         "n",
                         ApplicationNode(
@@ -418,7 +433,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(1),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        AbstractionSemanticInfo(
+                            FunctionVisibility.Public,
+                            listOf(),
+                            TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
+                        ),
                         Location.NoProvided
                     )
                 )
@@ -428,6 +447,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: operator with annotation") {
         module(
             FunctionNode(
+                false,
                 true,
                 listOf(AnnotationNode("native", mapOf(), Location.NoProvided)),
                 "n",
@@ -450,6 +470,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         listOf(Annotation("native", mapOf())),
                         "n",
                         ApplicationNode(
@@ -469,7 +490,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(1),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        AbstractionSemanticInfo(
+                            FunctionVisibility.Public,
+                            listOf(),
+                            TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
+                        ),
                         Location.NoProvided
                     )
                 )
@@ -477,16 +502,22 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         }
     }
     should("Semantic node: operator with function declaration") {
+        var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
             alias(TypeVisibility.Public, "Decl__n", listOf(Annotation("native", mapOf()))) {
                 functionType {
                     type("Unit")
                     type("Long")
+                }.also {
+                    fnType = it.flatMap {
+                        Either.Right(it.arguments.last())
+                    }
                 }
             }
         }
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "n",
@@ -509,6 +540,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         listOf(Annotation("native", mapOf())),
                         "n",
                         ApplicationNode(
@@ -528,7 +560,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(0),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        AbstractionSemanticInfo(
+                            FunctionVisibility.Public,
+                            listOf(),
+                            TypeSemanticInfo(fnType!!)
+                        ),
                         Location.NoProvided
                     )
                 )
@@ -538,6 +574,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: if with else") {
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "n",
@@ -565,10 +602,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         null,
                         "n",
                         ApplicationNode(
-                            ApplicationName("::prelude", "if"),
+                            ApplicationName(null, "if"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(name = "(>)"),
@@ -608,7 +646,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     "a",
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 )
-                            )
+                            ), TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
                         ),
                         Location.NoProvided
                     )
@@ -619,6 +657,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: if without else") {
         module(
             FunctionNode(
+                false,
                 false,
                 null,
                 "n",
@@ -646,10 +685,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         null,
                         "n",
                         ApplicationNode(
-                            ApplicationName("::prelude", "if"),
+                            ApplicationName(null, "if"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(name = "(>)"),
@@ -689,7 +729,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     "a",
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 )
-                            )
+                            ), TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
                         ),
                         Location.NoProvided
                     )
@@ -700,6 +740,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: list literal") {
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "n",
@@ -727,6 +768,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         null,
                         "n",
                         ApplicationNode(
@@ -758,7 +800,13 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(2),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        AbstractionSemanticInfo(
+                            FunctionVisibility.Public, listOf(), TypeSemanticInfo(
+                                Either.Right(
+                                    newParameterForTesting(0)
+                                )
+                            )
+                        ),
                         Location.NoProvided
                     )
                 )
@@ -768,6 +816,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: set literal") {
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "n",
@@ -793,6 +842,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         null,
                         "n",
                         ApplicationNode(
@@ -817,7 +867,13 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(1),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        AbstractionSemanticInfo(
+                            FunctionVisibility.Public, listOf(), TypeSemanticInfo(
+                                Either.Right(
+                                    newParameterForTesting(0)
+                                )
+                            )
+                        ),
                         Location.NoProvided
                     )
                 )
@@ -827,6 +883,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: tuple literal") {
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "n",
@@ -849,14 +906,22 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         null,
                         "n",
                         ApplicationNode(
                             ApplicationName("::prelude", "tupleOf"),
                             listOf(
-                                VarNode(
-                                    "x",
-                                    typeParameterForTesting(2),
+                                ApplicationNode(
+                                    ApplicationName(null, "x"),
+                                    listOf(
+                                        ConstantNode(
+                                            kotlin.Unit,
+                                            unitTypePromise,
+                                            Location.NoProvided
+                                        )
+                                    ),
+                                    typeParameterForTesting(3),
                                     Location.NoProvided
                                 ),
                                 VarNode(
@@ -867,7 +932,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(3),
+                            typeParameterForTesting(4),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -876,6 +941,10 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 Symbol(
                                     "y",
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
+                                )
+                            ), TypeSemanticInfo(
+                                Either.Right(
+                                    newParameterForTesting(1)
                                 )
                             )
                         ),
@@ -888,6 +957,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: map literal") {
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "n",
@@ -918,13 +988,14 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         null,
                         "n",
                         ApplicationNode(
                             ApplicationName("::prelude", "mapOf"),
                             listOf(
                                 ApplicationNode(
-                                    ApplicationName("::prelude", "pair"),
+                                    ApplicationName(null, "pair"),
                                     listOf(
                                         ConstantNode("key1", strTypePromise, Location.NoProvided),
                                         ConstantNode(1.toLong(), byteTypePromise, Location.NoProvided)
@@ -933,7 +1004,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                                 ApplicationNode(
-                                    ApplicationName("::prelude", "pair"),
+                                    ApplicationName(null, "pair"),
                                     listOf(
                                         ConstantNode("key2", strTypePromise, Location.NoProvided),
                                         ConstantNode(2.toLong(), byteTypePromise, Location.NoProvided)
@@ -945,7 +1016,13 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             typeParameterForTesting(3),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        AbstractionSemanticInfo(
+                            FunctionVisibility.Public, listOf(), TypeSemanticInfo(
+                                Either.Right(
+                                    newParameterForTesting(0)
+                                )
+                            )
+                        ),
                         Location.NoProvided
                     )
                 )
@@ -955,6 +1032,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: let") {
         module(
             FunctionNode(
+                false,
                 true,
                 null,
                 "n",
@@ -1004,6 +1082,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             abstractions.shouldBe(
                 listOf(
                     AbstractionNode(
+                        false,
                         null,
                         "n",
                         LetNode(
@@ -1064,7 +1143,13 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             EmptySemanticInfo(),
                             Location.NoProvided
                         ),
-                        AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+                        AbstractionSemanticInfo(
+                            FunctionVisibility.Public, listOf(), TypeSemanticInfo(
+                                Either.Right(
+                                    newParameterForTesting(0)
+                                )
+                            )
+                        ),
                         Location.NoProvided
                     )
                 )
@@ -1087,6 +1172,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             errors.build(),
             listOf(
                 AbstractionNode(
+                    false,
                     null,
                     "ten", ConstantNode(
                         10.toLong(),
@@ -1102,7 +1188,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             ModuleTypeSystemInfo(
                 listOf(),
                 ts
-            )
+            ), preludeModule
         ).apply {
             this.shouldBe(info)
             this.abstractions.first()
@@ -1118,10 +1204,11 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             errors.build(),
             listOf(
                 AbstractionNode(
+                    false,
                     null,
                     "n",
                     ApplicationNode(
-                        ApplicationName("::prelude", "if"),
+                        ApplicationName(null, "if"),
                         listOf(
                             ApplicationNode(
                                 ApplicationName(name = "True"),
@@ -1157,7 +1244,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             ModuleTypeSystemInfo(
                 listOf(),
                 ts
-            )
+            ), preludeModule
         ).apply {
             this.shouldBe(info)
             this.abstractions.first()
@@ -1173,6 +1260,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             errors.build(),
             listOf(
                 AbstractionNode(
+                    false,
                     null,
                     "n",
                     ApplicationNode(
@@ -1212,14 +1300,14 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             ModuleTypeSystemInfo(
                 listOf(),
                 ts
-            )
+            ), preludeModule
         ).apply {
             this.abstractions.shouldBeEmpty()
             this.errors.shouldBe(
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "no-function True (Num numeric<Long>) @0"
+                        "function" to "no-function True (Num NativeLong) @0"
                     )
                 )
             )

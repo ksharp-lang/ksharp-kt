@@ -1,6 +1,7 @@
 package org.ksharp.nodes
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -10,6 +11,7 @@ import org.ksharp.common.Location
 class FunctionNodeTest : StringSpec({
     "Test Node interface over FunctionNode" {
         FunctionNode(
+            false,
             true,
             listOf(),
             "ten",
@@ -18,6 +20,7 @@ class FunctionNodeTest : StringSpec({
             Location.NoProvided
         ).node.apply {
             cast<FunctionNode>().apply {
+                native.shouldBeFalse()
                 pub.shouldBeTrue()
                 annotations.shouldBeEmpty()
                 name.shouldBe("ten")

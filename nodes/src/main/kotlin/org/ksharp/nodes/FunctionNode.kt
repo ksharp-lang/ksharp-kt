@@ -3,6 +3,7 @@ package org.ksharp.nodes
 import org.ksharp.common.Location
 
 data class FunctionNode(
+    val native: Boolean,
     val pub: Boolean,
     val annotations: List<AnnotationNode>?,
     val name: String,

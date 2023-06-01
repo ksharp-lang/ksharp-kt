@@ -1,7 +1,7 @@
 package org.ksharp.semantics.typesystem
 
 import org.ksharp.common.*
-import org.ksharp.module.prelude.preludeModule
+import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
@@ -23,7 +23,7 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     TraitWithInvalidMethod("Trait '{name}' has invalid methods"),
     InterceptorTypeWithInvalidType("Interceptor type '{name}' has invalid type arm"),
     ParametricTypeShouldStartWithName("Parametric type should start with a name not a parameter. e.g Num a"),
-    FunctionDeclarationShouldBeAFunctionType("Function declaration '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int")
+    FunctionDeclarationShouldBeAFunctionType("Function declaration '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int. parsed as {repr}")
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -277,14 +277,17 @@ private fun TypeDeclarationNode.checkTypesSemantics(
         errors.collect(
             TypeSemanticsErrorCode
                 .FunctionDeclarationShouldBeAFunctionType
-                .new(location, "name" to name)
+                .new(location, "name" to name, "repr" to type.representation)
         )
     else builder.alias(TypeVisibility.Internal, "Decl__$name", annotations.checkAnnotations()) {
         this.register(name, type.cast())
     }
 }
 
-private fun Sequence<NodeData>.checkTypesSemantics(errors: ErrorCollector): PartialTypeSystem {
+private fun Sequence<NodeData>.checkTypesSemantics(
+    errors: ErrorCollector,
+    preludeModule: ModuleInfo
+): PartialTypeSystem {
     val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
         this@checkTypesSemantics.forEach {
             when (it) {
@@ -298,12 +301,12 @@ private fun Sequence<NodeData>.checkTypesSemantics(errors: ErrorCollector): Part
     return typeSystem
 }
 
-fun ModuleNode.checkTypesSemantics(): ModuleTypeSystemInfo {
+fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemInfo {
     val errors = ErrorCollector()
     val typeSystem = sequenceOf(
         types.asSequence(),
         typeDeclarations.asSequence()
-    ).flatten().checkTypesSemantics(errors)
+    ).flatten().checkTypesSemantics(errors, preludeModule)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(
         errors.build(),

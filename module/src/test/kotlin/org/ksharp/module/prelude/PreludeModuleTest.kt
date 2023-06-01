@@ -16,10 +16,16 @@ class PreludeModuleTest : StringSpec({
         preludeModule.functions.values
             .flatten()
             .map { it.representation }
+            .toSet()
             .shouldBe(
-                listOf(
-                    "if :: True\n" +
-                            "|False -> _a_ -> _a_ -> _a_"
+                setOf(
+                    "if :: Bool -> a -> a -> a",
+                    "pair :: a -> b -> (Pair a b)",
+                    "(+) :: (Num a) -> (Num a) -> (Num a)",
+                    "(-) :: (Num a) -> (Num a) -> (Num a)",
+                    "(*) :: (Num a) -> (Num a) -> (Num a)",
+                    "(/) :: (Num a) -> (Num a) -> (Num a)",
+                    "(**) :: (Num a) -> (Num a) -> (Num a)"
                 )
             )
     }

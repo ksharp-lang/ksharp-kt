@@ -4,6 +4,7 @@ import org.ksharp.common.add
 import org.ksharp.common.io.*
 import org.ksharp.common.listBuilder
 import org.ksharp.module.ModuleInfo
+import org.ksharp.module.prelude.kernelTypeSystem
 import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
 import java.io.OutputStream
@@ -56,7 +57,8 @@ fun BufferView.readModuleInfo(): ModuleInfo {
 
     val stringPool = StringPoolView(bufferFrom(offset))
     val dependencies = bufferFrom(offset + stringPoolSize).readStringList(stringPool)
-    val typeSystem = bufferFrom(offset + dependenciesSize + stringPoolSize).readTypeSystem(stringPool)
+    val kernelTypeSystem = kernelTypeSystem.value
+    val typeSystem = bufferFrom(offset + dependenciesSize + stringPoolSize).readTypeSystem(stringPool, kernelTypeSystem)
     val functions =
         bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize).readFunctionInfoTable(stringPool)
     return ModuleInfo(dependencies, typeSystem, functions)

@@ -41,16 +41,26 @@ private fun LetNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
 
 
 private fun AbstractionNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
-    expression.inferType(info).flatMap { returnType ->
+    run {
+        if (native) {
+            this.info.cast<AbstractionSemanticInfo>().returnType?.getType(location)
+                ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
+        } else expression.inferType(info)
+    }.flatMap { returnType ->
         val params = this.info.cast<AbstractionSemanticInfo>().parameters
         if (params.isEmpty()) {
             info.prelude.typeSystem["Unit"].map { unitType ->
                 listOf(unitType, returnType).toFunctionType()
             }
         } else {
-            params.asSequence()
-                .map { it.getInferredType(location) }
-                .unwrap()
+            params.asSequence().run {
+                if (native) {
+                    map {
+                        it.getType(location)
+                            .also { t -> it.setInferredType(t) }
+                    }
+                } else map { it.getInferredType(location) }
+            }.unwrap()
                 .map {
                     (it + returnType).toFunctionType()
                 }
