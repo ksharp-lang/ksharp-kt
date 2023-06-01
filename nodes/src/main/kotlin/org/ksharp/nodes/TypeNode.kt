@@ -48,7 +48,7 @@ data class LabelTypeNode(
         get() = sequenceOf(expr.cast())
 
     override val representation: String
-        get() = "$name = ${expr.representation}"
+        get() = "$name: ${expr.representation}"
 }
 
 data class UnitTypeNode(
@@ -113,7 +113,7 @@ data class TupleTypeNode(
         get() = types.asSequence().cast()
 
     override val representation: String
-        get() = "(${types.joinToString(" , ") { it.representation }})"
+        get() = "(${types.joinToString(", ") { it.representation }})"
 }
 
 data class ConstrainedTypeNode(
