@@ -1,23 +1,25 @@
-import org.eclipse.lsp4j.DidChangeTextDocumentParams
-import org.eclipse.lsp4j.DidCloseTextDocumentParams
-import org.eclipse.lsp4j.DidOpenTextDocumentParams
-import org.eclipse.lsp4j.DidSaveTextDocumentParams
+import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.TextDocumentService
+import java.util.concurrent.CompletableFuture
 
-class KSharpDocunmentService : TextDocumentService {
+class KSharpDocumentService : TextDocumentService {
     override fun didOpen(params: DidOpenTextDocumentParams?) {
-        TODO("Not yet implemented")
+        println(params)
     }
 
     override fun didChange(params: DidChangeTextDocumentParams?) {
-        TODO("Not yet implemented")
+        println(params)
     }
 
     override fun didClose(params: DidCloseTextDocumentParams?) {
-        TODO("Not yet implemented")
+        println(params)
     }
 
     override fun didSave(params: DidSaveTextDocumentParams?) {
-        TODO("Not yet implemented")
+        println(params)
+    }
+
+    override fun documentHighlight(params: DocumentHighlightParams?): CompletableFuture<MutableList<out DocumentHighlight>> {
+        return super.documentHighlight(params)
     }
 }
