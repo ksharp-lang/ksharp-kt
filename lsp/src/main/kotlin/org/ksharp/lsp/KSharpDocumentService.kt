@@ -1,3 +1,5 @@
+package org.ksharp.lsp
+
 import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.TextDocumentService
 import java.util.concurrent.CompletableFuture

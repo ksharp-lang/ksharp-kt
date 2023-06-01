@@ -1,3 +1,5 @@
+package org.ksharp.lsp
+
 import org.eclipse.lsp4j.launch.LSPLauncher
 
 fun main() {
