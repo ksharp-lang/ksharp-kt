@@ -7,9 +7,14 @@ import {
 } from "vscode-languageclient/node";
 import * as vscode from "vscode";
 
+//TODO: Read jar from env
 const serverOptions: ServerOptions = {
-  command: "java -jar ks-lsp.jar", //TODO: Read jar from env
-  args: [],
+  command:
+    "/Users/heli.jerez/Library/Java/JavaVirtualMachines/corretto-17.0.7/Contents/Home/bin/java",
+  args: [
+    "-jar",
+    "/Users/heli.jerez/dev/ksharp/ksharp-kt/lsp/build/libs/ks-lsp-all.jar",
+  ],
 };
 
 const clientOptions: LanguageClientOptions = {

@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "org.ksharp"
@@ -13,8 +14,8 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.0")
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:0.21.0")
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation(project(":parser"))
+    testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
 }
 
 tasks.test {
@@ -23,6 +24,11 @@ tasks.test {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "org.ksharp.lsp.MainCompanion"
+        attributes["Main-Class"] = "org.ksharp.lsp.KsLspMain"
     }
+    archiveFileName.set("ks-lsp.jar")
+}
+
+tasks.shadowJar {
+    archiveFileName.set("ks-lsp-all.jar")
 }

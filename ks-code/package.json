@@ -10,9 +10,7 @@
     "Other"
   ],
   "main": "./out/extension.js",
-  "activationEvents": [
-    "onLanguage:plaintext"
-  ],
+  "activationEvents": [],
   "contributes": {
     "languages": [
       {

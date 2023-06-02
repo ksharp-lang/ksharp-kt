@@ -1,34 +1,42 @@
 package org.ksharp.lsp
 
-import org.eclipse.lsp4j.InitializeParams
-import org.eclipse.lsp4j.InitializeResult
-import org.eclipse.lsp4j.services.LanguageServer
-import org.eclipse.lsp4j.services.TextDocumentService
-import org.eclipse.lsp4j.services.WorkspaceService
+import org.eclipse.lsp4j.*
+import org.eclipse.lsp4j.services.*
+import org.ksharp.lsp.capabilities.semantic_tokens.kSharpSemanticTokensProvider
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
-class KSharpLanguageServer : LanguageServer {
-    override fun initialize(params: InitializeParams?): CompletableFuture<InitializeResult> =
-        CompletableFuture.supplyAsync(Supplier {
+class KSharpLanguageServer : LanguageServer, LanguageClientAware {
+
+    override fun initialize(params: InitializeParams?): CompletableFuture<InitializeResult> {
+        ClientLogger.info("KSharp server: initialize $params")
+        return CompletableFuture.supplyAsync(Supplier {
             InitializeResult().apply {
-                capabilities.apply {
-                    setDocumentHighlightProvider(true)
+                capabilities = ServerCapabilities().apply {
+                    setTextDocumentSync(TextDocumentSyncOptions().apply {
+                        openClose = true
+                        change = TextDocumentSyncKind.Incremental
+                    })
+                    semanticTokensProvider = kSharpSemanticTokensProvider
                 }
             }
         })
+    }
 
     override fun shutdown(): CompletableFuture<Any> {
-        TODO("Not yet implemented")
+        ClientLogger.info("KSharp server: shutdown")
+        return CompletableFuture.supplyAsync { true }
     }
 
     override fun exit() {
-        TODO("Not yet implemented")
+        ClientLogger.info("KSharp server: exit")
+    }
+
+    override fun connect(client: LanguageClient) {
+        ClientLogger.initialize(client)
     }
 
     override fun getTextDocumentService(): TextDocumentService = KSharpDocumentService()
 
-    override fun getWorkspaceService(): WorkspaceService {
-        TODO("Not yet implemented")
-    }
+    override fun getWorkspaceService(): WorkspaceService = KSharpWorkspaceService()
 }

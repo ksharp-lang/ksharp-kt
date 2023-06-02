@@ -6,22 +6,28 @@ import java.util.concurrent.CompletableFuture
 
 class KSharpDocumentService : TextDocumentService {
     override fun didOpen(params: DidOpenTextDocumentParams?) {
-        println(params)
+        ClientLogger.info("didOpen: $params")
     }
 
     override fun didChange(params: DidChangeTextDocumentParams?) {
-        println(params)
+        ClientLogger.info("didChange: $params")
     }
 
     override fun didClose(params: DidCloseTextDocumentParams?) {
-        println(params)
+        ClientLogger.info("didClose: $params")
     }
 
     override fun didSave(params: DidSaveTextDocumentParams?) {
-        println(params)
+        ClientLogger.info("didSave: $params")
     }
 
-    override fun documentHighlight(params: DocumentHighlightParams?): CompletableFuture<MutableList<out DocumentHighlight>> {
-        return super.documentHighlight(params)
+    override fun semanticTokensFull(params: SemanticTokensParams?): CompletableFuture<SemanticTokens> {
+        ClientLogger.info("semanticTokensFull: $params")
+        return CompletableFuture.supplyAsync {
+            SemanticTokens().apply {
+                data = listOf()
+            }
+        }
     }
+
 }
