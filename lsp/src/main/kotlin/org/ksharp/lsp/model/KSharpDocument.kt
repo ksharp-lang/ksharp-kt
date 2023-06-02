@@ -56,11 +56,15 @@ class KSharpDocument(private val data: StringBuilder) {
         linePositions = topLines +
                 data.substring(startOffset + 1)
                     .asSequence()
-                    .calculateLines(startOffset + 1).also { println(it) }
+                    .calculateLines(startOffset + 1)
     }
 
     override fun toString(): String = content
 
+    fun asSequence(): Sequence<String> =
+        (0 until lines).asSequence().map {
+            line(it)
+        }
 }
 
 fun document(content: String) = KSharpDocument(StringBuilder(content))
