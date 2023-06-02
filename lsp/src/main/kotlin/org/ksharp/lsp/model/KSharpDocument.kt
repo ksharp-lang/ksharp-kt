@@ -43,7 +43,7 @@ class KSharpDocument(private val data: StringBuilder) {
 
     private fun offset(position: Position): Int {
         val (line, offset) = position
-        return linePositions[line] + offset + (if (line != 0 && offset == 0) 1 else 0)
+        return linePositions[line] + offset + (if (line != 0) 1 else 0)
     }
 
     fun update(range: Range, content: String) {

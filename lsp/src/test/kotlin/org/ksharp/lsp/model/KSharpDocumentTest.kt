@@ -36,4 +36,11 @@ class KSharpDocumentTest : StringSpec({
         doc.line(4).shouldBe("")
         doc.line(5).shouldBe("   ")
     }
+    "Add a new char in a line" {
+        val doc = document("type Num \n\nsum a = a * 2\n   1\n")
+        doc.update(Range(2 to 8, 2 to 8, 0), "b")
+        doc.content.shouldBe("type Num \n\nsum a = ba * 2\n   1\n")
+        doc.lines.shouldBe(5)
+        doc.line(2).shouldBe("sum a = ba * 2")
+    }
 })
