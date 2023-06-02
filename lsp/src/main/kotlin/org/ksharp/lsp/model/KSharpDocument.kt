@@ -14,19 +14,46 @@ class KSharpDocument(private val data: StringBuilder) {
     private var linePositions = emptyList<Int>()
 
     init {
-        linePositions = listOf(0) + data.asSequence().calculateLines(0)
+        linePositions = listOf(0) + data.calculateLines(0) + listOf(data.length)
     }
 
-    private fun Sequence<Char>.calculateLines(offset: Int) =
-        mapIndexed { index, c ->
+    private fun offset(position: Position): Int {
+        val (line, offset) = position
+        return linePositions[line] + offset + (if (line != 0) 1 else 0)
+    }
+
+    private fun CharSequence.calculateLines(offset: Int) =
+        asSequence().mapIndexed { index, c ->
             if (c == '\n') index + offset
             else -1
         }.filter { it != -1 }
             .toList()
 
+    private fun recalculateOffsets(range: Range, startOffset: Int, content: String) {
+        val (start, end, length) = range
+        val startLine = start.first
+        val endLine = end.first
+        val endOffset = startOffset + length
+        val contentLength = content.length
+
+        val topLines = linePositions.subList(0, startLine + 1)
+        val endLines = linePositions.subList(endLine, linePositions.size)
+            .filter { it >= endOffset }
+            .map { it - length + contentLength }
+
+        val endRangeStartOffset = linePositions[endLine]
+        val endRangeEndOffset = linePositions[endLine + 1] - 1
+        val middleOffset = (endRangeEndOffset - endRangeStartOffset - length).coerceAtLeast(0)
+
+        val newLines = content.calculateLines(middleOffset + topLines.last() + 1)
+
+        val result = topLines + newLines + endLines
+        linePositions = result
+    }
+
     val length: Int get() = data.length
 
-    val lines: Int get() = linePositions.size
+    val lines: Int get() = linePositions.size - 1
 
     val content: String get() = data.toString()
 
@@ -41,22 +68,11 @@ class KSharpDocument(private val data: StringBuilder) {
         } else data.substring(start, linePositions[endLine])
     }
 
-    private fun offset(position: Position): Int {
-        val (line, offset) = position
-        return linePositions[line] + offset + (if (line != 0) 1 else 0)
-    }
-
     fun update(range: Range, content: String) {
         val start = offset(range.start)
         val end = start + range.length
         data.replace(start, end, content)
-        val startLine = range.start.first
-        val topLines = linePositions.subList(0, startLine + 1)
-        val startOffset = topLines.last()
-        linePositions = topLines +
-                data.substring(startOffset + 1)
-                    .asSequence()
-                    .calculateLines(startOffset + 1)
+        recalculateOffsets(range, start, content)
     }
 
     override fun toString(): String = content

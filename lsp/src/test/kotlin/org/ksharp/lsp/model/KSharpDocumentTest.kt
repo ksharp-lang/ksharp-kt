@@ -82,4 +82,48 @@ class KSharpDocumentTest : StringSpec({
                 )
             )
     }
+    "Add characters maintaining line offsets" {
+        val doc = document("type Num \n\nsum a = a * 2\n   1\n")
+        doc.update(Range(2 to 1, 2 to 3, 2), "ab")
+        doc.content.shouldBe("type Num \n\nsab a = a * 2\n   1\n")
+        doc.asSequence()
+            .toList().shouldBe(
+                listOf(
+                    "type Num ",
+                    "",
+                    "sab a = a * 2",
+                    "   1",
+                    ""
+                )
+            )
+    }
+    "Add characters increasing line" {
+        val doc = document("type Num \n\nsum a = a * 2\n   1\n")
+        doc.update(Range(2 to 1, 2 to 3, 2), "abc")
+        doc.content.shouldBe("type Num \n\nsabc a = a * 2\n   1\n")
+        doc.asSequence()
+            .toList().shouldBe(
+                listOf(
+                    "type Num ",
+                    "",
+                    "sabc a = a * 2",
+                    "   1",
+                    ""
+                )
+            )
+    }
+    "Add character replace two lines by one" {
+        val doc = document("type Num \n\nsum a = a * 2\n   1\n")
+        doc.update(Range(2 to 8, 3 to 4, 10), "ab")
+        doc.content.shouldBe("type Num \n\nsum a = ab\n")
+        doc.asSequence()
+            .toList().shouldBe(
+                listOf(
+                    "type Num ",
+                    "",
+                    "sum a = ab",
+                    ""
+                )
+            )
+    }
 })
