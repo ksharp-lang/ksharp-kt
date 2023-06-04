@@ -5,7 +5,8 @@ import io.kotest.matchers.shouldBe
 
 class SupportedLanguagesTest : StringSpec({
     "Assert ksharp language filter" {
-        kSharpDocumentSelector.language.shouldBe("ksharp")
+        kSharpLanguageId.shouldBe("ksharp")
+        kSharpDocumentSelector.language.shouldBe(kSharpLanguageId)
     }
 
     "Assert supported languages" {

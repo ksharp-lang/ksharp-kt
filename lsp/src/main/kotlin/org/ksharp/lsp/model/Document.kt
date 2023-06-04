@@ -5,8 +5,7 @@ typealias Position = Pair<Int, Int>
 
 data class Range(
     val start: Position,
-    val end: Position,
-    val length: Int
+    val end: Position
 )
 
 private fun Int.createOffset(newLineLength: Int) =
@@ -26,7 +25,7 @@ private fun CharSequence.calculateLines(offset: Int): Sequence<Int> =
     }.drop(1)
         .map { it.first + offset }
 
-class KSharpDocument(private val data: StringBuilder) {
+class Document(val language: String, private val data: StringBuilder) {
 
     private var linePositions = emptyList<Int>()
 
@@ -39,8 +38,8 @@ class KSharpDocument(private val data: StringBuilder) {
         return linePositions[line] + offset + (if (line != 0) 1 else 0)
     }
 
-    private fun recalculateOffsets(range: Range, startOffset: Int, content: String) {
-        val (start, end, length) = range
+    private fun recalculateOffsets(range: Range, length: Int, startOffset: Int, content: String) {
+        val (start, end) = range
         val startLine = start.first
         val endLine = end.first
         val endOffset = startOffset + length
@@ -60,8 +59,7 @@ class KSharpDocument(private val data: StringBuilder) {
             .dropLast(1)
 
         val result = topLines + newLines + endLines
-        linePositions = listOf(0) + data.calculateLines(0)
-        println("$result -- $linePositions -- $topLines -- $endLines -- $newLines")
+        linePositions = result
     }
 
     val length: Int get() = data.length
@@ -83,9 +81,10 @@ class KSharpDocument(private val data: StringBuilder) {
 
     fun update(range: Range, content: String) {
         val start = offset(range.start)
-        val end = start + range.length
+        val end = offset(range.end)
+        val length = end - start
         data.replace(start, end, content)
-        recalculateOffsets(range, start, content)
+        recalculateOffsets(range, length, start, content)
     }
 
     override fun toString(): String = content
@@ -96,4 +95,4 @@ class KSharpDocument(private val data: StringBuilder) {
         }
 }
 
-fun document(content: String) = KSharpDocument(StringBuilder(content))
+fun document(language: String, content: String) = Document(language, StringBuilder(content))

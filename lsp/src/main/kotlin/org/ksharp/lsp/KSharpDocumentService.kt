@@ -3,27 +3,48 @@ package org.ksharp.lsp
 import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.TextDocumentService
 import org.ksharp.lsp.client.ClientLogger
+import org.ksharp.lsp.model.DocumentChange
+import org.ksharp.lsp.model.DocumentStorage
+import org.ksharp.lsp.model.Range
 import java.util.concurrent.CompletableFuture
 
-class KSharpDocumentService : TextDocumentService {
-    override fun didOpen(params: DidOpenTextDocumentParams?) {
-        ClientLogger.info("didOpen: $params")
+class KSharpDocumentService(private val documentStorage: DocumentStorage = DocumentStorage()) : TextDocumentService {
+
+    override fun didOpen(params: DidOpenTextDocumentParams) {
+        with(params.textDocument) {
+            documentStorage.add(uri, languageId, text)
+        }
     }
 
-    override fun didChange(params: DidChangeTextDocumentParams?) {
-        ClientLogger.info("didChange: $params")
+    override fun didChange(params: DidChangeTextDocumentParams) {
+        documentStorage.update(params.textDocument.uri,
+            params.contentChanges.asSequence().map { event ->
+                val range = event.range
+                DocumentChange(
+                    Range(
+                        range.start.let {
+                            it.line to it.character
+                        },
+                        range.end.let {
+                            it.line to it.character
+                        }
+                    ),
+                    event.text
+                )
+            })
     }
 
-    override fun didClose(params: DidCloseTextDocumentParams?) {
-        ClientLogger.info("didClose: $params")
+    override fun didClose(params: DidCloseTextDocumentParams) {
+        documentStorage.remove(params.textDocument.uri)
     }
 
-    override fun didSave(params: DidSaveTextDocumentParams?) {
+    override fun didSave(params: DidSaveTextDocumentParams) {
         ClientLogger.info("didSave: $params")
     }
 
-    override fun semanticTokensFull(params: SemanticTokensParams?): CompletableFuture<SemanticTokens> {
+    override fun semanticTokensFull(params: SemanticTokensParams): CompletableFuture<SemanticTokens> {
         ClientLogger.info("semanticTokensFull: $params")
+        ClientLogger.info("text: ${documentStorage.content(params.textDocument.uri)}")
         return CompletableFuture.supplyAsync {
             SemanticTokens().apply {
                 data = listOf()

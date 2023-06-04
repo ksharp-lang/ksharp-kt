@@ -11,7 +11,6 @@ import java.util.function.Supplier
 class KSharpLanguageServer : LanguageServer, LanguageClientAware {
 
     override fun initialize(params: InitializeParams?): CompletableFuture<InitializeResult> {
-        ClientLogger.info("KSharp server: initialize $params")
         return CompletableFuture.supplyAsync(Supplier {
             InitializeResult().apply {
                 capabilities = ServerCapabilities().apply {

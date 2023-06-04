@@ -10,11 +10,10 @@ val kSharpSemanticTokensProvider = SemanticTokensWithRegistrationOptions().apply
             SemanticTokenTypes.Type,
             SemanticTokenTypes.String,
             SemanticTokenTypes.Function,
-            SemanticTokenTypes.Variable
+            SemanticTokenTypes.Variable,
         )
         tokenModifiers = listOf()
     }
     setFull(true)
     setRange(false)
-
 }
