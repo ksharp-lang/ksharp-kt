@@ -24,6 +24,13 @@
         ],
         "configuration": "./language-configuration.json"
       }
+    ],
+    "grammars": [
+      {
+        "language": "ksharp",
+        "scopeName": "source.ksharp",
+        "path": "./syntaxes/ksharp.tmLanguage.json"
+      }
     ]
   },
   "scripts": {

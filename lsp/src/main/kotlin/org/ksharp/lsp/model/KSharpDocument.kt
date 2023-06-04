@@ -9,25 +9,35 @@ data class Range(
     val length: Int
 )
 
+private fun Int.createOffset(newLineLength: Int) =
+    if (this != -1)
+        this to newLineLength
+    else null
+
+private fun CharSequence.calculateLines(offset: Int): Sequence<Int> =
+    generateSequence(0 to 0) { (offset, newlineLength) ->
+        if (newlineLength == -1) null
+        else (offset + newlineLength).let { startIndex ->
+            this.indexOf("\r\n", startIndex).createOffset(2)
+                ?: this.indexOf("\n", startIndex).createOffset(1)
+                ?: this.indexOf("\r", startIndex).createOffset(1)
+                ?: (this.length to -1)
+        }
+    }.drop(1)
+        .map { it.first + offset }
+
 class KSharpDocument(private val data: StringBuilder) {
 
     private var linePositions = emptyList<Int>()
 
     init {
-        linePositions = listOf(0) + data.calculateLines(0) + listOf(data.length)
+        linePositions = listOf(0) + data.calculateLines(0)
     }
 
     private fun offset(position: Position): Int {
         val (line, offset) = position
         return linePositions[line] + offset + (if (line != 0) 1 else 0)
     }
-
-    private fun CharSequence.calculateLines(offset: Int) =
-        asSequence().mapIndexed { index, c ->
-            if (c == '\n') index + offset
-            else -1
-        }.filter { it != -1 }
-            .toList()
 
     private fun recalculateOffsets(range: Range, startOffset: Int, content: String) {
         val (start, end, length) = range
@@ -46,9 +56,12 @@ class KSharpDocument(private val data: StringBuilder) {
         val middleOffset = (endRangeEndOffset - endRangeStartOffset - length).coerceAtLeast(0)
 
         val newLines = content.calculateLines(middleOffset + topLines.last() + 1)
+            .toList()
+            .dropLast(1)
 
         val result = topLines + newLines + endLines
-        linePositions = result
+        linePositions = listOf(0) + data.calculateLines(0)
+        println("$result -- $linePositions -- $topLines -- $endLines -- $newLines")
     }
 
     val length: Int get() = data.length

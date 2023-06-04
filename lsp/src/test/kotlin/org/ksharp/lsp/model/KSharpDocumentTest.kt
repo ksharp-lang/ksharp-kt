@@ -20,6 +20,11 @@ class KSharpDocumentTest : StringSpec({
         doc.update(Range(0 to 0, 4 to 0, 30), "a𐐀b")
         doc.asSequence().toList().shouldBe(listOf("a𐐀b"))
     }
+    "Replace all content using different new lines" {
+        val doc = document("type Num \r\n\nsum a = a * 2\n   1\n")
+        doc.update(Range(0 to 0, 4 to 0, 31), "a𐐀b")
+        doc.asSequence().toList().shouldBe(listOf("a𐐀b"))
+    }
     "Replace a line" {
         val doc = document("type Num \n\nsum a = a * 2\n   1\n")
         doc.update(Range(1 to 0, 1 to 0, 0), "abc")
