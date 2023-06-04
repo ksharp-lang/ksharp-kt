@@ -1,7 +1,9 @@
 package org.ksharp.lsp.model
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.lsp.languages.kSharpLanguageId
 
@@ -12,5 +14,15 @@ class DocumentStorageTest : StringSpec({
         storage.update("doc", sequenceOf(DocumentChange(Range(0 to 0, 4 to 0), "a𐐀b"))).shouldBeTrue()
         storage.content("doc").shouldBe("a𐐀b")
         storage.remove("doc").shouldBe("a𐐀b")
+        storage.remove("doc").shouldBeNull()
+    }
+    "Remove not existent document" {
+        val storage = DocumentStorage()
+        storage.remove("doc").shouldBeNull()
+    }
+    "Update content over not existent document" {
+        val storage = DocumentStorage()
+        storage.update("doc", sequenceOf(DocumentChange(Range(0 to 0, 4 to 0), "a𐐀b"))).shouldBeFalse()
+        storage.content("doc").shouldBeNull()
     }
 })
