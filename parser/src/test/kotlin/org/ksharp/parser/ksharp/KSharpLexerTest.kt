@@ -5,6 +5,8 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.sequences.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.Line
+import org.ksharp.common.Offset
 import org.ksharp.parser.*
 
 class KSharpLexerTest : StringSpec({
@@ -1143,6 +1145,24 @@ class KSharpLexerNewLineLSPTest : StringSpec({
                     "*:3:10",
                     "2:3:12",
                     "1:4:3"
+                )
+            )
+    }
+    "Text unicode 16 character offsets" {
+        "\"a𐐀b\""
+            .lexerModule("file", true)
+            .asSequence()
+            .toList()
+            .printTokens()
+            .shouldContainAll(
+                LogicalLexerToken(
+                    token = LexerToken(
+                        type = KSharpTokenType.String,
+                        token = TextToken(text = "\"a𐐀b\"", startOffset = 0, endOffset = 6)
+                    ),
+                    context = "file",
+                    startPosition = (Line(value = 1) to Offset(value = 0)),
+                    endPosition = (Line(value = 1) to Offset(value = 6))
                 )
             )
     }

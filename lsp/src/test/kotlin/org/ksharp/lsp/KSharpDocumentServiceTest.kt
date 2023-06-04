@@ -45,5 +45,4 @@ class KSharpDocumentServiceTest : StringSpec({
         })
         storage.content("testDoc").shouldBeNull()
     }
-}
-)
+})
