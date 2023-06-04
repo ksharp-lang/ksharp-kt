@@ -71,7 +71,7 @@ fun <V> TokenLexerIterator<V>.toLogicalLexerToken(
 ): BaseLexerIterator<V> =
     object : LexerIterator<Token, V> {
         private var startPosition: Position = Line(1) to Offset(0)
-        private var startLineOffset: Int = 0
+        private var lineOffset: Int = 0
 
         override val state: LexerState<V> = this@toLogicalLexerToken.state
 
@@ -80,13 +80,15 @@ fun <V> TokenLexerIterator<V>.toLogicalLexerToken(
         override fun next(): LogicalLexerToken = with(this@toLogicalLexerToken.next()) {
             if (type == newLineType) {
                 startPosition = Line(startPosition.first.value.inc()) to Offset(0)
-                startLineOffset = endOffset.inc()
+                lineOffset = startOffset + (if (text.startsWith("\r\n")) 2 else 1)
+            } else {
+                startPosition = startPosition.first to Offset(startOffset - lineOffset)
             }
             LogicalLexerToken(
                 this,
                 context,
                 startPosition = startPosition,
-                endPosition = startPosition.first to Offset((endOffset - startLineOffset).coerceAtLeast(0))
+                endPosition = startPosition.first to Offset(startPosition.second.value + text.length)
             )
         }
     }

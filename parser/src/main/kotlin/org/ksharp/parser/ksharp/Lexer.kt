@@ -104,14 +104,15 @@ private val escapeCharacters = "t'\"rnf\\b".toSet()
 
 fun Char.isEscapeCharacter() = escapeCharacters.contains(this)
 
-fun Char.isNewLine() = this == '\n'
+fun Char.isNewLine() = this == '\n' || this == '\r'
 
 fun Char.isSpace() = this == ' ' || this == '\t'
 
 fun Char.isOperator() = operators.contains(this)
 fun Char.isDot() = this == '.'
 
-fun Char.shouldIgnore() = this == '\r'
+fun Char.shouldIgnore() = false
+
 private inline fun KSharpLexer.ifChar(
     predicate: Char.() -> Boolean,
     eofToken: TokenType,
@@ -364,7 +365,17 @@ fun KSharpLexer.string(): LexerToken {
 }
 
 
-fun KSharpLexer.newLine(): LexerToken = loopChar({ isSpace() }, KSharpTokenType.NewLine)
+fun KSharpLexer.newLine(requestForNewLineChar: Boolean): LexerToken {
+    if (requestForNewLineChar) {
+        val nc = nextChar()
+        if (nc != '\n') {
+            if (nc?.isSpace() == false) {
+                return token(KSharpTokenType.NewLine, 1)
+            }
+        }
+    }
+    return loopChar({ isSpace() }, KSharpTokenType.NewLine)
+}
 
 fun KSharpLexer.whiteSpace(): LexerToken = loopChar({ isSpace() }, KSharpTokenType.WhiteSpace)
 
@@ -397,7 +408,7 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
             equals('(') -> openParenthesisOrOperatorFunction()
             isDigit() -> number(c == '0')
             isDot() -> decimal(KSharpTokenType.Operator, 1)
-            isNewLine() -> newLine()
+            isNewLine() -> newLine(this == '\r')
             isSpace() -> whiteSpace()
             isOperator() -> operator()
             shouldIgnore() -> token(KSharpTokenType.Ignore, 0)
