@@ -368,10 +368,8 @@ fun KSharpLexer.string(): LexerToken {
 fun KSharpLexer.newLine(requestForNewLineChar: Boolean): LexerToken {
     if (requestForNewLineChar) {
         val nc = nextChar()
-        if (nc != '\n') {
-            if (nc?.isSpace() == false) {
-                return token(KSharpTokenType.NewLine, 1)
-            }
+        if (nc != '\n' && nc?.isSpace() == false) {
+            return token(KSharpTokenType.NewLine, 1)
         }
     }
     return loopChar({ isSpace() }, KSharpTokenType.NewLine)

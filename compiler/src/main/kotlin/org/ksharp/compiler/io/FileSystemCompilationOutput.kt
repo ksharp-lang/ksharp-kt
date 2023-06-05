@@ -13,5 +13,4 @@ class FileSystemCompilationOutput(private val root: Path) : CompilerOutput {
             }
             .writeText(content, StandardCharsets.UTF_8)
     }
-
 }
