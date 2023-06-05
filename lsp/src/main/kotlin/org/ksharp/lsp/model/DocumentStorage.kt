@@ -26,4 +26,7 @@ class DocumentStorage {
 
     fun content(uri: String): String? = documents[uri]?.content
 
+    fun <T> withDocumentContent(uri: String, action: (content: String) -> T): T? =
+        content(uri)?.let(action)
+
 }

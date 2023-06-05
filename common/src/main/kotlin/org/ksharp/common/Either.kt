@@ -21,6 +21,12 @@ sealed class Either<out L, out R> {
         is Left -> this as Either<Lp, Nothing>
     }
 
+    @Suppress("UNCHECKED_CAST")
+    fun <Lp, Rp> flatMapLeft(f: (L) -> Either<Lp, Rp>): Either<Lp, Rp> = when (this) {
+        is Right -> this as Either<Nothing, Rp>
+        is Left -> f(value)
+    }
+
     val valueOrNull
         get(): R? =
             when (this) {

@@ -15,6 +15,7 @@ dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.0")
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:0.21.0")
     implementation(project(":parser"))
+    implementation(project(":common"))
     testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
 }
 
