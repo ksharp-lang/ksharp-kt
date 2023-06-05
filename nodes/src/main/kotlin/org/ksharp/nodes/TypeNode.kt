@@ -7,14 +7,65 @@ interface TypeExpression {
     val representation: String
 }
 
+data class TypeNodeLocations(
+    val internalLocation: Location,
+    val name: Location,
+    val params: List<Location>,
+    val assignOperatorLocation: Location
+) : NodeLocations
+
+data class TraitNodeLocations(
+    val internalLocation: Location,
+    val name: Location,
+    val params: List<Location>,
+    val assignOperatorLocation: Location
+) : NodeLocations
+
+data class TraitFunctionNodeLocation(
+    val name: Location,
+    val operator: Location
+) : NodeLocations
+
+data class LabelTypeNodeLocations(
+    val name: Location,
+    val separator: Location
+) : NodeLocations
+
+
+data class FunctionTypeNodeLocations(
+    val separators: List<Location>
+) : NodeLocations
+
+data class TupleTypeNodeLocations(
+    val separators: List<Location>
+) : NodeLocations
+
+data class ConstrainedTypeNodeLocations(
+    val separator: Location
+) : NodeLocations
+
+data class UnionTypeNodeLocations(
+    val separators: List<Location>
+) : NodeLocations
+
+data class IntersectionTypeNodeLocations(
+    val separators: List<Location>
+) : NodeLocations
+
+data class TypeDeclarationNodeLocations(
+    val name: Location,
+    val separator: Location,
+    val params: List<Location>
+) : NodeLocations
+
 data class TraitFunctionNode(
     val name: String,
     val type: NodeData,
-    override val location: Location
+    override val location: Location,
+    override val locations: TraitFunctionNodeLocation
 ) : NodeData() {
     override val children: Sequence<NodeData>
         get() = sequenceOf(type)
-
 }
 
 data class TraitFunctionsNode(
@@ -22,6 +73,8 @@ data class TraitFunctionsNode(
 ) : NodeData() {
     override val location: Location
         get() = Location.NoProvided
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
     override val children: Sequence<NodeData>
         get() = functions.asSequence()
 }
@@ -32,7 +85,8 @@ data class TraitNode(
     val name: String,
     val params: List<String>,
     val definition: TraitFunctionsNode,
-    override val location: Location
+    override val location: Location,
+    override val locations: TraitNodeLocations
 ) : NodeData() {
     override val children: Sequence<NodeData>
         get() = sequenceOf(definition)
@@ -42,7 +96,8 @@ data class TraitNode(
 data class LabelTypeNode(
     val name: String,
     val expr: TypeExpression,
-    override val location: Location
+    override val location: Location,
+    override val locations: LabelTypeNodeLocations
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = sequenceOf(expr.cast())
@@ -57,6 +112,9 @@ data class UnitTypeNode(
     override val children: Sequence<NodeData>
         get() = emptySequence()
 
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
+
     override val representation: String
         get() = "()"
 }
@@ -67,6 +125,9 @@ data class ConcreteTypeNode(
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = emptySequence()
+
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
 
     override val representation: String
         get() = name
@@ -79,6 +140,9 @@ data class ParameterTypeNode(
     override val children: Sequence<NodeData>
         get() = emptySequence()
 
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
+
     override val representation: String
         get() = name
 }
@@ -90,16 +154,21 @@ data class ParametricTypeNode(
     override val children: Sequence<NodeData>
         get() = variables.asSequence().cast()
 
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
+
     override val representation: String
         get() = "(${variables.joinToString(" ") { it.representation }})"
 }
 
 data class FunctionTypeNode(
     val params: List<TypeExpression>,
-    override val location: Location
+    override val location: Location,
+    override val locations: FunctionTypeNodeLocations
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = params.asSequence().cast()
+
 
     override val representation: String
         get() = "(${params.joinToString(" -> ") { it.representation }})"
@@ -107,7 +176,8 @@ data class FunctionTypeNode(
 
 data class TupleTypeNode(
     val types: List<TypeExpression>,
-    override val location: Location
+    override val location: Location,
+    override val locations: TupleTypeNodeLocations
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = types.asSequence().cast()
@@ -119,7 +189,8 @@ data class TupleTypeNode(
 data class ConstrainedTypeNode(
     val type: TypeExpression,
     val expression: NodeData,
-    override val location: Location
+    override val location: Location,
+    override val locations: ConstrainedTypeNodeLocations
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = sequenceOf(type, expression).cast()
@@ -133,6 +204,8 @@ data class InvalidSetTypeNode(
 ) : NodeData() {
     override val children: Sequence<NodeData>
         get() = emptySequence()
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
 }
 
 data class SetElement(
@@ -140,6 +213,8 @@ data class SetElement(
     val expression: TypeExpression,
     override val location: Location
 ) : NodeData() {
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
     override val children: Sequence<NodeData>
         get() = emptySequence()
 
@@ -147,7 +222,8 @@ data class SetElement(
 
 data class UnionTypeNode(
     val types: List<TypeExpression>,
-    override val location: Location
+    override val location: Location,
+    override val locations: UnionTypeNodeLocations
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = types.asSequence().cast()
@@ -158,7 +234,8 @@ data class UnionTypeNode(
 
 data class IntersectionTypeNode(
     val types: List<TypeExpression>,
-    override val location: Location
+    override val location: Location,
+    override val locations: IntersectionTypeNodeLocations
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
         get() = types.asSequence().cast()
@@ -174,7 +251,8 @@ data class TypeNode(
     val name: String,
     val params: List<String>,
     val expr: NodeData,
-    override val location: Location
+    override val location: Location,
+    override val locations: TypeNodeLocations
 ) : NodeData() {
     override val children: Sequence<NodeData>
         get() = sequenceOf(expr)
@@ -185,7 +263,8 @@ data class TypeDeclarationNode(
     val name: String,
     val params: List<String>,
     val type: TypeExpression,
-    override val location: Location
+    override val location: Location,
+    override val locations: TypeDeclarationNodeLocations
 ) : NodeData() {
     override val children: Sequence<NodeData>
         get() = sequenceOf(type as NodeData)

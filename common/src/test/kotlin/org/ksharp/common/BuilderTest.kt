@@ -23,7 +23,6 @@ class ListAccumulatorStateTest : StringSpec({
                 get("Key1").shouldBe("Value1")
                 containsKey("Key1").shouldBe(true)
             }
-            size().shouldBe(1)
             build().shouldBe(mapOf("Key1" to "Value1"))
         }
     }

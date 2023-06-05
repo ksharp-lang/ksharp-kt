@@ -16,11 +16,13 @@ class LetExpressionNodeTest : StringSpec({
                         Location.NoProvided
                     ),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    MatchAssignNodeLocations(Location.NoProvided)
                 )
             ),
             LiteralValueNode("5", LiteralValueType.Integer, Location.NoProvided),
-            Location.NoProvided
+            Location.NoProvided,
+            LetExpressionNodeLocations(Location.NoProvided)
         ).node.apply {
             cast<LetExpressionNode>().apply {
                 matches.shouldBe(
@@ -29,15 +31,17 @@ class LetExpressionNodeTest : StringSpec({
                             MatchValueNode(
                                 MatchValueType.Expression,
                                 UnitNode(Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided,
                             ),
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            MatchAssignNodeLocations(Location.NoProvided)
                         )
                     )
                 )
                 expression.shouldBe(LiteralValueNode("5", LiteralValueType.Integer, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(LetExpressionNodeLocations(Location.NoProvided))
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -50,7 +54,8 @@ class LetExpressionNodeTest : StringSpec({
                                 Location.NoProvided
                             ),
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            MatchAssignNodeLocations(Location.NoProvided)
                         )
                     ),
                     Node(
