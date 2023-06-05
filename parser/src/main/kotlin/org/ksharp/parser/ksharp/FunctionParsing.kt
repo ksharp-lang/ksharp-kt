@@ -1,8 +1,10 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.common.new
 import org.ksharp.nodes.FunctionNode
+import org.ksharp.nodes.FunctionNodeLocations
 import org.ksharp.nodes.NodeData
 import org.ksharp.nodes.UnitNode
 import org.ksharp.parser.*
@@ -69,7 +71,14 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean): KSharpParserResul
                     name.text,
                     arguments,
                     expr,
-                    name.location
+                    name.location,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             }.map {
                 ParserValue(

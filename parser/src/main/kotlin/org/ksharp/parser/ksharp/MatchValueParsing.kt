@@ -1,5 +1,6 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
@@ -26,7 +27,8 @@ internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
                     MatchListValueNode(
                         head,
                         LiteralValueNode(tail.text, LiteralValueType.Binding, tail.location),
-                        location
+                        location,
+                        MatchListValueNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                     ),
                     location
                 ).cast<NodeData>()
@@ -54,6 +56,7 @@ internal fun KSharpLexerIterator.consumeMatchAssignment() =
             MatchAssignNode(
                 match,
                 it.last().cast(),
-                match.location
+                match.location,
+                MatchAssignNodeLocations(Location.NoProvided)
             )
         }

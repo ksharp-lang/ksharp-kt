@@ -3,6 +3,7 @@ package org.ksharp.parser.ksharp
 import org.ksharp.common.add
 import org.ksharp.common.cast
 import org.ksharp.nodes.AnnotationNode
+import org.ksharp.nodes.AnnotationNodeLocations
 import org.ksharp.parser.*
 
 typealias KSharpAnnotationValueResult = ParserResult<Any, KSharpLexerState>
@@ -27,15 +28,23 @@ private fun KSharpAnnotationValueResult.orAnnotationValue(
     or { it.ifConsume(type, false, createValue) }
 
 private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueResult =
-    ifConsume(KSharpTokenType.Alt, true) {
+    ifConsume(KSharpTokenType.Alt, false) {
         it.thenAnnotation().cast<KSharpAnnotationValueResult>()
     }.orAnnotationValue(KSharpTokenType.String) {
-        it.build {
-            it.first().cast<Token>().text.let { it.substring(1, it.length - 1) }
+        it.build { l ->
+            l.first().cast<Token>().text.let { t ->
+                t.substring(1, t.length - 1)
+            }
+        }
+    }.orAnnotationValue(KSharpTokenType.MultiLineString) {
+        it.build { l ->
+            l.first().cast<Token>().text.let { t ->
+                t.substring(3, t.length - 3)
+            }
         }
     }.orAnnotationValue({
         it.type == KSharpTokenType.UpperCaseWord && it.text.isBooleanLiteral
-    }) { it.build { it.first().cast<Token>().text == "True" } }
+    }) { it.build { l -> l.first().cast<Token>().text == "True" } }
         .orAnnotationValue(KSharpTokenType.OpenBracket) {
             it.thenLoop { tl -> tl.consumeAnnotationValue() }
                 .then(KSharpTokenType.CloseBracket, true)
@@ -71,7 +80,8 @@ private fun KSharpConsumeResult.thenAnnotation(): KSharpParserResult =
             }.then(KSharpTokenType.CloseParenthesis, true)
         }.thenIf(KSharpTokenType.UnitValue) { it }
         .build {
-            val annotationName = it.first().cast<Token>()
+            val altToken = it[0].cast<Token>()
+            val annotationName = it[1].cast<Token>()
             AnnotationNode(
                 annotationName.text,
                 it.asSequence()
@@ -81,7 +91,8 @@ private fun KSharpConsumeResult.thenAnnotation(): KSharpParserResult =
                         if (i is Pair<*, *>) i
                         else "default" to i
                     }.cast(),
-                annotationName.location
+                annotationName.location,
+                AnnotationNodeLocations(altToken.location, annotationName.location, listOf())
             )
         }.map {
             it.remainTokens.state.value.annotations.update { list ->
@@ -91,7 +102,7 @@ private fun KSharpConsumeResult.thenAnnotation(): KSharpParserResult =
         }.cast()
 
 internal fun KSharpLexerIterator.consumeAnnotation(): KSharpParserResult =
-    ifConsume(KSharpTokenType.Alt, true) { l ->
+    ifConsume(KSharpTokenType.Alt, false) { l ->
         l.enableDiscardBlockAndNewLineTokens { dbL ->
             dbL.disableCollapseAssignOperatorRule {
                 it.thenAnnotation()

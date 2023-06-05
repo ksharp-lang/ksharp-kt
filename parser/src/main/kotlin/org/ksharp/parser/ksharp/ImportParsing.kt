@@ -1,7 +1,9 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.nodes.ImportNode
+import org.ksharp.nodes.ImportNodeLocations
 import org.ksharp.parser.*
 
 /**
@@ -36,5 +38,14 @@ fun KSharpLexerIterator.consumeImport(): KSharpParserResult =
         .build {
             val moduleName = it[1] as String
             val key = it.last().cast<LexerValue>().text
-            ImportNode(moduleName, key, it.first().cast<LexerValue>().location)
+            ImportNode(
+                moduleName, key, it.first().cast<LexerValue>().location,
+                ImportNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided
+                )
+            )
         }

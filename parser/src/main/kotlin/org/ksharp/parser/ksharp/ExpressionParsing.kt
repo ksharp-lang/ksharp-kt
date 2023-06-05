@@ -1,5 +1,6 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
@@ -55,12 +56,14 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
                 it[1] as NodeData,
                 it[2] as NodeData,
                 UnitNode(location),
-                location
+                location,
+                IfNodeLocations(Location.NoProvided, Location.NoProvided, null)
             ) else IfNode(
                 it[1] as NodeData,
                 it[2] as NodeData,
                 it[3] as NodeData,
-                location
+                location,
+                IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
             )
         }
 
@@ -96,7 +99,10 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
             val letToken = it.first().cast<Token>()
             val expr = it.last().cast<NodeData>()
             val matches = it.asSequence().filterIsInstance<MatchAssignNode>().toList()
-            LetExpressionNode(matches, expr, letToken.location)
+            LetExpressionNode(
+                matches, expr, letToken.location,
+                LetExpressionNodeLocations(Location.NoProvided)
+            )
         }
 
 internal fun KSharpLexerIterator.consumeExpressionValue(
@@ -143,7 +149,11 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
                     .build { l -> l.first().cast() }
             }.build {
                 if (it.size == 1) it.first().cast<NodeData>()
-                else LiteralCollectionNode(it.cast(), LiteralCollectionType.Tuple, it.first().cast<NodeData>().location)
+                else LiteralCollectionNode(
+                    it.cast(), LiteralCollectionType.Tuple,
+                    it.first().cast<NodeData>().location,
+                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
+                )
             }
     } else withFunctionCall
 }
@@ -157,7 +167,8 @@ private fun KSharpConsumeResult.buildOperatorExpression(): KSharpParserResult =
                 operator.text,
                 it.first().cast(),
                 it.last().cast(),
-                operator.location
+                operator.location,
+                OperatorNodeLocations(Location.NoProvided)
             )
         }
     }

@@ -1,5 +1,6 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
@@ -34,7 +35,12 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
                 LiteralCollectionType.List
             } else LiteralCollectionType.Set
             val location = token.location
-            LiteralCollectionNode(it.drop(1).cast(), type, location)
+            LiteralCollectionNode(
+                it.drop(1).cast(),
+                type,
+                location,
+                LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
+            )
         }
 
 private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
@@ -44,7 +50,12 @@ private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
         .consume { it.consumeExpression(false) }
         .build {
             val first = it.first().cast<NodeData>()
-            LiteralMapEntryNode(first, it.last().cast(), first.location)
+            LiteralMapEntryNode(
+                first,
+                it.last().cast(),
+                first.location,
+                LiteralMapEntryNodeLocations(Location.NoProvided)
+            )
         }
 
 private fun KSharpLexerIterator.consumeMapLiteral(): KSharpParserResult =
@@ -60,7 +71,10 @@ private fun KSharpLexerIterator.consumeMapLiteral(): KSharpParserResult =
             val token = it.first().cast<Token>()
             val type = LiteralCollectionType.Map
             val location = token.location
-            LiteralCollectionNode(it.drop(1).cast(), type, location)
+            LiteralCollectionNode(
+                it.drop(1).cast(), type, location,
+                LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
+            )
         }
 
 internal fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean) =
@@ -96,5 +110,3 @@ internal fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean) =
                     }
             } else it
         }
-
-

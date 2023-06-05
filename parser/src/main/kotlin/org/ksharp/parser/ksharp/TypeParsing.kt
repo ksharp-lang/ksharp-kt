@@ -1,9 +1,6 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.add
-import org.ksharp.common.addAll
-import org.ksharp.common.cast
-import org.ksharp.common.listBuilder
+import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
@@ -69,16 +66,19 @@ private fun List<Any>.toFunctionType(separator: Token): NodeData {
     val first = first() as TypeExpression
     val last = last() as TypeExpression
     return if (last is FunctionTypeNode) {
-        FunctionTypeNode(listOf(first) + last.params, separator.location)
-    } else FunctionTypeNode(listOf(first, last), separator.location)
+        FunctionTypeNode(
+            listOf(first) + last.params, separator.location,
+            FunctionTypeNodeLocations(listOf())
+        )
+    } else FunctionTypeNode(listOf(first, last), separator.location, FunctionTypeNodeLocations(listOf()))
 }
 
 private fun List<Any>.toTupleType(separator: Token): NodeData {
     val first = first() as TypeExpression
     val last = last() as TypeExpression
     return if (last is TupleTypeNode) {
-        TupleTypeNode(listOf(first) + last.types, separator.location)
-    } else TupleTypeNode(listOf(first, last), separator.location)
+        TupleTypeNode(listOf(first) + last.types, separator.location, TupleTypeNodeLocations(listOf()))
+    } else TupleTypeNode(listOf(first, last), separator.location, TupleTypeNodeLocations(listOf()))
 }
 
 private fun List<Any>.toLabelOrValueType(): NodeData {
@@ -88,7 +88,8 @@ private fun List<Any>.toLabelOrValueType(): NodeData {
         LabelTypeNode(
             node.text.let { t -> t.substring(0, t.length - 1) },
             type.cast<TypeExpression>(),
-            node.location
+            node.location,
+            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
         )
     } else type
 }
@@ -191,8 +192,17 @@ private fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
                 val item = it.first() as NodeData
                 when (setType) {
                     SetType.Invalid -> InvalidSetTypeNode(item.location)
-                    SetType.Union -> UnionTypeNode(it.asTypeExpressionList(), item.location)
-                    SetType.Intersection -> IntersectionTypeNode(it.asTypeExpressionList(), item.location)
+                    SetType.Union -> UnionTypeNode(
+                        it.asTypeExpressionList(), item.location, UnionTypeNodeLocations(
+                            listOf()
+                        )
+                    )
+
+                    SetType.Intersection -> IntersectionTypeNode(
+                        it.asTypeExpressionList(), item.location, IntersectionTypeNodeLocations(
+                            listOf()
+                        )
+                    )
                 }
             }
         }
@@ -205,7 +215,12 @@ private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
         .build {
             val name = it.first().cast<Token>()
             val type = it.last().cast<NodeData>()
-            TraitFunctionNode(name.text, type, name.location)
+            TraitFunctionNode(
+                name.text,
+                type,
+                name.location,
+                TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
+            )
         }
 
 private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserResult =
@@ -226,7 +241,10 @@ private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserRes
             val params = if (it.size == 2) {
                 listOf<String>()
             } else it.subList(1, it.size - 1).cast()
-            TraitNode(internal, null, name.text, params, it.last().cast(), name.location)
+            TraitNode(
+                internal, null, name.text, params, it.last().cast(), name.location,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+            )
                 .cast()
         }.map {
             ParserValue(
@@ -254,7 +272,11 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResu
                         val params = if (it.size == 2) {
                             listOf<String>()
                         } else it.subList(1, it.size - 1).cast()
-                        TypeNode(internal, null, name.text, params, it.last().cast(), name.location)
+                        TypeNode(
+                            internal, null, name.text, params, it.last().cast(),
+                            name.location,
+                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                        )
                             .cast<NodeData>()
                     }.map {
                         ParserValue(
@@ -271,7 +293,12 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResu
                     if (it.size == 1) type.cast<NodeData>()
                     else {
                         val expr = it.last().cast<NodeData>()
-                        type.copy(expr = ConstrainedTypeNode(type.expr.cast(), expr, expr.location))
+                        type.copy(
+                            expr = ConstrainedTypeNode(
+                                type.expr.cast(), expr, expr.location,
+                                ConstrainedTypeNodeLocations(Location.NoProvided)
+                            )
+                        )
                     }
                 }
         }.or {
@@ -306,7 +333,8 @@ internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserR
                     name.text,
                     params.toList(),
                     i.last().cast(),
-                    name.location
+                    name.location,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                 ).cast<NodeData>()
             }.asLookAHeadResult()
     }.map {
