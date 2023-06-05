@@ -1,7 +1,6 @@
 package org.ksharp.lsp.capabilities.semantic_tokens
 
 import org.ksharp.common.*
-import org.ksharp.lsp.client.ClientLogger
 import kotlin.math.pow
 
 
@@ -81,8 +80,6 @@ class TokenEncoder(
             encoderData.add(modifiers.asSequence().map {
                 this.modifiers[it] ?: 0
             }.sum())
-
-            ClientLogger.info("data: [$offsetLine $offset $length $t 0]")
         }
     }
 

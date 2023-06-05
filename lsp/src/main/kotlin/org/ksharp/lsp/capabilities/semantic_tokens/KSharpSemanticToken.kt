@@ -7,7 +7,6 @@ import org.eclipse.lsp4j.SemanticTokensWithRegistrationOptions
 import org.ksharp.common.Either
 import org.ksharp.common.ErrorOrValue
 import org.ksharp.common.cast
-import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.parser.LogicalLexerToken
 import org.ksharp.parser.Token
 import org.ksharp.parser.asSequence
@@ -66,6 +65,8 @@ fun Token.semanticToken(): String? =
         KSharpTokenType.Float -> SemanticTokenTypes.Number
         KSharpTokenType.LowerCaseWord -> when (text) {
             "type" -> SemanticTokenTypes.Keyword
+            "native" -> SemanticTokenTypes.Keyword
+            "pub" -> SemanticTokenTypes.Keyword
             else -> null
         }
 
@@ -97,7 +98,6 @@ fun calculateSemanticTokens(uri: String, content: String): ErrorOrValue<List<Int
                             tokenType,
                             *tk.semanticTokenModifiers()
                         )
-                        ClientLogger.info("${tk.text}:${line.value}:${offset.value}:${tk.endOffset - tk.startOffset}:$tokenType")
                     }
                 }
             Either.Right(encoder.data())
