@@ -28,11 +28,11 @@ class TypeParserTest : StringSpec({
                 ) to listOf(
                     LexerToken(
                         type = KSharpTokenType.Operator10,
-                        token = TextToken(text = "--", startOffset = 22, endOffset = 23)
+                        token = TextToken(text = "--", startOffset = 22, endOffset = 24)
                     ),
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
-                        token = TextToken(text = "Int", startOffset = 25, endOffset = 27)
+                        token = TextToken(text = "Int", startOffset = 25, endOffset = 28)
                     ),
                     LexerToken(
                         type = KSharpTokenType.NewLine,
@@ -61,11 +61,11 @@ class TypeParserTest : StringSpec({
                 ) to listOf(
                     LexerToken(
                         type = KSharpTokenType.Operator4,
-                        token = TextToken(text = "|-", startOffset = 17, endOffset = 18)
+                        token = TextToken(text = "|-", startOffset = 17, endOffset = 19)
                     ),
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
-                        token = TextToken(text = "False", startOffset = 20, endOffset = 24)
+                        token = TextToken(text = "False", startOffset = 20, endOffset = 25)
                     ),
                     LexerToken(
                         type = KSharpTokenType.NewLine,
@@ -94,11 +94,11 @@ class TypeParserTest : StringSpec({
                 ) to listOf(
                     LexerToken(
                         type = KSharpTokenType.Operator6,
-                        token = TextToken(text = "&-", startOffset = 17, endOffset = 18)
+                        token = TextToken(text = "&-", startOffset = 17, endOffset = 19)
                     ),
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
-                        token = TextToken(text = "False", startOffset = 20, endOffset = 24)
+                        token = TextToken(text = "False", startOffset = 20, endOffset = 25)
                     ),
                     LexerToken(
                         type = KSharpTokenType.NewLine,

@@ -134,10 +134,10 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
 fun KSharpConsumeResult.thenAssignOperator() =
     then(KSharpTokenType.AssignOperator, true)
 
-fun Reader.parseModule(
-    context: String,
-    withLocations: Boolean = false
-): ParserErrorOrValue<KSharpLexerState, ModuleNode> =
+fun String.lexerModule(context: String, withLocations: Boolean) =
+    this.reader().lexerModule(context, withLocations)
+
+fun Reader.lexerModule(context: String, withLocations: Boolean) =
     kSharpLexer()
         .collapseKSharpTokens()
         .cast<TokenLexerIterator<KSharpLexerState>>()
@@ -148,7 +148,14 @@ fun Reader.parseModule(
             val token = LexerToken(it, TextToken("", 0, 0))
             if (withLocations) LogicalLexerToken(token, context, ZeroPosition, ZeroPosition)
             else token
-        }.consumeModule(context)
+        }
+
+fun Reader.parseModule(
+    context: String,
+    withLocations: Boolean = false
+): ParserErrorOrValue<KSharpLexerState, ModuleNode> =
+    lexerModule(context, withLocations)
+        .consumeModule(context)
         .map { it.value }
 
 fun Path.parseModule(withLocations: Boolean = false) =
