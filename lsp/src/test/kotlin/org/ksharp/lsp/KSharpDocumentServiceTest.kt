@@ -9,7 +9,8 @@ import org.ksharp.lsp.model.DocumentStorage
 class KSharpDocumentServiceTest : StringSpec({
     "Document lifecycle test" {
         val storage = DocumentStorage()
-        val service = KSharpDocumentService(storage)
+        val server = KSharpLanguageServer(storage)
+        val service = server.textDocumentService
         service.didOpen(DidOpenTextDocumentParams().apply {
             this.textDocument = TextDocumentItem().apply {
                 this.languageId = "ksharp"

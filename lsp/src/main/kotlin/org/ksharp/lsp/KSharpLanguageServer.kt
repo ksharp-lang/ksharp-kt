@@ -4,13 +4,14 @@ import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.*
 import org.ksharp.lsp.capabilities.semantic_tokens.kSharpSemanticTokensProvider
 import org.ksharp.lsp.client.Client
-import org.ksharp.lsp.client.ClientLogger
+import org.ksharp.lsp.model.DocumentStorage
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
-class KSharpLanguageServer : LanguageServer, LanguageClientAware {
+class KSharpLanguageServer(private val documentStorage: DocumentStorage = DocumentStorage()) : LanguageServer,
+    LanguageClientAware {
 
-    override fun initialize(params: InitializeParams?): CompletableFuture<InitializeResult> {
+    override fun initialize(params: InitializeParams): CompletableFuture<InitializeResult> {
         return CompletableFuture.supplyAsync(Supplier {
             InitializeResult().apply {
                 capabilities = ServerCapabilities().apply {
@@ -26,19 +27,17 @@ class KSharpLanguageServer : LanguageServer, LanguageClientAware {
     }
 
     override fun shutdown(): CompletableFuture<Any> {
-        ClientLogger.info("KSharp server: shutdown")
         return CompletableFuture.supplyAsync { true }
     }
 
     override fun exit() {
-        ClientLogger.info("KSharp server: exit")
     }
 
     override fun connect(client: LanguageClient) {
         Client.initialize(client)
     }
 
-    override fun getTextDocumentService(): TextDocumentService = KSharpDocumentService()
+    override fun getTextDocumentService(): TextDocumentService = KSharpDocumentService(documentStorage)
 
     override fun getWorkspaceService(): WorkspaceService = KSharpWorkspaceService()
 }

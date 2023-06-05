@@ -8,7 +8,7 @@ import org.ksharp.lsp.model.DocumentStorage
 import org.ksharp.lsp.model.Range
 import java.util.concurrent.CompletableFuture
 
-class KSharpDocumentService(private val documentStorage: DocumentStorage = DocumentStorage()) : TextDocumentService {
+class KSharpDocumentService(private val documentStorage: DocumentStorage) : TextDocumentService {
 
     override fun didOpen(params: DidOpenTextDocumentParams) {
         with(params.textDocument) {
@@ -38,9 +38,7 @@ class KSharpDocumentService(private val documentStorage: DocumentStorage = Docum
         documentStorage.remove(params.textDocument.uri)
     }
 
-    override fun didSave(params: DidSaveTextDocumentParams) {
-        ClientLogger.info("didSave: $params")
-    }
+    override fun didSave(params: DidSaveTextDocumentParams) {}
 
     override fun semanticTokensFull(params: SemanticTokensParams): CompletableFuture<SemanticTokens> {
         ClientLogger.info("semanticTokensFull: $params")
