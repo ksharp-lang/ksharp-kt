@@ -27,7 +27,7 @@ private fun KSharpAnnotationValueResult.orAnnotationValue(
     or { it.ifConsume(type, false, createValue) }
 
 private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueResult =
-    ifConsume(KSharpTokenType.Alt, true) { it ->
+    ifConsume(KSharpTokenType.Alt, true) {
         it.thenAnnotation().cast<KSharpAnnotationValueResult>()
     }.orAnnotationValue(KSharpTokenType.String) {
         it.build {
@@ -57,7 +57,7 @@ private fun KSharpLexerIterator.consumeAnnotationKeyValue(): KSharpAnnotationVal
             }.build {
                 val key = it.first().cast<Token>().text
                 val value = it.last()
-                (key to value) as Any
+                (key to value).cast<Any>()
             }
     }.or {
         it.consumeAnnotationValue()

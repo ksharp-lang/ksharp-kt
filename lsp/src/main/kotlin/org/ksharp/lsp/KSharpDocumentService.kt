@@ -38,7 +38,9 @@ class KSharpDocumentService(private val documentStorage: DocumentStorage) : Text
         documentStorage.remove(params.textDocument.uri)
     }
 
-    override fun didSave(params: DidSaveTextDocumentParams) {}
+    override fun didSave(params: DidSaveTextDocumentParams) {
+        //not required
+    }
 
     override fun semanticTokensFull(params: SemanticTokensParams): CompletableFuture<SemanticTokens> {
         ClientLogger.info("semanticTokensFull: $params")

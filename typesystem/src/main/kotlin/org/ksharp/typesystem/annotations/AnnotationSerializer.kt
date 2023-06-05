@@ -56,7 +56,7 @@ private val serializerReader = mapOf<String, SerializerReader<Any>>(
     "String" to SerializerReader { buffer, table ->
         table[buffer.readInt(0)]
     },
-    "Boolean" to SerializerReader { buffer, table ->
+    "Boolean" to SerializerReader { buffer, _ ->
         buffer.readInt(0) == 1
     },
     "List" to SerializerReader { buffer, table ->

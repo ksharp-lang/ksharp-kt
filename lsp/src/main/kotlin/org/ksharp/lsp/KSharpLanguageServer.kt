@@ -7,6 +7,7 @@ import org.ksharp.lsp.client.Client
 import org.ksharp.lsp.model.DocumentStorage
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
+import kotlin.system.exitProcess
 
 class KSharpLanguageServer(private val documentStorage: DocumentStorage = DocumentStorage()) : LanguageServer,
     LanguageClientAware {
@@ -31,6 +32,7 @@ class KSharpLanguageServer(private val documentStorage: DocumentStorage = Docume
     }
 
     override fun exit() {
+        exitProcess(0)
     }
 
     override fun connect(client: LanguageClient) {
