@@ -131,7 +131,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -163,7 +169,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -195,7 +207,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -214,7 +232,13 @@ class TypeParserTest : StringSpec({
                     listOf(),
                     ConcreteTypeNode("Int", Location.NoProvided),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -233,7 +257,13 @@ class TypeParserTest : StringSpec({
                     listOf(),
                     ConcreteTypeNode("Int", Location.NoProvided),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -257,7 +287,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -282,7 +318,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -301,7 +343,13 @@ class TypeParserTest : StringSpec({
                     listOf("n"),
                     ParameterTypeNode("n", Location.NoProvided),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -326,7 +374,13 @@ class TypeParserTest : StringSpec({
                         Location.NoProvided
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -353,7 +407,13 @@ class TypeParserTest : StringSpec({
                         FunctionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -378,7 +438,13 @@ class TypeParserTest : StringSpec({
                         Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -404,7 +470,13 @@ class TypeParserTest : StringSpec({
                         TupleTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -429,7 +501,13 @@ class TypeParserTest : StringSpec({
                         Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -457,7 +535,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -488,7 +572,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -522,7 +612,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -550,7 +646,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -584,7 +686,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -626,7 +734,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -668,7 +782,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -702,7 +822,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -723,7 +849,13 @@ class TypeParserTest : StringSpec({
                         Location.NoProvided
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -751,7 +883,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -779,7 +917,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -829,7 +973,13 @@ class TypeParserTest : StringSpec({
                         )
                     ),
                     Location.NoProvided,
-                    TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -882,7 +1032,13 @@ class TypeParserTest : StringSpec({
                         )
                     ),
                     Location.NoProvided,
-                    TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -932,7 +1088,13 @@ class TypeParserTest : StringSpec({
                         )
                     ),
                     Location.NoProvided,
-                    TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -969,7 +1131,13 @@ class TypeParserTest : StringSpec({
                         )
                     ),
                     Location.NoProvided,
-                    TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1004,7 +1172,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1042,7 +1216,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1090,7 +1270,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1136,7 +1322,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1184,7 +1376,13 @@ class TypeParserTest : StringSpec({
                         ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1223,7 +1421,13 @@ class TypeParserTest : StringSpec({
                         Location.NoProvided, ConstrainedTypeNodeLocations(Location.NoProvided)
                     ),
                     Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1238,7 +1442,13 @@ class TypeParserTest : StringSpec({
                 TypeNode(
                     false, null,
                     "Unit", listOf(), UnitTypeNode(Location.NoProvided), Location.NoProvided,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }

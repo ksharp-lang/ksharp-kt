@@ -9,6 +9,7 @@ interface TypeExpression {
 
 data class TypeNodeLocations(
     val internalLocation: Location,
+    val typeLocation: Location,
     val name: Location,
     val params: List<Location>,
     val assignOperatorLocation: Location
@@ -16,6 +17,7 @@ data class TypeNodeLocations(
 
 data class TraitNodeLocations(
     val internalLocation: Location,
+    val traitLocation: Location,
     val name: Location,
     val params: List<Location>,
     val assignOperatorLocation: Location

@@ -82,7 +82,13 @@ class TypeNodeTest : StringSpec({
             listOf("a"),
             TraitFunctionsNode(listOf()),
             testLocation,
-            TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+            TraitNodeLocations(
+                Location.NoProvided,
+                Location.NoProvided,
+                Location.NoProvided,
+                listOf(),
+                Location.NoProvided
+            )
         ).node.apply {
             cast<TraitNode>().apply {
                 internal.shouldBeTrue()
@@ -93,6 +99,7 @@ class TypeNodeTest : StringSpec({
                 location.shouldBe(testLocation)
                 locations.shouldBe(
                     TraitNodeLocations(
+                        Location.NoProvided,
                         Location.NoProvided,
                         Location.NoProvided,
                         listOf(),
@@ -327,7 +334,13 @@ class TypeNodeTest : StringSpec({
             listOf("a"),
             ConcreteTypeNode("Int", testLocation),
             testLocation,
-            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+            TypeNodeLocations(
+                Location.NoProvided,
+                Location.NoProvided,
+                Location.NoProvided,
+                listOf(),
+                Location.NoProvided
+            )
         ).node.apply {
             cast<TypeNode>().apply {
                 internal.shouldBeFalse()
@@ -338,6 +351,7 @@ class TypeNodeTest : StringSpec({
                 location.shouldBe(testLocation)
                 locations.shouldBe(
                     TypeNodeLocations(
+                        Location.NoProvided,
                         Location.NoProvided,
                         Location.NoProvided,
                         listOf(),

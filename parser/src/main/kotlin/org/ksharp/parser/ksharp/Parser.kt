@@ -110,11 +110,18 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
         is Either.Left -> {
             if (value.consumedTokens) {
                 val iter = value.remainTokens
-                var result = Either.Left(ParserError(value.error, true, emptyLexerIterator(value.remainTokens.state)))
+                var result = Either.Left(
+                    ParserError(
+                        value.error,
+                        value.collection,
+                        true,
+                        emptyLexerIterator(value.remainTokens.state)
+                    )
+                )
                 while (iter.hasNext()) {
                     val tk = iter.next()
                     if (tk.type == KSharpTokenType.EndBlock) {
-                        result = Either.Left(ParserError(value.error, true, iter))
+                        result = Either.Left(ParserError(value.error, value.collection, true, iter))
                         break
                     }
                 }

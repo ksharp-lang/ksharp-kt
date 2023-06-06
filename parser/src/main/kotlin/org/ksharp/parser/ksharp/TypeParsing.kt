@@ -223,13 +223,13 @@ private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
             )
         }
 
-private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserResult =
-    consumeKeyword("trait", true)
+private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
+    thenKeyword("trait", false)
         .enableDiscardBlockAndNewLineTokens { withoutBlocks ->
             withoutBlocks.thenUpperCaseWord()
                 .thenLoop {
                     it.consumeLowerCaseWord()
-                        .build { param -> param.last().cast<LexerValue>().text }
+                        .build { param -> param.last() }
                 }.thenAssignOperator()
         }.thenInBlock { block ->
             block.collect()
@@ -237,15 +237,35 @@ private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserRes
                 .build { TraitFunctionsNode(it.cast()) }
         }
         .build<NodeData, KSharpLexerState> {
-            val name = it.first().cast<LexerValue>()
-            val params = if (it.size == 2) {
-                listOf<String>()
-            } else it.subList(1, it.size - 1).cast()
+            var index = 0
+            val internalLoc = if (internal) {
+                it[index++].cast<Token>().location
+            } else Location.NoProvided
+            val traitLoc = it[index++].cast<Token>().location
+            val name = it[index++].cast<Token>()
+            val paramsLocations = listBuilder<Location>()
+            val params = it.asSequence()
+                .drop(index)
+                .takeWhile { i -> i is LexerValue && i.type != KSharpTokenType.AssignOperator }
+                .map { i ->
+                    val tk = i.cast<Token>()
+                    if (emitLocations) {
+                        paramsLocations.add(tk.location)
+                    }
+                    tk.text
+                }.toList()
+            index += params.size
+            val assignLoc = it[index].cast<Token>().location
             TraitNode(
                 internal, null, name.text, params, it.last().cast(), name.location,
-                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
-            )
-                .cast()
+                TraitNodeLocations(
+                    internalLoc,
+                    traitLoc,
+                    name.location,
+                    paramsLocations.build(),
+                    assignLoc
+                )
+            ).cast()
         }.map {
             ParserValue(
                 it.value.cast<TraitNode>()
@@ -254,28 +274,45 @@ private fun KSharpLexerIterator.consumeTrait(internal: Boolean): KSharpParserRes
             )
         }
 
-private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResult =
-    thenKeyword("type", true)
-        .enableDiscardBlockAndNewLineTokens { withoutBlocks ->
+private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
+    thenIfConsume({
+        it.type == KSharpTokenType.LowerCaseWord && it.text == "type"
+    }, false) {
+        it.enableDiscardBlockAndNewLineTokens { withoutBlocks ->
             withoutBlocks.enableLabelToken { withLabels ->
                 withLabels.thenUpperCaseWord()
                     .thenLoop {
                         it.consumeLowerCaseWord()
                             .build { param ->
-                                param.last().cast<LexerValue>().text
+                                param.last()
                             }
                     }
                     .thenAssignOperator()
                     .consume { it.consumeTypeExpr() }
                     .build {
-                        val name = it.first().cast<LexerValue>()
-                        val params = if (it.size == 2) {
-                            listOf<String>()
-                        } else it.subList(1, it.size - 1).cast()
+                        var index = 0
+                        val internalLoc = if (internal) {
+                            it[index++].cast<Token>().location
+                        } else Location.NoProvided
+                        val typeLoc = it[index++].cast<Token>().location
+                        val name = it[index++].cast<Token>()
+                        val paramsLocations = listBuilder<Location>()
+                        val params = it.asSequence()
+                            .drop(index)
+                            .takeWhile { i -> i is LexerValue && i.type != KSharpTokenType.AssignOperator }
+                            .map { i ->
+                                val tk = i.cast<Token>()
+                                if (emitLocations) {
+                                    paramsLocations.add(tk.location)
+                                }
+                                tk.text
+                            }.toList()
+                        index += params.size
+                        val assignLoc = it[index].cast<Token>().location
                         TypeNode(
                             internal, null, name.text, params, it.last().cast(),
                             name.location,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(internalLoc, typeLoc, name.location, paramsLocations.build(), assignLoc)
                         )
                             .cast<NodeData>()
                     }.map {
@@ -301,15 +338,16 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean): KSharpParserResu
                         )
                     }
                 }
-        }.or {
-            it.consumeTrait(internal)
         }
+    }.orCollect {
+        it.consumeTrait(internal, emitLocations)
+    }
 
 fun KSharpLexerIterator.consumeTypeDeclaration(): KSharpParserResult =
-    ifConsume(KSharpTokenType.LowerCaseWord, "internal", true) {
-        it.consumeType(true)
+    ifConsume(KSharpTokenType.LowerCaseWord, "internal", false) {
+        it.consumeType(true, state.value.emitLocations)
     }.or {
-        it.collect().consumeType(false)
+        it.collect().consumeType(false, state.value.emitLocations)
     }
 
 internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserResult =

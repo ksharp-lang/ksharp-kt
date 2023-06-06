@@ -197,7 +197,13 @@ class ModuleParserTest : StringSpec({
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(), listOf(), Location.NoProvided
                 )
@@ -225,7 +231,13 @@ class ModuleParserTest : StringSpec({
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         ),
                         TypeNode(
                             false,
@@ -234,7 +246,13 @@ class ModuleParserTest : StringSpec({
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(), listOf(), Location.NoProvided
                 )
@@ -257,7 +275,13 @@ class ModuleParserTest : StringSpec({
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         ),
                         TraitNode(
                             false,
@@ -282,7 +306,13 @@ class ModuleParserTest : StringSpec({
                                 )
                             ),
                             Location.NoProvided,
-                            TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TraitNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(), listOf(), Location.NoProvided
                 )
@@ -306,7 +336,13 @@ class ModuleParserTest : StringSpec({
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         ),
                         TraitNode(
                             false,
@@ -336,7 +372,13 @@ class ModuleParserTest : StringSpec({
                                 )
                             ),
                             Location.NoProvided,
-                            TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TraitNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(), listOf(), Location.NoProvided
                 )
@@ -449,7 +491,13 @@ class ModuleParserTest : StringSpec({
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
                             Location.NoProvided,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(
                         TypeDeclarationNode(

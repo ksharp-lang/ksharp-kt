@@ -32,7 +32,13 @@ class ModuleNodeTest : StringSpec({
             listOf(
                 TypeNode(
                     false, null, "Age", listOf(), ConcreteTypeNode("Int", testLocation), testLocation,
-                    TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             ),
             listOf(
@@ -80,7 +86,13 @@ class ModuleNodeTest : StringSpec({
                             listOf(),
                             ConcreteTypeNode("Int", testLocation),
                             testLocation,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     )
                 )
@@ -111,7 +123,13 @@ class ModuleNodeTest : StringSpec({
                             listOf(),
                             ConcreteTypeNode("Int", testLocation),
                             testLocation,
-                            TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ),
                     Node(
