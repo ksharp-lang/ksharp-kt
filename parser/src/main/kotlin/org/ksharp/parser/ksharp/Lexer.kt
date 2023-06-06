@@ -8,6 +8,7 @@ import java.io.Reader
 import java.util.concurrent.atomic.AtomicInteger
 
 data class KSharpLexerState(
+    val emitLocations: Boolean = false,
     val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
     val discardBlockTokens: Boolean = false,
@@ -150,6 +151,14 @@ private inline fun KSharpLexer.loopChar(
     predicate: Char.() -> Boolean,
     endToken: TokenType
 ): LexerToken = loopChar(predicate, endToken) { token(endToken, 1) }
+
+fun <R> KSharpLexerIterator.emitLocations(withLocations: Boolean, code: (KSharpLexerIterator) -> R): R =
+    state.value.emitLocations.let { initValue ->
+        state.update(state.value.copy(emitLocations = withLocations))
+        code(this).also {
+            state.update(state.value.copy(emitLocations = initValue))
+        }
+    }
 
 fun <R> KSharpLexerIterator.disableExpressionStartingNewLine(code: (KSharpLexerIterator) -> R): R =
     state.value.enableExpressionStartingNewLine.let { initValue ->

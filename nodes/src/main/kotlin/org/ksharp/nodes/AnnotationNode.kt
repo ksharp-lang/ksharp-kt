@@ -2,10 +2,16 @@ package org.ksharp.nodes
 
 import org.ksharp.common.Location
 
+data class AttributeLocation(
+    val key: Location?,
+    val value: Any,
+    val operator: Location?
+)
+
 data class AnnotationNodeLocations(
     val altLocation: Location,
     val name: Location,
-    val attrs: List<Pair<Location, Location>>
+    val attrs: List<AttributeLocation>
 ) : NodeLocations
 
 data class AnnotationNode(

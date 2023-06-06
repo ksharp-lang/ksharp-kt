@@ -132,7 +132,7 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
     }
 
 fun KSharpConsumeResult.thenAssignOperator() =
-    then(KSharpTokenType.AssignOperator, true)
+    then(KSharpTokenType.AssignOperator, false)
 
 fun String.lexerModule(context: String, withLocations: Boolean) =
     this.reader().lexerModule(context, withLocations)
@@ -155,7 +155,9 @@ fun Reader.parseModule(
     withLocations: Boolean = false
 ): ParserErrorOrValue<KSharpLexerState, ModuleNode> =
     lexerModule(context, withLocations)
-        .consumeModule(context)
+        .emitLocations(withLocations) {
+            it.consumeModule(context)
+        }
         .map { it.value }
 
 fun Path.parseModule(withLocations: Boolean = false) =
