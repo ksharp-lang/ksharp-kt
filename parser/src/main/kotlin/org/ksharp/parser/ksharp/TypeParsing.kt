@@ -87,7 +87,7 @@ private fun List<Any>.toLabelOrValueType(): NodeData {
     return if (node is Token && node.type == KSharpTokenType.Label) {
         LabelTypeNode(
             node.text.let { t -> t.substring(0, t.length - 1) },
-            type.cast<TypeExpression>(),
+            type.cast(),
             node.location,
             LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
         )
@@ -223,6 +223,35 @@ private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
             )
         }
 
+
+private fun List<Any>.createTypeNode(
+    internal: Boolean,
+    emitLocations: Boolean,
+    builder: (internal: Location, keyword: Location, name: Token, params: List<String>, paramsLocation: List<Location>, assign: Location, definition: Any) -> NodeData
+): NodeData {
+    var index = 0
+    val internalLoc = if (internal) {
+        this[index++].cast<Token>().location
+    } else Location.NoProvided
+    val keywordLoc = this[index++].cast<Token>().location
+    val name = this[index++].cast<Token>()
+    val paramsLocations = listBuilder<Location>()
+    val params = this.asSequence()
+        .drop(index)
+        .takeWhile { i -> i is LexerValue && i.type != KSharpTokenType.AssignOperator }
+        .map { i ->
+            val tk = i.cast<Token>()
+            if (emitLocations) {
+                paramsLocations.add(tk.location)
+            }
+            tk.text
+        }.toList()
+    index += params.size
+    val assignLoc = this[index].cast<Token>().location
+    val definition = this.last()
+    return builder(internalLoc, keywordLoc, name, params, paramsLocations.build(), assignLoc, definition)
+}
+
 private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
     thenKeyword("trait", false)
         .enableDiscardBlockAndNewLineTokens { withoutBlocks ->
@@ -236,36 +265,22 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
                 .thenLoop { it.consumeTraitFunction() }
                 .build { TraitFunctionsNode(it.cast()) }
         }
-        .build<NodeData, KSharpLexerState> {
-            var index = 0
-            val internalLoc = if (internal) {
-                it[index++].cast<Token>().location
-            } else Location.NoProvided
-            val traitLoc = it[index++].cast<Token>().location
-            val name = it[index++].cast<Token>()
-            val paramsLocations = listBuilder<Location>()
-            val params = it.asSequence()
-                .drop(index)
-                .takeWhile { i -> i is LexerValue && i.type != KSharpTokenType.AssignOperator }
-                .map { i ->
-                    val tk = i.cast<Token>()
-                    if (emitLocations) {
-                        paramsLocations.add(tk.location)
-                    }
-                    tk.text
-                }.toList()
-            index += params.size
-            val assignLoc = it[index].cast<Token>().location
-            TraitNode(
-                internal, null, name.text, params, it.last().cast(), name.location,
-                TraitNodeLocations(
-                    internalLoc,
-                    traitLoc,
-                    name.location,
-                    paramsLocations.build(),
-                    assignLoc
+        .build {
+            it.createTypeNode(
+                internal,
+                emitLocations
+            ) { internalLoc, keywordLoc, name, params, paramsLocations, assignLoc, definition ->
+                TraitNode(
+                    internal, null, name.text, params, definition.cast(), name.location,
+                    TraitNodeLocations(
+                        internalLoc,
+                        keywordLoc,
+                        name.location,
+                        paramsLocations,
+                        assignLoc
+                    )
                 )
-            ).cast()
+            }
         }.map {
             ParserValue(
                 it.value.cast<TraitNode>()
@@ -277,8 +292,8 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
 private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
     thenIfConsume({
         it.type == KSharpTokenType.LowerCaseWord && it.text == "type"
-    }, false) {
-        it.enableDiscardBlockAndNewLineTokens { withoutBlocks ->
+    }, false) { l ->
+        l.enableDiscardBlockAndNewLineTokens { withoutBlocks ->
             withoutBlocks.enableLabelToken { withLabels ->
                 withLabels.thenUpperCaseWord()
                     .thenLoop {
@@ -290,31 +305,16 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Bo
                     .thenAssignOperator()
                     .consume { it.consumeTypeExpr() }
                     .build {
-                        var index = 0
-                        val internalLoc = if (internal) {
-                            it[index++].cast<Token>().location
-                        } else Location.NoProvided
-                        val typeLoc = it[index++].cast<Token>().location
-                        val name = it[index++].cast<Token>()
-                        val paramsLocations = listBuilder<Location>()
-                        val params = it.asSequence()
-                            .drop(index)
-                            .takeWhile { i -> i is LexerValue && i.type != KSharpTokenType.AssignOperator }
-                            .map { i ->
-                                val tk = i.cast<Token>()
-                                if (emitLocations) {
-                                    paramsLocations.add(tk.location)
-                                }
-                                tk.text
-                            }.toList()
-                        index += params.size
-                        val assignLoc = it[index].cast<Token>().location
-                        TypeNode(
-                            internal, null, name.text, params, it.last().cast(),
-                            name.location,
-                            TypeNodeLocations(internalLoc, typeLoc, name.location, paramsLocations.build(), assignLoc)
-                        )
-                            .cast<NodeData>()
+                        it.createTypeNode(
+                            internal,
+                            emitLocations
+                        ) { internalLoc, keywordLoc, name, params, paramsLocations, assignLoc, definition ->
+                            TypeNode(
+                                internal, null, name.text, params, definition.cast(),
+                                name.location,
+                                TypeNodeLocations(internalLoc, keywordLoc, name.location, paramsLocations, assignLoc)
+                            )
+                        }
                     }.map {
                         ParserValue(
                             it.value.cast<TypeNode>()
