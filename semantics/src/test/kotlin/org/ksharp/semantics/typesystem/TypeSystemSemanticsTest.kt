@@ -39,11 +39,17 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
-                listOf(AnnotationNode("native", mapOf("flag" to true), Location.NoProvided)),
+                listOf(
+                    AnnotationNode(
+                        "native", mapOf("flag" to true), Location.NoProvided,
+                        AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                    )
+                ),
                 "Integer",
                 listOf(),
                 ConcreteTypeNode("Int", Location.NoProvided),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -60,7 +66,8 @@ class TypeSystemSemanticsTest : StringSpec({
                 "Integer",
                 listOf(),
                 ConcreteTypeNode("Int", Location.NoProvided),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -77,7 +84,8 @@ class TypeSystemSemanticsTest : StringSpec({
                 "Unidad",
                 listOf(),
                 UnitTypeNode(Location.NoProvided),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -97,9 +105,11 @@ class TypeSystemSemanticsTest : StringSpec({
                         ConcreteTypeNode("Double", Location.NoProvided),
                         ConcreteTypeNode("Double", Location.NoProvided)
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TupleTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -128,9 +138,11 @@ class TypeSystemSemanticsTest : StringSpec({
                         ConcreteTypeNode(
                             "Nothing", Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), Location.NoProvided,
+                    UnionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -154,9 +166,11 @@ class TypeSystemSemanticsTest : StringSpec({
                         ConcreteTypeNode(
                             "Nothing", Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), Location.NoProvided,
+                    UnionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
@@ -188,9 +202,10 @@ class TypeSystemSemanticsTest : StringSpec({
                         ConcreteTypeNode(
                             "Nothing", Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -236,11 +251,12 @@ class TypeSystemSemanticsTest : StringSpec({
                                     "Name", Location.NoProvided
                                 )
                             ),
-                            Location.NoProvided
+                            Location.NoProvided, TupleTypeNodeLocations(listOf())
                         )
-                    ), Location.NoProvided
+                    ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -286,9 +302,10 @@ class TypeSystemSemanticsTest : StringSpec({
                             ),
                             Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
@@ -320,9 +337,10 @@ class TypeSystemSemanticsTest : StringSpec({
                         ConcreteTypeNode(
                             "Nothing", Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -357,9 +375,10 @@ class TypeSystemSemanticsTest : StringSpec({
                         ConcreteTypeNode(
                             "Nothing", Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -381,7 +400,8 @@ class TypeSystemSemanticsTest : StringSpec({
                 "Integer",
                 listOf(),
                 ConcreteTypeNode("Int", Location.NoProvided),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             ),
             TypeNode(
                 true,
@@ -389,7 +409,8 @@ class TypeSystemSemanticsTest : StringSpec({
                 "Integer",
                 listOf(),
                 ConcreteTypeNode("Long", Location.NoProvided),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -416,7 +437,8 @@ class TypeSystemSemanticsTest : StringSpec({
                         ParameterTypeNode("v", Location.NoProvided)
                     ), Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -431,7 +453,8 @@ class TypeSystemSemanticsTest : StringSpec({
                 "Number",
                 listOf("n"),
                 ParameterTypeNode("n", Location.NoProvided),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -460,7 +483,8 @@ class TypeSystemSemanticsTest : StringSpec({
                     ),
                     Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -488,9 +512,11 @@ class TypeSystemSemanticsTest : StringSpec({
                         ParameterTypeNode("a", Location.NoProvided),
                         ParameterTypeNode("a", Location.NoProvided)
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -509,9 +535,11 @@ class TypeSystemSemanticsTest : StringSpec({
                         ParameterTypeNode("a", Location.NoProvided),
                         ConcreteTypeNode("String", Location.NoProvided)
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -522,7 +550,12 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TraitNode(
                 false,
-                listOf(AnnotationNode("native", mapOf(), Location.NoProvided)),
+                listOf(
+                    AnnotationNode(
+                        "native", mapOf(), Location.NoProvided,
+                        AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                    )
+                ),
                 "Number",
                 listOf("a"),
                 TraitFunctionsNode(
@@ -535,13 +568,14 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -570,9 +604,11 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
                             "prod",
@@ -582,13 +618,16 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -618,9 +657,9 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
                             "prod",
@@ -630,13 +669,14 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -666,9 +706,11 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
                             "prod",
@@ -678,13 +720,16 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -717,9 +762,11 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("b", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
                             "prod",
@@ -729,13 +776,16 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -775,9 +825,10 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ConcreteTypeNode("Int", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
                             "prod",
@@ -787,13 +838,15 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -833,13 +886,16 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ConcreteTypeNode("Bool", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             ),
             TraitNode(
                 false,
@@ -856,13 +912,16 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             ),
             TypeNode(
                 false,
@@ -877,9 +936,10 @@ class TypeSystemSemanticsTest : StringSpec({
                         ConcreteTypeNode(
                             "OrdTest", Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -903,13 +963,14 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ConcreteTypeNode("Bool", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             ),
             TraitNode(
                 false,
@@ -926,13 +987,14 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TraitNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             ),
             TypeNode(
                 false,
@@ -948,9 +1010,10 @@ class TypeSystemSemanticsTest : StringSpec({
                             "OrdTest", Location.NoProvided
                         ),
                         ParameterTypeNode("a", Location.NoProvided),
-                    ), Location.NoProvided
+                    ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -971,11 +1034,18 @@ class TypeSystemSemanticsTest : StringSpec({
                 ParametricTypeNode(
                     listOf(
                         ConcreteTypeNode("Map", Location.NoProvided),
-                        LabelTypeNode("key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided),
-                        LabelTypeNode("value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided)
+                        LabelTypeNode(
+                            "key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided,
+                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                        ),
+                        LabelTypeNode(
+                            "value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided,
+                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                        )
                     ), Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -988,10 +1058,21 @@ class TypeSystemSemanticsTest : StringSpec({
                 false,
                 null, "Point2D", listOf(), TupleTypeNode(
                     listOf(
-                        LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
-                        LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
-                    ), Location.NoProvided
-                ), Location.NoProvided
+                        LabelTypeNode(
+                            "x",
+                            ConcreteTypeNode("Double", Location.NoProvided),
+                            Location.NoProvided,
+                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                        ),
+                        LabelTypeNode(
+                            "y",
+                            ConcreteTypeNode("Double", Location.NoProvided),
+                            Location.NoProvided,
+                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                        )
+                    ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                ), Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -1002,7 +1083,10 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
-                null, "Composite", listOf("a"), TupleTypeNode(
+                null,
+                "Composite",
+                listOf("a"),
+                TupleTypeNode(
                     listOf(
                         LabelTypeNode(
                             "n", ParametricTypeNode(
@@ -1010,7 +1094,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ), Location.NoProvided
-                            ), Location.NoProvided
+                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                         ),
                         LabelTypeNode(
                             "point", TupleTypeNode(
@@ -1018,18 +1102,22 @@ class TypeSystemSemanticsTest : StringSpec({
                                     LabelTypeNode(
                                         "x",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                                     ),
                                     LabelTypeNode(
                                         "y",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                                     )
-                                ), Location.NoProvided
-                            ), Location.NoProvided
+                                ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                         )
-                    ), Location.NoProvided
-                ), Location.NoProvided
+                    ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                ),
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -1044,7 +1132,10 @@ class TypeSystemSemanticsTest : StringSpec({
                 null, "Composite", listOf(), TupleTypeNode(
                     listOf(
                         LabelTypeNode(
-                            "n", UnitTypeNode(Location.NoProvided), Location.NoProvided
+                            "n",
+                            UnitTypeNode(Location.NoProvided),
+                            Location.NoProvided,
+                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                         ),
                         LabelTypeNode(
                             "point", TupleTypeNode(
@@ -1052,18 +1143,21 @@ class TypeSystemSemanticsTest : StringSpec({
                                     LabelTypeNode(
                                         "x",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                                     ),
                                     LabelTypeNode(
                                         "y",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                                     )
-                                ), Location.NoProvided
-                            ), Location.NoProvided
+                                ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                         )
-                    ), Location.NoProvided
-                ), Location.NoProvided
+                    ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                ), Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -1074,15 +1168,18 @@ class TypeSystemSemanticsTest : StringSpec({
         module(
             TypeNode(
                 false,
-                null, "Composite", listOf(), TupleTypeNode(
+                null,
+                "Composite",
+                listOf(),
+                TupleTypeNode(
                     listOf(
                         LabelTypeNode(
                             "n", FunctionTypeNode(
                                 listOf(
                                     ConcreteTypeNode("Int", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
-                                ), Location.NoProvided
-                            ), Location.NoProvided
+                                ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                         ),
                         LabelTypeNode(
                             "point", TupleTypeNode(
@@ -1090,18 +1187,24 @@ class TypeSystemSemanticsTest : StringSpec({
                                     LabelTypeNode(
                                         "x",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                                     ),
                                     LabelTypeNode(
                                         "y",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                                     )
-                                ), Location.NoProvided
-                            ), Location.NoProvided
+                                ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                            ), Location.NoProvided,
+                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                         )
-                    ), Location.NoProvided
-                ), Location.NoProvided
+                    ), Location.NoProvided,
+                    TupleTypeNodeLocations(listOf())
+                ),
+                Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -1121,7 +1224,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ), Location.NoProvided
-                            ), Location.NoProvided
+                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                         ),
                         LabelTypeNode(
                             "point", TupleTypeNode(
@@ -1129,18 +1232,21 @@ class TypeSystemSemanticsTest : StringSpec({
                                     LabelTypeNode(
                                         "x",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                                     ),
                                     LabelTypeNode(
                                         "y",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                                     )
-                                ), Location.NoProvided
-                            ), Location.NoProvided
+                                ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
                         )
-                    ), Location.NoProvided
-                ), Location.NoProvided
+                    ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                ), Location.NoProvided,
+                TypeNodeLocations(Location.NoProvided, Location.NoProvided, listOf(), Location.NoProvided)
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.ParametricTypeShouldStartWithName.new(Location.NoProvided)))
@@ -1150,14 +1256,21 @@ class TypeSystemSemanticsTest : StringSpec({
     "Function declaration with annotation semantics" {
         moduleWithDeclarations(
             TypeDeclarationNode(
-                listOf(AnnotationNode("Test", mapOf(), Location.NoProvided)),
+                listOf(
+                    AnnotationNode(
+                        "Test", mapOf(), Location.NoProvided,
+                        AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                    )
+                ),
                 "ten",
                 listOf(),
                 FunctionTypeNode(
                     listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -1173,9 +1286,11 @@ class TypeSystemSemanticsTest : StringSpec({
                 listOf(),
                 FunctionTypeNode(
                     listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -1190,7 +1305,8 @@ class TypeSystemSemanticsTest : StringSpec({
                 "ten",
                 listOf(),
                 ConcreteTypeNode("Int", Location.NoProvided),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(
@@ -1228,9 +1344,11 @@ class TypeSystemSemanticsTest : StringSpec({
                         ),
                         ConcreteTypeNode("Int", Location.NoProvided)
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionTypeNodeLocations(listOf())
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()

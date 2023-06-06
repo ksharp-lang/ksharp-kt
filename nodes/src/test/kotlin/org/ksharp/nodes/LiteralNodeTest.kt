@@ -26,12 +26,14 @@ class LiteralNodeTest : StringSpec({
         LiteralCollectionNode(
             listOf(LiteralValueNode("1000.0", LiteralValueType.Decimal, Location.NoProvided)),
             LiteralCollectionType.List,
-            Location.NoProvided
+            Location.NoProvided,
+            LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
         ).node.apply {
             cast<LiteralCollectionNode>().apply {
                 values.shouldBe(listOf(LiteralValueNode("1000.0", LiteralValueType.Decimal, Location.NoProvided)))
                 type.shouldBe(LiteralCollectionType.List)
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided))
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
