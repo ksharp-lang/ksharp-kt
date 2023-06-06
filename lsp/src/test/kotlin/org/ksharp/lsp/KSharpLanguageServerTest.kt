@@ -26,8 +26,13 @@ class KSharpLanguageServerTest : StringSpec({
                                             SemanticTokenTypes.String,
                                             SemanticTokenTypes.Function,
                                             SemanticTokenTypes.Variable,
+                                            SemanticTokenTypes.Operator,
+                                            SemanticTokenTypes.Number,
+                                            SemanticTokenTypes.Keyword
                                         )
-                                        tokenModifiers = listOf()
+                                        tokenModifiers = listOf(
+                                            SemanticTokenModifiers.Declaration
+                                        )
                                     }
                                     setFull(true)
                                     setRange(false)
