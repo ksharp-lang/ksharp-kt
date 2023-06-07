@@ -352,4 +352,132 @@ class ParserLocationsTest : StringSpec({
                 )
             )
     }
+    "Import node locations" {
+        "import ksharp.math as math"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeImport)
+            }.map {
+                it.value.cast<ImportNode>().locations.also(::println)
+            }.shouldBeRight(
+                ImportNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 6)),
+                    Location((Line(value = 1) to Offset(value = 7)), Line(value = 1) to Offset(value = 13)),
+                    Location((Line(value = 1) to Offset(value = 14)), Line(value = 1) to Offset(value = 18)),
+                    Location((Line(value = 1) to Offset(value = 19)), Line(value = 1) to Offset(value = 21)),
+                    Location((Line(value = 1) to Offset(value = 22)), Line(value = 1) to Offset(value = 26)),
+                )
+            )
+    }
+    "Import node locations 2" {
+        "import ksharp as math"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeImport)
+            }.map {
+                it.value.cast<ImportNode>().locations.also(::println)
+            }.shouldBeRight(
+                ImportNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 6)),
+                    Location((Line(value = 1) to Offset(value = 7)), Line(value = 1) to Offset(value = 13)),
+                    Location((Line(value = 1) to Offset(value = 7)), Line(value = 1) to Offset(value = 13)),
+                    Location((Line(value = 1) to Offset(value = 14)), Line(value = 1) to Offset(value = 16)),
+                    Location((Line(value = 1) to Offset(value = 17)), Line(value = 1) to Offset(value = 21)),
+                )
+            )
+    }
+    "Native function node locations" {
+        "native sum a b"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+            }.map {
+                it.value.cast<FunctionNode>().locations.also(::println)
+            }.shouldBeRight(
+                FunctionNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 6)),
+                    Location.NoProvided,
+                    Location((Line(value = 1) to Offset(value = 7)), Line(value = 1) to Offset(value = 10)),
+                    listOf(
+                        Location((Line(value = 1) to Offset(value = 11)), Line(value = 1) to Offset(value = 12)),
+                        Location((Line(value = 1) to Offset(value = 13)), Line(value = 1) to Offset(value = 14)),
+                    ),
+                    Location.NoProvided,
+                )
+            )
+    }
+    "Native pub function node locations" {
+        "native pub sum a b"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+            }.map {
+                it.value.cast<FunctionNode>().locations.also(::println)
+            }.shouldBeRight(
+                FunctionNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 6)),
+                    Location((Line(value = 1) to Offset(value = 7)), Line(value = 1) to Offset(value = 10)),
+                    Location((Line(value = 1) to Offset(value = 11)), Line(value = 1) to Offset(value = 14)),
+                    listOf(
+                        Location((Line(value = 1) to Offset(value = 15)), Line(value = 1) to Offset(value = 16)),
+                        Location((Line(value = 1) to Offset(value = 17)), Line(value = 1) to Offset(value = 18)),
+                    ),
+                    Location.NoProvided,
+                )
+            )
+    }
+    "Native pub function node locations without arguments" {
+        "native pub sum"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+            }.map {
+                it.value.cast<FunctionNode>().locations.also(::println)
+            }.shouldBeRight(
+                FunctionNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 6)),
+                    Location((Line(value = 1) to Offset(value = 7)), Line(value = 1) to Offset(value = 10)),
+                    Location((Line(value = 1) to Offset(value = 11)), Line(value = 1) to Offset(value = 14)),
+                    listOf(),
+                    Location.NoProvided,
+                )
+            )
+    }
+    "function node locations" {
+        "sum a b = a + b"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+            }.map {
+                it.value.cast<FunctionNode>().locations.also(::println)
+            }.shouldBeRight(
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 3)),
+                    listOf(
+                        Location((Line(value = 1) to Offset(value = 4)), Line(value = 1) to Offset(value = 5)),
+                        Location((Line(value = 1) to Offset(value = 6)), Line(value = 1) to Offset(value = 7)),
+                    ),
+                    Location((Line(value = 1) to Offset(value = 8)), Line(value = 1) to Offset(value = 9)),
+                )
+            )
+    }
+    "pub function node locations" {
+        "pub ten = 10"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+            }.map {
+                it.value.cast<FunctionNode>().locations.also(::println)
+            }.shouldBeRight(
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 3)),
+                    Location((Line(value = 1) to Offset(value = 4)), Line(value = 1) to Offset(value = 7)),
+                    listOf(),
+                    Location((Line(value = 1) to Offset(value = 8)), Line(value = 1) to Offset(value = 9)),
+                )
+            )
+    }
 })

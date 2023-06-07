@@ -3,8 +3,8 @@ package org.ksharp.nodes
 import org.ksharp.common.Location
 
 data class FunctionNodeLocations(
-    val nativeLocation: Location?,
-    val pubLocation: Location?,
+    val nativeLocation: Location,
+    val pubLocation: Location,
     val name: Location,
     val parameters: List<Location>,
     val assignOperator: Location

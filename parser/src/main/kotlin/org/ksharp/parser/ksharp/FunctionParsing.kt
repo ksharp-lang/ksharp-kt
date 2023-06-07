@@ -1,8 +1,6 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.Location
-import org.ksharp.common.cast
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.FunctionNodeLocations
 import org.ksharp.nodes.NodeData
@@ -42,7 +40,7 @@ fun KSharpLexerIterator.consumeFunctionName(): KSharpConsumeResult =
     }, false)
 
 
-private fun KSharpConsumeResult.thenFunction(native: Boolean): KSharpParserResult =
+private fun KSharpConsumeResult.thenFunction(native: Boolean, emitLocations: Boolean): KSharpParserResult =
     thenIf({
         it.type == KSharpTokenType.LowerCaseWord && it.text == "pub"
     }, false) { it }
@@ -50,7 +48,7 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean): KSharpParserResul
         .enableDiscardBlockAndNewLineTokens { lx ->
             val funcDecl = lx.thenLoop {
                 it.consume(KSharpTokenType.LowerCaseWord)
-                    .build { l -> l.first().cast<Token>().text }
+                    .build { l -> l.first() }
             }
             run {
                 if (!native) {
@@ -58,26 +56,33 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean): KSharpParserResul
                         .consume { it.disableDiscardNewLineToken { l -> l.consumeExpression() } }
                 } else funcDecl
             }.build {
-                val pub = it.first().cast<Token>().text == "pub"
-                val items = if (pub) it.drop(1) else it
-                val name = items.first().cast<Token>()
-                val expr = if (native) UnitNode(name.location)
-                else items.last().cast<NodeData>()
-                val arguments = items.filterIsInstance<String>()
+                var index = 0
+                val nativeLocation = if (native) it[index++].cast<Token>().location else Location.NoProvided
+                val pub = it[index++].cast<Token>()
+                val pubLocation = if (pub.text == "pub") pub.location else Location.NoProvided
+                val name = if (pub.text == "pub") it[index++].cast() else pub
+                val expr = if (native) UnitNode(name.location) else it.last().cast<NodeData>()
+                val argumentsLocation = listBuilder<Location>()
+                val arguments = it.subList(index, if (native) it.size else it.size - 2)
+                    .map {
+                        val t = it.cast<Token>()
+                        if (emitLocations) argumentsLocation.add(t.location)
+                        t.text
+                    }
                 FunctionNode(
                     native,
-                    pub,
+                    pub.text == "pub",
                     null,
                     name.text,
                     arguments,
                     expr,
                     name.location,
                     FunctionNodeLocations(
-                        Location.NoProvided,
-                        Location.NoProvided,
-                        Location.NoProvided,
-                        listOf(),
-                        Location.NoProvided
+                        nativeLocation,
+                        pubLocation,
+                        name.location,
+                        argumentsLocation.build(),
+                        if (native) Location.NoProvided else it[it.size - 2].cast<Token>().location
                     )
                 )
             }.map {
@@ -90,8 +95,8 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean): KSharpParserResul
         }
 
 fun KSharpLexerIterator.consumeFunction(): KSharpParserResult =
-    ifConsume(KSharpTokenType.LowerCaseWord, "native", true) {
-        it.thenFunction(true)
+    ifConsume(KSharpTokenType.LowerCaseWord, "native", false) {
+        it.thenFunction(true, state.value.emitLocations)
     }.or {
-        it.collect().thenFunction(false)
+        it.collect().thenFunction(false, state.value.emitLocations)
     }
