@@ -39,6 +39,37 @@ fun KSharpLexerIterator.consumeFunctionName(): KSharpConsumeResult =
         }
     }, false)
 
+private fun createFunctionNode(native: Boolean, emitLocations: Boolean, it: List<Any>): FunctionNode {
+    var index = 0
+    val nativeLocation = if (native) it[index++].cast<Token>().location else Location.NoProvided
+    val pub = it[index++].cast<Token>()
+    val pubLocation = if (pub.text == "pub") pub.location else Location.NoProvided
+    val name = if (pub.text == "pub") it[index++].cast() else pub
+    val expr = if (native) UnitNode(name.location) else it.last().cast<NodeData>()
+    val argumentsLocation = listBuilder<Location>()
+    val arguments = it.subList(index, if (native) it.size else it.size - 2)
+        .map {
+            val t = it.cast<Token>()
+            if (emitLocations) argumentsLocation.add(t.location)
+            t.text
+        }
+    return FunctionNode(
+        native,
+        pub.text == "pub",
+        null,
+        name.text,
+        arguments,
+        expr,
+        name.location,
+        FunctionNodeLocations(
+            nativeLocation,
+            pubLocation,
+            name.location,
+            argumentsLocation.build(),
+            if (native) Location.NoProvided else it[it.size - 2].cast<Token>().location
+        )
+    )
+}
 
 private fun KSharpConsumeResult.thenFunction(native: Boolean, emitLocations: Boolean): KSharpParserResult =
     thenIf({
@@ -56,35 +87,7 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean, emitLocations: Boo
                         .consume { it.disableDiscardNewLineToken { l -> l.consumeExpression() } }
                 } else funcDecl
             }.build {
-                var index = 0
-                val nativeLocation = if (native) it[index++].cast<Token>().location else Location.NoProvided
-                val pub = it[index++].cast<Token>()
-                val pubLocation = if (pub.text == "pub") pub.location else Location.NoProvided
-                val name = if (pub.text == "pub") it[index++].cast() else pub
-                val expr = if (native) UnitNode(name.location) else it.last().cast<NodeData>()
-                val argumentsLocation = listBuilder<Location>()
-                val arguments = it.subList(index, if (native) it.size else it.size - 2)
-                    .map {
-                        val t = it.cast<Token>()
-                        if (emitLocations) argumentsLocation.add(t.location)
-                        t.text
-                    }
-                FunctionNode(
-                    native,
-                    pub.text == "pub",
-                    null,
-                    name.text,
-                    arguments,
-                    expr,
-                    name.location,
-                    FunctionNodeLocations(
-                        nativeLocation,
-                        pubLocation,
-                        name.location,
-                        argumentsLocation.build(),
-                        if (native) Location.NoProvided else it[it.size - 2].cast<Token>().location
-                    )
-                )
+                createFunctionNode(native, emitLocations, it)
             }.map {
                 ParserValue(
                     it.value.cast<FunctionNode>()
