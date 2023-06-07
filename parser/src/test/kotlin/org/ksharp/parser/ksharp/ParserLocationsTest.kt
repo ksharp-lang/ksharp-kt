@@ -510,4 +510,74 @@ class ParserLocationsTest : StringSpec({
                 )
             )
     }
+    "map literal node locations" {
+        "{\"key1\": 1}"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+            }.map {
+                it.value.cast<LiteralCollectionNode>()
+                    .values.first().cast<LiteralMapEntryNode>()
+                    .locations.also(::println)
+            }.shouldBeRight(
+                LiteralMapEntryNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 7)), Line(value = 1) to Offset(value = 8))
+                )
+            )
+    }
+    "let match assignment  expression node locations" {
+        """let x = 10
+           |   y = 20
+           |then x + y
+        """.trimMargin()
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+            }.map {
+                it.value.cast<LetExpressionNode>()
+                    .matches.last()
+                    .locations.also(::println)
+            }.shouldBeRight(
+                MatchAssignNodeLocations(
+                    Location((Line(value = 2) to Offset(value = 5)), Line(value = 2) to Offset(value = 6))
+                )
+            )
+    }
+    "let expression node locations" {
+        """let x = 10
+           |   y = 20
+           |then x + y
+        """.trimMargin()
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+            }.map {
+                it.value.cast<LetExpressionNode>()
+                    .locations.also(::println)
+            }.shouldBeRight(
+                LetExpressionNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 3)),
+                    Location((Line(value = 3) to Offset(value = 0)), Line(value = 3) to Offset(value = 4))
+                )
+            )
+    }
+    "let list assignment expression node locations" {
+        """let x = 10
+           |   [(1, 2) | rest] = 20
+           |then x + y
+        """.trimMargin()
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+            }.map {
+                it.value.cast<LetExpressionNode>()
+                    .matches.last()
+                    .matchValue.value.cast<MatchListValueNode>()
+                    .locations.also(::println)
+            }.shouldBeRight(
+                MatchListValueNodeLocations(
+                    Location((Line(value = 2) to Offset(value = 11)), Line(value = 2) to Offset(value = 12)),
+                )
+            )
+    }
 })

@@ -863,7 +863,8 @@ class ExpressionParserTest : StringSpec({
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
                         Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -910,7 +911,8 @@ class ExpressionParserTest : StringSpec({
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
                         Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -980,7 +982,8 @@ class ExpressionParserTest : StringSpec({
                                     FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
                                     Location.NoProvided,
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                             ),
                             Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
                         )
@@ -991,7 +994,7 @@ class ExpressionParserTest : StringSpec({
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                         Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided, LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }

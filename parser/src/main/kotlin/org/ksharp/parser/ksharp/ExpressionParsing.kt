@@ -95,17 +95,19 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
                 it.consumeMatchAssignment()
                     .resume()
                     .discardBlanks()
+                    .thenOptional(KSharpTokenType.BeginBlock, true)
                     .build { items ->
                         items.first().cast<NodeData>()
                     }
-            }.then(KSharpTokenType.Then, true)
+            }.then(KSharpTokenType.Then, false)
                 .consume { it.consumeExpression() }
         }.build {
             val letToken = it.first().cast<Token>()
             val expr = it.last().cast<NodeData>()
             val matches = it.asSequence().filterIsInstance<MatchAssignNode>().toList()
             LetExpressionNode(
-                matches, expr, letToken.location
+                matches, expr, letToken.location,
+                LetExpressionNodeLocations(letToken.location, it[it.size - 2].cast<Token>().location)
             )
         }
 

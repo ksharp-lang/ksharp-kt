@@ -1,6 +1,5 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
@@ -45,7 +44,7 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
 private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
     consumeExpressionValue(false)
         .resume()
-        .then(KSharpTokenType.Operator, ":", true)
+        .then(KSharpTokenType.Operator, ":", false)
         .consume { it.consumeExpression(false) }
         .build {
             val first = it.first().cast<NodeData>()
@@ -53,7 +52,7 @@ private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
                 first,
                 it.last().cast(),
                 first.location,
-                LiteralMapEntryNodeLocations(Location.NoProvided)
+                LiteralMapEntryNodeLocations(it[1].cast<Token>().location)
             )
         }
 

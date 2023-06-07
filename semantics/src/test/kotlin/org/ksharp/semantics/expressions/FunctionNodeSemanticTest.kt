@@ -1190,7 +1190,8 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
                         Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 ),
                 Location.NoProvided, FunctionNodeLocations(
                     Location.NoProvided,
