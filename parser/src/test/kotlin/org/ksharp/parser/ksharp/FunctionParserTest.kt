@@ -207,8 +207,7 @@ class FunctionParserTest : StringSpec({
                             FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
                             Location.NoProvided,
                         ),
-                        Location.NoProvided,
-                        LetExpressionNodeLocations(Location.NoProvided)
+                        Location.NoProvided
                     ),
                     Location.NoProvided,
                     FunctionNodeLocations(

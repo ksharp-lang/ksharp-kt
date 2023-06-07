@@ -52,18 +52,19 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
                 }
         }.build {
             val location = it.first().cast<Token>().location
+            val locations = IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
             if (it.size == 3) IfNode(
                 it[1] as NodeData,
                 it[2] as NodeData,
                 UnitNode(location),
                 location,
-                IfNodeLocations(Location.NoProvided, Location.NoProvided, null)
+                locations,
             ) else IfNode(
                 it[1] as NodeData,
                 it[2] as NodeData,
                 it[3] as NodeData,
                 location,
-                IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
+                locations
             )
         }
 
@@ -100,8 +101,7 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
             val expr = it.last().cast<NodeData>()
             val matches = it.asSequence().filterIsInstance<MatchAssignNode>().toList()
             LetExpressionNode(
-                matches, expr, letToken.location,
-                LetExpressionNodeLocations(Location.NoProvided)
+                matches, expr, letToken.location
             )
         }
 

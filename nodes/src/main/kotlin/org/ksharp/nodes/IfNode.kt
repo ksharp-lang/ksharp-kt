@@ -5,7 +5,7 @@ import org.ksharp.common.Location
 data class IfNodeLocations(
     val ifLocation: Location,
     val thenLocation: Location,
-    val elseLocation: Location?
+    val elseLocation: Location
 ) : NodeLocations
 
 data class IfNode(

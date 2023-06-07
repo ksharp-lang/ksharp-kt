@@ -41,11 +41,26 @@ class ModuleParserTest : StringSpec({
                     "text",
                     Location(Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 6)),
                     ImportNodeLocations(
-                        Location.NoProvided,
-                        Location.NoProvided,
-                        Location.NoProvided,
-                        Location.NoProvided,
-                        Location.NoProvided
+                        importLocation = Location(
+                            start = (Line(value = 1) to Offset(value = 0)),
+                            end = (Line(value = 1) to Offset(value = 6))
+                        ),
+                        moduleNameBegin = Location(
+                            start = (Line(value = 1) to Offset(value = 7)),
+                            end = (Line(value = 1) to Offset(value = 13))
+                        ),
+                        moduleNameEnd = Location(
+                            start = (Line(value = 1) to Offset(value = 14)),
+                            end = (Line(value = 1) to Offset(value = 18))
+                        ),
+                        asLocation = Location(
+                            start = (Line(value = 1) to Offset(value = 19)),
+                            end = (Line(value = 1) to Offset(value = 21))
+                        ),
+                        keyLocation = Location(
+                            start = (Line(value = 1) to Offset(value = 22)),
+                            end = (Line(value = 1) to Offset(value = 26))
+                        )
                     )
                 ),
                 ImportNode(
@@ -53,11 +68,26 @@ class ModuleParserTest : StringSpec({
                     "math",
                     Location(Line(value = 2) to Offset(value = 0), Line(value = 2) to Offset(value = 6)),
                     ImportNodeLocations(
-                        Location.NoProvided,
-                        Location.NoProvided,
-                        Location.NoProvided,
-                        Location.NoProvided,
-                        Location.NoProvided
+                        importLocation = Location(
+                            start = (Line(value = 2) to Offset(value = 0)),
+                            end = (Line(value = 2) to Offset(value = 6))
+                        ),
+                        moduleNameBegin = Location(
+                            start = (Line(value = 2) to Offset(value = 7)),
+                            end = (Line(value = 2) to Offset(value = 13))
+                        ),
+                        moduleNameEnd = Location(
+                            start = (Line(value = 2) to Offset(value = 14)),
+                            end = (Line(value = 2) to Offset(value = 18))
+                        ),
+                        asLocation = Location(
+                            start = (Line(value = 2) to Offset(value = 19)),
+                            end = (Line(value = 2) to Offset(value = 21))
+                        ),
+                        keyLocation = Location(
+                            start = (Line(value = 2) to Offset(value = 22)),
+                            end = (Line(value = 2) to Offset(value = 26))
+                        )
                     )
                 )
             ),

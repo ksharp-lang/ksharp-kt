@@ -22,7 +22,6 @@ class LetExpressionNodeTest : StringSpec({
             ),
             LiteralValueNode("5", LiteralValueType.Integer, Location.NoProvided),
             Location.NoProvided,
-            LetExpressionNodeLocations(Location.NoProvided)
         ).node.apply {
             cast<LetExpressionNode>().apply {
                 matches.shouldBe(
@@ -41,7 +40,7 @@ class LetExpressionNodeTest : StringSpec({
                 )
                 expression.shouldBe(LiteralValueNode("5", LiteralValueType.Integer, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
-                locations.shouldBe(LetExpressionNodeLocations(Location.NoProvided))
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
