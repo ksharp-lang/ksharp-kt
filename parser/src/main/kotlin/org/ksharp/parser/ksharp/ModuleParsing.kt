@@ -13,7 +13,7 @@ data class InvalidToken(
 )
 
 data class InvalidNode(
-    val token: List<InvalidToken>,
+    val tokens: List<InvalidToken>,
     val error: Error
 ) : NodeData() {
     override val locations: NodeLocations

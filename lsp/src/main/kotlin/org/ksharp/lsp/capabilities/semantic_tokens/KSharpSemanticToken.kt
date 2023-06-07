@@ -4,14 +4,9 @@ import org.eclipse.lsp4j.SemanticTokenModifiers
 import org.eclipse.lsp4j.SemanticTokenTypes
 import org.eclipse.lsp4j.SemanticTokensLegend
 import org.eclipse.lsp4j.SemanticTokensWithRegistrationOptions
-import org.ksharp.common.Either
-import org.ksharp.common.ErrorOrValue
-import org.ksharp.common.cast
-import org.ksharp.parser.LogicalLexerToken
-import org.ksharp.parser.Token
-import org.ksharp.parser.asSequence
+import org.ksharp.parser.TokenType
 import org.ksharp.parser.ksharp.KSharpTokenType
-import org.ksharp.parser.ksharp.lexerModule
+import org.ksharp.parser.ksharp.parseModuleAsNodeSequence
 
 
 val tokenEncoderSpec = tokenEncoderSpec {
@@ -38,8 +33,8 @@ val kSharpSemanticTokensProvider = SemanticTokensWithRegistrationOptions().apply
     setRange(false)
 }
 
-fun Token.semanticToken(): String? =
-    when (type) {
+fun TokenType.semanticToken(text: String): String? =
+    when (this) {
         KSharpTokenType.String -> SemanticTokenTypes.String
         KSharpTokenType.FunctionName -> SemanticTokenTypes.Function
         KSharpTokenType.OperatorFunctionName -> SemanticTokenTypes.Function
@@ -67,6 +62,10 @@ fun Token.semanticToken(): String? =
             "type" -> SemanticTokenTypes.Keyword
             "native" -> SemanticTokenTypes.Keyword
             "pub" -> SemanticTokenTypes.Keyword
+            "internal" -> SemanticTokenTypes.Keyword
+            "let" -> SemanticTokenTypes.Keyword
+            "if" -> SemanticTokenTypes.Keyword
+            "then" -> SemanticTokenTypes.Keyword
             else -> null
         }
 
@@ -77,28 +76,12 @@ fun Token.semanticToken(): String? =
         else -> null
     }
 
-fun Token.semanticTokenModifiers(): Array<String> =
-    when (type) {
-        else -> emptyArray<String>()
-    }
-
-fun calculateSemanticTokens(content: String): ErrorOrValue<List<Int>> =
+fun calculateSemanticTokens(content: String): List<Int> =
     tokenEncoderSpec.encoder()
         .let { encoder ->
-            content.lexerModule(withLocations = true)
-                .asSequence()
+            content.parseModuleAsNodeSequence()
                 .forEach {
-                    it.semanticToken()?.let { tokenType ->
-                        val tk = it.cast<LogicalLexerToken>()
-                        val (line, offset) = tk.startPosition
-                        encoder.register(
-                            line.value,
-                            offset.value,
-                            tk.endOffset - tk.startOffset,
-                            tokenType,
-                            *tk.semanticTokenModifiers()
-                        )
-                    }
+                    it.visit(encoder)
                 }
-            Either.Right(encoder.data())
+            encoder.data()
         }

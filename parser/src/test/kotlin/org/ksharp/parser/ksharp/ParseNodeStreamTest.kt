@@ -22,7 +22,7 @@ class ParseNodeStreamTest : StringSpec({
                                 Line(value = 1) to Offset(value = 1)
                             ), "token" to "'Integer:1'"
                         ),
-                        token = listOf(
+                        tokens = listOf(
                             InvalidToken(
                                 "1",
                                 KSharpTokenType.Integer,
@@ -53,7 +53,7 @@ class ParseNodeStreamTest : StringSpec({
                             "token" to "<EndBlock>",
                             "received-token" to "<BeginBlock>"
                         ),
-                        token = listOf(
+                        tokens = listOf(
                             InvalidToken(
                                 text = "import",
                                 type = KSharpTokenType.LowerCaseWord,
