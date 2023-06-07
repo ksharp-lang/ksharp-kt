@@ -48,9 +48,7 @@ class KSharpDocumentService(private val documentStorage: DocumentStorage) : Text
             val docUri = params.textDocument.uri
             ClientLogger.info("semantic analysis over $docUri")
             SemanticTokens().apply {
-                data = documentStorage.withDocumentContent(docUri) { content ->
-                    calculateSemanticTokens(docUri, content)
-                }?.valueOrNull ?: listOf()
+                data = documentStorage.withDocumentContent(docUri, ::calculateSemanticTokens)?.valueOrNull ?: listOf()
             }
         }
 

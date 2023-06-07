@@ -101,13 +101,13 @@ private fun Any.toAnnotationValue(): Any =
         else -> this
     }
 
-private fun Any.toAnnotationLocation(): Pair<Any, Int> =
+private fun Any.toAnnotationLocation(): Any =
     when (this) {
-        is Token -> this.location to text.length
+        is Token -> this.location
 
-        is List<*> -> this.map { it!!.toAnnotationLocation() } to 0
-        is AnnotationNode -> this.locations to 0
-        else -> Location.NoProvided to 0
+        is List<*> -> this.map { it!!.toAnnotationLocation() }
+        is AnnotationNode -> this.locations
+        else -> Location.NoProvided
     }
 
 private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpParserResult =
@@ -128,19 +128,17 @@ private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpPa
                     .associate { i ->
                         val kv = i.cast<AnnotationKeyValue>()
                         if (emitLocations) {
-                            val (valueLocation, valueLength) = kv.value.toAnnotationLocation()
                             attrsLocations.add(
                                 AttributeLocation(
                                     kv.keyLocation,
-                                    valueLocation,
-                                    valueLength,
+                                    kv.value.toAnnotationLocation(),
                                     kv.assignment,
                                 )
                             )
                         }
                         kv.key to kv.value.toAnnotationValue()
                     }.cast(),
-                annotationName.location,
+                altToken.location,
                 AnnotationNodeLocations(altToken.location, annotationName.location, attrsLocations.build())
             )
         }.map {

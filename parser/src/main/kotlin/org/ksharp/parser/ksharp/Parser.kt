@@ -141,29 +141,29 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
 fun KSharpConsumeResult.thenAssignOperator() =
     then(KSharpTokenType.AssignOperator, false)
 
-fun String.lexerModule(context: String, withLocations: Boolean) =
-    this.reader().lexerModule(context, withLocations)
+fun String.lexerModule(withLocations: Boolean) =
+    this.reader().lexerModule(withLocations)
 
-fun Reader.lexerModule(context: String, withLocations: Boolean) =
+fun Reader.lexerModule(withLocations: Boolean) =
     kSharpLexer()
         .collapseKSharpTokens()
         .cast<TokenLexerIterator<KSharpLexerState>>()
         .let {
-            if (withLocations) it.toLogicalLexerToken(context, KSharpTokenType.NewLine)
+            if (withLocations) it.toLogicalLexerToken(KSharpTokenType.NewLine)
             else it
         }.markBlocks {
             val token = LexerToken(it, TextToken("", 0, 0))
-            if (withLocations) LogicalLexerToken(token, context, ZeroPosition, ZeroPosition)
+            if (withLocations) LogicalLexerToken(token, ZeroPosition, ZeroPosition)
             else token
         }
 
 fun Reader.parseModule(
-    context: String,
+    name: String,
     withLocations: Boolean = false
 ): ParserErrorOrValue<KSharpLexerState, ModuleNode> =
-    lexerModule(context, withLocations)
+    lexerModule(withLocations)
         .emitLocations(withLocations) {
-            it.consumeModule(context)
+            it.consumeModule(name)
         }
         .map { it.value }
 
@@ -173,4 +173,4 @@ fun Path.parseModule(withLocations: Boolean = false) =
 fun File.parseModule(withLocations: Boolean = false) =
     reader(StandardCharsets.UTF_8).parseModule(name, withLocations)
 
-fun String.parseModule(context: String, withLocations: Boolean = false) = reader().parseModule(context, withLocations)
+fun String.parseModule(name: String, withLocations: Boolean = false) = reader().parseModule(name, withLocations)

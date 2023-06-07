@@ -47,7 +47,6 @@ class MatchValueParserTest : StringSpec({
                         ),
                         LiteralCollectionType.Tuple,
                         Location.NoProvided,
-                        LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                     ),
                     Location.NoProvided
                 )
@@ -68,7 +67,6 @@ class MatchValueParserTest : StringSpec({
                         ),
                         LiteralCollectionType.List,
                         Location.NoProvided,
-                        LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                     ),
                     Location.NoProvided
                 )
@@ -89,7 +87,7 @@ class MatchValueParserTest : StringSpec({
                         ),
                         LiteralValueNode("rest", LiteralValueType.Binding, Location.NoProvided),
                         Location.NoProvided,
-                        MatchListValueNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
+                        MatchListValueNodeLocations(Location.NoProvided)
                     ),
                     Location.NoProvided
                 )
@@ -112,12 +110,11 @@ class MatchValueParserTest : StringSpec({
                                 ),
                                 LiteralCollectionType.Tuple,
                                 Location.NoProvided,
-                                LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                             )
                         ),
                         LiteralValueNode("rest", LiteralValueType.Binding, Location.NoProvided),
                         Location.NoProvided,
-                        MatchListValueNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
+                        MatchListValueNodeLocations(Location.NoProvided)
                     ),
                     Location.NoProvided
                 )
@@ -138,7 +135,6 @@ class MatchValueParserTest : StringSpec({
                         ),
                         LiteralCollectionType.Set,
                         Location.NoProvided,
-                        LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                     ),
                     Location.NoProvided,
                 )
@@ -167,7 +163,6 @@ class MatchValueParserTest : StringSpec({
                         ),
                         LiteralCollectionType.Map,
                         Location.NoProvided,
-                        LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                     ),
                     Location.NoProvided
                 )
@@ -228,7 +223,6 @@ class MatchValueParserTest : StringSpec({
                             ),
                             LiteralCollectionType.Tuple,
                             Location.NoProvided,
-                            LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                         ),
                         Location.NoProvided
                     ),
@@ -239,7 +233,6 @@ class MatchValueParserTest : StringSpec({
                         ),
                         LiteralCollectionType.Tuple,
                         Location.NoProvided,
-                        LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                     ),
                     Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
                 )

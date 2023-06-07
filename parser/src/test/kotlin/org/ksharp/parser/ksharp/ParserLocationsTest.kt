@@ -12,27 +12,23 @@ class ParserLocationsTest : StringSpec({
     "Annotation locations" {
         val innerLocations = AnnotationNodeLocations(
             altLocation = Location(
-                context = "file.ks",
-                position = (Line(value = 1) to Offset(value = 46))
+                Line(value = 1) to Offset(value = 46), Line(value = 1) to Offset(value = 47)
             ),
             name = Location(
-                context = "file.ks",
-                position = (Line(value = 1) to Offset(value = 47))
+                (Line(value = 1) to Offset(value = 47)), Line(value = 1) to Offset(value = 53)
             ),
             attrs = listOf(
                 AttributeLocation(
                     null,
                     value = Location(
-                        context = "file.ks",
-                        position = (Line(value = 1) to Offset(value = 54))
+                        (Line(value = 1) to Offset(value = 54)), Line(value = 1) to Offset(value = 62)
                     ),
-                    valueLength = 8,
                     operator = null
                 )
             )
         )
         "@native(True for=[\"java\" \"c#\"] wire->internal=@native(\"String\") Flag=False)"
-            .lexerModule("file.ks", true)
+            .lexerModule(true)
             .emitLocations(true) {
                 it.consumeBlock(KSharpLexerIterator::consumeAnnotation)
             }
@@ -47,70 +43,62 @@ class ParserLocationsTest : StringSpec({
                             name = "native",
                             attrs = mapOf("default" to "String"),
                             location = Location(
-                                context = "file.ks",
-                                position = (Line(value = 1) to Offset(value = 47))
+                                Line(value = 1) to Offset(value = 46), Line(value = 1) to Offset(value = 47)
                             ),
                             locations = innerLocations
                         ),
                         "Flag" to false
                     ),
-                    location = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 1))),
+                    location = Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 1)),
                     locations = AnnotationNodeLocations(
-                        altLocation = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 0))),
-                        name = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 1))),
+                        altLocation = Location(
+                            (Line(value = 1) to Offset(value = 0)),
+                            Line(value = 1) to Offset(value = 1)
+                        ),
+                        name = Location((Line(value = 1) to Offset(value = 1)), Line(value = 1) to Offset(value = 7)),
                         attrs = listOf(
                             AttributeLocation(
                                 key = null,
                                 value = Location(
-                                    context = "file.ks",
-                                    position = (Line(value = 1) to Offset(value = 8))
+                                    (Line(value = 1) to Offset(value = 8)), (Line(value = 1) to Offset(value = 12))
                                 ),
-                                valueLength = 4,
                                 operator = null
                             ),
                             AttributeLocation(
-                                key = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 13))),
+                                key = Location(
+                                    (Line(value = 1) to Offset(value = 13)),
+                                    Line(value = 1) to Offset(value = 16)
+                                ),
                                 value = listOf(
                                     Location(
-                                        context = "file.ks",
-                                        position = (Line(value = 1) to Offset(value = 18))
-                                    ) to 6,
+                                        Line(value = 1) to Offset(value = 18), Line(value = 1) to Offset(value = 24)
+                                    ),
                                     Location(
-                                        context = "file.ks",
-                                        position = (Line(value = 1) to Offset(value = 25))
-                                    ) to 4
+                                        Line(value = 1) to Offset(value = 25), Line(value = 1) to Offset(value = 29)
+                                    )
                                 ),
-                                valueLength = 0,
                                 operator = Location(
-                                    context = "file.ks",
-                                    position = (Line(value = 1) to Offset(value = 16))
+                                    (Line(value = 1) to Offset(value = 16)), Line(value = 1) to Offset(value = 17)
                                 )
                             ),
                             AttributeLocation(
                                 key = Location(
-                                    context = "file.ks",
-                                    position = (Line(value = 1) to Offset(value = 31))
+                                    (Line(value = 1) to Offset(value = 31)), Line(value = 1) to Offset(value = 45)
                                 ),
                                 value = innerLocations,
-                                valueLength = 0,
                                 operator = Location(
-                                    context = "file.ks",
-                                    position = (Line(value = 1) to Offset(value = 45))
+                                    (Line(value = 1) to Offset(value = 45)), Line(value = 1) to Offset(value = 46)
                                 )
                             ),
                             AttributeLocation(
                                 key = Location(
-                                    context = "file.ks",
-                                    position = (Line(value = 1) to Offset(value = 64))
+                                    (Line(value = 1) to Offset(value = 64)), Line(value = 1) to Offset(value = 68)
                                 ),
                                 value = Location(
-                                    context = "file.ks",
-                                    position = (Line(value = 1) to Offset(value = 69))
+                                    (Line(value = 1) to Offset(value = 69)), Line(value = 1) to Offset(value = 74)
                                 ),
-                                valueLength = 5,
                                 operator = Location(
-                                    context = "file.ks",
-                                    position = (Line(value = 1) to Offset(value = 68))
+                                    (Line(value = 1) to Offset(value = 68)), Line(value = 1) to Offset(value = 69)
                                 )
                             )
                         )
@@ -120,43 +108,50 @@ class ParserLocationsTest : StringSpec({
     }
     "Type node header locations" {
         "type ListOfInt a b = Int"
-            .lexerModule("file.ks", true)
+            .lexerModule(true)
             .emitLocations(true) {
                 it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             }.map { it.value.cast<TypeNode>().locations }
             .shouldBeRight(
                 TypeNodeLocations(
                     internalLocation = Location.NoProvided,
-                    typeLocation = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 0))),
-                    name = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 5))),
+                    typeLocation = Location(
+                        (Line(value = 1) to Offset(value = 0)),
+                        (Line(value = 1) to Offset(value = 4))
+                    ),
+                    name = Location((Line(value = 1) to Offset(value = 5)), (Line(value = 1) to Offset(value = 14))),
                     params = listOf(
-                        Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 15))),
-                        Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 17)))
+                        Location((Line(value = 1) to Offset(value = 15)), (Line(value = 1) to Offset(value = 16))),
+                        Location((Line(value = 1) to Offset(value = 17)), (Line(value = 1) to Offset(value = 18)))
                     ),
                     assignOperatorLocation = Location(
-                        context = "file.ks",
-                        position = (Line(value = 1) to Offset(value = 19))
+                        (Line(value = 1) to Offset(value = 19)), (Line(value = 1) to Offset(value = 20))
                     )
                 )
             )
 
         "internal type ListOfInt a b = Int"
-            .lexerModule("file.ks", true)
+            .lexerModule(true)
             .emitLocations(true) {
                 it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             }.map { it.value.cast<TypeNode>().locations }
             .shouldBeRight(
                 TypeNodeLocations(
-                    internalLocation = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 0))),
-                    typeLocation = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 9))),
-                    name = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 14))),
+                    internalLocation = Location(
+                        (Line(value = 1) to Offset(value = 0)),
+                        (Line(value = 1) to Offset(value = 8))
+                    ),
+                    typeLocation = Location(
+                        (Line(value = 1) to Offset(value = 9)),
+                        (Line(value = 1) to Offset(value = 13))
+                    ),
+                    name = Location((Line(value = 1) to Offset(value = 14)), (Line(value = 1) to Offset(value = 23))),
                     params = listOf(
-                        Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 24))),
-                        Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 26)))
+                        Location((Line(value = 1) to Offset(value = 24)), (Line(value = 1) to Offset(value = 25))),
+                        Location((Line(value = 1) to Offset(value = 26)), (Line(value = 1) to Offset(value = 27)))
                     ),
                     assignOperatorLocation = Location(
-                        context = "file.ks",
-                        position = (Line(value = 1) to Offset(value = 28))
+                        (Line(value = 1) to Offset(value = 28)), (Line(value = 1) to Offset(value = 29))
                     )
                 )
             )
@@ -167,19 +162,26 @@ class ParserLocationsTest : StringSpec({
                 sum :: a -> a -> a
                 prod :: a -> a -> a
         """.trimIndent()
-            .lexerModule("file.ks", true)
+            .lexerModule(true)
             .emitLocations(true) {
                 it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             }.map { it.value.cast<TraitNode>().locations.also(::println) }
             .shouldBeRight(
                 TraitNodeLocations(
                     internalLocation = Location.NoProvided,
-                    traitLocation = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 0))),
-                    name = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 6))),
-                    params = listOf(Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 10)))),
+                    traitLocation = Location(
+                        (Line(value = 1) to Offset(value = 0)),
+                        Line(value = 1) to Offset(value = 5)
+                    ),
+                    name = Location((Line(value = 1) to Offset(value = 6)), Line(value = 1) to Offset(value = 9)),
+                    params = listOf(
+                        Location(
+                            (Line(value = 1) to Offset(value = 10)),
+                            Line(value = 1) to Offset(value = 11)
+                        )
+                    ),
                     assignOperatorLocation = Location(
-                        context = "file.ks",
-                        position = (Line(value = 1) to Offset(value = 12))
+                        (Line(value = 1) to Offset(value = 12)), Line(value = 1) to Offset(value = 13)
                     )
                 )
             )
@@ -189,22 +191,165 @@ class ParserLocationsTest : StringSpec({
                 sum :: a -> a -> a
                 prod :: a -> a -> a
         """.trimIndent()
-            .lexerModule("file.ks", true)
+            .lexerModule(true)
             .emitLocations(true) {
                 it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             }.map { it.value.cast<TraitNode>().locations.also(::println) }
             .shouldBeRight(
                 TraitNodeLocations(
-                    internalLocation = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 0))),
-                    traitLocation = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 9))),
-                    name = Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 15))),
-                    params = listOf(Location(context = "file.ks", position = (Line(value = 1) to Offset(value = 19)))),
+                    internalLocation = Location(
+                        (Line(value = 1) to Offset(value = 0)),
+                        Line(value = 1) to Offset(value = 8)
+                    ),
+                    traitLocation = Location(
+                        (Line(value = 1) to Offset(value = 9)),
+                        Line(value = 1) to Offset(value = 14)
+                    ),
+                    name = Location((Line(value = 1) to Offset(value = 15)), Line(value = 1) to Offset(value = 18)),
+                    params = listOf(
+                        Location(
+                            (Line(value = 1) to Offset(value = 19)),
+                            Line(value = 1) to Offset(value = 20)
+                        )
+                    ),
                     assignOperatorLocation = Location(
-                        context = "file.ks",
-                        position = (Line(value = 1) to Offset(value = 21))
+                        (Line(value = 1) to Offset(value = 21)), Line(value = 1) to Offset(value = 22)
                     )
                 )
-
+            )
+    }
+    "Function type node locations" {
+        "type ListOfInt = (List Int) -> a -> a -> b"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            }.map {
+                it.value.cast<TypeNode>()
+                    .expr
+                    .locations.also(::println)
+            }
+            .shouldBeRight(
+                FunctionTypeNodeLocations(
+                    separators = listOf(
+                        Location((Line(value = 1) to Offset(value = 28)), Line(value = 1) to Offset(value = 30)),
+                        Location((Line(value = 1) to Offset(value = 33)), Line(value = 1) to Offset(value = 35)),
+                        Location((Line(value = 1) to Offset(value = 38)), Line(value = 1) to Offset(value = 40))
+                    )
+                )
+            )
+    }
+    "Tuple type node locations" {
+        "type Point = Double , Double, Int"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            }.map {
+                it.value.cast<TypeNode>()
+                    .expr
+                    .locations.also(::println)
+            }
+            .shouldBeRight(
+                TupleTypeNodeLocations(
+                    separators = listOf(
+                        Location((Line(value = 1) to Offset(value = 20)), Line(value = 1) to Offset(value = 21)),
+                        Location((Line(value = 1) to Offset(value = 28)), Line(value = 1) to Offset(value = 29))
+                    )
+                )
+            )
+    }
+    "Union type node locations" {
+        "type Bool = True | False | NoSet"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            }.map {
+                it.value.cast<TypeNode>()
+                    .expr
+                    .locations.also(::println)
+            }
+            .shouldBeRight(
+                UnionTypeNodeLocations(
+                    separators = listOf(
+                        Location((Line(value = 1) to Offset(value = 17)), Line(value = 1) to Offset(value = 18)),
+                        Location((Line(value = 1) to Offset(value = 25)), Line(value = 1) to Offset(value = 26))
+                    )
+                )
+            )
+    }
+    "Intersection type node locations" {
+        "type Bool = True & False & NoSet"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            }.map {
+                it.value.cast<TypeNode>()
+                    .expr
+                    .locations.also(::println)
+            }
+            .shouldBeRight(
+                IntersectionTypeNodeLocations(
+                    separators = listOf(
+                        Location((Line(value = 1) to Offset(value = 17)), Line(value = 1) to Offset(value = 18)),
+                        Location((Line(value = 1) to Offset(value = 25)), Line(value = 1) to Offset(value = 26))
+                    )
+                )
+            )
+    }
+    "Constrained type node locations" {
+        "type Age = Int => (it > 0) && (it < 70)"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            }.map {
+                it.value.cast<TypeNode>()
+                    .expr
+                    .locations.also(::println)
+            }.shouldBeRight(
+                ConstrainedTypeNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 15)), Line(value = 1) to Offset(value = 17))
+                )
+            )
+    }
+    "Trait functions node locations" {
+        """
+            trait Num a =
+                sum :: a -> a -> a
+                prod :: a -> a -> a
+        """.trimIndent()
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            }.map {
+                it.value.cast<TraitNode>().definition.functions.map {
+                    it.locations
+                }
+            }
+            .shouldBeRight(
+                listOf(
+                    TraitFunctionNodeLocation(
+                        Location((Line(value = 2) to Offset(value = 4)), Line(value = 2) to Offset(value = 7)),
+                        Location((Line(value = 2) to Offset(value = 8)), Line(value = 2) to Offset(value = 10))
+                    ),
+                    TraitFunctionNodeLocation(
+                        Location((Line(value = 3) to Offset(value = 4)), Line(value = 3) to Offset(value = 8)),
+                        Location((Line(value = 3) to Offset(value = 9)), Line(value = 3) to Offset(value = 11))
+                    )
+                )
+            )
+    }
+    "Type declaration node locations" {
+        "sum a :: (Num a) -> (Num a) -> Int"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            }.map {
+                it.value.cast<TypeDeclarationNode>().locations
+            }.shouldBeRight(
+                TypeDeclarationNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 3)),
+                    Location((Line(value = 1) to Offset(value = 6)), Line(value = 1) to Offset(value = 8)),
+                    listOf(Location((Line(value = 1) to Offset(value = 4)), Line(value = 1) to Offset(value = 5)))
+                )
             )
     }
 })

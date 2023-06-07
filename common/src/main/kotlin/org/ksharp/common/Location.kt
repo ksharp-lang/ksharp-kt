@@ -11,10 +11,10 @@ typealias Position = Pair<Line, Offset>
 val ZeroPosition = Line(0) to Offset(0)
 
 data class Location(
-    val context: String,
-    val position: Position,
+    val start: Position,
+    val end: Position
 ) {
     companion object {
-        val NoProvided = Location("", ZeroPosition)
+        val NoProvided = Location(ZeroPosition, ZeroPosition)
     }
 }

@@ -85,7 +85,6 @@ class LiteralParserTest : StringSpec({
                     ),
                     LiteralCollectionType.List,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -104,7 +103,6 @@ class LiteralParserTest : StringSpec({
                     ),
                     LiteralCollectionType.Set,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -130,7 +128,6 @@ class LiteralParserTest : StringSpec({
                     ),
                     LiteralCollectionType.Map,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -149,7 +146,6 @@ class LiteralParserTest : StringSpec({
                     ),
                     LiteralCollectionType.Tuple,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
 
@@ -167,7 +163,6 @@ class LiteralParserTest : StringSpec({
                     ),
                     LiteralCollectionType.Tuple,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -185,7 +180,6 @@ class LiteralParserTest : StringSpec({
                     ),
                     LiteralCollectionType.Tuple,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -205,7 +199,6 @@ class LiteralParserTest : StringSpec({
                             ),
                             LiteralCollectionType.Tuple,
                             Location.NoProvided,
-                            LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                         ),
                         LiteralCollectionNode(
                             listOf(
@@ -213,13 +206,11 @@ class LiteralParserTest : StringSpec({
                                 LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
                             ),
                             LiteralCollectionType.Tuple,
-                            Location.NoProvided,
-                            LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
+                            Location.NoProvided
                         )
                     ),
                     LiteralCollectionType.List,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }

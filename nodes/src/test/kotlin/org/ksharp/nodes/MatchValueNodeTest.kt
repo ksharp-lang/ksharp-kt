@@ -32,7 +32,7 @@ class MatchValueNodeTest : StringSpec({
             ),
             LiteralValueNode("rest", LiteralValueType.Binding, Location.NoProvided),
             Location.NoProvided,
-            MatchListValueNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
+            MatchListValueNodeLocations(Location.NoProvided)
         ).node.apply {
             cast<MatchListValueNode>().apply {
                 head.shouldBe(listOf(UnitNode(Location.NoProvided)))
@@ -41,8 +41,6 @@ class MatchValueNodeTest : StringSpec({
                 locations.shouldBe(
                     MatchListValueNodeLocations(
                         Location.NoProvided,
-                        Location.NoProvided,
-                        Location.NoProvided
                     )
                 )
             }

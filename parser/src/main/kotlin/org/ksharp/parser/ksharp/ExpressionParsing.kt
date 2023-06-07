@@ -152,7 +152,6 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
                 else LiteralCollectionNode(
                     it.cast(), LiteralCollectionType.Tuple,
                     it.first().cast<NodeData>().location,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             }
     } else withFunctionCall
@@ -168,7 +167,6 @@ private fun KSharpConsumeResult.buildOperatorExpression(): KSharpParserResult =
                 it.first().cast(),
                 it.last().cast(),
                 operator.location,
-                OperatorNodeLocations(Location.NoProvided)
             )
         }
     }

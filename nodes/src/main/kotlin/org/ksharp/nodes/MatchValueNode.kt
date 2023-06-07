@@ -8,8 +8,6 @@ enum class MatchValueType {
 }
 
 data class MatchListValueNodeLocations(
-    val openLocation: Location,
-    val closeLocation: Location,
     val tailSeparatorLocation: Location
 ) : NodeLocations
 

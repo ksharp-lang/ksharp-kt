@@ -28,7 +28,7 @@ internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
                         head,
                         LiteralValueNode(tail.text, LiteralValueType.Binding, tail.location),
                         location,
-                        MatchListValueNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
+                        MatchListValueNodeLocations(Location.NoProvided)
                     ),
                     location
                 ).cast<NodeData>()

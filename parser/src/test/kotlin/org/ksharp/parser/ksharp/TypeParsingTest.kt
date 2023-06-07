@@ -1159,15 +1159,12 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode("Map", Location.NoProvided),
                             LabelTypeNode(
                                 "key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided,
-                                LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
-                            ),
+
+                                ),
                             LabelTypeNode(
                                 "value",
                                 ParameterTypeNode("v", Location.NoProvided),
                                 Location.NoProvided,
-                                LabelTypeNodeLocations(
-                                    Location.NoProvided, Location.NoProvided
-                                )
                             )
                         ), Location.NoProvided
                     ),
@@ -1201,17 +1198,11 @@ class TypeParserTest : StringSpec({
                                 "x",
                                 ConcreteTypeNode("Double", Location.NoProvided),
                                 Location.NoProvided,
-                                LabelTypeNodeLocations(
-                                    Location.NoProvided, Location.NoProvided
-                                )
                             ),
                             LabelTypeNode(
                                 "y",
                                 ConcreteTypeNode("Double", Location.NoProvided),
                                 Location.NoProvided,
-                                LabelTypeNodeLocations(
-                                    Location.NoProvided, Location.NoProvided
-                                )
                             )
                         ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                     ),
@@ -1247,7 +1238,7 @@ class TypeParserTest : StringSpec({
                                         ConcreteTypeNode("Num", Location.NoProvided),
                                         ParameterTypeNode("a", Location.NoProvided)
                                     ), Location.NoProvided
-                                ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                ), Location.NoProvided
                             ),
                             LabelTypeNode(
                                 "point", TupleTypeNode(
@@ -1256,16 +1247,16 @@ class TypeParserTest : StringSpec({
                                             "x",
                                             ConcreteTypeNode("Double", Location.NoProvided),
                                             Location.NoProvided,
-                                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
-                                        ),
+
+                                            ),
                                         LabelTypeNode(
                                             "y",
                                             ConcreteTypeNode("Double", Location.NoProvided),
                                             Location.NoProvided,
-                                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
-                                        )
+
+                                            )
                                     ), Location.NoProvided, TupleTypeNodeLocations(listOf())
-                                ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                ), Location.NoProvided
                             )
                         ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                     ),
@@ -1299,25 +1290,27 @@ class TypeParserTest : StringSpec({
                                 "n",
                                 UnitTypeNode(Location.NoProvided),
                                 Location.NoProvided,
-                                LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
-                            ),
+
+                                ),
                             LabelTypeNode(
-                                "point", TupleTypeNode(
+                                "point",
+                                TupleTypeNode(
                                     listOf(
                                         LabelTypeNode(
                                             "x",
                                             ConcreteTypeNode("Double", Location.NoProvided),
                                             Location.NoProvided,
-                                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
-                                        ),
+
+                                            ),
                                         LabelTypeNode(
                                             "y",
                                             ConcreteTypeNode("Double", Location.NoProvided),
                                             Location.NoProvided,
-                                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
-                                        )
+
+                                            )
                                     ), Location.NoProvided, TupleTypeNodeLocations(listOf())
-                                ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                ),
+                                Location.NoProvided,
                             )
                         ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                     ),
@@ -1348,30 +1341,34 @@ class TypeParserTest : StringSpec({
                     TupleTypeNode(
                         listOf(
                             LabelTypeNode(
-                                "n", FunctionTypeNode(
+                                "n",
+                                FunctionTypeNode(
                                     listOf(
                                         ConcreteTypeNode("Int", Location.NoProvided),
                                         ConcreteTypeNode("Int", Location.NoProvided)
                                     ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
-                                ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                ),
+                                Location.NoProvided,
                             ),
                             LabelTypeNode(
-                                "point", TupleTypeNode(
+                                "point",
+                                TupleTypeNode(
                                     listOf(
                                         LabelTypeNode(
                                             "x",
                                             ConcreteTypeNode("Double", Location.NoProvided),
                                             Location.NoProvided,
-                                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
-                                        ),
+
+                                            ),
                                         LabelTypeNode(
                                             "y",
                                             ConcreteTypeNode("Double", Location.NoProvided),
                                             Location.NoProvided,
-                                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
-                                        )
+
+                                            )
                                     ), Location.NoProvided, TupleTypeNodeLocations(listOf())
-                                ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                ),
+                                Location.NoProvided,
                             )
                         ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                     ),
@@ -1407,16 +1404,15 @@ class TypeParserTest : StringSpec({
                                 ">",
                                 FunctionCallNode("it", FunctionType.Function, listOf(), Location.NoProvided),
                                 LiteralValueNode("0", LiteralValueType.Integer, Location.NoProvided),
-                                Location.NoProvided,
-                                OperatorNodeLocations(Location.NoProvided)
+                                Location.NoProvided
                             ),
                             OperatorNode(
                                 "<",
                                 FunctionCallNode("it", FunctionType.Function, listOf(), Location.NoProvided),
                                 LiteralValueNode("70", LiteralValueType.Integer, Location.NoProvided),
-                                Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                                Location.NoProvided,
                             ),
-                            Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                            Location.NoProvided,
                         ),
                         Location.NoProvided, ConstrainedTypeNodeLocations(Location.NoProvided)
                     ),

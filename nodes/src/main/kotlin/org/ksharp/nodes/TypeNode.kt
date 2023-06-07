@@ -28,12 +28,6 @@ data class TraitFunctionNodeLocation(
     val operator: Location
 ) : NodeLocations
 
-data class LabelTypeNodeLocations(
-    val name: Location,
-    val separator: Location
-) : NodeLocations
-
-
 data class FunctionTypeNodeLocations(
     val separators: List<Location>
 ) : NodeLocations
@@ -99,8 +93,9 @@ data class LabelTypeNode(
     val name: String,
     val expr: TypeExpression,
     override val location: Location,
-    override val locations: LabelTypeNodeLocations
 ) : NodeData(), TypeExpression {
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
     override val children: Sequence<NodeData>
         get() = sequenceOf(expr.cast())
 

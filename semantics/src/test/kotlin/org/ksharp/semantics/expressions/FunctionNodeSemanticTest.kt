@@ -61,7 +61,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                    Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                    Location.NoProvided
                 ),
                 Location.NoProvided,
                 FunctionNodeLocations(
@@ -119,7 +119,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                    Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                    Location.NoProvided
                 ),
                 Location.NoProvided, FunctionNodeLocations(
                     Location.NoProvided,
@@ -176,7 +176,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                    Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                    Location.NoProvided
                 ),
                 Location.NoProvided, FunctionNodeLocations(
                     Location.NoProvided,
@@ -275,7 +275,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                    Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                    Location.NoProvided
                 ),
                 Location.NoProvided, FunctionNodeLocations(
                     Location.NoProvided,
@@ -325,7 +325,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                    Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                    Location.NoProvided
                 ),
                 Location.NoProvided, FunctionNodeLocations(
                     Location.NoProvided,
@@ -443,7 +443,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     "**",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                    Location.NoProvided
                 ),
                 Location.NoProvided,
                 FunctionNodeLocations(
@@ -513,7 +513,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided,
-                    OperatorNodeLocations(Location.NoProvided)
                 ),
                 Location.NoProvided,
                 FunctionNodeLocations(
@@ -591,7 +590,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided,
-                    OperatorNodeLocations(Location.NoProvided)
                 ),
                 Location.NoProvided,
                 FunctionNodeLocations(
@@ -656,7 +654,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                        Location.NoProvided
                     ),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
@@ -748,7 +746,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                         Location.NoProvided,
-                        OperatorNodeLocations(Location.NoProvided)
                     ),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     UnitNode(Location.NoProvided),
@@ -842,12 +839,10 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                             Location.NoProvided,
-                            OperatorNodeLocations(Location.NoProvided)
                         )
                     ),
                     LiteralCollectionType.List,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 ),
                 Location.NoProvided,
                 FunctionNodeLocations(
@@ -929,7 +924,6 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     ),
                     LiteralCollectionType.Set,
                     Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
                 ),
                 Location.NoProvided,
                 FunctionNodeLocations(
@@ -1000,8 +994,8 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     listOf(
                         FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, emptyList(), Location.NoProvided),
-                    ), LiteralCollectionType.Tuple, Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
+                    ),
+                    LiteralCollectionType.Tuple, Location.NoProvided,
                 ),
                 Location.NoProvided,
                 FunctionNodeLocations(
@@ -1092,8 +1086,8 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided,
                             LiteralMapEntryNodeLocations(Location.NoProvided)
                         )
-                    ), LiteralCollectionType.Map, Location.NoProvided,
-                    LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
+                    ),
+                    LiteralCollectionType.Map, Location.NoProvided,
                 ),
                 Location.NoProvided,
                 FunctionNodeLocations(
@@ -1194,7 +1188,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                        Location.NoProvided,
                     ),
                     Location.NoProvided,
                     LetExpressionNodeLocations(Location.NoProvided)

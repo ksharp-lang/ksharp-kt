@@ -25,7 +25,7 @@ class LexerTokenTest : StringSpec({
             TextToken("H", 2, 3)
         )
         val logicalToken = LogicalLexerToken(
-            token, "File", Line(1) to Offset(0), Line(2) to Offset(0)
+            token, Line(1) to Offset(0), Line(2) to Offset(0)
         )
         logicalToken.type.shouldBe(BaseTokenType.Unknown)
         logicalToken.text.shouldBe("H")
@@ -33,7 +33,7 @@ class LexerTokenTest : StringSpec({
         logicalToken.endOffset.shouldBe(3)
         logicalToken.startPosition.shouldBe(Line(1) to Offset(0))
         logicalToken.endPosition.shouldBe(Line(2) to Offset(0))
-        logicalToken.location.shouldBe(Location("File", Line(1) to Offset(0)))
+        logicalToken.location.shouldBe(Location(Line(1) to Offset(0), Line(2) to Offset(0)))
     }
     "Check LexerToken collapse" {
         val token1 = LexerToken(
@@ -56,14 +56,14 @@ class LexerTokenTest : StringSpec({
             TextToken("H", 2, 3)
         )
         val logicalToken1 = LogicalLexerToken(
-            token1, "File", Line(1) to Offset(0), Line(2) to Offset(0)
+            token1, Line(1) to Offset(0), Line(2) to Offset(0)
         )
         val token2 = LexerToken(
             BaseTokenType.Unknown,
             TextToken("H", 2, 10)
         )
         val logicalToken2 = LogicalLexerToken(
-            token2, "File", Line(3) to Offset(0), Line(4) to Offset(0)
+            token2, Line(3) to Offset(0), Line(4) to Offset(0)
         )
         val collapsed = logicalToken1.collapse(KSharpTokenType.EndBlock, "J", logicalToken2) as LogicalLexerToken
         collapsed.type.shouldBe(KSharpTokenType.EndBlock)

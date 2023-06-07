@@ -34,11 +34,12 @@ class ModuleParserTest : StringSpec({
     )
     val expectedModuleWithLocations: (String) -> ModuleNode = {
         ModuleNode(
-            it, listOf(
+            it,
+            listOf(
                 ImportNode(
                     "ksharp.text",
                     "text",
-                    Location(context = it, position = Line(value = 1) to Offset(value = 0)),
+                    Location(Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 6)),
                     ImportNodeLocations(
                         Location.NoProvided,
                         Location.NoProvided,
@@ -50,7 +51,7 @@ class ModuleParserTest : StringSpec({
                 ImportNode(
                     "ksharp.math",
                     "math",
-                    Location(context = it, position = Line(value = 2) to Offset(value = 0)),
+                    Location(Line(value = 2) to Offset(value = 0), Line(value = 2) to Offset(value = 6)),
                     ImportNodeLocations(
                         Location.NoProvided,
                         Location.NoProvided,
@@ -59,7 +60,11 @@ class ModuleParserTest : StringSpec({
                         Location.NoProvided
                     )
                 )
-            ), listOf(), listOf(), listOf(), Location(context = it, position = Line(value = 1) to Offset(value = 0))
+            ),
+            listOf(),
+            listOf(),
+            listOf(),
+            Location(Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 6))
         )
     }
     "Parse a module with imports" {
@@ -403,8 +408,8 @@ class ModuleParserTest : StringSpec({
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                                 Location.NoProvided,
-                                OperatorNodeLocations(Location.NoProvided)
-                            ),
+
+                                ),
                             Location.NoProvided,
                             FunctionNodeLocations(
                                 Location.NoProvided,
@@ -443,8 +448,8 @@ class ModuleParserTest : StringSpec({
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                                 Location.NoProvided,
-                                OperatorNodeLocations(Location.NoProvided)
-                            ),
+
+                                ),
                             Location.NoProvided,
                             FunctionNodeLocations(
                                 Location.NoProvided,
@@ -527,7 +532,7 @@ class ModuleParserTest : StringSpec({
                                 "+",
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided, OperatorNodeLocations(Location.NoProvided)
+                                Location.NoProvided,
                             ),
                             Location.NoProvided, FunctionNodeLocations(
                                 Location.NoProvided,

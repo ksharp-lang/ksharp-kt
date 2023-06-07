@@ -23,11 +23,6 @@ enum class LiteralCollectionType {
     Tuple
 }
 
-data class LiteralCollectionNodeLocations(
-    val openLocation: Location,
-    val closeLocation: Location
-) : NodeLocations
-
 data class LiteralMapEntryNodeLocations(
     val keyValueOperatorLocation: Location
 ) : NodeLocations
@@ -59,11 +54,12 @@ data class LiteralCollectionNode(
     val values: List<NodeData>,
     val type: LiteralCollectionType,
     override val location: Location,
-    override val locations: LiteralCollectionNodeLocations
 ) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = values.asSequence()
 
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
 }
 
 data class UnitNode(override val location: Location) : NodeData(), ExpressionParserNode {

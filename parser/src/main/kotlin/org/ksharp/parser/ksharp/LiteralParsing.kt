@@ -39,7 +39,6 @@ private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
                 it.drop(1).cast(),
                 type,
                 location,
-                LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
             )
         }
 
@@ -73,7 +72,6 @@ private fun KSharpLexerIterator.consumeMapLiteral(): KSharpParserResult =
             val location = token.location
             LiteralCollectionNode(
                 it.drop(1).cast(), type, location,
-                LiteralCollectionNodeLocations(Location.NoProvided, Location.NoProvided)
             )
         }
 

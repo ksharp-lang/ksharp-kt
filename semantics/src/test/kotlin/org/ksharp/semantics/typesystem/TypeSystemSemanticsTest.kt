@@ -1215,12 +1215,10 @@ class TypeSystemSemanticsTest : StringSpec({
                     listOf(
                         ConcreteTypeNode("Map", Location.NoProvided),
                         LabelTypeNode(
-                            "key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided,
-                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            "key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided
                         ),
                         LabelTypeNode(
-                            "value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided,
-                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            "value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided
                         )
                     ), Location.NoProvided
                 ),
@@ -1247,14 +1245,12 @@ class TypeSystemSemanticsTest : StringSpec({
                         LabelTypeNode(
                             "x",
                             ConcreteTypeNode("Double", Location.NoProvided),
-                            Location.NoProvided,
-                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            Location.NoProvided
                         ),
                         LabelTypeNode(
                             "y",
                             ConcreteTypeNode("Double", Location.NoProvided),
-                            Location.NoProvided,
-                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            Location.NoProvided
                         )
                     ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                 ), Location.NoProvided,
@@ -1286,7 +1282,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
                                 ), Location.NoProvided
-                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            ), Location.NoProvided
                         ),
                         LabelTypeNode(
                             "point", TupleTypeNode(
@@ -1294,17 +1290,15 @@ class TypeSystemSemanticsTest : StringSpec({
                                     LabelTypeNode(
                                         "x",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided,
-                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                        Location.NoProvided
                                     ),
                                     LabelTypeNode(
                                         "y",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided,
-                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                        Location.NoProvided
                                     )
                                 ), Location.NoProvided, TupleTypeNodeLocations(listOf())
-                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            ), Location.NoProvided
                         )
                     ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                 ),
@@ -1332,8 +1326,7 @@ class TypeSystemSemanticsTest : StringSpec({
                         LabelTypeNode(
                             "n",
                             UnitTypeNode(Location.NoProvided),
-                            Location.NoProvided,
-                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            Location.NoProvided
                         ),
                         LabelTypeNode(
                             "point", TupleTypeNode(
@@ -1341,17 +1334,15 @@ class TypeSystemSemanticsTest : StringSpec({
                                     LabelTypeNode(
                                         "x",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided,
-                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                        Location.NoProvided
                                     ),
                                     LabelTypeNode(
                                         "y",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided,
-                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                        Location.NoProvided
                                     )
                                 ), Location.NoProvided, TupleTypeNodeLocations(listOf())
-                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            ), Location.NoProvided
                         )
                     ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                 ), Location.NoProvided,
@@ -1383,7 +1374,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ConcreteTypeNode("Int", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
-                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            ), Location.NoProvided
                         ),
                         LabelTypeNode(
                             "point", TupleTypeNode(
@@ -1391,18 +1382,15 @@ class TypeSystemSemanticsTest : StringSpec({
                                     LabelTypeNode(
                                         "x",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided,
-                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                        Location.NoProvided
                                     ),
                                     LabelTypeNode(
                                         "y",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided,
-                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                        Location.NoProvided
                                     )
                                 ), Location.NoProvided, TupleTypeNodeLocations(listOf())
-                            ), Location.NoProvided,
-                            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            ), Location.NoProvided
                         )
                     ), Location.NoProvided,
                     TupleTypeNodeLocations(listOf())
@@ -1434,7 +1422,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ), Location.NoProvided
-                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            ), Location.NoProvided
                         ),
                         LabelTypeNode(
                             "point", TupleTypeNode(
@@ -1442,17 +1430,15 @@ class TypeSystemSemanticsTest : StringSpec({
                                     LabelTypeNode(
                                         "x",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided,
-                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                        Location.NoProvided
                                     ),
                                     LabelTypeNode(
                                         "y",
                                         ConcreteTypeNode("Double", Location.NoProvided),
-                                        Location.NoProvided,
-                                        LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                                        Location.NoProvided
                                     )
                                 ), Location.NoProvided, TupleTypeNodeLocations(listOf())
-                            ), Location.NoProvided, LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+                            ), Location.NoProvided
                         )
                     ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                 ), Location.NoProvided,

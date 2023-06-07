@@ -10,6 +10,11 @@ private enum class SetType {
     Intersection
 }
 
+private fun Token.toListLocations(emitLocations: Boolean) =
+    if (emitLocations) listOf(location) else listOf()
+
+private fun Token.appendToListLocations(locations: List<Location>) =
+    listOf(location) + locations
 
 private fun KSharpLexerIterator.consumeTypeVariable() =
     consume({
@@ -62,23 +67,36 @@ private fun List<Any>.toValueTypes(token: Token?): NodeData {
     else ParametricTypeNode(result, firstNode.location)
 }
 
-private fun List<Any>.toFunctionType(separator: Token): NodeData {
+private fun List<Any>.toFunctionType(separator: Token, emitLocations: Boolean): NodeData {
     val first = first() as TypeExpression
     val last = last() as TypeExpression
     return if (last is FunctionTypeNode) {
         FunctionTypeNode(
             listOf(first) + last.params, separator.location,
-            FunctionTypeNodeLocations(listOf())
+            if (emitLocations) FunctionTypeNodeLocations(separator.appendToListLocations(last.locations.separators))
+            else last.locations
         )
-    } else FunctionTypeNode(listOf(first, last), separator.location, FunctionTypeNodeLocations(listOf()))
+    } else FunctionTypeNode(
+        listOf(first, last),
+        separator.location,
+        FunctionTypeNodeLocations(separator.toListLocations(emitLocations))
+    )
 }
 
-private fun List<Any>.toTupleType(separator: Token): NodeData {
+private fun List<Any>.toTupleType(separator: Token, emitLocations: Boolean): NodeData {
     val first = first() as TypeExpression
     val last = last() as TypeExpression
     return if (last is TupleTypeNode) {
-        TupleTypeNode(listOf(first) + last.types, separator.location, TupleTypeNodeLocations(listOf()))
-    } else TupleTypeNode(listOf(first, last), separator.location, TupleTypeNodeLocations(listOf()))
+        TupleTypeNode(
+            listOf(first) + last.types, separator.location,
+            if (emitLocations) TupleTypeNodeLocations(separator.appendToListLocations(last.locations.separators))
+            else TupleTypeNodeLocations(listOf())
+        )
+    } else TupleTypeNode(
+        listOf(first, last),
+        separator.location,
+        TupleTypeNodeLocations(separator.toListLocations(emitLocations))
+    )
 }
 
 private fun List<Any>.toLabelOrValueType(): NodeData {
@@ -88,32 +106,31 @@ private fun List<Any>.toLabelOrValueType(): NodeData {
         LabelTypeNode(
             node.text.let { t -> t.substring(0, t.length - 1) },
             type.cast(),
-            node.location,
-            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+            node.location
         )
     } else type
 }
 
-private fun KSharpConsumeResult.thenJoinType() =
+private fun KSharpConsumeResult.thenJoinType(emitLocations: Boolean) =
     appendNode {
         it.toLabelOrValueType()
     }.thenIfTypeValueSeparator { i ->
-        i.consume { it.consumeTypeValue(true) }
+        i.consume { it.consumeTypeValue(true, emitLocations) }
     }.build {
         if (it.size == 1) return@build it.first().cast()
         val separator = it[1] as Token
         if (separator.type == KSharpTokenType.Operator10) {
-            return@build it.toFunctionType(separator)
+            return@build it.toFunctionType(separator, emitLocations)
         }
-        it.toTupleType(separator)
+        it.toTupleType(separator, emitLocations)
     }
 
-private fun KSharpLexerIterator.consumeTypeValue(allowLabel: Boolean): KSharpParserResult =
+private fun KSharpLexerIterator.consumeTypeValue(allowLabel: Boolean, emitLocations: Boolean): KSharpParserResult =
     ifConsume(KSharpTokenType.OpenParenthesis, true) {
-        it.consume { i -> i.consumeTypeValue(true) }
+        it.consume { i -> i.consumeTypeValue(true, emitLocations) }
             .then(KSharpTokenType.CloseParenthesis, true)
             .let { l ->
-                if (allowLabel) l.thenJoinType()
+                if (allowLabel) l.thenJoinType(emitLocations)
                 else l.build { items ->
                     items.toLabelOrValueType()
                 }
@@ -123,7 +140,7 @@ private fun KSharpLexerIterator.consumeTypeValue(allowLabel: Boolean): KSharpPar
             l.build { i -> UnitTypeNode(i.first().cast<Token>().location).cast<NodeData>() }
                 .let { result ->
                     if (allowLabel) result.resume()
-                        .thenJoinType()
+                        .thenJoinType(emitLocations)
                     else result
                 }
         }
@@ -132,16 +149,16 @@ private fun KSharpLexerIterator.consumeTypeValue(allowLabel: Boolean): KSharpPar
             result.or {
                 it.ifConsume(KSharpTokenType.Label) { l ->
                     l.consume {
-                        consumeTypeValue(false)
+                        consumeTypeValue(false, emitLocations)
                     }.build { items -> items.toLabelOrValueType() }
                         .resume()
-                        .thenLoop { i -> i.consumeTypeValue(true) }
-                        .thenJoinType()
+                        .thenLoop { i -> i.consumeTypeValue(true, emitLocations) }
+                        .thenJoinType(emitLocations)
                 }
             }.or {
                 it.consumeTypeVariable()
-                    .thenLoop { i -> i.consumeTypeValue(true) }
-                    .thenJoinType()
+                    .thenLoop { i -> i.consumeTypeValue(true, emitLocations) }
+                    .thenJoinType(emitLocations)
             }
         } else result.or {
             it.consumeTypeVariable()
@@ -171,12 +188,15 @@ private fun List<Any>.asTypeExpressionList(): List<TypeExpression> =
         else it as TypeExpression
     }
 
-private fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
-    consumeTypeValue(true)
+private fun List<Any>.asTypeExpressionLocations(emitLocations: Boolean): List<Location> =
+    if (emitLocations) filterIsInstance<SetElement>().map { it.cast<SetElement>().location } else listOf()
+
+private fun KSharpLexerIterator.consumeTypeExpr(emitLocations: Boolean): KSharpParserResult =
+    consumeTypeValue(true, emitLocations)
         .resume()
         .thenLoop {
             it.consumeTypeSetSeparator()
-                .consume { i -> i.consumeTypeValue(true) }
+                .consume { i -> i.consumeTypeValue(true, emitLocations) }
                 .build { i ->
                     val setOperator = i.first() as Token
                     SetElement(
@@ -194,23 +214,23 @@ private fun KSharpLexerIterator.consumeTypeExpr(): KSharpParserResult =
                     SetType.Invalid -> InvalidSetTypeNode(item.location)
                     SetType.Union -> UnionTypeNode(
                         it.asTypeExpressionList(), item.location, UnionTypeNodeLocations(
-                            listOf()
+                            it.asTypeExpressionLocations(emitLocations)
                         )
                     )
 
                     SetType.Intersection -> IntersectionTypeNode(
                         it.asTypeExpressionList(), item.location, IntersectionTypeNodeLocations(
-                            listOf()
+                            it.asTypeExpressionLocations(emitLocations)
                         )
                     )
                 }
             }
         }
 
-private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
+private fun KSharpLexerIterator.consumeTraitFunction(emitLocations: Boolean): KSharpParserResult =
     consumeLowerCaseWord()
-        .then(KSharpTokenType.Operator, "::", true)
-        .consume { it.consumeTypeValue(true) }
+        .then(KSharpTokenType.Operator, "::", false)
+        .consume { it.consumeTypeValue(true, emitLocations) }
         .thenNewLine()
         .build {
             val name = it.first().cast<Token>()
@@ -219,7 +239,8 @@ private fun KSharpLexerIterator.consumeTraitFunction(): KSharpParserResult =
                 name.text,
                 type,
                 name.location,
-                TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
+                if (emitLocations) TraitFunctionNodeLocation(name.location, it[1].cast<Token>().location)
+                else TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
             )
         }
 
@@ -262,7 +283,7 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
                 }.thenAssignOperator()
         }.thenInBlock { block ->
             block.collect()
-                .thenLoop { it.consumeTraitFunction() }
+                .thenLoop { it.consumeTraitFunction(emitLocations) }
                 .build { TraitFunctionsNode(it.cast()) }
         }
         .build {
@@ -303,7 +324,7 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Bo
                             }
                     }
                     .thenAssignOperator()
-                    .consume { it.consumeTypeExpr() }
+                    .consume { it.consumeTypeExpr(emitLocations) }
                     .build {
                         it.createTypeNode(
                             internal,
@@ -323,7 +344,7 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Bo
                         )
                     }
             }.resume()
-                .thenIf(KSharpTokenType.Operator7, "=>", true) { l ->
+                .thenIf(KSharpTokenType.Operator7, "=>", false) { l ->
                     l.consume { it.consumeExpression() }
                 }.build {
                     val type = it.first().cast<TypeNode>()
@@ -333,7 +354,11 @@ private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Bo
                         type.copy(
                             expr = ConstrainedTypeNode(
                                 type.expr.cast(), expr, expr.location,
-                                ConstrainedTypeNodeLocations(Location.NoProvided)
+                                ConstrainedTypeNodeLocations(
+                                    if (emitLocations)
+                                        it[1].cast<Token>().location
+                                    else Location.NoProvided
+                                )
                             )
                         )
                     }
@@ -355,24 +380,36 @@ internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserR
         it.consumeFunctionName()
             .thenLoop { p ->
                 p.consumeLowerCaseWord()
-                    .build { param -> param.last().cast<LexerValue>().text }
+                    .build { param -> param.last() }
             }
-            .then(KSharpTokenType.Operator, "::", true)
+            .then(KSharpTokenType.Operator, "::", false)
             .enableDiscardBlockAndNewLineTokens { lx ->
-                lx.consume { l -> l.consumeTypeValue(true) }
+                lx.consume { l -> l.consumeTypeValue(true, state.value.emitLocations) }
             }.build { i ->
+                val emitLocations = state.value.emitLocations
                 val name = i.first().cast<Token>()
+                val paramsLocations = listBuilder<Location>()
                 val params = i.asSequence()
                     .drop(1)
-                    .takeWhile { v -> v !is NodeData }
-                    .map { v -> v as String }
+                    .takeWhile { v -> (v as Token).type != KSharpTokenType.Operator }
+                    .map { v ->
+                        val tk = v as Token
+                        if (emitLocations) paramsLocations.add(tk.location)
+                        v.text
+                    }
                 TypeDeclarationNode(
                     null,
                     name.text,
                     params.toList(),
                     i.last().cast(),
                     name.location,
-                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                    if (emitLocations)
+                        TypeDeclarationNodeLocations(
+                            name.location,
+                            i[i.size - 2].cast<Token>().location,
+                            paramsLocations.build()
+                        )
+                    else TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                 ).cast<NodeData>()
             }.asLookAHeadResult()
     }.map {

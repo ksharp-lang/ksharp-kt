@@ -5,7 +5,6 @@ import org.ksharp.common.Location
 data class AttributeLocation(
     val key: Location?,
     val value: Any,
-    val valueLength: Int,
     val operator: Location?
 )
 

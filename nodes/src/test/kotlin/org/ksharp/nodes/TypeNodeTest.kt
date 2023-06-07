@@ -6,14 +6,9 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.Line
 import org.ksharp.common.Location
-import org.ksharp.common.Offset
 
-private val testLocation = Location(
-    context = "file.ks",
-    position = Line(0) to Offset(0)
-)
+private val testLocation = Location.NoProvided
 
 class TypeNodeTest : StringSpec({
     "Test Node Interface over TraitFunctionNode" {
@@ -121,14 +116,13 @@ class TypeNodeTest : StringSpec({
         LabelTypeNode(
             "key",
             ParameterTypeNode("k", testLocation),
-            testLocation,
-            LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided)
+            testLocation
         ).node.apply {
             cast<LabelTypeNode>().apply {
                 name.shouldBe("key")
                 expr.shouldBe(ParameterTypeNode("k", testLocation))
                 location.shouldBe(testLocation)
-                locations.shouldBe(LabelTypeNodeLocations(Location.NoProvided, Location.NoProvided))
+                locations.shouldBe(NoLocationsDefined)
                 representation.shouldBe("key: k")
             }
             parent.shouldBeNull()

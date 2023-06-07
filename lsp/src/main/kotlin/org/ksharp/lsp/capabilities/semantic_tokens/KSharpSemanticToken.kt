@@ -82,10 +82,10 @@ fun Token.semanticTokenModifiers(): Array<String> =
         else -> emptyArray<String>()
     }
 
-fun calculateSemanticTokens(uri: String, content: String): ErrorOrValue<List<Int>> =
+fun calculateSemanticTokens(content: String): ErrorOrValue<List<Int>> =
     tokenEncoderSpec.encoder()
         .let { encoder ->
-            content.lexerModule(uri, withLocations = true)
+            content.lexerModule(withLocations = true)
                 .asSequence()
                 .forEach {
                     it.semanticToken()?.let { tokenType ->
