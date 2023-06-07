@@ -42,7 +42,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     value = 10.toLong(),
                                     info = TypeSemanticInfo(type = it.typeSystem["Byte"]),
                                     location = Location(
-                                        Line(value = 2) to Offset(value = 6), ZeroPosition
+                                        Line(value = 2) to Offset(value = 6), Line(value = 2) to Offset(value = 8)
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
@@ -51,7 +51,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(
-                                    Line(value = 2) to Offset(value = 0), ZeroPosition
+                                    Line(value = 2) to Offset(value = 0), Line(value = 2) to Offset(value = 3)
                                 )
                             )
                         )
@@ -79,7 +79,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     value = 10.toLong(),
                                     info = TypeSemanticInfo(type = it.typeSystem["Byte"]),
                                     location = Location(
-                                        Line(value = 1) to Offset(value = 6), ZeroPosition
+                                        Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
@@ -88,7 +88,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(
-                                    Line(value = 1) to Offset(value = 0), ZeroPosition
+                                    Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 3)
                                 )
                             )
                         )
@@ -114,7 +114,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     value = 10.toLong(),
                                     info = TypeSemanticInfo(type = it.typeSystem["Byte"]),
                                     location = Location(
-                                        Line(value = 1) to Offset(value = 6), ZeroPosition
+                                        Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
@@ -123,7 +123,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(
-                                    Line(value = 1) to Offset(value = 0), ZeroPosition
+                                    Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 3)
                                 )
                             )
                         )
@@ -149,7 +149,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     value = 10.toLong(),
                                     info = TypeSemanticInfo(type = it.typeSystem["Byte"]),
                                     location = Location(
-                                        Line(value = 1) to Offset(value = 6), ZeroPosition
+                                        Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
@@ -158,7 +158,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(
-                                    Line(value = 1) to Offset(value = 0), ZeroPosition
+                                    Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 3)
                                 )
                             )
                         )
@@ -174,7 +174,7 @@ class CompilerTestModuleInfo : StringSpec({
             .shouldBeLeft(
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
-                        Location(Line(1) to Offset(6), ZeroPosition),
+                        Location(Line(1) to Offset(6), Line(value = 1) to Offset(value = 18)),
                         "function" to "no-exist-fun (Num NativeByte)"
                     )
                 )
