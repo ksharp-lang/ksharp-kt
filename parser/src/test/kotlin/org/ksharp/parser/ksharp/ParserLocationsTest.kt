@@ -480,4 +480,34 @@ class ParserLocationsTest : StringSpec({
                 )
             )
     }
+    "if then else node locations" {
+        "if 4 > a then 10 else 20"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+            }.map {
+                it.value.cast<IfNode>().locations.also(::println)
+            }.shouldBeRight(
+                IfNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 2)),
+                    Location((Line(value = 1) to Offset(value = 9)), Line(value = 1) to Offset(value = 13)),
+                    Location((Line(value = 1) to Offset(value = 17)), Line(value = 1) to Offset(value = 21)),
+                )
+            )
+    }
+    "if then node locations" {
+        "if 4 > a then 10"
+            .lexerModule(true)
+            .emitLocations(true) {
+                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+            }.map {
+                it.value.cast<IfNode>().locations.also(::println)
+            }.shouldBeRight(
+                IfNodeLocations(
+                    Location((Line(value = 1) to Offset(value = 0)), Line(value = 1) to Offset(value = 2)),
+                    Location((Line(value = 1) to Offset(value = 9)), Line(value = 1) to Offset(value = 13)),
+                    Location.NoProvided,
+                )
+            )
+    }
 })

@@ -44,25 +44,29 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
         .enableIfKeywords {
             it.consume { l -> l.consumeExpression() }
                 .thenOptional(KSharpTokenType.NewLine, true)
-                .then(KSharpTokenType.Then, true)
+                .then(KSharpTokenType.Then, false)
                 .consume { l -> l.consumeExpression() }
                 .thenOptional(KSharpTokenType.NewLine, true)
-                .thenIf(KSharpTokenType.Else, true) { el ->
+                .thenIf(KSharpTokenType.Else, false) { el ->
                     el.consume { l -> l.consumeExpression() }
                 }
         }.build {
             val location = it.first().cast<Token>().location
-            val locations = IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
-            if (it.size == 3) IfNode(
+            val locations = IfNodeLocations(
+                it[0].cast<Token>().location,
+                it[2].cast<Token>().location,
+                if (it.size == 4) Location.NoProvided else it[4].cast<Token>().location
+            )
+            if (it.size == 4) IfNode(
                 it[1] as NodeData,
-                it[2] as NodeData,
+                it[3] as NodeData,
                 UnitNode(location),
                 location,
                 locations,
             ) else IfNode(
                 it[1] as NodeData,
-                it[2] as NodeData,
                 it[3] as NodeData,
+                it[5] as NodeData,
                 location,
                 locations
             )
