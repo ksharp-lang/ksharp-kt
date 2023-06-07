@@ -1,6 +1,9 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.*
+import org.ksharp.common.Location
+import org.ksharp.common.add
+import org.ksharp.common.cast
+import org.ksharp.common.listBuilder
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.FunctionNodeLocations
 import org.ksharp.nodes.NodeData
@@ -23,10 +26,7 @@ fun KSharpConsumeResult.thenFunctionName(): KSharpConsumeResult =
             else -> it.isTypeKeyword()
         }
     }, {
-        BaseParserErrorCode.ExpectingToken.new(
-            "token" to "LowerCaseWord, Operator different internal, type",
-            "received-token" to "${it.type}:${it.text}"
-        )
+        createExpectedTokenError("LowerCaseWord, Operator different internal, type", it)
     }, false)
 
 fun KSharpLexerIterator.consumeFunctionName(): KSharpConsumeResult =

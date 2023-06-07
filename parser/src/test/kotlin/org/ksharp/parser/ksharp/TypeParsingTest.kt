@@ -23,6 +23,7 @@ class TypeParserTest : StringSpec({
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
                     "token" to "<EndBlock>",
                     "received-token" to "Operator10:--"
                 ) to listOf(
@@ -56,6 +57,7 @@ class TypeParserTest : StringSpec({
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
                     "token" to "<EndBlock>",
                     "received-token" to "Operator4:|-"
                 ) to listOf(
@@ -89,6 +91,7 @@ class TypeParserTest : StringSpec({
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
                     "token" to "<EndBlock>",
                     "received-token" to "Operator6:&-"
                 ) to listOf(

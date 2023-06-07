@@ -7,8 +7,18 @@ enum class BaseParserErrorCode(override val description: String) : ErrorCode {
     EofToken("No more tokens"),
     ExpectingToken("Expecting token {token} was {received-token}"),
     BreakLoop("Breaking loop"),
-    ConsumeTokenFailed("Consume token failed {token}")
+    ConsumeTokenFailed("Consume token failed {token}"),
 }
+
+fun createExpectedTokenError(tokenType: TokenType, receivedToken: Token) =
+    createExpectedTokenError(tokenType.toString(), receivedToken)
+
+fun createExpectedTokenError(token: String, receivedToken: Token) =
+    BaseParserErrorCode.ExpectingToken.new(
+        receivedToken.location,
+        "token" to "<$token>",
+        "received-token" to if (receivedToken.text.isEmpty()) "<${receivedToken.type}>" else "${receivedToken.type}:${receivedToken.text}"
+    )
 
 data class ParserValue<T, S>(
     val value: T,
@@ -57,7 +67,7 @@ fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken
         } else {
             Either.Left(
                 ParserError(
-                    BaseParserErrorCode.ConsumeTokenFailed.new("token" to "'${item.type}:${item.text}'"),
+                    BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
                     listBuilder(),
                     false,
                     cons(item)
@@ -155,7 +165,7 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
         } else {
             Either.Left(
                 ParserError(
-                    BaseParserErrorCode.ConsumeTokenFailed.new("token" to "'${item.type}:${item.text}'"),
+                    BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
                     listBuilder(),
                     false,
                     cons(item)
@@ -193,7 +203,10 @@ fun <T, S> ConsumeResult<S>.thenIfConsume(
             } else {
                 Either.Left(
                     ParserError(
-                        BaseParserErrorCode.ConsumeTokenFailed.new("token" to "'${item.type}:${item.text}'"),
+                        BaseParserErrorCode.ConsumeTokenFailed.new(
+                            item.location,
+                            "token" to "'${item.type}:${item.text}'"
+                        ),
                         it.collection,
                         false,
                         it.tokens.cons(item)
@@ -315,7 +328,7 @@ fun <S> ConsumeResult<S>.then(
 ) = then({
     it.type == type
 }, {
-    BaseParserErrorCode.ExpectingToken.new("token" to "<$type>", "received-token" to "${it.type}:${it.text}")
+    createExpectedTokenError(type, it)
 }, discardToken)
 
 fun <S> ConsumeResult<S>.then(
@@ -325,7 +338,7 @@ fun <S> ConsumeResult<S>.then(
 ) = then({
     it.type == type && it.text == text
 }, {
-    BaseParserErrorCode.ExpectingToken.new("token" to "'$type:$text'", "received-token" to "'${it.type}:${it.text}'")
+    createExpectedTokenError(type, it)
 }, discardToken)
 
 fun <T, S> ConsumeResult<S>.build(block: (items: List<Any>) -> T): ParserResult<T, S> =

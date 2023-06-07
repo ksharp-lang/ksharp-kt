@@ -5,7 +5,9 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
 import org.ksharp.common.Location
 import org.ksharp.common.Offset
+import org.ksharp.common.new
 import org.ksharp.nodes.*
+import org.ksharp.parser.BaseParserErrorCode
 
 class ParseNodeStreamTest : StringSpec({
     "Parse invalid tokens" {
@@ -14,6 +16,12 @@ class ParseNodeStreamTest : StringSpec({
             .shouldBe(
                 listOf(
                     InvalidNode(
+                        error = BaseParserErrorCode.ConsumeTokenFailed.new(
+                            Location(
+                                Line(value = 1) to Offset(value = 0),
+                                Line(value = 1) to Offset(value = 1)
+                            ), "token" to "'Integer:1'"
+                        ),
                         token = listOf(
                             InvalidToken(
                                 "1",
@@ -40,6 +48,11 @@ class ParseNodeStreamTest : StringSpec({
             .shouldBe(
                 listOf(
                     InvalidNode(
+                        error = BaseParserErrorCode.ExpectingToken.new(
+                            Location.NoProvided,
+                            "token" to "<EndBlock>",
+                            "received-token" to "<BeginBlock>"
+                        ),
                         token = listOf(
                             InvalidToken(
                                 text = "import",

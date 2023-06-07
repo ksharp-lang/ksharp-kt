@@ -1,5 +1,6 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.Error
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.nodes.*
@@ -12,7 +13,8 @@ data class InvalidToken(
 )
 
 data class InvalidNode(
-    val token: List<InvalidToken>
+    val token: List<InvalidToken>,
+    val error: Error
 ) : NodeData() {
     override val locations: NodeLocations
         get() = NoLocationsDefined
@@ -22,7 +24,7 @@ data class InvalidNode(
         get() = node.location
 }
 
-private fun KSharpConsumeResult.consumeInvalidTokens(): KSharpParserResult =
+private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParserResult =
     thenInBlock { cb ->
         cb.collect()
             .enableDiscardBlockAndNewLineTokens { tl ->
@@ -31,14 +33,17 @@ private fun KSharpConsumeResult.consumeInvalidTokens(): KSharpParserResult =
                         it.type != KSharpTokenType.EndBlock
                     }).build { it.first() }
                 }.build {
-                    InvalidNode(it.map { i ->
-                        val t = i.cast<Token>()
-                        InvalidToken(
-                            t.text,
-                            t.type,
-                            t.location
-                        )
-                    })
+                    InvalidNode(
+                        it.map { i ->
+                            val t = i.cast<Token>()
+                            InvalidToken(
+                                t.text,
+                                t.type,
+                                t.location
+                            )
+                        },
+                        error
+                    )
                 }
             }
     }.discardBlanks()
@@ -57,7 +62,10 @@ private fun KSharpLexerIterator.consumeModuleNodesLogic(): KSharpConsumeResult =
                         .or { l -> l.consumeFunction() }
                         .or { l -> l.consumeAnnotation() }
                 }.asLookAHeadResult()
-            }.orCollect { l -> l.consumeInvalidTokens() }
+            }.mapLeft {
+                state.value.lastError.set(it.error)
+                it
+            }.orCollect { l -> l.consumeInvalidTokens(state.value.lastError.get()!!) }
         }
 
 fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KSharpLexerState> =

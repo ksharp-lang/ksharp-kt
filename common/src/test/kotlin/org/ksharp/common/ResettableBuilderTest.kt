@@ -25,4 +25,16 @@ class ResettableBuilderTest : StringSpec({
         val builder = resettableListBuilder<String>()
         builder.build().shouldBeNull()
     }
+    "Resettable value" {
+        val value = resettableValue<Int>()
+        value.apply {
+            get().shouldBeNull()
+            set(10)
+            get().shouldBe(10)
+            get().shouldBeNull()
+            set(20)
+            reset()
+            get().shouldBeNull()
+        }
+    }
 })
