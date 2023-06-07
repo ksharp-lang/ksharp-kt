@@ -91,14 +91,15 @@ private fun KSharpConsumeResult.discardBlanks() =
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
     consume(KSharpTokenType.Let, false)
         .enableLetKeywords { l ->
-            l.thenLoop {
-                it.consumeMatchAssignment()
-                    .resume()
-                    .discardBlanks()
-                    .thenOptional(KSharpTokenType.BeginBlock, true)
-                    .build { items ->
-                        items.first().cast<NodeData>()
-                    }
+            l.enableDiscardBlockAndNewLineTokens { d ->
+                d.thenLoop {
+                    it.consumeMatchAssignment()
+                        .resume()
+                        .discardBlanks()
+                        .build { items ->
+                            items.first().cast<NodeData>()
+                        }
+                }
             }.then(KSharpTokenType.Then, false)
                 .consume { it.consumeExpression() }
         }.build {
