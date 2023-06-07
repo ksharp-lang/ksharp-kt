@@ -72,22 +72,6 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
             )
         }
 
-private fun KSharpConsumeResult.discardBlanks() =
-    map {
-        val lexer = it.tokens
-        while (lexer.hasNext()) {
-            val token = lexer.next()
-            if (token.type == KSharpTokenType.NewLine || token.type == KSharpTokenType.EndBlock) {
-                continue
-            }
-            return@map NodeCollector(
-                it.collection,
-                lexer.cons(token)
-            )
-        }
-        it
-    }
-
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
     consume(KSharpTokenType.Let, false)
         .enableLetKeywords { l ->

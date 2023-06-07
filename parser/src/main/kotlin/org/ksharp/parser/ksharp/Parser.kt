@@ -13,6 +13,22 @@ import java.nio.file.Path
 typealias KSharpParserResult = ParserResult<NodeData, KSharpLexerState>
 typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
 
+fun KSharpConsumeResult.discardBlanks() =
+    map {
+        val lexer = it.tokens
+        while (lexer.hasNext()) {
+            val token = lexer.next()
+            if (token.type == KSharpTokenType.NewLine || token.type == KSharpTokenType.EndBlock) {
+                continue
+            }
+            return@map NodeCollector(
+                it.collection,
+                lexer.cons(token)
+            )
+        }
+        it
+    }
+
 fun KSharpConsumeResult.appendNode(block: (items: List<Any>) -> NodeData): KSharpConsumeResult =
     map {
         val items = it.collection.build()
@@ -69,9 +85,12 @@ fun <R> KSharpConsumeResult.disableCollapseAssignOperatorRule(code: (KSharpConsu
     }
 
 fun KSharpLexerIterator.consumeBlock(action: (KSharpLexerIterator) -> KSharpParserResult): KSharpParserResult =
-    consume(KSharpTokenType.BeginBlock, true).flatMap { collector ->
-        action(collector.tokens).endBlock()
-    }
+    consume(KSharpTokenType.BeginBlock, true)
+        .flatMap { collector ->
+            action(collector.tokens)
+                .endBlock()
+        }
+
 
 fun KSharpConsumeResult.thenInBlock(action: (KSharpLexerIterator) -> KSharpParserResult): KSharpConsumeResult =
     consume {
@@ -174,3 +193,9 @@ fun File.parseModule(withLocations: Boolean = false) =
     reader(StandardCharsets.UTF_8).parseModule(name, withLocations)
 
 fun String.parseModule(name: String, withLocations: Boolean = false) = reader().parseModule(name, withLocations)
+
+fun String.parseModuleAsNodeSequence(): List<NodeData> =
+    lexerModule(true)
+        .emitLocations(true) {
+            it.consumeModuleNodes()
+        }
