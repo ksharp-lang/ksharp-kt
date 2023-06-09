@@ -102,8 +102,17 @@ private fun Any.toAnnotationValue(): Any =
     }
 
 private fun Any.toAnnotationValueClass() =
-    if (this is List<*>) List::class.java
-    else this.javaClass
+    when (this) {
+        is Token -> when (this.type) {
+            KSharpTokenType.String -> String::class.java
+            KSharpTokenType.MultiLineString -> String::class.java
+            KSharpTokenType.UpperCaseWord -> Boolean::class.java
+            else -> TODO()
+        }
+
+        is List<*> -> List::class.java
+        else -> this.javaClass
+    }
 
 private fun Any.toAnnotationLocation(): Any =
     when (this) {
