@@ -14,8 +14,7 @@ private fun List<AttributeLocation>.semanticTokens(encoder: TokenEncoder) {
             encoder.register(it.operator!!, SemanticTokenTypes.Operator)
         }
         when (it.value) {
-            String::class.java -> encoder.register(it.valueLocation.cast(), SemanticTokenTypes.String)
-            java.lang.Boolean::class.java -> encoder.register(
+            String::class.java, java.lang.Boolean::class.java -> encoder.register(
                 it.valueLocation.cast(),
                 SemanticTokenTypes.String
             )

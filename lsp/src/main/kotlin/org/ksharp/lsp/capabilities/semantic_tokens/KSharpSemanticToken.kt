@@ -77,6 +77,7 @@ fun TokenType.semanticToken(text: String): String? =
             else -> null
         }
 
+        KSharpTokenType.Alt -> SemanticTokenTypes.Operator
         KSharpTokenType.If -> SemanticTokenTypes.Keyword
         KSharpTokenType.Then -> SemanticTokenTypes.Keyword
         KSharpTokenType.Else -> SemanticTokenTypes.Keyword
@@ -84,15 +85,6 @@ fun TokenType.semanticToken(text: String): String? =
         else -> null
     }
 
-fun calculateSemanticTokens(content: String): List<Int> =
-    tokenEncoderSpec.encoder()
-        .let { encoder ->
-            content.parseModuleAsNodeSequence()
-                .forEach {
-                    it.visit(encoder)
-                }
-            encoder.data()
-        }
 
 fun TokenEncoder.register(location: Location, tokenType: String, vararg modifiers: String) {
     val (line, offset) = location.start
@@ -105,3 +97,13 @@ fun TokenEncoder.register(location: Location, tokenType: String, vararg modifier
         *modifiers
     )
 }
+
+fun calculateSemanticTokens(content: String): List<Int> =
+    tokenEncoderSpec.encoder()
+        .let { encoder ->
+            content.parseModuleAsNodeSequence()
+                .forEach {
+                    it.visit(encoder)
+                }
+            encoder.data()
+        }

@@ -19,12 +19,22 @@ fun NodeData.visit(encoder: TokenEncoder) {
         is UnionTypeNode -> semanticTokens(encoder)
         is IntersectionTypeNode -> semanticTokens(encoder)
         is ConstrainedTypeNode -> semanticTokens(encoder)
+        is TraitNode -> semanticTokens(encoder)
+        is TraitFunctionNode -> semanticTokens(encoder)
+        is TraitFunctionsNode -> semanticTokens(encoder)
 
         is FunctionNode -> semanticTokens(encoder)
 
         is OperatorNode -> semanticTokens(encoder)
         is LiteralCollectionNode -> semanticTokens(encoder)
         is LiteralValueNode -> semanticTokens(encoder)
+        is LiteralMapEntryNode -> semanticTokens(encoder)
+        is FunctionCallNode -> semanticTokens(encoder)
+        is IfNode -> semanticTokens(encoder)
+        is LetExpressionNode -> semanticTokens(encoder)
+        is MatchListValueNode -> semanticTokens(encoder)
+        is MatchAssignNode -> semanticTokens(encoder)
+        is MatchValueNode -> semanticTokens(encoder)
         else -> {}
     }
 }

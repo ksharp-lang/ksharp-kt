@@ -3,7 +3,7 @@ package org.ksharp.lsp
 import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.TextDocumentService
 import org.ksharp.lsp.capabilities.semantic_tokens.calculateSemanticTokens
-import org.ksharp.lsp.client.ClientLogger
+import org.ksharp.lsp.client.Client
 import org.ksharp.lsp.model.DocumentChange
 import org.ksharp.lsp.model.DocumentStorage
 import org.ksharp.lsp.model.Range
@@ -46,7 +46,46 @@ class KSharpDocumentService(private val documentStorage: DocumentStorage) : Text
     override fun semanticTokensFull(params: SemanticTokensParams): CompletableFuture<SemanticTokens> =
         CompletableFuture.supplyAsync {
             val docUri = params.textDocument.uri
-            ClientLogger.info("semantic analysis over $docUri")
+            Client.run {
+                it.publishDiagnostics(PublishDiagnosticsParams().apply {
+                    this.uri = docUri
+                    this.diagnostics.add(
+                        Diagnostic().apply {
+                            this.range = Range().apply {
+                                this.start = Position().apply {
+                                    this.line = 23
+                                    this.character = 0
+                                }
+                                this.end = Position().apply {
+                                    this.line = 23
+                                    this.character = 2
+                                }
+                            }
+                            this.severity = DiagnosticSeverity.Error
+                            this.source = "k# analyzer"
+                            this.message = "Testing error"
+                        }
+                    )
+
+                    this.diagnostics.add(
+                        Diagnostic().apply {
+                            this.range = Range().apply {
+                                this.start = Position().apply {
+                                    this.line = 0
+                                    this.character = 0
+                                }
+                                this.end = Position().apply {
+                                    this.line = 0
+                                    this.character = 2
+                                }
+                            }
+                            this.severity = DiagnosticSeverity.Error
+                            this.source = "k# analyzer"
+                            this.message = "Testing error second"
+                        }
+                    )
+                })
+            }
             SemanticTokens().apply {
                 data = documentStorage.withDocumentContent(docUri, ::calculateSemanticTokens) ?: listOf()
             }

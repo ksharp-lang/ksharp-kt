@@ -122,8 +122,8 @@ private fun Any.toAnnotationLocation(): Any =
             val v = it!!
             AttributeLocation(
                 null,
-                it.toAnnotationValueClass(),
-                it.toAnnotationLocation(),
+                v.toAnnotationValueClass(),
+                v.toAnnotationLocation(),
                 null
             )
         }

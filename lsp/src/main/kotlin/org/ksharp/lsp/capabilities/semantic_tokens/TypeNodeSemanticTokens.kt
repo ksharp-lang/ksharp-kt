@@ -87,3 +87,28 @@ fun ConstrainedTypeNode.semanticTokens(encoder: TokenEncoder) {
     encoder.register(locations.separator, SemanticTokenTypes.Operator)
     expression.visit(encoder)
 }
+
+fun TraitNode.semanticTokens(encoder: TokenEncoder) {
+    annotations?.forEach {
+        it.visit(encoder)
+    }
+    if (internal)
+        encoder.register(locations.internalLocation, SemanticTokenTypes.Keyword)
+    encoder.register(locations.traitLocation, SemanticTokenTypes.Keyword)
+    encoder.register(locations.name, SemanticTokenTypes.Type, SemanticTokenModifiers.Declaration)
+    locations.params.forEach {
+        encoder.register(it, SemanticTokenTypes.TypeParameter)
+    }
+    encoder.register(locations.assignOperatorLocation, SemanticTokenTypes.Operator)
+    definition.visit(encoder)
+}
+
+fun TraitFunctionsNode.semanticTokens(encoder: TokenEncoder) {
+    functions.forEach { it.visit(encoder) }
+}
+
+fun TraitFunctionNode.semanticTokens(encoder: TokenEncoder) {
+    encoder.register(locations.name, SemanticTokenTypes.Method)
+    encoder.register(locations.operator, SemanticTokenTypes.Operator)
+    type.visit(encoder)
+}

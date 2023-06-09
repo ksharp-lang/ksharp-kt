@@ -72,7 +72,6 @@ fun List<NodeData>.toModuleNode(name: String): ModuleNode {
     val location = firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
     val imports = filterIsInstance<ImportNode>()
     val types = filter { n -> n is TypeNode || n is TraitNode }
-        .map { n -> n as NodeData }
     val typeDeclarations = filterIsInstance<TypeDeclarationNode>()
     val functions = filterIsInstance<FunctionNode>()
     return ModuleNode(name, imports, types, typeDeclarations, functions, location)
