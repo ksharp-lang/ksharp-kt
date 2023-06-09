@@ -68,22 +68,23 @@ private fun KSharpLexerIterator.consumeModuleNodesLogic(): KSharpConsumeResult =
             }.orCollect { l -> l.consumeInvalidTokens(state.value.lastError.get()!!) }
         }
 
+fun List<NodeData>.toModuleNode(name: String): ModuleNode {
+    val location = firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
+    val imports = filterIsInstance<ImportNode>()
+    val types = filter { n -> n is TypeNode || n is TraitNode }
+        .map { n -> n as NodeData }
+    val typeDeclarations = filterIsInstance<TypeDeclarationNode>()
+    val functions = filterIsInstance<FunctionNode>()
+    return ModuleNode(name, imports, types, typeDeclarations, functions, location)
+}
+
 fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KSharpLexerState> =
     consumeModuleNodesLogic().build {
-        val location = it.firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
-        val imports = it.filterIsInstance<ImportNode>()
-        val types = it
-            .filter { n -> n is TypeNode || n is TraitNode }
-            .map { n -> n as NodeData }
-        val typeDeclarations = it.filterIsInstance<TypeDeclarationNode>()
-        val functions = it.filterIsInstance<FunctionNode>()
-        ModuleNode(name, imports, types, typeDeclarations, functions, location)
+        it.cast<List<NodeData>>().toModuleNode(name)
     }
 
 
 fun KSharpLexerIterator.consumeModuleNodes(): List<NodeData> =
     consumeModuleNodesLogic().build {
         it.cast<List<NodeData>>()
-    }.map {
-        it.value
-    }.valueOrNull ?: listOf()
+    }.map { it.value }.valueOrNull ?: listOf()
