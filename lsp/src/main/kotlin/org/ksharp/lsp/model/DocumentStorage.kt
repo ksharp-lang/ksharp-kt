@@ -15,7 +15,6 @@ class DocumentStorage {
     fun remove(uri: String) =
         documents.remove(uri)?.content
 
-
     fun update(uri: String, changes: Sequence<DocumentChange>): Boolean =
         documents[uri]?.let { doc ->
             changes.forEach {
@@ -28,5 +27,4 @@ class DocumentStorage {
 
     fun <T> withDocumentContent(uri: String, action: (content: String) -> T): T? =
         content(uri)?.let(action)
-
 }

@@ -101,11 +101,24 @@ private fun Any.toAnnotationValue(): Any =
         else -> this
     }
 
+private fun Any.toAnnotationValueClass() =
+    if (this is List<*>) List::class.java
+    else this.javaClass
+
 private fun Any.toAnnotationLocation(): Any =
     when (this) {
         is Token -> this.location
 
-        is List<*> -> this.map { it!!.toAnnotationLocation() }
+        is List<*> -> this.map {
+            val v = it!!
+            AttributeLocation(
+                null,
+                it.toAnnotationValueClass(),
+                it.toAnnotationLocation(),
+                null
+            )
+        }
+
         is AnnotationNode -> this.locations
         else -> Location.NoProvided
     }
@@ -127,16 +140,18 @@ private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpPa
                     .drop(2)
                     .associate { i ->
                         val kv = i.cast<AnnotationKeyValue>()
+                        val value = kv.value.toAnnotationValue()
                         if (emitLocations) {
                             attrsLocations.add(
                                 AttributeLocation(
                                     kv.keyLocation,
+                                    value.toAnnotationValueClass(),
                                     kv.value.toAnnotationLocation(),
                                     kv.assignment,
                                 )
                             )
                         }
-                        kv.key to kv.value.toAnnotationValue()
+                        kv.key to value
                     }.cast(),
                 altToken.location,
                 AnnotationNodeLocations(altToken.location, annotationName.location, attrsLocations.build())

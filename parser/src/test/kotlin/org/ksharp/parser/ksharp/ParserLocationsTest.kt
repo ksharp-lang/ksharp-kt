@@ -20,7 +20,8 @@ class ParserLocationsTest : StringSpec({
             attrs = listOf(
                 AttributeLocation(
                     null,
-                    value = Location(
+                    String::class.java,
+                    valueLocation = Location(
                         (Line(value = 1) to Offset(value = 54)), Line(value = 1) to Offset(value = 62)
                     ),
                     operator = null
@@ -58,23 +59,33 @@ class ParserLocationsTest : StringSpec({
                         name = Location((Line(value = 1) to Offset(value = 1)), Line(value = 1) to Offset(value = 7)),
                         attrs = listOf(
                             AttributeLocation(
-                                key = null,
-                                value = Location(
+                                null,
+                                java.lang.Boolean::class.java,
+                                Location(
                                     (Line(value = 1) to Offset(value = 8)), (Line(value = 1) to Offset(value = 12))
                                 ),
                                 operator = null
                             ),
                             AttributeLocation(
-                                key = Location(
+                                Location(
                                     (Line(value = 1) to Offset(value = 13)),
                                     Line(value = 1) to Offset(value = 16)
                                 ),
-                                value = listOf(
-                                    Location(
-                                        Line(value = 1) to Offset(value = 18), Line(value = 1) to Offset(value = 24)
+                                List::class.java,
+                                listOf(
+                                    AttributeLocation(
+                                        null,
+                                        String::class.java,
+                                        Location(
+                                            Line(value = 1) to Offset(value = 18), Line(value = 1) to Offset(value = 24)
+                                        ),
+                                        null
                                     ),
-                                    Location(
-                                        Line(value = 1) to Offset(value = 25), Line(value = 1) to Offset(value = 29)
+                                    AttributeLocation(
+                                        null, String::class.java,
+                                        Location(
+                                            Line(value = 1) to Offset(value = 25), Line(value = 1) to Offset(value = 29)
+                                        ), null
                                     )
                                 ),
                                 operator = Location(
@@ -82,19 +93,21 @@ class ParserLocationsTest : StringSpec({
                                 )
                             ),
                             AttributeLocation(
-                                key = Location(
+                                Location(
                                     (Line(value = 1) to Offset(value = 31)), Line(value = 1) to Offset(value = 45)
                                 ),
-                                value = innerLocations,
+                                value = AnnotationNode::class.java,
+                                innerLocations,
                                 operator = Location(
                                     (Line(value = 1) to Offset(value = 45)), Line(value = 1) to Offset(value = 46)
                                 )
                             ),
                             AttributeLocation(
-                                key = Location(
+                                Location(
                                     (Line(value = 1) to Offset(value = 64)), Line(value = 1) to Offset(value = 68)
                                 ),
-                                value = Location(
+                                java.lang.Boolean::class.java,
+                                Location(
                                     (Line(value = 1) to Offset(value = 69)), Line(value = 1) to Offset(value = 74)
                                 ),
                                 operator = Location(

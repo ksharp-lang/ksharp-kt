@@ -3,8 +3,9 @@ package org.ksharp.nodes
 import org.ksharp.common.Location
 
 data class AttributeLocation(
-    val key: Location?,
-    val value: Any,
+    val keyLocation: Location?,
+    val value: Class<*>,
+    val valueLocation: Any,
     val operator: Location?
 )
 

@@ -4,6 +4,7 @@ import org.eclipse.lsp4j.SemanticTokenModifiers
 import org.eclipse.lsp4j.SemanticTokenTypes
 import org.eclipse.lsp4j.SemanticTokensLegend
 import org.eclipse.lsp4j.SemanticTokensWithRegistrationOptions
+import org.ksharp.common.Location
 import org.ksharp.parser.TokenType
 import org.ksharp.parser.ksharp.KSharpTokenType
 import org.ksharp.parser.ksharp.parseModuleAsNodeSequence
@@ -18,6 +19,12 @@ val tokenEncoderSpec = tokenEncoderSpec {
         +SemanticTokenTypes.Operator
         +SemanticTokenTypes.Number
         +SemanticTokenTypes.Keyword
+        +SemanticTokenTypes.Namespace
+        +SemanticTokenTypes.Method
+        +SemanticTokenTypes.TypeParameter
+        +SemanticTokenTypes.Parameter
+        +SemanticTokenTypes.Comment
+        +SemanticTokenTypes.Decorator
     }
     modifiers {
         +SemanticTokenModifiers.Declaration
@@ -66,6 +73,7 @@ fun TokenType.semanticToken(text: String): String? =
             "let" -> SemanticTokenTypes.Keyword
             "if" -> SemanticTokenTypes.Keyword
             "then" -> SemanticTokenTypes.Keyword
+            "as" -> SemanticTokenTypes.Keyword
             else -> null
         }
 
@@ -85,3 +93,15 @@ fun calculateSemanticTokens(content: String): List<Int> =
                 }
             encoder.data()
         }
+
+fun TokenEncoder.register(location: Location, tokenType: String, vararg modifiers: String) {
+    val (line, offset) = location.start
+    val (_, endOffset) = location.end
+    register(
+        line.value,
+        offset.value,
+        endOffset.value - offset.value,
+        tokenType,
+        *modifiers
+    )
+}
