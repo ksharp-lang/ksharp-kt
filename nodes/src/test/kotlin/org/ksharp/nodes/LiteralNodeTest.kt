@@ -17,6 +17,7 @@ class LiteralNodeTest : StringSpec({
                 value.shouldBe("1000")
                 type.shouldBe(LiteralValueType.Integer)
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBeEmpty()
@@ -82,6 +83,7 @@ class LiteralNodeTest : StringSpec({
         ).node.apply {
             cast<UnitNode>().apply {
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBeEmpty()
