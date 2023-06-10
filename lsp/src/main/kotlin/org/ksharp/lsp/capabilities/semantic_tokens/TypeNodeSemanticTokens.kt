@@ -58,8 +58,7 @@ private fun TokenEncoder.registerWithSeparators(nodes: List<NodeData>, separator
     if (nodesIter.hasNext()) {
         nodesIter.next().visit(this)
     }
-    while (nodesIter.hasNext()) {
-        separatorsIter.hasNext()
+    while (nodesIter.hasNext() && separatorsIter.hasNext()) {
         val separator = separatorsIter.next()
         register(separator, SemanticTokenTypes.Operator)
         nodesIter.next().visit(this)
