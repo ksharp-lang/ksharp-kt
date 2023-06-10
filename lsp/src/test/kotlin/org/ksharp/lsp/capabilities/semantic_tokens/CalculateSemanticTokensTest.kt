@@ -10,6 +10,17 @@ private fun String.spec(document: String, expectedTokens: String) =
 
 private val specs = listOf(
     "Invalid tokens".spec("1 + 2", "0, 0, 1, 5, 0, 0, 2, 1, 4, 0, 0, 2, 1, 5, 0"),
+    "Type annotations".spec(
+        """
+          @native("Test")
+          type Num = Int
+      """.trimIndent(),
+        "0, 0, 7, 12, 0, 0, 8, 6, 1, 0, 0, -8, 7, 12, 0, 0, 8, 6, 1, 0, 1, 0, 4, 6, 0, 0, 5, 3, 0, 1, 0, 4, 1, 4, 0, 0, 2, 3, 3, 0"
+    ),
+    "Internal types".spec(
+        "internal type Integer = Int",
+        "0, 0, 8, 6, 0, 0, 9, 4, 6, 0, 0, 5, 7, 0, 1, 0, 8, 1, 4, 0, 0, 2, 3, 3, 0"
+    ),
     "Parametric tokens".spec(
         "type Map a b = Map a b",
         "0, 0, 4, 6, 0, 0, 5, 3, 0, 1, 0, 4, 1, 9, 0, 0, 2, 1, 9, 0, 0, 2, 1, 4, 0, 0, 2, 3, 3, 0, 0, 4, 1, 10, 0, 0, 2, 1, 10, 0"
@@ -38,6 +49,13 @@ private val specs = listOf(
         "sum a b :: a -> b -> Int",
         "0, 0, 3, 8, 0, 0, 8, 2, 4, 0, 0, -4, 1, 10, 0, 0, 2, 1, 10, 0, 0, 5, 1, 10, 0, 0, 2, 2, 4, 0, 0, 3, 1, 10, 0, 0, 2, 2, 4, 0, 0, 3, 3, 3, 0"
     ),
+    "annotation type declarations".spec(
+        """
+            @native("Hello World")
+            sum a b :: a -> b -> Int
+        """.trimIndent(),
+        "0, 0, 7, 12, 0, 0, 8, 13, 1, 0, 0, -8, 7, 12, 0, 0, 8, 13, 1, 0, 1, 0, 3, 8, 0, 0, 8, 2, 4, 0, 0, -4, 1, 10, 0, 0, 2, 1, 10, 0, 0, 5, 1, 10, 0, 0, 2, 2, 4, 0, 0, 3, 1, 10, 0, 0, 2, 2, 4, 0, 0, 3, 3, 3, 0"
+    ),
     "function".spec(
         "sum a b = a + b",
         "0, 0, 3, 8, 0, 0, 4, 1, 10, 0, 0, 2, 1, 10, 0, 0, 2, 1, 4, 0, 0, 4, 1, 4, 0"
@@ -65,6 +83,13 @@ private val specs = listOf(
                   then x + y
         """.trimIndent(),
         "0, 0, 3, 8, 0, 0, 4, 1, 4, 0, 0, 2, 3, 4, 0, 0, 6, 1, 4, 0, 0, 2, 2, 5, 0, 1, 12, 1, 4, 0, 0, 2, 2, 5, 0, 1, 6, 4, 4, 0, 0, 7, 1, 4, 0"
+    ),
+    "function annotations".spec(
+        """
+            @native("Test")
+            sum a b = a + b
+        """.trimIndent(),
+        "0, 0, 7, 12, 0, 0, 8, 6, 1, 0, 0, -8, 7, 12, 0, 0, 8, 6, 1, 0, 1, 0, 3, 8, 0, 0, 4, 1, 10, 0, 0, 2, 1, 10, 0, 0, 2, 1, 4, 0, 0, 4, 1, 4, 0"
     )
 )
 
