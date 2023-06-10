@@ -10,6 +10,10 @@ private fun String.spec(document: String, expectedTokens: String) =
 
 private val specs = listOf(
     "Invalid tokens".spec("1 + 2", "0, 0, 1, 5, 0, 0, 2, 1, 4, 0, 0, 2, 1, 5, 0"),
+    "Import".spec(
+        "import math as m",
+        "0, 0, 6, 6, 0, 0, 7, 4, 7, 0, 0, 5, 2, 6, 0, 0, 3, 1, 7, 0"
+    ),
     "Type annotations".spec(
         """
           @native("Test")

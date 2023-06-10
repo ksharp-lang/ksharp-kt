@@ -46,4 +46,23 @@ class KSharpDocumentServiceTest : StringSpec({
         })
         storage.content("testDoc").shouldBeNull()
     }
+    "Test semantic tokens function" {
+        val storage = DocumentStorage()
+        val server = KSharpLanguageServer(storage)
+        val service = server.textDocumentService
+        service.didOpen(DidOpenTextDocumentParams().apply {
+            this.textDocument = TextDocumentItem().apply {
+                this.languageId = "ksharp"
+                this.uri = "testDoc"
+                this.text = "import math as m"
+            }
+        })
+        service.semanticTokensFull(SemanticTokensParams().apply {
+            this.textDocument = TextDocumentIdentifier().apply {
+                this.uri = "testDoc"
+            }
+        }).get().shouldBe(SemanticTokens().apply {
+            this.data = listOf(0, 0, 6, 6, 0, 0, 7, 4, 7, 0, 0, 5, 2, 6, 0, 0, 3, 1, 7, 0)
+        })
+    }
 })
