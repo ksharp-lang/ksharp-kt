@@ -26,27 +26,27 @@ class LexerTest : StringSpec({
             listOf(
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    token = TextToken("H", 0, 0),
+                    token = TextToken("H", 0, 1),
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    token = TextToken("e", 1, 1),
+                    token = TextToken("e", 1, 2),
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    token = TextToken(" ", 2, 2)
+                    token = TextToken(" ", 2, 3)
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    token = TextToken("M", 3, 3)
+                    token = TextToken("M", 3, 4)
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    token = TextToken("a", 4, 4)
+                    token = TextToken("a", 4, 5)
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    token = TextToken("n", 5, 5)
+                    token = TextToken("n", 5, 6)
                 )
             )
         )
@@ -60,15 +60,15 @@ class LexerTest : StringSpec({
             listOf(
                 LexerToken(
                     type = WordToken.Word,
-                    token = TextToken("He", 0, 1)
+                    token = TextToken("He", 0, 2)
                 ),
                 LexerToken(
                     type = BaseTokenType.Unknown,
-                    token = TextToken(" ", 2, 2)
+                    token = TextToken(" ", 2, 3)
                 ),
                 LexerToken(
                     type = WordToken.Word,
-                    token = TextToken("man", 3, 5)
+                    token = TextToken("man", 3, 6)
                 ),
             )
         )
@@ -84,15 +84,15 @@ class LexerTest : StringSpec({
                 listOf(
                     LexerToken(
                         type = WordToken.Word,
-                        token = TextToken("He", 0, 1)
+                        token = TextToken("He", 0, 2)
                     ),
                     LexerToken(
                         type = BaseTokenType.Unknown,
-                        token = TextToken(" --- ", 2, 6)
+                        token = TextToken(" --- ", 2, 7)
                     ),
                     LexerToken(
                         type = WordToken.Word,
-                        token = TextToken("man", 7, 9)
+                        token = TextToken("man", 7, 10)
                     ),
                 )
             )
@@ -105,7 +105,7 @@ class LexerTest : StringSpec({
             } else if (it == '\n') {
                 token(WordToken.NewLine, 0)
             } else null
-        }.toLogicalLexerToken("context", WordToken.NewLine)
+        }.toLogicalLexerToken(WordToken.NewLine)
             .asSequence()
             .toList().onEach(::println)
             .shouldBe(
@@ -113,47 +113,42 @@ class LexerTest : StringSpec({
                     LogicalLexerToken(
                         LexerToken(
                             type = WordToken.Word,
-                            token = TextToken("Hello", 0, 4)
+                            token = TextToken("Hello", 0, 5)
                         ),
-                        "context",
                         startPosition = Line(1) to Offset(0),
-                        endPosition = Line(1) to Offset(4)
+                        endPosition = Line(1) to Offset(5)
                     ),
                     LogicalLexerToken(
                         LexerToken(
                             type = WordToken.NewLine,
-                            token = TextToken("\n", 5, 5)
+                            token = TextToken("\n", 5, 6)
                         ),
-                        "context",
                         startPosition = Line(2) to Offset(0),
-                        endPosition = Line(2) to Offset(0)
+                        endPosition = Line(2) to Offset(1)
                     ),
                     LogicalLexerToken(
                         LexerToken(
                             type = WordToken.Word,
-                            token = TextToken("World", 6, 10)
+                            token = TextToken("World", 6, 11)
                         ),
-                        "context",
                         startPosition = Line(2) to Offset(0),
-                        endPosition = Line(2) to Offset(4)
+                        endPosition = Line(2) to Offset(5)
                     ),
                     LogicalLexerToken(
                         LexerToken(
                             type = WordToken.NewLine,
-                            token = TextToken("\n", 11, 11)
+                            token = TextToken("\n", 11, 12)
                         ),
-                        "context",
-                        startPosition = Line(3) to Offset(0),
-                        endPosition = Line(3) to Offset(0)
-                    ),
-                    LogicalLexerToken(
-                        LexerToken(
-                            type = WordToken.Word,
-                            token = TextToken("FS", 12, 13)
-                        ),
-                        "context",
                         startPosition = Line(3) to Offset(0),
                         endPosition = Line(3) to Offset(1)
+                    ),
+                    LogicalLexerToken(
+                        LexerToken(
+                            type = WordToken.Word,
+                            token = TextToken("FS", 12, 14)
+                        ),
+                        startPosition = Line(3) to Offset(0),
+                        endPosition = Line(3) to Offset(2)
                     )
                 )
             )

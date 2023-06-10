@@ -14,6 +14,7 @@ data class FunctionCallNode(
     val arguments: List<NodeData>,
     override val location: Location
 ) : NodeData(), ExpressionParserNode {
+    override val locations: NodeLocations get() = NoLocationsDefined
     override val children: Sequence<NodeData>
         get() = arguments.asSequence()
 }

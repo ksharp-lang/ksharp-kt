@@ -13,7 +13,7 @@ class CharType : Type {
 
     override val visibility: TypeVisibility
         get() = TypeVisibility.Public
-    
+
     override val serializer: TypeSerializer
         get() = TypeSerializers.CharType
 
@@ -26,6 +26,8 @@ class CharType : Type {
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()
     override val representation: String = "char<Char>"
+
+    override fun toString(): String = representation
 }
 
 val charType = CharType()

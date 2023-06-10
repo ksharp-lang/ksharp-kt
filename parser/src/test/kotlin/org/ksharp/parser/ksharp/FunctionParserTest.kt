@@ -8,6 +8,58 @@ import org.ksharp.parser.TextToken
 import org.ksharp.test.shouldBeRight
 
 class FunctionParserTest : StringSpec({
+    "native function" {
+        "native sum a b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    true,
+                    false,
+                    null,
+                    "sum",
+                    listOf("a", "b"),
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
+    "native pub function" {
+        "native pub sum a b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    true,
+                    true,
+                    null,
+                    "sum",
+                    listOf("a", "b"),
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
     "public function" {
         "pub sum a b = a + b"
             .kSharpLexer()
@@ -17,7 +69,9 @@ class FunctionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(
+                    false,
                     true,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     OperatorNode(
@@ -26,7 +80,44 @@ class FunctionParserTest : StringSpec({
                         FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                         Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
+    "if function" {
+        "pub if a b = a + b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    false,
+                    true,
+                    null,
+                    "if",
+                    listOf("a", "b"),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided,
+                    ),
+                    Location.NoProvided, FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -40,15 +131,23 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     false,
+                    false,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     OperatorNode(
                         "+",
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided, FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -65,6 +164,8 @@ class FunctionParserTest : StringSpec({
             .shouldBeRight(
                 FunctionNode(
                     false,
+                    false,
+                    null,
                     "sum",
                     listOf("a", "b"),
                     LetExpressionNode(
@@ -79,9 +180,10 @@ class FunctionParserTest : StringSpec({
                                     "*",
                                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                    Location.NoProvided
+                                    Location.NoProvided,
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                MatchAssignNodeLocations(Location.NoProvided)
                             ),
                             MatchAssignNode(
                                 MatchValueNode(
@@ -93,20 +195,91 @@ class FunctionParserTest : StringSpec({
                                     "*",
                                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                    Location.NoProvided
+                                    Location.NoProvided,
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                MatchAssignNodeLocations(Location.NoProvided)
                             )
                         ),
                         OperatorNode(
                             "+",
                             FunctionCallNode("a2", FunctionType.Function, listOf(), Location.NoProvided),
                             FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
                         ),
-                        Location.NoProvided
+                        Location.NoProvided,
+                        LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
+    "operator function" {
+        "(+) a b = a + b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    false,
+                    false,
+                    null,
+                    "(+)",
+                    listOf("a", "b"),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided,
+                    ),
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
+    "complex function names" {
+        "internal->wire a b = a + b"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .map { it.value }
+            .shouldBeRight(
+                FunctionNode(
+                    false,
+                    false,
+                    null,
+                    "internal->wire",
+                    listOf("a", "b"),
+                    OperatorNode(
+                        "+",
+                        FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                        FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                        Location.NoProvided,
+                    ),
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }

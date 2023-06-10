@@ -1,6 +1,6 @@
 package org.ksharp.typesystem.annotations
 
-data class Annotation internal constructor(
+data class Annotation(
     val name: String,
     val attrs: Map<String, Any>
 ) {
@@ -11,6 +11,4 @@ data class Annotation internal constructor(
             }.takeIf { it.isNotEmpty() }?.let { "($it)" } ?: ""
         }"
     }
-    
 }
-

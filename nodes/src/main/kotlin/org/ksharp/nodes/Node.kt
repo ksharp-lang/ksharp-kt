@@ -33,6 +33,7 @@ class Node(
 }
 
 abstract class NodeData {
+    abstract val locations: NodeLocations
     abstract val location: Location
     protected abstract val children: Sequence<NodeData>
     val node: Node get() = Node(null, location, this)
@@ -42,3 +43,7 @@ abstract class NodeData {
 }
 
 sealed interface ExpressionParserNode
+
+sealed interface NodeLocations
+
+object NoLocationsDefined : NodeLocations

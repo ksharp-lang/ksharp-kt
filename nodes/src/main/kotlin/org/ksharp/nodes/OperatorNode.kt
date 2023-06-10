@@ -6,8 +6,10 @@ data class OperatorNode(
     val operator: String,
     val left: NodeData,
     val right: NodeData,
-    override val location: Location
+    override val location: Location,
 ) : NodeData(), ExpressionParserNode {
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
     override val children: Sequence<NodeData>
         get() = sequenceOf(left, right)
 }

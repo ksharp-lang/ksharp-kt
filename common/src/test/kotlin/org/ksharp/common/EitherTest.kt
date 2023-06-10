@@ -23,6 +23,42 @@ class EitherTest : StringSpec({
                 isRight.shouldBe(false)
             }
     }
+    "flat map a left Either" {
+        (Either.Left("Hello")
+                as Either<String, String>)
+            .flatMapLeft {
+                Either.Right(it.length)
+            }
+            .apply {
+                shouldBe(Either.Right(5))
+                isLeft.shouldBe(false)
+                isRight.shouldBe(true)
+            }
+    }
+    "flat map left on a right Either" {
+        (Either.Right("World")
+                as Either<String, String>)
+            .flatMapLeft {
+                Either.Right(it.length)
+            }
+            .apply {
+                shouldBe(Either.Right("World"))
+                isLeft.shouldBe(false)
+                isRight.shouldBe(true)
+            }
+    }
+    "flat map a left Either 2" {
+        (Either.Left("Hello")
+                as Either<String, String>)
+            .flatMap {
+                Either.Right(it.length)
+            }
+            .apply {
+                shouldBe(Either.Left("Hello"))
+                isLeft.shouldBe(true)
+                isRight.shouldBe(false)
+            }
+    }
     "Unwrap with a left Either" {
         listOf<Either<Boolean, String>>(
             Either.Right("He"),

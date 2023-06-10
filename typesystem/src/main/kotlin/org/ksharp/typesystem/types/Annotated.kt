@@ -15,7 +15,7 @@ data class Annotated internal constructor(
     override val visibility: TypeVisibility
         get() = type.visibility
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoDefined
+        get() = TypeSerializers.Annotated
     override val unification: TypeUnification
         get() = TypeUnifications.Default
 
@@ -33,8 +33,8 @@ data class Annotated internal constructor(
 
 internal fun Type.annotated(annotations: List<Annotation>) = Annotated(annotations, this)
 
-val Type.annotations: Iterable<Annotation>
+val Type.annotations: List<Annotation>
     get() = when (this) {
-        is Annotated -> this.annotations.asIterable()
-        else -> emptyList<Annotation>().asIterable()
+        is Annotated -> this.annotations
+        else -> emptyList()
     }

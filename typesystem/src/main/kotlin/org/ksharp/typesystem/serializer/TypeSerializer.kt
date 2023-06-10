@@ -14,6 +14,7 @@ enum class TypeSerializers(
     override val writer: SerializerWriter<out Type>
 ) : TypeSerializer {
     Concrete(ConcreteSerializer()),
+    Annotated(AnnotatedSerializer()),
     Alias(AliasSerializer()),
     Parameter(ParameterSerializer()),
     ParametricType(ParametricTypeSerializer()),
@@ -55,8 +56,8 @@ fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
     asSequence().writeTo(size, buffer, table)
 }
 
-fun BufferView.readTypeSystem(table: BinaryTableView): TypeSystem {
-    return TypeSystemImpl(null, readMapOfTypes(table))
+fun BufferView.readTypeSystem(table: BinaryTableView, parent: TypeSystem? = null): TypeSystem {
+    return TypeSystemImpl(parent, readMapOfTypes(table))
 }
 
 fun BufferView.readTypeVisibility(index: Int): TypeVisibility {

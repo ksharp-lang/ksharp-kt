@@ -1,14 +1,20 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.*
+import org.ksharp.nodes.AnnotationNode
 import org.ksharp.parser.*
 import java.io.Reader
 import java.util.concurrent.atomic.AtomicInteger
 
 data class KSharpLexerState(
+    val lastError: ResettableValue<Error> = resettableValue(),
+    val emitLocations: Boolean = false,
+    val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
     val discardBlockTokens: Boolean = false,
     val discardNewLineToken: Boolean = false,
     val collapseDotOperatorRule: Boolean = true,
+    val collapseAssignOperatorRule: Boolean = true,
     val mapThenElseKeywords: Boolean = false,
     val mapThenKeywords: Boolean = false,
     val enableExpressionStartingNewLine: Boolean = true
@@ -99,14 +105,15 @@ private val escapeCharacters = "t'\"rnf\\b".toSet()
 
 fun Char.isEscapeCharacter() = escapeCharacters.contains(this)
 
-fun Char.isNewLine() = this == '\n'
+fun Char.isNewLine() = this == '\n' || this == '\r'
 
 fun Char.isSpace() = this == ' ' || this == '\t'
 
 fun Char.isOperator() = operators.contains(this)
 fun Char.isDot() = this == '.'
 
-fun Char.shouldIgnore() = this == '\r'
+fun Char.shouldIgnore() = false
+
 private inline fun KSharpLexer.ifChar(
     predicate: Char.() -> Boolean,
     eofToken: TokenType,
@@ -145,6 +152,14 @@ private inline fun KSharpLexer.loopChar(
     endToken: TokenType
 ): LexerToken = loopChar(predicate, endToken) { token(endToken, 1) }
 
+fun <R> KSharpLexerIterator.emitLocations(withLocations: Boolean, code: (KSharpLexerIterator) -> R): R =
+    state.value.emitLocations.let { initValue ->
+        state.update(state.value.copy(emitLocations = withLocations))
+        code(this).also {
+            state.update(state.value.copy(emitLocations = initValue))
+        }
+    }
+
 fun <R> KSharpLexerIterator.disableExpressionStartingNewLine(code: (KSharpLexerIterator) -> R): R =
     state.value.enableExpressionStartingNewLine.let { initValue ->
         state.update(state.value.copy(enableExpressionStartingNewLine = false))
@@ -167,6 +182,14 @@ fun <R> KSharpLexerIterator.disableCollapseDotOperatorRule(code: (KSharpLexerIte
         state.update(state.value.copy(collapseDotOperatorRule = false))
         code(this).also {
             state.update(state.value.copy(collapseDotOperatorRule = initValue))
+        }
+    }
+
+fun <R> KSharpLexerIterator.disableCollapseAssignOperatorRule(code: (KSharpLexerIterator) -> R): R =
+    state.value.collapseAssignOperatorRule.let { initValue ->
+        state.update(state.value.copy(collapseAssignOperatorRule = false))
+        code(this).also {
+            state.update(state.value.copy(collapseAssignOperatorRule = initValue))
         }
     }
 
@@ -351,7 +374,15 @@ fun KSharpLexer.string(): LexerToken {
 }
 
 
-fun KSharpLexer.newLine(): LexerToken = loopChar({ isSpace() }, KSharpTokenType.NewLine)
+fun KSharpLexer.newLine(requestForNewLineChar: Boolean): LexerToken {
+    if (requestForNewLineChar) {
+        val nc = nextChar()
+        if (nc != '\n' && nc?.isSpace() == false) {
+            return token(KSharpTokenType.NewLine, 1)
+        }
+    }
+    return loopChar({ isSpace() }, KSharpTokenType.NewLine)
+}
 
 fun KSharpLexer.whiteSpace(): LexerToken = loopChar({ isSpace() }, KSharpTokenType.WhiteSpace)
 
@@ -384,7 +415,7 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
             equals('(') -> openParenthesisOrOperatorFunction()
             isDigit() -> number(c == '0')
             isDot() -> decimal(KSharpTokenType.Operator, 1)
-            isNewLine() -> newLine()
+            isNewLine() -> newLine(this == '\r')
             isSpace() -> whiteSpace()
             isOperator() -> operator()
             shouldIgnore() -> token(KSharpTokenType.Ignore, 0)
@@ -413,7 +444,11 @@ private fun KSharpLexerIterator.canCollapseTokens(current: Token, newToken: Toke
     if (!allowedToken) return false
     return when (newToken.type) {
         KSharpTokenType.Operator -> {
-            collapseDotOperatorRule || newToken.text != "."
+            when {
+                !state.value.collapseAssignOperatorRule && newToken.text == "=" -> false
+                collapseDotOperatorRule || newToken.text != "." -> true
+                else -> false
+            }
         }
 
         KSharpTokenType.LowerCaseWord -> true

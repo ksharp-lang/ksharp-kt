@@ -7,6 +7,7 @@ import org.ksharp.common.io.BinaryTable
 import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
+import org.ksharp.typesystem.annotations.annotation
 import org.ksharp.typesystem.serializer.readType
 import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
@@ -26,9 +27,7 @@ private fun mockStringTable(items: ListBuilder<String>) = object : BinaryTable {
         }
 }
 
-private fun mockStringTableView(items: List<String>) = object : BinaryTableView {
-    override fun get(index: Int): String = items[index]
-}
+private fun mockStringTableView(items: List<String>) = BinaryTableView { index -> items[index] }
 
 private inline fun <reified T : Type> T.shouldBeSerializable() {
     val stringPool = listBuilder<String>()
@@ -184,6 +183,14 @@ class TypeSystemSerializerTest : StringSpec({
             TypeVisibility.Public,
             "True",
             "Bool"
+        ).shouldBeSerializable()
+    }
+    "Serialize Annotated Types" {
+        Annotated(
+            listOf(annotation("Test") {
+                set("key1", "value1")
+            }),
+            Concrete(TypeVisibility.Public, "Int")
         ).shouldBeSerializable()
     }
 })

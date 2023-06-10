@@ -5,7 +5,7 @@ import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
-import org.ksharp.module.prelude.preludeModule
+import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
@@ -17,9 +17,10 @@ import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.semantics.scopes.FunctionTableBuilder
 import org.ksharp.semantics.scopes.SymbolTableBuilder
+import org.ksharp.semantics.typesystem.toAnnotation
 import org.ksharp.typesystem.TypeSystem
-import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.newParameter
+import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.types.*
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
@@ -62,6 +63,11 @@ private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<Type
     })
 }
 
+private fun Type.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> =
+    when (this) {
+        is Annotated -> this.type.typePromise(node)
+        else -> this.cast<FunctionType>().typePromise(node)
+    }
 
 internal fun ModuleNode.buildFunctionTable(
     errors: ErrorCollector,
@@ -70,23 +76,29 @@ internal fun ModuleNode.buildFunctionTable(
     FunctionTableBuilder(errors).let { table ->
         val listBuilder = listBuilder<FunctionNode>()
         functions.forEach { f ->
-            errors.collect(typeSystem["Decl__${f.name}"]
-                .valueOrNull
-                .let { type ->
-                    type?.cast<FunctionType>()?.typePromise(f) ?: Either.Right(f.typePromise(typeSystem))
-                }).map { type ->
-                table.register(
-                    f.name,
-                    Function(
-                        if (f.pub) FunctionVisibility.Public else FunctionVisibility.Internal,
+            val type = typeSystem["Decl__${f.name}"].valueOrNull
+            errors.collect(type.let { it?.typePromise(f) ?: Either.Right(f.typePromise(typeSystem)) })
+                .map {
+                    val annotations = when (type) {
+                        is Annotated -> type.annotations
+                        else -> null
+                    }
+                    table.register(
                         f.name,
-                        type
-                    ), f.location
-                ).map { listBuilder.add(f) }
-            }
+                        Function(
+                            if (f.pub) FunctionVisibility.Public else FunctionVisibility.Internal,
+                            annotations,
+                            f.name,
+                            it
+                        ), f.location
+                    ).map { listBuilder.add(f) }
+                }
         }
         table.build() to listBuilder.build()
     }
+
+private fun List<AnnotationNode>?.checkAnnotations(): List<Annotation>? =
+    this?.map { it.toAnnotation() }
 
 private fun FunctionNode.checkSemantics(
     errors: ErrorCollector,
@@ -111,15 +123,34 @@ private fun FunctionNode.checkSemantics(
         val semanticNode = expression.cast<ExpressionParserNode>()
             .toSemanticNode(errors, info, typeSystem)
         AbstractionNode(
+            native,
+            function.annotations ?: annotations.checkAnnotations(),
             name,
             semanticNode,
             AbstractionSemanticInfo(
                 function.visibility,
-                parameters.map { symbolTable[it]!!.first }.toList()
+                parameters.map { symbolTable[it]!!.first }.toList(),
+                function.type.last()
             ),
             location
         )
     }
+
+internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
+    this.asSequence().map {
+        val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
+        val arguments = semanticInfo
+            .parameters.map { i ->
+                when (val iType = i.getInferredType(it.location)) {
+                    is Either.Right -> iType.value
+                    else -> newParameter()
+                }
+            }
+        val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
+        if (returnType != null) {
+            FunctionInfo(it.native, semanticInfo.visibility, null, it.annotations, it.name, arguments + returnType)
+        } else FunctionInfo(it.native, semanticInfo.visibility, null, it.annotations, it.name, arguments)
+    }.groupBy { it.name }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
     val errors = ErrorCollector()
@@ -139,7 +170,8 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
 }
 
 fun ModuleFunctionInfo.checkInferenceSemantics(
-    moduleTypeSystemInfo: ModuleTypeSystemInfo
+    moduleTypeSystemInfo: ModuleTypeSystemInfo,
+    preludeModule: ModuleInfo
 ): ModuleFunctionInfo {
     val errors = ErrorCollector()
     errors.collectAll(this.errors)
@@ -148,17 +180,7 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
         ModuleInfo(
             emptyList(),
             moduleTypeSystemInfo.typeSystem,
-            abstractions.asSequence().map {
-                val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
-                val arguments = semanticInfo
-                    .parameters.map { i ->
-                        when (val iType = i.getInferredType(it.location)) {
-                            is Either.Right -> iType.value
-                            else -> newParameter()
-                        }
-                    }
-                FunctionInfo(semanticInfo.visibility, null, it.name, arguments)
-            }.groupBy { it.name }
+            abstractions.toFunctionInfoMap()
         ),
         emptyMap()
     )

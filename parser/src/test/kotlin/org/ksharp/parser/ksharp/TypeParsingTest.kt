@@ -23,16 +23,17 @@ class TypeParserTest : StringSpec({
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
                     "token" to "<EndBlock>",
                     "received-token" to "Operator10:--"
                 ) to listOf(
                     LexerToken(
                         type = KSharpTokenType.Operator10,
-                        token = TextToken(text = "--", startOffset = 22, endOffset = 23)
+                        token = TextToken(text = "--", startOffset = 22, endOffset = 24)
                     ),
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
-                        token = TextToken(text = "Int", startOffset = 25, endOffset = 27)
+                        token = TextToken(text = "Int", startOffset = 25, endOffset = 28)
                     ),
                     LexerToken(
                         type = KSharpTokenType.NewLine,
@@ -56,16 +57,17 @@ class TypeParserTest : StringSpec({
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
                     "token" to "<EndBlock>",
                     "received-token" to "Operator4:|-"
                 ) to listOf(
                     LexerToken(
                         type = KSharpTokenType.Operator4,
-                        token = TextToken(text = "|-", startOffset = 17, endOffset = 18)
+                        token = TextToken(text = "|-", startOffset = 17, endOffset = 19)
                     ),
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
-                        token = TextToken(text = "False", startOffset = 20, endOffset = 24)
+                        token = TextToken(text = "False", startOffset = 20, endOffset = 25)
                     ),
                     LexerToken(
                         type = KSharpTokenType.NewLine,
@@ -89,16 +91,17 @@ class TypeParserTest : StringSpec({
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
                     "token" to "<EndBlock>",
                     "received-token" to "Operator6:&-"
                 ) to listOf(
                     LexerToken(
                         type = KSharpTokenType.Operator6,
-                        token = TextToken(text = "&-", startOffset = 17, endOffset = 18)
+                        token = TextToken(text = "&-", startOffset = 17, endOffset = 19)
                     ),
                     LexerToken(
                         type = KSharpTokenType.UpperCaseWord,
-                        token = TextToken(text = "False", startOffset = 20, endOffset = 24)
+                        token = TextToken(text = "False", startOffset = 20, endOffset = 25)
                     ),
                     LexerToken(
                         type = KSharpTokenType.NewLine,
@@ -121,6 +124,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ListOfInt",
                     listOf(),
                     ParametricTypeNode(
@@ -129,7 +133,14 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ), Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -143,6 +154,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ListOfInt",
                     listOf(),
                     FunctionTypeNode(
@@ -157,9 +169,16 @@ class TypeParserTest : StringSpec({
                             ParameterTypeNode(
                                 "a", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -173,6 +192,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ListOfInt",
                     listOf(),
                     FunctionTypeNode(
@@ -181,15 +201,22 @@ class TypeParserTest : StringSpec({
                                 listOf(
                                     ConcreteTypeNode("Int", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
-                                ), Location.NoProvided
+                                ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
                             ParameterTypeNode("a", Location.NoProvided),
                             ParameterTypeNode(
                                 "a", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -203,10 +230,18 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Integer",
                     listOf(),
                     ConcreteTypeNode("Int", Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -220,10 +255,18 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     true,
+                    null,
                     "Integer",
                     listOf(),
                     ConcreteTypeNode("Int", Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -237,6 +280,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ListOfInt",
                     listOf(),
                     ParametricTypeNode(
@@ -245,7 +289,14 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ), Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -259,6 +310,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "KVStore",
                     listOf("k", "v"),
                     ParametricTypeNode(
@@ -268,7 +320,14 @@ class TypeParserTest : StringSpec({
                             ParameterTypeNode("v", Location.NoProvided)
                         ), Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -282,10 +341,18 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Num",
                     listOf("n"),
                     ParameterTypeNode("n", Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -299,6 +366,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Num",
                     listOf("n"),
                     ParametricTypeNode(
@@ -308,7 +376,14 @@ class TypeParserTest : StringSpec({
                         ),
                         Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -322,6 +397,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Sum",
                     listOf("a"),
                     FunctionTypeNode(
@@ -330,9 +406,17 @@ class TypeParserTest : StringSpec({
                             ParameterTypeNode("a", Location.NoProvided),
                             ParameterTypeNode("a", Location.NoProvided)
                         ),
-                        Location.NoProvided
+                        Location.NoProvided,
+                        FunctionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -346,6 +430,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "ToString",
                     listOf("a"),
                     FunctionTypeNode(
@@ -353,9 +438,16 @@ class TypeParserTest : StringSpec({
                             ParameterTypeNode("a", Location.NoProvided),
                             ConcreteTypeNode("String", Location.NoProvided)
                         ),
-                        Location.NoProvided
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -369,6 +461,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Point",
                     listOf(),
                     TupleTypeNode(
@@ -376,9 +469,17 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode("Double", Location.NoProvided),
                             ConcreteTypeNode("Double", Location.NoProvided)
                         ),
-                        Location.NoProvided
+                        Location.NoProvided,
+                        TupleTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -392,6 +493,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     true,
+                    null,
                     "ToString",
                     listOf("a"),
                     FunctionTypeNode(
@@ -399,9 +501,16 @@ class TypeParserTest : StringSpec({
                             ParameterTypeNode("a", Location.NoProvided),
                             ConcreteTypeNode("String", Location.NoProvided)
                         ),
-                        Location.NoProvided
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -415,6 +524,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Bool",
                     listOf(),
                     UnionTypeNode(
@@ -425,9 +535,16 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode(
                                 "False", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -441,6 +558,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Bool",
                     listOf(),
                     UnionTypeNode(
@@ -454,9 +572,16 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode(
                                 "NoDefined", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -470,6 +595,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf("a"),
                     UnionTypeNode(
@@ -486,9 +612,16 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode(
                                 "Nothing", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -502,6 +635,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf("a"),
                     UnionTypeNode(
@@ -512,9 +646,16 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode(
                                 "Nothing", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -528,6 +669,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf(),
                     UnionTypeNode(
@@ -544,9 +686,16 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode(
                                 "Nothing", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -560,6 +709,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf(),
                     UnionTypeNode(
@@ -582,11 +732,18 @@ class TypeParserTest : StringSpec({
                                         "Name", Location.NoProvided
                                     )
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, TupleTypeNodeLocations(listOf())
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -600,6 +757,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf(),
                     UnionTypeNode(
@@ -624,9 +782,16 @@ class TypeParserTest : StringSpec({
                                 ),
                                 Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -640,6 +805,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Maybe",
                     listOf("a", "a"),
                     UnionTypeNode(
@@ -656,9 +822,16 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode(
                                 "Nothing", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -672,12 +845,20 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Bool",
                     listOf(),
                     InvalidSetTypeNode(
                         Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -691,6 +872,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Num",
                     listOf(),
                     IntersectionTypeNode(
@@ -701,9 +883,16 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode(
                                 "Ord", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -717,6 +906,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "Num",
                     listOf(),
                     IntersectionTypeNode(
@@ -727,9 +917,16 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode(
                                 "Ord", Location.NoProvided
                             )
-                        ), Location.NoProvided
+                        ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -747,6 +944,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TraitNode(
                     false,
+                    null,
                     "Num",
                     listOf("a"),
                     TraitFunctionsNode(
@@ -759,9 +957,9 @@ class TypeParserTest : StringSpec({
                                         ParameterTypeNode("a", Location.NoProvided),
                                         ParameterTypeNode("a", Location.NoProvided)
                                     ),
-                                    Location.NoProvided
+                                    Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             ),
                             TraitFunctionNode(
                                 "prod",
@@ -771,13 +969,20 @@ class TypeParserTest : StringSpec({
                                         ParameterTypeNode("a", Location.NoProvided),
                                         ParameterTypeNode("a", Location.NoProvided)
                                     ),
-                                    Location.NoProvided
+                                    Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             )
                         )
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -795,6 +1000,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TraitNode(
                     false,
+                    null,
                     "Num",
                     listOf("a", "b"),
                     TraitFunctionsNode(
@@ -807,9 +1013,11 @@ class TypeParserTest : StringSpec({
                                         ParameterTypeNode("a", Location.NoProvided),
                                         ParameterTypeNode("a", Location.NoProvided)
                                     ),
-                                    Location.NoProvided
+                                    Location.NoProvided,
+                                    FunctionTypeNodeLocations(listOf())
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             ),
                             TraitFunctionNode(
                                 "prod",
@@ -819,13 +1027,21 @@ class TypeParserTest : StringSpec({
                                         ParameterTypeNode("a", Location.NoProvided),
                                         ParameterTypeNode("a", Location.NoProvided)
                                     ),
-                                    Location.NoProvided
+                                    Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             )
                         )
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -843,6 +1059,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TraitNode(
                     false,
+                    null,
                     "Num",
                     listOf("a"),
                     TraitFunctionsNode(
@@ -855,9 +1072,9 @@ class TypeParserTest : StringSpec({
                                         ParameterTypeNode("b", Location.NoProvided),
                                         ParameterTypeNode("a", Location.NoProvided)
                                     ),
-                                    Location.NoProvided
+                                    Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             ),
                             TraitFunctionNode(
                                 "prod",
@@ -867,13 +1084,20 @@ class TypeParserTest : StringSpec({
                                         ParameterTypeNode("a", Location.NoProvided),
                                         ParameterTypeNode("a", Location.NoProvided)
                                     ),
-                                    Location.NoProvided
+                                    Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             )
                         )
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -890,6 +1114,7 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TraitNode(
                     true,
+                    null,
                     "Num",
                     listOf("a"),
                     TraitFunctionsNode(
@@ -902,13 +1127,20 @@ class TypeParserTest : StringSpec({
                                         ConcreteTypeNode("Int", Location.NoProvided),
                                         ConcreteTypeNode("Int", Location.NoProvided)
                                     ),
-                                    Location.NoProvided
+                                    Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             )
                         )
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -922,16 +1154,31 @@ class TypeParserTest : StringSpec({
             .shouldBeRight(
                 TypeNode(
                     false,
+                    null,
                     "KVStore",
                     listOf("k", "v"),
                     ParametricTypeNode(
                         listOf(
                             ConcreteTypeNode("Map", Location.NoProvided),
-                            LabelTypeNode("key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided),
-                            LabelTypeNode("value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided)
+                            LabelTypeNode(
+                                "key", ParameterTypeNode("k", Location.NoProvided), Location.NoProvided,
+
+                                ),
+                            LabelTypeNode(
+                                "value",
+                                ParameterTypeNode("v", Location.NoProvided),
+                                Location.NoProvided,
+                            )
                         ), Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -944,12 +1191,32 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Point2D", listOf(), TupleTypeNode(
+                    false,
+                    null,
+                    "Point2D",
+                    listOf(),
+                    TupleTypeNode(
                         listOf(
-                            LabelTypeNode("x", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided),
-                            LabelTypeNode("y", ConcreteTypeNode("Double", Location.NoProvided), Location.NoProvided)
-                        ), Location.NoProvided
-                    ), Location.NoProvided
+                            LabelTypeNode(
+                                "x",
+                                ConcreteTypeNode("Double", Location.NoProvided),
+                                Location.NoProvided,
+                            ),
+                            LabelTypeNode(
+                                "y",
+                                ConcreteTypeNode("Double", Location.NoProvided),
+                                Location.NoProvided,
+                            )
+                        ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -962,7 +1229,11 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Composite", listOf("a"), TupleTypeNode(
+                    false,
+                    null,
+                    "Composite",
+                    listOf("a"),
+                    TupleTypeNode(
                         listOf(
                             LabelTypeNode(
                                 "n", ParametricTypeNode(
@@ -978,18 +1249,28 @@ class TypeParserTest : StringSpec({
                                         LabelTypeNode(
                                             "x",
                                             ConcreteTypeNode("Double", Location.NoProvided),
-                                            Location.NoProvided
-                                        ),
+                                            Location.NoProvided,
+
+                                            ),
                                         LabelTypeNode(
                                             "y",
                                             ConcreteTypeNode("Double", Location.NoProvided),
-                                            Location.NoProvided
-                                        )
-                                    ), Location.NoProvided
+                                            Location.NoProvided,
+
+                                            )
+                                    ), Location.NoProvided, TupleTypeNodeLocations(listOf())
                                 ), Location.NoProvided
                             )
-                        ), Location.NoProvided
-                    ), Location.NoProvided
+                        ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1002,29 +1283,48 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Composite", listOf("a"), TupleTypeNode(
+                    false,
+                    null,
+                    "Composite",
+                    listOf("a"),
+                    TupleTypeNode(
                         listOf(
                             LabelTypeNode(
-                                "n", UnitTypeNode(Location.NoProvided), Location.NoProvided
-                            ),
+                                "n",
+                                UnitTypeNode(Location.NoProvided),
+                                Location.NoProvided,
+
+                                ),
                             LabelTypeNode(
-                                "point", TupleTypeNode(
+                                "point",
+                                TupleTypeNode(
                                     listOf(
                                         LabelTypeNode(
                                             "x",
                                             ConcreteTypeNode("Double", Location.NoProvided),
-                                            Location.NoProvided
-                                        ),
+                                            Location.NoProvided,
+
+                                            ),
                                         LabelTypeNode(
                                             "y",
                                             ConcreteTypeNode("Double", Location.NoProvided),
-                                            Location.NoProvided
-                                        )
-                                    ), Location.NoProvided
-                                ), Location.NoProvided
+                                            Location.NoProvided,
+
+                                            )
+                                    ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                                ),
+                                Location.NoProvided,
                             )
-                        ), Location.NoProvided
-                    ), Location.NoProvided
+                        ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1037,34 +1337,52 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Composite", listOf("a"), TupleTypeNode(
+                    false,
+                    null,
+                    "Composite",
+                    listOf("a"),
+                    TupleTypeNode(
                         listOf(
                             LabelTypeNode(
-                                "n", FunctionTypeNode(
+                                "n",
+                                FunctionTypeNode(
                                     listOf(
                                         ConcreteTypeNode("Int", Location.NoProvided),
                                         ConcreteTypeNode("Int", Location.NoProvided)
-                                    ), Location.NoProvided
-                                ), Location.NoProvided
+                                    ), Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                                ),
+                                Location.NoProvided,
                             ),
                             LabelTypeNode(
-                                "point", TupleTypeNode(
+                                "point",
+                                TupleTypeNode(
                                     listOf(
                                         LabelTypeNode(
                                             "x",
                                             ConcreteTypeNode("Double", Location.NoProvided),
-                                            Location.NoProvided
-                                        ),
+                                            Location.NoProvided,
+
+                                            ),
                                         LabelTypeNode(
                                             "y",
                                             ConcreteTypeNode("Double", Location.NoProvided),
-                                            Location.NoProvided
-                                        )
-                                    ), Location.NoProvided
-                                ), Location.NoProvided
+                                            Location.NoProvided,
+
+                                            )
+                                    ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                                ),
+                                Location.NoProvided,
                             )
-                        ), Location.NoProvided
-                    ), Location.NoProvided
+                        ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1077,7 +1395,11 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Age", listOf(), ConstrainedTypeNode(
+                    false,
+                    null,
+                    "Age",
+                    listOf(),
+                    ConstrainedTypeNode(
                         ConcreteTypeNode("Int", Location.NoProvided),
                         OperatorNode(
                             "&&",
@@ -1091,12 +1413,20 @@ class TypeParserTest : StringSpec({
                                 "<",
                                 FunctionCallNode("it", FunctionType.Function, listOf(), Location.NoProvided),
                                 LiteralValueNode("70", LiteralValueType.Integer, Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided,
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
                         ),
+                        Location.NoProvided, ConstrainedTypeNodeLocations(Location.NoProvided)
+                    ),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
                         Location.NoProvided
-                    ), Location.NoProvided
+                    )
                 )
             )
     }
@@ -1109,7 +1439,15 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
-                    false, "Unit", listOf(), UnitTypeNode(Location.NoProvided), Location.NoProvided
+                    false, null,
+                    "Unit", listOf(), UnitTypeNode(Location.NoProvided), Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -1122,13 +1460,37 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
+                    null,
                     "ten",
                     listOf(),
                     FunctionTypeNode(
                         listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
-                        Location.NoProvided
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "If on function type declaration" {
+        "if :: () -> Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "if",
+                    listOf(),
+                    FunctionTypeNode(
+                        listOf(UnitTypeNode(Location.NoProvided), ConcreteTypeNode("Int", Location.NoProvided)),
+                        Location.NoProvided,
+                        FunctionTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                 )
             )
     }
@@ -1141,6 +1503,7 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
+                    null,
                     "sum",
                     listOf(),
                     FunctionTypeNode(
@@ -1149,9 +1512,10 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode("Int", Location.NoProvided),
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ),
-                        Location.NoProvided
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                 )
             )
     }
@@ -1164,6 +1528,7 @@ class TypeParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
+                    null,
                     "sum",
                     listOf("a"),
                     FunctionTypeNode(
@@ -1184,9 +1549,84 @@ class TypeParserTest : StringSpec({
                             ),
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ),
-                        Location.NoProvided
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "Type declaration with operators" {
+        "(+) a :: (Num a) -> (Num a) -> Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "(+)",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "Type declaration with complex function names" {
+        "wire->internal a :: (Num a) -> (Num a) -> Int"
+            .kSharpLexer()
+            .collapseKSharpTokens()
+            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "wire->internal",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                 )
             )
     }

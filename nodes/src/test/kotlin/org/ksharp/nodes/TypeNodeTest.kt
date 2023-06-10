@@ -6,14 +6,9 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.Line
 import org.ksharp.common.Location
-import org.ksharp.common.Offset
 
-private val testLocation = Location(
-    context = "file.ks",
-    position = Line(0) to Offset(0)
-)
+private val testLocation = Location.NoProvided
 
 class TypeNodeTest : StringSpec({
     "Test Node Interface over TraitFunctionNode" {
@@ -21,11 +16,13 @@ class TypeNodeTest : StringSpec({
             "sum",
             InvalidSetTypeNode(testLocation),
             testLocation,
+            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
         ).node.apply {
             cast<TraitFunctionNode>().apply {
                 name.shouldBe("sum")
                 type.shouldBe(InvalidSetTypeNode(testLocation))
                 location.shouldBe(testLocation)
+                locations.shouldBe(TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided))
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -40,6 +37,7 @@ class TypeNodeTest : StringSpec({
                     "sum",
                     InvalidSetTypeNode(testLocation),
                     testLocation,
+                    TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                 )
             )
         ).node.apply {
@@ -50,6 +48,7 @@ class TypeNodeTest : StringSpec({
                             "sum",
                             InvalidSetTypeNode(testLocation),
                             testLocation,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 )
@@ -63,6 +62,7 @@ class TypeNodeTest : StringSpec({
                             "sum",
                             InvalidSetTypeNode(testLocation),
                             testLocation,
+                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         )
                     )
                 )
@@ -72,17 +72,35 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over TraitNode" {
         TraitNode(
             true,
+            emptyList(),
             "Num",
             listOf("a"),
             TraitFunctionsNode(listOf()),
-            testLocation
+            testLocation,
+            TraitNodeLocations(
+                Location.NoProvided,
+                Location.NoProvided,
+                Location.NoProvided,
+                listOf(),
+                Location.NoProvided
+            )
         ).node.apply {
             cast<TraitNode>().apply {
                 internal.shouldBeTrue()
+                annotations.shouldBeEmpty()
                 name.shouldBe("Num")
                 params.shouldBe(listOf("a"))
                 definition.shouldBe(TraitFunctionsNode(listOf()))
                 location.shouldBe(testLocation)
+                locations.shouldBe(
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -104,6 +122,8 @@ class TypeNodeTest : StringSpec({
                 name.shouldBe("key")
                 expr.shouldBe(ParameterTypeNode("k", testLocation))
                 location.shouldBe(testLocation)
+                locations.shouldBe(NoLocationsDefined)
+                representation.shouldBe("key: k")
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -123,6 +143,7 @@ class TypeNodeTest : StringSpec({
             cast<ConcreteTypeNode>().apply {
                 name.shouldBe("Int")
                 location.shouldBe(testLocation)
+                representation.shouldBe("Int")
             }
             parent.shouldBeNull()
             children.toList().shouldBeEmpty()
@@ -136,6 +157,7 @@ class TypeNodeTest : StringSpec({
             cast<ParameterTypeNode>().apply {
                 name.shouldBe("k")
                 location.shouldBe(testLocation)
+                representation.shouldBe("k")
             }
             parent.shouldBeNull()
             children.toList().shouldBeEmpty()
@@ -154,6 +176,7 @@ class TypeNodeTest : StringSpec({
                     )
                 )
                 location.shouldBe(testLocation)
+                representation.shouldBe("(List Int)")
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -178,11 +201,14 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over FunctionTypeNode" {
         FunctionTypeNode(
             listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)),
-            testLocation
+            testLocation,
+            FunctionTypeNodeLocations(listOf())
         ).node.apply {
             cast<FunctionTypeNode>().apply {
                 params.shouldBe(listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)))
                 location.shouldBe(testLocation)
+                locations.shouldBe(FunctionTypeNodeLocations(listOf()))
+                representation.shouldBe("(Int -> Int)")
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -196,11 +222,14 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over TupleTypeNode" {
         TupleTypeNode(
             listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)),
-            testLocation
+            testLocation,
+            TupleTypeNodeLocations(listOf())
         ).node.apply {
             cast<TupleTypeNode>().apply {
                 types.shouldBe(listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("Int", testLocation)))
                 location.shouldBe(testLocation)
+                locations.shouldBe(TupleTypeNodeLocations(listOf()))
+                representation.shouldBe("(Int, Int)")
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -214,11 +243,14 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over UnionTypeNode" {
         UnionTypeNode(
             listOf(ConcreteTypeNode("True", testLocation), ConcreteTypeNode("False", testLocation)),
-            testLocation
+            testLocation,
+            UnionTypeNodeLocations(listOf())
         ).node.apply {
             cast<UnionTypeNode>().apply {
                 types.shouldBe(listOf(ConcreteTypeNode("True", testLocation), ConcreteTypeNode("False", testLocation)))
                 location.shouldBe(testLocation)
+                locations.shouldBe(UnionTypeNodeLocations(listOf()))
+                representation.shouldBe("(True | False)")
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -232,11 +264,14 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over IntersectionTypeNode" {
         IntersectionTypeNode(
             listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("String", testLocation)),
-            testLocation
+            testLocation,
+            IntersectionTypeNodeLocations(listOf())
         ).node.apply {
             cast<IntersectionTypeNode>().apply {
                 types.shouldBe(listOf(ConcreteTypeNode("Int", testLocation), ConcreteTypeNode("String", testLocation)))
                 location.shouldBe(testLocation)
+                locations.shouldBe(IntersectionTypeNodeLocations(listOf()))
+                representation.shouldBe("(Int & String)")
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -266,12 +301,15 @@ class TypeNodeTest : StringSpec({
         ConstrainedTypeNode(
             ConcreteTypeNode("Int", testLocation),
             UnitNode(testLocation),
-            testLocation
+            testLocation,
+            ConstrainedTypeNodeLocations(Location.NoProvided)
         ).node.apply {
             cast<ConstrainedTypeNode>().apply {
                 type.shouldBe(ConcreteTypeNode("Int", testLocation))
                 expression.shouldBe(UnitNode(testLocation))
                 location.shouldBe(testLocation)
+                locations.shouldBe(ConstrainedTypeNodeLocations(Location.NoProvided))
+                representation.shouldBe("Int")
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -285,17 +323,35 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over TypeNode" {
         TypeNode(
             false,
+            null,
             "Num",
             listOf("a"),
             ConcreteTypeNode("Int", testLocation),
-            testLocation
+            testLocation,
+            TypeNodeLocations(
+                Location.NoProvided,
+                Location.NoProvided,
+                Location.NoProvided,
+                listOf(),
+                Location.NoProvided
+            )
         ).node.apply {
             cast<TypeNode>().apply {
                 internal.shouldBeFalse()
+                annotations.shouldBeNull()
                 name.shouldBe("Num")
                 params.shouldBe(listOf("a"))
                 expr.shouldBe(ConcreteTypeNode("Int", testLocation))
                 location.shouldBe(testLocation)
+                locations.shouldBe(
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -311,6 +367,7 @@ class TypeNodeTest : StringSpec({
         ).node.apply {
             cast<UnitTypeNode>().apply {
                 location.shouldBe(testLocation)
+                representation.shouldBe("()")
             }
             parent.shouldBeNull()
             children.toList().shouldBeEmpty()
@@ -318,15 +375,18 @@ class TypeNodeTest : StringSpec({
     }
     "Test Node interface on TypeDeclarationNode" {
         TypeDeclarationNode(
+            null,
             "sum",
             listOf(),
             ConcreteTypeNode("Int", testLocation),
-            testLocation
+            testLocation,
+            TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
         ).node.apply {
             cast<TypeDeclarationNode>().apply {
                 name.shouldBe("sum")
                 type.shouldBe(ConcreteTypeNode("Int", testLocation))
                 location.shouldBe(testLocation)
+                locations.shouldBe(TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf()))
             }
             parent.shouldBeNull()
             children.toList().shouldBe(

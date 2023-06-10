@@ -14,19 +14,20 @@ internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
                         .build { it.last().cast<NodeData>() }
                 } else it.consumeExpressionValue(false)
             }
-            .then(KSharpTokenType.Operator4, "|", true)
+            .then(KSharpTokenType.Operator4, "|", false)
             .then(KSharpTokenType.LowerCaseWord)
             .then(KSharpTokenType.CloseBracket, true)
             .build {
                 val tail = it.last().cast<Token>()
-                val head = it.dropLast(1).cast<List<NodeData>>()
+                val head = it.dropLast(2).cast<List<NodeData>>()
                 val location = head.first().location
                 MatchValueNode(
                     MatchValueType.List,
                     MatchListValueNode(
                         head,
                         LiteralValueNode(tail.text, LiteralValueType.Binding, tail.location),
-                        location
+                        location,
+                        MatchListValueNodeLocations(it[it.size - 2].cast<Token>().location)
                     ),
                     location
                 ).cast<NodeData>()
@@ -54,6 +55,7 @@ internal fun KSharpLexerIterator.consumeMatchAssignment() =
             MatchAssignNode(
                 match,
                 it.last().cast(),
-                match.location
+                match.location,
+                MatchAssignNodeLocations(it[1].cast<Token>().location)
             )
         }

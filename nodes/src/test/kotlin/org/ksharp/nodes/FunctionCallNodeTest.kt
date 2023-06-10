@@ -26,6 +26,7 @@ class FunctionCallNodeTest : StringSpec({
                     )
                 )
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(

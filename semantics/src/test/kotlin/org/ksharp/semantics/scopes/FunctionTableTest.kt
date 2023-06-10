@@ -21,13 +21,13 @@ class FunctionTableTest : StringSpec({
         FunctionTableBuilder(ErrorCollector()).apply {
             register(
                 "sum",
-                Function(FunctionVisibility.Public, "sum", listOf(mockType)),
+                Function(FunctionVisibility.Public, null, "sum", listOf(mockType)),
                 Location.NoProvided
             ).shouldBeRight()
         }.build().apply {
             this["sum"]!!.apply {
                 first.shouldBe(
-                    Function(FunctionVisibility.Public, "sum", listOf(mockType))
+                    Function(FunctionVisibility.Public, null, "sum", listOf(mockType))
                 )
                 second.shouldBe(Location.NoProvided)
                 isPublic.shouldBeTrue()
@@ -40,12 +40,12 @@ class FunctionTableTest : StringSpec({
         FunctionTableBuilder(ErrorCollector()).apply {
             register(
                 "sum",
-                Function(FunctionVisibility.Internal, "sum", listOf(mockType)),
+                Function(FunctionVisibility.Internal, null, "sum", listOf(mockType)),
                 Location.NoProvided
             ).shouldBeRight()
             register(
                 "sum",
-                Function(FunctionVisibility.Public, "sub", listOf(mockType)),
+                Function(FunctionVisibility.Public, null, "sub", listOf(mockType)),
                 Location.NoProvided
             ).shouldBeLeft(
                 TableErrorCode.AlreadyDefined.new(
@@ -57,7 +57,7 @@ class FunctionTableTest : StringSpec({
         }.build().apply {
             this["sum"]!!.apply {
                 this.first.shouldBe(
-                    Function(FunctionVisibility.Internal, "sum", listOf(mockType))
+                    Function(FunctionVisibility.Internal, null, "sum", listOf(mockType))
                 )
                 second.shouldBe(Location.NoProvided)
                 isPublic.shouldBeFalse()

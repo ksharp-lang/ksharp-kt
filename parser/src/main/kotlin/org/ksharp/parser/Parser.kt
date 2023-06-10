@@ -7,8 +7,18 @@ enum class BaseParserErrorCode(override val description: String) : ErrorCode {
     EofToken("No more tokens"),
     ExpectingToken("Expecting token {token} was {received-token}"),
     BreakLoop("Breaking loop"),
-    ConsumeTokenFailed("Consume token failed {token}")
+    ConsumeTokenFailed("Consume token failed {token}"),
 }
+
+fun createExpectedTokenError(tokenType: TokenType, receivedToken: Token) =
+    createExpectedTokenError(tokenType.toString(), receivedToken)
+
+fun createExpectedTokenError(token: String, receivedToken: Token) =
+    BaseParserErrorCode.ExpectingToken.new(
+        receivedToken.location,
+        "token" to "<$token>",
+        "received-token" to if (receivedToken.text.isEmpty()) "<${receivedToken.type}>" else "${receivedToken.type}:${receivedToken.text}"
+    )
 
 data class ParserValue<T, S>(
     val value: T,
@@ -17,6 +27,7 @@ data class ParserValue<T, S>(
 
 data class ParserError<S>(
     val error: Error,
+    val collection: ListBuilder<Any>,
     val consumedTokens: Boolean,
     val remainTokens: BaseLexerIterator<S>
 )
@@ -56,14 +67,20 @@ fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken
         } else {
             Either.Left(
                 ParserError(
-                    BaseParserErrorCode.ConsumeTokenFailed.new("token" to "'${item.type}:${item.text}'"),
+                    BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
+                    listBuilder(),
                     false,
                     cons(item)
                 )
             )
         }
     }
-    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), false, this))
+    return Either.Left(
+        ParserError(
+            BaseParserErrorCode.EofToken.new(), listBuilder(),
+            false, this
+        )
+    )
 }
 
 fun <S> BaseLexerIterator<S>.optionalConsume(
@@ -90,7 +107,12 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
             )
         }
     }
-    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), false, this))
+    return Either.Left(
+        ParserError(
+            BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), listBuilder(),
+            false, this
+        )
+    )
 }
 
 fun <S> ConsumeResult<S>.thenOptional(
@@ -114,6 +136,7 @@ fun <S> ConsumeResult<S>.thenOptional(
         } else Either.Left(
             ParserError(
                 BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"),
+                it.collection,
                 false,
                 it.tokens
             )
@@ -142,15 +165,63 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
         } else {
             Either.Left(
                 ParserError(
-                    BaseParserErrorCode.ConsumeTokenFailed.new("token" to "'${item.type}:${item.text}'"),
+                    BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
+                    listBuilder(),
                     false,
                     cons(item)
                 )
             )
         }
     }
-    return Either.Left(ParserError(BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), false, this))
+    return Either.Left(
+        ParserError(
+            BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), listBuilder(),
+            false, this
+        )
+    )
 }
+
+fun <T, S> ConsumeResult<S>.thenIfConsume(
+    predicate: (Token) -> Boolean,
+    discardToken: Boolean = false,
+    block: (tokens: ConsumeResult<S>) -> ParserResult<T, S>
+): ParserResult<T, S> =
+    this.flatMap {
+        if (it.tokens.hasNext()) {
+            val item = it.tokens.next()
+            if (predicate(item)) {
+                block(
+                    Either.Right(
+                        NodeCollector(
+                            it.collection.apply {
+                                if (!discardToken) add(item)
+                            },
+                            it.tokens
+                        )
+                    )
+                )
+            } else {
+                Either.Left(
+                    ParserError(
+                        BaseParserErrorCode.ConsumeTokenFailed.new(
+                            item.location,
+                            "token" to "'${item.type}:${item.text}'"
+                        ),
+                        it.collection,
+                        false,
+                        it.tokens.cons(item)
+                    )
+                )
+            }
+        } else Either.Left(
+            ParserError(
+                BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"),
+                it.collection,
+                false,
+                it.tokens
+            )
+        )
+    }.cast()
 
 
 fun <S> BaseLexerIterator<S>.consume(type: TokenType, discardToken: Boolean = false): ConsumeResult<S> = consume({
@@ -193,6 +264,23 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
     it.type == type && it.text == text
 }, discardToken, block)
 
+fun <T, S> ConsumeResult<S>.thenIfConsume(
+    type: TokenType,
+    discardToken: Boolean = false,
+    block: (tokens: ConsumeResult<S>) -> ParserResult<T, S>
+): ParserResult<T, S> = thenIfConsume({
+    it.type == type
+}, discardToken, block)
+
+fun <T, S> ConsumeResult<S>.thenIfConsume(
+    type: TokenType,
+    text: String,
+    discardToken: Boolean = false,
+    block: (tokens: ConsumeResult<S>) -> ParserResult<T, S>
+): ParserResult<T, S> = thenIfConsume({
+    it.type == type && it.text == text
+}, discardToken, block)
+
 fun <S, T> ParserResult<T, S>.or(
     rule: (tokens: BaseLexerIterator<S>) -> ParserResult<T, S>
 ) =
@@ -204,6 +292,17 @@ fun <S, T> ParserResult<T, S>.or(
         is Either.Right -> this
     }
 
+fun <S, T> ParserResult<T, S>.orCollect(
+    rule: (tokens: ConsumeResult<S>) -> ParserResult<T, S>
+) =
+    when (this) {
+        is Either.Left -> if (value.consumedTokens) {
+            this
+        } else rule(Either.Right(NodeCollector(value.collection, value.remainTokens)))
+
+        is Either.Right -> this
+    }
+
 fun <S> ConsumeResult<S>.then(
     predicate: (Token) -> Boolean,
     error: (Token) -> Error,
@@ -211,15 +310,16 @@ fun <S> ConsumeResult<S>.then(
 ): ConsumeResult<S> =
     this.flatMap {
         val iterator = it.tokens
+        val collection = it.collection
         if (iterator.hasNext()) {
             val item = iterator.next()
             if (predicate(item)) {
-                if (!discardToken) it.collection.add(item)
+                if (!discardToken) collection.add(item)
                 Either.Right(it)
             } else {
-                Either.Left(ParserError(error(item), it.consumed, iterator.cons(item)))
+                Either.Left(ParserError(error(item), collection, it.consumed, iterator.cons(item)))
             }
-        } else Either.Left(ParserError(BaseParserErrorCode.EofToken.new(), it.consumed, iterator))
+        } else Either.Left(ParserError(BaseParserErrorCode.EofToken.new(), collection, it.consumed, iterator))
     }
 
 fun <S> ConsumeResult<S>.then(
@@ -228,7 +328,7 @@ fun <S> ConsumeResult<S>.then(
 ) = then({
     it.type == type
 }, {
-    BaseParserErrorCode.ExpectingToken.new("token" to "<$type>", "received-token" to "${it.type}:${it.text}")
+    createExpectedTokenError(type, it)
 }, discardToken)
 
 fun <S> ConsumeResult<S>.then(
@@ -238,7 +338,7 @@ fun <S> ConsumeResult<S>.then(
 ) = then({
     it.type == type && it.text == text
 }, {
-    BaseParserErrorCode.ExpectingToken.new("token" to "'$type:$text'", "received-token" to "'${it.type}:${it.text}'")
+    createExpectedTokenError(type, it)
 }, discardToken)
 
 fun <T, S> ConsumeResult<S>.build(block: (items: List<Any>) -> T): ParserResult<T, S> =

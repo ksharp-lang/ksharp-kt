@@ -1,11 +1,12 @@
 package org.ksharp.semantics.typesystem
 
 import org.ksharp.common.*
-import org.ksharp.module.prelude.preludeModule
+import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
 import org.ksharp.typesystem.*
+import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.types.*
 
 enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode {
@@ -22,7 +23,7 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     TraitWithInvalidMethod("Trait '{name}' has invalid methods"),
     InterceptorTypeWithInvalidType("Interceptor type '{name}' has invalid type arm"),
     ParametricTypeShouldStartWithName("Parametric type should start with a name not a parameter. e.g Num a"),
-    FunctionDeclarationShouldBeAFunctionType("Function declaration '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int")
+    FunctionDeclarationShouldBeAFunctionType("Function declaration '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int. parsed as {repr}")
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -205,8 +206,24 @@ fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
         else -> TODO("$node")
     }
 
+fun AnnotationNode.toAnnotation(): Annotation =
+    Annotation(
+        name,
+        attrs.entries.associate {
+            val value = it.value
+            it.key to if (value is AnnotationNode) value.toAnnotation() else value
+        }
+    )
+
+private fun List<AnnotationNode>?.checkAnnotations(): List<Annotation> =
+    this?.map { it.toAnnotation() } ?: emptyList()
+
 private fun TypeSystemBuilder.register(node: TypeNode) =
-    alias(if (node.internal) TypeVisibility.Internal else TypeVisibility.Public, node.name, listOf()) {
+    alias(
+        if (node.internal) TypeVisibility.Internal else TypeVisibility.Public,
+        node.name,
+        node.annotations.checkAnnotations()
+    ) {
         this.register(node.name, node.expr)
     }
 
@@ -229,7 +246,7 @@ private fun TraitNode.checkTypesSemantics(
             if (internal) TypeVisibility.Internal else TypeVisibility.Public,
             name,
             params.first(),
-            listOf()
+            this.annotations.checkAnnotations()
         ) {
             definition.functions.forEach { f ->
                 errors.collect(f.checkParams(f.name, f.location, params.asSequence()))
@@ -260,14 +277,17 @@ private fun TypeDeclarationNode.checkTypesSemantics(
         errors.collect(
             TypeSemanticsErrorCode
                 .FunctionDeclarationShouldBeAFunctionType
-                .new(location, "name" to name)
+                .new(location, "name" to name, "repr" to type.representation)
         )
-    else builder.alias(TypeVisibility.Internal, "Decl__$name", listOf()) {
+    else builder.alias(TypeVisibility.Internal, "Decl__$name", annotations.checkAnnotations()) {
         this.register(name, type.cast())
     }
 }
 
-private fun Sequence<NodeData>.checkTypesSemantics(errors: ErrorCollector): PartialTypeSystem {
+private fun Sequence<NodeData>.checkTypesSemantics(
+    errors: ErrorCollector,
+    preludeModule: ModuleInfo
+): PartialTypeSystem {
     val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
         this@checkTypesSemantics.forEach {
             when (it) {
@@ -281,12 +301,12 @@ private fun Sequence<NodeData>.checkTypesSemantics(errors: ErrorCollector): Part
     return typeSystem
 }
 
-fun ModuleNode.checkTypesSemantics(): ModuleTypeSystemInfo {
+fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemInfo {
     val errors = ErrorCollector()
     val typeSystem = sequenceOf(
         types.asSequence(),
         typeDeclarations.asSequence()
-    ).flatten().checkTypesSemantics(errors)
+    ).flatten().checkTypesSemantics(errors, preludeModule)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(
         errors.build(),

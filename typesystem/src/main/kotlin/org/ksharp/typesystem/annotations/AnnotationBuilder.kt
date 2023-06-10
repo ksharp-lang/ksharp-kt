@@ -7,7 +7,19 @@ import org.ksharp.common.put
 
 @Mutable
 class AnnotationBuilder(private var attrs: MapBuilder<String, Any>) {
-    operator fun set(key: String, value: Any) {
+    operator fun set(key: String, value: String) {
+        attrs.put(key, value)
+    }
+
+    operator fun set(key: String, value: Annotation) {
+        attrs.put(key, value)
+    }
+
+    operator fun set(key: String, value: Boolean) {
+        attrs.put(key, value)
+    }
+
+    operator fun <T> set(key: String, value: List<T>) {
         attrs.put(key, value)
     }
 }

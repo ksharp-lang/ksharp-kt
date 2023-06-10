@@ -10,10 +10,7 @@ private class ErrorExample(
 ) :
     ErrorCode
 
-private val location = Location(
-    context = "context",
-    position = Line(0) to Offset(0)
-)
+private val location = Location.NoProvided
 
 class ErrorTest : StringSpec({
     "Test error creation with arguments" {
@@ -32,10 +29,7 @@ class ErrorTest : StringSpec({
     "Test error creation with location" {
         ErrorExample().new(location, "Argument1" to "Test Replace").apply {
             location.shouldBe(
-                Location(
-                    context = "context",
-                    position = Line(0) to Offset(0)
-                )
+                Location.NoProvided
             )
             toString().shouldBe("EX001: ExampleError Test Replace")
         }
@@ -43,10 +37,7 @@ class ErrorTest : StringSpec({
     "Test error creation with location no passing arguments" {
         ErrorExample().new(location).apply {
             location.shouldBe(
-                Location(
-                    context = "context",
-                    position = Line(0) to Offset(0)
-                )
+                Location.NoProvided
             )
             toString().shouldBe("EX001: ExampleError {Argument1}")
         }

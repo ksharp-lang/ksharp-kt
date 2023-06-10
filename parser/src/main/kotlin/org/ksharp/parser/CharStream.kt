@@ -7,6 +7,7 @@ import java.io.StringReader
 data class TextToken(
     val text: String,
     val startOffset: Int,
+    // Exclusive index, calculated as: startOffset + token length
     val endOffset: Int
 )
 
@@ -41,7 +42,7 @@ class CharStream internal constructor(
         } else skip).coerceAtLeast(0)
         val len = cache.length - pendingOffset - cSkip
         val text = cache.substring(0, len)
-        val result = TextToken(text, offset, offset + len - 1)
+        val result = TextToken(text, offset, offset + len)
         offset += len
         pendingOffset += cSkip
         cache.delete(0, len)
