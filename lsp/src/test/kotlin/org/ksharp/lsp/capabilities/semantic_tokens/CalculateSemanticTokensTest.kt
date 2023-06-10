@@ -38,6 +38,22 @@ private val specs = listOf(
         "sum a b :: a -> b -> Int",
         "0, 0, 3, 8, 0, 0, 8, 2, 4, 0, 0, -4, 1, 10, 0, 0, 2, 1, 10, 0, 0, 5, 1, 10, 0, 0, 2, 2, 4, 0, 0, 3, 1, 10, 0, 0, 2, 2, 4, 0, 0, 3, 3, 3, 0"
     ),
+    "function".spec(
+        "sum a b = a + b",
+        "0, 0, 3, 8, 0, 0, 4, 1, 10, 0, 0, 2, 1, 10, 0, 0, 2, 1, 4, 0, 0, 4, 1, 4, 0"
+    ),
+    "native functions".spec(
+        "native sum a b",
+        "0, 0, 6, 6, 0, 0, 7, 3, 8, 0, 0, 4, 1, 10, 0, 0, 2, 1, 10, 0"
+    ),
+    "native pub functions".spec(
+        "native pub sum a b",
+        "0, 0, 6, 6, 0, 0, 7, 3, 6, 0, 0, 4, 3, 8, 0, 0, 4, 1, 10, 0, 0, 2, 1, 10, 0"
+    ),
+    "pub functions".spec(
+        "pub sum a b = a + b",
+        "0, 0, 3, 6, 0, 0, 4, 3, 8, 0, 0, 4, 1, 10, 0, 0, 2, 1, 10, 0, 0, 2, 1, 4, 0, 0, 4, 1, 4, 0"
+    )
 )
 
 class CalculateSemanticTokensTest : FreeSpec({
