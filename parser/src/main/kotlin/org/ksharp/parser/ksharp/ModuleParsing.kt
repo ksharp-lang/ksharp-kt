@@ -21,7 +21,7 @@ data class InvalidNode(
     override val children: Sequence<NodeData>
         get() = emptySequence()
     override val location: Location
-        get() = node.location
+        get() = Location.NoProvided
 }
 
 private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParserResult =
@@ -74,7 +74,10 @@ fun List<NodeData>.toModuleNode(name: String): ModuleNode {
     val types = filter { n -> n is TypeNode || n is TraitNode }
     val typeDeclarations = filterIsInstance<TypeDeclarationNode>()
     val functions = filterIsInstance<FunctionNode>()
-    return ModuleNode(name, imports, types, typeDeclarations, functions, location)
+    val errors = asSequence().filterIsInstance<InvalidNode>().map {
+        it.error
+    }.toList()
+    return ModuleNode(name, imports, types, typeDeclarations, functions, errors, location)
 }
 
 fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KSharpLexerState> =

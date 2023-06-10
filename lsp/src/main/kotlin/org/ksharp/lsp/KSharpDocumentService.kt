@@ -3,7 +3,6 @@ package org.ksharp.lsp
 import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.TextDocumentService
 import org.ksharp.lsp.capabilities.semantic_tokens.calculateSemanticTokens
-import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.lsp.model.DocumentChange
 import org.ksharp.lsp.model.DocumentStorage
 import org.ksharp.lsp.model.Range
@@ -44,13 +43,6 @@ class KSharpDocumentService(private val documentStorage: DocumentStorage) : Text
     }
 
     override fun semanticTokensFull(params: SemanticTokensParams): CompletableFuture<SemanticTokens> =
-        CompletableFuture.supplyAsync {
-            val docUri = params.textDocument.uri
-            SemanticTokens().apply {
-                data = documentStorage.withDocumentContent(docUri, ::calculateSemanticTokens) ?: listOf()
-            }.also {
-                ClientLogger.info("semantic data: ${it.data}")
-            }
-        }
+        documentStorage.withDocumentContent(params.textDocument.uri, ::calculateSemanticTokens)
 
 }

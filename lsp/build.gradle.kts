@@ -17,6 +17,8 @@ dependencies {
     implementation(project(":nodes"))
     implementation(project(":parser"))
     implementation(project(":common"))
+    implementation(project(":semantics"))
+    implementation(project(":module"))
     testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
 }
 

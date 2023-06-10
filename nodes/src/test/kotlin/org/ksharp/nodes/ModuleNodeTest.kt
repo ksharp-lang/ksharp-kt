@@ -43,6 +43,7 @@ class ModuleNodeTest : StringSpec({
                 )
             ),
             listOf(),
+            listOf(),
             testLocation
         ).node.apply {
             cast<ModuleNode>().apply {
@@ -92,6 +93,7 @@ class ModuleNodeTest : StringSpec({
                     )
                 )
                 functions.shouldBeEmpty()
+                errors.shouldBeEmpty()
                 location.shouldBe(testLocation)
                 locations.shouldBe(NoLocationsDefined)
             }

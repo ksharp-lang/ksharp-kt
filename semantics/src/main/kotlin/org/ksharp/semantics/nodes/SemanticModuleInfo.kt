@@ -27,7 +27,7 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
             if (ix != -1) name.substring(0, ix)
             else name
         },
-        typeSemantics.errors + moduleSemantics.errors,
+        errors + typeSemantics.errors + moduleSemantics.errors,
         typeSemantics.typeSystem,
         moduleSemantics.abstractions
     )

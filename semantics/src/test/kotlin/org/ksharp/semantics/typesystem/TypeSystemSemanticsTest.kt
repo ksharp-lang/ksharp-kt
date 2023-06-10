@@ -19,6 +19,7 @@ private fun module(vararg types: NodeData) =
         listOf(*types),
         listOf(),
         listOf(),
+        listOf(),
         Location.NoProvided
     )
 
@@ -28,6 +29,7 @@ private fun moduleWithDeclarations(vararg declarations: TypeDeclarationNode) =
         listOf(),
         listOf(),
         listOf(*declarations),
+        listOf(),
         listOf(),
         Location.NoProvided
     )
