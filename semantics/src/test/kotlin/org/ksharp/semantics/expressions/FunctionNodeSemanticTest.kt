@@ -63,7 +63,14 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                     Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
@@ -114,7 +121,13 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                     Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided, FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
@@ -165,7 +178,13 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                     Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided, FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
@@ -203,7 +222,13 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 "ten",
                 listOf(),
                 LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                Location.NoProvided
+                Location.NoProvided, FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
@@ -252,7 +277,13 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                     Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided, FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
@@ -296,7 +327,13 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                     Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided, FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
@@ -355,7 +392,14 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         "n",
                         listOf(),
                         LiteralValueNode(value, literalType, Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
+                        FunctionNodeLocations(
+                            Location.NoProvided,
+                            Location.NoProvided,
+                            Location.NoProvided,
+                            listOf(),
+                            Location.NoProvided
+                        )
                     )
                 ).checkFunctionSemantics(
                     ModuleTypeSystemInfo(
@@ -401,7 +445,14 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -449,16 +500,28 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             FunctionNode(
                 false,
                 true,
-                listOf(AnnotationNode("native", mapOf(), Location.NoProvided)),
+                listOf(
+                    AnnotationNode(
+                        "native", mapOf(), Location.NoProvided,
+                        AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                    )
+                ),
                 "n",
                 listOf(),
                 OperatorNode(
                     "**",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -526,9 +589,16 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     "**",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -588,9 +658,17 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     ),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -667,13 +745,21 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     UnitNode(Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -752,11 +838,20 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             "+",
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
                         )
-                    ), LiteralCollectionType.List, Location.NoProvided
+                    ),
+                    LiteralCollectionType.List,
+                    Location.NoProvided,
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -828,9 +923,16 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
                     ),
                     LiteralCollectionType.Set,
-                    Location.NoProvided
+                    Location.NoProvided,
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -892,9 +994,17 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     listOf(
                         FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, emptyList(), Location.NoProvided),
-                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                    ),
+                    LiteralCollectionType.Tuple, Location.NoProvided,
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -967,16 +1077,26 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         LiteralMapEntryNode(
                             LiteralValueNode("\"key1\"", LiteralValueType.String, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            LiteralMapEntryNodeLocations(Location.NoProvided)
                         ),
                         LiteralMapEntryNode(
                             LiteralValueNode("\"key2\"", LiteralValueType.String, Location.NoProvided),
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            LiteralMapEntryNodeLocations(Location.NoProvided)
                         )
-                    ), LiteralCollectionType.Map, Location.NoProvided
+                    ),
+                    LiteralCollectionType.Map, Location.NoProvided,
                 ),
-                Location.NoProvided
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
@@ -1050,7 +1170,8 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
                                 ), Location.NoProvided
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            MatchAssignNodeLocations(Location.NoProvided)
                         ),
                         MatchAssignNode(
                             MatchValueNode(
@@ -1059,18 +1180,26 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 Location.NoProvided
                             ),
                             LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            MatchAssignNodeLocations(Location.NoProvided)
                         )
                     ),
                     OperatorNode(
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 ),
-                Location.NoProvided
+                Location.NoProvided, FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
             )
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(

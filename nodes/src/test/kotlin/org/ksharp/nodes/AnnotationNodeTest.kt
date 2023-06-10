@@ -11,12 +11,24 @@ class AnnotationNodeTest : StringSpec({
         AnnotationNode(
             "ten",
             mapOf("key 1" to "value 2"),
-            Location.NoProvided
+            Location.NoProvided,
+            AnnotationNodeLocations(
+                altLocation = Location.NoProvided,
+                name = Location.NoProvided,
+                attrs = listOf()
+            )
         ).node.apply {
             cast<AnnotationNode>().apply {
                 name.shouldBe("ten")
                 attrs.shouldBe(mapOf("key 1" to "value 2"))
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(
+                    AnnotationNodeLocations(
+                        altLocation = Location.NoProvided,
+                        name = Location.NoProvided,
+                        attrs = listOf()
+                    )
+                )
             }
             parent.shouldBeNull()
             children.toList().shouldBeEmpty()

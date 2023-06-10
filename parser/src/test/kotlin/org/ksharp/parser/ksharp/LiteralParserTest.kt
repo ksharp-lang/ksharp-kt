@@ -84,7 +84,7 @@ class LiteralParserTest : StringSpec({
                         LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
                     ),
                     LiteralCollectionType.List,
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -102,7 +102,7 @@ class LiteralParserTest : StringSpec({
                         LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
                     ),
                     LiteralCollectionType.Set,
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -118,14 +118,16 @@ class LiteralParserTest : StringSpec({
                         LiteralMapEntryNode(
                             LiteralValueNode("\"key1\"", LiteralValueType.String, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided, LiteralMapEntryNodeLocations(Location.NoProvided)
                         ),
                         LiteralMapEntryNode(
                             LiteralValueNode("\"key2\"", LiteralValueType.String, Location.NoProvided),
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided, LiteralMapEntryNodeLocations(Location.NoProvided)
                         )
-                    ), LiteralCollectionType.Map, Location.NoProvided
+                    ),
+                    LiteralCollectionType.Map,
+                    Location.NoProvided,
                 )
             )
     }
@@ -141,7 +143,9 @@ class LiteralParserTest : StringSpec({
                         LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                         LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
-                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                    ),
+                    LiteralCollectionType.Tuple,
+                    Location.NoProvided,
                 )
             )
 
@@ -156,7 +160,9 @@ class LiteralParserTest : StringSpec({
                         LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                         LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
-                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                    ),
+                    LiteralCollectionType.Tuple,
+                    Location.NoProvided,
                 )
             )
     }
@@ -171,7 +177,9 @@ class LiteralParserTest : StringSpec({
                     listOf(
                         FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, emptyList(), Location.NoProvided),
-                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                    ),
+                    LiteralCollectionType.Tuple,
+                    Location.NoProvided,
                 )
             )
     }
@@ -188,15 +196,21 @@ class LiteralParserTest : StringSpec({
                             listOf(
                                 LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided)
-                            ), LiteralCollectionType.Tuple, Location.NoProvided
+                            ),
+                            LiteralCollectionType.Tuple,
+                            Location.NoProvided,
                         ),
                         LiteralCollectionNode(
                             listOf(
                                 LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided)
-                            ), LiteralCollectionType.Tuple, Location.NoProvided
+                            ),
+                            LiteralCollectionType.Tuple,
+                            Location.NoProvided
                         )
-                    ), LiteralCollectionType.List, Location.NoProvided
+                    ),
+                    LiteralCollectionType.List,
+                    Location.NoProvided,
                 )
             )
     }

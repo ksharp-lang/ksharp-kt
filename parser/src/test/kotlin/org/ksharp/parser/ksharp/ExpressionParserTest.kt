@@ -82,7 +82,7 @@ class ExpressionParserTest : StringSpec({
                                 )
                             ),
                             LiteralCollectionType.Tuple,
-                            Location.NoProvided
+                            Location.NoProvided,
                         ),
                         LiteralValueNode(
                             "5",
@@ -179,7 +179,8 @@ class ExpressionParserTest : StringSpec({
                                     LiteralValueType.Integer,
                                     Location.NoProvided
                                 )
-                            ), LiteralCollectionType.List, Location.NoProvided
+                            ),
+                            LiteralCollectionType.List, Location.NoProvided,
                         )
                     ),
                     Location.NoProvided
@@ -197,7 +198,7 @@ class ExpressionParserTest : StringSpec({
                     "**",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -212,7 +213,7 @@ class ExpressionParserTest : StringSpec({
                     "*",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -227,7 +228,7 @@ class ExpressionParserTest : StringSpec({
                     "+",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -244,10 +245,10 @@ class ExpressionParserTest : StringSpec({
                         "+",
                         LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
                     LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -262,7 +263,7 @@ class ExpressionParserTest : StringSpec({
                     ">>",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -277,7 +278,7 @@ class ExpressionParserTest : StringSpec({
                     ">",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -292,7 +293,7 @@ class ExpressionParserTest : StringSpec({
                     "!=",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -307,7 +308,7 @@ class ExpressionParserTest : StringSpec({
                     "&",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -322,7 +323,7 @@ class ExpressionParserTest : StringSpec({
                     "^",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -337,7 +338,7 @@ class ExpressionParserTest : StringSpec({
                     "|",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -352,7 +353,7 @@ class ExpressionParserTest : StringSpec({
                     "&&",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -367,7 +368,7 @@ class ExpressionParserTest : StringSpec({
                     "||",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -382,7 +383,7 @@ class ExpressionParserTest : StringSpec({
                     "$",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -397,7 +398,7 @@ class ExpressionParserTest : StringSpec({
                     ".",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -412,7 +413,7 @@ class ExpressionParserTest : StringSpec({
                     ":",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -429,10 +430,11 @@ class ExpressionParserTest : StringSpec({
                         listOf(
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided)
-                        ), LiteralCollectionType.Tuple, Location.NoProvided
+                        ),
+                        LiteralCollectionType.Tuple, Location.NoProvided,
                     ),
                     LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -450,9 +452,10 @@ class ExpressionParserTest : StringSpec({
                             "+",
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
                         )
-                    ), LiteralCollectionType.Tuple, Location.NoProvided
+                    ),
+                    LiteralCollectionType.Tuple, Location.NoProvided,
                 ),
             )
     }
@@ -469,10 +472,10 @@ class ExpressionParserTest : StringSpec({
                         "+>",
                         LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
                     LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -490,9 +493,10 @@ class ExpressionParserTest : StringSpec({
                             "+",
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
                         )
-                    ), LiteralCollectionType.List, Location.NoProvided
+                    ),
+                    LiteralCollectionType.List, Location.NoProvided,
                 ),
             )
     }
@@ -510,21 +514,23 @@ class ExpressionParserTest : StringSpec({
                                 "+",
                                 LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided,
                             ),
                             OperatorNode(
                                 "+",
                                 LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                                Location.NoProvided
-                            ), Location.NoProvided
+                                Location.NoProvided,
+                            ), Location.NoProvided, LiteralMapEntryNodeLocations(Location.NoProvided)
                         ),
                         LiteralMapEntryNode(
                             LiteralValueNode("\"key2\"", LiteralValueType.String, Location.NoProvided),
                             LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided, LiteralMapEntryNodeLocations(Location.NoProvided)
                         )
-                    ), LiteralCollectionType.Map, Location.NoProvided
+                    ),
+                    LiteralCollectionType.Map,
+                    Location.NoProvided,
                 ),
             )
     }
@@ -556,7 +562,7 @@ class ExpressionParserTest : StringSpec({
                             "+",
                             LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
                         ),
                     ),
                     Location.NoProvided
@@ -589,12 +595,12 @@ class ExpressionParserTest : StringSpec({
                                 "+",
                                 LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided,
                             ),
                         ),
                         Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -627,7 +633,7 @@ class ExpressionParserTest : StringSpec({
                         Location.NoProvided
                     ),
                     LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
                 ),
             )
     }
@@ -643,11 +649,11 @@ class ExpressionParserTest : StringSpec({
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided, IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -663,11 +669,11 @@ class ExpressionParserTest : StringSpec({
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     UnitNode(Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided, IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -685,11 +691,11 @@ class ExpressionParserTest : StringSpec({
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided, IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -719,11 +725,12 @@ class ExpressionParserTest : StringSpec({
                                 "!=",
                                 LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided,
                             ),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                         ),
                         LiteralValueNode(
                             "15",
@@ -760,11 +767,12 @@ class ExpressionParserTest : StringSpec({
                                 "!=",
                                 LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided,
                             ),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                             UnitNode(Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                         ),
                         LiteralValueNode(
                             "15",
@@ -788,11 +796,11 @@ class ExpressionParserTest : StringSpec({
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
                     UnitNode(Location.NoProvided),
                     UnitNode(Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided, IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -835,7 +843,8 @@ class ExpressionParserTest : StringSpec({
                                 Location.NoProvided
                             ),
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            MatchAssignNodeLocations(Location.NoProvided)
                         ),
                         MatchAssignNode(
                             MatchValueNode(
@@ -844,16 +853,18 @@ class ExpressionParserTest : StringSpec({
                                 Location.NoProvided
                             ),
                             LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            MatchAssignNodeLocations(Location.NoProvided)
                         )
                     ),
                     OperatorNode(
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -880,7 +891,8 @@ class ExpressionParserTest : StringSpec({
                                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
                                 ), Location.NoProvided
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            MatchAssignNodeLocations(Location.NoProvided)
                         ),
                         MatchAssignNode(
                             MatchValueNode(
@@ -889,16 +901,18 @@ class ExpressionParserTest : StringSpec({
                                 Location.NoProvided
                             ),
                             LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            MatchAssignNodeLocations(Location.NoProvided)
                         )
                     ),
                     OperatorNode(
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }
@@ -938,9 +952,9 @@ class ExpressionParserTest : StringSpec({
                                             "*",
                                             FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                            Location.NoProvided
+                                            Location.NoProvided,
                                         ),
-                                        Location.NoProvided
+                                        Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
                                     ),
                                     MatchAssignNode(
                                         MatchValueNode(
@@ -957,29 +971,30 @@ class ExpressionParserTest : StringSpec({
                                             "*",
                                             FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                            Location.NoProvided
+                                            Location.NoProvided,
                                         ),
-                                        Location.NoProvided
+                                        Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
                                     )
                                 ),
                                 OperatorNode(
                                     "+",
                                     FunctionCallNode("a2", FunctionType.Function, listOf(), Location.NoProvided),
                                     FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
-                                    Location.NoProvided
+                                    Location.NoProvided,
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                             ),
-                            Location.NoProvided
+                            Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
                         )
                     ),
                     OperatorNode(
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided, LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
             )
     }

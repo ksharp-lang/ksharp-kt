@@ -31,12 +31,18 @@ class MatchValueNodeTest : StringSpec({
                 UnitNode(Location.NoProvided)
             ),
             LiteralValueNode("rest", LiteralValueType.Binding, Location.NoProvided),
-            Location.NoProvided
+            Location.NoProvided,
+            MatchListValueNodeLocations(Location.NoProvided)
         ).node.apply {
             cast<MatchListValueNode>().apply {
                 head.shouldBe(listOf(UnitNode(Location.NoProvided)))
                 tail.shouldBe(LiteralValueNode("rest", LiteralValueType.Binding, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(
+                    MatchListValueNodeLocations(
+                        Location.NoProvided,
+                    )
+                )
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -59,7 +65,8 @@ class MatchValueNodeTest : StringSpec({
                 Location.NoProvided
             ),
             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-            Location.NoProvided
+            Location.NoProvided,
+            MatchAssignNodeLocations(Location.NoProvided)
         ).node.apply {
             cast<MatchAssignNode>().apply {
                 matchValue.shouldBe(
@@ -71,6 +78,7 @@ class MatchValueNodeTest : StringSpec({
                 )
                 expression.shouldBe(LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(MatchAssignNodeLocations(Location.NoProvided))
             }
             parent.shouldBeNull()
             children.toList().shouldBe(

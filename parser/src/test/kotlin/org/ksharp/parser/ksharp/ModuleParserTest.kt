@@ -11,24 +11,90 @@ import java.nio.file.Paths
 class ModuleParserTest : StringSpec({
     val expectedModule = ModuleNode(
         "File", listOf(
-            ImportNode("ksharp.text", "text", Location.NoProvided),
-            ImportNode("ksharp.math", "math", Location.NoProvided)
+            ImportNode(
+                "ksharp.text", "text", Location.NoProvided,
+                ImportNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided
+                )
+            ),
+            ImportNode(
+                "ksharp.math", "math", Location.NoProvided, ImportNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided
+                )
+            )
         ), listOf(), listOf(), listOf(), Location.NoProvided
     )
     val expectedModuleWithLocations: (String) -> ModuleNode = {
         ModuleNode(
-            it, listOf(
+            it,
+            listOf(
                 ImportNode(
                     "ksharp.text",
                     "text",
-                    Location(context = it, position = Line(value = 1) to Offset(value = 0))
+                    Location(Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 6)),
+                    ImportNodeLocations(
+                        importLocation = Location(
+                            start = (Line(value = 1) to Offset(value = 0)),
+                            end = (Line(value = 1) to Offset(value = 6))
+                        ),
+                        moduleNameBegin = Location(
+                            start = (Line(value = 1) to Offset(value = 7)),
+                            end = (Line(value = 1) to Offset(value = 13))
+                        ),
+                        moduleNameEnd = Location(
+                            start = (Line(value = 1) to Offset(value = 14)),
+                            end = (Line(value = 1) to Offset(value = 18))
+                        ),
+                        asLocation = Location(
+                            start = (Line(value = 1) to Offset(value = 19)),
+                            end = (Line(value = 1) to Offset(value = 21))
+                        ),
+                        keyLocation = Location(
+                            start = (Line(value = 1) to Offset(value = 22)),
+                            end = (Line(value = 1) to Offset(value = 26))
+                        )
+                    )
                 ),
                 ImportNode(
                     "ksharp.math",
                     "math",
-                    Location(context = it, position = Line(value = 2) to Offset(value = 0))
+                    Location(Line(value = 2) to Offset(value = 0), Line(value = 2) to Offset(value = 6)),
+                    ImportNodeLocations(
+                        importLocation = Location(
+                            start = (Line(value = 2) to Offset(value = 0)),
+                            end = (Line(value = 2) to Offset(value = 6))
+                        ),
+                        moduleNameBegin = Location(
+                            start = (Line(value = 2) to Offset(value = 7)),
+                            end = (Line(value = 2) to Offset(value = 13))
+                        ),
+                        moduleNameEnd = Location(
+                            start = (Line(value = 2) to Offset(value = 14)),
+                            end = (Line(value = 2) to Offset(value = 18))
+                        ),
+                        asLocation = Location(
+                            start = (Line(value = 2) to Offset(value = 19)),
+                            end = (Line(value = 2) to Offset(value = 21))
+                        ),
+                        keyLocation = Location(
+                            start = (Line(value = 2) to Offset(value = 22)),
+                            end = (Line(value = 2) to Offset(value = 26))
+                        )
+                    )
                 )
-            ), listOf(), listOf(), listOf(), Location(context = it, position = Line(value = 1) to Offset(value = 0))
+            ),
+            listOf(),
+            listOf(),
+            listOf(),
+            Location(Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 6))
         )
     }
     "Parse a module with imports" {
@@ -76,7 +142,16 @@ class ModuleParserTest : StringSpec({
             .shouldBeRight(
                 ModuleNode(
                     "File", listOf(
-                        ImportNode("ksharp.text", "text", Location.NoProvided)
+                        ImportNode(
+                            "ksharp.text", "text", Location.NoProvided,
+                            ImportNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided
+                            )
+                        )
                     ), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
@@ -99,9 +174,10 @@ class ModuleParserTest : StringSpec({
                                     ConcreteTypeNode("Int", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                         )
                     ), listOf(), Location.NoProvided
                 )
@@ -117,7 +193,13 @@ class ModuleParserTest : StringSpec({
                 ModuleNode(
                     "File", listOf(), listOf(), listOf(
                         TypeDeclarationNode(
-                            listOf(AnnotationNode("native", mapOf("lang" to "java"), Location.NoProvided)),
+                            listOf(
+                                AnnotationNode(
+                                    "native", mapOf("lang" to "java"), Location.NoProvided, AnnotationNodeLocations(
+                                        Location.NoProvided, Location.NoProvided, listOf()
+                                    )
+                                )
+                            ),
                             "sum",
                             listOf(),
                             FunctionTypeNode(
@@ -126,9 +208,10 @@ class ModuleParserTest : StringSpec({
                                     ConcreteTypeNode("Int", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                         )
                     ), listOf(), Location.NoProvided
                 )
@@ -148,7 +231,14 @@ class ModuleParserTest : StringSpec({
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(), listOf(), Location.NoProvided
                 )
@@ -166,11 +256,23 @@ class ModuleParserTest : StringSpec({
                     "File", listOf(), listOf(
                         TypeNode(
                             false,
-                            listOf(AnnotationNode("native", mapOf("flag" to true), Location.NoProvided)),
+                            listOf(
+                                AnnotationNode(
+                                    "native", mapOf("flag" to true), Location.NoProvided,
+                                    AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                                )
+                            ),
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         ),
                         TypeNode(
                             false,
@@ -178,7 +280,14 @@ class ModuleParserTest : StringSpec({
                             "Age2",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(), listOf(), Location.NoProvided
                 )
@@ -200,7 +309,14 @@ class ModuleParserTest : StringSpec({
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         ),
                         TraitNode(
                             false,
@@ -217,13 +333,21 @@ class ModuleParserTest : StringSpec({
                                                 ConcreteTypeNode("Int", Location.NoProvided),
                                                 ConcreteTypeNode("Int", Location.NoProvided)
                                             ),
-                                            Location.NoProvided
+                                            Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                         ),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                                     )
                                 )
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(), listOf(), Location.NoProvided
                 )
@@ -246,11 +370,23 @@ class ModuleParserTest : StringSpec({
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         ),
                         TraitNode(
                             false,
-                            listOf(AnnotationNode("native", mapOf("name" to "java"), Location.NoProvided)),
+                            listOf(
+                                AnnotationNode(
+                                    "native", mapOf("name" to "java"), Location.NoProvided,
+                                    AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                                )
+                            ),
                             "Num",
                             listOf("a"),
                             TraitFunctionsNode(
@@ -263,13 +399,21 @@ class ModuleParserTest : StringSpec({
                                                 ConcreteTypeNode("Int", Location.NoProvided),
                                                 ConcreteTypeNode("Int", Location.NoProvided)
                                             ),
-                                            Location.NoProvided
+                                            Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                         ),
-                                        Location.NoProvided
+                                        Location.NoProvided,
+                                        TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                                     )
                                 )
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TraitNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(), listOf(), Location.NoProvided
                 )
@@ -293,9 +437,17 @@ class ModuleParserTest : StringSpec({
                                 "+",
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided,
+
+                                ),
+                            Location.NoProvided,
+                            FunctionNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
                                 Location.NoProvided
-                            ),
-                            Location.NoProvided
+                            )
                         )
                     ), Location.NoProvided
                 )
@@ -313,16 +465,29 @@ class ModuleParserTest : StringSpec({
                         FunctionNode(
                             false,
                             false,
-                            listOf(AnnotationNode("native", mapOf("flag" to false), Location.NoProvided)),
+                            listOf(
+                                AnnotationNode(
+                                    "native", mapOf("flag" to false), Location.NoProvided,
+                                    AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                                )
+                            ),
                             "sum",
                             listOf("a", "b"),
                             OperatorNode(
                                 "+",
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                                Location.NoProvided,
+
+                                ),
+                            Location.NoProvided,
+                            FunctionNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
                                 Location.NoProvided
-                            ),
-                            Location.NoProvided
+                            )
                         )
                     ), Location.NoProvided
                 )
@@ -341,7 +506,18 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", listOf(ImportNode("ksharp.text", "text", Location.NoProvided)),
+                    "File", listOf(
+                        ImportNode(
+                            "ksharp.text", "text", Location.NoProvided,
+                            ImportNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided
+                            )
+                        )
+                    ),
                     listOf(
                         TypeNode(
                             false,
@@ -349,7 +525,14 @@ class ModuleParserTest : StringSpec({
                             "Age",
                             listOf(),
                             ConcreteTypeNode("Int", Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), listOf(
                         TypeDeclarationNode(
@@ -362,9 +545,11 @@ class ModuleParserTest : StringSpec({
                                     ConcreteTypeNode("Int", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                FunctionTypeNodeLocations(listOf())
                             ),
-                            Location.NoProvided
+                            Location.NoProvided,
+                            TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                         )
                     ), listOf(
                         FunctionNode(
@@ -377,9 +562,15 @@ class ModuleParserTest : StringSpec({
                                 "+",
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided,
                             ),
-                            Location.NoProvided
+                            Location.NoProvided, FunctionNodeLocations(
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                Location.NoProvided,
+                                listOf(),
+                                Location.NoProvided
+                            )
                         )
                     ), Location.NoProvided
                 )

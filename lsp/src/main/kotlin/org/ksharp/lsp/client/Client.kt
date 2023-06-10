@@ -2,12 +2,14 @@ package org.ksharp.lsp.client
 
 import org.eclipse.lsp4j.services.LanguageClient
 
+
 object Client {
 
     private lateinit var clientInstance: LanguageClient
 
     var initialized = false
         private set
+
 
     fun initialize(client: LanguageClient) {
         if (!initialized) {

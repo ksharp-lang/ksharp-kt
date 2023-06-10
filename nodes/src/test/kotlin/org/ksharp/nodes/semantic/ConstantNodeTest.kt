@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
+import org.ksharp.nodes.NoLocationsDefined
 
 class ConstantNodeTest : StringSpec({
     "Test Node Interface over ConstantNode" {
@@ -17,6 +18,7 @@ class ConstantNodeTest : StringSpec({
                 value.shouldBe("10")
                 info.shouldBe("Info")
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBeEmpty()

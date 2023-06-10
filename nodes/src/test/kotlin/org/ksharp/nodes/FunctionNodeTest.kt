@@ -17,7 +17,14 @@ class FunctionNodeTest : StringSpec({
             "ten",
             listOf("a"),
             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-            Location.NoProvided
+            Location.NoProvided,
+            FunctionNodeLocations(
+                nativeLocation = Location.NoProvided,
+                pubLocation = Location.NoProvided,
+                Location.NoProvided,
+                listOf(),
+                Location.NoProvided
+            )
         ).node.apply {
             cast<FunctionNode>().apply {
                 native.shouldBeFalse()
@@ -27,6 +34,15 @@ class FunctionNodeTest : StringSpec({
                 parameters.shouldBe(listOf("a"))
                 expression.shouldBe(LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(
+                    FunctionNodeLocations(
+                        nativeLocation = Location.NoProvided,
+                        pubLocation = Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
             }
             parent.shouldBeNull()
             children.toList().shouldBe(

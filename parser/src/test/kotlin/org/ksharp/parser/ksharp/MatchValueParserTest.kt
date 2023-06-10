@@ -44,7 +44,9 @@ class MatchValueParserTest : StringSpec({
                         listOf(
                             FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
                             FunctionCallNode("y", FunctionType.Function, emptyList(), Location.NoProvided),
-                        ), LiteralCollectionType.Tuple, Location.NoProvided
+                        ),
+                        LiteralCollectionType.Tuple,
+                        Location.NoProvided,
                     ),
                     Location.NoProvided
                 )
@@ -62,7 +64,9 @@ class MatchValueParserTest : StringSpec({
                         listOf(
                             FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
                             FunctionCallNode("y", FunctionType.Function, emptyList(), Location.NoProvided),
-                        ), LiteralCollectionType.List, Location.NoProvided
+                        ),
+                        LiteralCollectionType.List,
+                        Location.NoProvided,
                     ),
                     Location.NoProvided
                 )
@@ -82,7 +86,8 @@ class MatchValueParserTest : StringSpec({
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided)
                         ),
                         LiteralValueNode("rest", LiteralValueType.Binding, Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
+                        MatchListValueNodeLocations(Location.NoProvided)
                     ),
                     Location.NoProvided
                 )
@@ -102,11 +107,14 @@ class MatchValueParserTest : StringSpec({
                                 listOf(
                                     LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                ), LiteralCollectionType.Tuple, Location.NoProvided
+                                ),
+                                LiteralCollectionType.Tuple,
+                                Location.NoProvided,
                             )
                         ),
                         LiteralValueNode("rest", LiteralValueType.Binding, Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
+                        MatchListValueNodeLocations(Location.NoProvided)
                     ),
                     Location.NoProvided
                 )
@@ -124,9 +132,11 @@ class MatchValueParserTest : StringSpec({
                         listOf(
                             FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                        ), LiteralCollectionType.Set, Location.NoProvided
+                        ),
+                        LiteralCollectionType.Set,
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
                 )
             )
     }
@@ -143,14 +153,16 @@ class MatchValueParserTest : StringSpec({
                             LiteralMapEntryNode(
                                 LiteralValueNode("\"key1\"", LiteralValueType.String, Location.NoProvided),
                                 FunctionCallNode("x", FunctionType.Function, emptyList(), Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided, LiteralMapEntryNodeLocations(Location.NoProvided)
                             ),
                             LiteralMapEntryNode(
                                 LiteralValueNode("\"key2\"", LiteralValueType.String, Location.NoProvided),
                                 FunctionCallNode("y", FunctionType.Function, emptyList(), Location.NoProvided),
-                                Location.NoProvided
+                                Location.NoProvided, LiteralMapEntryNodeLocations(Location.NoProvided)
                             )
-                        ), LiteralCollectionType.Map, Location.NoProvided
+                        ),
+                        LiteralCollectionType.Map,
+                        Location.NoProvided,
                     ),
                     Location.NoProvided
                 )
@@ -209,7 +221,8 @@ class MatchValueParserTest : StringSpec({
                                 FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
                             ),
-                            LiteralCollectionType.Tuple, Location.NoProvided
+                            LiteralCollectionType.Tuple,
+                            Location.NoProvided,
                         ),
                         Location.NoProvided
                     ),
@@ -218,9 +231,10 @@ class MatchValueParserTest : StringSpec({
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided)
                         ),
-                        LiteralCollectionType.Tuple, Location.NoProvided
+                        LiteralCollectionType.Tuple,
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
                 )
             )
     }

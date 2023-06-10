@@ -7,6 +7,14 @@ enum class MatchValueType {
     List,
 }
 
+data class MatchListValueNodeLocations(
+    val tailSeparatorLocation: Location
+) : NodeLocations
+
+data class MatchAssignNodeLocations(
+    val assignOperatorLocation: Location
+) : NodeLocations
+
 data class MatchValueNode(
     val type: MatchValueType,
     val value: NodeData,
@@ -15,12 +23,16 @@ data class MatchValueNode(
 
     override val children: Sequence<NodeData>
         get() = sequenceOf(value)
+
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
 }
 
 data class MatchListValueNode(
     val head: List<NodeData>,
     val tail: NodeData,
-    override val location: Location
+    override val location: Location,
+    override val locations: MatchListValueNodeLocations
 ) : NodeData(), ExpressionParserNode {
 
     override val children: Sequence<NodeData>
@@ -31,7 +43,8 @@ data class MatchListValueNode(
 data class MatchAssignNode(
     val matchValue: MatchValueNode,
     val expression: NodeData,
-    override val location: Location
+    override val location: Location,
+    override val locations: MatchAssignNodeLocations
 ) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = sequenceOf(matchValue, expression)

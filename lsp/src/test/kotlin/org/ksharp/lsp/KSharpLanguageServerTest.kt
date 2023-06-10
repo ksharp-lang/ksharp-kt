@@ -3,7 +3,6 @@ package org.ksharp.lsp
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.eclipse.lsp4j.*
-import org.ksharp.lsp.capabilities.semantic_tokens.kSharpSemanticTokensProvider
 import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.lsp.mocks.LanguageClientMock
 
@@ -20,7 +19,30 @@ class KSharpLanguageServerTest : StringSpec({
                                     openClose = true
                                     change = TextDocumentSyncKind.Incremental
                                 })
-                                semanticTokensProvider = kSharpSemanticTokensProvider
+                                semanticTokensProvider = SemanticTokensWithRegistrationOptions().apply {
+                                    legend = SemanticTokensLegend().apply {
+                                        tokenTypes = listOf(
+                                            SemanticTokenTypes.Type,
+                                            SemanticTokenTypes.String,
+                                            SemanticTokenTypes.Function,
+                                            SemanticTokenTypes.Variable,
+                                            SemanticTokenTypes.Operator,
+                                            SemanticTokenTypes.Number,
+                                            SemanticTokenTypes.Keyword,
+                                            SemanticTokenTypes.Namespace,
+                                            SemanticTokenTypes.Method,
+                                            SemanticTokenTypes.TypeParameter,
+                                            SemanticTokenTypes.Parameter,
+                                            SemanticTokenTypes.Comment,
+                                            SemanticTokenTypes.Decorator
+                                        )
+                                        tokenModifiers = listOf(
+                                            SemanticTokenModifiers.Declaration
+                                        )
+                                    }
+                                    setFull(true)
+                                    setRange(false)
+                                }
                             }
                         })
                 shutdown()

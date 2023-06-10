@@ -1,6 +1,7 @@
 package org.ksharp.parser
 
 import io.kotest.core.spec.style.StringSpec
+import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -64,7 +65,11 @@ class ParserTest : StringSpec({
                 it.error to it.remainTokens.asSequence().toList()
             }
             .shouldBeLeft(
-                BaseParserErrorCode.ExpectingToken.new("token" to "<Test1>", "received-token" to "Unknown:1") to listOf(
+                BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
+                    "token" to "<Test1>",
+                    "received-token" to "Unknown:1"
+                ) to listOf(
                     LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)),
                     LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
                 )

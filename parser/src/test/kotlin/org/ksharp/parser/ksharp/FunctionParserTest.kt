@@ -23,7 +23,14 @@ class FunctionParserTest : StringSpec({
                     "sum",
                     listOf("a", "b"),
                     UnitNode(Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -42,7 +49,14 @@ class FunctionParserTest : StringSpec({
                     "sum",
                     listOf("a", "b"),
                     UnitNode(Location.NoProvided),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -66,7 +80,14 @@ class FunctionParserTest : StringSpec({
                         FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                         Location.NoProvided
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -88,9 +109,15 @@ class FunctionParserTest : StringSpec({
                         "+",
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided, FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -112,9 +139,15 @@ class FunctionParserTest : StringSpec({
                         "+",
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided, FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -147,9 +180,10 @@ class FunctionParserTest : StringSpec({
                                     "*",
                                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                    Location.NoProvided
+                                    Location.NoProvided,
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                MatchAssignNodeLocations(Location.NoProvided)
                             ),
                             MatchAssignNode(
                                 MatchValueNode(
@@ -161,20 +195,29 @@ class FunctionParserTest : StringSpec({
                                     "*",
                                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                    Location.NoProvided
+                                    Location.NoProvided,
                                 ),
-                                Location.NoProvided
+                                Location.NoProvided,
+                                MatchAssignNodeLocations(Location.NoProvided)
                             )
                         ),
                         OperatorNode(
                             "+",
                             FunctionCallNode("a2", FunctionType.Function, listOf(), Location.NoProvided),
                             FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
-                            Location.NoProvided
+                            Location.NoProvided,
                         ),
-                        Location.NoProvided
+                        Location.NoProvided,
+                        LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -196,9 +239,16 @@ class FunctionParserTest : StringSpec({
                         "+",
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }
@@ -220,9 +270,16 @@ class FunctionParserTest : StringSpec({
                         "+",
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
-                        Location.NoProvided
+                        Location.NoProvided,
                     ),
-                    Location.NoProvided
+                    Location.NoProvided,
+                    FunctionNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             )
     }

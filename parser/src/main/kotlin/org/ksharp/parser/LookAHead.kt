@@ -49,6 +49,6 @@ fun <T, S> BaseLexerIterator<S>.lookAHead(block: (BaseLexerIterator<S>) -> Error
     }.mapLeft {
         val collection = collBuilder.build()
         val newIter = sequenceOf(collection.asSequence(), this.asSequence()).flatten().iterator()
-        ParserError(it, false, newIter.asLexerIterator(state))
+        ParserError(it, listBuilder(), false, newIter.asLexerIterator(state))
     }
 }

@@ -12,6 +12,9 @@ data class ModuleNode(
     override val location: Location
 ) : NodeData() {
 
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
+    
     override val children: Sequence<NodeData>
         get() = sequenceOf(
             imports.asSequence(),

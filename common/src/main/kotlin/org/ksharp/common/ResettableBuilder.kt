@@ -30,3 +30,29 @@ class ResettableBuilder<S, V, T : Builder<S, V>>(private val initializer: () -> 
 fun <Item> resettableListBuilder() = ResettableListBuilder<Item> {
     listBuilder()
 }
+
+@Mutable
+class ResettableValue<V> {
+
+    private var value: V? = null
+
+    fun get(): V? {
+        if (value != null) {
+            val result = value!!
+            value = null
+            return result
+        }
+        return null
+    }
+
+    fun set(value: V) {
+        this.value = value
+    }
+
+    fun reset() {
+        this.value = null
+    }
+
+}
+
+fun <Item> resettableValue() = ResettableValue<Item>()

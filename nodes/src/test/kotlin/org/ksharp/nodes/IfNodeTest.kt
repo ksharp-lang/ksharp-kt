@@ -11,13 +11,15 @@ class IfNodeTest : StringSpec({
             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
             LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
-            Location.NoProvided
+            Location.NoProvided,
+            IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided)
         ).node.apply {
             cast<IfNode>().apply {
                 condition.shouldBe(LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided))
                 trueExpression.shouldBe(LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided))
                 falseExpression.shouldBe(LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(IfNodeLocations(Location.NoProvided, Location.NoProvided, Location.NoProvided))
             }
             parent.shouldBeNull()
             children.toList().shouldBe(

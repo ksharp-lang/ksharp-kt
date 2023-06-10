@@ -66,7 +66,6 @@ fun <V> BaseLexerIterator<V>.collapseTokens(canCollapse: (TokenType) -> Boolean 
 }
 
 fun <V> TokenLexerIterator<V>.toLogicalLexerToken(
-    context: String,
     newLineType: TokenType
 ): BaseLexerIterator<V> =
     object : LexerIterator<Token, V> {
@@ -86,7 +85,6 @@ fun <V> TokenLexerIterator<V>.toLogicalLexerToken(
             }
             LogicalLexerToken(
                 this,
-                context,
                 startPosition = startPosition,
                 endPosition = startPosition.first to Offset(startPosition.second.value + text.length)
             )

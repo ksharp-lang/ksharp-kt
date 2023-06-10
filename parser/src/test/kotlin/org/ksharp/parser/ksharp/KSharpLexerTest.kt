@@ -1108,7 +1108,7 @@ class KSharpLexerExpressionBlocks : StringSpec({
 class KSharpLexerNewLineLSPTest : StringSpec({
     "Check text produce line positions complaint with LSP" {
         "type Num \n\nsum a = a * 2\n   1\n"
-            .lexerModule("file", true)
+            .lexerModule(true)
             .asSequence()
             .asLspPositionsSequence()
             .toList()
@@ -1129,7 +1129,7 @@ class KSharpLexerNewLineLSPTest : StringSpec({
     }
     "Check text produce line positions complaint with LSP using carrier return" {
         "type Num \n\rsum a = a * 2\r\n   1\n"
-            .lexerModule("file", true)
+            .lexerModule(true)
             .asSequence()
             .asLspPositionsSequence()
             .toList()
@@ -1150,7 +1150,7 @@ class KSharpLexerNewLineLSPTest : StringSpec({
     }
     "Text unicode 16 character offsets" {
         "\"a𐐀b\""
-            .lexerModule("file", true)
+            .lexerModule(true)
             .asSequence()
             .toList()
             .printTokens()
@@ -1160,7 +1160,6 @@ class KSharpLexerNewLineLSPTest : StringSpec({
                         type = KSharpTokenType.String,
                         token = TextToken(text = "\"a𐐀b\"", startOffset = 0, endOffset = 6)
                     ),
-                    context = "file",
                     startPosition = (Line(value = 1) to Offset(value = 0)),
                     endPosition = (Line(value = 1) to Offset(value = 6))
                 )
