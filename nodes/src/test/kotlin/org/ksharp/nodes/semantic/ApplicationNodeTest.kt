@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
+import org.ksharp.nodes.NoLocationsDefined
 import org.ksharp.nodes.Node
 
 class ApplicationNodeTest : StringSpec({
@@ -33,6 +34,7 @@ class ApplicationNodeTest : StringSpec({
                     )
                 )
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(

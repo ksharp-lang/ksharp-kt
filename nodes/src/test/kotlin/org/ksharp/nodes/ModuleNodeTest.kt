@@ -93,6 +93,7 @@ class ModuleNodeTest : StringSpec({
                 )
                 functions.shouldBeEmpty()
                 location.shouldBe(testLocation)
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
