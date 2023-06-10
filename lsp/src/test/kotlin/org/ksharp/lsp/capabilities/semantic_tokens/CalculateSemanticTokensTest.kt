@@ -129,7 +129,7 @@ class CalculateSemanticTokensTest : FreeSpec({
     "Calculate semantic tokens " - {
         specs.forEach { (desc, spec) ->
             desc {
-                val actions = documentActions()
+                val actions = documentActions("doc")
                 actions.parseAction(spec.first)
                 actions.semanticTokens.value.get().shouldBe(spec.second)
             }
