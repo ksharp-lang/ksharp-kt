@@ -2,6 +2,7 @@ package org.ksharp.lsp.capabilities.semantic_tokens
 
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
+import org.ksharp.lsp.actions.documentActions
 
 private fun String.spec(document: String, expectedTokens: String) =
     this to (document to
@@ -128,7 +129,9 @@ class CalculateSemanticTokensTest : FreeSpec({
     "Calculate semantic tokens " - {
         specs.forEach { (desc, spec) ->
             desc {
-                calculateSemanticTokens(spec.first).shouldBe(spec.second)
+                val actions = documentActions("doc")
+                actions.parseAction(spec.first)
+                actions.semanticTokens.value.get().shouldBe(spec.second)
             }
         }
     }

@@ -1,13 +1,11 @@
 package org.ksharp.lsp.capabilities.semantic_tokens
 
-import org.eclipse.lsp4j.SemanticTokenModifiers
-import org.eclipse.lsp4j.SemanticTokenTypes
-import org.eclipse.lsp4j.SemanticTokensLegend
-import org.eclipse.lsp4j.SemanticTokensWithRegistrationOptions
+import org.eclipse.lsp4j.*
 import org.ksharp.common.Location
+import org.ksharp.lsp.actions.DocumentActions
 import org.ksharp.parser.TokenType
 import org.ksharp.parser.ksharp.KSharpTokenType
-import org.ksharp.parser.ksharp.parseModuleAsNodeSequence
+import java.util.concurrent.CompletableFuture
 
 
 val tokenEncoderSpec = tokenEncoderSpec {
@@ -98,12 +96,13 @@ fun TokenEncoder.register(location: Location, tokenType: String, vararg modifier
     )
 }
 
-fun calculateSemanticTokens(content: String): List<Int> =
-    tokenEncoderSpec.encoder()
-        .let { encoder ->
-            content.parseModuleAsNodeSequence()
-                .forEach {
-                    it.visit(encoder)
+fun calculateSemanticTokens(actions: DocumentActions, content: String): CompletableFuture<SemanticTokens> =
+    actions.parseAction(content).let {
+        actions.semanticTokens
+            .value
+            .thenApplyAsync { d ->
+                SemanticTokens().apply {
+                    data = d
                 }
-            encoder.data()
-        }
+            }
+    }

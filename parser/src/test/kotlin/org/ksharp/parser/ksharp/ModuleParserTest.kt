@@ -30,7 +30,7 @@ class ModuleParserTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ), listOf(), listOf(), listOf(), Location.NoProvided
+        ), listOf(), listOf(), listOf(), listOf(), Location.NoProvided
     )
     val expectedModuleWithLocations: (String) -> ModuleNode = {
         ModuleNode(
@@ -94,6 +94,7 @@ class ModuleParserTest : StringSpec({
             listOf(),
             listOf(),
             listOf(),
+            listOf(),
             Location(Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 6))
         )
     }
@@ -152,7 +153,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), listOf(), Location.NoProvided
+                    ), listOf(), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -179,7 +180,7 @@ class ModuleParserTest : StringSpec({
                             Location.NoProvided,
                             TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                         )
-                    ), listOf(), Location.NoProvided
+                    ), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -213,7 +214,7 @@ class ModuleParserTest : StringSpec({
                             Location.NoProvided,
                             TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                         )
-                    ), listOf(), Location.NoProvided
+                    ), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -240,7 +241,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), Location.NoProvided
+                    ), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -289,7 +290,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), Location.NoProvided
+                    ), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -349,7 +350,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), Location.NoProvided
+                    ), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -415,7 +416,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), Location.NoProvided
+                    ), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -449,7 +450,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), Location.NoProvided
+                    ), listOf(), Location.NoProvided
                 )
             )
     }
@@ -489,7 +490,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), Location.NoProvided
+                    ), listOf(), Location.NoProvided
                 )
             )
     }
@@ -572,7 +573,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), Location.NoProvided
+                    ), listOf(), Location.NoProvided
                 )
             )
     }
