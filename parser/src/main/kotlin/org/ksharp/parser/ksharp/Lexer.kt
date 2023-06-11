@@ -17,8 +17,9 @@ data class KSharpLexerState(
     val collapseAssignOperatorRule: Boolean = true,
     val mapThenElseKeywords: Boolean = false,
     val mapThenKeywords: Boolean = false,
-    val enableExpressionStartingNewLine: Boolean = true
-)
+    val enableExpressionStartingNewLine: Boolean = true,
+    val lookAheadLexerState: LookAheadLexerState = LookAheadLexerState()
+) : WithLookAHeadState by lookAheadLexerState
 
 typealias KSharpLexer = Lexer<KSharpLexerState>
 typealias KSharpLexerIterator = BaseLexerIterator<KSharpLexerState>
@@ -689,8 +690,8 @@ fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
 
 fun String.kSharpLexer() = lexer(KSharpLexerState(), charStream(), kSharpTokenFactory).filter {
     it.type != KSharpTokenType.Ignore
-}
+}.enableLookAHead()
 
 fun Reader.kSharpLexer() = lexer(KSharpLexerState(), charStream(), kSharpTokenFactory).filter {
     it.type != KSharpTokenType.Ignore
-}
+}.enableLookAHead()

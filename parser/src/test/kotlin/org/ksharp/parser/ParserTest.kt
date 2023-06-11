@@ -110,7 +110,8 @@ class ParserTest : StringSpec({
             keyword("sequence"),
             pcomma()
         ).iterator()
-            .asLexerIterator(LexerState(""))
+            .asLexerIterator(LexerState(LookAheadLexerState()))
+            .enableLookAHead()
             .consume(TestParserTokenTypes.Keyword)
             .thenLoop {
                 it.consume(TestParserTokenTypes.Operator, ".")
@@ -142,7 +143,8 @@ class ParserTest : StringSpec({
             keyword("sequence"),
             pcomma()
         ).iterator()
-            .asLexerIterator(LexerState(""))
+            .asLexerIterator(LexerState(LookAheadLexerState()))
+            .enableLookAHead()
             .consume(TestParserTokenTypes.Keyword)
             .thenLoop {
                 it.consume(TestParserTokenTypes.Operator, ".")
@@ -185,7 +187,8 @@ class ParserTest : StringSpec({
             pcomma(),
             pcomma()
         ).iterator()
-            .asLexerIterator(LexerState(""))
+            .asLexerIterator(LexerState(LookAheadLexerState()))
+            .enableLookAHead()
             .consume(TestParserTokenTypes.Keyword, "import")
             .consume {
                 it.consume(TestParserTokenTypes.Keyword)
@@ -230,7 +233,8 @@ class ParserTest : StringSpec({
             keyword("sequence"),
             pcomma()
         ).iterator()
-            .asLexerIterator(LexerState(""))
+            .asLexerIterator(LexerState(LookAheadLexerState()))
+            .enableLookAHead()
             .ifConsume(TestParserTokenTypes.Keyword) {
                 it.thenLoop { l ->
                     l.consume(TestParserTokenTypes.Operator, ".")
@@ -262,7 +266,8 @@ class ParserTest : StringSpec({
             keyword("sequence"),
             pcomma()
         ).iterator()
-            .asLexerIterator(LexerState(""))
+            .asLexerIterator(LexerState(LookAheadLexerState()))
+            .enableLookAHead()
             .ifConsume(TestParserTokenTypes.Operator) {
                 it.build { "" }
             }.or {
@@ -296,7 +301,8 @@ class ParserTest : StringSpec({
             keyword("sequence"),
             pcomma()
         ).iterator()
-            .asLexerIterator(LexerState(""))
+            .asLexerIterator(LexerState(LookAheadLexerState()))
+            .enableLookAHead()
             .consume(TestParserTokenTypes.Keyword)
             .thenIf(TestParserTokenTypes.Operator, ".") {
                 it.then(TestParserTokenTypes.Keyword)

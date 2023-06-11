@@ -3,7 +3,7 @@ package org.ksharp.parser
 import org.ksharp.common.annotation.Mutable
 
 @Mutable
-class LexerState<V>(initialValue: V) {
+open class LexerState<V>(initialValue: V) {
     var value = initialValue
         private set
 

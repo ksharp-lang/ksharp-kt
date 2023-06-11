@@ -8,6 +8,7 @@ enum class BaseParserErrorCode(override val description: String) : ErrorCode {
     ExpectingToken("Expecting token {token} was {received-token}"),
     BreakLoop("Breaking loop"),
     ConsumeTokenFailed("Consume token failed {token}"),
+    LookAHeadNotEnabled("Look ahead for lexer not enabled"),
 }
 
 fun createExpectedTokenError(tokenType: TokenType, receivedToken: Token) =
@@ -356,12 +357,12 @@ fun <L, T, S> Either<L, ParserValue<T, S>>.resume() =
         )
     }
 
-fun <T : Any, S> ConsumeResult<S>.thenLoop(block: (BaseLexerIterator<S>) -> ParserResult<T, S>): ConsumeResult<S> =
+fun <T : Any, S : WithLookAHeadState> ConsumeResult<S>.thenLoop(block: (BaseLexerIterator<S>) -> ParserResult<T, S>): ConsumeResult<S> =
     thenLoopIndexed { lexer, _ ->
         block(lexer)
     }
 
-fun <T : Any, S> ConsumeResult<S>.thenLoopIndexed(block: (BaseLexerIterator<S>, index: Int) -> ParserResult<T, S>): ConsumeResult<S> =
+fun <T : Any, S : WithLookAHeadState> ConsumeResult<S>.thenLoopIndexed(block: (BaseLexerIterator<S>, index: Int) -> ParserResult<T, S>): ConsumeResult<S> =
     this.flatMap {
         val returnValue: NodeCollector<S>
         var tokens = it.tokens
@@ -370,7 +371,7 @@ fun <T : Any, S> ConsumeResult<S>.thenLoopIndexed(block: (BaseLexerIterator<S>, 
             index += 1
             val result = tokens.lookAHead { lexer ->
                 when (val result = block(lexer, index)) {
-                    is Either.Right -> result.value.value.asLookAHeadResult(result.remainTokens)
+                    is Either.Right -> result.value.value.asLookAHeadResult()
                     is Either.Left -> BaseParserErrorCode.BreakLoop.new().asLookAHeadResult()
                 }
             }

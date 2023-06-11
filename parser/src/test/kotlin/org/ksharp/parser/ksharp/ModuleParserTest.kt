@@ -577,4 +577,22 @@ class ModuleParserTest : StringSpec({
                 )
             )
     }
+    "Parse a module with more than one function" {
+        """
+            sum a b = a + b
+            sum2 a b = a + b
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File",
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+    }
 })

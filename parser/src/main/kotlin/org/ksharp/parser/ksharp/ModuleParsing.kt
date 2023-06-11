@@ -59,8 +59,8 @@ private fun KSharpLexerIterator.consumeModuleNodesLogic(): KSharpConsumeResult =
                     it.consumeImport()
                         .or { l -> l.consumeFunctionTypeDeclaration() }
                         .or { l -> l.consumeTypeDeclaration() }
-                        .or { l -> l.consumeFunction() }
                         .or { l -> l.consumeAnnotation() }
+                        .or { l -> l.consumeFunction() }
                 }.asLookAHeadResult()
             }.mapLeft {
                 state.value.lastError.set(it.error)
