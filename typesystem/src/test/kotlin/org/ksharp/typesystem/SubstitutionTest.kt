@@ -372,4 +372,76 @@ class SubstitutionTest : StringSpec({
         context.substitute(Location.NoProvided, type1, Concrete(TypeVisibility.Public, "Int"))
             .shouldBeRight(type2)
     }
+    "Parametric type substitution using alias types" {
+        val typeSystem = typeSystem {
+            parametricType(TypeVisibility.Public, "Num") {
+                parameter("a")
+            }
+        }.value
+        val context = SubstitutionContext(typeSystem)
+        val p1 = ParametricType(
+            TypeVisibility.Public,
+            Alias(TypeVisibility.Public, "Num"),
+            listOf(Parameter(TypeVisibility.Public, "a"))
+        )
+        val p2 = ParametricType(
+            TypeVisibility.Public,
+            Alias(TypeVisibility.Public, "Num"),
+            listOf(Parameter(TypeVisibility.Public, "a"))
+        )
+        context.extract(Location.NoProvided, p1, p2).shouldBeRight(true)
+        context.substitute(Location.NoProvided, p1, Concrete(TypeVisibility.Public, "Int"))
+            .shouldBeRight(p1)
+    }
+    "Parametric type substitution using alias types and concrete types" {
+        val typeSystem = typeSystem {
+            parametricType(TypeVisibility.Public, "Num") {
+                parameter("a")
+            }
+            type(TypeVisibility.Public, "Int")
+        }.value
+        val context = SubstitutionContext(typeSystem)
+        val p1 = ParametricType(
+            TypeVisibility.Public,
+            Alias(TypeVisibility.Public, "Num"),
+            listOf(Parameter(TypeVisibility.Public, "a"))
+        )
+        val p2 = ParametricType(
+            TypeVisibility.Public,
+            Alias(TypeVisibility.Public, "Num"),
+            listOf(Concrete(TypeVisibility.Public, "Int"))
+        )
+        context.extract(Location.NoProvided, p1, p2).shouldBeRight(true)
+        context.substitute(Location.NoProvided, p1, Concrete(TypeVisibility.Public, "Int"))
+            .shouldBeRight(p2)
+    }
+    "Parametric type substitution using alias types and specialized parametric type" {
+        val typeSystem = typeSystem {
+            parametricType(TypeVisibility.Public, "Num") {
+                parameter("a")
+            }
+            type(TypeVisibility.Public, "Int")
+            alias(TypeVisibility.Public, "Integer") {
+                parametricType("Num") {
+                    type("Int")
+                }
+            }
+        }.value
+        val context = SubstitutionContext(typeSystem)
+        val p1 = ParametricType(
+            TypeVisibility.Public,
+            Alias(TypeVisibility.Public, "Num"),
+            listOf(Parameter(TypeVisibility.Public, "a"))
+        )
+        val p2 = Alias(TypeVisibility.Public, "Integer")
+        context.extract(Location.NoProvided, p1, p2).shouldBeRight(true)
+        context.substitute(Location.NoProvided, p1, Concrete(TypeVisibility.Public, "Int"))
+            .shouldBeRight(
+                ParametricType(
+                    TypeVisibility.Public,
+                    Alias(TypeVisibility.Public, "Num"),
+                    listOf(Alias(TypeVisibility.Public, "Int"))
+                )
+            )
+    }
 })
