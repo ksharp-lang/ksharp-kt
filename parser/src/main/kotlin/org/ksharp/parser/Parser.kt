@@ -55,11 +55,9 @@ typealias ConsumeResult<S> = Either<ParserError<S>, NodeCollector<S>>
 
 fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken: Boolean = false): ConsumeResult<S> {
     val lookAhead = state.lookAHeadState
-    val buffer = lookAhead.buffer()
     if (hasNext()) {
         val item = next()
         return if (predicate(item)) {
-            buffer.release()
             Either.Right(
                 NodeCollector(
                     listBuilder<Any>().apply {
@@ -69,7 +67,7 @@ fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken
                 )
             )
         } else {
-            buffer.recover()
+            lookAhead.addPendingToken(item)
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
@@ -80,7 +78,6 @@ fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken
             )
         }
     }
-    buffer.recover()
     return Either.Left(
         ParserError(
             BaseParserErrorCode.EofToken.new(), listBuilder(),
@@ -94,11 +91,9 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
     discardToken: Boolean = false
 ): ConsumeResult<S> {
     val lookAHead = state.lookAHeadState
-    val buffer = lookAHead.buffer()
     if (hasNext()) {
         val item = next()
         return if (predicate(item)) {
-            buffer.release()
             Either.Right(
                 NodeCollector(
                     listBuilder<Any>().apply {
@@ -108,7 +103,7 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
                 )
             )
         } else {
-            buffer.recover()
+            lookAHead.addPendingToken(item)
             Either.Right(
                 NodeCollector(
                     listBuilder<Any>(),
@@ -117,7 +112,6 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
             )
         }
     }
-    buffer.recover()
     return Either.Left(
         ParserError(
             BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), listBuilder(),
@@ -133,15 +127,13 @@ fun <S> ConsumeResult<S>.thenOptional(
     flatMap {
         val iterator = it.tokens
         val lookAhead = iterator.state.lookAHeadState
-        val buffer = lookAhead.buffer()
         if (iterator.hasNext()) {
             val item = iterator.next()
             if (predicate(item)) {
-                buffer.release()
                 if (!discardToken) it.collection.add(item)
                 Either.Right(it)
             } else {
-                buffer.recover()
+                lookAhead.addPendingToken(item)
                 Either.Right(
                     NodeCollector(
                         it.collection,
@@ -150,7 +142,6 @@ fun <S> ConsumeResult<S>.thenOptional(
                 )
             }
         } else {
-            buffer.recover()
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"),
@@ -167,12 +158,10 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
     discardToken: Boolean = false,
     block: (tokens: ConsumeResult<S>) -> ParserResult<T, S>
 ): ParserResult<T, S> {
-    val lookAHead = state.lookAHeadState
-    val buffer = lookAHead.buffer()
+    val lookAhead = state.lookAHeadState
     if (hasNext()) {
         val item = next()
         return if (predicate(item)) {
-            buffer.release()
             block(
                 Either.Right(
                     NodeCollector(
@@ -184,7 +173,7 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
                 )
             )
         } else {
-            buffer.recover()
+            lookAhead.addPendingToken(item)
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
@@ -195,7 +184,6 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
             )
         }
     }
-    buffer.recover()
     return Either.Left(
         ParserError(
             BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), listBuilder(),
@@ -212,11 +200,9 @@ fun <T, S> ConsumeResult<S>.thenIfConsume(
     this.flatMap {
         val iterator = it.tokens
         val lookAhead = iterator.state.lookAHeadState
-        val buffer = lookAhead.buffer()
         if (iterator.hasNext()) {
             val item = it.tokens.next()
             if (predicate(item)) {
-                buffer.release()
                 block(
                     Either.Right(
                         NodeCollector(
@@ -228,7 +214,7 @@ fun <T, S> ConsumeResult<S>.thenIfConsume(
                     )
                 )
             } else {
-                buffer.recover()
+                lookAhead.addPendingToken(item)
                 Either.Left(
                     ParserError(
                         BaseParserErrorCode.ConsumeTokenFailed.new(
@@ -242,7 +228,6 @@ fun <T, S> ConsumeResult<S>.thenIfConsume(
                 )
             }
         } else {
-            buffer.recover()
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"),
@@ -342,19 +327,16 @@ fun <S> ConsumeResult<S>.then(
         val iterator = it.tokens
         val collection = it.collection
         val lookAhead = iterator.state.lookAHeadState
-        val buffer = lookAhead.buffer()
         if (iterator.hasNext()) {
             val item = iterator.next()
             if (predicate(item)) {
-                buffer.release()
                 if (!discardToken) collection.add(item)
                 Either.Right(it)
             } else {
-                buffer.recover()
+                lookAhead.addPendingToken(item)
                 Either.Left(ParserError(error(item), collection, it.consumed, iterator))
             }
         } else {
-            buffer.recover()
             Either.Left(ParserError(BaseParserErrorCode.EofToken.new(), collection, it.consumed, iterator))
         }
     }
@@ -435,11 +417,9 @@ fun <S> ConsumeResult<S>.thenIf(
     this.flatMap {
         val tokens = it.tokens
         val lookAHead = tokens.state.lookAHeadState
-        val buffer = lookAHead.buffer()
         if (tokens.hasNext()) {
             val token = tokens.next()
             if (predicate(token)) {
-                buffer.release()
                 if (!discardToken) it.collection.add(token)
                 block(
                     Either.Right(
@@ -450,7 +430,7 @@ fun <S> ConsumeResult<S>.thenIf(
                     )
                 )
             } else {
-                buffer.recover()
+                lookAHead.addPendingToken(token)
                 Either.Right(
                     NodeCollector(
                         it.collection,
@@ -459,7 +439,6 @@ fun <S> ConsumeResult<S>.thenIf(
                 )
             }
         } else {
-            buffer.release()
             Either.Right(it)
         }
     }

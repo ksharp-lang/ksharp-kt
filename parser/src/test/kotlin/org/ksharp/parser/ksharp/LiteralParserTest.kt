@@ -3,12 +3,14 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.*
+import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
 
 class LiteralParserTest : StringSpec({
     "Character" {
         "'a'"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -17,6 +19,7 @@ class LiteralParserTest : StringSpec({
     "String" {
         "\"a\""
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -25,6 +28,7 @@ class LiteralParserTest : StringSpec({
     "Multiline String" {
         "\"\"\"Hello\"\"\""
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -33,6 +37,7 @@ class LiteralParserTest : StringSpec({
     "Integer" {
         "1_000"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -41,6 +46,7 @@ class LiteralParserTest : StringSpec({
     "Hex number" {
         "0xFFFF"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -49,6 +55,7 @@ class LiteralParserTest : StringSpec({
     "Octal number" {
         "0o1234"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -57,6 +64,7 @@ class LiteralParserTest : StringSpec({
     "Binary number" {
         "0b0010"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -65,6 +73,7 @@ class LiteralParserTest : StringSpec({
     "Decimal" {
         "1.6"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -73,6 +82,7 @@ class LiteralParserTest : StringSpec({
     "List" {
         "[1, 2, 3]"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -91,6 +101,7 @@ class LiteralParserTest : StringSpec({
     "Set" {
         "#[1, 2, 3]"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -109,6 +120,7 @@ class LiteralParserTest : StringSpec({
     "Map" {
         "{\"key1\": 1, \"key2\": 2}"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -134,6 +146,7 @@ class LiteralParserTest : StringSpec({
     "Tuple" {
         "1, 2, 3"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -151,6 +164,7 @@ class LiteralParserTest : StringSpec({
 
         "(1, 2, 3)"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -169,6 +183,7 @@ class LiteralParserTest : StringSpec({
     "Tuples with function calls" {
         "x, y"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -186,6 +201,7 @@ class LiteralParserTest : StringSpec({
     "List of tuples" {
         "[(1, 2), (2, 3)]"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()
             .map { it.value }
@@ -217,6 +233,7 @@ class LiteralParserTest : StringSpec({
     "Binding" {
         "map"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
@@ -227,6 +244,7 @@ class LiteralParserTest : StringSpec({
     "Type Instance Binding" {
         "Point"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
@@ -237,6 +255,7 @@ class LiteralParserTest : StringSpec({
     "Function name Binding" {
         "point2d->point3d"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
@@ -247,6 +266,7 @@ class LiteralParserTest : StringSpec({
     "Operator Binding" {
         "(+)"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
@@ -257,6 +277,7 @@ class LiteralParserTest : StringSpec({
     "Unit literal" {
         "()"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }

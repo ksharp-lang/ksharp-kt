@@ -22,6 +22,7 @@ class ParserTest : StringSpec({
         }.take(5)
             .iterator()
             .asLexerIterator(LexerState(""))
+            .enableLookAhead()
             .consume(BaseTokenType.Unknown)
             .then(BaseTokenType.Unknown)
             .then(BaseTokenType.Unknown)
@@ -47,6 +48,7 @@ class ParserTest : StringSpec({
             LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
         }.take(1).iterator()
             .asLexerIterator(LexerState(""))
+            .enableLookAhead()
             .consume(BaseTokenType.Unknown)
             .then(BaseTokenType.Unknown)
             .mapLeft {
@@ -59,6 +61,7 @@ class ParserTest : StringSpec({
             LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
         }.take(3).iterator()
             .asLexerIterator(LexerState(""))
+            .enableLookAhead()
             .consume(BaseTokenType.Unknown)
             .then(TestParserTokenTypes.Test1)
             .mapLeft {
@@ -80,6 +83,7 @@ class ParserTest : StringSpec({
             LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0))
         }.take(5).iterator()
             .asLexerIterator(LexerState(""))
+            .enableLookAhead()
             .consume(TestParserTokenTypes.Test1)
             .build { it as Any }
             .also { it.shouldBeLeft() }
@@ -111,7 +115,7 @@ class ParserTest : StringSpec({
             pcomma()
         ).iterator()
             .asLexerIterator(LexerState(""))
-
+            .enableLookAhead()
             .consume(TestParserTokenTypes.Keyword)
             .thenLoop {
                 it.consume(TestParserTokenTypes.Operator, ".")
@@ -144,7 +148,7 @@ class ParserTest : StringSpec({
             pcomma()
         ).iterator()
             .asLexerIterator(LexerState(""))
-
+            .enableLookAhead()
             .consume(TestParserTokenTypes.Keyword)
             .thenLoop {
                 it.consume(TestParserTokenTypes.Operator, ".")
@@ -188,7 +192,7 @@ class ParserTest : StringSpec({
             pcomma()
         ).iterator()
             .asLexerIterator(LexerState(""))
-
+            .enableLookAhead()
             .consume(TestParserTokenTypes.Keyword, "import")
             .consume {
                 it.consume(TestParserTokenTypes.Keyword)
@@ -234,7 +238,7 @@ class ParserTest : StringSpec({
             pcomma()
         ).iterator()
             .asLexerIterator(LexerState(""))
-
+            .enableLookAhead()
             .ifConsume(TestParserTokenTypes.Keyword) {
                 it.thenLoop { l ->
                     l.consume(TestParserTokenTypes.Operator, ".")
@@ -267,7 +271,7 @@ class ParserTest : StringSpec({
             pcomma()
         ).iterator()
             .asLexerIterator(LexerState(""))
-
+            .enableLookAhead()
             .ifConsume(TestParserTokenTypes.Operator) {
                 it.build { "" }
             }.or {
@@ -302,7 +306,7 @@ class ParserTest : StringSpec({
             pcomma()
         ).iterator()
             .asLexerIterator(LexerState(""))
-
+            .enableLookAhead()
             .consume(TestParserTokenTypes.Keyword)
             .thenIf(TestParserTokenTypes.Operator, ".") {
                 it.then(TestParserTokenTypes.Keyword)
@@ -328,6 +332,7 @@ class ParserTest : StringSpec({
             pcomma()
         ).iterator()
             .asLexerIterator(LexerState(""))
+            .enableLookAhead()
             .consume(TestParserTokenTypes.Keyword)
             .thenIf(TestParserTokenTypes.Operator, ":") {
                 it.then(TestParserTokenTypes.Keyword)

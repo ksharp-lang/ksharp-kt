@@ -17,13 +17,12 @@ fun KSharpConsumeResult.discardBlanks() =
     map {
         val lexer = it.tokens
         val lookAhead = lexer.state.lookAHeadState
-        val buffer = lookAhead.buffer()
         while (lexer.hasNext()) {
             val token = lexer.next()
             if (token.type == KSharpTokenType.NewLine || token.type == KSharpTokenType.EndBlock) {
                 continue
             }
-            buffer.releaseWith(token)
+            lookAhead.addPendingToken(token)
             return@map NodeCollector(
                 it.collection,
                 lexer

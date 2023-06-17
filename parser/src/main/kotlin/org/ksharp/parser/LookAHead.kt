@@ -4,35 +4,19 @@ import org.ksharp.common.*
 import org.ksharp.common.annotation.Mutable
 import java.util.*
 
-interface LookAheadBuffer {
-    fun release()
-    fun recover()
-
-    /**
-     * Release the buffer and add at the beginning of the stack a token
-     */
-    fun releaseWith(token: Token)
-}
-
 class LookAheadLexerState {
     private val checkpoints: Stack<Stack<Token>> = Stack()
 
     var enabled = false
         private set
 
-    private var bufferEnabled = false
-
     var lexer: BaseLexerIterator<*>? = null
         private set
 
     private var rootLexer: BaseLexerIterator<*>? = null
     private var pendingTokens = mutableListOf<Token>()
-    private val buffer = mutableListOf<Token>()
 
     fun addCheckPoint() {
-        if (bufferEnabled) {
-            throw RuntimeException("Can't add an endpoint when there is a buffer active")
-        }
         checkpoints.add(Stack())
     }
 
@@ -48,7 +32,6 @@ class LookAheadLexerState {
     }
 
     private fun collectValue(token: Token) {
-        addBuffer(token)
         if (!checkpoints.isEmpty()) {
             checkpoints.peek().push(token)
         }
@@ -61,12 +44,6 @@ class LookAheadLexerState {
         } else null
     } else pendingTokens.removeFirst())?.also {
         collectValue(it)
-    }
-
-    private fun addBuffer(token: Token) {
-        if (bufferEnabled) {
-            buffer.add(token)
-        }
     }
 
     fun <S> enable(
@@ -83,32 +60,12 @@ class LookAheadLexerState {
         return this.lexer!!.cast()
     }
 
-    fun buffer(): LookAheadBuffer {
-        if (bufferEnabled) {
-            throw RuntimeException("A buffer already was created")
-        }
-        bufferEnabled = true
-        buffer.clear()
-        return object : LookAheadBuffer {
-
-            override fun release() {
-                bufferEnabled = false
-            }
-
-            override fun recover() {
-                bufferEnabled = false
-                pendingTokens.addAll(buffer)
-            }
-
-            override fun releaseWith(token: Token) {
-                bufferEnabled = false
-                pendingTokens.add(token)
-            }
-        }
-    }
-
     internal fun addPendingTokens(tokens: List<Token>) {
         pendingTokens.addAll(0, tokens)
+    }
+
+    internal fun addPendingToken(token: Token) {
+        pendingTokens.add(0, token)
     }
 
 }
