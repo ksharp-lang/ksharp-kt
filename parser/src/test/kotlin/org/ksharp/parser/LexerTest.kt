@@ -79,7 +79,8 @@ class LexerTest : StringSpec({
             if (it.isLetter()) {
                 consumeWord()
             } else null
-        }.collapseTokens()
+        }.enableLookAhead()
+            .collapseTokens()
             .asSequence().toList().shouldBe(
                 listOf(
                     LexerToken(

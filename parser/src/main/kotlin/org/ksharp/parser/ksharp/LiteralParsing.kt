@@ -11,7 +11,9 @@ private fun KSharpConsumeResult.buildLiteralValue(type: LiteralValueType): KShar
     }
 
 private fun KSharpLexerIterator.consumeLiteralValue(token: KSharpTokenType, type: LiteralValueType) =
-    consume(token).buildLiteralValue(type)
+    ifConsume(token) {
+        it.buildLiteralValue(type)
+    }
 
 private fun KSharpParserResult.orConsumeLiteralValue(token: KSharpTokenType, type: LiteralValueType) =
     or { it.consumeLiteralValue(token, type) }

@@ -14,7 +14,7 @@ private val Token.functionType
         }
 
 fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
-    consume({
+    ifConsume({
         when (it.type) {
             KSharpTokenType.OperatorFunctionName -> true
             KSharpTokenType.FunctionName -> true
@@ -22,22 +22,25 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
             KSharpTokenType.UpperCaseWord -> true
             else -> false
         }
-    }).thenLoop {
-        it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
-    }
-        .build {
-            val fnName = it.first().cast<Token>()
-            FunctionCallNode(
-                fnName.text,
-                fnName.functionType,
-                it.drop(1).map { arg ->
-                    if (arg is LiteralValueNode && arg.type == LiteralValueType.Binding && arg.value.endsWith(":")) {
-                        arg.copy(type = LiteralValueType.Label)
-                    } else arg as NodeData
-                },
-                fnName.location
-            )
+    }) { l ->
+        l.thenLoop {
+            val r = it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
+            r
         }
+            .build {
+                val fnName = it.first().cast<Token>()
+                FunctionCallNode(
+                    fnName.text,
+                    fnName.functionType,
+                    it.drop(1).map { arg ->
+                        if (arg is LiteralValueNode && arg.type == LiteralValueType.Binding && arg.value.endsWith(":")) {
+                            arg.copy(type = LiteralValueType.Label)
+                        } else arg as NodeData
+                    },
+                    fnName.location
+                )
+            }
+    }
 
 fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
     consume(KSharpTokenType.If, false)
@@ -121,8 +124,8 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
         }
     } else groupExpression
 
-    val literal = newLineExpression.or {
-        it.consumeLiteral(withBindings)
+    val literal = newLineExpression.or { l ->
+        l.consumeLiteral(withBindings)
     }.or { it.consumeIfExpression() }
         .or { it.consumeLetExpression() }
 

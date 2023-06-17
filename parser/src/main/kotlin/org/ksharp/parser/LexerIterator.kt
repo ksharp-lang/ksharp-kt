@@ -3,7 +3,10 @@ package org.ksharp.parser
 import org.ksharp.common.annotation.Mutable
 
 @Mutable
-open class LexerState<V>(initialValue: V) {
+open class LexerState<V>(
+    initialValue: V,
+    val lookAHeadState: LookAheadLexerState = LookAheadLexerState()
+) {
     var value = initialValue
         private set
 
@@ -18,27 +21,42 @@ interface LexerIterator<out T : Token, V> {
     fun next(): T
 }
 
-fun <T : Token, V> LexerIterator<T, V>.asSequence() = generateSequence { if (hasNext()) next() else null }
 
-fun <T : Token, S> LexerIterator<T, S>.filter(predicate: (T) -> Boolean) = generateLexerIterator(state) {
-    while (hasNext()) {
-        val item = next()
-        if (predicate(item)) return@generateLexerIterator item
+class LookAheadLexerIterator<T : Token, V>(private val lexer: LexerIterator<T, V>) : LexerIterator<T, V> by lexer {
+
+    private val buffer = mutableListOf<Token>()
+
+    fun lookNext(): T {
+        val result = next()
+        buffer.add(result)
+        return result
     }
-    null
+
+    fun clearBuffer() {
+        buffer.clear()
+    }
+
+    fun recoverBuffer() {
+        if (buffer.isNotEmpty()) {
+            state.lookAHeadState.addPendingTokens(buffer)
+            buffer.clear()
+        }
+    }
+
 }
+
+fun <T : Token, V> LexerIterator<T, V>.asSequence() = generateSequence { if (hasNext()) next() else null }
 
 fun <T : Token, S> Iterator<T>.asLexerIterator(state: LexerState<S>) = generateLexerIterator(state) {
     if (hasNext()) next()
     else null
 }
 
-
 inline fun <T : Token, V> generateLexerIterator(
     state: LexerState<V>,
     crossinline generator: () -> T?
-): LexerIterator<T, V> {
-    return object : LexerIterator<T, V> {
+): LexerIterator<T, V> =
+    object : LexerIterator<T, V> {
         private var current: T? = null
         override val state: LexerState<V> = state
 
@@ -49,41 +67,38 @@ inline fun <T : Token, V> generateLexerIterator(
 
         override fun next(): T = current ?: throw NoSuchElementException()
     }
-}
 
 fun <T : Token, S> emptyLexerIterator(state: LexerState<S>): LexerIterator<T, S> = generateLexerIterator(state) {
     null
 }
 
-internal class ConsLexerIterator<T : Token, V> internal constructor(
-    private val token: T,
-    internal val iterator: LexerIterator<T, V>
-) : LexerIterator<T, V> {
-    internal var tokenConsumed = false
-        private set
-
-    override val state: LexerState<V> = iterator.state
-
-    override fun hasNext(): Boolean {
-        if (!tokenConsumed) {
-            return true
-        }
-        return iterator.hasNext()
+fun <T : Token, S> oneLexerIterator(state: LexerState<S>, value: T): LexerIterator<T, S> {
+    var result: T? = value
+    return generateLexerIterator(state) {
+        result.also { result = null }
     }
-
-    override fun next(): T {
-        if (!tokenConsumed) {
-            tokenConsumed = true
-            return token
-        }
-        return iterator.next()
-    }
-
 }
 
-fun <T : Token, V> LexerIterator<T, V>.cons(token: T): LexerIterator<T, V> {
-    if (this is ConsLexerIterator && tokenConsumed) {
-        return ConsLexerIterator(token, iterator)
+fun <T : Token, S> LexerIterator<T, S>.filter(predicate: (T) -> Boolean) = generateLexerIterator(state) {
+    while (hasNext()) {
+        val item = next()
+        if (predicate(item)) return@generateLexerIterator item
     }
-    return ConsLexerIterator(token, this)
+    null
+}
+
+fun <I : Token, O : Token, S> LexerIterator<I, S>.map(transform: (value: I) -> O): LexerIterator<O, S> =
+    generateLexerIterator(state) {
+        if (hasNext()) {
+            transform(next())
+        } else null
+    }
+
+fun <T : Token, S> LexerIterator<T, S>.generateIteratorWithLookAhead(nextValue: LookAheadLexerIterator<T, S>.() -> T?): LexerIterator<T, S> {
+    val lexer = LookAheadLexerIterator(this)
+    return generateLexerIterator(state) {
+        val result = lexer.nextValue()
+        lexer.recoverBuffer()
+        result
+    }
 }

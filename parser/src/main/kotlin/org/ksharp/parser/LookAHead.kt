@@ -4,43 +4,51 @@ import org.ksharp.common.*
 import org.ksharp.common.annotation.Mutable
 import java.util.*
 
-interface WithLookAHeadState {
-    val enabled: Boolean
-    fun <S> enable(lexer: BaseLexerIterator<S>)
+interface LookAheadBuffer {
+    fun release()
+    fun recover()
 
-    fun removeCheckPoint(consumeTokens: Boolean)
-
-    fun addCheckPoint()
-
-    fun <S : WithLookAHeadState> lexer(): BaseLexerIterator<S>
-
+    /**
+     * Release the buffer and add at the beginning of the stack a token
+     */
+    fun releaseWith(token: Token)
 }
 
-class LookAheadLexerState : WithLookAHeadState {
-
+class LookAheadLexerState {
     private val checkpoints: Stack<Stack<Token>> = Stack()
-    override var enabled: Boolean = false
+
+    var enabled = false
         private set
+
+    private var bufferEnabled = false
+
     var lexer: BaseLexerIterator<*>? = null
         private set
 
     private var rootLexer: BaseLexerIterator<*>? = null
-    private var pendingTokens: Stack<Token> = Stack()
+    private var pendingTokens = mutableListOf<Token>()
+    private val buffer = mutableListOf<Token>()
 
-    override fun addCheckPoint() {
+    fun addCheckPoint() {
+        if (bufferEnabled) {
+            throw RuntimeException("Can't add an endpoint when there is a buffer active")
+        }
         checkpoints.add(Stack())
     }
 
-    override fun removeCheckPoint(consumeTokens: Boolean) {
+    fun removeCheckPoint(consumeTokens: Boolean) {
         val lastCheckPoint = checkpoints.pop()
         if (!consumeTokens) {
             pendingTokens = lastCheckPoint
-        } else if (!checkpoints.isEmpty()) {
-            checkpoints.peek().addAll(lastCheckPoint)
+        } else {
+            if (!checkpoints.isEmpty()) {
+                checkpoints.peek().addAll(lastCheckPoint)
+            }
         }
     }
 
     private fun collectValue(token: Token) {
+        addBuffer(token)
         if (!checkpoints.isEmpty()) {
             checkpoints.peek().push(token)
         }
@@ -55,9 +63,15 @@ class LookAheadLexerState : WithLookAHeadState {
         collectValue(it)
     }
 
-    override fun <S> enable(
+    private fun addBuffer(token: Token) {
+        if (bufferEnabled) {
+            buffer.add(token)
+        }
+    }
+
+    fun <S> enable(
         lexer: BaseLexerIterator<S>
-    ) {
+    ): BaseLexerIterator<S> {
         if (!enabled) {
             this.enabled = true
             this.rootLexer = lexer.cast()
@@ -66,9 +80,36 @@ class LookAheadLexerState : WithLookAHeadState {
             }
             this.lexer = lexerResult.cast()
         }
+        return this.lexer!!.cast()
     }
 
-    override fun <S : WithLookAHeadState> lexer(): BaseLexerIterator<S> = lexer!!.cast()
+    fun buffer(): LookAheadBuffer {
+        if (bufferEnabled) {
+            throw RuntimeException("A buffer already was created")
+        }
+        bufferEnabled = true
+        buffer.clear()
+        return object : LookAheadBuffer {
+
+            override fun release() {
+                bufferEnabled = false
+            }
+
+            override fun recover() {
+                bufferEnabled = false
+                pendingTokens.addAll(buffer)
+            }
+
+            override fun releaseWith(token: Token) {
+                bufferEnabled = false
+                pendingTokens.add(token)
+            }
+        }
+    }
+
+    internal fun addPendingTokens(tokens: List<Token>) {
+        pendingTokens.addAll(0, tokens)
+    }
 
 }
 
@@ -89,15 +130,12 @@ fun <T : Any> Error.asLookAHeadResult(): ErrorOrValue<LookAHeadResult<T>> =
 fun <T> T.asLookAHeadResult(): ErrorOrValue<LookAHeadResult<T>> =
     Either.Right(LookAHeadResult(this))
 
-
-fun <S : WithLookAHeadState> BaseLexerIterator<S>.enableLookAHead(): BaseLexerIterator<S> = state.value.let {
-    it.enable(this)
-    it.lexer()
-}
+fun <S> BaseLexerIterator<S>.enableLookAhead(): BaseLexerIterator<S> =
+    state.lookAHeadState.enable(this)
 
 @Mutable
-fun <T, S : WithLookAHeadState> BaseLexerIterator<S>.lookAHead(block: (BaseLexerIterator<S>) -> ErrorOrValue<LookAHeadResult<T>>): ParserResult<T, S> {
-    val lookAheadLexerState = state.value
+fun <T, S> BaseLexerIterator<S>.lookAHead(block: (BaseLexerIterator<S>) -> ErrorOrValue<LookAHeadResult<T>>): ParserResult<T, S> {
+    val lookAheadLexerState = state.lookAHeadState
     if (!lookAheadLexerState.enabled) {
         ParserError(
             BaseParserErrorCode.LookAHeadNotEnabled.new(Location.NoProvided),
@@ -108,18 +146,19 @@ fun <T, S : WithLookAHeadState> BaseLexerIterator<S>.lookAHead(block: (BaseLexer
     }
 
     lookAheadLexerState.addCheckPoint()
+
     val result = block(this)
 
     return result.map {
         lookAheadLexerState.removeCheckPoint(true)
-        ParserValue(it.value, lookAheadLexerState.lexer<S>())
+        ParserValue(it.value, this)
     }.mapLeft {
         lookAheadLexerState.removeCheckPoint(false)
         ParserError(
             it,
             listBuilder(),
             false,
-            lookAheadLexerState.lexer<S>()
+            this
         )
     }
 }

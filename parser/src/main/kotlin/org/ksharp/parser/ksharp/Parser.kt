@@ -16,14 +16,17 @@ typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
 fun KSharpConsumeResult.discardBlanks() =
     map {
         val lexer = it.tokens
+        val lookAhead = lexer.state.lookAHeadState
+        val buffer = lookAhead.buffer()
         while (lexer.hasNext()) {
             val token = lexer.next()
             if (token.type == KSharpTokenType.NewLine || token.type == KSharpTokenType.EndBlock) {
                 continue
             }
+            buffer.releaseWith(token)
             return@map NodeCollector(
                 it.collection,
-                lexer.cons(token)
+                lexer
             )
         }
         it
@@ -165,7 +168,7 @@ fun String.lexerModule(withLocations: Boolean) =
 
 fun Reader.lexerModule(withLocations: Boolean) =
     kSharpLexer()
-        .collapseKSharpTokens()
+        .ensureNewLineAtEnd()
         .cast<TokenLexerIterator<KSharpLexerState>>()
         .let {
             if (withLocations) it.toLogicalLexerToken(KSharpTokenType.NewLine)
@@ -175,6 +178,10 @@ fun Reader.lexerModule(withLocations: Boolean) =
             if (withLocations) LogicalLexerToken(token, ZeroPosition, ZeroPosition)
             else token
         }
+        .enableLookAhead()
+        .collapseKSharpTokens()
+        .discardBlocksOrNewLineTokens()
+
 
 fun Reader.parseModule(
     name: String,

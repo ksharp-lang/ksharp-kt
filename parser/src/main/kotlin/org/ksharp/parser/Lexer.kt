@@ -4,6 +4,7 @@ import org.ksharp.common.Line
 import org.ksharp.common.Offset
 import org.ksharp.common.Position
 import org.ksharp.common.annotation.Mutable
+import org.ksharp.common.cast
 import java.io.Reader
 
 typealias TokenFactory<V> = Lexer<V>.(c: Char) -> LexerToken?
@@ -31,39 +32,36 @@ fun <V> lexer(initialState: V, content: CharStream, factory: TokenFactory<V>): T
     val l = Lexer(state, content, factory)
     return generateLexerIterator(state) {
         l.next()
-    }
+    }.cast()
 }
 
 fun <V> String.lexer(initialState: V, factory: TokenFactory<V>) = lexer(initialState, charStream(), factory)
 fun <V> Reader.lexer(initialState: V, factory: TokenFactory<V>) = lexer(initialState, charStream(), factory)
 
-fun <V> BaseLexerIterator<V>.collapseTokens(canCollapse: (TokenType) -> Boolean = { true }): BaseLexerIterator<V> {
-    var token: Token?
-    var lastToken: Token? = null
-
-    return generateLexerIterator(state) {
-        token = lastToken
-        lastToken = null
+fun <V> BaseLexerIterator<V>.collapseTokens(canCollapse: (TokenType) -> Boolean = { true }): BaseLexerIterator<V> =
+    generateIteratorWithLookAhead {
+        var token: Token? = null
         while (hasNext()) {
-            lastToken = next()
             if (token == null) {
-                token = lastToken
+                token = next()
                 continue
             }
-            if (token!!.type == lastToken!!.type && canCollapse(token!!.type)) {
-                token = token!!.collapse(
-                    token!!.type,
-                    "${token!!.text}${lastToken!!.text}",
-                    lastToken!!
+            val nextToken = lookNext()
+
+            if (token.type == nextToken.type && canCollapse(token.type)) {
+                token = token.collapse(
+                    token.type,
+                    "${token.text}${nextToken.text}",
+                    nextToken
                 )
-                lastToken = null
+                clearBuffer()
                 continue
             }
+
             break
         }
         token
     }
-}
 
 fun <V> TokenLexerIterator<V>.toLogicalLexerToken(
     newLineType: TokenType

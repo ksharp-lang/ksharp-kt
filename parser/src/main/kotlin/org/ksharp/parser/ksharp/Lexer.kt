@@ -17,9 +17,8 @@ data class KSharpLexerState(
     val collapseAssignOperatorRule: Boolean = true,
     val mapThenElseKeywords: Boolean = false,
     val mapThenKeywords: Boolean = false,
-    val enableExpressionStartingNewLine: Boolean = true,
-    val lookAheadLexerState: LookAheadLexerState = LookAheadLexerState()
-) : WithLookAHeadState by lookAheadLexerState
+    val enableExpressionStartingNewLine: Boolean = true
+)
 
 typealias KSharpLexer = Lexer<KSharpLexerState>
 typealias KSharpLexerIterator = BaseLexerIterator<KSharpLexerState>
@@ -536,7 +535,7 @@ private fun Token.shouldDiscardToken(discardBlockTokens: Boolean, blockCounter: 
     return false
 }
 
-private fun KSharpLexerIterator.discardBlocksOrNewLineTokens(): KSharpLexerIterator {
+fun KSharpLexerIterator.discardBlocksOrNewLineTokens(): KSharpLexerIterator {
     val blockCounter = AtomicInteger(0)
     return generateLexerIterator(state) {
         while (hasNext()) {
@@ -558,7 +557,7 @@ fun KSharpLexerIterator.markBlocks(
 ): KSharpLexerIterator {
     val collapseNewLines = this.collapseNewLines()
     val controller = BlockController(expressionToken)
-    val withEndExpressions = generateLexerIterator(state) {
+    return generateLexerIterator(state) {
         val pendingToken = controller.pendingToken()
         if (pendingToken != null) {
             return@generateLexerIterator pendingToken
@@ -567,30 +566,28 @@ fun KSharpLexerIterator.markBlocks(
             return@generateLexerIterator controller.processToken(collapseNewLines.next())
         }
         controller.end()
-    }.discardBlocksOrNewLineTokens()
-    return withEndExpressions
+    }
 }
 
-private fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {
+fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {
+    var lastTokenIsNewLine = false
     var lastToken: Token? = null
     return generateLexerIterator(state) {
         if (hasNext()) {
-            val result = next()
-            lastToken = result
-            return@generateLexerIterator result
-        }
-        if (lastToken != null && lastToken!!.type != KSharpTokenType.NewLine) {
+            lastToken = next()
+            lastTokenIsNewLine = lastToken!!.type == KSharpTokenType.NewLine
+            lastToken
+        } else if (!lastTokenIsNewLine) {
+            lastTokenIsNewLine = true
             val offset = lastToken!!.endOffset + 1
-            val result = LexerToken(
+            LexerToken(
                 KSharpTokenType.NewLine,
                 token = TextToken("\n", offset, offset)
             )
-            lastToken = null
-            return@generateLexerIterator result
-        }
-        null
-    }
+        } else null
+    }.cast()
 }
+
 
 private fun Token.checkKeywordsCollection(keywords: Map<String, KSharpTokenType>): Token {
     val type = keywords[text]
@@ -630,59 +627,51 @@ private fun KSharpLexerIterator.mapKeywords(): KSharpLexerIterator =
     }
 
 fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
-    val newTokens = this.ensureNewLineAtEnd()
-        .collapseTokens {
-            it != KSharpTokenType.NewLine
-        }
-
-    var token: Token?
-    var lastToken: Token? = null
     var lastWasNewLine = false
-
-    return generateLexerIterator(state) {
-        token = lastToken
-        lastToken = null
-        while (newTokens.hasNext()) {
-            lastToken = newTokens.next()
+    return collapseTokens {
+        it != KSharpTokenType.NewLine
+    }.generateIteratorWithLookAhead {
+        var token: Token? = null
+        while (hasNext()) {
             if (token == null) {
-                token = lastToken
-                lastToken = null
+                token = next()
                 continue
             }
 
-            if (token!!.type == KSharpTokenType.WhiteSpace) {
+            val nextToken = lookNext()
+
+            if (token.type == KSharpTokenType.WhiteSpace) {
                 if (lastWasNewLine) {
                     break
                 }
-                token = lastToken
-                lastToken = null
+                token = nextToken
+                clearBuffer()
                 continue
             }
 
-            if (isUnitToken(token!!, lastToken!!)) {
-                token = token!!.collapse(
+            if (isUnitToken(token, nextToken)) {
+                token = token.collapse(
                     KSharpTokenType.UnitValue,
                     "()",
-                    lastToken!!
+                    nextToken
                 )
-                lastToken = null
+                clearBuffer()
                 continue
             }
 
-            if (canCollapseTokens(token!!, lastToken!!)) {
-                token = token!!.collapse(
+            if (canCollapseTokens(token, nextToken)) {
+                token = token.collapse(
                     KSharpTokenType.FunctionName,
-                    "${token!!.text}${lastToken!!.text}",
-                    lastToken!!
+                    "${token.text}${nextToken.text}",
+                    nextToken
                 )
-                lastToken = null
+                clearBuffer()
                 continue
             }
 
             lastWasNewLine = false
             break
         }
-
         lastWasNewLine = token?.type == KSharpTokenType.NewLine
         token?.mapOperatorToken()
     }.mapKeywords()
@@ -690,8 +679,8 @@ fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
 
 fun String.kSharpLexer() = lexer(KSharpLexerState(), charStream(), kSharpTokenFactory).filter {
     it.type != KSharpTokenType.Ignore
-}.enableLookAHead()
+}
 
 fun Reader.kSharpLexer() = lexer(KSharpLexerState(), charStream(), kSharpTokenFactory).filter {
     it.type != KSharpTokenType.Ignore
-}.enableLookAHead()
+}

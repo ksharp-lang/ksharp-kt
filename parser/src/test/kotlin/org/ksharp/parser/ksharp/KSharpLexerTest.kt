@@ -197,6 +197,7 @@ class KSharpLexerTest : StringSpec({
     }
     "Given a lexer, check collapse tokens, should remove whitespace only" {
         "import ksharp .test as math".kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence()
             .toList()
@@ -211,6 +212,7 @@ class KSharpLexerTest : StringSpec({
     }
     "Given a lexer, check collapse tokens to form function tokens" {
         "internal->wire.name  ->  wire data.list map . test".kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence()
             .toList().onEach(::println)
@@ -228,6 +230,8 @@ class KSharpLexerTest : StringSpec({
     }
     "Given a lexer, check collapse tokens, should leave really important whitespaces (those after a newline) inside the NewLine token" {
         "internal->wire.name = \n    10".kSharpLexer()
+            .ensureNewLineAtEnd()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence()
             .toList().onEach { println("+++ $it") }
@@ -243,105 +247,111 @@ class KSharpLexerTest : StringSpec({
     }
     "Given a lexer, map operators" {
         "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ? :".kSharpLexer()
+            .ensureNewLineAtEnd()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence()
             .toList()
             .printTokens()
-            .shouldContainAll(
-                LexerToken(
-                    type = KSharpTokenType.Operator12,
-                    token = TextToken(text = "**", startOffset = 0, endOffset = 2)
-                ),
+            .shouldBe(
+                listOf(
+                    LexerToken(
+                        type = KSharpTokenType.Operator12,
+                        token = TextToken(text = "**", startOffset = 0, endOffset = 2)
+                    ),
 
-                LexerToken(
-                    type = KSharpTokenType.Operator11,
-                    token = TextToken(text = "*>>", startOffset = 3, endOffset = 6)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator11,
-                    token = TextToken(text = "//>", startOffset = 7, endOffset = 10)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator11,
-                    token = TextToken(text = "%%%", startOffset = 11, endOffset = 14)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator10,
-                    token = TextToken(text = "+++", startOffset = 15, endOffset = 18)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator10,
-                    token = TextToken(text = "-", startOffset = 19, endOffset = 20)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator9,
-                    token = TextToken(text = "<<", startOffset = 21, endOffset = 23)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator9,
-                    token = TextToken(text = ">>", startOffset = 24, endOffset = 26)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator8,
-                    token = TextToken(text = "<==", startOffset = 27, endOffset = 30)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator7,
-                    token = TextToken(text = "!=", startOffset = 31, endOffset = 33)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator6,
-                    token = TextToken(text = "&", startOffset = 34, endOffset = 35)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator4,
-                    token = TextToken(text = "|||", startOffset = 36, endOffset = 39)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator5,
-                    token = TextToken(text = "^&", startOffset = 40, endOffset = 42)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator3,
-                    token = TextToken(text = "&&", startOffset = 43, endOffset = 45)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator2,
-                    token = TextToken(text = "||", startOffset = 46, endOffset = 48)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.AssignOperator,
-                    token = TextToken(text = "=", startOffset = 49, endOffset = 50)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator0,
-                    token = TextToken(text = ".", startOffset = 51, endOffset = 52)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator,
-                    token = TextToken(text = "#", startOffset = 53, endOffset = 54)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator1,
-                    token = TextToken(text = "$", startOffset = 55, endOffset = 56)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator,
-                    token = TextToken(text = "?", startOffset = 57, endOffset = 58)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.Operator,
-                    token = TextToken(text = ":", startOffset = 59, endOffset = 60)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.NewLine,
-                    token = TextToken(text = "\n", startOffset = 61, endOffset = 61)
+                    LexerToken(
+                        type = KSharpTokenType.Operator11,
+                        token = TextToken(text = "*>>", startOffset = 3, endOffset = 6)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator11,
+                        token = TextToken(text = "//>", startOffset = 7, endOffset = 10)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator11,
+                        token = TextToken(text = "%%%", startOffset = 11, endOffset = 14)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator10,
+                        token = TextToken(text = "+++", startOffset = 15, endOffset = 18)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator10,
+                        token = TextToken(text = "-", startOffset = 19, endOffset = 20)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator9,
+                        token = TextToken(text = "<<", startOffset = 21, endOffset = 23)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator9,
+                        token = TextToken(text = ">>", startOffset = 24, endOffset = 26)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator8,
+                        token = TextToken(text = "<==", startOffset = 27, endOffset = 30)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator7,
+                        token = TextToken(text = "!=", startOffset = 31, endOffset = 33)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator6,
+                        token = TextToken(text = "&", startOffset = 34, endOffset = 35)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator4,
+                        token = TextToken(text = "|||", startOffset = 36, endOffset = 39)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator5,
+                        token = TextToken(text = "^&", startOffset = 40, endOffset = 42)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator3,
+                        token = TextToken(text = "&&", startOffset = 43, endOffset = 45)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator2,
+                        token = TextToken(text = "||", startOffset = 46, endOffset = 48)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.AssignOperator,
+                        token = TextToken(text = "=", startOffset = 49, endOffset = 50)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator0,
+                        token = TextToken(text = ".", startOffset = 51, endOffset = 52)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator,
+                        token = TextToken(text = "#", startOffset = 53, endOffset = 54)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator1,
+                        token = TextToken(text = "$", startOffset = 55, endOffset = 56)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator,
+                        token = TextToken(text = "?", startOffset = 57, endOffset = 58)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.Operator,
+                        token = TextToken(text = ":", startOffset = 59, endOffset = 60)
+                    ),
+                    LexerToken(
+                        type = KSharpTokenType.NewLine,
+                        token = TextToken(text = "\n", startOffset = 61, endOffset = 61)
+                    )
                 )
             )
     }
     "Given a lexer, map character and string" {
         "'a' \"Hello World\" \"\"\"Hello\nWorld\"\"\" \"\" '\\\''  \"\\\"\""
             .kSharpLexer()
+            .ensureNewLineAtEnd()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence()
             .toList()
@@ -380,7 +390,7 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given a lexer, map invalid characters" {
-        "'".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+        "'".kSharpLexer().ensureNewLineAtEnd().enableLookAhead().collapseKSharpTokens().asSequence().toList()
             .shouldBe(
                 listOf(
                     LexerToken(
@@ -394,7 +404,8 @@ class KSharpLexerTest : StringSpec({
                 )
             )
 
-        "'a".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+        "'a".kSharpLexer().ensureNewLineAtEnd()
+            .enableLookAhead().collapseKSharpTokens().asSequence().toList()
             .shouldBe(
                 listOf(
                     LexerToken(
@@ -409,7 +420,7 @@ class KSharpLexerTest : StringSpec({
             )
     }
     "Given a lexer, map invalid strings" {
-        "\"".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+        "\"".kSharpLexer().ensureNewLineAtEnd().enableLookAhead().collapseKSharpTokens().asSequence().toList()
             .shouldBe(
                 listOf(
                     LexerToken(
@@ -423,7 +434,7 @@ class KSharpLexerTest : StringSpec({
                 )
             )
 
-        "\"a".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+        "\"a".kSharpLexer().ensureNewLineAtEnd().enableLookAhead().collapseKSharpTokens().asSequence().toList()
             .shouldBe(
                 listOf(
                     LexerToken(
@@ -437,7 +448,7 @@ class KSharpLexerTest : StringSpec({
                 )
             )
 
-        "\"\"\"".kSharpLexer().collapseKSharpTokens().asSequence().toList()
+        "\"\"\"".kSharpLexer().ensureNewLineAtEnd().enableLookAhead().collapseKSharpTokens().asSequence().toList()
             .shouldBe(
                 listOf(
                     LexerToken(
@@ -473,6 +484,7 @@ class KSharpLexerTest : StringSpec({
     "Given a lexer, unit value" {
         "() ( 1 )"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence().toList()
             .shouldContainAll(
@@ -497,6 +509,7 @@ class KSharpLexerTest : StringSpec({
     "if then else mapIfThenKeyword disabled" {
         "if then else"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence().toList()
             .shouldContainAll(
@@ -517,6 +530,7 @@ class KSharpLexerTest : StringSpec({
     "if then else mapIfThenKeyword enabled" {
         "if then else"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .enableMapElseThenKeywords {
                 it.asSequence().toList()
@@ -539,6 +553,7 @@ class KSharpLexerTest : StringSpec({
     "let then  mapLetThenKeyword enabled" {
         "let then"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .enableMapThenKeywords {
                 it.asSequence().toList()
@@ -557,6 +572,7 @@ class KSharpLexerTest : StringSpec({
     "let then  mapLetThenKeyword disabled" {
         "let then"
             .kSharpLexer()
+            .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence().toList()
             .shouldContainAll(
@@ -594,18 +610,26 @@ private fun Sequence<Token>.asLspPositionsSequence() =
 
 private fun <T> List<T>.printTokens() = onEach { println("\"$it\",") }
 
-class KSharpLexerMarkBlocksTest : ShouldSpec({
+
+private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForMarkBlockTests(): KSharpLexerIterator {
     val endExpression: (TokenType) -> LexerToken = {
         LexerToken(
             type = it,
             token = TextToken("", 0, 0)
         )
     }
+    return ensureNewLineAtEnd()
+        .markBlocks(endExpression)
+        .enableLookAhead()
+        .collapseKSharpTokens()
+        .discardBlocksOrNewLineTokens()
+}
+
+class KSharpLexerMarkBlocksTest : ShouldSpec({
     context("With just one block without new line") {
         "type Int = Integer"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 should("Should return one expression") {
                     asSequence()
@@ -629,8 +653,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
     context("With just one block and new line at end") {
         "type Int = Integer\n"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 should("Should return one expression") {
                     asSequence()
@@ -656,8 +679,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
            | Int =
            | Integer
         """.trimMargin().kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 should("Should return one expression") {
                     asSequence()
@@ -687,8 +709,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
            | Int =
            | Integer
         """.trimMargin().kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .enableDiscardBlockAndNewLineTokens {
                 it.asSequence()
                     .asStringSequence()
@@ -716,8 +737,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
           | Int =
           | Integer
         """.trimMargin().kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 should("Should return three blocks") {
                     asSequence()
@@ -758,8 +778,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
           | let x = 3
           |   a + 3
         """.trimMargin().kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 should("Should return three expression") {
                     asSequence()
@@ -809,8 +828,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
           |   a + 3
           | println 10
         """.trimMargin().kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 should("Should return three expression") {
                     asSequence()
@@ -867,8 +885,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
           |   a + 3
           |let sum a b = a = b
         """.trimMargin().kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 should("Should return 4 expression") {
                     asSequence()
@@ -934,8 +951,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
             |    div
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 should("Should return the two new lines and one endExpression") {
                     asSequence().asStringSequence().toList().printTokens().shouldBe(
@@ -962,21 +978,13 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
 })
 
 class KSharpLexerExpressionBlocks : StringSpec({
-    val endExpression: (TokenType) -> LexerToken = {
-        LexerToken(
-            type = it,
-            token = TextToken("", 0, 0)
-        )
-    }
     "Block Expression" {
         """
             10 +
             |   calc 10 20
         """.trimMargin()
-            .also { println(it) }
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
@@ -1001,10 +1009,8 @@ class KSharpLexerExpressionBlocks : StringSpec({
             |   calc 10 20 + 
             |   inc 2
         """.trimMargin()
-            .also { println(it) }
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
@@ -1033,10 +1039,8 @@ class KSharpLexerExpressionBlocks : StringSpec({
             |   then 10 + 20 
             |   else 30 + 40
         """.trimMargin()
-            .also { println(it) }
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
@@ -1068,10 +1072,8 @@ class KSharpLexerExpressionBlocks : StringSpec({
             |    z = 30
             |    x + y + z
         """.trimMargin()
-            .also { println(it) }
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks(endExpression)
+            .prepareLexerForMarkBlockTests()
             .apply {
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
