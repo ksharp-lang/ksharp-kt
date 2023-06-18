@@ -663,9 +663,97 @@ class ModuleParserTest : StringSpec({
             var = 10
         """.trimIndent()
             .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File",
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    listOf(
+                        FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = listOf(
+                                AnnotationNode(
+                                    name = "native",
+                                    attrs = mapOf("lang" to listOf("java", "c#")),
+                                    location = Location.NoProvided,
+                                    locations = AnnotationNodeLocations(
+                                        altLocation = Location.NoProvided,
+                                        name = Location.NoProvided,
+                                        attrs = listOf()
+                                    )
+                                )
+                            ),
+                            name = "var",
+                            parameters = listOf(),
+                            expression = LiteralValueNode(
+                                value = "10",
+                                type = LiteralValueType.Integer,
+                                location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = listOf(),
+                                assignOperator = Location.NoProvided
+                            )
+                        )
+                    ),
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Parse two types with carrie return and line feed" {
+        "type Unit = KernelUnit\r\ntype Char = KernelChar"
+            .parseModule("File", false)
             .map {
-                it.functions.onEach(::println)
+                it.types.onEach(::println)
             }
-            .shouldBeRight()
+            .shouldBeRight(
+                ModuleNode(
+                    "File",
+                    listOf(),
+                    listOf(
+                        TypeNode(
+                            internal = false,
+                            annotations = null,
+                            name = "Unit",
+                            params = listOf(),
+                            expr = ConcreteTypeNode(name = "KernelUnit", location = Location.NoProvided),
+                            location = Location.NoProvided,
+                            locations = TypeNodeLocations(
+                                internalLocation = Location.NoProvided,
+                                typeLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                params = listOf(),
+                                assignOperatorLocation = Location.NoProvided
+                            )
+                        ),
+                        TypeNode(
+                            internal = false,
+                            annotations = null,
+                            name = "Char",
+                            params = listOf(),
+                            expr = ConcreteTypeNode(name = "KernelChar", location = Location.NoProvided),
+                            location = Location.NoProvided,
+                            locations = TypeNodeLocations(
+                                internalLocation = Location.NoProvided,
+                                typeLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                params = listOf(),
+                                assignOperatorLocation = Location.NoProvided
+                            )
+                        )
+                    ),
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
     }
 })

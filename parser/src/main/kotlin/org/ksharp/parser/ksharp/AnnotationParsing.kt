@@ -46,7 +46,10 @@ private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueR
         .orAnnotationValue({
             it.type == KSharpTokenType.UpperCaseWord && it.text.isBooleanLiteral
         }).orAnnotationValue(KSharpTokenType.OpenBracket) {
-            it.thenLoop { tl -> tl.consumeAnnotationValue() }
+            it.thenLoop { tl ->
+                tl.optionalConsume(KSharpTokenType.Comma, true)
+                tl.consumeAnnotationValue()
+            }
                 .then(KSharpTokenType.CloseBracket, true)
                 .build { v -> v.drop(1) }
         }

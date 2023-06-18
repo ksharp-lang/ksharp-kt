@@ -496,7 +496,7 @@ private fun Token.mapOperatorToken(): Token = when (type) {
 }
 
 internal fun String.indentLength() =
-    replace("\n", "") //normalize newline to zero spaces
+    replace("\n", "").replace("\r", "") //normalize newline to zero spaces
         .replace("\t", "  ") //normalize tab to two spaces
         .length + 1 // add one that represent the newline
 
