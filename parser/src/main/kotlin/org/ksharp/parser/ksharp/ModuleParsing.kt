@@ -34,14 +34,21 @@ private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParser
                     }).build { it.first() }
                 }.build {
                     InvalidNode(
-                        it.map { i ->
-                            val t = i.cast<Token>()
-                            InvalidToken(
-                                t.text,
-                                t.type,
-                                t.location
-                            )
-                        },
+                        it.asSequence()
+                            .filter { i ->
+                                when (i.cast<Token>().type) {
+                                    KSharpTokenType.BeginBlock, KSharpTokenType.NewLine, KSharpTokenType.EndBlock -> false
+                                    else -> true
+                                }
+                            }
+                            .map { i ->
+                                val t = i.cast<Token>()
+                                InvalidToken(
+                                    t.text,
+                                    t.type,
+                                    t.location
+                                )
+                            }.toList(),
                         error
                     )
                 }

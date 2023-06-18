@@ -16,11 +16,13 @@ class ParseNodeStreamTest : StringSpec({
             .shouldBe(
                 listOf(
                     InvalidNode(
-                        error = BaseParserErrorCode.ConsumeTokenFailed.new(
+                        error = BaseParserErrorCode.ExpectingToken.new(
                             Location(
                                 Line(value = 1) to Offset(value = 0),
                                 Line(value = 1) to Offset(value = 1)
-                            ), "token" to "'Integer:1'"
+                            ),
+                            "token" to "<LowerCaseWord, Operator different internal, type>",
+                            "received-token" to "Integer:1"
                         ),
                         tokens = listOf(
                             InvalidToken(
@@ -84,14 +86,6 @@ class ParseNodeStreamTest : StringSpec({
                                 location = Location(
                                     start = (Line(value = 1) to Offset(value = 15)),
                                     end = (Line(value = 1) to Offset(value = 16))
-                                )
-                            ),
-                            InvalidToken(
-                                text = "",
-                                type = KSharpTokenType.BeginBlock,
-                                location = Location(
-                                    start = (Line(value = 0) to Offset(value = 0)),
-                                    end = (Line(value = 0) to Offset(value = 0))
                                 )
                             ),
                             InvalidToken(
