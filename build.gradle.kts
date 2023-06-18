@@ -70,7 +70,7 @@ subprojects {
     }
 
     extensions.configure(JacocoPluginExtension::class) {
-        this.toolVersion = "0.8.8"
+        this.toolVersion = "0.8.10"
         reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
     }
 }
