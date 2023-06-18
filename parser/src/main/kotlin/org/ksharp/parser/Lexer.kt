@@ -38,34 +38,37 @@ fun <V> lexer(initialState: V, content: CharStream, factory: TokenFactory<V>): T
 fun <V> String.lexer(initialState: V, factory: TokenFactory<V>) = lexer(initialState, charStream(), factory)
 fun <V> Reader.lexer(initialState: V, factory: TokenFactory<V>) = lexer(initialState, charStream(), factory)
 
-fun <V> BaseLexerIterator<V>.collapseTokens(canCollapse: (TokenType) -> Boolean = { true }): BaseLexerIterator<V> =
-    generateIteratorWithLookAhead {
-        var token: Token? = null
+/**
+ * Use this method before enable lookAhead, to reduce the amount of tokens produced by collapsing the tokens with the same type
+ */
+fun <V> BaseLexerIterator<V>.collapseTokens(vararg excludeTokens: TokenType): BaseLexerIterator<V> {
+    val tokenTypes = excludeTokens.toSet()
+    var lastToken: Token? = null
+    return generateLexerIterator(state) {
+        var token: Token? = lastToken
+        lastToken = null
         while (hasNext()) {
             if (token == null) {
                 token = next()
                 continue
             }
-            val nextToken = lookNext()
-
-            if (token.type == nextToken.type && canCollapse(token.type)) {
+            lastToken = next()
+            if (token.type == lastToken!!.type && !tokenTypes.contains(token.type)) {
                 token = token.collapse(
                     token.type,
-                    "${token.text}${nextToken.text}",
-                    nextToken
+                    "${token.text}${lastToken!!.text}",
+                    lastToken!!
                 )
-                clearBuffer()
                 continue
             }
-
             break
         }
         token
     }
+}
 
-fun <V> TokenLexerIterator<V>.toLogicalLexerToken(
-    newLineType: TokenType
-): BaseLexerIterator<V> =
+
+fun <V> TokenLexerIterator<V>.toLogicalLexerToken(): BaseLexerIterator<V> =
     object : LexerIterator<Token, V> {
         private var startPosition: Position = Line(1) to Offset(0)
         private var lineOffset: Int = 0
@@ -75,7 +78,7 @@ fun <V> TokenLexerIterator<V>.toLogicalLexerToken(
         override fun hasNext(): Boolean = this@toLogicalLexerToken.hasNext()
 
         override fun next(): LogicalLexerToken = with(this@toLogicalLexerToken.next()) {
-            if (type == newLineType) {
+            if (type == BaseTokenType.NewLine) {
                 startPosition = Line(startPosition.first.value.inc()) to Offset(0)
                 lineOffset = startOffset + (if (text.startsWith("\r\n")) 2 else 1)
             } else {

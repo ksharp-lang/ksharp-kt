@@ -741,6 +741,7 @@ class ExpressionParserTest : StringSpec({
            |   15
         """.trimMargin()
             .kSharpLexer()
+            .ensureNewLineAtEnd()
             .enableLookAhead()
             .collapseKSharpTokens()
             .consumeExpression()

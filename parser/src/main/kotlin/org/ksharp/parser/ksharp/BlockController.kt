@@ -1,6 +1,7 @@
 package org.ksharp.parser.ksharp
 
 import org.ksharp.common.annotation.Mutable
+import org.ksharp.parser.BaseTokenType
 import org.ksharp.parser.Token
 import org.ksharp.parser.TokenType
 
@@ -11,7 +12,7 @@ class BlockController(private val builder: (TokenType) -> Token) {
     private var ended = false
     private fun <T> ArrayDeque<T>.push(level: T) = addLast(level)
     private fun Token.whenNewLine(block: (Token) -> Token): Token =
-        if (type == KSharpTokenType.NewLine) {
+        if (type == BaseTokenType.NewLine) {
             block(this)
         } else this
 
@@ -19,13 +20,13 @@ class BlockController(private val builder: (TokenType) -> Token) {
         while (true) {
             val level = register.removeLast()
             if (level <= untilLevel) {
-                pendingToken.push(builder(KSharpTokenType.NewLine))
+                pendingToken.push(builder(BaseTokenType.NewLine))
                 if (untilLevel != 1) {
                     register.push(level)
                 } else pendingToken.push(builder(KSharpTokenType.EndBlock))
                 return
             }
-            pendingToken.push(builder(KSharpTokenType.NewLine))
+            pendingToken.push(builder(BaseTokenType.NewLine))
             pendingToken.push(builder(KSharpTokenType.EndBlock))
         }
     }

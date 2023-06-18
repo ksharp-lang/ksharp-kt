@@ -37,7 +37,7 @@ private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParser
                         it.asSequence()
                             .filter { i ->
                                 when (i.cast<Token>().type) {
-                                    KSharpTokenType.BeginBlock, KSharpTokenType.NewLine, KSharpTokenType.EndBlock -> false
+                                    KSharpTokenType.BeginBlock, BaseTokenType.NewLine, KSharpTokenType.EndBlock -> false
                                     else -> true
                                 }
                             }

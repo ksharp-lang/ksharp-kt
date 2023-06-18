@@ -39,7 +39,7 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "Int", startOffset = 25, endOffset = 28)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     ),
                     LexerToken(
@@ -72,7 +72,7 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "False", startOffset = 20, endOffset = 25)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     ),
                     LexerToken(
@@ -105,7 +105,7 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "False", startOffset = 20, endOffset = 25)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     ),
                     LexerToken(

@@ -25,7 +25,7 @@ class KSharpLexerTest : StringSpec({
                                 TextToken("type", 0, 4)
                             ),
                             LexerToken(
-                                KSharpTokenType.WhiteSpace,
+                                BaseTokenType.WhiteSpace,
                                 TextToken(" ", 4, 5)
                             ),
                             LexerToken(
@@ -33,7 +33,7 @@ class KSharpLexerTest : StringSpec({
                                 TextToken("Name", 5, 9)
                             ),
                             LexerToken(
-                                KSharpTokenType.WhiteSpace,
+                                BaseTokenType.WhiteSpace,
                                 TextToken(" ", 9, 10)
                             ),
                             LexerToken(
@@ -41,7 +41,7 @@ class KSharpLexerTest : StringSpec({
                                 TextToken("lbl:", 10, 14)
                             ),
                             LexerToken(
-                                KSharpTokenType.WhiteSpace,
+                                BaseTokenType.WhiteSpace,
                                 TextToken(" ", 14, 15)
                             ),
                             LexerToken(
@@ -53,7 +53,7 @@ class KSharpLexerTest : StringSpec({
                                 TextToken(":", 19, 20)
                             ),
                             LexerToken(
-                                type = KSharpTokenType.WhiteSpace,
+                                type = BaseTokenType.WhiteSpace,
                                 token = TextToken(text = " ", startOffset = 20, endOffset = 21)
                             ),
                             LexerToken(
@@ -231,6 +231,7 @@ class KSharpLexerTest : StringSpec({
     "Given a lexer, check collapse tokens, should leave really important whitespaces (those after a newline) inside the NewLine token" {
         "internal->wire.name = \n    10".kSharpLexer()
             .ensureNewLineAtEnd()
+            .collapseTokensExceptNewLines()
             .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence()
@@ -240,14 +241,15 @@ class KSharpLexerTest : StringSpec({
                 LexerToken(KSharpTokenType.Operator0, TextToken(".", 14, 15)),
                 LexerToken(KSharpTokenType.LowerCaseWord, TextToken("name", 15, 19)),
                 LexerToken(KSharpTokenType.AssignOperator, TextToken("=", 20, 21)),
-                LexerToken(KSharpTokenType.NewLine, TextToken("\n    ", 22, 27)),
+                LexerToken(BaseTokenType.NewLine, TextToken("\n    ", 22, 27)),
                 LexerToken(KSharpTokenType.Integer, TextToken("10", 27, 29)),
-                LexerToken(KSharpTokenType.NewLine, TextToken("\n", 30, 30)),
+                LexerToken(BaseTokenType.NewLine, TextToken("\n", 30, 30)),
             )
     }
     "Given a lexer, map operators" {
         "** *>> //> %%% +++ - << >> <== != & ||| ^& && || = . # $ ? :".kSharpLexer()
             .ensureNewLineAtEnd()
+            .collapseTokensExceptNewLines()
             .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence()
@@ -341,7 +343,7 @@ class KSharpLexerTest : StringSpec({
                         token = TextToken(text = ":", startOffset = 59, endOffset = 60)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "\n", startOffset = 61, endOffset = 61)
                     )
                 )
@@ -351,6 +353,7 @@ class KSharpLexerTest : StringSpec({
         "'a' \"Hello World\" \"\"\"Hello\nWorld\"\"\" \"\" '\\\''  \"\\\"\""
             .kSharpLexer()
             .ensureNewLineAtEnd()
+            .collapseTokensExceptNewLines()
             .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence()
@@ -383,7 +386,7 @@ class KSharpLexerTest : StringSpec({
                         token = TextToken(text = "\"\\\"\"", startOffset = 45, endOffset = 49)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "\n", startOffset = 50, endOffset = 50)
                     ),
                 )
@@ -398,7 +401,7 @@ class KSharpLexerTest : StringSpec({
                         token = TextToken(text = "'", startOffset = 0, endOffset = 1)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "\n", startOffset = 2, endOffset = 2)
                     ),
                 )
@@ -413,7 +416,7 @@ class KSharpLexerTest : StringSpec({
                         token = TextToken(text = "'a", startOffset = 0, endOffset = 2)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "\n", startOffset = 3, endOffset = 3)
                     ),
                 )
@@ -428,7 +431,7 @@ class KSharpLexerTest : StringSpec({
                         token = TextToken(text = "\"", startOffset = 0, endOffset = 1)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "\n", startOffset = 2, endOffset = 2)
                     ),
                 )
@@ -442,7 +445,7 @@ class KSharpLexerTest : StringSpec({
                         token = TextToken(text = "\"a", startOffset = 0, endOffset = 2)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "\n", startOffset = 3, endOffset = 3)
                     ),
                 )
@@ -456,7 +459,7 @@ class KSharpLexerTest : StringSpec({
                         token = TextToken(text = "\"\"\"", startOffset = 0, endOffset = 3)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "\n", startOffset = 4, endOffset = 4)
                     ),
                 )
@@ -466,7 +469,7 @@ class KSharpLexerTest : StringSpec({
         "\t".kSharpLexer()
             .asSequence()
             .toList()
-            .shouldBe(listOf(LexerToken(KSharpTokenType.WhiteSpace, TextToken("\t", 0, 1))))
+            .shouldBe(listOf(LexerToken(BaseTokenType.WhiteSpace, TextToken("\t", 0, 1))))
     }
     "Given a lexer, check carrier return as NewLine token" {
         "\r".kSharpLexer()
@@ -475,7 +478,7 @@ class KSharpLexerTest : StringSpec({
             .shouldBe(
                 listOf(
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "\r", startOffset = 0, endOffset = 1)
                     ),
                 )
@@ -590,7 +593,7 @@ class KSharpLexerTest : StringSpec({
 
 private fun Sequence<Token>.asStringSequence() = map {
     when (it.type) {
-        KSharpTokenType.NewLine -> "NewLine"
+        BaseTokenType.NewLine -> "NewLine"
         KSharpTokenType.BeginBlock -> "BeginBlock"
         KSharpTokenType.EndBlock -> "EndBlock"
         else -> "${it.type}:${it.text}"
@@ -603,7 +606,7 @@ private fun Sequence<Token>.asLspPositionsSequence() =
             when (it.type) {
                 KSharpTokenType.BeginBlock -> null
                 KSharpTokenType.EndBlock -> null
-                KSharpTokenType.NewLine -> null
+                BaseTokenType.NewLine -> null
                 else -> "${it.text}:${it.startPosition.first.value}:${it.startPosition.second.value}"
             }
         }.filterNotNull()

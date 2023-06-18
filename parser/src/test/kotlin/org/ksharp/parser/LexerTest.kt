@@ -6,7 +6,7 @@ import org.ksharp.common.Line
 import org.ksharp.common.Offset
 
 enum class WordToken : TokenType {
-    Word, NewLine
+    Word
 }
 
 fun Lexer<String>.consumeWord(): LexerToken {
@@ -104,9 +104,9 @@ class LexerTest : StringSpec({
             if (it.isLetter()) {
                 consumeWord()
             } else if (it == '\n') {
-                token(WordToken.NewLine, 0)
+                token(BaseTokenType.NewLine, 0)
             } else null
-        }.toLogicalLexerToken(WordToken.NewLine)
+        }.toLogicalLexerToken()
             .asSequence()
             .toList().onEach(::println)
             .shouldBe(
@@ -121,7 +121,7 @@ class LexerTest : StringSpec({
                     ),
                     LogicalLexerToken(
                         LexerToken(
-                            type = WordToken.NewLine,
+                            type = BaseTokenType.NewLine,
                             token = TextToken("\n", 5, 6)
                         ),
                         startPosition = Line(2) to Offset(0),
@@ -137,7 +137,7 @@ class LexerTest : StringSpec({
                     ),
                     LogicalLexerToken(
                         LexerToken(
-                            type = WordToken.NewLine,
+                            type = BaseTokenType.NewLine,
                             token = TextToken("\n", 11, 12)
                         ),
                         startPosition = Line(3) to Offset(0),

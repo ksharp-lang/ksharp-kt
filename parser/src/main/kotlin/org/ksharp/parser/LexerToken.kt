@@ -27,7 +27,9 @@ interface LexerLogicalPosition {
 }
 
 enum class BaseTokenType : TokenType {
-    Unknown
+    Unknown,
+    NewLine,
+    WhiteSpace
 }
 
 data class LexerToken internal constructor(
