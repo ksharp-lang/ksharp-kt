@@ -545,7 +545,9 @@ class ParserLocationsTest : StringSpec({
         """.trimMargin()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+                it.consumeBlock { l ->
+                    l.enableDiscardBlockAndNewLineTokens(KSharpLexerIterator::consumeExpression)
+                }
             }.map {
                 it.value.cast<LetExpressionNode>()
                     .matches.last()
@@ -563,7 +565,9 @@ class ParserLocationsTest : StringSpec({
         """.trimMargin()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+                it.consumeBlock { l ->
+                    l.enableDiscardBlockAndNewLineTokens(KSharpLexerIterator::consumeExpression)
+                }
             }.map {
                 it.value.cast<LetExpressionNode>()
                     .locations.also(::println)
@@ -581,7 +585,9 @@ class ParserLocationsTest : StringSpec({
         """.trimMargin()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+                it.consumeBlock { l ->
+                    l.enableDiscardBlockAndNewLineTokens(KSharpLexerIterator::consumeExpression)
+                }
             }.map {
                 it.value.cast<LetExpressionNode>()
                     .matches.last()

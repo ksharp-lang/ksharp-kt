@@ -3,6 +3,7 @@ package org.ksharp.parser
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import java.util.concurrent.atomic.AtomicInteger
 
 private enum class TempTokens : TokenType {
     TOKEN
@@ -24,9 +25,6 @@ private data class TempToken(override val text: String, override val type: Token
         get() = 0
 
 }
-
-private fun LexerIterator<TempToken, Int>.nextIterator(): TempToken =
-    if (hasNext()) next() else throw NoSuchElementException()
 
 class LexerIteratorTest : StringSpec({
     "Check call next before hasNext" {
@@ -60,27 +58,6 @@ class LexerIteratorTest : StringSpec({
             state.value.shouldBe(5)
         }
     }
-    "Const a lexer iterator" {
-        val state = LexerState(0)
-        generateLexerIterator(state) {
-            state.update(state.value.inc())
-            TempToken(state.value.toString(), TempTokens.TOKEN)
-        }.cons(TempToken("0", TempTokens.TOKEN))
-            .asSequence()
-            .take(5)
-            .apply {
-                toList().shouldBe(
-                    listOf(
-                        TempToken("0", TempTokens.TOKEN),
-                        TempToken("1", TempTokens.TOKEN),
-                        TempToken("2", TempTokens.TOKEN),
-                        TempToken("3", TempTokens.TOKEN),
-                        TempToken("4", TempTokens.TOKEN)
-                    )
-                )
-                state.value.shouldBe(4)
-            }
-    }
     "Generate a finite lexer iterator" {
         val state = LexerState(0)
         generateLexerIterator(state) {
@@ -93,30 +70,6 @@ class LexerIteratorTest : StringSpec({
                 toList().shouldBe(
                     listOf(
                         TempToken("1", TempTokens.TOKEN),
-                        TempToken("2", TempTokens.TOKEN),
-                        TempToken("3", TempTokens.TOKEN)
-                    )
-                )
-                state.value.shouldBe(4)
-            }
-    }
-    "Check cons, next and cons again" {
-        val stateVariable = LexerState(0)
-        generateLexerIterator(stateVariable) {
-            stateVariable.update(stateVariable.value.inc())
-            if (stateVariable.value <= 3) {
-                TempToken(stateVariable.value.toString(), TempTokens.TOKEN)
-            } else null
-        }.cons(TempToken("99", TempTokens.TOKEN))
-            .apply {
-                state.value.shouldBe(0)
-                nextIterator().shouldBe(TempToken("99", TempTokens.TOKEN))
-                nextIterator().shouldBe(TempToken("1", TempTokens.TOKEN))
-            }.cons(TempToken("50", TempTokens.TOKEN))
-            .apply {
-                asSequence().toList().shouldBe(
-                    listOf(
-                        TempToken("50", TempTokens.TOKEN),
                         TempToken("2", TempTokens.TOKEN),
                         TempToken("3", TempTokens.TOKEN)
                     )
@@ -144,5 +97,72 @@ class LexerIteratorTest : StringSpec({
         emptyLexerIterator<TempToken, String>(LexerState(""))
             .asSequence()
             .toList().shouldBe(emptyList())
+    }
+    "One lexer iterator" {
+        oneLexerIterator(LexerState(""), TempToken("Hello", TempTokens.TOKEN))
+            .asSequence()
+            .toList()
+            .shouldBe(listOf(TempToken("Hello", TempTokens.TOKEN)))
+    }
+    "Map lexer iterator" {
+        val stateVariable = LexerState(0)
+        generateLexerIterator(stateVariable) {
+            stateVariable.update(stateVariable.value.inc())
+            TempToken(stateVariable.value.toString(), TempTokens.TOKEN)
+        }.map {
+            TempToken("tk - ${it.text}", TempTokens.TOKEN)
+        }.asSequence()
+            .take(2)
+            .toList()
+            .shouldBe(listOf(TempToken("tk - 1", TempTokens.TOKEN), TempToken("tk - 2", TempTokens.TOKEN)))
+    }
+    "Lookahead Iterator generator test" {
+        val counter = AtomicInteger(0)
+        generateLexerIterator(LexerState("")) {
+            LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0))
+        }.enableLookAhead()
+            .generateIteratorWithLookAhead {
+                var firstResult: Token? = null
+                if (hasNext()) {
+                    firstResult = next()
+                }
+                hasNext()
+                lookNext()
+                firstResult
+            }.asSequence()
+            .take(3)
+            .toList()
+            .shouldBe(
+                listOf(
+                    LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)),
+                    LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)),
+                    LexerToken(BaseTokenType.Unknown, TextToken("3", 0, 0)),
+                )
+            )
+    }
+    "Lookahead Iterator generator, clearing buffer test" {
+        val counter = AtomicInteger(0)
+        generateLexerIterator(LexerState("")) {
+            LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0))
+        }.enableLookAhead()
+            .generateIteratorWithLookAhead {
+                var firstResult: Token? = null
+                if (hasNext()) {
+                    firstResult = next()
+                }
+                hasNext()
+                lookNext()
+                clearBuffer()
+                firstResult
+            }.asSequence()
+            .take(3)
+            .toList()
+            .shouldBe(
+                listOf(
+                    LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)),
+                    LexerToken(BaseTokenType.Unknown, TextToken("3", 0, 0)),
+                    LexerToken(BaseTokenType.Unknown, TextToken("5", 0, 0)),
+                )
+            )
     }
 })

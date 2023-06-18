@@ -4,19 +4,21 @@ import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.nodes.*
-import org.ksharp.parser.BaseParserErrorCode
-import org.ksharp.parser.LexerToken
-import org.ksharp.parser.TextToken
-import org.ksharp.parser.asSequence
+import org.ksharp.parser.*
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+
+private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
+    filterAndCollapseTokens()
+        .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+        .enableLookAhead()
+        .discardBlocksOrNewLineTokens()
 
 class TypeParserTest : StringSpec({
     "Invalid type separator" {
         "type ListOfInt = List -- Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .shouldBeLeft()
             .mapLeft {
@@ -36,7 +38,7 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "Int", startOffset = 25, endOffset = 28)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     ),
                     LexerToken(
@@ -49,8 +51,7 @@ class TypeParserTest : StringSpec({
     "Invalid type separator 2" {
         "type Bool = True |- False"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .shouldBeLeft()
             .mapLeft {
@@ -70,7 +71,7 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "False", startOffset = 20, endOffset = 25)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     ),
                     LexerToken(
@@ -83,8 +84,7 @@ class TypeParserTest : StringSpec({
     "Invalid type separator 3" {
         "type Bool = True &- False"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .shouldBeLeft()
             .mapLeft {
@@ -104,7 +104,7 @@ class TypeParserTest : StringSpec({
                         token = TextToken(text = "False", startOffset = 20, endOffset = 25)
                     ),
                     LexerToken(
-                        type = KSharpTokenType.NewLine,
+                        type = BaseTokenType.NewLine,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     ),
                     LexerToken(
@@ -117,8 +117,7 @@ class TypeParserTest : StringSpec({
     "Type using parenthesis" {
         "type ListOfInt = (List Int)"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -147,8 +146,7 @@ class TypeParserTest : StringSpec({
     "Function type using parenthesis" {
         "type ListOfInt = (List Int) -> a -> a"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -185,8 +183,7 @@ class TypeParserTest : StringSpec({
     "Function type using parenthesis 2" {
         "type ListOfInt = (Int -> Int) -> a -> a"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -223,8 +220,7 @@ class TypeParserTest : StringSpec({
     "Alias type" {
         "type Integer = Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -248,8 +244,7 @@ class TypeParserTest : StringSpec({
     "Internal Alias type" {
         "internal type Integer = Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -273,8 +268,7 @@ class TypeParserTest : StringSpec({
     "Parametric alias type" {
         "type ListOfInt = List Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -303,8 +297,7 @@ class TypeParserTest : StringSpec({
     "Parametric type" {
         "type KVStore k v = Map k v"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -334,8 +327,7 @@ class TypeParserTest : StringSpec({
     "Parametric type 2" {
         "type Num n = n"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -359,8 +351,7 @@ class TypeParserTest : StringSpec({
     "Parametric type 3" {
         "type Num n = n String"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -390,8 +381,7 @@ class TypeParserTest : StringSpec({
     "Function type" {
         "type Sum a = a -> a -> a"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -423,8 +413,7 @@ class TypeParserTest : StringSpec({
     "Function type 2" {
         "type ToString a = a -> String"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -454,8 +443,7 @@ class TypeParserTest : StringSpec({
     "Tuple type" {
         "type Point = Double , Double"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -486,8 +474,7 @@ class TypeParserTest : StringSpec({
     "Internal function type" {
         "internal type ToString a = a -> String"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -517,8 +504,7 @@ class TypeParserTest : StringSpec({
     "Union type" {
         "type Bool = True | False"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -551,8 +537,7 @@ class TypeParserTest : StringSpec({
     "Union type 2" {
         "type Bool = True | False |  NoDefined"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -588,8 +573,7 @@ class TypeParserTest : StringSpec({
     "Union type 3" {
         "type Maybe a = Just a | Nothing"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -628,8 +612,7 @@ class TypeParserTest : StringSpec({
     "Union type 4" {
         "type Maybe a = a | Nothing"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -662,8 +645,7 @@ class TypeParserTest : StringSpec({
     "Union type 5" {
         "type Maybe = Just a | Nothing"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -702,8 +684,7 @@ class TypeParserTest : StringSpec({
     "Union type 6" {
         "type Maybe = Just a | Nothing, Name"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -750,8 +731,7 @@ class TypeParserTest : StringSpec({
     "Union type 7" {
         "type Maybe = Just a | a Name"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -798,8 +778,7 @@ class TypeParserTest : StringSpec({
     "Union type 8" {
         "type Maybe a a = Just a | Nothing"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -838,8 +817,7 @@ class TypeParserTest : StringSpec({
     "Invalid Set type 2" {
         "type Bool = True | False & NoDefined"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -865,8 +843,7 @@ class TypeParserTest : StringSpec({
     "Intersection type" {
         "type Num = Eq & Ord"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -899,8 +876,7 @@ class TypeParserTest : StringSpec({
     "Intersection type 2" {
         "type Num = a & Ord"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -937,8 +913,7 @@ class TypeParserTest : StringSpec({
                 prod :: a -> a -> a
         """.trimIndent()
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -993,8 +968,7 @@ class TypeParserTest : StringSpec({
                 prod :: a -> a -> a
         """.trimIndent()
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1052,8 +1026,7 @@ class TypeParserTest : StringSpec({
                 prod :: a -> a -> a
         """.trimIndent()
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1107,8 +1080,7 @@ class TypeParserTest : StringSpec({
                 sum :: Int -> Int -> Int
         """.trimIndent()
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1147,8 +1119,7 @@ class TypeParserTest : StringSpec({
     "Labels on parametric types" {
         "type KVStore k v = Map key: k value: v"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1185,8 +1156,7 @@ class TypeParserTest : StringSpec({
     "Labels on tuples" {
         "type Point2D = x: Double, y: Double"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1223,8 +1193,7 @@ class TypeParserTest : StringSpec({
     "Labels with composite types" {
         "type Composite a = n: (Num a), point: (x: Double, y: Double)"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1277,8 +1246,7 @@ class TypeParserTest : StringSpec({
     "Labels with composite types 2 " {
         "type Composite a = n: (), point: (x: Double, y: Double)"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1331,8 +1299,7 @@ class TypeParserTest : StringSpec({
     "Labels with composite types 3" {
         "type Composite a = n: (Int -> Int), point: (x: Double, y: Double)"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1389,8 +1356,7 @@ class TypeParserTest : StringSpec({
     "Constrained type" {
         "type Age = Int => (it > 0) && (it < 70)"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1433,8 +1399,7 @@ class TypeParserTest : StringSpec({
     "Unit type" {
         "type Unit = ()"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1454,8 +1419,7 @@ class TypeParserTest : StringSpec({
     "Type declaration" {
         "ten :: () -> Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1475,8 +1439,7 @@ class TypeParserTest : StringSpec({
     "If on function type declaration" {
         "if :: () -> Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1497,8 +1460,7 @@ class TypeParserTest : StringSpec({
     "Type declaration 2" {
         "sum :: Int -> Int -> Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1522,8 +1484,7 @@ class TypeParserTest : StringSpec({
     "Type declaration with params" {
         "sum a :: (Num a) -> (Num a) -> Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1559,8 +1520,7 @@ class TypeParserTest : StringSpec({
     "Type declaration with operators" {
         "(+) a :: (Num a) -> (Num a) -> Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
             .map { it.value }
             .shouldBeRight(
@@ -1596,8 +1556,7 @@ class TypeParserTest : StringSpec({
     "Type declaration with complex function names" {
         "wire->internal a :: (Num a) -> (Num a) -> Int"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForTypeParsing()
             .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
             .map { it.value }
             .shouldBeRight(

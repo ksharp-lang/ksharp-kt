@@ -11,35 +11,39 @@ private fun KSharpConsumeResult.buildLiteralValue(type: LiteralValueType): KShar
     }
 
 private fun KSharpLexerIterator.consumeLiteralValue(token: KSharpTokenType, type: LiteralValueType) =
-    consume(token).buildLiteralValue(type)
+    ifConsume(token) {
+        it.buildLiteralValue(type)
+    }
 
 private fun KSharpParserResult.orConsumeLiteralValue(token: KSharpTokenType, type: LiteralValueType) =
     or { it.consumeLiteralValue(token, type) }
 
 
 private fun KSharpLexerIterator.consumeListOrSetLiteral(): KSharpParserResult =
-    consume({
+    ifConsume({
         it.type == KSharpTokenType.OpenBracket ||
                 it.type == KSharpTokenType.OpenSetBracket
-    }).thenLoopIndexed { lexer, index ->
-        if (index > 0) {
-            lexer.consume(KSharpTokenType.Comma, true)
-                .consume { it.consumeExpression(false) }
-                .build { it.last().cast() }
-        } else lexer.consumeExpression(false)
-    }.then(KSharpTokenType.CloseBracket, true)
-        .build {
-            val token = it.first().cast<Token>()
-            val type = if (token.type == KSharpTokenType.OpenBracket) {
-                LiteralCollectionType.List
-            } else LiteralCollectionType.Set
-            val location = token.location
-            LiteralCollectionNode(
-                it.drop(1).cast(),
-                type,
-                location,
-            )
-        }
+    }, false) { ifLexer ->
+        ifLexer.thenLoopIndexed { lexer, index ->
+            if (index > 0) {
+                lexer.consume(KSharpTokenType.Comma, true)
+                    .consume { it.consumeExpression(false) }
+                    .build { it.last().cast() }
+            } else lexer.consumeExpression(false)
+        }.then(KSharpTokenType.CloseBracket, true)
+            .build {
+                val token = it.first().cast<Token>()
+                val type = if (token.type == KSharpTokenType.OpenBracket) {
+                    LiteralCollectionType.List
+                } else LiteralCollectionType.Set
+                val location = token.location
+                LiteralCollectionNode(
+                    it.drop(1).cast(),
+                    type,
+                    location,
+                )
+            }
+    }
 
 private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
     consumeExpressionValue(false)
@@ -57,22 +61,23 @@ private fun KSharpLexerIterator.consumeMapEntryLiteral(): KSharpParserResult =
         }
 
 private fun KSharpLexerIterator.consumeMapLiteral(): KSharpParserResult =
-    consume(KSharpTokenType.OpenCurlyBraces)
-        .thenLoopIndexed { lexer, index ->
+    ifConsume(KSharpTokenType.OpenCurlyBraces) { ifLexer ->
+        ifLexer.thenLoopIndexed { lexer, index ->
             if (index > 0) {
                 lexer.consume(KSharpTokenType.Comma, true)
                     .consume { it.consumeMapEntryLiteral() }
                     .build { it.last().cast() }
             } else lexer.consumeMapEntryLiteral()
         }.then(KSharpTokenType.CloseCurlyBraces, true)
-        .build {
-            val token = it.first().cast<Token>()
-            val type = LiteralCollectionType.Map
-            val location = token.location
-            LiteralCollectionNode(
-                it.drop(1).cast(), type, location,
-            )
-        }
+            .build {
+                val token = it.first().cast<Token>()
+                val type = LiteralCollectionType.Map
+                val location = token.location
+                LiteralCollectionNode(
+                    it.drop(1).cast(), type, location,
+                )
+            }
+    }
 
 internal fun KSharpLexerIterator.consumeLiteral(withBindings: Boolean) =
     consumeLiteralValue(KSharpTokenType.Character, LiteralValueType.Character)

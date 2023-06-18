@@ -18,7 +18,7 @@ fun semanticModuleInfoAction(moduleName: String, builder: ActionsGraphBuilder<Se
         )
     ) {
         execution { _, nodes ->
-            nodes.toModuleNode(moduleName)
+            nodes.asSequence().toModuleNode(moduleName)
                 .toSemanticModuleInfo(preludeModule)
         }
         graphBuilder(builder)

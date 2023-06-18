@@ -13,19 +13,22 @@ import java.nio.file.Path
 typealias KSharpParserResult = ParserResult<NodeData, KSharpLexerState>
 typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
 
-fun KSharpConsumeResult.discardBlanks() =
+fun KSharpConsumeResult.discardNewLines() =
     map {
         val lexer = it.tokens
+        val checkpoint = lexer.state.lookAHeadState.checkpoint()
         while (lexer.hasNext()) {
             val token = lexer.next()
-            if (token.type == KSharpTokenType.NewLine || token.type == KSharpTokenType.EndBlock) {
+            if (token.type == BaseTokenType.NewLine) {
                 continue
             }
+            checkpoint.end(1)
             return@map NodeCollector(
                 it.collection,
-                lexer.cons(token)
+                lexer
             )
         }
+        checkpoint.end(ConsumeTokens)
         it
     }
 
@@ -122,7 +125,7 @@ fun KSharpConsumeResult.thenKeyword(text: String, discardToken: Boolean = false)
     thenLowerCaseWord(text, discardToken)
 
 fun KSharpConsumeResult.thenNewLine() =
-    then(KSharpTokenType.NewLine, true)
+    then(BaseTokenType.NewLine, true)
 
 private fun KSharpParserResult.endBlock(): KSharpParserResult =
     when (this) {
@@ -149,10 +152,13 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
         }
 
         is Either.Right -> {
-            value.remainTokens.optionalConsume(KSharpTokenType.NewLine)
+            value.remainTokens.optionalConsume(BaseTokenType.NewLine)
                 .then(KSharpTokenType.EndBlock, false)
                 .map {
                     ParserValue(value.value, it.tokens)
+                }.mapLeft {
+                    it.collection.add(value.value)
+                    it
                 }
         }
     }
@@ -165,16 +171,19 @@ fun String.lexerModule(withLocations: Boolean) =
 
 fun Reader.lexerModule(withLocations: Boolean) =
     kSharpLexer()
-        .collapseKSharpTokens()
+        .filterAndCollapseTokens()
         .cast<TokenLexerIterator<KSharpLexerState>>()
         .let {
-            if (withLocations) it.toLogicalLexerToken(KSharpTokenType.NewLine)
+            if (withLocations) it.toLogicalLexerToken()
             else it
         }.markBlocks {
             val token = LexerToken(it, TextToken("", 0, 0))
             if (withLocations) LogicalLexerToken(token, ZeroPosition, ZeroPosition)
             else token
         }
+        .enableLookAhead()
+        .discardBlocksOrNewLineTokens()
+
 
 fun Reader.parseModule(
     name: String,
