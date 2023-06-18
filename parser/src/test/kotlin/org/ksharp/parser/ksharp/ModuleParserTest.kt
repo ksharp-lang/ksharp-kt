@@ -583,9 +583,6 @@ class ModuleParserTest : StringSpec({
             |sum2 a b = a + b
         """.trimMargin("|")
             .parseModule("File", false)
-            .map {
-                it.errors.onEach(::println)
-            }
             .shouldBeRight(
                 ModuleNode(
                     "File",
@@ -593,7 +590,67 @@ class ModuleParserTest : StringSpec({
                     listOf(),
                     listOf(),
                     listOf(
-
+                        FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = null,
+                            name = "sum",
+                            parameters = listOf("a", "b"),
+                            expression = OperatorNode(
+                                operator = "+",
+                                left = FunctionCallNode(
+                                    name = "a",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    location = Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "b",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = listOf(),
+                                assignOperator = Location.NoProvided
+                            )
+                        ), FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = null,
+                            name = "sum2",
+                            parameters = listOf("a", "b"),
+                            expression = OperatorNode(
+                                operator = "+",
+                                left = FunctionCallNode(
+                                    name = "a",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    location = Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "b",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = listOf(),
+                                assignOperator = Location.NoProvided
+                            )
+                        )
                     ),
                     listOf(),
                     Location.NoProvided

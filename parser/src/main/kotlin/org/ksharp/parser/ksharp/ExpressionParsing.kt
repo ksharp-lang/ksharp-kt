@@ -1,7 +1,6 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.Location
-import org.ksharp.common.cast
+import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
@@ -102,6 +101,40 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
         }
     }
 
+private fun KSharpLexerIterator.ifBeginNewLineExpression(
+    block: (tokens: KSharpConsumeResult) -> KSharpParserResult
+): KSharpParserResult {
+    val checkpoint = state.lookAHeadState.checkpoint()
+
+    val isNewLine = if (hasNext()) {
+        val token = next()
+        token.type == BaseTokenType.NewLine
+    } else false
+
+    val token = if (isNewLine && hasNext()) {
+        next()
+    } else null
+
+    checkpoint.end(PreserveTokens)
+    return if (token != null && token.type != KSharpTokenType.EndBlock) {
+        block(
+            Either.Right(
+                NodeCollector(
+                    listBuilder(),
+                    this
+                )
+            )
+        )
+    } else Either.Left(
+        ParserError(
+            BaseParserErrorCode.ConsumeTokenFailed.new(Location.NoProvided, "token" to "<no newline>"),
+            listBuilder(),
+            false,
+            this
+        )
+    )
+}
+
 internal fun KSharpLexerIterator.consumeExpressionValue(
     tupleWithoutParenthesis: Boolean = true,
     withBindings: Boolean = false
@@ -119,7 +152,7 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
 
     val newLineExpression = if (state.value.enableExpressionStartingNewLine) {
         groupExpression.or {
-            it.ifConsume(BaseTokenType.NewLine, true) { ifL ->
+            it.ifBeginNewLineExpression { ifL ->
                 ifL.discardNewLines()
                     .consume { l -> l.consumeExpression() }
                     .build { l -> l.first().cast<NodeData>() }
