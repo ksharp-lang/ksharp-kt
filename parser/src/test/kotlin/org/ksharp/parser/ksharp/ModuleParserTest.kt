@@ -710,9 +710,6 @@ class ModuleParserTest : StringSpec({
     "Parse two types with carrie return and line feed" {
         "type Unit = KernelUnit\r\ntype Char = KernelChar"
             .parseModule("File", false)
-            .map {
-                it.types.onEach(::println)
-            }
             .shouldBeRight(
                 ModuleNode(
                     "File",
