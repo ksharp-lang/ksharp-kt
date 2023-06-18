@@ -3,7 +3,6 @@ package org.ksharp.parser
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.cast
 import java.util.concurrent.atomic.AtomicInteger
 
 private enum class TempTokens : TokenType {
@@ -26,9 +25,6 @@ private data class TempToken(override val text: String, override val type: Token
         get() = 0
 
 }
-
-private fun LexerIterator<Token, Int>.nextIterator(): TempToken =
-    if (hasNext()) next().cast() else throw NoSuchElementException()
 
 class LexerIteratorTest : StringSpec({
     "Check call next before hasNext" {

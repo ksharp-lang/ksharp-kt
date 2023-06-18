@@ -60,9 +60,6 @@ internal class LookAheadCheckpoints {
             }
         } else fallback()
 
-    fun cons(size: Int) {
-        currentIndex -= size
-    }
 
     private fun addToBuffer(token: Token) {
         val newSize = currentIndex + 1

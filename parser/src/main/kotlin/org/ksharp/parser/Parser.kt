@@ -8,7 +8,6 @@ enum class BaseParserErrorCode(override val description: String) : ErrorCode {
     ExpectingToken("Expecting token {token} was {received-token}"),
     BreakLoop("Breaking loop"),
     ConsumeTokenFailed("Consume token failed {token}"),
-    LookAHeadNotEnabled("Look ahead for lexer not enabled"),
 }
 
 fun createExpectedTokenError(tokenType: TokenType, receivedToken: Token) =
