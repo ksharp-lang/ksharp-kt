@@ -657,4 +657,15 @@ class ModuleParserTest : StringSpec({
                 )
             )
     }
+    "Parse a module with a function with annotation" {
+        """
+            @native(lang=["java", "c#"])
+            var = 10
+        """.trimIndent()
+            .parseModule("File", false)
+            .map {
+                it.functions.onEach(::println)
+            }
+            .shouldBeRight()
+    }
 })

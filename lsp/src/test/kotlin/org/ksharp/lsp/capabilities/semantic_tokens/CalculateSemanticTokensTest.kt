@@ -125,6 +125,7 @@ private val specs = listOf(
     )
 )
 
+
 class CalculateSemanticTokensTest : FreeSpec({
     "Calculate semantic tokens " - {
         specs.forEach { (desc, spec) ->
@@ -136,3 +137,4 @@ class CalculateSemanticTokensTest : FreeSpec({
         }
     }
 })
+
