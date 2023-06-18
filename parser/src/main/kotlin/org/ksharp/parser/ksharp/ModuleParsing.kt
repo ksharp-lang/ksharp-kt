@@ -1,8 +1,6 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.Error
-import org.ksharp.common.Location
-import org.ksharp.common.cast
+import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
@@ -24,55 +22,58 @@ data class InvalidNode(
         get() = Location.NoProvided
 }
 
-private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParserResult =
-    thenInBlock { cb ->
-        cb.collect()
-            .enableDiscardBlockAndNewLineTokens { tl ->
-                tl.thenLoop { l ->
-                    l.consume({
-                        it.type != KSharpTokenType.EndBlock
-                    }).build { it.first() }
-                }.build {
-                    InvalidNode(
-                        it.asSequence()
-                            .filter { i ->
-                                when (i.cast<Token>().type) {
-                                    KSharpTokenType.BeginBlock, BaseTokenType.NewLine, KSharpTokenType.EndBlock -> false
-                                    else -> true
-                                }
-                            }
-                            .map { i ->
-                                val t = i.cast<Token>()
-                                InvalidToken(
-                                    t.text,
-                                    t.type,
-                                    t.location
-                                )
-                            }.toList(),
-                        error
-                    )
-                }
-            }
-    }.discardBlanks()
-        .build {
-            it.first().cast()
+private fun KSharpLexerIterator.consumeInvalidTokens(error: Error): KSharpParserResult =
+    collect()
+        .thenLoop { t ->
+            t.consume({
+                it.type != KSharpTokenType.EndBlock
+            }).build { it.first() }
+        }.thenLoop { t ->
+            t.consume({
+                it.type != KSharpTokenType.BeginBlock
+            }).build { it.first() }
+        }.build {
+            InvalidNode(
+                it.asSequence()
+                    .filter { i ->
+                        when (i.cast<Token>().type) {
+                            KSharpTokenType.BeginBlock, BaseTokenType.NewLine, KSharpTokenType.EndBlock -> false
+                            else -> true
+                        }
+                    }
+                    .map { i ->
+                        val t = i.cast<Token>()
+                        InvalidToken(
+                            t.text,
+                            t.type,
+                            t.location
+                        )
+                    }.toList(),
+                error
+            )
         }
+
+private fun KSharpParserResult.consumeInvalidTokens(state: KSharpLexerState): KSharpParserResult =
+    mapLeft { e ->
+        state.lastError.set(e.error)
+        e
+    }.or { l -> l.consumeInvalidTokens(state.lastError.get()!!) }
 
 private fun KSharpLexerIterator.consumeModuleNodesLogic(): KSharpConsumeResult =
     collect()
         .thenLoop { then ->
-            then.lookAHead { lookAHead ->
-                lookAHead.consumeBlock {
-                    it.consumeImport()
-                        .or { l -> l.consumeFunctionTypeDeclaration() }
-                        .or { l -> l.consumeTypeDeclaration() }
-                        .or { l -> l.consumeAnnotation() }
-                        .or { l -> l.consumeFunction() }
-                }.asLookAHeadResult()
-            }.mapLeft {
-                state.value.lastError.set(it.error)
-                it
-            }.orCollect { l -> l.consumeInvalidTokens(state.value.lastError.get()!!) }
+            then.consumeBlock {
+                it.consumeImport()
+                    .or { l -> l.consumeFunctionTypeDeclaration() }
+                    .or { l -> l.consumeTypeDeclaration() }
+                    .or { l -> l.consumeAnnotation() }
+                    .or { l -> l.consumeFunction() }
+                    .consumeInvalidTokens(state.value)
+            }.flatMapLeft {
+                if (it.collection.size() != 0) {
+                    Either.Right(ParserValue(it.collection.build().first(), it.remainTokens))
+                } else Either.Left(it)
+            }.cast<KSharpParserResult>()
         }
 
 fun List<NodeData>.toModuleNode(name: String): ModuleNode {

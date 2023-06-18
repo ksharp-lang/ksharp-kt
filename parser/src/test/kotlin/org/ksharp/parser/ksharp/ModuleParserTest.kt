@@ -579,17 +579,22 @@ class ModuleParserTest : StringSpec({
     }
     "Parse a module with more than one function" {
         """
-            sum a b = a + b
-            sum2 a b = a + b
-        """.trimIndent()
+            |sum a b = a + b
+            |sum2 a b = a + b
+        """.trimMargin("|")
             .parseModule("File", false)
+            .map {
+                it.functions.onEach(::println)
+            }
             .shouldBeRight(
                 ModuleNode(
                     "File",
                     listOf(),
                     listOf(),
                     listOf(),
-                    listOf(),
+                    listOf(
+
+                    ),
                     listOf(),
                     Location.NoProvided
                 )

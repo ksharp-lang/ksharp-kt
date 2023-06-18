@@ -156,6 +156,9 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
                 .then(KSharpTokenType.EndBlock, false)
                 .map {
                     ParserValue(value.value, it.tokens)
+                }.mapLeft {
+                    it.collection.add(value.value)
+                    it
                 }
         }
     }

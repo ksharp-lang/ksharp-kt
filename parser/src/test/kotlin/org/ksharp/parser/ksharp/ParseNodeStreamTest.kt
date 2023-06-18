@@ -9,6 +9,15 @@ import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.parser.BaseParserErrorCode
 
+private fun List<NodeData>.asStringList() =
+    map {
+        val nodeType = it.javaClass.simpleName
+        val suffix = if (it is InvalidNode)
+            " ${it.tokens.joinToString("") { s -> s.text }}"
+        else ""
+        "$nodeType$suffix"
+    }
+
 class ParseNodeStreamTest : StringSpec({
     "Parse invalid tokens" {
         "1 +"
@@ -46,48 +55,46 @@ class ParseNodeStreamTest : StringSpec({
            |sum a = a + b
         """.trimMargin()
             .parseModuleAsNodeSequence()
-            .onEach { println(it) }
             .shouldBe(
                 listOf(
+                    ImportNode(
+                        moduleName = "math", key = "k", location = Location(
+                            start = (Line(value = 1) to Offset(value = 0)),
+                            end = (Line(value = 1) to Offset(value = 6))
+                        ),
+                        locations = ImportNodeLocations(
+                            importLocation = Location(
+                                start = (Line(value = 1) to Offset(value = 0)),
+                                end = (Line(value = 1) to Offset(value = 6))
+                            ),
+                            moduleNameBegin = Location(
+                                start = (Line(value = 1) to Offset(value = 7)),
+                                end = (Line(value = 1) to Offset(value = 11))
+                            ),
+                            moduleNameEnd = Location(
+                                start = (Line(value = 1) to Offset(value = 7)),
+                                end = (Line(value = 1) to Offset(value = 11))
+                            ),
+                            asLocation = Location(
+                                start = (Line(value = 1) to Offset(value = 12)),
+                                end = (Line(value = 1) to Offset(value = 14))
+                            ),
+                            keyLocation = Location(
+                                start = (Line(value = 1) to Offset(value = 15)),
+                                end = (Line(value = 1) to Offset(value = 16))
+                            )
+                        )
+                    ),
                     InvalidNode(
                         error = BaseParserErrorCode.ExpectingToken.new(
-                            Location.NoProvided,
-                            "token" to "<EndBlock>",
-                            "received-token" to "<BeginBlock>"
+                            Location(
+                                start = (Line(value = 2) to Offset(value = 3)),
+                                end = (Line(value = 2) to Offset(value = 4))
+                            ),
+                            "token" to "<LowerCaseWord, Operator different internal, type>",
+                            "received-token" to "Integer:1"
                         ),
                         tokens = listOf(
-                            InvalidToken(
-                                text = "import",
-                                type = KSharpTokenType.LowerCaseWord,
-                                location = Location(
-                                    start = (Line(value = 1) to Offset(value = 0)),
-                                    end = (Line(value = 1) to Offset(value = 6))
-                                )
-                            ),
-                            InvalidToken(
-                                text = "math",
-                                type = KSharpTokenType.LowerCaseWord,
-                                location = Location(
-                                    start = (Line(value = 1) to Offset(value = 7)),
-                                    end = (Line(value = 1) to Offset(value = 11))
-                                )
-                            ),
-                            InvalidToken(
-                                text = "as",
-                                type = KSharpTokenType.LowerCaseWord,
-                                location = Location(
-                                    start = (Line(value = 1) to Offset(value = 12)),
-                                    end = (Line(value = 1) to Offset(value = 14))
-                                )
-                            ),
-                            InvalidToken(
-                                text = "k",
-                                type = KSharpTokenType.LowerCaseWord,
-                                location = Location(
-                                    start = (Line(value = 1) to Offset(value = 15)),
-                                    end = (Line(value = 1) to Offset(value = 16))
-                                )
-                            ),
                             InvalidToken(
                                 text = "1",
                                 type = KSharpTokenType.Integer,
@@ -160,5 +167,25 @@ class ParseNodeStreamTest : StringSpec({
 
                 )
             )
+    }
+    "Check produce node types" {
+        """import math as k
+           |   1 +
+           |        3 + 5
+           |sum a = a + b
+        """.trimMargin()
+            .parseModuleAsNodeSequence()
+            .asStringList()
+            .shouldBe(listOf("ImportNode", "InvalidNode 1+3+5", "FunctionNode"))
+    }
+    "Check produce node types 2" {
+        """import math as k
+           |   1 +
+           |3 + 5
+           |sum a = a + b
+        """.trimMargin()
+            .parseModuleAsNodeSequence()
+            .asStringList()
+            .shouldBe(listOf("ImportNode", "InvalidNode 1+", "InvalidNode 3+5", "FunctionNode"))
     }
 })
