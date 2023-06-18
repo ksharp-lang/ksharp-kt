@@ -16,18 +16,19 @@ typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
 fun KSharpConsumeResult.discardBlanks() =
     map {
         val lexer = it.tokens
-        val lookAhead = lexer.state.lookAHeadState
+        val checkpoint = lexer.state.lookAHeadState.checkpoint()
         while (lexer.hasNext()) {
             val token = lexer.next()
             if (token.type == KSharpTokenType.NewLine || token.type == KSharpTokenType.EndBlock) {
                 continue
             }
-            lookAhead.addPendingToken(token)
+            checkpoint.end(1)
             return@map NodeCollector(
                 it.collection,
                 lexer
             )
         }
+        checkpoint.end(ConsumeTokens)
         it
     }
 

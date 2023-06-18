@@ -3,103 +3,83 @@ package org.ksharp.parser
 import org.ksharp.common.*
 import org.ksharp.common.annotation.Mutable
 import java.util.*
-import kotlin.math.max
 
 private const val BufferSize: Int = 10
 
-internal class LookAheadBuffer {
+const val ConsumeTokens: Int = 0
+const val PreserveTokens: Int = -1
+
+
+internal class LookAheadCheckpoints {
     private var buffer = arrayOfNulls<Token>(BufferSize)
     private val checkPoints = Stack<Int>()
 
-    private var tmpCheckpointIndex = -1
+    private var inCheckPoint = false
     private var endIndex = 0
     private var currentIndex = 0
-
     val checkpoints: Int get() = checkPoints.size
     fun addCheckpoint() {
         checkPoints.push(currentIndex)
-        tmpCheckpointIndex = -1
+        inCheckPoint = true
     }
 
-    fun removeCheckPoint(consumeTokens: Boolean) {
+    fun removeCheckPoint(rewind: Int) {
         val startIndex = checkPoints.pop()
 
-        if (consumeTokens) {
-            if (checkPoints.isEmpty()) {
-                clear()
+        when (rewind) {
+            ConsumeTokens -> {
+                if (checkPoints.isEmpty()) {
+                    clear()
+                }
             }
-            return
-        }
 
-        currentIndex = startIndex
-        tmpCheckpointIndex = endIndex
+            PreserveTokens -> {
+                currentIndex = startIndex
+            }
+
+            else -> {
+                currentIndex -= rewind
+            }
+        }
     }
 
     fun next(fallback: () -> Token?): Token? =
-        if (checkPoints.isNotEmpty() || tmpCheckpointIndex != -1) {
+        if (inCheckPoint) {
             if (currentIndex == endIndex) {
                 val result = fallback()
                 if (result != null) {
                     addToBuffer(result)
-                    currentIndex = endIndex
                 }
                 result
             } else {
                 val result = buffer[currentIndex++]
-                if (currentIndex == tmpCheckpointIndex) {
-                    checkPoints.clear()
+                if (currentIndex == endIndex && checkPoints.isEmpty()) {
                     clear()
                 }
                 result
             }
         } else fallback()
 
-    fun rewind(move: Int) {
-        currentIndex = (currentIndex - move).coerceAtLeast(0)
-    }
-
-    fun cons(token: Token) {
-        if (checkPoints.isEmpty()) {
-            addCheckpoint()
-            addToBuffer(token)
-            currentIndex = endIndex
-            tmpCheckpointIndex = endIndex
-        }
-        currentIndex -= 1
-    }
-
-    fun cons(tokens: List<Token>) {
-        val size = tokens.size
-        if (checkPoints.isEmpty()) {
-            addCheckpoint()
-            ensureBufferFor(size)
-            tokens.forEach { token ->
-                buffer[currentIndex++] = token
-            }
-            endIndex = currentIndex
-            tmpCheckpointIndex = endIndex
-        }
+    fun cons(size: Int) {
         currentIndex -= size
     }
 
     private fun addToBuffer(token: Token) {
-        ensureBufferFor(1)
-        buffer[currentIndex] = token
-        endIndex = currentIndex + 1
-    }
-
-    private fun ensureBufferFor(newItems: Int) {
-        if (currentIndex + newItems >= buffer.size) {
-            val newBuffer = arrayOfNulls<Token>(buffer.size + max(BufferSize, newItems))
+        val newSize = currentIndex + 1
+        if (newSize >= buffer.size) {
+            val newBuffer = arrayOfNulls<Token>(buffer.size + BufferSize)
             System.arraycopy(buffer, 0, newBuffer, 0, buffer.size)
             buffer = newBuffer
         }
+        buffer[currentIndex] = token
+        currentIndex = newSize
+        endIndex = newSize
     }
 
     private fun clear() {
         currentIndex = 0
         endIndex = 0
-        tmpCheckpointIndex = -1
+        inCheckPoint = false
     }
 
     private fun trim() {
@@ -108,78 +88,41 @@ internal class LookAheadBuffer {
     }
 }
 
+interface LookAheadCheckpoint {
+    fun end(rewind: Int)
+
+}
+
 class LookAheadLexerState {
-    private val checkpoints: Stack<Stack<Token>> = Stack()
+    private val checkpoints = LookAheadCheckpoints()
 
-    var enabled = false
-        private set
-
-    var lexer: BaseLexerIterator<*>? = null
-        private set
-
-    private var rootLexer: BaseLexerIterator<*>? = null
-    private var pendingTokens = mutableListOf<Token>()
-
-    fun addCheckPoint() {
-        val stack = Stack<Token>()
-        if (pendingTokens.isNotEmpty()) {
-            if (checkpoints.isNotEmpty()) {
-                checkpoints.peek().apply {
-                    val pendingIndex = indexOf(pendingTokens.first())
-                    if (pendingIndex != -1) repeat(size - pendingIndex) { pop() }
-                }
-            }
-            stack.addAll(pendingTokens)
-        }
-        checkpoints.add(stack)
-    }
-
-    fun removeCheckPoint(consumeTokens: Boolean) {
-        val lastCheckPoint = checkpoints.pop()
-        if (!consumeTokens) {
-            pendingTokens = lastCheckPoint
-        } else {
-            if (!checkpoints.isEmpty()) {
-                checkpoints.peek().addAll(lastCheckPoint)
-            }
-        }
-    }
-
-    private fun collectValue(token: Token) {
-        if (!checkpoints.isEmpty()) {
-            checkpoints.peek().push(token)
-        }
-    }
-
-    private fun nextToken(): Token? = (if (pendingTokens.isEmpty()) {
-        val lexer = rootLexer!!
-        if (lexer.hasNext()) {
-            lexer.next().also {
-                collectValue(it)
-            }
-        } else null
-    } else pendingTokens.removeFirst())
+    private var enabled = false
+    private lateinit var lexer: BaseLexerIterator<*>
 
     fun <S> enable(
         lexer: BaseLexerIterator<S>
     ): BaseLexerIterator<S> {
         if (!enabled) {
             this.enabled = true
-            this.rootLexer = lexer.cast()
             val lexerResult = generateLexerIterator(lexer.state) {
-                nextToken()
+                checkpoints.next {
+                    if (lexer.hasNext()) {
+                        lexer.next()
+                    } else null
+                }
             }
             this.lexer = lexerResult.cast()
         }
-        return this.lexer!!.cast()
+        return this.lexer.cast()
     }
 
-    internal fun addPendingTokens(tokens: List<Token>) {
-        pendingTokens.addAll(0, tokens)
-    }
-
-    internal fun addPendingToken(token: Token) {
-        pendingTokens.add(0, token)
+    fun checkpoint(): LookAheadCheckpoint {
+        checkpoints.addCheckpoint()
+        return object : LookAheadCheckpoint {
+            override fun end(rewind: Int) {
+                checkpoints.removeCheckPoint(rewind)
+            }
+        }
     }
 
 }
@@ -206,25 +149,13 @@ fun <S> BaseLexerIterator<S>.enableLookAhead(): BaseLexerIterator<S> =
 
 @Mutable
 fun <T, S> BaseLexerIterator<S>.lookAHead(block: (BaseLexerIterator<S>) -> ErrorOrValue<LookAHeadResult<T>>): ParserResult<T, S> {
-    val lookAheadLexerState = state.lookAHeadState
-    if (!lookAheadLexerState.enabled) {
-        ParserError(
-            BaseParserErrorCode.LookAHeadNotEnabled.new(Location.NoProvided),
-            listBuilder(),
-            false,
-            this
-        )
-    }
-
-    lookAheadLexerState.addCheckPoint()
-
+    val checkpoint = state.lookAHeadState.checkpoint()
     val result = block(this)
-
     return result.map {
-        lookAheadLexerState.removeCheckPoint(true)
+        checkpoint.end(ConsumeTokens)
         ParserValue(it.value, this)
     }.mapLeft {
-        lookAheadLexerState.removeCheckPoint(false)
+        checkpoint.end(PreserveTokens)
         ParserError(
             it,
             listBuilder(),

@@ -54,10 +54,11 @@ data class NodeCollector<S> internal constructor(
 typealias ConsumeResult<S> = Either<ParserError<S>, NodeCollector<S>>
 
 fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken: Boolean = false): ConsumeResult<S> {
-    val lookAhead = state.lookAHeadState
+    val checkpoint = state.lookAHeadState.checkpoint()
     if (hasNext()) {
         val item = next()
         return if (predicate(item)) {
+            checkpoint.end(ConsumeTokens)
             Either.Right(
                 NodeCollector(
                     listBuilder<Any>().apply {
@@ -67,7 +68,7 @@ fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken
                 )
             )
         } else {
-            lookAhead.addPendingToken(item)
+            checkpoint.end(1)
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
@@ -78,6 +79,7 @@ fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken
             )
         }
     }
+    checkpoint.end(ConsumeTokens)
     return Either.Left(
         ParserError(
             BaseParserErrorCode.EofToken.new(), listBuilder(),
@@ -90,10 +92,11 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
     predicate: (Token) -> Boolean,
     discardToken: Boolean = false
 ): ConsumeResult<S> {
-    val lookAHead = state.lookAHeadState
+    val checkpoint = state.lookAHeadState.checkpoint()
     if (hasNext()) {
         val item = next()
         return if (predicate(item)) {
+            checkpoint.end(ConsumeTokens)
             Either.Right(
                 NodeCollector(
                     listBuilder<Any>().apply {
@@ -103,7 +106,7 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
                 )
             )
         } else {
-            lookAHead.addPendingToken(item)
+            checkpoint.end(1)
             Either.Right(
                 NodeCollector(
                     listBuilder<Any>(),
@@ -112,6 +115,7 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
             )
         }
     }
+    checkpoint.end(ConsumeTokens)
     return Either.Left(
         ParserError(
             BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), listBuilder(),
@@ -126,14 +130,15 @@ fun <S> ConsumeResult<S>.thenOptional(
 ): ConsumeResult<S> =
     flatMap {
         val iterator = it.tokens
-        val lookAhead = iterator.state.lookAHeadState
+        val checkpoint = iterator.state.lookAHeadState.checkpoint()
         if (iterator.hasNext()) {
             val item = iterator.next()
             if (predicate(item)) {
+                checkpoint.end(ConsumeTokens)
                 if (!discardToken) it.collection.add(item)
                 Either.Right(it)
             } else {
-                lookAhead.addPendingToken(item)
+                checkpoint.end(1)
                 Either.Right(
                     NodeCollector(
                         it.collection,
@@ -142,6 +147,7 @@ fun <S> ConsumeResult<S>.thenOptional(
                 )
             }
         } else {
+            checkpoint.end(ConsumeTokens)
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"),
@@ -158,10 +164,11 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
     discardToken: Boolean = false,
     block: (tokens: ConsumeResult<S>) -> ParserResult<T, S>
 ): ParserResult<T, S> {
-    val lookAhead = state.lookAHeadState
+    val checkpoint = state.lookAHeadState.checkpoint()
     if (hasNext()) {
         val item = next()
         return if (predicate(item)) {
+            checkpoint.end(ConsumeTokens)
             block(
                 Either.Right(
                     NodeCollector(
@@ -173,7 +180,7 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
                 )
             )
         } else {
-            lookAhead.addPendingToken(item)
+            checkpoint.end(1)
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
@@ -184,6 +191,7 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
             )
         }
     }
+    checkpoint.end(ConsumeTokens)
     return Either.Left(
         ParserError(
             BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"), listBuilder(),
@@ -199,10 +207,11 @@ fun <T, S> ConsumeResult<S>.thenIfConsume(
 ): ParserResult<T, S> =
     this.flatMap {
         val iterator = it.tokens
-        val lookAhead = iterator.state.lookAHeadState
+        val checkpoint = iterator.state.lookAHeadState.checkpoint()
         if (iterator.hasNext()) {
             val item = it.tokens.next()
             if (predicate(item)) {
+                checkpoint.end(ConsumeTokens)
                 block(
                     Either.Right(
                         NodeCollector(
@@ -214,7 +223,7 @@ fun <T, S> ConsumeResult<S>.thenIfConsume(
                     )
                 )
             } else {
-                lookAhead.addPendingToken(item)
+                checkpoint.end(1)
                 Either.Left(
                     ParserError(
                         BaseParserErrorCode.ConsumeTokenFailed.new(
@@ -228,6 +237,7 @@ fun <T, S> ConsumeResult<S>.thenIfConsume(
                 )
             }
         } else {
+            checkpoint.end(ConsumeTokens)
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new("token" to "<EOF>"),
@@ -326,17 +336,19 @@ fun <S> ConsumeResult<S>.then(
     this.flatMap {
         val iterator = it.tokens
         val collection = it.collection
-        val lookAhead = iterator.state.lookAHeadState
+        val checkpoint = iterator.state.lookAHeadState.checkpoint()
         if (iterator.hasNext()) {
             val item = iterator.next()
             if (predicate(item)) {
+                checkpoint.end(ConsumeTokens)
                 if (!discardToken) collection.add(item)
                 Either.Right(it)
             } else {
-                lookAhead.addPendingToken(item)
+                checkpoint.end(1)
                 Either.Left(ParserError(error(item), collection, it.consumed, iterator))
             }
         } else {
+            checkpoint.end(ConsumeTokens)
             Either.Left(ParserError(BaseParserErrorCode.EofToken.new(), collection, it.consumed, iterator))
         }
     }
@@ -416,10 +428,11 @@ fun <S> ConsumeResult<S>.thenIf(
 ): ConsumeResult<S> =
     this.flatMap {
         val tokens = it.tokens
-        val lookAHead = tokens.state.lookAHeadState
+        val checkpoint = tokens.state.lookAHeadState.checkpoint()
         if (tokens.hasNext()) {
             val token = tokens.next()
             if (predicate(token)) {
+                checkpoint.end(ConsumeTokens)
                 if (!discardToken) it.collection.add(token)
                 block(
                     Either.Right(
@@ -430,7 +443,7 @@ fun <S> ConsumeResult<S>.thenIf(
                     )
                 )
             } else {
-                lookAHead.addPendingToken(token)
+                checkpoint.end(1)
                 Either.Right(
                     NodeCollector(
                         it.collection,
@@ -439,6 +452,7 @@ fun <S> ConsumeResult<S>.thenIf(
                 )
             }
         } else {
+            checkpoint.end(ConsumeTokens)
             Either.Right(it)
         }
     }

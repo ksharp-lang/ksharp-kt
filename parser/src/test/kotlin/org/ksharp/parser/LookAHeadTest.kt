@@ -25,7 +25,7 @@ enum class LookAHeadError(override val description: String) : ErrorCode {
 class LookAHeadTest : StringSpec({
     "LookAhead buffer with consumeTokens test" {
         val counter = AtomicInteger(0)
-        LookAheadBuffer().apply {
+        LookAheadCheckpoints().apply {
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)))
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
@@ -35,7 +35,7 @@ class LookAHeadTest : StringSpec({
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("3", 0, 0)))
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("4", 0, 0)))
-            removeCheckPoint(true)
+            removeCheckPoint(ConsumeTokens)
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("5", 0, 0)))
             checkpoints.shouldBe(0)
@@ -43,7 +43,7 @@ class LookAHeadTest : StringSpec({
     }
     "LookAhead buffer with consumeTokens = false test" {
         val counter = AtomicInteger(0)
-        LookAheadBuffer().apply {
+        LookAheadCheckpoints().apply {
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)))
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
@@ -53,7 +53,7 @@ class LookAHeadTest : StringSpec({
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("3", 0, 0)))
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("4", 0, 0)))
-            removeCheckPoint(false)
+            removeCheckPoint(PreserveTokens)
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("3", 0, 0)))
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
@@ -65,18 +65,13 @@ class LookAHeadTest : StringSpec({
     }
     "LookAhead cons without checkpoints test" {
         val counter = AtomicInteger(0)
-        LookAheadBuffer().apply {
+        LookAheadCheckpoints().apply {
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)))
-            val t = next {
-                LexerToken(
-                    BaseTokenType.Unknown,
-                    TextToken(counter.incrementAndGet().toString(), 0, 0)
-                )
-            }.apply {
-                shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)))
-            }
-            cons(t!!)
+            addCheckpoint()
+            next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
+                .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)))
+            removeCheckPoint(1)
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)))
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
@@ -86,25 +81,20 @@ class LookAHeadTest : StringSpec({
     }
     "LookAhead cons with checkpoints test" {
         val counter = AtomicInteger(0)
-        LookAheadBuffer().apply {
+        LookAheadCheckpoints().apply {
             addCheckpoint()
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)))
-            val t = next {
-                LexerToken(
-                    BaseTokenType.Unknown,
-                    TextToken(counter.incrementAndGet().toString(), 0, 0)
-                )
-            }.apply {
-                shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)))
-            }
-            cons(t!!)
+            addCheckpoint()
+            next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
+                .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)))
+            removeCheckPoint(1)
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)))
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("3", 0, 0)))
             checkpoints.shouldBe(1)
-            removeCheckPoint(false)
+            removeCheckPoint(PreserveTokens)
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)))
             checkpoints.shouldBe(0)
@@ -112,24 +102,13 @@ class LookAHeadTest : StringSpec({
     }
     "LookAhead cons a list without checkpoints test" {
         val counter = AtomicInteger(0)
-        LookAheadBuffer().apply {
-            val t1 = next {
-                LexerToken(
-                    BaseTokenType.Unknown,
-                    TextToken(counter.incrementAndGet().toString(), 0, 0)
-                )
-            }.apply {
-                shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)))
-            }
-            val t2 = next {
-                LexerToken(
-                    BaseTokenType.Unknown,
-                    TextToken(counter.incrementAndGet().toString(), 0, 0)
-                )
-            }.apply {
-                shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)))
-            }
-            cons(listOf(t1!!, t2!!))
+        LookAheadCheckpoints().apply {
+            addCheckpoint()
+            next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
+                .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)))
+            next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
+                .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("2", 0, 0)))
+            removeCheckPoint(2)
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }
                 .shouldBe(LexerToken(BaseTokenType.Unknown, TextToken("1", 0, 0)))
             next { LexerToken(BaseTokenType.Unknown, TextToken(counter.incrementAndGet().toString(), 0, 0)) }

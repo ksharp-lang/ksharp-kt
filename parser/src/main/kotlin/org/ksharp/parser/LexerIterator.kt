@@ -24,25 +24,27 @@ interface LexerIterator<out T : Token, V> {
 
 class LookAheadLexerIterator<T : Token, V>(private val lexer: LexerIterator<T, V>) : LexerIterator<T, V> by lexer {
 
-    private val buffer = mutableListOf<Token>()
+    private var bufferSize = 0
+
+    fun inCheckpoint(nextToken: LookAheadLexerIterator<T, V>.() -> T?): T? {
+        val checkpoint = state.lookAHeadState.checkpoint()
+        val result = nextToken()
+        if (bufferSize != 0) {
+            checkpoint.end(bufferSize)
+            clearBuffer()
+        } else checkpoint.end(bufferSize)
+        return result
+    }
 
     fun lookNext(): T {
         val result = next()
-        buffer.add(result)
+        bufferSize += 1
         return result
     }
 
     fun clearBuffer() {
-        buffer.clear()
+        bufferSize = 0
     }
-
-    fun recoverBuffer() {
-        if (buffer.isNotEmpty()) {
-            state.lookAHeadState.addPendingTokens(buffer)
-            buffer.clear()
-        }
-    }
-
 }
 
 fun <T : Token, V> LexerIterator<T, V>.asSequence() = generateSequence { if (hasNext()) next() else null }
@@ -97,8 +99,6 @@ fun <I : Token, O : Token, S> LexerIterator<I, S>.map(transform: (value: I) -> O
 fun <T : Token, S> LexerIterator<T, S>.generateIteratorWithLookAhead(nextValue: LookAheadLexerIterator<T, S>.() -> T?): LexerIterator<T, S> {
     val lexer = LookAheadLexerIterator(this)
     return generateLexerIterator(state) {
-        val result = lexer.nextValue()
-        lexer.recoverBuffer()
-        result
+        lexer.inCheckpoint(nextValue)
     }
 }
