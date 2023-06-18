@@ -43,8 +43,8 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
     }
 
 fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
-    consume(KSharpTokenType.If, false)
-        .enableIfKeywords {
+    ifConsume(KSharpTokenType.If, false) { ifLexer ->
+        ifLexer.enableIfKeywords {
             it.consume { l -> l.consumeExpression() }
                 .thenOptional(KSharpTokenType.NewLine, true)
                 .then(KSharpTokenType.Then, false)
@@ -74,10 +74,11 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
                 locations
             )
         }
+    }
 
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
-    consume(KSharpTokenType.Let, false)
-        .enableLetKeywords { l ->
+    ifConsume(KSharpTokenType.Let, false) { ifLexer ->
+        ifLexer.enableLetKeywords { l ->
             l.enableDiscardBlockAndNewLineTokens { d ->
                 d.thenLoop {
                     it.consumeMatchAssignment()
@@ -98,6 +99,7 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
                 LetExpressionNodeLocations(letToken.location, it[it.size - 2].cast<Token>().location)
             )
         }
+    }
 
 internal fun KSharpLexerIterator.consumeExpressionValue(
     tupleWithoutParenthesis: Boolean = true,
