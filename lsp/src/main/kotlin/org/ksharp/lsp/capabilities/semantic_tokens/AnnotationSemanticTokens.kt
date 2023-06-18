@@ -23,7 +23,7 @@ private fun List<AttributeLocation>.semanticTokens(encoder: TokenEncoder) {
             AnnotationNode::class.java -> it.valueLocation.cast<AnnotationNodeLocations>()
                 .semanticTokens(encoder)
 
-            else -> {}
+            else -> Unit
         }
     }
 }

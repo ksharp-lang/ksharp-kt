@@ -7,7 +7,6 @@ import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.ParametricType
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.TypeVariable
 
 class ParametricUnification : CompoundUnification<ParametricType>() {
 
@@ -22,14 +21,14 @@ class ParametricUnification : CompoundUnification<ParametricType>() {
     ): ErrorOrType =
         if (type1.params.size != type2.params.size) incompatibleType(location, type1, type2)
         else {
-            val type = if (type1.type == type2.type) {
+            val type = if (type1.type.representation == type2.type.representation) {
                 Either.Right(type1.type)
             } else incompatibleType(location, type1, type2)
             type.flatMap {
                 unifyListOfTypes(location, typeSystem, type1, type2, type1.params, type2.params).map { params ->
                     ParametricType(
                         it.visibility,
-                        it as TypeVariable,
+                        it,
                         params
                     )
                 }
