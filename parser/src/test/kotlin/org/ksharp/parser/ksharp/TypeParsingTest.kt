@@ -9,10 +9,9 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
-    ensureNewLineAtEnd()
+    filterAndCollapseTokens()
         .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
         .enableLookAhead()
-        .collapseKSharpTokens()
         .discardBlocksOrNewLineTokens()
 
 class TypeParserTest : StringSpec({

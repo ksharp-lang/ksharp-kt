@@ -3,15 +3,19 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.*
+import org.ksharp.parser.TokenLexerIterator
 import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
+
+private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForMatchValueParsing() =
+    filterAndCollapseTokens()
+        .enableLookAhead()
+
 
 class MatchValueParserTest : StringSpec({
     "Match binding" {
         "x".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -24,9 +28,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match value" {
         "10".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -39,9 +41,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match tuple" {
         "x, y".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -61,9 +61,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match list" {
         "[x, y]".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -83,9 +81,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match list with remaining" {
         "[1, 2 | rest]".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -106,9 +102,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match list with remaining 2" {
         "[(1, 2) | rest]".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -135,9 +129,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match sets" {
         "#[x, 1]".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -157,9 +149,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match maps" {
         "{\"key1\": x, \"key2\": y}".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -187,9 +177,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match types" {
         "Bool x".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -208,9 +196,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match types with labels" {
         "Username password: p".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchValue()
             .map { it.value }
             .shouldBeRight(
@@ -230,9 +216,7 @@ class MatchValueParserTest : StringSpec({
     }
     "Match assignment" {
         "x, y = 1, 2".kSharpLexer()
-            .ensureNewLineAtEnd()
-            .enableLookAhead()
-            .collapseKSharpTokens()
+            .prepareLexerForMatchValueParsing()
             .consumeMatchAssignment()
             .map { it.value }
             .shouldBeRight(

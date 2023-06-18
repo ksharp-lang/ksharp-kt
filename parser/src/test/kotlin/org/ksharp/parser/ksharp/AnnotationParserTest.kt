@@ -11,10 +11,9 @@ import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForAnnotationParsing() =
-    ensureNewLineAtEnd()
+    filterAndCollapseTokens()
         .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
         .enableLookAhead()
-        .collapseKSharpTokens()
         .discardBlocksOrNewLineTokens()
 
 class AnnotationParserTest : StringSpec({

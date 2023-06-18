@@ -168,8 +168,7 @@ fun String.lexerModule(withLocations: Boolean) =
 
 fun Reader.lexerModule(withLocations: Boolean) =
     kSharpLexer()
-        .ensureNewLineAtEnd()
-        .collapseTokensExceptNewLines()
+        .filterAndCollapseTokens()
         .cast<TokenLexerIterator<KSharpLexerState>>()
         .let {
             if (withLocations) it.toLogicalLexerToken()
@@ -180,7 +179,6 @@ fun Reader.lexerModule(withLocations: Boolean) =
             else token
         }
         .enableLookAhead()
-        .collapseKSharpTokens()
         .discardBlocksOrNewLineTokens()
 
 

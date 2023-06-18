@@ -10,10 +10,9 @@ import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForFunctionParsing() =
-    ensureNewLineAtEnd()
+    filterAndCollapseTokens()
         .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
         .enableLookAhead()
-        .collapseKSharpTokens()
         .discardBlocksOrNewLineTokens()
 
 class FunctionParserTest : StringSpec({

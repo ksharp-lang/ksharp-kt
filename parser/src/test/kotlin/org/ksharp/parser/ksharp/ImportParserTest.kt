@@ -13,10 +13,9 @@ class ImportParserTest : StringSpec({
     "Parse import" {
         "import ksharp.math as math"
             .kSharpLexer()
-            .ensureNewLineAtEnd()
+            .filterAndCollapseTokens()
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .enableLookAhead()
-            .collapseKSharpTokens()
             .discardBlocksOrNewLineTokens()
             .consumeBlock { it.consumeImport() }
             .map { it.value }
@@ -38,10 +37,9 @@ class ImportParserTest : StringSpec({
     "Parse import 2" {
         "import ksharp as math"
             .kSharpLexer()
-            .ensureNewLineAtEnd()
+            .filterAndCollapseTokens()
             .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
             .enableLookAhead()
-            .collapseKSharpTokens()
             .discardBlocksOrNewLineTokens()
             .consumeBlock { it.consumeImport() }
             .map { it.value }

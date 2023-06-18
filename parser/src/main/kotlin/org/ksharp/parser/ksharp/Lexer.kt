@@ -628,21 +628,18 @@ fun KSharpLexerIterator.collapseTokensExceptNewLines(): KSharpLexerIterator =
     collapseTokens(BaseTokenType.NewLine)
 
 fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
-    return generateIteratorWithLookAhead {
-        var token: Token? = null
+    var lastToken: Token? = null
+    return generateLexerIterator(state) {
+        var token: Token? = lastToken
+        lastToken = null
         while (hasNext()) {
             if (token == null) {
                 token = next()
                 continue
             }
 
-            val nextToken = lookNext()
-
-            if (token.type == BaseTokenType.WhiteSpace) {
-                token = nextToken
-                clearBuffer()
-                continue
-            }
+            lastToken = next()
+            val nextToken = lastToken!!
 
             if (isUnitToken(token, nextToken)) {
                 token = token.collapse(
@@ -650,7 +647,6 @@ fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
                     "()",
                     nextToken
                 )
-                clearBuffer()
                 continue
             }
 
@@ -660,7 +656,6 @@ fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
                     "${token.text}${nextToken.text}",
                     nextToken
                 )
-                clearBuffer()
                 continue
             }
 
@@ -669,6 +664,12 @@ fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
         token?.mapOperatorToken()
     }.mapKeywords()
 }
+
+fun KSharpLexerIterator.filterAndCollapseTokens() =
+    ensureNewLineAtEnd()
+        .collapseTokensExceptNewLines()
+        .collapseKSharpTokens()
+        .filterWhiteSpace()
 
 fun String.kSharpLexer() = lexer(KSharpLexerState(), charStream(), kSharpTokenFactory).filter {
     it.type != KSharpTokenType.Ignore
