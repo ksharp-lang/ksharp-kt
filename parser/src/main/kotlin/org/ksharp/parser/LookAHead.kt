@@ -87,8 +87,8 @@ internal class LookAheadCheckpoints {
     private fun trim() {
         if (checkPoints.isEmpty()) {
             if (currentIndex != 0) {
-                System.arraycopy(buffer, currentIndex, buffer, 0, endIndex)
                 endIndex -= currentIndex
+                System.arraycopy(buffer, currentIndex, buffer, 0, endIndex)
                 currentIndex = 0
             }
         }
