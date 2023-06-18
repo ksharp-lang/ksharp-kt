@@ -82,17 +82,15 @@ internal class LookAheadCheckpoints {
     }
 
     private fun trim() {
-        if (checkPoints.isEmpty()) {
-            if (currentIndex != 0) {
-                endIndex -= currentIndex
-                System.arraycopy(buffer, currentIndex, buffer, 0, endIndex)
-                currentIndex = 0
-            }
+        if (checkPoints.isEmpty() && currentIndex != 0) {
+            endIndex -= currentIndex
+            System.arraycopy(buffer, currentIndex, buffer, 0, endIndex)
+            currentIndex = 0
         }
     }
 }
 
-interface LookAheadCheckpoint {
+fun interface LookAheadCheckpoint {
     fun end(rewind: Int)
 
 }
@@ -119,11 +117,7 @@ class LookAheadLexerState {
     fun checkpoint(): LookAheadCheckpoint {
         if (!enabled) throw RuntimeException("LookAhead not enabled")
         checkpoints.addCheckpoint()
-        return object : LookAheadCheckpoint {
-            override fun end(rewind: Int) {
-                checkpoints.removeCheckPoint(rewind)
-            }
-        }
+        return LookAheadCheckpoint { rewind -> checkpoints.removeCheckPoint(rewind) }
     }
 
 }
