@@ -32,9 +32,6 @@ internal class LookAheadCheckpoints {
         when (rewind) {
             ConsumeTokens -> {
                 trim()
-                if (checkPoints.isEmpty()) {
-                    inCheckPoint = false
-                }
             }
 
             PreserveTokens -> {

@@ -67,7 +67,7 @@ fun <S> BaseLexerIterator<S>.consume(predicate: (Token) -> Boolean, discardToken
                 )
             )
         } else {
-            checkpoint.end(1)
+            checkpoint.end(PreserveTokens)
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
@@ -105,7 +105,7 @@ fun <S> BaseLexerIterator<S>.optionalConsume(
                 )
             )
         } else {
-            checkpoint.end(1)
+            checkpoint.end(PreserveTokens)
             Either.Right(
                 NodeCollector(
                     listBuilder<Any>(),
@@ -137,7 +137,7 @@ fun <S> ConsumeResult<S>.thenOptional(
                 if (!discardToken) it.collection.add(item)
                 Either.Right(it)
             } else {
-                checkpoint.end(1)
+                checkpoint.end(PreserveTokens)
                 Either.Right(
                     NodeCollector(
                         it.collection,
@@ -179,7 +179,7 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
                 )
             )
         } else {
-            checkpoint.end(1)
+            checkpoint.end(PreserveTokens)
             Either.Left(
                 ParserError(
                     BaseParserErrorCode.ConsumeTokenFailed.new(item.location, "token" to "'${item.type}:${item.text}'"),
@@ -222,7 +222,7 @@ fun <T, S> ConsumeResult<S>.thenIfConsume(
                     )
                 )
             } else {
-                checkpoint.end(1)
+                checkpoint.end(PreserveTokens)
                 Either.Left(
                     ParserError(
                         BaseParserErrorCode.ConsumeTokenFailed.new(
@@ -343,7 +343,7 @@ fun <S> ConsumeResult<S>.then(
                 if (!discardToken) collection.add(item)
                 Either.Right(it)
             } else {
-                checkpoint.end(1)
+                checkpoint.end(PreserveTokens)
                 Either.Left(ParserError(error(item), collection, it.consumed, iterator))
             }
         } else {
@@ -442,7 +442,7 @@ fun <S> ConsumeResult<S>.thenIf(
                     )
                 )
             } else {
-                checkpoint.end(1)
+                checkpoint.end(PreserveTokens)
                 Either.Right(
                     NodeCollector(
                         it.collection,
