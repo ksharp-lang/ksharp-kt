@@ -20,7 +20,7 @@ private val serializerWriter = mapOf<String, SerializerWriter<Any>>(
     },
     "Boolean" to SerializerWriter { input, buffer, table ->
         buffer.serializeValue("Boolean", table) {
-            add(if (input as Boolean) 1 else 0)
+            add(if (input.cast()) 1 else 0)
         }
     },
     "List" to SerializerWriter { input, buffer, table ->
