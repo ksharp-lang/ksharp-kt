@@ -13,13 +13,13 @@ import java.nio.file.Path
 typealias KSharpParserResult = ParserResult<NodeData, KSharpLexerState>
 typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
 
-fun KSharpConsumeResult.discardBlanks() =
+fun KSharpConsumeResult.discardNewLines() =
     map {
         val lexer = it.tokens
         val checkpoint = lexer.state.lookAHeadState.checkpoint()
         while (lexer.hasNext()) {
             val token = lexer.next()
-            if (token.type == BaseTokenType.NewLine || token.type == KSharpTokenType.EndBlock) {
+            if (token.type == BaseTokenType.NewLine) {
                 continue
             }
             checkpoint.end(1)

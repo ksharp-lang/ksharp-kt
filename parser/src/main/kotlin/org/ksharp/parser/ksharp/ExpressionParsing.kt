@@ -83,12 +83,13 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
                 d.thenLoop {
                     it.consumeMatchAssignment()
                         .resume()
-                        .discardBlanks()
+                        .discardNewLines()
                         .build { items ->
                             items.first().cast<NodeData>()
                         }
                 }
-            }.then(KSharpTokenType.Then, false)
+            }.thenOptional(KSharpTokenType.EndBlock, true)
+                .then(KSharpTokenType.Then, false)
                 .consume { it.consumeExpression() }
         }.build {
             val letToken = it.first().cast<Token>()
@@ -119,7 +120,7 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
     val newLineExpression = if (state.value.enableExpressionStartingNewLine) {
         groupExpression.or {
             it.ifConsume(BaseTokenType.NewLine, true) { ifL ->
-                ifL.discardBlanks()
+                ifL.discardNewLines()
                     .consume { l -> l.consumeExpression() }
                     .build { l -> l.first().cast<NodeData>() }
             }

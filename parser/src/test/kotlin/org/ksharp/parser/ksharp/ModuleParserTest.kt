@@ -584,7 +584,7 @@ class ModuleParserTest : StringSpec({
         """.trimMargin("|")
             .parseModule("File", false)
             .map {
-                it.functions.onEach(::println)
+                it.errors.onEach(::println)
             }
             .shouldBeRight(
                 ModuleNode(
