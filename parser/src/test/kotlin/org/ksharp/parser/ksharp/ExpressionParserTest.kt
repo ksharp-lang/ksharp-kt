@@ -3,13 +3,19 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.*
+import org.ksharp.parser.TokenLexerIterator
+import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
+
+private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForExpressionParsing() =
+    filterAndCollapseTokens()
+        .enableLookAhead()
 
 class ExpressionParserTest : StringSpec({
     "function call" {
         "sum 10 20"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -35,7 +41,7 @@ class ExpressionParserTest : StringSpec({
     "function name call" {
         "sum->two 10 20"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -61,7 +67,7 @@ class ExpressionParserTest : StringSpec({
     "function call receiving tuples" {
         "moveX 10,20 5"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -97,7 +103,7 @@ class ExpressionParserTest : StringSpec({
     "type instance" {
         "Point 10 20"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -123,7 +129,7 @@ class ExpressionParserTest : StringSpec({
     "operator as prefix function" {
         "(+) 10 20"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -149,7 +155,7 @@ class ExpressionParserTest : StringSpec({
     "function with variables" {
         "map toString [10, 20, 30]"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -190,7 +196,7 @@ class ExpressionParserTest : StringSpec({
     "operator 12 test" {
         "10 ** 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -205,7 +211,7 @@ class ExpressionParserTest : StringSpec({
     "operator 11 test" {
         "10 * 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -220,7 +226,7 @@ class ExpressionParserTest : StringSpec({
     "operator 10 test" {
         "10 + 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -235,7 +241,7 @@ class ExpressionParserTest : StringSpec({
     "operator precedence test" {
         "10 + 2 * 3"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -255,7 +261,7 @@ class ExpressionParserTest : StringSpec({
     "operator 9 test" {
         "10 >> 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -270,7 +276,7 @@ class ExpressionParserTest : StringSpec({
     "operator 8 test" {
         "10 > 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -285,7 +291,7 @@ class ExpressionParserTest : StringSpec({
     "operator 7 test" {
         "10 != 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -300,7 +306,7 @@ class ExpressionParserTest : StringSpec({
     "operator 6 test" {
         "10 & 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -315,7 +321,7 @@ class ExpressionParserTest : StringSpec({
     "operator 5 test" {
         "10 ^ 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -330,7 +336,7 @@ class ExpressionParserTest : StringSpec({
     "operator 4 test" {
         "10 | 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -345,7 +351,7 @@ class ExpressionParserTest : StringSpec({
     "operator 3 test" {
         "10 && 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -360,7 +366,7 @@ class ExpressionParserTest : StringSpec({
     "operator 2 test" {
         "10 || 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -375,7 +381,7 @@ class ExpressionParserTest : StringSpec({
     "operator 1 test" {
         "10 $ 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -390,7 +396,7 @@ class ExpressionParserTest : StringSpec({
     "operator 0 test" {
         "10 . 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -405,7 +411,7 @@ class ExpressionParserTest : StringSpec({
     "operator test" {
         "10 : 2"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -420,7 +426,7 @@ class ExpressionParserTest : StringSpec({
     "tuple and operators" {
         "10 , 2 + 1"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -441,7 +447,7 @@ class ExpressionParserTest : StringSpec({
     "tuple and operators 2" {
         "10 , (2 + 1)"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -462,7 +468,7 @@ class ExpressionParserTest : StringSpec({
     "custom operator precedence test" {
         "10 +> 2 * 3"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -482,7 +488,7 @@ class ExpressionParserTest : StringSpec({
     "collection with expressions" {
         "[10 , 2 + 1]"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -503,7 +509,7 @@ class ExpressionParserTest : StringSpec({
     "map with expressions" {
         "{(10 + 2): 10 + 20, \"key2\": 20}"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -540,7 +546,7 @@ class ExpressionParserTest : StringSpec({
            |        30 + 15
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -575,7 +581,7 @@ class ExpressionParserTest : StringSpec({
            |       30 + 15
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -608,7 +614,7 @@ class ExpressionParserTest : StringSpec({
         """sum 10 20 30 + 15
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -640,7 +646,7 @@ class ExpressionParserTest : StringSpec({
     "complete if expression" {
         "if 4 > a then 10 else 20"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -660,7 +666,7 @@ class ExpressionParserTest : StringSpec({
     "complete if without else expression" {
         "if 4 > a then 10"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -682,7 +688,7 @@ class ExpressionParserTest : StringSpec({
            |    then 10
            |    else 20""".trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -707,7 +713,7 @@ class ExpressionParserTest : StringSpec({
            |   15
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -749,7 +755,7 @@ class ExpressionParserTest : StringSpec({
            |   15
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -787,7 +793,7 @@ class ExpressionParserTest : StringSpec({
     "if with unit expression" {
         "if 4 > a then () else ()"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -807,7 +813,7 @@ class ExpressionParserTest : StringSpec({
     "Type instance with labels" {
         "Username label1: x label2: 20"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -830,7 +836,7 @@ class ExpressionParserTest : StringSpec({
            |then x + y
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -874,7 +880,7 @@ class ExpressionParserTest : StringSpec({
            |then x + y
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -923,7 +929,7 @@ class ExpressionParserTest : StringSpec({
           |then x + 2
         """.trimMargin()
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForExpressionParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(

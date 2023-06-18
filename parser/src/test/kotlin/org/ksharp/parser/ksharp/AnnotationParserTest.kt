@@ -6,14 +6,21 @@ import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.AnnotationNodeLocations
 import org.ksharp.parser.LexerToken
 import org.ksharp.parser.TextToken
+import org.ksharp.parser.TokenLexerIterator
+import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
+
+private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForAnnotationParsing() =
+    filterAndCollapseTokens()
+        .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+        .enableLookAhead()
+        .discardBlocksOrNewLineTokens()
 
 class AnnotationParserTest : StringSpec({
     "Annotation without attributes" {
         "@native"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForAnnotationParsing()
             .consumeBlock(KSharpLexerIterator::consumeAnnotation)
             .map { it.value.also { println(it) } }
             .shouldBeRight(
@@ -28,8 +35,7 @@ class AnnotationParserTest : StringSpec({
     "Annotation without attributes 2" {
         "@native()"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForAnnotationParsing()
             .consumeBlock(KSharpLexerIterator::consumeAnnotation)
             .map { it.value.also { println(it) } }
             .shouldBeRight(
@@ -44,8 +50,7 @@ class AnnotationParserTest : StringSpec({
     "Annotation with attributes" {
         "@native(True for=[\"java\" \"c#\"] wire->internal=@native(\"String\") Flag=False)"
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForAnnotationParsing()
             .consumeBlock(KSharpLexerIterator::consumeAnnotation)
             .map { it.value.also { println(it) } }
             .shouldBeRight(
@@ -70,8 +75,7 @@ class AnnotationParserTest : StringSpec({
             Flag=False)
         """.trimIndent()
             .kSharpLexer()
-            .collapseKSharpTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .prepareLexerForAnnotationParsing()
             .consumeBlock(KSharpLexerIterator::consumeAnnotation)
             .map { it.value.also { println(it) } }
             .shouldBeRight(

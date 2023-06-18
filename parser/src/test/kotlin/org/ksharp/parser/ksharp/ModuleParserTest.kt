@@ -577,4 +577,180 @@ class ModuleParserTest : StringSpec({
                 )
             )
     }
+    "Parse a module with more than one function" {
+        """
+            |sum a b = a + b
+            |sum2 a b = a + b
+        """.trimMargin("|")
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File",
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    listOf(
+                        FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = null,
+                            name = "sum",
+                            parameters = listOf("a", "b"),
+                            expression = OperatorNode(
+                                operator = "+",
+                                left = FunctionCallNode(
+                                    name = "a",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    location = Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "b",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = listOf(),
+                                assignOperator = Location.NoProvided
+                            )
+                        ), FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = null,
+                            name = "sum2",
+                            parameters = listOf("a", "b"),
+                            expression = OperatorNode(
+                                operator = "+",
+                                left = FunctionCallNode(
+                                    name = "a",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    location = Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "b",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = listOf(),
+                                assignOperator = Location.NoProvided
+                            )
+                        )
+                    ),
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Parse a module with a function with annotation" {
+        """
+            @native(lang=["java", "c#"])
+            var = 10
+        """.trimIndent()
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File",
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    listOf(
+                        FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = listOf(
+                                AnnotationNode(
+                                    name = "native",
+                                    attrs = mapOf("lang" to listOf("java", "c#")),
+                                    location = Location.NoProvided,
+                                    locations = AnnotationNodeLocations(
+                                        altLocation = Location.NoProvided,
+                                        name = Location.NoProvided,
+                                        attrs = listOf()
+                                    )
+                                )
+                            ),
+                            name = "var",
+                            parameters = listOf(),
+                            expression = LiteralValueNode(
+                                value = "10",
+                                type = LiteralValueType.Integer,
+                                location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = listOf(),
+                                assignOperator = Location.NoProvided
+                            )
+                        )
+                    ),
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+    }
+    "Parse two types with carrie return and line feed" {
+        "type Unit = KernelUnit\r\ntype Char = KernelChar"
+            .parseModule("File", false)
+            .shouldBeRight(
+                ModuleNode(
+                    "File",
+                    listOf(),
+                    listOf(
+                        TypeNode(
+                            internal = false,
+                            annotations = null,
+                            name = "Unit",
+                            params = listOf(),
+                            expr = ConcreteTypeNode(name = "KernelUnit", location = Location.NoProvided),
+                            location = Location.NoProvided,
+                            locations = TypeNodeLocations(
+                                internalLocation = Location.NoProvided,
+                                typeLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                params = listOf(),
+                                assignOperatorLocation = Location.NoProvided
+                            )
+                        ),
+                        TypeNode(
+                            internal = false,
+                            annotations = null,
+                            name = "Char",
+                            params = listOf(),
+                            expr = ConcreteTypeNode(name = "KernelChar", location = Location.NoProvided),
+                            location = Location.NoProvided,
+                            locations = TypeNodeLocations(
+                                internalLocation = Location.NoProvided,
+                                typeLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                params = listOf(),
+                                assignOperatorLocation = Location.NoProvided
+                            )
+                        )
+                    ),
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+    }
 })

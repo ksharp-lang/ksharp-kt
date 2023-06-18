@@ -3,13 +3,20 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.*
+import org.ksharp.parser.TokenLexerIterator
+import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
+
+private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForLiteralParsing() =
+    filterAndCollapseTokens()
+        .enableLookAhead()
+
 
 class LiteralParserTest : StringSpec({
     "Character" {
         "'a'"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("'a'", LiteralValueType.Character, Location.NoProvided))
@@ -17,7 +24,7 @@ class LiteralParserTest : StringSpec({
     "String" {
         "\"a\""
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("\"a\"", LiteralValueType.String, Location.NoProvided))
@@ -25,7 +32,7 @@ class LiteralParserTest : StringSpec({
     "Multiline String" {
         "\"\"\"Hello\"\"\""
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("\"\"\"Hello\"\"\"", LiteralValueType.MultiLineString, Location.NoProvided))
@@ -33,7 +40,7 @@ class LiteralParserTest : StringSpec({
     "Integer" {
         "1_000"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("1_000", LiteralValueType.Integer, Location.NoProvided))
@@ -41,7 +48,7 @@ class LiteralParserTest : StringSpec({
     "Hex number" {
         "0xFFFF"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("0xFFFF", LiteralValueType.HexInteger, Location.NoProvided))
@@ -49,7 +56,7 @@ class LiteralParserTest : StringSpec({
     "Octal number" {
         "0o1234"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("0o1234", LiteralValueType.OctalInteger, Location.NoProvided))
@@ -57,7 +64,7 @@ class LiteralParserTest : StringSpec({
     "Binary number" {
         "0b0010"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("0b0010", LiteralValueType.BinaryInteger, Location.NoProvided))
@@ -65,7 +72,7 @@ class LiteralParserTest : StringSpec({
     "Decimal" {
         "1.6"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(LiteralValueNode("1.6", LiteralValueType.Decimal, Location.NoProvided))
@@ -73,7 +80,7 @@ class LiteralParserTest : StringSpec({
     "List" {
         "[1, 2, 3]"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -91,7 +98,7 @@ class LiteralParserTest : StringSpec({
     "Set" {
         "#[1, 2, 3]"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -109,7 +116,7 @@ class LiteralParserTest : StringSpec({
     "Map" {
         "{\"key1\": 1, \"key2\": 2}"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -134,7 +141,7 @@ class LiteralParserTest : StringSpec({
     "Tuple" {
         "1, 2, 3"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -151,7 +158,7 @@ class LiteralParserTest : StringSpec({
 
         "(1, 2, 3)"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -169,7 +176,7 @@ class LiteralParserTest : StringSpec({
     "Tuples with function calls" {
         "x, y"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -186,7 +193,7 @@ class LiteralParserTest : StringSpec({
     "List of tuples" {
         "[(1, 2), (2, 3)]"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpression()
             .map { it.value }
             .shouldBeRight(
@@ -217,7 +224,7 @@ class LiteralParserTest : StringSpec({
     "Binding" {
         "map"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(
@@ -227,7 +234,7 @@ class LiteralParserTest : StringSpec({
     "Type Instance Binding" {
         "Point"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(
@@ -237,7 +244,7 @@ class LiteralParserTest : StringSpec({
     "Function name Binding" {
         "point2d->point3d"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(
@@ -247,7 +254,7 @@ class LiteralParserTest : StringSpec({
     "Operator Binding" {
         "(+)"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(
@@ -257,7 +264,7 @@ class LiteralParserTest : StringSpec({
     "Unit literal" {
         "()"
             .kSharpLexer()
-            .collapseKSharpTokens()
+            .prepareLexerForLiteralParsing()
             .consumeExpressionValue(withBindings = true)
             .map { it.value }
             .shouldBeRight(

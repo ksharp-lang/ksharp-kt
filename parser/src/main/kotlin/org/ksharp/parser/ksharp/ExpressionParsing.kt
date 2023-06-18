@@ -1,7 +1,6 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.Location
-import org.ksharp.common.cast
+import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
@@ -14,7 +13,7 @@ private val Token.functionType
         }
 
 fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
-    consume({
+    ifConsume({
         when (it.type) {
             KSharpTokenType.OperatorFunctionName -> true
             KSharpTokenType.FunctionName -> true
@@ -22,31 +21,34 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
             KSharpTokenType.UpperCaseWord -> true
             else -> false
         }
-    }).thenLoop {
-        it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
-    }
-        .build {
-            val fnName = it.first().cast<Token>()
-            FunctionCallNode(
-                fnName.text,
-                fnName.functionType,
-                it.drop(1).map { arg ->
-                    if (arg is LiteralValueNode && arg.type == LiteralValueType.Binding && arg.value.endsWith(":")) {
-                        arg.copy(type = LiteralValueType.Label)
-                    } else arg as NodeData
-                },
-                fnName.location
-            )
+    }) { l ->
+        l.thenLoop {
+            val r = it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
+            r
         }
+            .build {
+                val fnName = it.first().cast<Token>()
+                FunctionCallNode(
+                    fnName.text,
+                    fnName.functionType,
+                    it.drop(1).map { arg ->
+                        if (arg is LiteralValueNode && arg.type == LiteralValueType.Binding && arg.value.endsWith(":")) {
+                            arg.copy(type = LiteralValueType.Label)
+                        } else arg as NodeData
+                    },
+                    fnName.location
+                )
+            }
+    }
 
 fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
-    consume(KSharpTokenType.If, false)
-        .enableIfKeywords {
+    ifConsume(KSharpTokenType.If, false) { ifLexer ->
+        ifLexer.enableIfKeywords {
             it.consume { l -> l.consumeExpression() }
-                .thenOptional(KSharpTokenType.NewLine, true)
+                .thenOptional(BaseTokenType.NewLine, true)
                 .then(KSharpTokenType.Then, false)
                 .consume { l -> l.consumeExpression() }
-                .thenOptional(KSharpTokenType.NewLine, true)
+                .thenOptional(BaseTokenType.NewLine, true)
                 .thenIf(KSharpTokenType.Else, false) { el ->
                     el.consume { l -> l.consumeExpression() }
                 }
@@ -71,20 +73,22 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
                 locations
             )
         }
+    }
 
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
-    consume(KSharpTokenType.Let, false)
-        .enableLetKeywords { l ->
+    ifConsume(KSharpTokenType.Let, false) { ifLexer ->
+        ifLexer.enableLetKeywords { l ->
             l.enableDiscardBlockAndNewLineTokens { d ->
                 d.thenLoop {
                     it.consumeMatchAssignment()
                         .resume()
-                        .discardBlanks()
+                        .discardNewLines()
                         .build { items ->
                             items.first().cast<NodeData>()
                         }
                 }
-            }.then(KSharpTokenType.Then, false)
+            }.thenOptional(KSharpTokenType.EndBlock, true)
+                .then(KSharpTokenType.Then, false)
                 .consume { it.consumeExpression() }
         }.build {
             val letToken = it.first().cast<Token>()
@@ -95,6 +99,41 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
                 LetExpressionNodeLocations(letToken.location, it[it.size - 2].cast<Token>().location)
             )
         }
+    }
+
+private fun KSharpLexerIterator.ifBeginNewLineExpression(
+    block: (tokens: KSharpConsumeResult) -> KSharpParserResult
+): KSharpParserResult {
+    val checkpoint = state.lookAHeadState.checkpoint()
+
+    val isNewLine = if (hasNext()) {
+        val token = next()
+        token.type == BaseTokenType.NewLine
+    } else false
+
+    val token = if (isNewLine && hasNext()) {
+        next()
+    } else null
+
+    checkpoint.end(PreserveTokens)
+    return if (token != null && token.type != KSharpTokenType.EndBlock) {
+        block(
+            Either.Right(
+                NodeCollector(
+                    listBuilder(),
+                    this
+                )
+            )
+        )
+    } else Either.Left(
+        ParserError(
+            BaseParserErrorCode.ConsumeTokenFailed.new(Location.NoProvided, "token" to "<no newline>"),
+            listBuilder(),
+            false,
+            this
+        )
+    )
+}
 
 internal fun KSharpLexerIterator.consumeExpressionValue(
     tupleWithoutParenthesis: Boolean = true,
@@ -113,16 +152,16 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
 
     val newLineExpression = if (state.value.enableExpressionStartingNewLine) {
         groupExpression.or {
-            it.ifConsume(KSharpTokenType.NewLine, true) { ifL ->
-                ifL.discardBlanks()
+            it.ifBeginNewLineExpression { ifL ->
+                ifL.discardNewLines()
                     .consume { l -> l.consumeExpression() }
                     .build { l -> l.first().cast<NodeData>() }
             }
         }
     } else groupExpression
 
-    val literal = newLineExpression.or {
-        it.consumeLiteral(withBindings)
+    val literal = newLineExpression.or { l ->
+        l.consumeLiteral(withBindings)
     }.or { it.consumeIfExpression() }
         .or { it.consumeLetExpression() }
 
