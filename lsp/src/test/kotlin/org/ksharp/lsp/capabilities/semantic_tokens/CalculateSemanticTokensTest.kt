@@ -106,10 +106,11 @@ private val specs = listOf(
     ),
     "function annotations 2".spec(
         """
-            @native(lang=["java", "c#"])
-            var = 10
-        """.trimIndent(),
-        "0, 0, 1, 4, 0, 0, 1, 6, 6, 0, 0, 13, 6, 1, 0, 0, 8, 4, 1, 0, 1, 0, 3, 8, 0, 0, 4, 1, 4, 0, 0, 2, 2, 5, 0"
+            |@native(lang=["java", "c#"])
+            |var = 10
+        """.trimMargin("|")
+            .replace("\r", ""),
+        "0, 0, 7, 12, 0, 0, 8, 4, 10, 0, 0, 4, 1, 4, 0, 0, 2, 6, 1, 0, 0, 8, 4, 1, 0, 0, -22, 7, 12, 0, 0, 8, 4, 10, 0, 0, 4, 1, 4, 0, 0, 2, 6, 1, 0, 0, 8, 4, 1, 0, 1, 0, 3, 8, 0, 0, 4, 1, 4, 0, 0, 2, 2, 5, 0"
     ),
     "list".spec(
         "list = [10, 20, 30]",
@@ -132,7 +133,8 @@ class CalculateSemanticTokensTest : FreeSpec({
             desc {
                 val actions = documentActions("doc")
                 actions.parseAction(spec.first)
-                actions.semanticTokens.value.get().shouldBe(spec.second)
+                actions.semanticTokens.value.get()
+                    .shouldBe(spec.second)
             }
         }
     }
