@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
 private fun <S> BaseLexerIterator<S>.consume(size: Int) {
     repeat((0 until size).count()) {
         if (this.hasNext()) {
-            this.next()
+            this.next().also(::println)
         }
     }
 }

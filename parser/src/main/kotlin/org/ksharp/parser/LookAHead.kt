@@ -1,7 +1,10 @@
 package org.ksharp.parser
 
-import org.ksharp.common.*
+import org.ksharp.common.Either
+import org.ksharp.common.Error
+import org.ksharp.common.ErrorOrValue
 import org.ksharp.common.annotation.Mutable
+import org.ksharp.common.listBuilder
 import java.util.*
 
 private const val BufferSize: Int = 10
@@ -28,8 +31,9 @@ internal class LookAheadCheckpoints {
 
         when (rewind) {
             ConsumeTokens -> {
+                trim()
                 if (checkPoints.isEmpty()) {
-                    clear()
+                    inCheckPoint = false
                 }
             }
 
@@ -39,6 +43,7 @@ internal class LookAheadCheckpoints {
 
             else -> {
                 currentIndex -= rewind
+                trim()
             }
         }
     }
@@ -80,8 +85,13 @@ internal class LookAheadCheckpoints {
     }
 
     private fun trim() {
-        System.arraycopy(buffer, currentIndex, buffer, 0, endIndex)
-        currentIndex = 0
+        if (checkPoints.isEmpty()) {
+            if (currentIndex != 0) {
+                System.arraycopy(buffer, currentIndex, buffer, 0, endIndex)
+                endIndex -= currentIndex
+                currentIndex = 0
+            }
+        }
     }
 }
 
@@ -94,26 +104,23 @@ class LookAheadLexerState {
     private val checkpoints = LookAheadCheckpoints()
 
     private var enabled = false
-    private lateinit var lexer: BaseLexerIterator<*>
 
     fun <S> enable(
         lexer: BaseLexerIterator<S>
-    ): BaseLexerIterator<S> {
+    ): BaseLexerIterator<S> =
         if (!enabled) {
             this.enabled = true
-            val lexerResult = generateLexerIterator(lexer.state) {
+            generateLexerIterator(lexer.state) {
                 checkpoints.next {
                     if (lexer.hasNext()) {
                         lexer.next()
                     } else null
                 }
             }
-            this.lexer = lexerResult.cast()
-        }
-        return this.lexer.cast()
-    }
+        } else throw RuntimeException("LookAhead already enabled")
 
     fun checkpoint(): LookAheadCheckpoint {
+        if (!enabled) throw RuntimeException("LookAhead not enabled")
         checkpoints.addCheckpoint()
         return object : LookAheadCheckpoint {
             override fun end(rewind: Int) {
