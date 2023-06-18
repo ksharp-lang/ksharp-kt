@@ -288,23 +288,6 @@ fun <T, S> BaseLexerIterator<S>.ifConsume(
     it.type == type && it.text == text
 }, discardToken, block)
 
-fun <T, S> ConsumeResult<S>.thenIfConsume(
-    type: TokenType,
-    discardToken: Boolean = false,
-    block: (tokens: ConsumeResult<S>) -> ParserResult<T, S>
-): ParserResult<T, S> = thenIfConsume({
-    it.type == type
-}, discardToken, block)
-
-fun <T, S> ConsumeResult<S>.thenIfConsume(
-    type: TokenType,
-    text: String,
-    discardToken: Boolean = false,
-    block: (tokens: ConsumeResult<S>) -> ParserResult<T, S>
-): ParserResult<T, S> = thenIfConsume({
-    it.type == type && it.text == text
-}, discardToken, block)
-
 fun <S, T> ParserResult<T, S>.or(
     rule: (tokens: BaseLexerIterator<S>) -> ParserResult<T, S>
 ) =

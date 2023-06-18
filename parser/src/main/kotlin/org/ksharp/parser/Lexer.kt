@@ -68,7 +68,7 @@ fun <V> BaseLexerIterator<V>.collapseTokens(vararg excludeTokens: TokenType): Ba
 }
 
 fun <S> BaseLexerIterator<S>.filterWhiteSpace(): BaseLexerIterator<S> = filter {
-    it.type != org.ksharp.parser.BaseTokenType.WhiteSpace
+    it.type != BaseTokenType.WhiteSpace
 }
 
 fun <V> TokenLexerIterator<V>.toLogicalLexerToken(): BaseLexerIterator<V> =
