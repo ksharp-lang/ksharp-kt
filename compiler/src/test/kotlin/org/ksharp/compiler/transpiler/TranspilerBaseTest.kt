@@ -2,6 +2,7 @@ package org.ksharp.compiler.transpiler
 
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.compiler.moduleInfo
+import org.ksharp.compiler.transpiler.transpilers.CppTranspiler
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.test.shouldBeRight
 
@@ -35,5 +36,15 @@ class TranspilerBaseTest : StringSpec({
                     "sum2" to false
                 )
             )
+    }
+    "Transpile non parametric sum :: Int -> Int -> Int" {
+        """
+            sum :: Int -> Int -> Int
+            sum a b = a + b
+        """.trimIndent()
+            .moduleInfo("tst.ks", preludeModule)
+            .shouldBeRight()
+            .map { it.transpile(CppTranspiler()) }
+            .shouldBeRight("")
     }
 })
