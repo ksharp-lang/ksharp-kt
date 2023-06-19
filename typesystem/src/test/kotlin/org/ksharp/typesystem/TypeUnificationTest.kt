@@ -350,4 +350,32 @@ class TypeUnificationTest : StringSpec({
                 )
             )
     }
+    "Unification Parametric with Generalise types" {
+        val ts = typeSystem {
+            type(TypeVisibility.Public, "NativeInt")
+            parametricType(TypeVisibility.Public, "Num") {
+                parameter("a")
+            }
+            alias(TypeVisibility.Public, "Int") {
+                parametricType("Num") {
+                    type("NativeInt")
+                }
+            }
+        }.value
+        ts.unify(
+            Location.NoProvided,
+            ParametricType(
+                TypeVisibility.Public, Concrete(TypeVisibility.Public, "Num"), listOf(
+                    Parameter(TypeVisibility.Public, "a")
+                )
+            ),
+            Alias(TypeVisibility.Public, "Int")
+        ).shouldBeRight(
+            ParametricType(
+                TypeVisibility.Public, Concrete(TypeVisibility.Public, "Num"), listOf(
+                    Concrete(TypeVisibility.Public, "NativeInt")
+                )
+            )
+        )
+    }
 })

@@ -23,8 +23,7 @@ private fun KSharpLexerIterator.consumeModuleName() =
                     .thenLowerCaseWord()
                     .build { pair ->
                         pair.joinToString("") { t ->
-                            t as LexerValue
-                            t.text
+                            t.cast<LexerValue>().text
                         } to pair.last()
                     }
             }.build {

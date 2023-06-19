@@ -34,7 +34,7 @@ fun LiteralValueNode.semanticTokens(encoder: TokenEncoder) {
 
         LiteralValueType.Label -> encoder.register(location, SemanticTokenTypes.Comment)
 
-        else -> {}
+        else -> Unit
     }
 }
 

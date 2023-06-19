@@ -1,5 +1,8 @@
 package org.ksharp.common
 
+import org.ksharp.common.annotation.CodeGeneratedByInlining
+
+@CodeGeneratedByInlining
 inline fun <T> generateIterator(crossinline generator: () -> T?): Iterator<T> = object : Iterator<T> {
     private var current: T? = null
 
