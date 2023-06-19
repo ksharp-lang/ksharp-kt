@@ -1,4 +1,6 @@
 package org.ksharp.ir
 
-class Module {
-}
+data class Module(
+    val dependencies: List<String>,
+    val symbols: List<TopLevelSymbol>
+) : IrNode
