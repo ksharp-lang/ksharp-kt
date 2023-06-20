@@ -106,7 +106,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 left.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 right.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
             ),
-            paramTypePromise(),
+            ApplicationSemanticInfo(),
             location
         )
 
@@ -117,7 +117,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 trueExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 falseExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
             ),
-            paramTypePromise(),
+            ApplicationSemanticInfo(),
             location
         )
 
@@ -134,7 +134,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 ApplicationNode(
                     name.toApplicationName(),
                     listOf(UnitNode(location).toSemanticNode(errors, callInfo, typeSystem)),
-                    paramTypePromise(),
+                    ApplicationSemanticInfo(),
                     location
                 )
             }
@@ -145,7 +145,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 arguments.map {
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
                 },
-                paramTypePromise(),
+                ApplicationSemanticInfo(),
                 location
             )
         }
@@ -164,7 +164,7 @@ internal fun ExpressionParserNode.toSemanticNode(
             ApplicationNode(
                 type.applicationName,
                 expressions,
-                paramTypePromise(),
+                ApplicationSemanticInfo(),
                 location
             )
         }
@@ -176,7 +176,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                     key.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                     value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 ),
-                paramTypePromise(),
+                ApplicationSemanticInfo(),
                 location
             )
         }
