@@ -79,6 +79,13 @@ private fun SemanticInfo.callSemanticInfo(): SemanticInfo =
         LetSemanticInfo(table)
     } else this
 
+private fun String.toApplicationName(): ApplicationName {
+    val ix = this.indexOf('.')
+    return if (ix != -1) {
+        ApplicationName(this.substring(0, ix), this.substring(ix + 1))
+    } else ApplicationName(name = this)
+}
+
 internal fun ExpressionParserNode.toSemanticNode(
     errors: ErrorCollector,
     info: SemanticInfo,
@@ -104,7 +111,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         )
 
         is IfNode -> ApplicationNode(
-            ApplicationName(null, "if"),
+            ApplicationName(PRELUDE_FLAG, "if"),
             listOf(
                 condition.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 trueExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
@@ -125,7 +132,7 @@ internal fun ExpressionParserNode.toSemanticNode(
             } else {
                 val callInfo = info.callSemanticInfo()
                 ApplicationNode(
-                    ApplicationName(name = name),
+                    name.toApplicationName(),
                     listOf(UnitNode(location).toSemanticNode(errors, callInfo, typeSystem)),
                     paramTypePromise(),
                     location
@@ -134,7 +141,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         } else {
             val callInfo = info.callSemanticInfo()
             ApplicationNode(
-                ApplicationName(name = name),
+                name.toApplicationName(),
                 arguments.map {
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
                 },
@@ -164,7 +171,7 @@ internal fun ExpressionParserNode.toSemanticNode(
 
         is LiteralMapEntryNode -> {
             ApplicationNode(
-                ApplicationName(null, "pair"),
+                ApplicationName(PRELUDE_FLAG, "pair"),
                 listOf(
                     key.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                     value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
