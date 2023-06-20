@@ -24,7 +24,8 @@ import org.ksharp.typesystem.types.*
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
-    ParamMismatch("Param mismatch for '{name}'. {fnParam} != {declParam}")
+    ParamMismatch("Param mismatch for '{name}'. {fnParam} != {declParam}"),
+    InvalidFunctionName("Function name can't contain '.' symbol '{name}'")
 }
 
 private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> =
@@ -69,6 +70,12 @@ private fun Type.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>
         else -> this.cast<FunctionType>().typePromise(node)
     }
 
+internal fun String.checkFunctionName(location: Location): ErrorOrValue<Unit> {
+    val ix = this.indexOf(".")
+    return if (ix == -1) Either.Right(Unit)
+    else Either.Left(FunctionSemanticsErrorCode.InvalidFunctionName.new(location, "name" to this))
+}
+
 internal fun ModuleNode.buildFunctionTable(
     errors: ErrorCollector,
     typeSystem: TypeSystem
@@ -76,23 +83,25 @@ internal fun ModuleNode.buildFunctionTable(
     FunctionTableBuilder(errors).let { table ->
         val listBuilder = listBuilder<FunctionNode>()
         functions.forEach { f ->
-            val type = typeSystem["Decl__${f.name}"].valueOrNull
-            errors.collect(type.let { it?.typePromise(f) ?: Either.Right(f.typePromise(typeSystem)) })
-                .map {
-                    val annotations = when (type) {
-                        is Annotated -> type.annotations
-                        else -> null
-                    }
-                    table.register(
-                        f.name,
-                        Function(
-                            if (f.pub) FunctionVisibility.Public else FunctionVisibility.Internal,
-                            annotations,
+            errors.collect(f.name.checkFunctionName(location)).map {
+                val type = typeSystem["Decl__${f.name}"].valueOrNull
+                errors.collect(type.let { it?.typePromise(f) ?: Either.Right(f.typePromise(typeSystem)) })
+                    .map {
+                        val annotations = when (type) {
+                            is Annotated -> type.annotations
+                            else -> null
+                        }
+                        table.register(
                             f.name,
-                            it
-                        ), f.location
-                    ).map { listBuilder.add(f) }
-                }
+                            Function(
+                                if (f.pub) FunctionVisibility.Public else FunctionVisibility.Internal,
+                                annotations,
+                                f.name,
+                                it
+                            ), f.location
+                        ).map { listBuilder.add(f) }
+                    }
+            }
         }
         table.build() to listBuilder.build()
     }
@@ -148,8 +157,8 @@ internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
             }
         val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
         if (returnType != null) {
-            FunctionInfo(it.native, semanticInfo.visibility, null, it.annotations, it.name, arguments + returnType)
-        } else FunctionInfo(it.native, semanticInfo.visibility, null, it.annotations, it.name, arguments)
+            FunctionInfo(it.native, semanticInfo.visibility, it.annotations, it.name, arguments + returnType)
+        } else FunctionInfo(it.native, semanticInfo.visibility, it.annotations, it.name, arguments)
     }.groupBy { it.name }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
