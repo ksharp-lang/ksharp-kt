@@ -125,7 +125,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                TypeSemanticInfo(Either.Right(newParameter())),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
@@ -157,7 +157,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                TypeSemanticInfo(Either.Right(newParameter())),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
@@ -189,7 +189,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                TypeSemanticInfo(Either.Right(newParameter())),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -228,7 +228,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     ),
                 ),
-                TypeSemanticInfo(Either.Right(newParameter())),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -258,7 +258,7 @@ class InferenceTest : StringSpec({
                     ApplicationNode(
                         ApplicationName(name = "True"),
                         listOf(),
-                        TypeSemanticInfo(Either.Right(newParameter())),
+                        ApplicationSemanticInfo(),
                         Location.NoProvided
                     ),
                     ConstantNode(
@@ -272,7 +272,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     ),
                 ),
-                TypeSemanticInfo(Either.Right(newParameter())),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -312,7 +312,7 @@ class InferenceTest : StringSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            TypeSemanticInfo(Either.Right(newParameter())),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo(),
@@ -347,7 +347,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                TypeSemanticInfo(Either.Right(newParameter())),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
@@ -382,7 +382,7 @@ class InferenceTest : StringSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            TypeSemanticInfo(Either.Right(newParameter())),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo(),

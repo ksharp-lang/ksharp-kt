@@ -2,6 +2,7 @@ package org.ksharp.semantics.nodes
 
 import InferenceErrorCode
 import org.ksharp.common.*
+import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
@@ -33,6 +34,8 @@ data class AbstractionSemanticInfo(
     val parameters: List<SemanticInfo>,
     val returnType: TypePromise? = null
 ) : SemanticInfo()
+
+data class ApplicationSemanticInfo(var functionInfo: FunctionInfo? = null) : SemanticInfo()
 
 data class EmptySemanticInfo(private val nothing: Unit = Unit) : SemanticInfo()
 
