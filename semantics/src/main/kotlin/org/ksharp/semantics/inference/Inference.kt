@@ -2,6 +2,7 @@ import org.ksharp.common.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
+import org.ksharp.semantics.nodes.ApplicationSemanticInfo
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
@@ -78,7 +79,9 @@ private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrTyp
         .map { it.inferType(info) }
         .unwrap()
         .flatMap {
-            info.findAppType(location, functionName, it).map { fn ->
+            info.findAppType(location, functionName, it).map { result ->
+                this.info.cast<ApplicationSemanticInfo>().functionInfo = result.functionInfo
+                val fn = result.type
                 if (fn is FunctionType) {
                     val inferredFn = fn.cast<FunctionType>()
                     inferredFn.arguments.asSequence()

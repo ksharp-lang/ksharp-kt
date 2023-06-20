@@ -519,7 +519,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(1),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -588,7 +588,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(1),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -665,7 +665,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(0),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -745,7 +745,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(0),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -818,7 +818,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    typeParameterForTesting(2),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
@@ -832,7 +832,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                             ),
-                            typeParameterForTesting(3),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -909,7 +909,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    typeParameterForTesting(2),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
@@ -923,7 +923,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                             ),
-                            (typeParameterForTesting(3)),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1006,11 +1006,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    (typeParameterForTesting(1)),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(2),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1084,7 +1084,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(1),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1149,7 +1149,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    typeParameterForTesting(3),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 VarNode(
@@ -1160,7 +1160,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(4),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1238,7 +1238,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         ConstantNode("key1", strTypePromise, Location.NoProvided),
                                         ConstantNode(1.toLong(), byteTypePromise, Location.NoProvided)
                                     ),
-                                    typeParameterForTesting(1),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 ApplicationNode(
@@ -1247,11 +1247,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         ConstantNode("key2", strTypePromise, Location.NoProvided),
                                         ConstantNode(2.toLong(), byteTypePromise, Location.NoProvided)
                                     ),
-                                    typeParameterForTesting(2),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 )
                             ),
-                            typeParameterForTesting(3),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1349,7 +1349,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                                 Location.NoProvided
                                             )
                                         ),
-                                        typeParameterForTesting(2),
+                                        ApplicationSemanticInfo(),
                                         Location.NoProvided
                                     ),
                                     EmptySemanticInfo(),
@@ -1358,7 +1358,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 LetBindingNode(
                                     VarNode(
                                         "y",
-                                        Symbol("y", typeParameterForTesting(3)),
+                                        Symbol("y", typeParameterForTesting(2)),
                                         Location.NoProvided
                                     ),
                                     ConstantNode(
@@ -1380,11 +1380,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     ),
                                     VarNode(
                                         "y",
-                                        Symbol("y", typeParameterForTesting(3)),
+                                        Symbol("y", typeParameterForTesting(2)),
                                         Location.NoProvided
                                     )
                                 ),
-                                typeParameterForTesting(4),
+                                ApplicationSemanticInfo(),
                                 Location.NoProvided
                             ),
                             EmptySemanticInfo(),
@@ -1460,7 +1460,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                             ApplicationNode(
                                 ApplicationName(name = "True"),
                                 listOf(),
-                                typeParameterForTesting(2),
+                                ApplicationSemanticInfo(),
                                 Location.NoProvided
                             ),
                             ConstantNode(
@@ -1474,7 +1474,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                                 Location.NoProvided
                             ),
                         ),
-                        typeParameterForTesting(3),
+                        ApplicationSemanticInfo(),
                         Location.NoProvided
                     ),
                     AbstractionSemanticInfo(
@@ -1516,7 +1516,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                             ApplicationNode(
                                 ApplicationName(name = "True"),
                                 listOf(),
-                                typeParameterForTesting(2),
+                                ApplicationSemanticInfo(),
                                 Location.NoProvided
                             ),
                             ConstantNode(
@@ -1530,7 +1530,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                                 Location.NoProvided
                             ),
                         ),
-                        typeParameterForTesting(3),
+                        ApplicationSemanticInfo(),
                         Location.NoProvided
                     ),
                     AbstractionSemanticInfo(
