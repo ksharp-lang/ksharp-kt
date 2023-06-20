@@ -100,6 +100,57 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "function call from a imported module" {
+        "pos.moveX 10,20 5"
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "pos.moveX",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralCollectionNode(
+                            listOf(
+                                LiteralValueNode(
+                                    "10",
+                                    LiteralValueType.Integer,
+                                    Location.NoProvided
+                                ), LiteralValueNode(
+                                    "20",
+                                    LiteralValueType.Integer,
+                                    Location.NoProvided
+                                )
+                            ),
+                            LiteralCollectionType.Tuple,
+                            Location.NoProvided,
+                        ),
+                        LiteralValueNode(
+                            "5",
+                            LiteralValueType.Integer,
+                            Location.NoProvided
+                        )
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
+    "function call without arguments" {
+        "pos.moveX"
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                FunctionCallNode(
+                    "pos.moveX",
+                    FunctionType.Function,
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+    }
     "type instance" {
         "Point 10 20"
             .kSharpLexer()
