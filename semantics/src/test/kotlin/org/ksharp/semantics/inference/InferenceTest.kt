@@ -32,7 +32,6 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
                     false,
                     FunctionVisibility.Public,
                     null,
-                    null,
                     "(test+)",
                     listOf(a, a, a)
                 )
@@ -41,7 +40,6 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
                 FunctionInfo(
                     false,
                     FunctionVisibility.Public,
-                    null,
                     null,
                     "(test+)",
                     listOf(intType, intType, intType)

@@ -4,6 +4,7 @@ import org.ksharp.common.*
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
+import org.ksharp.semantics.expressions.checkFunctionName
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.annotations.Annotation
@@ -272,15 +273,17 @@ private fun TraitNode.checkTypesSemantics(
 private fun TypeDeclarationNode.checkTypesSemantics(
     errors: ErrorCollector,
     builder: TypeSystemBuilder
-) = errors.collect(type.cast<NodeData>().checkParams(name, location, params.asSequence())).map {
-    if (type !is FunctionTypeNode)
-        errors.collect(
-            TypeSemanticsErrorCode
-                .FunctionDeclarationShouldBeAFunctionType
-                .new(location, "name" to name, "repr" to type.representation)
-        )
-    else builder.alias(TypeVisibility.Internal, "Decl__$name", annotations.checkAnnotations()) {
-        this.register(name, type.cast())
+) = errors.collect(name.checkFunctionName(location)).map {
+    errors.collect(type.cast<NodeData>().checkParams(name, location, params.asSequence())).map {
+        if (type !is FunctionTypeNode)
+            errors.collect(
+                TypeSemanticsErrorCode
+                    .FunctionDeclarationShouldBeAFunctionType
+                    .new(location, "name" to name, "repr" to type.representation)
+            )
+        else builder.alias(TypeVisibility.Internal, "Decl__$name", annotations.checkAnnotations()) {
+            this.register(name, type.cast())
+        }
     }
 }
 

@@ -49,6 +49,44 @@ private fun ModuleNode.buildFunctionTable(moduleTypeSystemInfo: ModuleTypeSystem
 }
 
 class FunctionNodeSemanticFunctionTableTest : StringSpec({
+    "table: function with invalid name" {
+        module(
+            FunctionNode(
+                false,
+                true,
+                null,
+                "dot.sum",
+                listOf("a", "b"),
+                OperatorNode(
+                    "+",
+                    FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
+                    FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
+                    Location.NoProvided
+                ),
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+        ).buildFunctionTable(
+            ModuleTypeSystemInfo(
+                listOf(),
+                preludeModule.typeSystem
+            )
+        ).apply {
+            errors.shouldBe(
+                listOf(
+                    FunctionSemanticsErrorCode.InvalidFunctionName.new(Location.NoProvided, "name" to "dot.sum")
+                )
+            )
+            functionTable["dot.sum"]
+                .shouldBeNull()
+        }
+    }
     "table: function without declaration" {
         module(
             FunctionNode(
@@ -641,6 +679,86 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             )
         }
     }
+    should("Semantic node: function with module name") {
+        var fnType: ErrorOrType? = null
+        val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
+            alias(TypeVisibility.Public, "Decl__n", listOf(Annotation("native", mapOf()))) {
+                functionType {
+                    type("Unit")
+                    type("Long")
+                }.also {
+                    fnType = it.flatMap {
+                        Either.Right(it.arguments.last())
+                    }
+                }
+            }
+        }
+        module(
+            FunctionNode(
+                false,
+                true,
+                null,
+                "n",
+                listOf(),
+                FunctionCallNode(
+                    "math.sum",
+                    FunctionType.Function,
+                    listOf(
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                    ),
+                    Location.NoProvided,
+                ),
+                Location.NoProvided,
+                FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                nTs.value
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        false,
+                        listOf(Annotation("native", mapOf())),
+                        "n",
+                        ApplicationNode(
+                            ApplicationName(pck = "math", name = "sum"),
+                            listOf(
+                                ConstantNode(
+                                    10.toLong(),
+                                    byteTypePromise,
+                                    Location.NoProvided
+                                ),
+                                ConstantNode(
+                                    2.toLong(),
+                                    byteTypePromise,
+                                    Location.NoProvided
+                                )
+                            ),
+                            typeParameterForTesting(0),
+                            Location.NoProvided
+                        ),
+                        AbstractionSemanticInfo(
+                            FunctionVisibility.Public,
+                            listOf(),
+                            TypeSemanticInfo(fnType!!)
+                        ),
+                        Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
     should("Semantic node: if with else") {
         module(
             FunctionNode(
@@ -684,7 +802,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         null,
                         "n",
                         ApplicationNode(
-                            ApplicationName(null, "if"),
+                            ApplicationName("::prelude", "if"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(name = "(>)"),
@@ -775,7 +893,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         null,
                         "n",
                         ApplicationNode(
-                            ApplicationName(null, "if"),
+                            ApplicationName("::prelude", "if"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(name = "(>)"),
@@ -1115,7 +1233,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             ApplicationName("::prelude", "mapOf"),
                             listOf(
                                 ApplicationNode(
-                                    ApplicationName(null, "pair"),
+                                    ApplicationName("::prelude", "pair"),
                                     listOf(
                                         ConstantNode("key1", strTypePromise, Location.NoProvided),
                                         ConstantNode(1.toLong(), byteTypePromise, Location.NoProvided)
@@ -1124,7 +1242,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                                 ApplicationNode(
-                                    ApplicationName(null, "pair"),
+                                    ApplicationName("::prelude", "pair"),
                                     listOf(
                                         ConstantNode("key2", strTypePromise, Location.NoProvided),
                                         ConstantNode(2.toLong(), byteTypePromise, Location.NoProvided)

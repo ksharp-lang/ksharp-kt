@@ -46,7 +46,6 @@ class FunctionSerializerTest : StringSpec({
             true,
             FunctionVisibility.Public,
             null,
-            null,
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
@@ -55,8 +54,7 @@ class FunctionSerializerTest : StringSpec({
         FunctionInfo(
             false,
             FunctionVisibility.Internal,
-            "math",
-            null,
+            listOf(),
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
@@ -65,7 +63,6 @@ class FunctionSerializerTest : StringSpec({
         FunctionInfo(
             true,
             FunctionVisibility.Internal,
-            null,
             listOf(Annotation("native", mapOf("flag" to true))),
             "sum",
             listOf(newParameter(), newParameter())
@@ -75,7 +72,6 @@ class FunctionSerializerTest : StringSpec({
         FunctionInfo(
             false,
             FunctionVisibility.Internal,
-            "temp",
             listOf(Annotation("native", mapOf("flag" to true))),
             "sum",
             listOf(newParameter(), newParameter())
@@ -88,7 +84,6 @@ class FunctionSerializerTest : StringSpec({
                     true,
                     FunctionVisibility.Public,
                     null,
-                    null,
                     "sum",
                     listOf(newParameter(), newParameter())
                 )
@@ -97,7 +92,6 @@ class FunctionSerializerTest : StringSpec({
                 FunctionInfo(
                     false,
                     FunctionVisibility.Public,
-                    null,
                     null,
                     "sub",
                     listOf(newParameter(), newParameter())

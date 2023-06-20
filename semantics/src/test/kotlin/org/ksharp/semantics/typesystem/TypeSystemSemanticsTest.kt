@@ -7,6 +7,7 @@ import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
+import org.ksharp.semantics.expressions.FunctionSemanticsErrorCode
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
@@ -1558,6 +1559,43 @@ class TypeSystemSemanticsTest : StringSpec({
             errors.shouldBeEmpty()
             typeSystem["Decl__sum"].map { it.representation }
                 .shouldBeRight("((Num a) -> (Num a) -> Int)")
+        }
+    }
+    "Function declaration with invalid name" {
+        moduleWithDeclarations(
+            TypeDeclarationNode(
+                null,
+                "dot.sum",
+                listOf("a"),
+                FunctionTypeNode(
+                    listOf(
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode("Num", Location.NoProvided),
+                                ParameterTypeNode("a", Location.NoProvided),
+                            ),
+                            Location.NoProvided
+                        ),
+                        ParametricTypeNode(
+                            listOf(
+                                ConcreteTypeNode("Num", Location.NoProvided),
+                                ParameterTypeNode("a", Location.NoProvided),
+                            ),
+                            Location.NoProvided
+                        ),
+                        ConcreteTypeNode("Int", Location.NoProvided)
+                    ),
+                    Location.NoProvided,
+                    FunctionTypeNodeLocations(listOf())
+                ),
+                Location.NoProvided,
+                TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+            )
+        ).checkTypesSemantics(preludeModule).apply {
+            errors.shouldBe(
+                listOf(FunctionSemanticsErrorCode.InvalidFunctionName.new(Location.NoProvided, "name" to "dot.sum"))
+            )
+            typeSystem["Decl__sum"].shouldBeLeft()
         }
     }
 })
