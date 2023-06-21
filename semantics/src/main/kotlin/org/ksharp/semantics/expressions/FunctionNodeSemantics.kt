@@ -2,7 +2,10 @@ package org.ksharp.semantics.expressions
 
 import inferType
 import org.ksharp.common.*
-import org.ksharp.module.*
+import org.ksharp.module.Attribute
+import org.ksharp.module.CommonAttribute
+import org.ksharp.module.FunctionInfo
+import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
@@ -11,10 +14,8 @@ import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.nodes.*
+import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
-import org.ksharp.semantics.scopes.FunctionTable
-import org.ksharp.semantics.scopes.FunctionTableBuilder
-import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.semantics.typesystem.toAnnotation
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.annotations.Annotation
