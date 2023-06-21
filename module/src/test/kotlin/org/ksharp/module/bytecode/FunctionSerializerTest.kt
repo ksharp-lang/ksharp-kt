@@ -2,17 +2,19 @@ package org.ksharp.module.bytecode
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.cast
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.common.listBuilder
+import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
-import org.ksharp.module.FunctionVisibility
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.module.NameAttribute
+import org.ksharp.module.nameAttribute
 import org.ksharp.typesystem.types.newParameter
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
-private fun FunctionInfo.shouldBeSerializable() {
+private fun FunctionInfo.shouldBeSerializable(): FunctionInfo {
     val stringPool = listBuilder<String>()
     val buffer = newBufferWriter()
     val table = mockStringTable(stringPool)
@@ -21,9 +23,11 @@ private fun FunctionInfo.shouldBeSerializable() {
     buffer.transferTo(output)
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
-    input.bufferView {
+    return input.bufferView {
         it.readFunctionInfo(stringPoolView).also { println(it) }
-    }.shouldBe(this)
+    }.apply {
+        shouldBe(this)
+    }
 }
 
 private fun Map<String, List<FunctionInfo>>.shouldBeSerializable() {
@@ -43,36 +47,37 @@ private fun Map<String, List<FunctionInfo>>.shouldBeSerializable() {
 class FunctionSerializerTest : StringSpec({
     "Serialize FunctionInfo with dependency = null" {
         FunctionInfo(
-            true,
-            FunctionVisibility.Public,
-            null,
+            setOf(CommonAttribute.Native, CommonAttribute.Public),
             "sum",
-            listOf(newParameter(), newParameter())
+            listOf(newParameter())
         ).shouldBeSerializable()
     }
     "Serialize FunctionInfo" {
         FunctionInfo(
-            false,
-            FunctionVisibility.Internal,
-            listOf(),
+            setOf(CommonAttribute.Internal),
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
     }
     "Serialize FunctionInfo with annotations" {
         FunctionInfo(
-            true,
-            FunctionVisibility.Internal,
-            listOf(Annotation("native", mapOf("flag" to true))),
+            setOf(
+                CommonAttribute.Native,
+                CommonAttribute.Internal,
+                nameAttribute(mapOf("java" to "sum", "c#" to "Sum"))
+            ),
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
+            .attributes
+            .first { it is NameAttribute }
+            .cast<NameAttribute>()
+            .value
+            .shouldBe(mapOf("java" to "sum", "c#" to "Sum"))
     }
     "Serialize FunctionInfo complete" {
         FunctionInfo(
-            false,
-            FunctionVisibility.Internal,
-            listOf(Annotation("native", mapOf("flag" to true))),
+            setOf(CommonAttribute.Internal),
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
@@ -81,18 +86,14 @@ class FunctionSerializerTest : StringSpec({
         mapOf(
             "sum" to listOf(
                 FunctionInfo(
-                    true,
-                    FunctionVisibility.Public,
-                    null,
+                    setOf(CommonAttribute.Native, CommonAttribute.Public),
                     "sum",
                     listOf(newParameter(), newParameter())
                 )
             ),
             "sub" to listOf(
                 FunctionInfo(
-                    false,
-                    FunctionVisibility.Public,
-                    null,
+                    setOf(CommonAttribute.Public),
                     "sub",
                     listOf(newParameter(), newParameter())
                 )

@@ -2,9 +2,7 @@ package org.ksharp.semantics.expressions
 
 import inferType
 import org.ksharp.common.*
-import org.ksharp.module.FunctionInfo
-import org.ksharp.module.FunctionVisibility
-import org.ksharp.module.ModuleInfo
+import org.ksharp.module.*
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
@@ -156,9 +154,17 @@ internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
                 }
             }
         val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
+        val attributes = mutableSetOf<Attribute>()
+        if (it.native) {
+            attributes.add(CommonAttribute.Native)
+        }
+        when (semanticInfo.visibility) {
+            FunctionVisibility.Public -> attributes.add(CommonAttribute.Public)
+            else -> attributes.add((CommonAttribute.Internal))
+        }
         if (returnType != null) {
-            FunctionInfo(it.native, semanticInfo.visibility, it.annotations, it.name, arguments + returnType)
-        } else FunctionInfo(it.native, semanticInfo.visibility, it.annotations, it.name, arguments)
+            FunctionInfo(attributes, it.name, arguments + returnType)
+        } else FunctionInfo(attributes, it.name, arguments)
     }.groupBy { it.name }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {

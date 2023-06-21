@@ -7,6 +7,7 @@ import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.common.new
+import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
@@ -29,18 +30,14 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
         functions = mapOf(
             "(test+)" to listOf(
                 FunctionInfo(
-                    false,
-                    FunctionVisibility.Public,
-                    null,
+                    setOf(CommonAttribute.Public),
                     "(test+)",
                     listOf(a, a, a)
                 )
             ),
             "(test*)" to listOf(
                 FunctionInfo(
-                    false,
-                    FunctionVisibility.Public,
-                    null,
+                    setOf(CommonAttribute.Public),
                     "(test+)",
                     listOf(intType, intType, intType)
                 )
