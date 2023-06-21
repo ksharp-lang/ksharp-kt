@@ -1,9 +1,7 @@
-package org.ksharp.module
+package org.ksharp.typesystem.attributes
 
 import org.ksharp.common.cast
 import org.ksharp.common.io.*
-import org.ksharp.module.bytecode.EnumAttributeSerializerWriter
-import org.ksharp.module.bytecode.NameAttributeSerializerWriter
 
 interface Attribute {
     val name: String

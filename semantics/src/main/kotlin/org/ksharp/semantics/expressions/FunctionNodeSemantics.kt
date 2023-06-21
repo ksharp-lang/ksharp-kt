@@ -2,8 +2,6 @@ package org.ksharp.semantics.expressions
 
 import inferType
 import org.ksharp.common.*
-import org.ksharp.module.Attribute
-import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.AnnotationNode
@@ -19,6 +17,8 @@ import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.typesystem.toAnnotation
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.*
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {

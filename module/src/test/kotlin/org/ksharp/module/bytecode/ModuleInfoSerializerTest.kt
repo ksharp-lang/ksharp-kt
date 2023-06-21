@@ -3,9 +3,9 @@ package org.ksharp.module.bytecode
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.io.bufferView
-import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.TypeVisibility
 import org.ksharp.typesystem.types.newParameter

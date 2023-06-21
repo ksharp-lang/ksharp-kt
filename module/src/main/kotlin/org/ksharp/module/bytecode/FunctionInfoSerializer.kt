@@ -6,8 +6,8 @@ import org.ksharp.common.listBuilder
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 import org.ksharp.module.FunctionInfo
-import org.ksharp.module.readAttributes
-import org.ksharp.module.writeTo
+import org.ksharp.typesystem.attributes.readAttributes
+import org.ksharp.typesystem.attributes.writeTo
 import org.ksharp.typesystem.serializer.readListOfTypes
 import org.ksharp.typesystem.serializer.writeTo
 
@@ -16,7 +16,6 @@ fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
         add(0) // 0
         attributes.writeTo(this, table) // 4
         add(table.add(name)) // 8
-        println(size)
         types.writeTo(this, table) //12
         set(0, size)
         transferTo(buffer)

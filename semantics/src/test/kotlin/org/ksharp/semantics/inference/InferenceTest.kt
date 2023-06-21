@@ -7,7 +7,6 @@ import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.common.new
-import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
@@ -17,6 +16,7 @@ import org.ksharp.semantics.scopes.FunctionVisibility
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.newParameter
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType

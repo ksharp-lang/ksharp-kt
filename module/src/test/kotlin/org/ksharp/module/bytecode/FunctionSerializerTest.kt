@@ -6,10 +6,10 @@ import org.ksharp.common.cast
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.common.listBuilder
-import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
-import org.ksharp.module.NameAttribute
-import org.ksharp.module.nameAttribute
+import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NameAttribute
+import org.ksharp.typesystem.attributes.nameAttribute
 import org.ksharp.typesystem.types.newParameter
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -24,7 +24,7 @@ private fun FunctionInfo.shouldBeSerializable(): FunctionInfo {
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
     return input.bufferView {
-        it.readFunctionInfo(stringPoolView).also { println(it) }
+        it.readFunctionInfo(stringPoolView)
     }.apply {
         shouldBe(this)
     }
