@@ -1,5 +1,6 @@
 package org.ksharp.ir
 
+import org.ksharp.module.Attribute
 import org.ksharp.typesystem.types.Type
 
 interface Expression : IrNode {

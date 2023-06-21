@@ -1,16 +1,7 @@
 package org.ksharp.ir
 
+import org.ksharp.module.Attribute
 import org.ksharp.typesystem.types.Type
-
-interface Attribute : IrNode
-
-enum class CommonAttribute(val description: String) : Attribute {
-    Native("Symbol implementation is native"),
-    Public("Symbol accessible in any module"),
-    Private("Symbol accessible only in the module where they are defined"),
-    Impure("Symbol has side effects"),
-    Constant("Symbol represent a compile constant value")
-}
 
 data class SymbolName(
     val name: String,
