@@ -2,8 +2,9 @@ package org.ksharp.semantics.expressions
 
 import inferType
 import org.ksharp.common.*
+import org.ksharp.module.Attribute
+import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
-import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.ExpressionParserNode
@@ -13,10 +14,8 @@ import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.nodes.*
+import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
-import org.ksharp.semantics.scopes.FunctionTable
-import org.ksharp.semantics.scopes.FunctionTableBuilder
-import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.semantics.typesystem.toAnnotation
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.annotations.Annotation
@@ -156,9 +155,17 @@ internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
                 }
             }
         val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
+        val attributes = mutableSetOf<Attribute>()
+        if (it.native) {
+            attributes.add(CommonAttribute.Native)
+        }
+        when (semanticInfo.visibility) {
+            FunctionVisibility.Public -> attributes.add(CommonAttribute.Public)
+            else -> attributes.add((CommonAttribute.Internal))
+        }
         if (returnType != null) {
-            FunctionInfo(it.native, semanticInfo.visibility, it.annotations, it.name, arguments + returnType)
-        } else FunctionInfo(it.native, semanticInfo.visibility, it.annotations, it.name, arguments)
+            FunctionInfo(attributes, it.name, arguments + returnType)
+        } else FunctionInfo(attributes, it.name, arguments)
     }.groupBy { it.name }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {

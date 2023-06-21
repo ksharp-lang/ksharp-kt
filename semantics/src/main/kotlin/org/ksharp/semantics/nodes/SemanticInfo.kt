@@ -3,11 +3,7 @@ package org.ksharp.semantics.nodes
 import InferenceErrorCode
 import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
-import org.ksharp.module.FunctionVisibility
-import org.ksharp.semantics.scopes.SymbolTable
-import org.ksharp.semantics.scopes.SymbolTableBuilder
-import org.ksharp.semantics.scopes.Table
-import org.ksharp.semantics.scopes.TableValue
+import org.ksharp.semantics.scopes.*
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.newParameter

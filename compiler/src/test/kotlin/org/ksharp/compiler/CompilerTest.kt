@@ -6,12 +6,12 @@ import io.kotest.core.test.TestCase
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
-import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.ConstantNode
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.TypeSemanticInfo
+import org.ksharp.semantics.scopes.FunctionVisibility
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.annotations.Annotation
