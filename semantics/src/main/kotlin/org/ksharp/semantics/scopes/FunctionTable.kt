@@ -1,9 +1,13 @@
 package org.ksharp.semantics.scopes
 
-import org.ksharp.module.FunctionVisibility
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.TypePromise
 import org.ksharp.typesystem.annotations.Annotation
+
+enum class FunctionVisibility {
+    Internal,
+    Public
+}
 
 data class Function(
     val visibility: FunctionVisibility,

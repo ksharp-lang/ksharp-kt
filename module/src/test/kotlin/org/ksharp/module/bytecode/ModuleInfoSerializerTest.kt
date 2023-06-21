@@ -3,10 +3,9 @@ package org.ksharp.module.bytecode
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.io.bufferView
+import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
-import org.ksharp.module.FunctionVisibility
 import org.ksharp.module.ModuleInfo
-import org.ksharp.typesystem.annotations.Annotation
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.TypeVisibility
 import org.ksharp.typesystem.types.newParameter
@@ -39,24 +38,18 @@ class ModuleInfoSerializerTest : StringSpec({
             mapOf(
                 "sum" to listOf(
                     FunctionInfo(
-                        true,
-                        FunctionVisibility.Public,
-                        listOf(Annotation("native", mapOf("flag" to true))),
+                        setOf(CommonAttribute.Native, CommonAttribute.Public),
                         "sum",
                         listOf(newParameter(), newParameter())
                     ), FunctionInfo(
-                        false,
-                        FunctionVisibility.Public,
-                        listOf(),
+                        setOf(CommonAttribute.Public),
                         "sum",
                         listOf(newParameter(), newParameter(), newParameter())
                     )
                 ),
                 "sub" to listOf(
                     FunctionInfo(
-                        false,
-                        FunctionVisibility.Public,
-                        listOf(Annotation("native", mapOf("flag" to true))),
+                        setOf(CommonAttribute.Native, CommonAttribute.Public),
                         "sub",
                         listOf(newParameter(), newParameter())
                     )
