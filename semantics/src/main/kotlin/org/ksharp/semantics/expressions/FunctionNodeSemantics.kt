@@ -1,6 +1,5 @@
 package org.ksharp.semantics.expressions
 
-import inferType
 import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
@@ -10,6 +9,7 @@ import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.InferenceInfo
+import org.ksharp.semantics.inference.inferType
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable

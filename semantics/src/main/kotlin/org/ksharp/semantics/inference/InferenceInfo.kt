@@ -1,6 +1,5 @@
 package org.ksharp.semantics.inference
 
-import InferenceErrorCode
 import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
@@ -11,37 +10,33 @@ import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.substitution.SubstitutionContext
 import org.ksharp.typesystem.substitution.extract
 import org.ksharp.typesystem.substitution.substitute
+import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.parameters
 import org.ksharp.typesystem.types.toFunctionType
 import org.ksharp.typesystem.unification.unify
 
-data class FunctionFindResult(
-    val functionInfo: FunctionInfo? = null,
-    val type: Type
-)
-
 internal fun FunctionInfo.substitute(
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
-): ErrorOrType {
+): ErrorOrValue<FunctionType> {
     val context = SubstitutionContext(typeSystem)
-    val result: ErrorOrType? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
+    val result: ErrorOrValue<FunctionType>? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
         val substitutionResult = context.extract(location, item1, item2)
         if (substitutionResult.isLeft) {
             incompatibleType<List<Type>>(location, item1, item2).cast<Either.Left<Error>>()
         } else substitutionResult
-    }.firstNotNullOfOrNull { if (it.isLeft) it.cast<ErrorOrType>() else null }
-    val fnType = types.toFunctionType()
-    return result ?: context.substitute(location, fnType, fnType)
+    }.firstNotNullOfOrNull { if (it.isLeft) it.cast<ErrorOrValue<FunctionType>>() else null }
+    val fnType = types.toFunctionType(attributes)
+    return result ?: context.substitute(location, fnType, fnType).cast()
 }
 
 internal fun FunctionInfo.unify(
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
-): ErrorOrType {
+): ErrorOrValue<FunctionType> {
     return typeSystem(types.last()).flatMap { returnType ->
         types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
             typeSystem.unify(location, item1, item2)
@@ -51,7 +46,7 @@ internal fun FunctionInfo.unify(
                 if (returnType.parameters.firstOrNull() != null) {
                     substitute(typeSystem, location, params)
                 } else {
-                    Either.Right((params + returnType).toFunctionType())
+                    Either.Right((params + returnType).toFunctionType(attributes))
                 }
             }
     }
@@ -62,7 +57,7 @@ data class InferenceInfo(
     val module: ModuleInfo,
     val dependencies: Map<String, ModuleInfo> = emptyMap()
 ) {
-    private val cache = cacheOf<Pair<String, List<Type>>, Either<String, FunctionFindResult>>()
+    private val cache = cacheOf<Pair<String, List<Type>>, Either<String, Type>>()
 
     private fun ModuleInfo.findFunction(name: String, numParams: Int): Sequence<FunctionInfo>? =
         functions[name]?.let { fns ->
@@ -75,26 +70,24 @@ data class InferenceInfo(
                 it.representation
             }
         }"
-    
+
     private fun Sequence<FunctionInfo>?.unify(
         typeSystem: TypeSystem,
         location: Location,
         arguments: List<Type>
-    ): Either.Right<FunctionFindResult>? =
+    ): Either.Right<FunctionType>? =
         if (this != null)
             this.map {
-                it.unify(typeSystem, location, arguments).map { tp ->
-                    FunctionFindResult(it, tp)
-                }
+                it.unify(typeSystem, location, arguments)
             }.firstOrNull { it.isRight }
-                    as? Either.Right<FunctionFindResult>
+                    as? Either.Right<FunctionType>
         else null
 
     fun findAppType(
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
-    ): ErrorOrValue<FunctionFindResult> =
+    ): ErrorOrType =
         appName.name.let {
             if (it.first().isUpperCase()) {
                 findConstructorType(location, appName, arguments)
@@ -105,7 +98,7 @@ data class InferenceInfo(
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
-    ): ErrorOrValue<FunctionFindResult> =
+    ): ErrorOrType =
         arguments.size.let { numArguments ->
             val name = appName.name
             cache.get(name to arguments) {
@@ -126,7 +119,7 @@ data class InferenceInfo(
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
-    ): ErrorOrValue<FunctionFindResult> =
+    ): ErrorOrType =
         arguments.size.let { _ ->
             val name = appName.name
             cache.get(name to arguments) {
@@ -136,8 +129,6 @@ data class InferenceInfo(
                 } else type
                 result.mapLeft {
                     functionName(name, arguments)
-                }.map {
-                    FunctionFindResult(type = it)
                 }
             }.mapLeft {
                 InferenceErrorCode.FunctionNotFound.new(
