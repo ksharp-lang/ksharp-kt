@@ -2,6 +2,7 @@ package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
+import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -13,7 +14,7 @@ import org.ksharp.typesystem.validateTypeName
 typealias UnionTypeFactoryBuilder = UnionTypeFactory.() -> Unit
 
 data class UnionType internal constructor(
-    override val visibility: TypeVisibility,
+    override val attributes: Set<Attribute>,
     val arguments: Map<String, ClassType>,
 ) : Type {
     override val serializer: TypeSerializer
@@ -34,7 +35,7 @@ data class UnionType internal constructor(
             .joinToString("\n|")
 
     data class ClassType internal constructor(
-        override val visibility: TypeVisibility,
+        override val attributes: Set<Attribute>,
         val label: String,
         val params: List<Type>
     ) : Type {
@@ -67,11 +68,11 @@ class UnionTypeFactory(
     fun clazz(label: String, parameters: ParametricTypeFactoryBuilder = {}) {
         result = result.flatMap { params ->
             validateTypeName(label).flatMap {
-                factory.add(label, TypeConstructor(factory.visibility, label, unionType))
+                factory.add(label, TypeConstructor(factory.attributes, label, unionType))
                 ParametricTypeFactory(factory).apply(parameters).build().map { args ->
                     params.put(
                         label, UnionType.ClassType(
-                            factory.visibility,
+                            factory.attributes,
                             label = label,
                             params = args
                         )
@@ -91,5 +92,5 @@ class UnionTypeFactory(
 
 fun TypeItemBuilder.unionType(factory: UnionTypeFactoryBuilder) =
     UnionTypeFactory(name, this).apply(factory).build().map {
-        UnionType(visibility, it)
+        UnionType(attributes, it)
     }

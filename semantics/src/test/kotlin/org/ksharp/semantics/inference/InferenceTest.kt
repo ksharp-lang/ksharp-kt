@@ -12,7 +12,6 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.nodes.*
-import org.ksharp.semantics.scopes.FunctionVisibility
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
@@ -55,14 +54,13 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "ten", ConstantNode(
                 10.toLong(),
                 longTypePromise,
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+            AbstractionSemanticInfo(listOf()),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeRight(
@@ -77,15 +75,14 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
-            true,
-            emptyList(),
+            setOf(CommonAttribute.Public, CommonAttribute.Native),
             "ten", ConstantNode(
                 10.toLong(),
                 longTypePromise,
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
-                FunctionVisibility.Public, listOf(), TypeSemanticInfo(
+                listOf(), TypeSemanticInfo(
                     Either.Right(
                         newParameterForTesting(0)
                     )
@@ -105,8 +102,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
                 ApplicationName(name = "(test+)"),
@@ -125,7 +121,7 @@ class InferenceTest : StringSpec({
                 ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+            AbstractionSemanticInfo(listOf()),
             Location.NoProvided
         ).inferType(module).apply {
             map { it.representation }
@@ -137,8 +133,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
                 ApplicationName(name = "(test+)"),
@@ -157,7 +152,7 @@ class InferenceTest : StringSpec({
                 ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+            AbstractionSemanticInfo(listOf()),
             Location.NoProvided
         ).inferType(module).apply {
             map { it.representation }
@@ -169,8 +164,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val variable = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
         val abstraction = AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
                 ApplicationName(name = "(test+)"),
@@ -190,7 +184,6 @@ class InferenceTest : StringSpec({
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
-                FunctionVisibility.Public,
                 listOf(variable)
             ),
             Location.NoProvided
@@ -208,8 +201,7 @@ class InferenceTest : StringSpec({
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         val variable = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
         val abstraction = AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
                 ApplicationName(name = "(test*)"),
@@ -229,7 +221,6 @@ class InferenceTest : StringSpec({
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
-                FunctionVisibility.Public,
                 listOf(variable)
             ),
             Location.NoProvided
@@ -246,8 +237,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         val abstraction = AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
                 ApplicationName(null, "if"),
@@ -273,7 +263,6 @@ class InferenceTest : StringSpec({
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
-                FunctionVisibility.Public,
                 listOf()
             ),
             Location.NoProvided
@@ -288,8 +277,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val parameter = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
         val abstraction = AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "n",
             LetNode(
                 listOf(
@@ -320,7 +308,7 @@ class InferenceTest : StringSpec({
                 EmptySemanticInfo(),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+            AbstractionSemanticInfo(listOf()),
             Location.NoProvided
         )
         abstraction.inferType(module).apply {
@@ -332,8 +320,7 @@ class InferenceTest : StringSpec({
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
         AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
                 ApplicationName(name = "not-found"),
@@ -347,7 +334,7 @@ class InferenceTest : StringSpec({
                 ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+            AbstractionSemanticInfo(listOf()),
             Location.NoProvided
         ).inferType(module).apply {
             shouldBeLeft(
@@ -363,8 +350,7 @@ class InferenceTest : StringSpec({
         val longTypePromise = ts.getTypeSemanticInfo("Long")
         val parameter = TypeSemanticInfo(Either.Right(newParameter()))
         val abstraction = AbstractionNode(
-            false,
-            emptyList(),
+            setOf(CommonAttribute.Public),
             "n",
             LetNode(
                 listOf(
@@ -390,7 +376,7 @@ class InferenceTest : StringSpec({
                 EmptySemanticInfo(),
                 Location.NoProvided
             ),
-            AbstractionSemanticInfo(FunctionVisibility.Public, listOf()),
+            AbstractionSemanticInfo(listOf()),
             Location.NoProvided
         )
         abstraction.inferType(module).apply {

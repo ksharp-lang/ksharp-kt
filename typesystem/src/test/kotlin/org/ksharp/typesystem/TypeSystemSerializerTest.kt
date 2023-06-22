@@ -7,7 +7,7 @@ import org.ksharp.common.io.BinaryTable
 import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
-import org.ksharp.typesystem.annotations.annotation
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.serializer.readType
 import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
@@ -60,9 +60,9 @@ private fun TypeSystem.shouldBeSerializable(): TypeSystem {
 class TypeSystemSerializerTest : StringSpec({
     "Serialize TypeSystem" {
         typeSystem {
-            type(TypeVisibility.Public, "Int")
-            type(TypeVisibility.Public, "String")
-            parametricType(TypeVisibility.Public, "Map") {
+            type(setOf(CommonAttribute.Public), "Int")
+            type(setOf(CommonAttribute.Public), "String")
+            parametricType(setOf(CommonAttribute.Public), "Map") {
                 type("Int")
                 type("Int")
             }
@@ -70,109 +70,112 @@ class TypeSystemSerializerTest : StringSpec({
             .shouldBeSerializable()
             .apply {
                 size.shouldBe(3)
-                get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
-                get("String").shouldBeType(Concrete(TypeVisibility.Public, "String"), "String")
+                get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
+                get("String").shouldBeType(Concrete(setOf(CommonAttribute.Public), "String"), "String")
                 get("Map").shouldBeType(
                     ParametricType(
-                        TypeVisibility.Public,
-                        Alias(TypeVisibility.Public, "Map"),
-                        listOf(Alias(TypeVisibility.Public, "Int"), Alias(TypeVisibility.Public, "Int"))
+                        setOf(CommonAttribute.Public),
+                        Alias(setOf(CommonAttribute.Public), "Map"),
+                        listOf(Alias(setOf(CommonAttribute.Public), "Int"), Alias(setOf(CommonAttribute.Public), "Int"))
                     ),
                     "(Map Int Int)"
                 )
             }
     }
     "Serialize Concrete Types" {
-        Concrete(TypeVisibility.Public, "Int").shouldBeSerializable()
+        Concrete(setOf(CommonAttribute.Public), "Int").shouldBeSerializable()
     }
     "Serialize Alias Types" {
-        Alias(TypeVisibility.Public, "Int").shouldBeSerializable()
+        Alias(setOf(CommonAttribute.Public), "Int").shouldBeSerializable()
     }
     "Serialize Parameter Types" {
-        Parameter(TypeVisibility.Public, "Int").shouldBeSerializable()
+        Parameter(setOf(CommonAttribute.Public), "Int").shouldBeSerializable()
     }
     "Serialize Parametric Types" {
         ParametricType(
-            TypeVisibility.Public,
-            Alias(TypeVisibility.Public, "Map"),
+            setOf(CommonAttribute.Public),
+            Alias(setOf(CommonAttribute.Public), "Map"),
             listOf(
-                Concrete(TypeVisibility.Public, "String"),
-                Concrete(TypeVisibility.Public, "Double")
+                Concrete(setOf(CommonAttribute.Public), "String"),
+                Concrete(setOf(CommonAttribute.Public), "Double")
             )
         ).shouldBeSerializable()
     }
     "Serialize Labeled Types" {
         Labeled(
             "Label",
-            Concrete(TypeVisibility.Public, "String")
+            Concrete(setOf(CommonAttribute.Public), "String")
         ).shouldBeSerializable()
     }
     "Serialize Function Types" {
         FunctionType(
-            TypeVisibility.Public,
+            setOf(CommonAttribute.Public),
             listOf(
-                Concrete(TypeVisibility.Internal, "Int"),
-                Concrete(TypeVisibility.Public, "Int2"),
-                Concrete(TypeVisibility.Public, "Int3")
+                Concrete(setOf(CommonAttribute.Internal), "Int"),
+                Concrete(setOf(CommonAttribute.Public), "Int2"),
+                Concrete(setOf(CommonAttribute.Public), "Int3")
             )
         ).shouldBeSerializable()
     }
     "Serialize Intersection Types" {
         IntersectionType(
-            TypeVisibility.Internal,
-            listOf(Alias(TypeVisibility.Public, "String"), Alias(TypeVisibility.Internal, "Int"))
+            setOf(CommonAttribute.Internal),
+            listOf(Alias(setOf(CommonAttribute.Public), "String"), Alias(setOf(CommonAttribute.Internal), "Int"))
         ).shouldBeSerializable()
     }
     "Serialize Tuple Types" {
         TupleType(
-            TypeVisibility.Internal,
-            listOf(Alias(TypeVisibility.Internal, "String"), Alias(TypeVisibility.Internal, "Int"))
+            setOf(CommonAttribute.Internal),
+            listOf(Alias(setOf(CommonAttribute.Internal), "String"), Alias(setOf(CommonAttribute.Internal), "Int"))
         ).shouldBeSerializable()
     }
     "Serialize Union Types" {
         UnionType(
-            TypeVisibility.Internal,
+            setOf(CommonAttribute.Internal),
             mapOf(
                 "String" to UnionType.ClassType(
-                    TypeVisibility.Internal,
+                    setOf(CommonAttribute.Internal),
                     "String",
-                    listOf(Parameter(TypeVisibility.Internal, "a"))
+                    listOf(Parameter(setOf(CommonAttribute.Internal), "a"))
                 ),
                 "Int" to UnionType.ClassType(
-                    TypeVisibility.Internal,
+                    setOf(CommonAttribute.Internal),
                     "Int",
-                    listOf(Parameter(TypeVisibility.Internal, "b"))
+                    listOf(Parameter(setOf(CommonAttribute.Internal), "b"))
                 ),
                 "Map" to UnionType.ClassType(
-                    TypeVisibility.Internal,
+                    setOf(CommonAttribute.Internal),
                     "Map",
-                    listOf(Concrete(TypeVisibility.Internal, "Int"), Parameter(TypeVisibility.Internal, "c"))
+                    listOf(
+                        Concrete(setOf(CommonAttribute.Internal), "Int"),
+                        Parameter(setOf(CommonAttribute.Internal), "c")
+                    )
                 )
             )
         ).shouldBeSerializable()
     }
     "Serialize Trait Types" {
         TraitType(
-            TypeVisibility.Internal,
+            setOf(CommonAttribute.Internal),
             "Num",
             "a",
             mapOf(
                 "sum" to TraitType.MethodType(
-                    TypeVisibility.Public,
+                    setOf(CommonAttribute.Public),
                     "sum",
                     listOf(
-                        Parameter(TypeVisibility.Public, "a"),
-                        Parameter(TypeVisibility.Public, "a"),
-                        Parameter(TypeVisibility.Public, "a")
+                        Parameter(setOf(CommonAttribute.Public), "a"),
+                        Parameter(setOf(CommonAttribute.Public), "a"),
+                        Parameter(setOf(CommonAttribute.Public), "a")
                     )
                 ),
                 "sub" to TraitType.MethodType(
-                    TypeVisibility.Public,
+                    setOf(CommonAttribute.Public),
                     "sub",
                     listOf(
-                        Parameter(TypeVisibility.Public, "a"),
-                        Parameter(TypeVisibility.Public, "a"),
-                        Parameter(TypeVisibility.Public, "a")
+                        Parameter(setOf(CommonAttribute.Public), "a"),
+                        Parameter(setOf(CommonAttribute.Public), "a"),
+                        Parameter(setOf(CommonAttribute.Public), "a")
                     )
                 )
             )
@@ -180,17 +183,9 @@ class TypeSystemSerializerTest : StringSpec({
     }
     "Serialize TypeConstructor Types" {
         TypeConstructor(
-            TypeVisibility.Public,
+            setOf(CommonAttribute.Public),
             "True",
             "Bool"
-        ).shouldBeSerializable()
-    }
-    "Serialize Annotated Types" {
-        Annotated(
-            listOf(annotation("Test") {
-                set("key1", "value1")
-            }),
-            Concrete(TypeVisibility.Public, "Int")
         ).shouldBeSerializable()
     }
 })

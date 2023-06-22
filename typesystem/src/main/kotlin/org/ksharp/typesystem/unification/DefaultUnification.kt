@@ -5,7 +5,6 @@ import org.ksharp.common.Location
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.incompatibleType
-import org.ksharp.typesystem.types.Annotated
 import org.ksharp.typesystem.types.Labeled
 import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.Type
@@ -15,7 +14,6 @@ val Type.innerType: Type
     get() =
         when (this) {
             is Labeled -> type
-            is Annotated -> type
             else -> this
         }
 

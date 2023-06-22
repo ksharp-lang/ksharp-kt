@@ -11,10 +11,9 @@ import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.ConstantNode
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.TypeSemanticInfo
-import org.ksharp.semantics.scopes.FunctionVisibility
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.resetParameterCounterForTesting
 import java.io.File
@@ -35,8 +34,7 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
-                                false,
-                                annotations = listOf(Annotation("native", mapOf())),
+                                setOf(CommonAttribute.Internal),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
@@ -46,7 +44,6 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    visibility = FunctionVisibility.Internal,
                                     parameters = listOf(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
@@ -72,8 +69,7 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
-                                false,
-                                annotations = null,
+                                setOf(CommonAttribute.Internal),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
@@ -83,7 +79,6 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    visibility = FunctionVisibility.Internal,
                                     parameters = listOf(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
@@ -107,8 +102,7 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
-                                false,
-                                annotations = null,
+                                setOf(CommonAttribute.Internal),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
@@ -118,7 +112,6 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    visibility = FunctionVisibility.Internal,
                                     parameters = listOf(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
@@ -142,8 +135,7 @@ class CompilerTestModuleInfo : StringSpec({
                     it.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
-                                false,
-                                annotations = null,
+                                setOf(CommonAttribute.Internal),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
@@ -153,7 +145,6 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    visibility = FunctionVisibility.Internal,
                                     parameters = listOf(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),

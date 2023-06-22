@@ -18,7 +18,6 @@ interface Substitution {
 
 enum class Substitutions(override val algo: SubstitutionAlgo<out Type>) : Substitution {
     Alias(AliasSubstitution()),
-    Annotated(AnnotatedSubstitution()),
     ClassType(ClassSubstitution()),
     Function(FunctionSubstitution()),
     Identity(IdentitySubstitution()),

@@ -3,6 +3,8 @@ package org.ksharp.typesystem.attributes
 import org.ksharp.common.cast
 import org.ksharp.common.io.*
 
+val NoAttributes = emptySet<Attribute>()
+
 interface Attribute {
     val name: String
     val writer: SerializerWriter<Attribute>
