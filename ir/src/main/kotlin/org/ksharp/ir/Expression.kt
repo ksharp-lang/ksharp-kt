@@ -1,19 +1,30 @@
 package org.ksharp.ir
 
-import org.ksharp.module.Attribute
+import org.ksharp.common.Location
+import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.Type
 
-interface Expression : IrNode {
-    val attributes: Set<Attribute>
-}
+sealed interface Expression : Symbol
 
 data class ConstantExpression(
-    override val attributes: Set<Attribute>,
     val value: Any,
-    val type: Type
-) : Expression
+    val type: Type,
+    override val location: Location
+) : Expression {
+    override val attributes: Set<Attribute>
+        get() = setOf(CommonAttribute.Constant)
+}
 
 data class VariableAccessExpression(
     override val attributes: Set<Attribute>,
-    val index: Int
+    val index: Int,
+    override val location: Location
 ) : Expression
+
+data class UnitExpression(
+    override val location: Location
+) : Expression {
+    override val attributes: Set<Attribute>
+        get() = setOf(CommonAttribute.Constant)
+}
