@@ -1,7 +1,5 @@
 package org.ksharp.semantics.inference
 
-import InferenceErrorCode
-import inferType
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Either
 import org.ksharp.common.Location
@@ -118,7 +116,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                ApplicationSemanticInfo(),
+                EmptySemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(listOf()),
@@ -149,7 +147,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                ApplicationSemanticInfo(),
+                EmptySemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(listOf()),
@@ -180,7 +178,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                ApplicationSemanticInfo(),
+                EmptySemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -217,7 +215,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     ),
                 ),
-                ApplicationSemanticInfo(),
+                EmptySemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -245,7 +243,7 @@ class InferenceTest : StringSpec({
                     ApplicationNode(
                         ApplicationName(name = "True"),
                         listOf(),
-                        ApplicationSemanticInfo(),
+                        EmptySemanticInfo(),
                         Location.NoProvided
                     ),
                     ConstantNode(
@@ -259,7 +257,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     ),
                 ),
-                ApplicationSemanticInfo(),
+                EmptySemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -297,7 +295,7 @@ class InferenceTest : StringSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            ApplicationSemanticInfo(),
+                            EmptySemanticInfo(),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo(),
@@ -331,7 +329,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                ApplicationSemanticInfo(),
+                EmptySemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(listOf()),
@@ -365,7 +363,7 @@ class InferenceTest : StringSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            ApplicationSemanticInfo(),
+                            EmptySemanticInfo(),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo(),

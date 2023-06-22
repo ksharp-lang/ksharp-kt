@@ -1,6 +1,5 @@
 package org.ksharp.compiler
 
-import InferenceErrorCode
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.core.test.TestCase
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -9,6 +8,7 @@ import org.ksharp.common.*
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.ConstantNode
+import org.ksharp.semantics.inference.InferenceErrorCode
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
