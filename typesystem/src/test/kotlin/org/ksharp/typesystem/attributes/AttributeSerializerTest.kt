@@ -1,14 +1,28 @@
-package org.ksharp.module.bytecode
+package org.ksharp.typesystem.attributes
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.cast
+import org.ksharp.common.*
+import org.ksharp.common.io.BinaryTable
+import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
-import org.ksharp.common.listBuilder
-import org.ksharp.module.*
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.util.concurrent.atomic.AtomicInteger
+
+private fun mockStringTable(items: ListBuilder<String>) = object : BinaryTable {
+    private val counter = AtomicInteger(-1)
+    private val dictionary = mapBuilder<String, Int>()
+    override fun add(name: String): Int =
+        dictionary.get(name) ?: run {
+            items.add(name)
+            dictionary.put(name, counter.incrementAndGet())
+            counter.get()
+        }
+}
+
+private fun mockStringTableView(items: List<String>) = BinaryTableView { index -> items[index] }
 
 private fun Attribute.shouldBeSerializable(): Attribute {
     val stringPool = listBuilder<String>()

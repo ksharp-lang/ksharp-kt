@@ -6,22 +6,22 @@ import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.unify
 
 class TypeUnificationTest : StringSpec({
     val typeSystem = typeSystem {
-        type(TypeVisibility.Public, "Int")
-        type(TypeVisibility.Public, "Long")
-        alias(TypeVisibility.Public, "Integer") {
+        type(NoAttributes, "Int")
+        type(NoAttributes, "Long")
+        alias(NoAttributes, "Integer") {
             type("Int")
         }
-        parametricType(TypeVisibility.Public, "Map") {
+        parametricType(NoAttributes, "Map") {
             parameter("a")
             parameter("b")
         }
-        alias(TypeVisibility.Public, "LongMap") {
+        alias(NoAttributes, "LongMap") {
             parametricType("Map") {
                 type("Long")
                 parameter("b")
@@ -63,12 +63,6 @@ class TypeUnificationTest : StringSpec({
         typeSystem.unify(Location.NoProvided, type1, type2).shouldBeRight(typeSystem["Int"].valueOrNull!!)
         typeSystem.unify(Location.NoProvided, type2, type1).shouldBeRight(typeSystem["Int"].valueOrNull!!)
     }
-    "Compatible concrete and annotated alias types" {
-        val type1 = typeSystem["Int"].valueOrNull!!
-        val type2 = Annotated(listOf(Annotation("a", mapOf("key" to "value"))), typeSystem["Integer"].valueOrNull!!)
-        typeSystem.unify(Location.NoProvided, type1, type2).shouldBeRight(type1)
-        typeSystem.unify(Location.NoProvided, type2, type1).shouldBeRight(type1)
-    }
     "Not compatible concrete types" {
         val type1 = typeSystem["Int"].valueOrNull!!
         val type2 = typeSystem["Long"].valueOrNull!!
@@ -83,8 +77,8 @@ class TypeUnificationTest : StringSpec({
     "Compatible parametric types" {
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
-            TypeVisibility.Public,
-            Alias(TypeVisibility.Public, "Map"), listOf(
+            NoAttributes,
+            Alias(NoAttributes, "Map"), listOf(
                 typeSystem["Integer"].valueOrNull!!,
                 typeSystem["Int"].valueOrNull!!
             )
@@ -92,8 +86,8 @@ class TypeUnificationTest : StringSpec({
         typeSystem.unify(Location.NoProvided, type1, type2)
             .shouldBeRight(
                 ParametricType(
-                    TypeVisibility.Public,
-                    Alias(TypeVisibility.Public, "Map"), listOf(
+                    NoAttributes,
+                    Alias(NoAttributes, "Map"), listOf(
                         typeSystem["Int"].valueOrNull!!,
                         typeSystem["Int"].valueOrNull!!
                     )
@@ -106,10 +100,10 @@ class TypeUnificationTest : StringSpec({
         typeSystem.unify(Location.NoProvided, type1, type2)
             .shouldBeRight(
                 ParametricType(
-                    TypeVisibility.Public,
-                    Alias(TypeVisibility.Public, "Map"), listOf(
-                        Parameter(TypeVisibility.Public, "a"),
-                        Parameter(TypeVisibility.Public, "b"),
+                    NoAttributes,
+                    Alias(NoAttributes, "Map"), listOf(
+                        Parameter(NoAttributes, "a"),
+                        Parameter(NoAttributes, "b"),
                     )
                 )
             )
@@ -117,8 +111,8 @@ class TypeUnificationTest : StringSpec({
     "Incompatible parametric types" {
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
-            TypeVisibility.Public,
-            Alias(TypeVisibility.Public, "Map"), listOf(
+            NoAttributes,
+            Alias(NoAttributes, "Map"), listOf(
                 typeSystem["Int"].valueOrNull!!
             )
         )
@@ -134,8 +128,8 @@ class TypeUnificationTest : StringSpec({
     "Compatible parametric types by types" {
         val type1 = typeSystem["LongMap"].valueOrNull!!
         val type2 = ParametricType(
-            TypeVisibility.Public,
-            Alias(TypeVisibility.Public, "Map"), listOf(
+            NoAttributes,
+            Alias(NoAttributes, "Map"), listOf(
                 typeSystem["Long"].valueOrNull!!,
                 typeSystem["Int"].valueOrNull!!
             )
@@ -148,8 +142,8 @@ class TypeUnificationTest : StringSpec({
     "Incompatible parametric types by types" {
         val type1 = typeSystem["LongMap"].valueOrNull!!
         val type2 = ParametricType(
-            TypeVisibility.Public,
-            Alias(TypeVisibility.Public, "Map"), listOf(
+            NoAttributes,
+            Alias(NoAttributes, "Map"), listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
             )
@@ -165,7 +159,7 @@ class TypeUnificationTest : StringSpec({
     }
     "Incompatible parametric types 2" {
         val type1 = typeSystem["Map"].valueOrNull!!
-        val type2 = Concrete(TypeVisibility.Public, "Int")
+        val type2 = Concrete(NoAttributes, "Int")
         typeSystem.unify(Location.NoProvided, type1, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
@@ -178,8 +172,8 @@ class TypeUnificationTest : StringSpec({
     "Incompatible parametric types by variable" {
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
-            TypeVisibility.Public,
-            Alias(TypeVisibility.Public, "List"), listOf(
+            NoAttributes,
+            Alias(NoAttributes, "List"), listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Int"].valueOrNull!!
             )
@@ -195,14 +189,14 @@ class TypeUnificationTest : StringSpec({
     }
     "Compatible tuples type" {
         val type1 = TupleType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
             )
         )
         val type2 = TupleType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Integer"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
@@ -211,7 +205,7 @@ class TypeUnificationTest : StringSpec({
         typeSystem.unify(Location.NoProvided, type1, type2)
             .shouldBeRight(
                 TupleType(
-                    TypeVisibility.Public,
+                    NoAttributes,
                     listOf(
                         typeSystem["Int"].valueOrNull!!,
                         typeSystem["Long"].valueOrNull!!
@@ -221,7 +215,7 @@ class TypeUnificationTest : StringSpec({
     }
     "Compatible tuples type 2" {
         val type1 = TupleType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
@@ -231,7 +225,7 @@ class TypeUnificationTest : StringSpec({
         typeSystem.unify(Location.NoProvided, type1, type2)
             .shouldBeRight(
                 TupleType(
-                    TypeVisibility.Public,
+                    NoAttributes,
                     listOf(
                         typeSystem["Int"].valueOrNull!!,
                         typeSystem["Long"].valueOrNull!!
@@ -241,14 +235,14 @@ class TypeUnificationTest : StringSpec({
     }
     "Incompatible tuples type byt size" {
         val type1 = TupleType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
             )
         )
         val type2 = TupleType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Long"].valueOrNull!!
             )
@@ -264,14 +258,14 @@ class TypeUnificationTest : StringSpec({
     }
     "Compatible function type" {
         val type1 = FunctionType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
             )
         )
         val type2 = FunctionType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Integer"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
@@ -280,7 +274,7 @@ class TypeUnificationTest : StringSpec({
         typeSystem.unify(Location.NoProvided, type1, type2)
             .shouldBeRight(
                 FunctionType(
-                    TypeVisibility.Public,
+                    NoAttributes,
                     listOf(
                         typeSystem["Int"].valueOrNull!!,
                         typeSystem["Long"].valueOrNull!!
@@ -290,14 +284,14 @@ class TypeUnificationTest : StringSpec({
     }
     "Incompatible function type" {
         val type1 = FunctionType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
             )
         )
         val type2 = FunctionType(
-            TypeVisibility.Public,
+            NoAttributes,
             listOf(
                 typeSystem["Integer"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!,
@@ -315,25 +309,25 @@ class TypeUnificationTest : StringSpec({
     }
     "Compatible type constructor and union type" {
         val union = UnionType(
-            TypeVisibility.Public,
+            NoAttributes,
             mapOf(
-                "True" to UnionType.ClassType(TypeVisibility.Public, "True", listOf()),
-                "False" to UnionType.ClassType(TypeVisibility.Public, "True", listOf())
+                "True" to UnionType.ClassType(NoAttributes, "True", listOf()),
+                "False" to UnionType.ClassType(NoAttributes, "True", listOf())
             )
         )
-        val typeConstructor = TypeConstructor(TypeVisibility.Public, "True", "Bool")
+        val typeConstructor = TypeConstructor(NoAttributes, "True", "Bool")
         typeSystem.unify(Location.NoProvided, union, typeConstructor)
             .shouldBeRight(union)
         typeSystem.unify(
             Location.NoProvided, union, UnionType(
-                TypeVisibility.Public,
+                NoAttributes,
                 mapOf(
-                    "True" to UnionType.ClassType(TypeVisibility.Public, "True", listOf()),
-                    "False" to UnionType.ClassType(TypeVisibility.Public, "True", listOf())
+                    "True" to UnionType.ClassType(NoAttributes, "True", listOf()),
+                    "False" to UnionType.ClassType(NoAttributes, "True", listOf())
                 )
             )
         ).shouldBeRight(union)
-        typeSystem.unify(Location.NoProvided, union, Concrete(TypeVisibility.Public, "Int"))
+        typeSystem.unify(Location.NoProvided, union, Concrete(NoAttributes, "Int"))
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -341,7 +335,7 @@ class TypeUnificationTest : StringSpec({
                     "type2" to "Int"
                 )
             )
-        typeSystem.unify(Location.NoProvided, union, TypeConstructor(TypeVisibility.Public, "Other", "Bool"))
+        typeSystem.unify(Location.NoProvided, union, TypeConstructor(NoAttributes, "Other", "Bool"))
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -352,11 +346,11 @@ class TypeUnificationTest : StringSpec({
     }
     "Unification Parametric with Generalise types" {
         val ts = typeSystem {
-            type(TypeVisibility.Public, "NativeInt")
-            parametricType(TypeVisibility.Public, "Num") {
+            type(NoAttributes, "NativeInt")
+            parametricType(NoAttributes, "Num") {
                 parameter("a")
             }
-            alias(TypeVisibility.Public, "Int") {
+            alias(NoAttributes, "Int") {
                 parametricType("Num") {
                     type("NativeInt")
                 }
@@ -365,15 +359,15 @@ class TypeUnificationTest : StringSpec({
         ts.unify(
             Location.NoProvided,
             ParametricType(
-                TypeVisibility.Public, Concrete(TypeVisibility.Public, "Num"), listOf(
-                    Parameter(TypeVisibility.Public, "a")
+                NoAttributes, Concrete(NoAttributes, "Num"), listOf(
+                    Parameter(NoAttributes, "a")
                 )
             ),
-            Alias(TypeVisibility.Public, "Int")
+            Alias(NoAttributes, "Int")
         ).shouldBeRight(
             ParametricType(
-                TypeVisibility.Public, Concrete(TypeVisibility.Public, "Num"), listOf(
-                    Concrete(TypeVisibility.Public, "NativeInt")
+                NoAttributes, Concrete(NoAttributes, "Num"), listOf(
+                    Concrete(NoAttributes, "NativeInt")
                 )
             )
         )

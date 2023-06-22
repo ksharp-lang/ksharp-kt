@@ -4,7 +4,6 @@ import org.ksharp.common.io.*
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemImpl
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.TypeVisibility
 
 interface TypeSerializer {
     val writer: SerializerWriter<out Type>
@@ -14,7 +13,6 @@ enum class TypeSerializers(
     override val writer: SerializerWriter<out Type>
 ) : TypeSerializer {
     Concrete(ConcreteSerializer()),
-    Annotated(AnnotatedSerializer()),
     Alias(AliasSerializer()),
     Parameter(ParameterSerializer()),
     ParametricType(ParametricTypeSerializer()),
@@ -26,8 +24,7 @@ enum class TypeSerializers(
     UnionType(UnionTypeSerializer()),
     MethodType(MethodTypeSerializer()),
     NoType(TypeConstructorSerializer()),
-    TraitType(TraitSerializer()),
-    NoDefined(SerializerWriter { _, _, _ -> TODO("Not yet implemented") })
+    TraitType(TraitSerializer())
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -58,12 +55,4 @@ fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
 
 fun BufferView.readTypeSystem(table: BinaryTableView, parent: TypeSystem? = null): TypeSystem {
     return TypeSystemImpl(parent, readMapOfTypes(table))
-}
-
-fun BufferView.readTypeVisibility(index: Int): TypeVisibility {
-    return readInt(index).let { TypeVisibility.values()[it] }
-}
-
-fun BufferWriter.writeTypeVisibility(type: Type) {
-    add(type.visibility.ordinal)
 }

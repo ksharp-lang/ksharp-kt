@@ -6,6 +6,7 @@ import org.ksharp.semantics.nodes.ApplicationSemanticInfo
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.toFunctionType
 
@@ -42,31 +43,34 @@ private fun LetNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
 
 
 private fun AbstractionNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
-    run {
-        if (native) {
-            this.info.cast<AbstractionSemanticInfo>().returnType?.getType(location)
-                ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
-        } else expression.inferType(info)
-    }.flatMap { returnType ->
-        val params = this.info.cast<AbstractionSemanticInfo>().parameters
-        if (params.isEmpty()) {
-            info.prelude.typeSystem["Unit"].map { unitType ->
-                listOf(unitType, returnType).toFunctionType()
-            }
-        } else {
-            params.asSequence().run {
-                if (native) {
-                    map {
-                        it.getType(location)
-                            .also { t -> it.setInferredType(t) }
-                    }
-                } else map { it.getInferredType(location) }
-            }.unwrap()
-                .map {
-                    (it + returnType).toFunctionType()
+    attributes.contains(CommonAttribute.Native).let { native ->
+        run {
+            if (native) {
+                this.info.cast<AbstractionSemanticInfo>().returnType?.getType(location)
+                    ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
+            } else expression.inferType(info)
+        }.flatMap { returnType ->
+            val params = this.info.cast<AbstractionSemanticInfo>().parameters
+            if (params.isEmpty()) {
+                info.prelude.typeSystem["Unit"].map { unitType ->
+                    listOf(unitType, returnType).toFunctionType()
                 }
+            } else {
+                params.asSequence().run {
+                    if (native) {
+                        map {
+                            it.getType(location)
+                                .also { t -> it.setInferredType(t) }
+                        }
+                    } else map { it.getInferredType(location) }
+                }.unwrap()
+                    .map {
+                        (it + returnType).toFunctionType()
+                    }
+            }
         }
     }
+
 
 private fun ConstantNode<SemanticInfo>.infer(): ErrorOrType =
     info.getType(location)

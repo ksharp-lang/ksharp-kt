@@ -2,16 +2,11 @@ package org.ksharp.semantics.scopes
 
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.TypePromise
-import org.ksharp.typesystem.annotations.Annotation
-
-enum class FunctionVisibility {
-    Internal,
-    Public
-}
+import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.CommonAttribute
 
 data class Function(
-    val visibility: FunctionVisibility,
-    val annotations: List<Annotation>?,
+    val attributes: Set<Attribute>,
     val name: String,
     val type: List<TypePromise>,
 )
@@ -23,7 +18,7 @@ val TableValue<Function>.isInternal get() = first.isInternal
 
 val TableValue<Function>.isPublic get() = first.isPublic
 
-val Function.isInternal get() = this.visibility == FunctionVisibility.Internal
-val Function.isPublic get() = this.visibility == FunctionVisibility.Public
+val Function.isInternal get() = attributes.contains(CommonAttribute.Internal)
+val Function.isPublic get() = attributes.contains(CommonAttribute.Public)
 
 typealias FunctionTable = TableImpl<Function>

@@ -20,7 +20,7 @@ class FunctionUnification : CompoundUnification<FunctionType>() {
         if (type1.arguments.size != type2.arguments.size) incompatibleType(location, type1, type2)
         else {
             unifyListOfTypes(location, typeSystem, type1, type2, type1.arguments, type2.arguments).map { params ->
-                FunctionType(type1.visibility, params)
+                FunctionType(type1.attributes, params)
             }
         }
 }

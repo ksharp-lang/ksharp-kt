@@ -1,5 +1,6 @@
 package org.ksharp.typesystem.types
 
+import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -8,7 +9,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class TypeConstructor(
-    override val visibility: TypeVisibility,
+    override val attributes: Set<Attribute>,
     val name: String,
     val alias: String
 ) : Type {

@@ -11,6 +11,7 @@ import org.ksharp.semantics.expressions.FunctionSemanticsErrorCode
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.Type
 
 private fun module(vararg types: NodeData) =
@@ -35,7 +36,7 @@ private fun moduleWithDeclarations(vararg declarations: TypeDeclarationNode) =
         Location.NoProvided
     )
 
-private val Type.representationWithVisibility get() = "${visibility.name}-${representation}"
+private val Type.representationWithVisibility get() = "${if (attributes.contains(CommonAttribute.Public)) "Public" else "Internal"}-${representation}"
 
 class TypeSystemSemanticsTest : StringSpec({
     "Type annotation semantics" {
@@ -64,7 +65,7 @@ class TypeSystemSemanticsTest : StringSpec({
             errors.shouldBeEmpty()
             typeSystem["Int"].map { it.representation }.shouldBeRight("(Num NativeInt)")
             typeSystem["Integer"].map { it.representationWithVisibility }
-                .shouldBeRight("Public-@native(flag=true) Int")
+                .shouldBeRight("Public-Int")
         }
     }
     "Alias semantics" {
@@ -698,7 +699,7 @@ class TypeSystemSemanticsTest : StringSpec({
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
-                |Public-@native trait Number a =
+                |Public-trait Number a =
                 |    sum :: a -> a -> a
             """.trimMargin()
             )
@@ -1480,7 +1481,7 @@ class TypeSystemSemanticsTest : StringSpec({
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Decl__ten"].map { it.representation }
-                .shouldBeRight("@Test Unit -> Int")
+                .shouldBeRight("(Unit -> Int)")
         }
     }
     "Function declaration semantics" {
