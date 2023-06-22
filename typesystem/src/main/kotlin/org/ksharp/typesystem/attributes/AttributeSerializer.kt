@@ -1,12 +1,9 @@
-package org.ksharp.module.bytecode
+package org.ksharp.typesystem.attributes
 
 import org.ksharp.common.cast
 import org.ksharp.common.io.*
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
-import org.ksharp.module.Attribute
-import org.ksharp.module.AttributeWithValue
-import org.ksharp.module.nameAttribute
 
 class EnumAttributeSerializerReader : SerializerReader<Attribute> {
     override fun read(buffer: BufferView, table: BinaryTableView): Attribute {

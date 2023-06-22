@@ -7,7 +7,9 @@ import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.expressions.checkFunctionName
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
 import org.ksharp.typesystem.*
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.nameAttribute
 import org.ksharp.typesystem.types.*
 
 enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode {
@@ -207,23 +209,29 @@ fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
         else -> TODO("$node")
     }
 
-fun AnnotationNode.toAnnotation(): Annotation =
-    Annotation(
-        name,
-        attrs.entries.associate {
-            val value = it.value
-            it.key to if (value is AnnotationNode) value.toAnnotation() else value
-        }
-    )
+fun AnnotationNode.toAttribute(): Attribute? =
+    when (name) {
+        "name" -> nameAttribute(mapOf()) //TODO Calculate the names map
+        else -> null
+    }
 
-private fun List<AnnotationNode>?.checkAnnotations(): List<Annotation> =
-    this?.map { it.toAnnotation() } ?: emptyList()
+private fun List<AnnotationNode>?.checkAnnotations(internal: Boolean): Set<Attribute> =
+    (if (internal) CommonAttribute.Internal else CommonAttribute.Public).let { visibility ->
+        this.checkAnnotations(setOf(visibility))
+    }
+
+fun List<AnnotationNode>?.checkAnnotations(attributes: Set<Attribute>): Set<Attribute> =
+    this?.asSequence()
+        ?.map { it.toAttribute() }
+        ?.filterNotNull()
+        ?.toMutableSet()?.apply {
+            addAll(attributes)
+        } ?: attributes
 
 private fun TypeSystemBuilder.register(node: TypeNode) =
     alias(
-        if (node.internal) TypeVisibility.Internal else TypeVisibility.Public,
+        node.annotations.checkAnnotations(node.internal),
         node.name,
-        node.annotations.checkAnnotations()
     ) {
         this.register(node.name, node.expr)
     }
@@ -244,10 +252,9 @@ private fun TraitNode.checkTypesSemantics(
     .let { errors.collect(it) }
     .map {
         builder.trait(
-            if (internal) TypeVisibility.Internal else TypeVisibility.Public,
+            annotations.checkAnnotations(internal),
             name,
-            params.first(),
-            this.annotations.checkAnnotations()
+            params.first()
         ) {
             definition.functions.forEach { f ->
                 errors.collect(f.checkParams(f.name, f.location, params.asSequence()))
@@ -281,7 +288,7 @@ private fun TypeDeclarationNode.checkTypesSemantics(
                     .FunctionDeclarationShouldBeAFunctionType
                     .new(location, "name" to name, "repr" to type.representation)
             )
-        else builder.alias(TypeVisibility.Internal, "Decl__$name", annotations.checkAnnotations()) {
+        else builder.alias(annotations.checkAnnotations(true), "Decl__$name") {
             this.register(name, type.cast())
         }
     }

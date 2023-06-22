@@ -3,7 +3,7 @@ package org.ksharp.typesystem.types
 import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemBuilder
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -18,7 +18,7 @@ typealias TraitTypeFactoryBuilder = TraitTypeFactory.() -> Unit
 interface IsTrait
 
 data class TraitType internal constructor(
-    override val visibility: TypeVisibility,
+    override val attributes: Set<Attribute>,
     val name: String,
     val param: String,
     val methods: Map<String, MethodType>,
@@ -34,7 +34,7 @@ data class TraitType internal constructor(
         get() = Substitutions.NoDefined
 
     data class MethodType internal constructor(
-        override val visibility: TypeVisibility,
+        override val attributes: Set<Attribute>,
         val name: String,
         val arguments: List<Type>,
     ) : Type {
@@ -80,7 +80,7 @@ class TraitTypeFactory(
                 ParametricTypeFactory(factory).apply(arguments).build().map { args ->
                     params.put(
                         name, TraitType.MethodType(
-                            factory.visibility,
+                            factory.attributes,
                             name,
                             args
                         )
@@ -99,16 +99,15 @@ class TraitTypeFactory(
 }
 
 fun TypeSystemBuilder.trait(
-    visibility: TypeVisibility,
+    attributes: Set<Attribute>,
     name: String,
     paramName: String,
-    annotations: List<Annotation> = listOf(),
     factory: TraitTypeFactoryBuilder
 ) =
-    item(visibility, name, annotations) {
+    item(attributes, name) {
         validateTypeParamName(paramName).flatMap {
             TraitTypeFactory(this).apply(factory).build().map {
-                TraitType(visibility, name, paramName, it)
+                TraitType(attributes, name, paramName, it)
             }
         }
     }
