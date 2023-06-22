@@ -1,7 +1,10 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.types.*
+import org.ksharp.typesystem.types.Alias
+import org.ksharp.typesystem.types.Labeled
+import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.TypeConstructor
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
 
@@ -22,10 +25,6 @@ interface TypeSystem {
             is Alias -> this[type.name].flatMap { this(it) }
             is Labeled -> this(type.type).map {
                 Labeled(type.label, it)
-            }
-
-            is Annotated -> this(type.type).map {
-                Annotated(type.annotations, it)
             }
 
             is TypeConstructor -> this[type.alias]

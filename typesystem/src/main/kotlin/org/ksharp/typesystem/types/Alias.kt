@@ -4,7 +4,8 @@ import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeFactoryBuilder
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemBuilder
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -13,7 +14,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class Alias internal constructor(
-    override val visibility: TypeVisibility,
+    override val attributes: Set<Attribute>,
     val name: String
 ) : TypeVariable {
     override val serializer: TypeSerializer
@@ -30,18 +31,17 @@ data class Alias internal constructor(
     }
 }
 
-fun TypeSystem.alias(name: String): ErrorOrType =
+fun TypeSystem.alias(attributes: Set<Attribute> = NoAttributes, name: String): ErrorOrType =
     this[name].map {
-        Alias(TypeVisibility.Internal, name)
+        Alias(attributes, name)
     }
 
 
 fun TypeSystemBuilder.alias(
-    visibility: TypeVisibility,
+    attributes: Set<Attribute>,
     name: String,
-    annotations: List<Annotation> = listOf(),
     factory: TypeFactoryBuilder
 ) =
-    item(visibility, name, annotations) {
+    item(attributes, name) {
         factory()
     }

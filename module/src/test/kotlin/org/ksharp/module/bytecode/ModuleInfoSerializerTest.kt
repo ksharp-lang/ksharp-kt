@@ -3,11 +3,10 @@ package org.ksharp.module.bytecode
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.io.bufferView
-import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.typeSystem
-import org.ksharp.typesystem.types.TypeVisibility
 import org.ksharp.typesystem.types.newParameter
 import org.ksharp.typesystem.types.type
 import java.io.ByteArrayInputStream
@@ -32,8 +31,8 @@ class ModuleInfoSerializerTest : StringSpec({
         ModuleInfo(
             listOf("module1", "module2"),
             typeSystem {
-                type(TypeVisibility.Public, "Int")
-                type(TypeVisibility.Public, "String")
+                type(setOf(CommonAttribute.Public), "Int")
+                type(setOf(CommonAttribute.Public), "String")
             }.value,
             mapOf(
                 "sum" to listOf(

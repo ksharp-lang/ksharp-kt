@@ -2,11 +2,8 @@ package org.ksharp.semantics.expressions
 
 import inferType
 import org.ksharp.common.*
-import org.ksharp.module.Attribute
-import org.ksharp.module.CommonAttribute
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
-import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
@@ -14,12 +11,18 @@ import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.nodes.*
-import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
-import org.ksharp.semantics.typesystem.toAnnotation
+import org.ksharp.semantics.scopes.FunctionTable
+import org.ksharp.semantics.scopes.FunctionTableBuilder
+import org.ksharp.semantics.scopes.SymbolTableBuilder
+import org.ksharp.semantics.typesystem.checkAnnotations
 import org.ksharp.typesystem.TypeSystem
-import org.ksharp.typesystem.annotations.Annotation
-import org.ksharp.typesystem.types.*
+import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.newParameter
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
@@ -64,10 +67,7 @@ private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<Type
 }
 
 private fun Type.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> =
-    when (this) {
-        is Annotated -> this.type.typePromise(node)
-        else -> this.cast<FunctionType>().typePromise(node)
-    }
+    this.cast<FunctionType>().typePromise(node)
 
 internal fun String.checkFunctionName(location: Location): ErrorOrValue<Unit> {
     val ix = this.indexOf(".")
@@ -86,15 +86,19 @@ internal fun ModuleNode.buildFunctionTable(
                 val type = typeSystem["Decl__${f.name}"].valueOrNull
                 errors.collect(type.let { it?.typePromise(f) ?: Either.Right(f.typePromise(typeSystem)) })
                     .map {
-                        val annotations = when (type) {
-                            is Annotated -> type.annotations
-                            else -> null
-                        }
+                        val visibility = if (f.pub) CommonAttribute.Public else CommonAttribute.Internal
+                        val attributes = if (type != null) {
+                            mutableSetOf<Attribute>().apply {
+                                addAll(type.attributes)
+                                remove(CommonAttribute.Public)
+                                remove(CommonAttribute.Internal)
+                                add(visibility)
+                            }
+                        } else setOf<Attribute>(visibility)
                         table.register(
                             f.name,
                             Function(
-                                if (f.pub) FunctionVisibility.Public else FunctionVisibility.Internal,
-                                annotations,
+                                attributes,
                                 f.name,
                                 it
                             ), f.location
@@ -104,9 +108,6 @@ internal fun ModuleNode.buildFunctionTable(
         }
         table.build() to listBuilder.build()
     }
-
-private fun List<AnnotationNode>?.checkAnnotations(): List<Annotation>? =
-    this?.map { it.toAnnotation() }
 
 private fun FunctionNode.checkSemantics(
     errors: ErrorCollector,
@@ -130,13 +131,15 @@ private fun FunctionNode.checkSemantics(
         val info = SymbolTableSemanticInfo(symbolTable)
         val semanticNode = expression.cast<ExpressionParserNode>()
             .toSemanticNode(errors, info, typeSystem)
+        val attributes = mutableSetOf<Attribute>()
+        if (native) attributes.add(CommonAttribute.Native)
+        attributes.addAll(function.attributes)
+        attributes.addAll(annotations.checkAnnotations(NoAttributes))
         AbstractionNode(
-            native,
-            function.annotations ?: annotations.checkAnnotations(),
+            attributes,
             name,
             semanticNode,
             AbstractionSemanticInfo(
-                function.visibility,
                 parameters.map { symbolTable[it]!!.first }.toList(),
                 function.type.last()
             ),
@@ -155,14 +158,7 @@ internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
                 }
             }
         val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
-        val attributes = mutableSetOf<Attribute>()
-        if (it.native) {
-            attributes.add(CommonAttribute.Native)
-        }
-        when (semanticInfo.visibility) {
-            FunctionVisibility.Public -> attributes.add(CommonAttribute.Public)
-            else -> attributes.add((CommonAttribute.Internal))
-        }
+        val attributes = it.attributes
         if (returnType != null) {
             FunctionInfo(attributes, it.name, arguments + returnType)
         } else FunctionInfo(attributes, it.name, arguments)

@@ -9,85 +9,36 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.new
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
-import org.ksharp.typesystem.annotations.Annotation
-import org.ksharp.typesystem.annotations.annotation
+import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.*
 
 fun ErrorOrType.shouldBeType(type: Type, repr: String) =
     this.apply {
-        map { it.representation.also(::println) }.shouldBeRight(repr)
+        map { it.representation }.shouldBeRight(repr)
         shouldBeRight(type)
     }
 
 class TypeSystemTest : ShouldSpec({
     context("Given a type system. Check:") {
-        context("Annotated types") {
-            val annotations = listOf(
-                annotation("impure") {
-                    set("lang", "kotlin")
-                }
-            )
-            typeSystem {
-                type(TypeVisibility.Public, "Int", annotations)
-                alias(TypeVisibility.Public, "Integer", annotations) {
-                    type("Int")
-                }
-                parametricType(TypeVisibility.Public, "List", annotations) {
-                    parameter("a")
-                }
-            }.apply {
-                context("Should contains the following types:") {
-                    should("Int type") {
-                        get("Int").shouldBeType(
-                            Annotated(annotations, Concrete(TypeVisibility.Public, "Int")),
-                            "@impure(lang=kotlin) Int"
-                        )
-                    }
-                    should("Integer type") {
-                        get("Integer").shouldBeType(
-                            Annotated(annotations, Alias(TypeVisibility.Public, "Int")),
-                            "@impure(lang=kotlin) Int"
-                        )
-                    }
-                    should("List type") {
-                        get("List").shouldBeType(
-                            Annotated(
-                                annotations,
-                                ParametricType(
-                                    TypeVisibility.Public,
-                                    Alias(TypeVisibility.Public, "List"),
-                                    listOf(Parameter(TypeVisibility.Public, "a"))
-                                )
-                            ), "@impure(lang=kotlin) List a"
-                        )
-                    }
-                }
-                should("Should have 3 types") {
-                    size.shouldBe(3)
-                }
-                should("Shouldn't have errors") {
-                    errors.shouldBeEmpty()
-                }
-            }
-        }
         context("Concrete, Aliases, Parametric and Function Types") {
             typeSystem {
-                type(TypeVisibility.Public, "Int")
-                type(TypeVisibility.Public, "String")
-                alias(TypeVisibility.Public, "Integer") {
+                type(setOf(CommonAttribute.Public), "Int")
+                type(setOf(CommonAttribute.Public), "String")
+                alias(setOf(CommonAttribute.Public), "Integer") {
                     type("Int")
                 }
-                parametricType(TypeVisibility.Public, "Map") {
+                parametricType(setOf(CommonAttribute.Public), "Map") {
                     parameter("a")
                     parameter("b")
                 }
-                alias(TypeVisibility.Public, "StringMap") {
+                alias(setOf(CommonAttribute.Public), "StringMap") {
                     parametricType("Map") {
                         type("String")
                         parameter("b")
                     }
                 }
-                alias(TypeVisibility.Public, "Sum") {
+                alias(setOf(CommonAttribute.Public), "Sum") {
                     functionType {
                         type("Int")
                         type("Int")
@@ -97,22 +48,22 @@ class TypeSystemTest : ShouldSpec({
             }.apply {
                 context("Should contains the following types:") {
                     should("Int type") {
-                        get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                        get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
                     }
                     should("String type") {
-                        get("String").shouldBeType(Concrete(TypeVisibility.Public, "String"), "String")
+                        get("String").shouldBeType(Concrete(setOf(CommonAttribute.Public), "String"), "String")
                     }
                     should("Integer alias type") {
-                        get("Integer").shouldBeType(Alias(TypeVisibility.Public, "Int"), "Int")
+                        get("Integer").shouldBeType(Alias(setOf(CommonAttribute.Public), "Int"), "Int")
                     }
                     should("(Map a b) parametric type") {
                         get("Map").shouldBeType(
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Map"),
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "Map"),
                                 listOf(
-                                    Parameter(TypeVisibility.Public, "a"),
-                                    Parameter(TypeVisibility.Public, "b")
+                                    Parameter(setOf(CommonAttribute.Public), "a"),
+                                    Parameter(setOf(CommonAttribute.Public), "b")
                                 )
                             ), "(Map a b)"
                         )
@@ -120,11 +71,11 @@ class TypeSystemTest : ShouldSpec({
                     should("StringMap should be alias of (Map String b)") {
                         get("StringMap").shouldBeType(
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Map"),
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "Map"),
                                 listOf(
-                                    Alias(TypeVisibility.Public, "String"),
-                                    Parameter(TypeVisibility.Public, "b")
+                                    Alias(setOf(CommonAttribute.Public), "String"),
+                                    Parameter(setOf(CommonAttribute.Public), "b")
                                 )
                             ), "(Map String b)"
                         )
@@ -132,11 +83,11 @@ class TypeSystemTest : ShouldSpec({
                     should("Sum should be function of Int -> Int -> Int") {
                         get("Sum").shouldBeType(
                             FunctionType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(TypeVisibility.Public, "Int"),
-                                    Alias(TypeVisibility.Public, "Int"),
-                                    Alias(TypeVisibility.Public, "Int")
+                                    Alias(setOf(CommonAttribute.Public), "Int"),
+                                    Alias(setOf(CommonAttribute.Public), "Int"),
+                                    Alias(setOf(CommonAttribute.Public), "Int")
                                 )
                             ), "(Int -> Int -> Int)"
                         )
@@ -152,28 +103,31 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Get alias type and resolve the type against the typeSystem") {
             typeSystem {
-                type(TypeVisibility.Public, "Int")
-                parametricType(TypeVisibility.Public, "Map") {
+                type(setOf(CommonAttribute.Public), "Int")
+                parametricType(setOf(CommonAttribute.Public), "Map") {
                     type("Int")
                     type("Int")
                 }
             }.apply {
                 should("Type exists so should create an alias type") {
-                    value.alias("Map").shouldBeType(Alias(TypeVisibility.Internal, "Map"), "Map")
+                    value.alias(name = "Map").shouldBeType(Alias(NoAttributes, "Map"), "Map")
                 }
                 should("Resolve alias type should returns the parametric type") {
-                    value(Alias(TypeVisibility.Public, "Map")).shouldBeType(
+                    value(Alias(setOf(CommonAttribute.Public), "Map")).shouldBeType(
                         ParametricType(
-                            TypeVisibility.Public,
-                            Alias(TypeVisibility.Public, "Map"),
-                            listOf(Alias(TypeVisibility.Public, "Int"), Alias(TypeVisibility.Public, "Int"))
+                            setOf(CommonAttribute.Public),
+                            Alias(setOf(CommonAttribute.Public), "Map"),
+                            listOf(
+                                Alias(setOf(CommonAttribute.Public), "Int"),
+                                Alias(setOf(CommonAttribute.Public), "Int")
+                            )
                         ),
                         "(Map Int Int)"
                     )
                 }
                 context("Not alias types should resolve to themself") {
-                    value(Concrete(TypeVisibility.Public, "Int")).shouldBeType(
-                        Concrete(TypeVisibility.Public, "Int"),
+                    value(Concrete(setOf(CommonAttribute.Public), "Int")).shouldBeType(
+                        Concrete(setOf(CommonAttribute.Public), "Int"),
                         "Int"
                     )
                 }
@@ -181,48 +135,33 @@ class TypeSystemTest : ShouldSpec({
                     value(
                         Labeled(
                             "n",
-                            Alias(TypeVisibility.Public, "Map")
+                            Alias(setOf(CommonAttribute.Public), "Map")
                         )
                     ).shouldBeType(
                         Labeled(
                             "n",
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Map"),
-                                listOf(Alias(TypeVisibility.Public, "Int"), Alias(TypeVisibility.Public, "Int"))
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "Map"),
+                                listOf(
+                                    Alias(setOf(CommonAttribute.Public), "Int"),
+                                    Alias(setOf(CommonAttribute.Public), "Int")
+                                )
                             )
                         ),
                         "n: (Map Int Int)"
-                    )
-                }
-                context("Resolve a Annotated alias") {
-                    value(
-                        Annotated(
-                            listOf(Annotation("anno", mapOf("key" to "value"))),
-                            Alias(TypeVisibility.Public, "Map")
-                        )
-                    ).shouldBeType(
-                        Annotated(
-                            listOf(Annotation("anno", mapOf("key" to "value"))),
-                            ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Map"),
-                                listOf(Alias(TypeVisibility.Public, "Int"), Alias(TypeVisibility.Public, "Int"))
-                            )
-                        ),
-                        "@anno(key=value) Map Int Int"
                     )
                 }
             }
         }
         context("Parametric Types") {
             typeSystem {
-                parametricType(TypeVisibility.Public, "Map") {
+                parametricType(setOf(CommonAttribute.Public), "Map") {
                     parameter("a")
                     parameter("b")
                 }
 
-                parametricType(TypeVisibility.Public, "Either") {
+                parametricType(setOf(CommonAttribute.Public), "Either") {
                     parameter("a")
                     parametricType("Either") {
                         parameter("a")
@@ -230,7 +169,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                 }
 
-                alias(TypeVisibility.Public, "StringMap") {
+                alias(setOf(CommonAttribute.Public), "StringMap") {
                     parametricType("Map") {
                         parameter("a")
                     }
@@ -240,9 +179,12 @@ class TypeSystemTest : ShouldSpec({
                     should("(Map a b) type") {
                         get("Map").shouldBeType(
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Map"),
-                                listOf(Parameter(TypeVisibility.Public, "a"), Parameter(TypeVisibility.Public, "b"))
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "Map"),
+                                listOf(
+                                    Parameter(setOf(CommonAttribute.Public), "a"),
+                                    Parameter(setOf(CommonAttribute.Public), "b")
+                                )
                             ),
                             "(Map a b)"
                         )
@@ -250,16 +192,16 @@ class TypeSystemTest : ShouldSpec({
                     should("Recursive: (Either a (Either a b)) type") {
                         get("Either").shouldBeType(
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Either"),
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "Either"),
                                 listOf(
-                                    Parameter(TypeVisibility.Public, "a"),
+                                    Parameter(setOf(CommonAttribute.Public), "a"),
                                     ParametricType(
-                                        TypeVisibility.Public,
-                                        Alias(TypeVisibility.Public, "Either"),
+                                        setOf(CommonAttribute.Public),
+                                        Alias(setOf(CommonAttribute.Public), "Either"),
                                         listOf(
-                                            Parameter(TypeVisibility.Public, "a"),
-                                            Parameter(TypeVisibility.Public, "b")
+                                            Parameter(setOf(CommonAttribute.Public), "a"),
+                                            Parameter(setOf(CommonAttribute.Public), "b")
                                         )
                                     )
                                 )
@@ -276,19 +218,19 @@ class TypeSystemTest : ShouldSpec({
                         listOf(
                             TypeSystemErrorCode.InvalidNumberOfParameters.new(
                                 "type" to ParametricType(
-                                    TypeVisibility.Public,
-                                    Alias(TypeVisibility.Public, "Map"),
+                                    setOf(CommonAttribute.Public),
+                                    Alias(setOf(CommonAttribute.Public), "Map"),
                                     listOf(
-                                        Parameter(TypeVisibility.Public, "a"),
-                                        Parameter(TypeVisibility.Public, "b")
+                                        Parameter(setOf(CommonAttribute.Public), "a"),
+                                        Parameter(setOf(CommonAttribute.Public), "b")
                                     )
                                 ),
                                 "number" to 2,
                                 "configuredType" to ParametricType(
-                                    TypeVisibility.Public,
-                                    Alias(TypeVisibility.Public, "Map"),
+                                    setOf(CommonAttribute.Public),
+                                    Alias(setOf(CommonAttribute.Public), "Map"),
                                     listOf(
-                                        Parameter(TypeVisibility.Public, "a")
+                                        Parameter(setOf(CommonAttribute.Public), "a")
                                     )
                                 )
                             )
@@ -300,44 +242,44 @@ class TypeSystemTest : ShouldSpec({
         context("Parameters") {
             context("Intermediate") {
                 newParameter().apply {
-                    shouldBe(Parameter(TypeVisibility.Internal, "@0"))
+                    shouldBe(Parameter(NoAttributes, "@0"))
                     intermediate.shouldBeTrue()
                 }
-                newParameter().shouldBe(Parameter(TypeVisibility.Internal, "@1"))
+                newParameter().shouldBe(Parameter(NoAttributes, "@1"))
             }
             context("Normal parameters aren't intermediate") {
-                Parameter(TypeVisibility.Internal, "a").intermediate.shouldBeFalse()
+                Parameter(NoAttributes, "a").intermediate.shouldBeFalse()
             }
         }
         context("Function types") {
             typeSystem {
-                type(TypeVisibility.Public, "Int")
-                parametricType(TypeVisibility.Public, "List") {
+                type(setOf(CommonAttribute.Public), "Int")
+                parametricType(setOf(CommonAttribute.Public), "List") {
                     parameter("a")
                 }
-                alias(TypeVisibility.Public, "Sum") {
+                alias(setOf(CommonAttribute.Public), "Sum") {
                     functionType {
                         type("Int")
                     }
                 }
-                alias(TypeVisibility.Public, "Sum") {
+                alias(setOf(CommonAttribute.Public), "Sum") {
                     functionType {
                     }
                 }
-                alias(TypeVisibility.Public, "Sum") {
+                alias(setOf(CommonAttribute.Public), "Sum") {
                     functionType {
                         type("Int")
                         type("Int")
                         type("Int")
                     }
                 }
-                alias(TypeVisibility.Public, "Abs") {
+                alias(setOf(CommonAttribute.Public), "Abs") {
                     functionType {
                         parameter("a")
                         type("Int")
                     }
                 }
-                alias(TypeVisibility.Public, "Get") {
+                alias(setOf(CommonAttribute.Public), "Get") {
                     functionType {
                         parametricType("List") {
                             type("Int")
@@ -345,7 +287,7 @@ class TypeSystemTest : ShouldSpec({
                         type("Int")
                     }
                 }
-                alias(TypeVisibility.Public, "MapFn") {
+                alias(setOf(CommonAttribute.Public), "MapFn") {
                     functionType {
                         parametricType("List") {
                             parameter("a")
@@ -362,14 +304,14 @@ class TypeSystemTest : ShouldSpec({
             }.apply {
                 context("Should contains the following types:") {
                     should("Int type") {
-                        get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                        get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
                     }
                     should("(List a) type") {
                         get("List").shouldBeType(
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "List"),
-                                listOf(Parameter(TypeVisibility.Public, "a"))
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "List"),
+                                listOf(Parameter(setOf(CommonAttribute.Public), "a"))
                             ),
                             "(List a)"
                         )
@@ -377,11 +319,11 @@ class TypeSystemTest : ShouldSpec({
                     should("(Int -> Int -> Int) type") {
                         get("Sum").shouldBeType(
                             FunctionType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(TypeVisibility.Public, "Int"),
-                                    Alias(TypeVisibility.Public, "Int"),
-                                    Alias(TypeVisibility.Public, "Int")
+                                    Alias(setOf(CommonAttribute.Public), "Int"),
+                                    Alias(setOf(CommonAttribute.Public), "Int"),
+                                    Alias(setOf(CommonAttribute.Public), "Int")
                                 )
                             ),
                             "(Int -> Int -> Int)"
@@ -390,8 +332,11 @@ class TypeSystemTest : ShouldSpec({
                     should("(a -> Int) type") {
                         get("Abs").shouldBeType(
                             FunctionType(
-                                TypeVisibility.Public,
-                                listOf(Parameter(TypeVisibility.Public, "a"), Alias(TypeVisibility.Public, "Int"))
+                                setOf(CommonAttribute.Public),
+                                listOf(
+                                    Parameter(setOf(CommonAttribute.Public), "a"),
+                                    Alias(setOf(CommonAttribute.Public), "Int")
+                                )
                             ),
                             "(a -> Int)"
                         )
@@ -400,14 +345,14 @@ class TypeSystemTest : ShouldSpec({
                         get("Get")
                             .shouldBeType(
                                 FunctionType(
-                                    TypeVisibility.Public,
+                                    setOf(CommonAttribute.Public),
                                     listOf(
                                         ParametricType(
-                                            TypeVisibility.Public,
-                                            Alias(TypeVisibility.Public, "List"),
-                                            listOf(Alias(TypeVisibility.Public, "Int"))
+                                            setOf(CommonAttribute.Public),
+                                            Alias(setOf(CommonAttribute.Public), "List"),
+                                            listOf(Alias(setOf(CommonAttribute.Public), "Int"))
                                         ),
-                                        Alias(TypeVisibility.Public, "Int")
+                                        Alias(setOf(CommonAttribute.Public), "Int")
                                     )
                                 ),
                                 "((List Int) -> Int)"
@@ -417,24 +362,24 @@ class TypeSystemTest : ShouldSpec({
                         get("MapFn")
                             .shouldBeType(
                                 FunctionType(
-                                    TypeVisibility.Public,
+                                    setOf(CommonAttribute.Public),
                                     listOf(
                                         ParametricType(
-                                            TypeVisibility.Public,
-                                            Alias(TypeVisibility.Public, "List"),
-                                            listOf(Parameter(TypeVisibility.Public, "a"))
+                                            setOf(CommonAttribute.Public),
+                                            Alias(setOf(CommonAttribute.Public), "List"),
+                                            listOf(Parameter(setOf(CommonAttribute.Public), "a"))
                                         ),
                                         FunctionType(
-                                            TypeVisibility.Public,
+                                            setOf(CommonAttribute.Public),
                                             listOf(
-                                                Parameter(TypeVisibility.Public, "a"),
-                                                Parameter(TypeVisibility.Public, "b")
+                                                Parameter(setOf(CommonAttribute.Public), "a"),
+                                                Parameter(setOf(CommonAttribute.Public), "b")
                                             )
                                         ),
                                         ParametricType(
-                                            TypeVisibility.Public,
-                                            Alias(TypeVisibility.Public, "List"),
-                                            listOf(Parameter(TypeVisibility.Public, "b"))
+                                            setOf(CommonAttribute.Public),
+                                            Alias(setOf(CommonAttribute.Public), "List"),
+                                            listOf(Parameter(setOf(CommonAttribute.Public), "b"))
                                         ),
                                     )
                                 ),
@@ -457,17 +402,17 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Tuple types") {
             typeSystem {
-                type(TypeVisibility.Public, "String")
-                parametricType(TypeVisibility.Public, "Num") {
+                type(setOf(CommonAttribute.Public), "String")
+                parametricType(setOf(CommonAttribute.Public), "Num") {
                     parameter("a")
                 }
-                alias(TypeVisibility.Public, "User") {
+                alias(setOf(CommonAttribute.Public), "User") {
                     tupleType {
                         type("String")
                         type("String")
                     }
                 }
-                alias(TypeVisibility.Public, "Point") {
+                alias(setOf(CommonAttribute.Public), "Point") {
                     tupleType {
                         parametricType("Num") {
                             parameter("x")
@@ -477,7 +422,7 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
-                alias(TypeVisibility.Public, "NestedTuple") {
+                alias(setOf(CommonAttribute.Public), "NestedTuple") {
                     tupleType {
                         parametricType("Num") {
                             parameter("x")
@@ -493,8 +438,11 @@ class TypeSystemTest : ShouldSpec({
                     should("User (String, String) type") {
                         get("User").shouldBeType(
                             TupleType(
-                                TypeVisibility.Public,
-                                listOf(Alias(TypeVisibility.Public, "String"), Alias(TypeVisibility.Public, "String"))
+                                setOf(CommonAttribute.Public),
+                                listOf(
+                                    Alias(setOf(CommonAttribute.Public), "String"),
+                                    Alias(setOf(CommonAttribute.Public), "String")
+                                )
                             ),
                             "(String, String)"
                         )
@@ -502,17 +450,17 @@ class TypeSystemTest : ShouldSpec({
                     should("Point ((Num x), (Num x)) type") {
                         get("Point").shouldBeType(
                             TupleType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 listOf(
                                     ParametricType(
-                                        TypeVisibility.Public,
-                                        Alias(TypeVisibility.Public, "Num"),
-                                        listOf(Parameter(TypeVisibility.Public, "x"))
+                                        setOf(CommonAttribute.Public),
+                                        Alias(setOf(CommonAttribute.Public), "Num"),
+                                        listOf(Parameter(setOf(CommonAttribute.Public), "x"))
                                     ),
                                     ParametricType(
-                                        TypeVisibility.Public,
-                                        Alias(TypeVisibility.Public, "Num"),
-                                        listOf(Parameter(TypeVisibility.Public, "x"))
+                                        setOf(CommonAttribute.Public),
+                                        Alias(setOf(CommonAttribute.Public), "Num"),
+                                        listOf(Parameter(setOf(CommonAttribute.Public), "x"))
                                     ),
                                 )
                             ),
@@ -522,19 +470,19 @@ class TypeSystemTest : ShouldSpec({
                     should("NestedTuple ((Num x), point: (String, x)) type") {
                         get("NestedTuple").shouldBeType(
                             TupleType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 listOf(
                                     ParametricType(
-                                        TypeVisibility.Public,
-                                        Alias(TypeVisibility.Public, "Num"),
-                                        listOf(Parameter(TypeVisibility.Public, "x"))
+                                        setOf(CommonAttribute.Public),
+                                        Alias(setOf(CommonAttribute.Public), "Num"),
+                                        listOf(Parameter(setOf(CommonAttribute.Public), "x"))
                                     ),
                                     Labeled(
                                         "point", TupleType(
-                                            TypeVisibility.Public,
+                                            setOf(CommonAttribute.Public),
                                             listOf(
-                                                Alias(TypeVisibility.Public, "String"),
-                                                Parameter(TypeVisibility.Public, "x")
+                                                Alias(setOf(CommonAttribute.Public), "String"),
+                                                Parameter(setOf(CommonAttribute.Public), "x")
                                             )
                                         )
                                     ),
@@ -554,12 +502,12 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Union types") {
             typeSystem {
-                type(TypeVisibility.Public, "String")
-                parametricType(TypeVisibility.Public, "Dict") {
+                type(setOf(CommonAttribute.Public), "String")
+                parametricType(setOf(CommonAttribute.Public), "Dict") {
                     type("String")
                     parameter("b")
                 }
-                alias(TypeVisibility.Public, "Either") {
+                alias(setOf(CommonAttribute.Public), "Either") {
                     unionType {
                         clazz("Left") {
                             parameter("a")
@@ -569,19 +517,19 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
-                alias(TypeVisibility.Public, "Weekend") {
+                alias(setOf(CommonAttribute.Public), "Weekend") {
                     unionType {
                         clazz("Saturday")
                         clazz("Sunday")
                     }
                 }
-                alias(TypeVisibility.Public, "Bool") {
+                alias(setOf(CommonAttribute.Public), "Bool") {
                     unionType {
                         clazz("True")
                         clazz("False")
                     }
                 }
-                alias(TypeVisibility.Public, "Bool2") {
+                alias(setOf(CommonAttribute.Public), "Bool2") {
                     unionType {
                         clazz("True")
                     }
@@ -589,14 +537,17 @@ class TypeSystemTest : ShouldSpec({
             }.apply {
                 context("Should contains the following types:") {
                     should("String type") {
-                        get("String").shouldBeType(Concrete(TypeVisibility.Public, "String"), "String")
+                        get("String").shouldBeType(Concrete(setOf(CommonAttribute.Public), "String"), "String")
                     }
                     should("(Dict String b) type") {
                         get("Dict").shouldBeType(
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Dict"),
-                                listOf(Alias(TypeVisibility.Public, "String"), Parameter(TypeVisibility.Public, "b"))
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "Dict"),
+                                listOf(
+                                    Alias(setOf(CommonAttribute.Public), "String"),
+                                    Parameter(setOf(CommonAttribute.Public), "b")
+                                )
                             ),
                             "(Dict String b)"
                         )
@@ -604,17 +555,17 @@ class TypeSystemTest : ShouldSpec({
                     should("Left a|Right b type") {
                         get("Either").shouldBeType(
                             UnionType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 mapOf(
                                     "Left" to UnionType.ClassType(
-                                        TypeVisibility.Public,
+                                        setOf(CommonAttribute.Public),
                                         "Left",
-                                        listOf(Parameter(TypeVisibility.Public, "a"))
+                                        listOf(Parameter(setOf(CommonAttribute.Public), "a"))
                                     ),
                                     "Right" to UnionType.ClassType(
-                                        TypeVisibility.Public,
+                                        setOf(CommonAttribute.Public),
                                         "Right",
-                                        listOf(Parameter(TypeVisibility.Public, "b"))
+                                        listOf(Parameter(setOf(CommonAttribute.Public), "b"))
                                     )
                                 )
                             ),
@@ -624,10 +575,14 @@ class TypeSystemTest : ShouldSpec({
                     should("Saturday|Sunday type") {
                         get("Weekend").shouldBeType(
                             UnionType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 mapOf(
-                                    "Saturday" to UnionType.ClassType(TypeVisibility.Public, "Saturday", listOf()),
-                                    "Sunday" to UnionType.ClassType(TypeVisibility.Public, "Sunday", listOf())
+                                    "Saturday" to UnionType.ClassType(
+                                        setOf(CommonAttribute.Public),
+                                        "Saturday",
+                                        listOf()
+                                    ),
+                                    "Sunday" to UnionType.ClassType(setOf(CommonAttribute.Public), "Sunday", listOf())
                                 )
                             ),
                             "Saturday\n|Sunday"
@@ -636,10 +591,10 @@ class TypeSystemTest : ShouldSpec({
                     should("True|False type") {
                         get("Bool").shouldBeType(
                             UnionType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 mapOf(
-                                    "True" to UnionType.ClassType(TypeVisibility.Public, "True", listOf()),
-                                    "False" to UnionType.ClassType(TypeVisibility.Public, "False", listOf())
+                                    "True" to UnionType.ClassType(setOf(CommonAttribute.Public), "True", listOf()),
+                                    "False" to UnionType.ClassType(setOf(CommonAttribute.Public), "False", listOf())
                                 )
                             ),
                             "True\n|False"
@@ -647,7 +602,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                     should("True type") {
                         get("True").shouldBeType(
-                            TypeConstructor(TypeVisibility.Public, "True", "Bool"),
+                            TypeConstructor(setOf(CommonAttribute.Public), "True", "Bool"),
                             "True"
                         )
                     }
@@ -663,13 +618,13 @@ class TypeSystemTest : ShouldSpec({
                     )
                 }
                 should("Resolve type constructor types") {
-                    value(TypeConstructor(TypeVisibility.Public, "True", "Bool"))
+                    value(TypeConstructor(setOf(CommonAttribute.Public), "True", "Bool"))
                         .shouldBeType(
                             UnionType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 mapOf(
-                                    "True" to UnionType.ClassType(TypeVisibility.Public, "True", listOf()),
-                                    "False" to UnionType.ClassType(TypeVisibility.Public, "False", listOf())
+                                    "True" to UnionType.ClassType(setOf(CommonAttribute.Public), "True", listOf()),
+                                    "False" to UnionType.ClassType(setOf(CommonAttribute.Public), "False", listOf())
                                 )
                             ),
                             "True\n|False"
@@ -679,7 +634,7 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Trait types") {
             typeSystem {
-                trait(TypeVisibility.Public, "Num", "a") {
+                trait(setOf(CommonAttribute.Public), "Num", "a") {
                     method("(+)") {
                         parameter("a")
                         parameter("a")
@@ -691,14 +646,14 @@ class TypeSystemTest : ShouldSpec({
                         parameter("a")
                     }
                 }
-                trait(TypeVisibility.Public, "num", "a") {
+                trait(setOf(CommonAttribute.Public), "num", "a") {
                     method("(+)") {
                         parameter("a")
                         parameter("a")
                         parameter("a")
                     }
                 }
-                trait(TypeVisibility.Public, "Functor", "F") {
+                trait(setOf(CommonAttribute.Public), "Functor", "F") {
                     method("map") {
                         functionType {
                             parameter("a")
@@ -707,7 +662,7 @@ class TypeSystemTest : ShouldSpec({
                         parameter("b")
                     }
                 }
-                trait(TypeVisibility.Public, "Monad", "m") {
+                trait(setOf(CommonAttribute.Public), "Monad", "m") {
                     method("map ing") {
                         functionType {
                             parameter("a")
@@ -721,24 +676,24 @@ class TypeSystemTest : ShouldSpec({
                     should("Num trait") {
                         get("Num").shouldBeType(
                             TraitType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 "Num", "a", mapOf(
                                     "(+)" to TraitType.MethodType(
-                                        TypeVisibility.Public,
+                                        setOf(CommonAttribute.Public),
                                         "(+)",
                                         listOf(
-                                            Parameter(TypeVisibility.Public, "a"),
-                                            Parameter(TypeVisibility.Public, "a"),
-                                            Parameter(TypeVisibility.Public, "a")
+                                            Parameter(setOf(CommonAttribute.Public), "a"),
+                                            Parameter(setOf(CommonAttribute.Public), "a"),
+                                            Parameter(setOf(CommonAttribute.Public), "a")
                                         )
                                     ),
                                     "(-)" to TraitType.MethodType(
-                                        TypeVisibility.Public,
+                                        setOf(CommonAttribute.Public),
                                         "(-)",
                                         listOf(
-                                            Parameter(TypeVisibility.Public, "a"),
-                                            Parameter(TypeVisibility.Public, "a"),
-                                            Parameter(TypeVisibility.Public, "a")
+                                            Parameter(setOf(CommonAttribute.Public), "a"),
+                                            Parameter(setOf(CommonAttribute.Public), "a"),
+                                            Parameter(setOf(CommonAttribute.Public), "a")
                                         )
                                     )
                                 )
@@ -764,28 +719,28 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Intersection types") {
             typeSystem {
-                type(TypeVisibility.Public, "Int")
-                type(TypeVisibility.Public, "Char")
-                alias(TypeVisibility.Public, "OrdNum") {
+                type(setOf(CommonAttribute.Public), "Int")
+                type(setOf(CommonAttribute.Public), "Char")
+                alias(setOf(CommonAttribute.Public), "OrdNum") {
                     intersectionType {
                         type("Num")
                         type("Ord")
                     }
                 }
-                trait(TypeVisibility.Public, "Num", "a") {
+                trait(setOf(CommonAttribute.Public), "Num", "a") {
                     method("(+)") {
                         parameter("a")
                         parameter("a")
                         parameter("a")
                     }
                 }
-                trait(TypeVisibility.Public, "Ord", "a") {
+                trait(setOf(CommonAttribute.Public), "Ord", "a") {
                     method("(<=)") {
                         parameter("a")
                         parameter("a")
                     }
                 }
-                alias(TypeVisibility.Public, "Str") {
+                alias(setOf(CommonAttribute.Public), "Str") {
                     intersectionType {
                         type("Int")
                         type("Char")
@@ -796,8 +751,11 @@ class TypeSystemTest : ShouldSpec({
                     should("OrdNum intersection type") {
                         get("OrdNum").shouldBeType(
                             IntersectionType(
-                                TypeVisibility.Public,
-                                listOf(Alias(TypeVisibility.Public, "Num"), Alias(TypeVisibility.Public, "Ord"))
+                                setOf(CommonAttribute.Public),
+                                listOf(
+                                    Alias(setOf(CommonAttribute.Public), "Num"),
+                                    Alias(setOf(CommonAttribute.Public), "Ord")
+                                )
                             ),
                             "(Num & Ord)"
                         )
@@ -818,22 +776,22 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Error validations") {
             typeSystem {
-                type(TypeVisibility.Public, "int")
-                type(TypeVisibility.Public, "Int")
-                alias(TypeVisibility.Public, "PInt") {
+                type(setOf(CommonAttribute.Public), "int")
+                type(setOf(CommonAttribute.Public), "Int")
+                alias(setOf(CommonAttribute.Public), "PInt") {
                     parametricType("Int") {}
                 }
-                parametricType(TypeVisibility.Public, "Test") {}
-                alias(TypeVisibility.Public, "Float") {
+                parametricType(setOf(CommonAttribute.Public), "Test") {}
+                alias(setOf(CommonAttribute.Public), "Float") {
                     type("Double")
                 }
-                parametricType(TypeVisibility.Public, "Float") {
+                parametricType(setOf(CommonAttribute.Public), "Float") {
                     type("Double")
                 }
-                type(TypeVisibility.Public, "Int")
+                type(setOf(CommonAttribute.Public), "Int")
             }.apply {
                 should("Should have Int type") {
-                    get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                    get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
                 }
                 should("Shouldn't find the type String") {
                     get("String").shouldBeLeft(TypeSystemErrorCode.TypeNotFound.new("type" to "String"))
@@ -857,28 +815,28 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Labels") {
             typeSystem {
-                type(TypeVisibility.Public, "String")
-                type(TypeVisibility.Public, "Int")
-                parametricType(TypeVisibility.Public, "Num") {
+                type(setOf(CommonAttribute.Public), "String")
+                type(setOf(CommonAttribute.Public), "Int")
+                parametricType(setOf(CommonAttribute.Public), "Num") {
                     parameter("x")
                 }
-                parametricType(TypeVisibility.Public, "Map") {
+                parametricType(setOf(CommonAttribute.Public), "Map") {
                     parameter("k", "key")
                     parameter("v", "value")
                 }
-                alias(TypeVisibility.Public, "User") {
+                alias(setOf(CommonAttribute.Public), "User") {
                     tupleType {
                         type("String", "name")
                         type("String", "password")
                     }
                 }
-                alias(TypeVisibility.Public, "Point") {
+                alias(setOf(CommonAttribute.Public), "Point") {
                     tupleType {
                         parameter("n", "x")
                         parameter("n", "y")
                     }
                 }
-                alias(TypeVisibility.Public, "Point2D") {
+                alias(setOf(CommonAttribute.Public), "Point2D") {
                     tupleType {
                         parametricType("Num", "x") {
                             parameter("n")
@@ -888,14 +846,14 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
-                alias(TypeVisibility.Public, "Sum") {
+                alias(setOf(CommonAttribute.Public), "Sum") {
                     functionType {
                         type("Int", "a")
                         parameter("b")
                         type("Int", "result")
                     }
                 }
-                alias(TypeVisibility.Public, "Option") {
+                alias(setOf(CommonAttribute.Public), "Option") {
                     unionType {
                         clazz("Some") {
                             parameter("v", "value")
@@ -906,28 +864,28 @@ class TypeSystemTest : ShouldSpec({
             }.apply {
                 context("Should contain the following types:") {
                     should("String type") {
-                        get("String").shouldBeType(Concrete(TypeVisibility.Public, "String"), "String")
+                        get("String").shouldBeType(Concrete(setOf(CommonAttribute.Public), "String"), "String")
                     }
                     should("Int type") {
-                        get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                        get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
                     }
                     should("(Num x) type") {
                         get("Num").shouldBeType(
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Num"),
-                                listOf(Parameter(TypeVisibility.Public, "x"))
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "Num"),
+                                listOf(Parameter(setOf(CommonAttribute.Public), "x"))
                             ), "(Num x)"
                         )
                     }
                     should("(Map key: k value: v) type") {
                         get("Map").shouldBeType(
                             ParametricType(
-                                TypeVisibility.Public,
-                                Alias(TypeVisibility.Public, "Map"),
+                                setOf(CommonAttribute.Public),
+                                Alias(setOf(CommonAttribute.Public), "Map"),
                                 listOf(
-                                    Parameter(TypeVisibility.Public, "k").labeled("key"),
-                                    Parameter(TypeVisibility.Public, "v").labeled("value")
+                                    Parameter(setOf(CommonAttribute.Public), "k").labeled("key"),
+                                    Parameter(setOf(CommonAttribute.Public), "v").labeled("value")
                                 )
                             ), "(Map key: k value: v)"
                         )
@@ -935,10 +893,10 @@ class TypeSystemTest : ShouldSpec({
                     should("(name: String, password: String) type") {
                         get("User").shouldBeType(
                             TupleType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(TypeVisibility.Public, "String").labeled("name"),
-                                    Alias(TypeVisibility.Public, "String").labeled("password")
+                                    Alias(setOf(CommonAttribute.Public), "String").labeled("name"),
+                                    Alias(setOf(CommonAttribute.Public), "String").labeled("password")
                                 )
                             ),
                             "(name: String, password: String)"
@@ -947,10 +905,10 @@ class TypeSystemTest : ShouldSpec({
                     should("(x: n, y: n) type") {
                         get("Point").shouldBeType(
                             TupleType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 listOf(
-                                    Parameter(TypeVisibility.Public, "n").labeled("x"),
-                                    Parameter(TypeVisibility.Public, "n").labeled("y")
+                                    Parameter(setOf(CommonAttribute.Public), "n").labeled("x"),
+                                    Parameter(setOf(CommonAttribute.Public), "n").labeled("y")
                                 )
                             ),
                             "(x: n, y: n)"
@@ -959,17 +917,17 @@ class TypeSystemTest : ShouldSpec({
                     should("(x: Num n, y: Num n) type") {
                         get("Point2D").shouldBeType(
                             TupleType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 listOf(
                                     ParametricType(
-                                        TypeVisibility.Public,
-                                        Alias(TypeVisibility.Public, "Num"),
-                                        listOf(Parameter(TypeVisibility.Public, "n"))
+                                        setOf(CommonAttribute.Public),
+                                        Alias(setOf(CommonAttribute.Public), "Num"),
+                                        listOf(Parameter(setOf(CommonAttribute.Public), "n"))
                                     ).labeled("x"),
                                     ParametricType(
-                                        TypeVisibility.Public,
-                                        Alias(TypeVisibility.Public, "Num"),
-                                        listOf(Parameter(TypeVisibility.Public, "n"))
+                                        setOf(CommonAttribute.Public),
+                                        Alias(setOf(CommonAttribute.Public), "Num"),
+                                        listOf(Parameter(setOf(CommonAttribute.Public), "n"))
                                     ).labeled("y")
                                 )
                             ),
@@ -979,11 +937,11 @@ class TypeSystemTest : ShouldSpec({
                     should("(a: Int -> b -> result: Int) Type") {
                         get("Sum").shouldBeType(
                             FunctionType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(TypeVisibility.Public, "Int").labeled("a"),
-                                    Parameter(TypeVisibility.Public, "b"),
-                                    Alias(TypeVisibility.Public, "Int").labeled("result")
+                                    Alias(setOf(CommonAttribute.Public), "Int").labeled("a"),
+                                    Parameter(setOf(CommonAttribute.Public), "b"),
+                                    Alias(setOf(CommonAttribute.Public), "Int").labeled("result")
                                 )
                             ),
                             "(a: Int -> b -> result: Int)"
@@ -992,14 +950,14 @@ class TypeSystemTest : ShouldSpec({
                     should("(Some value: v | None) type") {
                         get("Option").shouldBeType(
                             UnionType(
-                                TypeVisibility.Public,
+                                setOf(CommonAttribute.Public),
                                 mapOf(
                                     "Some" to UnionType.ClassType(
-                                        TypeVisibility.Public,
+                                        setOf(CommonAttribute.Public),
                                         "Some",
-                                        listOf(Parameter(TypeVisibility.Public, "v").labeled("value"))
+                                        listOf(Parameter(setOf(CommonAttribute.Public), "v").labeled("value"))
                                     ),
-                                    "None" to UnionType.ClassType(TypeVisibility.Public, "None", listOf())
+                                    "None" to UnionType.ClassType(setOf(CommonAttribute.Public), "None", listOf())
                                 )
                             ),
                             "Some value: v\n|None"
@@ -1016,23 +974,26 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Order declaration shouldn't affect builder") {
             typeSystem {
-                alias(TypeVisibility.Public, "Abs") {
+                alias(setOf(CommonAttribute.Public), "Abs") {
                     functionType {
                         type("Int")
                         type("Int")
                     }
                 }
-                type(TypeVisibility.Public, "Int")
+                type(setOf(CommonAttribute.Public), "Int")
             }.apply {
                 context("Should contain the following types:") {
                     should("Int type") {
-                        get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                        get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
                     }
                     should("Int -> Int type") {
                         get("Abs").shouldBeType(
                             FunctionType(
-                                TypeVisibility.Public,
-                                listOf(Alias(TypeVisibility.Public, "Int"), Alias(TypeVisibility.Public, "Int"))
+                                setOf(CommonAttribute.Public),
+                                listOf(
+                                    Alias(setOf(CommonAttribute.Public), "Int"),
+                                    Alias(setOf(CommonAttribute.Public), "Int")
+                                )
                             ),
                             "(Int -> Int)"
                         )
@@ -1048,9 +1009,9 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Hierarchical type system") {
             typeSystem(typeSystem {
-                type(TypeVisibility.Public, "Int")
+                type(setOf(CommonAttribute.Public), "Int")
             }) {
-                parametricType(TypeVisibility.Public, "List") {
+                parametricType(setOf(CommonAttribute.Public), "List") {
                     type("Int")
                 }
             }.apply {
@@ -1058,14 +1019,14 @@ class TypeSystemTest : ShouldSpec({
                     errors.shouldBeEmpty()
                 }
                 should("Can find Int") {
-                    get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                    get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
                 }
                 should("Can find List Int") {
                     get("List").shouldBeType(
                         ParametricType(
-                            TypeVisibility.Public,
-                            Alias(TypeVisibility.Public, "List"),
-                            listOf(Alias(TypeVisibility.Public, "Int"))
+                            setOf(CommonAttribute.Public),
+                            Alias(setOf(CommonAttribute.Public), "List"),
+                            listOf(Alias(setOf(CommonAttribute.Public), "Int"))
                         ), "(List Int)"
                     )
                 }
@@ -1073,16 +1034,16 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Hierarchical type system with Errors") {
             typeSystem(typeSystem {
-                type(TypeVisibility.Public, "Int")
-                parametricType(TypeVisibility.Public, "String") {
+                type(setOf(CommonAttribute.Public), "Int")
+                parametricType(setOf(CommonAttribute.Public), "String") {
                     type("Array")
                 }
             }) {
-                type(TypeVisibility.Public, "Int")
-                parametricType(TypeVisibility.Public, "Set") {
+                type(setOf(CommonAttribute.Public), "Int")
+                parametricType(setOf(CommonAttribute.Public), "Set") {
                     type("String")
                 }
-                parametricType(TypeVisibility.Public, "List") {
+                parametricType(setOf(CommonAttribute.Public), "List") {
                     type("Int")
                 }
             }.apply {
@@ -1096,14 +1057,14 @@ class TypeSystemTest : ShouldSpec({
                     )
                 }
                 should("Can find Int") {
-                    get("Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                    get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
                 }
                 should("Can find List Int") {
                     get("List").shouldBeType(
                         ParametricType(
-                            TypeVisibility.Public,
-                            Alias(TypeVisibility.Public, "List"),
-                            listOf(Alias(TypeVisibility.Public, "Int"))
+                            setOf(CommonAttribute.Public),
+                            Alias(setOf(CommonAttribute.Public), "List"),
+                            listOf(Alias(setOf(CommonAttribute.Public), "Int"))
                         ), "(List Int)"
                     )
                 }
@@ -1112,48 +1073,48 @@ class TypeSystemTest : ShouldSpec({
         context("Module type system") {
             moduleTypeSystem {
                 register("num", typeSystem {
-                    type(TypeVisibility.Public, "Int")
-                    type(TypeVisibility.Public, "Float")
+                    type(setOf(CommonAttribute.Public), "Int")
+                    type(setOf(CommonAttribute.Public), "Float")
                 })
                 register("str", typeSystem {
-                    type(TypeVisibility.Public, "String")
+                    type(setOf(CommonAttribute.Public), "String")
                 })
             }.apply {
                 errors.shouldBeEmpty()
                 size.shouldBe(0)
-                get("num.Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                get("num.Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
             }
         }
         context("Module type system with parent") {
             moduleTypeSystem(typeSystem {
-                type(TypeVisibility.Public, "List")
+                type(setOf(CommonAttribute.Public), "List")
             }) {
                 register("num", typeSystem {
-                    type(TypeVisibility.Public, "Int")
-                    type(TypeVisibility.Public, "Float")
+                    type(setOf(CommonAttribute.Public), "Int")
+                    type(setOf(CommonAttribute.Public), "Float")
                 })
                 register("str", typeSystem {
-                    type(TypeVisibility.Public, "String")
+                    type(setOf(CommonAttribute.Public), "String")
                 })
             }.apply {
                 errors.shouldBeEmpty()
                 size.shouldBe(0)
-                get("List").shouldBeType(Concrete(TypeVisibility.Public, "List"), "List")
-                get("num.Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                get("List").shouldBeType(Concrete(setOf(CommonAttribute.Public), "List"), "List")
+                get("num.Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
             }
         }
         context("Module type system with parent and errors") {
             moduleTypeSystem(typeSystem {
-                type(TypeVisibility.Public, "List")
-                type(TypeVisibility.Public, "List")
+                type(setOf(CommonAttribute.Public), "List")
+                type(setOf(CommonAttribute.Public), "List")
             }) {
                 register("num", typeSystem {
-                    type(TypeVisibility.Public, "Int")
-                    type(TypeVisibility.Public, "Int")
-                    type(TypeVisibility.Public, "Float")
+                    type(setOf(CommonAttribute.Public), "Int")
+                    type(setOf(CommonAttribute.Public), "Int")
+                    type(setOf(CommonAttribute.Public), "Float")
                 })
                 register("str", typeSystem {
-                    type(TypeVisibility.Public, "String")
+                    type(setOf(CommonAttribute.Public), "String")
                 })
             }.apply {
                 errors.shouldBe(
@@ -1163,8 +1124,8 @@ class TypeSystemTest : ShouldSpec({
                     )
                 )
                 size.shouldBe(0)
-                get("List").shouldBeType(Concrete(TypeVisibility.Public, "List"), "List")
-                get("num.Int").shouldBeType(Concrete(TypeVisibility.Public, "Int"), "Int")
+                get("List").shouldBeType(Concrete(setOf(CommonAttribute.Public), "List"), "List")
+                get("num.Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
                 get("BigInt").shouldBeLeft()
                 get("num.BigDec").shouldBeLeft()
                 get("txt.String").shouldBeLeft()
@@ -1172,15 +1133,15 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Check list all types on the typeSystem") {
             typeSystem {
-                type(TypeVisibility.Public, "Int")
-                type(TypeVisibility.Public, "String")
+                type(setOf(CommonAttribute.Public), "Int")
+                type(setOf(CommonAttribute.Public), "String")
             }.apply {
                 value.asSequence()
                     .toList()
                     .shouldBe(
                         listOf(
-                            "Int" to Concrete(TypeVisibility.Public, "Int"),
-                            "String" to Concrete(TypeVisibility.Public, "String")
+                            "Int" to Concrete(setOf(CommonAttribute.Public), "Int"),
+                            "String" to Concrete(setOf(CommonAttribute.Public), "String")
                         )
                     )
             }

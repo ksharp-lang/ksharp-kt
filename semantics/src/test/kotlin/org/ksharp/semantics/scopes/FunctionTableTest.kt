@@ -12,6 +12,7 @@ import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.newParameterForTesting
 
 class FunctionTableTest : StringSpec({
@@ -20,13 +21,13 @@ class FunctionTableTest : StringSpec({
         FunctionTableBuilder(ErrorCollector()).apply {
             register(
                 "sum",
-                Function(FunctionVisibility.Public, null, "sum", listOf(mockType)),
+                Function(setOf(CommonAttribute.Public), "sum", listOf(mockType)),
                 Location.NoProvided
             ).shouldBeRight()
         }.build().apply {
             this["sum"]!!.apply {
                 first.shouldBe(
-                    Function(FunctionVisibility.Public, null, "sum", listOf(mockType))
+                    Function(setOf(CommonAttribute.Public), "sum", listOf(mockType))
                 )
                 second.shouldBe(Location.NoProvided)
                 isPublic.shouldBeTrue()
@@ -39,12 +40,12 @@ class FunctionTableTest : StringSpec({
         FunctionTableBuilder(ErrorCollector()).apply {
             register(
                 "sum",
-                Function(FunctionVisibility.Internal, null, "sum", listOf(mockType)),
+                Function(setOf(CommonAttribute.Internal), "sum", listOf(mockType)),
                 Location.NoProvided
             ).shouldBeRight()
             register(
                 "sum",
-                Function(FunctionVisibility.Public, null, "sub", listOf(mockType)),
+                Function(setOf(CommonAttribute.Public), "sub", listOf(mockType)),
                 Location.NoProvided
             ).shouldBeLeft(
                 TableErrorCode.AlreadyDefined.new(
@@ -56,7 +57,7 @@ class FunctionTableTest : StringSpec({
         }.build().apply {
             this["sum"]!!.apply {
                 this.first.shouldBe(
-                    Function(FunctionVisibility.Internal, null, "sum", listOf(mockType))
+                    Function(setOf(CommonAttribute.Internal), "sum", listOf(mockType))
                 )
                 second.shouldBe(Location.NoProvided)
                 isPublic.shouldBeFalse()

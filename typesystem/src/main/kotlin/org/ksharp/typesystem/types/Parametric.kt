@@ -2,7 +2,8 @@ package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.*
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -16,7 +17,7 @@ private var parameterIdCounter = AtomicInteger(-1)
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
 data class Parameter internal constructor(
-    override val visibility: TypeVisibility,
+    override val attributes: Set<Attribute>,
     val name: String,
 ) : TypeVariable {
     override val serializer: TypeSerializer
@@ -33,14 +34,14 @@ data class Parameter internal constructor(
 }
 
 fun resetParameterCounterForTesting() = parameterIdCounter.set(-1)
-fun newParameterForTesting(id: Int) = Parameter(TypeVisibility.Internal, "@${id}")
+fun newParameterForTesting(id: Int) = Parameter(NoAttributes, "@${id}")
 
-fun newParameter() = Parameter(TypeVisibility.Internal, "@${parameterIdCounter.incrementAndGet()}")
+fun newParameter() = Parameter(NoAttributes, "@${parameterIdCounter.incrementAndGet()}")
 
-fun newNamedParameter(name: String) = Parameter(TypeVisibility.Internal, name)
+fun newNamedParameter(name: String) = Parameter(NoAttributes, name)
 
 data class ParametricType internal constructor(
-    override val visibility: TypeVisibility,
+    override val attributes: Set<Attribute>,
     val type: Type,
     val params: List<Type>
 ) : Type {
@@ -78,7 +79,7 @@ class ParametricTypeFactory(
     fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->
             validateTypeParamName(name).map {
-                params.add(Parameter(builder.visibility, it).labeled(label))
+                params.add(Parameter(builder.attributes, it).labeled(label))
                 params
             }
         }
@@ -136,7 +137,7 @@ fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryB
                     TypeSystemErrorCode.ParametricTypeWithoutParameters.new("type" to name)
                 )
             } else
-                Either.Right(ParametricType(visibility, Alias(visibility, name), it))
+                Either.Right(ParametricType(attributes, Alias(attributes, name), it))
         }
     } else
         type(name).flatMap { pType ->
@@ -152,22 +153,21 @@ fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryB
                         TypeSystemErrorCode.InvalidNumberOfParameters.new(
                             "type" to type,
                             "number" to type.params.size,
-                            "configuredType" to ParametricType(visibility, type.type, types)
+                            "configuredType" to ParametricType(attributes, type.type, types)
                         )
                     } else null
                 }
-                Either.Right(ParametricType(visibility, pType, types))
+                Either.Right(ParametricType(attributes, pType, types))
             }
         }
 
 
 fun TypeSystemBuilder.parametricType(
-    visibility: TypeVisibility,
+    attributes: Set<Attribute>,
     name: String,
-    annotations: List<Annotation> = listOf(),
     factory: ParametricTypeFactoryBuilder
 ) =
-    item(visibility, name, annotations) {
+    item(attributes, name) {
         this.parametricType(name, factory)
     }
 

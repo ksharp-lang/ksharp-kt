@@ -1,10 +1,8 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.TypeVisibility
-import org.ksharp.typesystem.types.annotated
 
 typealias TypeEntry = Pair<String, Type>
 typealias ErrorOrType = ErrorOrValue<Type>
@@ -13,7 +11,7 @@ typealias GetType = (key: String) -> Type?
 typealias TypeValidation = (getType: GetType) -> Error?
 
 class TypeItemBuilder(
-    val visibility: TypeVisibility,
+    val attributes: Set<Attribute>,
     val name: String,
     private val storeView: MapView<String, Type>,
     private val store: MapBuilder<String, Type>,
@@ -66,23 +64,19 @@ class TypeSystemBuilder(
     }
 
     fun item(
-        visibility: TypeVisibility,
+        attributes: Set<Attribute>,
         name: String,
-        annotations: List<Annotation>,
         factory: TypeFactoryBuilder
     ) {
         builder.item {
-            TypeItemBuilder(visibility, name, mapView, store, this, builder).apply {
+            TypeItemBuilder(attributes, name, mapView, store, this, builder).apply {
                 validateTypeName(name).flatMap {
                     if (isTypeNameTaken(it)) {
                         Either.Left(TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to it))
                     } else {
                         factory()
                     }
-                }.map { t ->
-                    val type = if (annotations.isEmpty()) {
-                        t
-                    } else t.annotated(annotations)
+                }.map { type ->
                     store.put(name, type)
                     value(name to type)
                 }.mapLeft { error ->
@@ -94,4 +88,3 @@ class TypeSystemBuilder(
 
     fun build() = builder.build()
 }
-

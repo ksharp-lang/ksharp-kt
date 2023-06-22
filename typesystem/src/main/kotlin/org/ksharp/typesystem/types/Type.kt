@@ -6,7 +6,7 @@ import org.ksharp.common.new
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode
-import org.ksharp.typesystem.annotations.Annotation
+import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -14,18 +14,13 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
-enum class TypeVisibility {
-    Internal,
-    Public
-}
-
 interface Type {
     val serializer: TypeSerializer
     val unification: TypeUnification
     val substitution: Substitution
     val compound: Boolean get() = true
     val terms: Sequence<Type>
-    val visibility: TypeVisibility
+    val attributes: Set<Attribute>
     val representation: String get() = toString().let { s -> if (compound) "($s)" else s }
 }
 
@@ -35,7 +30,7 @@ sealed interface TypeVariable : Type {
 }
 
 data class Concrete internal constructor(
-    override val visibility: TypeVisibility,
+    override val attributes: Set<Attribute>,
     val name: String,
 ) : Type {
     override val serializer: TypeSerializer
@@ -54,7 +49,7 @@ data class Concrete internal constructor(
 
 
 fun TypeItemBuilder.type(name: String): ErrorOrValue<TypeVariable> =
-    Either.Right(Alias(visibility, name)).also {
+    Either.Right(Alias(attributes, name)).also {
         validation {
             if (it(name) == null)
                 TypeSystemErrorCode.TypeNotFound.new("type" to name)
@@ -62,7 +57,7 @@ fun TypeItemBuilder.type(name: String): ErrorOrValue<TypeVariable> =
         }
     }
 
-fun TypeSystemBuilder.type(visibility: TypeVisibility, name: String, annotations: List<Annotation> = listOf()) =
-    item(visibility, name, annotations) {
-        Either.Right(Concrete(visibility, name))
+fun TypeSystemBuilder.type(attributes: Set<Attribute>, name: String) =
+    item(attributes, name) {
+        Either.Right(Concrete(attributes, name))
     }

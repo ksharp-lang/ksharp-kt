@@ -4,11 +4,12 @@ import org.ksharp.common.Either
 import org.ksharp.module.RecordSize
 import org.ksharp.module.prelude.serializer.TypeSerializers
 import org.ksharp.module.prelude.unification.TypeUnifications
+import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.TypeVisibility
 import org.ksharp.typesystem.unification.TypeUnification
 
 enum class Numeric(val size: kotlin.Int, val isInteger: Boolean, val recordSize: RecordSize) {
@@ -26,8 +27,8 @@ data class NumericType internal constructor(
     val type: Numeric
 ) : Type {
 
-    override val visibility: TypeVisibility
-        get() = TypeVisibility.Public
+    override val attributes: Set<Attribute>
+        get() = setOf(CommonAttribute.Public)
 
     override val serializer: TypeSerializer
         get() = TypeSerializers.NumericType

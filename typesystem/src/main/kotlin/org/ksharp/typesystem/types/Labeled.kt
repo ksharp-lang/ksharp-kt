@@ -1,5 +1,6 @@
 package org.ksharp.typesystem.types
 
+import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -12,8 +13,8 @@ data class Labeled internal constructor(
     val type: Type
 ) : Type by type {
 
-    override val visibility: TypeVisibility
-        get() = type.visibility
+    override val attributes: Set<Attribute>
+        get() = type.attributes
 
     override val serializer: TypeSerializer
         get() = TypeSerializers.Labeled
