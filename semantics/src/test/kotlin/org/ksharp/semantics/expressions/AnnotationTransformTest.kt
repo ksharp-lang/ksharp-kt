@@ -22,7 +22,19 @@ class AnnotationTransformTest : StringSpec({
             ),
             AnnotationNode(
                 "name",
+                mapOf("for" to listOf("java", "c#")),
+                Location.NoProvided,
+                AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+            ),
+            AnnotationNode(
+                "name",
                 mapOf("default" to "custom-name-2", "for" to "clojure"),
+                Location.NoProvided,
+                AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+            ),
+            AnnotationNode(
+                "name",
+                mapOf("default" to "custom-name-3", "for" to true),
                 Location.NoProvided,
                 AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             ),
@@ -49,6 +61,18 @@ class AnnotationTransformTest : StringSpec({
             AnnotationNode(
                 "if",
                 mapOf("default" to "clojure"),
+                Location.NoProvided,
+                AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+            ),
+            AnnotationNode(
+                "if",
+                mapOf("for" to "clojure"),
+                Location.NoProvided,
+                AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+            ),
+            AnnotationNode(
+                "if",
+                mapOf("default" to true),
                 Location.NoProvided,
                 AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             ),
