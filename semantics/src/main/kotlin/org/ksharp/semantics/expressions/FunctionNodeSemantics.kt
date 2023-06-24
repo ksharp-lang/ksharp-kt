@@ -15,7 +15,6 @@ import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.semantics.scopes.FunctionTableBuilder
 import org.ksharp.semantics.scopes.SymbolTableBuilder
-import org.ksharp.semantics.typesystem.checkAnnotations
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
@@ -134,7 +133,7 @@ private fun FunctionNode.checkSemantics(
         val attributes = mutableSetOf<Attribute>()
         if (native) attributes.add(CommonAttribute.Native)
         attributes.addAll(function.attributes)
-        attributes.addAll(annotations.checkAnnotations(NoAttributes))
+        attributes.addAll(annotations.toAttributes(NoAttributes))
         AbstractionNode(
             attributes,
             name,

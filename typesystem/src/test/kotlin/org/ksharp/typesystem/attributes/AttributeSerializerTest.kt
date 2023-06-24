@@ -64,8 +64,18 @@ class AttributeSerializerTest : StringSpec({
             .cast<NameAttribute>()
             .value.shouldBe(mapOf("java" to "name", "c#" to "name2"))
     }
+    "Target language attribute serializer" {
+        targetLanguageAttribute(setOf("java", "c#"))
+            .shouldBeSerializable()
+            .cast<TargetLanguageAttribute>()
+            .value.shouldBe(setOf("java", "c#"))
+    }
     "Set of attributes" {
-        setOf(CommonAttribute.Public, nameAttribute(mapOf("java" to "name")))
+        setOf(
+            CommonAttribute.Public,
+            nameAttribute(mapOf("java" to "name")),
+            targetLanguageAttribute(setOf("java", "c#"))
+        )
             .shouldBeSerializable()
     }
 })
