@@ -5,9 +5,7 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
 import org.ksharp.common.Location
 import org.ksharp.common.Offset
-import org.ksharp.ir.ConstantExpression
-import org.ksharp.ir.Function
-import org.ksharp.ir.toSemanticModuleInfo
+import org.ksharp.ir.*
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
@@ -18,21 +16,55 @@ private fun String.getFirstAbstraction() =
         .abstractions
         .first()
 
+private fun createSpec(description: String, code: String, expected: IrNode) =
+    Triple(description, code, expected)
+
 class AbstractionToIrSymbolTest : StringSpec({
     val byteType = preludeModule.typeSystem["Byte"].valueOrNull!!
+    val doubleType = preludeModule.typeSystem["Double"].valueOrNull!!
+    val charType = preludeModule.typeSystem["Char"].valueOrNull!!
     val unitType = preludeModule.typeSystem["Unit"].valueOrNull!!
-    "Constant function to irFunction" {
+    listOf(
+        createSpec(
+            "IrInteger expression", "ten = 10", IrInteger(
+                10,
+                byteType,
+                Location(Line(1) to Offset(6), Line(1) to Offset(8))
+            )
+        ),
+        createSpec(
+            "IrDecimal expression", "ten = 10.0", IrDecimal(
+                10.0,
+                doubleType,
+                Location(Line(1) to Offset(6), Line(1) to Offset(10))
+            )
+        ),
+        createSpec(
+            "IrCharacter expression", "ten = 'a'", IrCharacter(
+                'a',
+                charType,
+                Location(Line(1) to Offset(6), Line(1) to Offset(9))
+            )
+        ),
+    ).forEach { (description, code, expected) ->
+        description {
+            code.getFirstAbstraction()
+                .toIrSymbol()
+                .expr.shouldBe(expected)
+        }
+    }
+    "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
             .toIrSymbol()
             .shouldBe(
-                Function(
+                IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
                     "ten",
                     listOf(),
                     listOf(unitType, byteType).toFunctionType(NoAttributes),
-                    ConstantExpression(
-                        10.toLong(),
+                    IrInteger(
+                        10,
                         byteType,
                         Location(Line(1) to Offset(6), Line(1) to Offset(8))
                     ),

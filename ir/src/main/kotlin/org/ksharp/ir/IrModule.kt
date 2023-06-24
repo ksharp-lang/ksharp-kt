@@ -3,13 +3,13 @@ package org.ksharp.ir
 import org.ksharp.ir.transform.toIrSymbol
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 
-data class Module(
+data class IrModule(
     val dependencies: List<String>,
-    val symbols: List<TopLevelSymbol>
+    val symbols: List<IrTopLevelSymbol>
 ) : IrNode
 
 fun SemanticModuleInfo.toIrModule() =
-    Module(
+    IrModule(
         listOf(),
         abstractions.map { it.toIrSymbol() }
     )

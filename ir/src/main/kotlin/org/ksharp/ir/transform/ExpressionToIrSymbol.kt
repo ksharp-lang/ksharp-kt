@@ -1,16 +1,38 @@
 package org.ksharp.ir.transform
 
-import org.ksharp.ir.ConstantExpression
-import org.ksharp.ir.Expression
+import org.ksharp.common.cast
+import org.ksharp.ir.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.nodes.SemanticInfo
 
 fun ConstantNode<SemanticInfo>.toIrSymbol() =
-    ConstantExpression(
-        value,
-        inferredType,
-        location
-    )
+    when (value) {
+        is Long -> IrInteger(
+            value.cast(),
+            inferredType,
+            location
+        )
+
+        is Double -> IrDecimal(
+            value.cast(),
+            inferredType,
+            location
+        )
+
+        is Char -> IrCharacter(
+            value.cast(),
+            inferredType,
+            location
+        )
+
+        is String -> IrString(
+            value.cast(),
+            inferredType,
+            location
+        )
+
+        else -> TODO("Constant node value not supported $value: ${value.javaClass}")
+    }
 
 fun SemanticNode<SemanticInfo>.toIrSymbol(): Expression =
     when (this) {
