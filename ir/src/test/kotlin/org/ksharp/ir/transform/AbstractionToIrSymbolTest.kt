@@ -23,6 +23,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     val byteType = preludeModule.typeSystem["Byte"].valueOrNull!!
     val doubleType = preludeModule.typeSystem["Double"].valueOrNull!!
     val charType = preludeModule.typeSystem["Char"].valueOrNull!!
+    val stringType = preludeModule.typeSystem["String"].valueOrNull!!
     val unitType = preludeModule.typeSystem["Unit"].valueOrNull!!
     listOf(
         createSpec(
@@ -44,6 +45,13 @@ class AbstractionToIrSymbolTest : StringSpec({
                 'a',
                 charType,
                 Location(Line(1) to Offset(6), Line(1) to Offset(9))
+            )
+        ),
+        createSpec(
+            "IrString expression", "ten = \"Hello\"", IrString(
+                "Hello",
+                stringType,
+                Location(Line(1) to Offset(6), Line(1) to Offset(13))
             )
         ),
     ).forEach { (description, code, expected) ->
