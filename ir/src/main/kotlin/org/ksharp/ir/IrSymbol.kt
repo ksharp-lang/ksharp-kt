@@ -16,7 +16,7 @@ interface IrSymbol : IrNode {
 
 interface IrTopLevelSymbol : IrSymbol {
     val name: String
-    val expr: Expression
+    val expr: IrExpression
 }
 
 data class IrFunction(
@@ -24,14 +24,14 @@ data class IrFunction(
     override val name: String,
     val arguments: List<Argument>,
     val type: Type,
-    override val expr: Expression,
+    override val expr: IrExpression,
     override val location: Location
-) : IrTopLevelSymbol, Expression
+) : IrTopLevelSymbol, IrExpression
 
 data class IrType(
     override val attributes: Set<Attribute>,
     override val name: String,
     val parameters: List<String>,
-    override val expr: Expression,
+    override val expr: IrExpression,
     override val location: Location
 ) : IrTopLevelSymbol

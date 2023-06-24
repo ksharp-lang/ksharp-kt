@@ -5,10 +5,13 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
 import org.ksharp.common.Location
 import org.ksharp.common.Offset
+import org.ksharp.common.cast
 import org.ksharp.ir.*
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.attributes.nameAttribute
 import org.ksharp.typesystem.types.toFunctionType
 
 private fun String.getFirstAbstraction() =
@@ -79,5 +82,25 @@ class AbstractionToIrSymbolTest : StringSpec({
                     Location(Line(1) to Offset(0), Line(1) to Offset(3))
                 )
             )
+    }
+    "Name attribute for java" {
+        """
+            @name("diez" for="java")
+            ten = 10
+        """.trimIndent()
+            .getFirstAbstraction()
+            .toIrSymbol()
+            .attributes
+            .apply {
+                shouldBe(
+                    setOf(
+                        CommonAttribute.Internal,
+                        CommonAttribute.Constant,
+                        nameAttribute(mapOf("java" to "diez"))
+                    ),
+                )
+                first { it is NameAttribute }.cast<NameAttribute>().value.shouldBe(mapOf("java" to "diez"))
+
+            }
     }
 })

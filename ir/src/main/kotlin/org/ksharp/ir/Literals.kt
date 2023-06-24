@@ -5,7 +5,7 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.Type
 
-sealed interface Literal : Expression {
+sealed interface Literal : IrExpression {
     override val attributes: Set<Attribute>
         get() = setOf(CommonAttribute.Constant)
 

@@ -34,7 +34,7 @@ fun ConstantNode<SemanticInfo>.toIrSymbol() =
         else -> TODO("Constant node value not supported $value: ${value.javaClass}")
     }
 
-fun SemanticNode<SemanticInfo>.toIrSymbol(): Expression =
+fun SemanticNode<SemanticInfo>.toIrSymbol(): IrExpression =
     when (this) {
         is ConstantNode -> toIrSymbol()
         is ApplicationNode -> TODO()
