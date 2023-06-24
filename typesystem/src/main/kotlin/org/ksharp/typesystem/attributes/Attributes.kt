@@ -19,10 +19,13 @@ enum class CommonAttribute(val description: String, override val writer: Seriali
     Public("Symbol accessible in any module", EnumAttributeSerializerWriter),
     Internal("Symbol accessible only in the module where they are defined", EnumAttributeSerializerWriter),
     Impure("Symbol has side effects", EnumAttributeSerializerWriter),
+    Pure("Symbol has not side effects", EnumAttributeSerializerWriter),
     Constant("Symbol represent a compile constant value", EnumAttributeSerializerWriter)
 }
 
 interface NameAttribute : AttributeWithValue<Map<String, String>>
+
+interface TargetLanguageAttribute : AttributeWithValue<Set<String>>
 
 private data class NameAttributeImpl(override val name: String = "name") : NameAttribute {
 
@@ -33,9 +36,23 @@ private data class NameAttributeImpl(override val name: String = "name") : NameA
 
 }
 
+private data class TargetLanguageAttributeImpl(override val name: String = "targetLanguage") : TargetLanguageAttribute {
+
+    override lateinit var value: Set<String>
+
+    override val writer: SerializerWriter<Attribute>
+        get() = TargetLanguageAttributeSerializerWriter.cast()
+
+}
+
 fun nameAttribute(name: Map<String, String>): AttributeWithValue<Map<String, String>> =
     NameAttributeImpl().apply {
         value = name
+    }
+
+fun targetLanguageAttribute(targetLanguages: Set<String>): AttributeWithValue<Set<String>> =
+    TargetLanguageAttributeImpl().apply {
+        value = targetLanguages
     }
 
 internal fun Attribute.writeTo(buffer: BufferWriter, table: BinaryTable) {

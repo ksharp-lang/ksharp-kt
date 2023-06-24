@@ -5,11 +5,11 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.expressions.checkFunctionName
+import org.ksharp.semantics.expressions.toAttributes
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
-import org.ksharp.typesystem.attributes.nameAttribute
 import org.ksharp.typesystem.types.*
 
 enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode {
@@ -209,24 +209,11 @@ fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
         else -> TODO("$node")
     }
 
-fun AnnotationNode.toAttribute(): Attribute? =
-    when (name) {
-        "name" -> nameAttribute(mapOf()) //TODO Calculate the names map
-        else -> null
-    }
-
 private fun List<AnnotationNode>?.checkAnnotations(internal: Boolean): Set<Attribute> =
     (if (internal) CommonAttribute.Internal else CommonAttribute.Public).let { visibility ->
-        this.checkAnnotations(setOf(visibility))
+        this.toAttributes(setOf(visibility))
     }
 
-fun List<AnnotationNode>?.checkAnnotations(attributes: Set<Attribute>): Set<Attribute> =
-    this?.asSequence()
-        ?.map { it.toAttribute() }
-        ?.filterNotNull()
-        ?.toMutableSet()?.apply {
-            addAll(attributes)
-        } ?: attributes
 
 private fun TypeSystemBuilder.register(node: TypeNode) =
     alias(
