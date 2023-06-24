@@ -30,28 +30,35 @@ class AbstractionToIrSymbolTest : StringSpec({
     val unitType = preludeModule.typeSystem["Unit"].valueOrNull!!
     listOf(
         createSpec(
-            "IrInteger expression", "ten = 10", IrInteger(
+            "IrInteger expression", "fn = 10", IrInteger(
                 10,
                 byteType,
-                Location(Line(1) to Offset(6), Line(1) to Offset(8))
+                Location(Line(1) to Offset(5), Line(1) to Offset(7))
             )
         ),
         createSpec(
-            "IrDecimal expression", "ten = 10.0", IrDecimal(
+            "IrDecimal expression", "fn = 10.0", IrDecimal(
                 10.0,
                 doubleType,
-                Location(Line(1) to Offset(6), Line(1) to Offset(10))
+                Location(Line(1) to Offset(5), Line(1) to Offset(9))
             )
         ),
         createSpec(
-            "IrCharacter expression", "ten = 'a'", IrCharacter(
+            "IrCharacter expression", "fn = 'a'", IrCharacter(
                 'a',
                 charType,
-                Location(Line(1) to Offset(6), Line(1) to Offset(9))
+                Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )
         ),
         createSpec(
-            "IrString expression", "ten = \"Hello\"", IrString(
+            "IrString expression", "fn = \"Hello\"", IrString(
+                "Hello",
+                stringType,
+                Location(Line(1) to Offset(5), Line(1) to Offset(12))
+            )
+        ),
+        createSpec(
+            "IrList expression", "fn = [1, 2, 3]", IrString(
                 "Hello",
                 stringType,
                 Location(Line(1) to Offset(6), Line(1) to Offset(13))
@@ -100,7 +107,6 @@ class AbstractionToIrSymbolTest : StringSpec({
                     ),
                 )
                 first { it is NameAttribute }.cast<NameAttribute>().value.shouldBe(mapOf("java" to "diez"))
-
             }
     }
 })

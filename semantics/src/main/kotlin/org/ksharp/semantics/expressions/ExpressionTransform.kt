@@ -17,7 +17,7 @@ enum class ExpressionSemanticsErrorCode(override val description: String) : Erro
     SymbolAlreadyUsed("Symbol already used '{name}'")
 }
 
-private const val PRELUDE_FLAG = "::prelude"
+const val PRELUDE_FLAG = "::prelude"
 
 private val LiteralCollectionType.applicationName
     get(): ApplicationName =
@@ -111,7 +111,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         )
 
         is IfNode -> ApplicationNode(
-            ApplicationName(PRELUDE_FLAG, "if"),
+            ApplicationName(null, "if"),
             listOf(
                 condition.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 trueExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
@@ -171,7 +171,7 @@ internal fun ExpressionParserNode.toSemanticNode(
 
         is LiteralMapEntryNode -> {
             ApplicationNode(
-                ApplicationName(PRELUDE_FLAG, "pair"),
+                ApplicationName(null, "pair"),
                 listOf(
                     key.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                     value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
