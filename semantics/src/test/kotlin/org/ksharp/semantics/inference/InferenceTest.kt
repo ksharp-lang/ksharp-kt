@@ -1,6 +1,7 @@
 package org.ksharp.semantics.inference
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cast
@@ -9,11 +10,13 @@ import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
+import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
 import org.ksharp.semantics.nodes.*
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.types.newParameter
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
@@ -116,7 +119,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(listOf()),
@@ -147,7 +150,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(listOf()),
@@ -178,7 +181,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -215,7 +218,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     ),
                 ),
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -243,7 +246,7 @@ class InferenceTest : StringSpec({
                     ApplicationNode(
                         ApplicationName(name = "True"),
                         listOf(),
-                        EmptySemanticInfo(),
+                        ApplicationSemanticInfo(),
                         Location.NoProvided
                     ),
                     ConstantNode(
@@ -257,7 +260,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     ),
                 ),
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(
@@ -295,7 +298,7 @@ class InferenceTest : StringSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo(),
@@ -329,7 +332,7 @@ class InferenceTest : StringSpec({
                         Location.NoProvided
                     )
                 ),
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 Location.NoProvided
             ),
             AbstractionSemanticInfo(listOf()),
@@ -363,7 +366,7 @@ class InferenceTest : StringSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         EmptySemanticInfo(),
@@ -385,5 +388,195 @@ class InferenceTest : StringSpec({
                 )
             )
         }
+    }
+    "listOf inference" {
+        val module = createInferenceInfo(ts)
+        val byteTypePromise = ts.getTypeSemanticInfo("Byte")
+        AbstractionNode(
+            setOf(CommonAttribute.Public),
+            "n",
+            ApplicationNode(
+                ApplicationName(PRELUDE_COLLECTION_FLAG, "listOf"),
+                listOf(
+                    ConstantNode(
+                        10.toLong(),
+                        byteTypePromise,
+                        Location.NoProvided
+                    ),
+                    ApplicationNode(
+                        ApplicationName(name = "(+)"),
+                        listOf(
+                            ConstantNode(
+                                2.toLong(),
+                                byteTypePromise,
+                                Location.NoProvided
+                            ),
+                            ConstantNode(
+                                1.toLong(),
+                                byteTypePromise,
+                                Location.NoProvided
+                            )
+                        ),
+                        ApplicationSemanticInfo(),
+                        Location.NoProvided
+                    )
+                ),
+                ApplicationSemanticInfo(),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(
+                listOf(), TypeSemanticInfo(
+                    Either.Right(
+                        newParameterForTesting(0)
+                    )
+                )
+            ),
+            Location.NoProvided
+        ).inferType(module)
+            .map { it.representation }
+            .shouldBeRight("(KernelUnit -> (List (Num numeric<Byte>)))")
+    }
+    "mapOf inference" {
+        val module = createInferenceInfo(ts)
+        val byteTypePromise = ts.getTypeSemanticInfo("Byte")
+        val strTypePromise = ts.getTypeSemanticInfo("String")
+        AbstractionNode(
+            setOf(CommonAttribute.Public),
+            "n",
+            ApplicationNode(
+                ApplicationName(PRELUDE_COLLECTION_FLAG, "mapOf"),
+                listOf(
+                    ApplicationNode(
+                        ApplicationName(null, "pair"),
+                        listOf(
+                            ConstantNode("key1", strTypePromise, Location.NoProvided),
+                            ConstantNode(1.toLong(), byteTypePromise, Location.NoProvided)
+                        ),
+                        ApplicationSemanticInfo(),
+                        Location.NoProvided
+                    ),
+                    ApplicationNode(
+                        ApplicationName(null, "pair"),
+                        listOf(
+                            ConstantNode("key2", strTypePromise, Location.NoProvided),
+                            ConstantNode(2.toLong(), byteTypePromise, Location.NoProvided)
+                        ),
+                        ApplicationSemanticInfo(),
+                        Location.NoProvided
+                    )
+                ),
+                ApplicationSemanticInfo(),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(
+                listOf(), TypeSemanticInfo(
+                    Either.Right(
+                        newParameterForTesting(0)
+                    )
+                )
+            ),
+            Location.NoProvided
+        ).inferType(module)
+            .map { it.representation }
+            .shouldBeRight("(KernelUnit -> (Map (List char<Char>) (Num numeric<Byte>)))")
+    }
+    "setOf inference" {
+        val module = createInferenceInfo(ts)
+        val byteTypePromise = ts.getTypeSemanticInfo("Byte")
+        AbstractionNode(
+            setOf(CommonAttribute.Public),
+            "n",
+            ApplicationNode(
+                ApplicationName(PRELUDE_COLLECTION_FLAG, "setOf"),
+                listOf(
+                    ConstantNode(
+                        10.toLong(),
+                        byteTypePromise,
+                        Location.NoProvided
+                    ),
+                    ApplicationNode(
+                        ApplicationName(name = "(+)"),
+                        listOf(
+                            ConstantNode(
+                                2.toLong(),
+                                byteTypePromise,
+                                Location.NoProvided
+                            ),
+                            ConstantNode(
+                                1.toLong(),
+                                byteTypePromise,
+                                Location.NoProvided
+                            )
+                        ),
+                        ApplicationSemanticInfo(),
+                        Location.NoProvided
+                    )
+                ),
+                ApplicationSemanticInfo(),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(
+                listOf(), TypeSemanticInfo(
+                    Either.Right(
+                        newParameterForTesting(0)
+                    )
+                )
+            ),
+            Location.NoProvided
+        ).inferType(module)
+            .map { it.representation }
+            .shouldBeRight("(KernelUnit -> (Set (Num numeric<Byte>)))")
+    }
+    "tupleOf inference" {
+        val module = createInferenceInfo(ts)
+        val byteTypePromise = ts.getTypeSemanticInfo("Byte")
+        val abstraction = AbstractionNode(
+            setOf(CommonAttribute.Public),
+            "n",
+            ApplicationNode(
+                ApplicationName(PRELUDE_COLLECTION_FLAG, "tupleOf"),
+                listOf(
+                    ConstantNode(
+                        10.toLong(),
+                        byteTypePromise,
+                        Location.NoProvided
+                    ),
+                    ApplicationNode(
+                        ApplicationName(name = "(+)"),
+                        listOf(
+                            ConstantNode(
+                                2.toLong(),
+                                byteTypePromise,
+                                Location.NoProvided
+                            ),
+                            ConstantNode(
+                                1.toLong(),
+                                byteTypePromise,
+                                Location.NoProvided
+                            )
+                        ),
+                        ApplicationSemanticInfo(),
+                        Location.NoProvided
+                    )
+                ),
+                ApplicationSemanticInfo(),
+                Location.NoProvided
+            ),
+            AbstractionSemanticInfo(
+                listOf(), TypeSemanticInfo(
+                    Either.Right(
+                        newParameterForTesting(0)
+                    )
+                )
+            ),
+            Location.NoProvided
+        )
+        abstraction.inferType(module)
+            .map { it.representation }
+            .shouldBeRight("(KernelUnit -> ((Num NativeByte), (Num numeric<Byte>)))")
+        abstraction.expression.info.cast<ApplicationSemanticInfo>()
+            .function!!
+            .attributes.filterIsInstance<NameAttribute>()
+            .first().value["ir"]!!.shouldBe("prelude::tupleOf")
     }
 })

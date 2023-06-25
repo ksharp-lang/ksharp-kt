@@ -17,15 +17,22 @@ enum class ExpressionSemanticsErrorCode(override val description: String) : Erro
     SymbolAlreadyUsed("Symbol already used '{name}'")
 }
 
-private const val PRELUDE_FLAG = "::prelude"
+internal const val PRELUDE_COLLECTION_FLAG = "::collection"
+
+enum class CollectionFunctionName(val applicationName: ApplicationName) {
+    List(ApplicationName(PRELUDE_COLLECTION_FLAG, "listOf")),
+    Map(ApplicationName(PRELUDE_COLLECTION_FLAG, "mapOf")),
+    Tuple(ApplicationName(PRELUDE_COLLECTION_FLAG, "tupleOf")),
+    Set(ApplicationName(PRELUDE_COLLECTION_FLAG, "setOf"))
+}
 
 private val LiteralCollectionType.applicationName
     get(): ApplicationName =
         when (this) {
-            LiteralCollectionType.List -> ApplicationName(PRELUDE_FLAG, "listOf")
-            LiteralCollectionType.Map -> ApplicationName(PRELUDE_FLAG, "mapOf")
-            LiteralCollectionType.Tuple -> ApplicationName(PRELUDE_FLAG, "tupleOf")
-            LiteralCollectionType.Set -> ApplicationName(PRELUDE_FLAG, "setOf")
+            LiteralCollectionType.List -> CollectionFunctionName.List.applicationName
+            LiteralCollectionType.Map -> CollectionFunctionName.Map.applicationName
+            LiteralCollectionType.Tuple -> CollectionFunctionName.Tuple.applicationName
+            LiteralCollectionType.Set -> CollectionFunctionName.Set.applicationName
         }
 
 private fun integer2Type(value: Long): String =
@@ -106,18 +113,18 @@ internal fun ExpressionParserNode.toSemanticNode(
                 left.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 right.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
             ),
-            EmptySemanticInfo(),
+            ApplicationSemanticInfo(),
             location
         )
 
         is IfNode -> ApplicationNode(
-            ApplicationName(PRELUDE_FLAG, "if"),
+            ApplicationName(null, "if"),
             listOf(
                 condition.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 trueExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 falseExpression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
             ),
-            EmptySemanticInfo(),
+            ApplicationSemanticInfo(),
             location
         )
 
@@ -134,7 +141,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 ApplicationNode(
                     name.toApplicationName(),
                     listOf(UnitNode(location).toSemanticNode(errors, callInfo, typeSystem)),
-                    EmptySemanticInfo(),
+                    ApplicationSemanticInfo(),
                     location
                 )
             }
@@ -145,7 +152,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 arguments.map {
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
                 },
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 location
             )
         }
@@ -164,19 +171,19 @@ internal fun ExpressionParserNode.toSemanticNode(
             ApplicationNode(
                 type.applicationName,
                 expressions,
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 location
             )
         }
 
         is LiteralMapEntryNode -> {
             ApplicationNode(
-                ApplicationName(PRELUDE_FLAG, "pair"),
+                ApplicationName(null, "pair"),
                 listOf(
                     key.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                     value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 ),
-                EmptySemanticInfo(),
+                ApplicationSemanticInfo(),
                 location
             )
         }
