@@ -79,10 +79,7 @@ fun SemanticInfo.getType(location: Location): ErrorOrType =
     }
 
 fun TypePromise.getType(location: Location): ErrorOrType =
-    when (this) {
-        is SemanticInfo -> this.cast<SemanticInfo>().getType(location)
-        else -> type
-    }
+    this.cast<SemanticInfo>().getType(location)
 
 fun paramTypePromise() = TypeSemanticInfo(Either.Right(newParameter()))
 

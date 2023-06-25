@@ -1123,7 +1123,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     ApplicationName(null, "x"),
                                     listOf(
                                         ConstantNode(
-                                            kotlin.Unit,
+                                            Unit,
                                             unitTypePromise,
                                             Location.NoProvided
                                         )
