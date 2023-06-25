@@ -6,6 +6,13 @@ import org.ksharp.typesystem.attributes.CommonAttribute
 
 sealed interface IrExpression : IrSymbol
 
+data class IrPair(
+    override val attributes: Set<Attribute>,
+    val first: IrExpression,
+    val second: IrExpression,
+    override val location: Location
+) : IrExpression
+
 data class IrVariableAccess(
     override val attributes: Set<Attribute>,
     val index: Int,

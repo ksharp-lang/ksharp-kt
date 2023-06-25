@@ -128,10 +128,12 @@ private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrTyp
                     if (fn is FunctionType) {
                         this.info.cast<ApplicationSemanticInfo>().function = fn
                         val inferredFn = fn.cast<FunctionType>()
-                        inferredFn.arguments.asSequence()
-                            .zip(arguments.asSequence()) { fnArg, arg ->
-                                arg.info.setInferredType(Either.Right(fnArg))
-                            }.last()
+                        if (!isPreludeCollectionFlag) {
+                            inferredFn.arguments.asSequence()
+                                .zip(arguments.asSequence()) { fnArg, arg ->
+                                    arg.info.setInferredType(Either.Right(fnArg))
+                                }.last()
+                        }
                         inferredFn.arguments.last()
                     } else fn
                 }

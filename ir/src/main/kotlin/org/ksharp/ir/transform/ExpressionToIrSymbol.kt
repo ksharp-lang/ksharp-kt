@@ -37,7 +37,7 @@ fun ConstantNode<SemanticInfo>.toIrSymbol() =
 fun SemanticNode<SemanticInfo>.toIrSymbol(): IrExpression =
     when (this) {
         is ConstantNode -> toIrSymbol()
-        is ApplicationNode -> TODO()
+        is ApplicationNode -> toIrSymbol()
         is AbstractionNode -> toIrSymbol()
         is LetBindingNode -> TODO()
         is LetNode -> TODO()
