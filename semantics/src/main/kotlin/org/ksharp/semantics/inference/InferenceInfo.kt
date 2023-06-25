@@ -4,6 +4,7 @@ import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.ApplicationName
+import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.incompatibleType
@@ -101,10 +102,13 @@ data class InferenceInfo(
     ): ErrorOrType =
         arguments.size.let { numArguments ->
             val name = appName.name
-            cache.get(name to arguments) {
-                module.findFunction(name, numArguments + 1)
+            val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
+            cache.get(funName to arguments) {
+                val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else module
+                val secondSearch = if (appName.pck == null) prelude else null
+                firstSearch.findFunction(name, numArguments + 1)
                     .unify(module.typeSystem, location, arguments)
-                    ?: prelude.findFunction(name, numArguments + 1)
+                    ?: secondSearch?.findFunction(name, numArguments + 1)
                         .unify(prelude.typeSystem, location, arguments)
                     ?: Either.Left(functionName(name, arguments))
             }.mapLeft {

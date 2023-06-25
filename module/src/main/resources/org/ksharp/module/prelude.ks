@@ -31,6 +31,34 @@ native pub if a b c
 pair a b :: a -> b -> (Pair a b)
 native pub pair a b
 
+@name("prelude::tupleOf" for="ir")
+tupleOf a :: a -> a
+native tupleOf a
+
+@name("prelude::listOf" for="ir")
+listOf a :: a -> (List a)
+native pub listOf a
+
+@name("prelude::listOf" for="ir")
+emptyList a :: () -> (List a)
+native pub emptyList
+
+@name("prelude::setOf" for="ir")
+setOf a :: a -> (Set a)
+native pub setOf a
+
+@name("prelude::setOf" for="ir")
+emptySet a :: () -> (List a)
+native pub emptySet
+
+@name("prelude::mapOf" for="ir")
+mapOf k v :: (Pair k v) -> (Map k v)
+native pub mapOf p
+
+@name("prelude::mapOf" for="ir")
+emptyMap k v :: () -> (Map k v)
+native pub emptyMap
+
 @name("prelude::sum" for="ir")
 (+) a :: (Num a) -> (Num a) -> (Num a)
 native pub (+) a b

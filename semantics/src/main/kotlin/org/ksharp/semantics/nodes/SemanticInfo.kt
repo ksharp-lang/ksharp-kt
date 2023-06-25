@@ -8,6 +8,7 @@ import org.ksharp.semantics.scopes.Table
 import org.ksharp.semantics.scopes.TableValue
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.newParameter
 
 sealed interface TypePromise {
@@ -31,6 +32,9 @@ data class AbstractionSemanticInfo(
     val parameters: List<SemanticInfo>,
     val returnType: TypePromise? = null
 ) : SemanticInfo()
+
+data class ApplicationSemanticInfo(var function: FunctionType? = null) : SemanticInfo()
+
 
 data class EmptySemanticInfo(private val nothing: Unit = Unit) : SemanticInfo()
 
@@ -75,10 +79,7 @@ fun SemanticInfo.getType(location: Location): ErrorOrType =
     }
 
 fun TypePromise.getType(location: Location): ErrorOrType =
-    when (this) {
-        is SemanticInfo -> this.cast<SemanticInfo>().getType(location)
-        else -> type
-    }
+    this.cast<SemanticInfo>().getType(location)
 
 fun paramTypePromise() = TypeSemanticInfo(Either.Right(newParameter()))
 
