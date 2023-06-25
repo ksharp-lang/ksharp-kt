@@ -2,6 +2,7 @@ package org.ksharp.typesystem.types
 
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -33,3 +34,6 @@ fun TypeItemBuilder.tupleType(factory: ParametricTypeFactoryBuilder) =
     ParametricTypeFactory(this).apply(factory).build().map {
         TupleType(attributes, it)
     }
+
+
+fun List<Type>.toTupleType(attributes: Set<Attribute> = NoAttributes) = TupleType(attributes, this)

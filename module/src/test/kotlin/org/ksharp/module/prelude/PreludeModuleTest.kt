@@ -21,6 +21,13 @@ class PreludeModuleTest : StringSpec({
                 setOf(
                     "if :: Bool -> a -> a -> a",
                     "pair :: a -> b -> (Pair a b)",
+                    "tupleOf :: a -> a",
+                    "listOf :: a -> (List a)",
+                    "emptyList :: (List a)",
+                    "setOf :: a -> (Set a)",
+                    "emptySet :: (List a)",
+                    "mapOf :: (Pair k v) -> (Map k v)",
+                    "emptyMap :: (Map k v)",
                     "(+) :: (Num a) -> (Num a) -> (Num a)",
                     "(-) :: (Num a) -> (Num a) -> (Num a)",
                     "(*) :: (Num a) -> (Num a) -> (Num a)",

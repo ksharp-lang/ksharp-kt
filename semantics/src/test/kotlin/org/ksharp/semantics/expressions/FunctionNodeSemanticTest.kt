@@ -512,7 +512,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -579,7 +579,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -654,7 +654,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -732,7 +732,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -787,7 +787,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName("::prelude", "if"),
+                            ApplicationName(null, "if"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(name = "(>)"),
@@ -803,7 +803,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    EmptySemanticInfo(),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
@@ -817,7 +817,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -876,7 +876,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Internal),
                         "n",
                         ApplicationNode(
-                            ApplicationName("::prelude", "if"),
+                            ApplicationName(null, "if"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(name = "(>)"),
@@ -892,7 +892,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    EmptySemanticInfo(),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
@@ -906,7 +906,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -966,7 +966,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName("::prelude", "listOf"),
+                            ApplicationName(PRELUDE_COLLECTION_FLAG, "listOf"),
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
@@ -987,11 +987,11 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                             Location.NoProvided
                                         )
                                     ),
-                                    EmptySemanticInfo(),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1046,7 +1046,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName("::prelude", "setOf"),
+                            ApplicationName(PRELUDE_COLLECTION_FLAG, "setOf"),
                             listOf(
                                 ConstantNode(
                                     1.toLong(),
@@ -1064,7 +1064,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1117,18 +1117,18 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName("::prelude", "tupleOf"),
+                            ApplicationName(PRELUDE_COLLECTION_FLAG, "tupleOf"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(null, "x"),
                                     listOf(
                                         ConstantNode(
-                                            kotlin.Unit,
+                                            Unit,
                                             unitTypePromise,
                                             Location.NoProvided
                                         )
                                     ),
-                                    EmptySemanticInfo(),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 VarNode(
@@ -1139,7 +1139,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1207,28 +1207,28 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName("::prelude", "mapOf"),
+                            ApplicationName(PRELUDE_COLLECTION_FLAG, "mapOf"),
                             listOf(
                                 ApplicationNode(
-                                    ApplicationName("::prelude", "pair"),
+                                    ApplicationName(null, "pair"),
                                     listOf(
                                         ConstantNode("key1", strTypePromise, Location.NoProvided),
                                         ConstantNode(1.toLong(), byteTypePromise, Location.NoProvided)
                                     ),
-                                    EmptySemanticInfo(),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 ),
                                 ApplicationNode(
-                                    ApplicationName("::prelude", "pair"),
+                                    ApplicationName(null, "pair"),
                                     listOf(
                                         ConstantNode("key2", strTypePromise, Location.NoProvided),
                                         ConstantNode(2.toLong(), byteTypePromise, Location.NoProvided)
                                     ),
-                                    EmptySemanticInfo(),
+                                    ApplicationSemanticInfo(),
                                     Location.NoProvided
                                 )
                             ),
-                            EmptySemanticInfo(),
+                            ApplicationSemanticInfo(),
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
@@ -1325,7 +1325,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                                 Location.NoProvided
                                             )
                                         ),
-                                        EmptySemanticInfo(),
+                                        ApplicationSemanticInfo(),
                                         Location.NoProvided
                                     ),
                                     EmptySemanticInfo(),
@@ -1360,7 +1360,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         Location.NoProvided
                                     )
                                 ),
-                                EmptySemanticInfo(),
+                                ApplicationSemanticInfo(),
                                 Location.NoProvided
                             ),
                             EmptySemanticInfo(),
@@ -1434,7 +1434,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                             ApplicationNode(
                                 ApplicationName(name = "True"),
                                 listOf(),
-                                EmptySemanticInfo(),
+                                ApplicationSemanticInfo(),
                                 Location.NoProvided
                             ),
                             ConstantNode(
@@ -1448,7 +1448,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                                 Location.NoProvided
                             ),
                         ),
-                        EmptySemanticInfo(),
+                        ApplicationSemanticInfo(),
                         Location.NoProvided
                     ),
                     AbstractionSemanticInfo(
@@ -1483,12 +1483,12 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                     NoAttributes,
                     "n",
                     ApplicationNode(
-                        ApplicationName("::prelude", "no-function"),
+                        ApplicationName(null, "no-function"),
                         listOf(
                             ApplicationNode(
                                 ApplicationName(name = "True"),
                                 listOf(),
-                                EmptySemanticInfo(),
+                                ApplicationSemanticInfo(),
                                 Location.NoProvided
                             ),
                             ConstantNode(
@@ -1502,7 +1502,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                                 Location.NoProvided
                             ),
                         ),
-                        EmptySemanticInfo(),
+                        ApplicationSemanticInfo(),
                         Location.NoProvided
                     ),
                     AbstractionSemanticInfo(
