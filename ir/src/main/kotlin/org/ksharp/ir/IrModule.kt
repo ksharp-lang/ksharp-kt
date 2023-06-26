@@ -11,5 +11,5 @@ data class IrModule(
 fun SemanticModuleInfo.toIrModule() =
     IrModule(
         listOf(),
-        abstractions.map { it.toIrSymbol() }
+        abstractions.map { it.toIrSymbol(emptyVariableIndex) }
     )

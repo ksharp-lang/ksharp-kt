@@ -12,6 +12,7 @@ import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
+import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.toFunctionType
 
 private fun String.getFirstAbstraction() =
@@ -142,14 +143,14 @@ class AbstractionToIrSymbolTest : StringSpec({
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
-                .toIrSymbol()
+                .toIrSymbol(emptyVariableIndex)
                 .expr.shouldBe(expected)
         }
     }
     "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
-            .toIrSymbol()
+            .toIrSymbol(emptyVariableIndex)
             .shouldBe(
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
@@ -171,7 +172,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             ten = 10
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol()
+            .toIrSymbol(emptyVariableIndex)
             .attributes
             .apply {
                 shouldBe(
@@ -182,6 +183,32 @@ class AbstractionToIrSymbolTest : StringSpec({
                     ),
                 )
                 first { it is NameAttribute }.cast<NameAttribute>().value.shouldBe(mapOf("java" to "diez"))
+            }
+    }
+    "Function with arguments" {
+        val internalCharType =
+            preludeModule.typeSystem.alias(setOf(CommonAttribute.Internal), "KernelChar").valueOrNull!!
+        """
+            c :: KernelChar -> KernelChar
+            c a = a
+        """.trimIndent()
+            .getFirstAbstraction()
+            .toIrSymbol(emptyVariableIndex)
+            .apply {
+                shouldBe(
+                    IrFunction(
+                        setOf(CommonAttribute.Internal),
+                        "c",
+                        listOf("a"),
+                        listOf(internalCharType, internalCharType).toFunctionType(NoAttributes),
+                        IrVar(
+                            setOf(CommonAttribute.Pure),
+                            0,
+                            Location(Line(2) to Offset(6), Line(2) to Offset(7))
+                        ),
+                        Location(Line(2) to Offset(0), Line(2) to Offset(1))
+                    )
+                )
             }
     }
 })

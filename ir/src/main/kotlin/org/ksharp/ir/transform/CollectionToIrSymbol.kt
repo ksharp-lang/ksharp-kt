@@ -6,7 +6,7 @@ import org.ksharp.ir.IrMap
 import org.ksharp.ir.IrSet
 
 val IrListFactory: CustomApplicationIrNode = {
-    val (attributes, symbols) = arguments.toIrSymbols()
+    val (attributes, symbols) = arguments.toIrSymbols(it)
     IrList(
         attributes,
         symbols,
@@ -15,7 +15,7 @@ val IrListFactory: CustomApplicationIrNode = {
 }
 
 val IrSetFactory: CustomApplicationIrNode = {
-    val (attributes, symbols) = arguments.toIrSymbols()
+    val (attributes, symbols) = arguments.toIrSymbols(it)
     IrSet(
         attributes,
         symbols,
@@ -24,7 +24,7 @@ val IrSetFactory: CustomApplicationIrNode = {
 }
 
 val IrMapFactory: CustomApplicationIrNode = {
-    val (attributes, symbols) = arguments.toIrSymbols()
+    val (attributes, symbols) = arguments.toIrSymbols(it)
     IrMap(
         attributes,
         symbols.cast(),

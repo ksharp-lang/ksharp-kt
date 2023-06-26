@@ -13,7 +13,7 @@ data class IrPair(
     override val location: Location
 ) : IrExpression
 
-data class IrVariableAccess(
+data class IrVar(
     override val attributes: Set<Attribute>,
     val index: Int,
     override val location: Location

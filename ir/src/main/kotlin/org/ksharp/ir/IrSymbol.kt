@@ -4,11 +4,6 @@ import org.ksharp.common.Location
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.Type
 
-data class Argument(
-    val name: String,
-    val type: Type
-)
-
 interface IrSymbol : IrNode {
     val location: Location
     val attributes: Set<Attribute>
@@ -22,7 +17,7 @@ interface IrTopLevelSymbol : IrSymbol {
 data class IrFunction(
     override val attributes: Set<Attribute>,
     override val name: String,
-    val arguments: List<Argument>,
+    val arguments: List<String>,
     val type: Type,
     override val expr: IrExpression,
     override val location: Location
