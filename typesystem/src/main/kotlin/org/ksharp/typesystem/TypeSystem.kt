@@ -1,10 +1,7 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.types.Alias
-import org.ksharp.typesystem.types.Labeled
-import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.TypeConstructor
+import org.ksharp.typesystem.types.*
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
 
@@ -75,3 +72,17 @@ fun typeSystem(parent: PartialTypeSystem? = null, block: TypeSystemBuilder.() ->
                 )
             } else it
         }
+
+
+fun TypeSystem.resolveAliasForTesting(type: Type): Type =
+    invoke(type).map {
+        if (it == type) {
+            when (it) {
+                is ParametricType -> ParametricType(it.attributes, it.type, it.params.map { p ->
+                    resolveAliasForTesting(p)
+                })
+
+                else -> it
+            }
+        } else it
+    }.valueOrNull!!
