@@ -22,11 +22,3 @@ data class IrFunction(
     override val expr: IrExpression,
     override val location: Location
 ) : IrTopLevelSymbol, IrExpression
-
-data class IrType(
-    override val attributes: Set<Attribute>,
-    override val name: String,
-    val parameters: List<String>,
-    override val expr: IrExpression,
-    override val location: Location
-) : IrTopLevelSymbol
