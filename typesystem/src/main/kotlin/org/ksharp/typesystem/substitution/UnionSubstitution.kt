@@ -59,6 +59,6 @@ class ClassSubstitution : CompoundSubstitution<UnionType.ClassType>() {
     ): ErrorOrType =
         type.params.substitute(context, location, typeContext)
             .map {
-                UnionType.ClassType(type.attributes, type.label, it)
+                UnionType.ClassType(type.label, it)
             }
 }

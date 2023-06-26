@@ -156,8 +156,8 @@ private fun UnionTypeFactory.register(node: NodeData) {
 
 fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
     when (node) {
-        is ConcreteTypeNode -> type(node.name)
-        is UnitTypeNode -> type("Unit")
+        is ConcreteTypeNode -> alias(node.name)
+        is UnitTypeNode -> alias("Unit")
 
         is TupleTypeNode -> tupleType {
             node.types.forEach {
@@ -216,11 +216,11 @@ private fun List<AnnotationNode>?.checkAnnotations(internal: Boolean): Set<Attri
 
 
 private fun TypeSystemBuilder.register(node: TypeNode) =
-    alias(
+    type(
         node.annotations.checkAnnotations(node.internal),
         node.name,
     ) {
-        this.register(node.name, node.expr)
+        register(node.name, node.expr)
     }
 
 private fun TypeNode.checkTypesSemantics(
@@ -275,7 +275,7 @@ private fun TypeDeclarationNode.checkTypesSemantics(
                     .FunctionDeclarationShouldBeAFunctionType
                     .new(location, "name" to name, "repr" to type.representation)
             )
-        else builder.alias(annotations.checkAnnotations(true), "Decl__$name") {
+        else builder.type(annotations.checkAnnotations(true), "Decl__$name") {
             this.register(name, type.cast())
         }
     }

@@ -14,14 +14,14 @@ class TypeUnificationTest : StringSpec({
     val typeSystem = typeSystem {
         type(NoAttributes, "Int")
         type(NoAttributes, "Long")
-        alias(NoAttributes, "Integer") {
-            type("Int")
+        type(NoAttributes, "Integer") {
+            alias("Int")
         }
         parametricType(NoAttributes, "Map") {
             parameter("a")
             parameter("b")
         }
-        alias(NoAttributes, "LongMap") {
+        type(NoAttributes, "LongMap") {
             parametricType("Map") {
                 type("Long")
                 parameter("b")
@@ -78,7 +78,7 @@ class TypeUnificationTest : StringSpec({
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Map"), listOf(
+            Alias("Map"), listOf(
                 typeSystem["Integer"].valueOrNull!!,
                 typeSystem["Int"].valueOrNull!!
             )
@@ -87,7 +87,7 @@ class TypeUnificationTest : StringSpec({
             .shouldBeRight(
                 ParametricType(
                     NoAttributes,
-                    Alias(NoAttributes, "Map"), listOf(
+                    Alias("Map"), listOf(
                         typeSystem["Int"].valueOrNull!!,
                         typeSystem["Int"].valueOrNull!!
                     )
@@ -101,9 +101,9 @@ class TypeUnificationTest : StringSpec({
             .shouldBeRight(
                 ParametricType(
                     NoAttributes,
-                    Alias(NoAttributes, "Map"), listOf(
-                        Parameter(NoAttributes, "a"),
-                        Parameter(NoAttributes, "b"),
+                    Alias("Map"), listOf(
+                        Parameter("a"),
+                        Parameter("b"),
                     )
                 )
             )
@@ -112,7 +112,7 @@ class TypeUnificationTest : StringSpec({
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Map"), listOf(
+            Alias("Map"), listOf(
                 typeSystem["Int"].valueOrNull!!
             )
         )
@@ -129,7 +129,7 @@ class TypeUnificationTest : StringSpec({
         val type1 = typeSystem["LongMap"].valueOrNull!!
         val type2 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Map"), listOf(
+            Alias("Map"), listOf(
                 typeSystem["Long"].valueOrNull!!,
                 typeSystem["Int"].valueOrNull!!
             )
@@ -143,7 +143,7 @@ class TypeUnificationTest : StringSpec({
         val type1 = typeSystem["LongMap"].valueOrNull!!
         val type2 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Map"), listOf(
+            Alias("Map"), listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
             )
@@ -173,7 +173,7 @@ class TypeUnificationTest : StringSpec({
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "List"), listOf(
+            Alias("List"), listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Int"].valueOrNull!!
             )
@@ -311,8 +311,8 @@ class TypeUnificationTest : StringSpec({
         val union = UnionType(
             NoAttributes,
             mapOf(
-                "True" to UnionType.ClassType(NoAttributes, "True", listOf()),
-                "False" to UnionType.ClassType(NoAttributes, "True", listOf())
+                "True" to UnionType.ClassType("True", listOf()),
+                "False" to UnionType.ClassType("True", listOf())
             )
         )
         val typeConstructor = TypeConstructor(NoAttributes, "True", "Bool")
@@ -322,8 +322,8 @@ class TypeUnificationTest : StringSpec({
             Location.NoProvided, union, UnionType(
                 NoAttributes,
                 mapOf(
-                    "True" to UnionType.ClassType(NoAttributes, "True", listOf()),
-                    "False" to UnionType.ClassType(NoAttributes, "True", listOf())
+                    "True" to UnionType.ClassType("True", listOf()),
+                    "False" to UnionType.ClassType("True", listOf())
                 )
             )
         ).shouldBeRight(union)
@@ -350,7 +350,7 @@ class TypeUnificationTest : StringSpec({
             parametricType(NoAttributes, "Num") {
                 parameter("a")
             }
-            alias(NoAttributes, "Int") {
+            type(NoAttributes, "Int") {
                 parametricType("Num") {
                     type("NativeInt")
                 }
@@ -360,10 +360,10 @@ class TypeUnificationTest : StringSpec({
             Location.NoProvided,
             ParametricType(
                 NoAttributes, Concrete(NoAttributes, "Num"), listOf(
-                    Parameter(NoAttributes, "a")
+                    Parameter("a")
                 )
             ),
-            Alias(NoAttributes, "Int")
+            Alias("Int")
         ).shouldBeRight(
             ParametricType(
                 NoAttributes, Concrete(NoAttributes, "Num"), listOf(

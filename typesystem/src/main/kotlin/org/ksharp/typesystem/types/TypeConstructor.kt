@@ -30,4 +30,7 @@ data class TypeConstructor(
 
     override val compound: Boolean
         get() = false
+
+    override fun new(attributes: Set<Attribute>): Type = TypeConstructor(attributes, name, alias)
+
 }

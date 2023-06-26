@@ -2,7 +2,7 @@ package org.ksharp.module.prelude.types
 
 import org.ksharp.module.prelude.serializer.TypeSerializers
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
@@ -13,7 +13,7 @@ import org.ksharp.typesystem.unification.TypeUnifications
 class CharType : Type {
 
     override val attributes: Set<Attribute>
-        get() = setOf(CommonAttribute.Public)
+        get() = NoAttributes
 
     override val serializer: TypeSerializer
         get() = TypeSerializers.CharType
@@ -29,6 +29,8 @@ class CharType : Type {
     override val representation: String = "char<Char>"
 
     override fun toString(): String = representation
+
+    override fun new(attributes: Set<Attribute>): Type = this
 }
 
 val charType = CharType()

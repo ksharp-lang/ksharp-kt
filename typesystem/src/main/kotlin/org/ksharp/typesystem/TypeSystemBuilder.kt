@@ -2,6 +2,7 @@ package org.ksharp.typesystem
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.Type
 
 typealias TypeEntry = Pair<String, Type>
@@ -41,6 +42,9 @@ class TypeItemBuilder(
         }.mapLeft { error ->
             validation { error }
         }
+
+    internal fun createForSubtypes() = TypeItemBuilder(NoAttributes, name, storeView, store, builder, partialBuilder)
+
 }
 
 class TypeSystemBuilder(

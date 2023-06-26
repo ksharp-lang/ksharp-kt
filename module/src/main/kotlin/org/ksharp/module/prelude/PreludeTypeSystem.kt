@@ -6,19 +6,18 @@ import org.ksharp.module.prelude.types.charType
 import org.ksharp.module.prelude.types.numeric
 import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.TypeSystemBuilder
-import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.typeSystem
-import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.type
 
 private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
-    alias(setOf(CommonAttribute.Public), alias) {
+    type(NoAttributes, alias) {
         numeric(type)
     }
 
 private fun createKernelTypeSystem() = typeSystem {
-    type(setOf(CommonAttribute.Public), "KernelUnit")
-    alias(setOf(CommonAttribute.Public), "KernelChar") { Either.Right(charType) }
+    type(NoAttributes, "KernelUnit")
+    type(NoAttributes, "KernelChar") { Either.Right(charType) }
     number("NativeByte", Numeric.Byte)
     number("NativeShort", Numeric.Short)
     number("NativeInt", Numeric.Int)

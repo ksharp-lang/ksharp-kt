@@ -25,20 +25,20 @@ class TypeSystemTest : ShouldSpec({
             typeSystem {
                 type(setOf(CommonAttribute.Public), "Int")
                 type(setOf(CommonAttribute.Public), "String")
-                alias(setOf(CommonAttribute.Public), "Integer") {
-                    type("Int")
+                type(setOf(CommonAttribute.Internal), "Integer") {
+                    alias("Int")
                 }
                 parametricType(setOf(CommonAttribute.Public), "Map") {
                     parameter("a")
                     parameter("b")
                 }
-                alias(setOf(CommonAttribute.Public), "StringMap") {
+                type(NoAttributes, "StringMap") {
                     parametricType("Map") {
                         type("String")
                         parameter("b")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Sum") {
+                type(NoAttributes, "Sum") {
                     functionType {
                         type("Int")
                         type("Int")
@@ -54,16 +54,16 @@ class TypeSystemTest : ShouldSpec({
                         get("String").shouldBeType(Concrete(setOf(CommonAttribute.Public), "String"), "String")
                     }
                     should("Integer alias type") {
-                        get("Integer").shouldBeType(Alias(setOf(CommonAttribute.Public), "Int"), "Int")
+                        get("Integer").shouldBeType(TypeAlias(setOf(CommonAttribute.Internal), "Int"), "Int")
                     }
                     should("(Map a b) parametric type") {
                         get("Map").shouldBeType(
                             ParametricType(
                                 setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "Map"),
+                                Alias("Map"),
                                 listOf(
-                                    Parameter(setOf(CommonAttribute.Public), "a"),
-                                    Parameter(setOf(CommonAttribute.Public), "b")
+                                    Parameter("a"),
+                                    Parameter("b")
                                 )
                             ), "(Map a b)"
                         )
@@ -71,11 +71,11 @@ class TypeSystemTest : ShouldSpec({
                     should("StringMap should be alias of (Map String b)") {
                         get("StringMap").shouldBeType(
                             ParametricType(
-                                setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "Map"),
+                                NoAttributes,
+                                Alias("Map"),
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "String"),
-                                    Parameter(setOf(CommonAttribute.Public), "b")
+                                    Alias("String"),
+                                    Parameter("b")
                                 )
                             ), "(Map String b)"
                         )
@@ -83,11 +83,11 @@ class TypeSystemTest : ShouldSpec({
                     should("Sum should be function of Int -> Int -> Int") {
                         get("Sum").shouldBeType(
                             FunctionType(
-                                setOf(CommonAttribute.Public),
+                                NoAttributes,
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "Int"),
-                                    Alias(setOf(CommonAttribute.Public), "Int"),
-                                    Alias(setOf(CommonAttribute.Public), "Int")
+                                    Alias("Int"),
+                                    Alias("Int"),
+                                    Alias("Int")
                                 )
                             ), "(Int -> Int -> Int)"
                         )
@@ -110,16 +110,16 @@ class TypeSystemTest : ShouldSpec({
                 }
             }.apply {
                 should("Type exists so should create an alias type") {
-                    value.alias(name = "Map").shouldBeType(Alias(NoAttributes, "Map"), "Map")
+                    value.alias(name = "Map").shouldBeType(Alias("Map"), "Map")
                 }
                 should("Resolve alias type should returns the parametric type") {
-                    value(Alias(setOf(CommonAttribute.Public), "Map")).shouldBeType(
+                    value(Alias("Map")).shouldBeType(
                         ParametricType(
                             setOf(CommonAttribute.Public),
-                            Alias(setOf(CommonAttribute.Public), "Map"),
+                            Alias("Map"),
                             listOf(
-                                Alias(setOf(CommonAttribute.Public), "Int"),
-                                Alias(setOf(CommonAttribute.Public), "Int")
+                                Alias("Int"),
+                                Alias("Int")
                             )
                         ),
                         "(Map Int Int)"
@@ -135,17 +135,17 @@ class TypeSystemTest : ShouldSpec({
                     value(
                         Labeled(
                             "n",
-                            Alias(setOf(CommonAttribute.Public), "Map")
+                            Alias("Map")
                         )
                     ).shouldBeType(
                         Labeled(
                             "n",
                             ParametricType(
                                 setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "Map"),
+                                Alias("Map"),
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "Int"),
-                                    Alias(setOf(CommonAttribute.Public), "Int")
+                                    Alias("Int"),
+                                    Alias("Int")
                                 )
                             )
                         ),
@@ -169,7 +169,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                 }
 
-                alias(setOf(CommonAttribute.Public), "StringMap") {
+                type(NoAttributes, "StringMap") {
                     parametricType("Map") {
                         parameter("a")
                     }
@@ -180,10 +180,10 @@ class TypeSystemTest : ShouldSpec({
                         get("Map").shouldBeType(
                             ParametricType(
                                 setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "Map"),
+                                Alias("Map"),
                                 listOf(
-                                    Parameter(setOf(CommonAttribute.Public), "a"),
-                                    Parameter(setOf(CommonAttribute.Public), "b")
+                                    Parameter("a"),
+                                    Parameter("b")
                                 )
                             ),
                             "(Map a b)"
@@ -193,15 +193,15 @@ class TypeSystemTest : ShouldSpec({
                         get("Either").shouldBeType(
                             ParametricType(
                                 setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "Either"),
+                                Alias("Either"),
                                 listOf(
-                                    Parameter(setOf(CommonAttribute.Public), "a"),
+                                    Parameter("a"),
                                     ParametricType(
-                                        setOf(CommonAttribute.Public),
-                                        Alias(setOf(CommonAttribute.Public), "Either"),
+                                        NoAttributes,
+                                        Alias("Either"),
                                         listOf(
-                                            Parameter(setOf(CommonAttribute.Public), "a"),
-                                            Parameter(setOf(CommonAttribute.Public), "b")
+                                            Parameter("a"),
+                                            Parameter("b")
                                         )
                                     )
                                 )
@@ -219,18 +219,18 @@ class TypeSystemTest : ShouldSpec({
                             TypeSystemErrorCode.InvalidNumberOfParameters.new(
                                 "type" to ParametricType(
                                     setOf(CommonAttribute.Public),
-                                    Alias(setOf(CommonAttribute.Public), "Map"),
+                                    Alias("Map"),
                                     listOf(
-                                        Parameter(setOf(CommonAttribute.Public), "a"),
-                                        Parameter(setOf(CommonAttribute.Public), "b")
+                                        Parameter("a"),
+                                        Parameter("b")
                                     )
                                 ),
                                 "number" to 2,
                                 "configuredType" to ParametricType(
-                                    setOf(CommonAttribute.Public),
-                                    Alias(setOf(CommonAttribute.Public), "Map"),
+                                    NoAttributes,
+                                    Alias("Map"),
                                     listOf(
-                                        Parameter(setOf(CommonAttribute.Public), "a")
+                                        Parameter("a")
                                     )
                                 )
                             )
@@ -242,13 +242,13 @@ class TypeSystemTest : ShouldSpec({
         context("Parameters") {
             context("Intermediate") {
                 newParameter().apply {
-                    shouldBe(Parameter(NoAttributes, "@0"))
+                    shouldBe(Parameter("@0"))
                     intermediate.shouldBeTrue()
                 }
-                newParameter().shouldBe(Parameter(NoAttributes, "@1"))
+                newParameter().shouldBe(Parameter("@1"))
             }
             context("Normal parameters aren't intermediate") {
-                Parameter(NoAttributes, "a").intermediate.shouldBeFalse()
+                Parameter("a").intermediate.shouldBeFalse()
             }
         }
         context("Function types") {
@@ -257,29 +257,29 @@ class TypeSystemTest : ShouldSpec({
                 parametricType(setOf(CommonAttribute.Public), "List") {
                     parameter("a")
                 }
-                alias(setOf(CommonAttribute.Public), "Sum") {
+                type(NoAttributes, "Sum") {
                     functionType {
                         type("Int")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Sum") {
+                type(NoAttributes, "Sum") {
                     functionType {
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Sum") {
+                type(setOf(CommonAttribute.Public), "Sum") {
                     functionType {
                         type("Int")
                         type("Int")
                         type("Int")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Abs") {
+                type(setOf(CommonAttribute.Public), "Abs") {
                     functionType {
                         parameter("a")
                         type("Int")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Get") {
+                type(setOf(CommonAttribute.Public), "Get") {
                     functionType {
                         parametricType("List") {
                             type("Int")
@@ -287,7 +287,7 @@ class TypeSystemTest : ShouldSpec({
                         type("Int")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "MapFn") {
+                type(setOf(CommonAttribute.Public), "MapFn") {
                     functionType {
                         parametricType("List") {
                             parameter("a")
@@ -310,8 +310,8 @@ class TypeSystemTest : ShouldSpec({
                         get("List").shouldBeType(
                             ParametricType(
                                 setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "List"),
-                                listOf(Parameter(setOf(CommonAttribute.Public), "a"))
+                                Alias("List"),
+                                listOf(Parameter("a"))
                             ),
                             "(List a)"
                         )
@@ -321,9 +321,9 @@ class TypeSystemTest : ShouldSpec({
                             FunctionType(
                                 setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "Int"),
-                                    Alias(setOf(CommonAttribute.Public), "Int"),
-                                    Alias(setOf(CommonAttribute.Public), "Int")
+                                    Alias("Int"),
+                                    Alias("Int"),
+                                    Alias("Int")
                                 )
                             ),
                             "(Int -> Int -> Int)"
@@ -334,8 +334,8 @@ class TypeSystemTest : ShouldSpec({
                             FunctionType(
                                 setOf(CommonAttribute.Public),
                                 listOf(
-                                    Parameter(setOf(CommonAttribute.Public), "a"),
-                                    Alias(setOf(CommonAttribute.Public), "Int")
+                                    Parameter("a"),
+                                    Alias("Int")
                                 )
                             ),
                             "(a -> Int)"
@@ -348,11 +348,11 @@ class TypeSystemTest : ShouldSpec({
                                     setOf(CommonAttribute.Public),
                                     listOf(
                                         ParametricType(
-                                            setOf(CommonAttribute.Public),
-                                            Alias(setOf(CommonAttribute.Public), "List"),
-                                            listOf(Alias(setOf(CommonAttribute.Public), "Int"))
+                                            NoAttributes,
+                                            Alias("List"),
+                                            listOf(Alias("Int"))
                                         ),
-                                        Alias(setOf(CommonAttribute.Public), "Int")
+                                        Alias("Int")
                                     )
                                 ),
                                 "((List Int) -> Int)"
@@ -365,21 +365,21 @@ class TypeSystemTest : ShouldSpec({
                                     setOf(CommonAttribute.Public),
                                     listOf(
                                         ParametricType(
-                                            setOf(CommonAttribute.Public),
-                                            Alias(setOf(CommonAttribute.Public), "List"),
-                                            listOf(Parameter(setOf(CommonAttribute.Public), "a"))
+                                            NoAttributes,
+                                            Alias("List"),
+                                            listOf(Parameter("a"))
                                         ),
                                         FunctionType(
-                                            setOf(CommonAttribute.Public),
+                                            NoAttributes,
                                             listOf(
-                                                Parameter(setOf(CommonAttribute.Public), "a"),
-                                                Parameter(setOf(CommonAttribute.Public), "b")
+                                                Parameter("a"),
+                                                Parameter("b")
                                             )
                                         ),
                                         ParametricType(
-                                            setOf(CommonAttribute.Public),
-                                            Alias(setOf(CommonAttribute.Public), "List"),
-                                            listOf(Parameter(setOf(CommonAttribute.Public), "b"))
+                                            NoAttributes,
+                                            Alias("List"),
+                                            listOf(Parameter("b"))
                                         ),
                                     )
                                 ),
@@ -406,13 +406,13 @@ class TypeSystemTest : ShouldSpec({
                 parametricType(setOf(CommonAttribute.Public), "Num") {
                     parameter("a")
                 }
-                alias(setOf(CommonAttribute.Public), "User") {
+                type(setOf(CommonAttribute.Public), "User") {
                     tupleType {
                         type("String")
                         type("String")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Point") {
+                type(setOf(CommonAttribute.Public), "Point") {
                     tupleType {
                         parametricType("Num") {
                             parameter("x")
@@ -422,7 +422,7 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "NestedTuple") {
+                type(setOf(CommonAttribute.Public), "NestedTuple") {
                     tupleType {
                         parametricType("Num") {
                             parameter("x")
@@ -440,8 +440,8 @@ class TypeSystemTest : ShouldSpec({
                             TupleType(
                                 setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "String"),
-                                    Alias(setOf(CommonAttribute.Public), "String")
+                                    Alias("String"),
+                                    Alias("String")
                                 )
                             ),
                             "(String, String)"
@@ -453,14 +453,14 @@ class TypeSystemTest : ShouldSpec({
                                 setOf(CommonAttribute.Public),
                                 listOf(
                                     ParametricType(
-                                        setOf(CommonAttribute.Public),
-                                        Alias(setOf(CommonAttribute.Public), "Num"),
-                                        listOf(Parameter(setOf(CommonAttribute.Public), "x"))
+                                        NoAttributes,
+                                        Alias("Num"),
+                                        listOf(Parameter("x"))
                                     ),
                                     ParametricType(
-                                        setOf(CommonAttribute.Public),
-                                        Alias(setOf(CommonAttribute.Public), "Num"),
-                                        listOf(Parameter(setOf(CommonAttribute.Public), "x"))
+                                        NoAttributes,
+                                        Alias("Num"),
+                                        listOf(Parameter("x"))
                                     ),
                                 )
                             ),
@@ -473,16 +473,16 @@ class TypeSystemTest : ShouldSpec({
                                 setOf(CommonAttribute.Public),
                                 listOf(
                                     ParametricType(
-                                        setOf(CommonAttribute.Public),
-                                        Alias(setOf(CommonAttribute.Public), "Num"),
-                                        listOf(Parameter(setOf(CommonAttribute.Public), "x"))
+                                        NoAttributes,
+                                        Alias("Num"),
+                                        listOf(Parameter("x"))
                                     ),
                                     Labeled(
                                         "point", TupleType(
-                                            setOf(CommonAttribute.Public),
+                                            NoAttributes,
                                             listOf(
-                                                Alias(setOf(CommonAttribute.Public), "String"),
-                                                Parameter(setOf(CommonAttribute.Public), "x")
+                                                Alias("String"),
+                                                Parameter("x")
                                             )
                                         )
                                     ),
@@ -507,7 +507,7 @@ class TypeSystemTest : ShouldSpec({
                     type("String")
                     parameter("b")
                 }
-                alias(setOf(CommonAttribute.Public), "Either") {
+                type(setOf(CommonAttribute.Public), "Either") {
                     unionType {
                         clazz("Left") {
                             parameter("a")
@@ -517,19 +517,19 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Weekend") {
+                type(setOf(CommonAttribute.Public), "Weekend") {
                     unionType {
                         clazz("Saturday")
                         clazz("Sunday")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Bool") {
+                type(setOf(CommonAttribute.Public), "Bool") {
                     unionType {
                         clazz("True")
                         clazz("False")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Bool2") {
+                type(NoAttributes, "Bool2") {
                     unionType {
                         clazz("True")
                     }
@@ -543,10 +543,10 @@ class TypeSystemTest : ShouldSpec({
                         get("Dict").shouldBeType(
                             ParametricType(
                                 setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "Dict"),
+                                Alias("Dict"),
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "String"),
-                                    Parameter(setOf(CommonAttribute.Public), "b")
+                                    Alias("String"),
+                                    Parameter("b")
                                 )
                             ),
                             "(Dict String b)"
@@ -558,14 +558,12 @@ class TypeSystemTest : ShouldSpec({
                                 setOf(CommonAttribute.Public),
                                 mapOf(
                                     "Left" to UnionType.ClassType(
-                                        setOf(CommonAttribute.Public),
                                         "Left",
-                                        listOf(Parameter(setOf(CommonAttribute.Public), "a"))
+                                        listOf(Parameter("a"))
                                     ),
                                     "Right" to UnionType.ClassType(
-                                        setOf(CommonAttribute.Public),
                                         "Right",
-                                        listOf(Parameter(setOf(CommonAttribute.Public), "b"))
+                                        listOf(Parameter("b"))
                                     )
                                 )
                             ),
@@ -578,11 +576,10 @@ class TypeSystemTest : ShouldSpec({
                                 setOf(CommonAttribute.Public),
                                 mapOf(
                                     "Saturday" to UnionType.ClassType(
-                                        setOf(CommonAttribute.Public),
                                         "Saturday",
                                         listOf()
                                     ),
-                                    "Sunday" to UnionType.ClassType(setOf(CommonAttribute.Public), "Sunday", listOf())
+                                    "Sunday" to UnionType.ClassType("Sunday", listOf())
                                 )
                             ),
                             "Saturday\n|Sunday"
@@ -593,8 +590,8 @@ class TypeSystemTest : ShouldSpec({
                             UnionType(
                                 setOf(CommonAttribute.Public),
                                 mapOf(
-                                    "True" to UnionType.ClassType(setOf(CommonAttribute.Public), "True", listOf()),
-                                    "False" to UnionType.ClassType(setOf(CommonAttribute.Public), "False", listOf())
+                                    "True" to UnionType.ClassType("True", listOf()),
+                                    "False" to UnionType.ClassType("False", listOf())
                                 )
                             ),
                             "True\n|False"
@@ -623,8 +620,8 @@ class TypeSystemTest : ShouldSpec({
                             UnionType(
                                 setOf(CommonAttribute.Public),
                                 mapOf(
-                                    "True" to UnionType.ClassType(setOf(CommonAttribute.Public), "True", listOf()),
-                                    "False" to UnionType.ClassType(setOf(CommonAttribute.Public), "False", listOf())
+                                    "True" to UnionType.ClassType("True", listOf()),
+                                    "False" to UnionType.ClassType("False", listOf())
                                 )
                             ),
                             "True\n|False"
@@ -682,18 +679,18 @@ class TypeSystemTest : ShouldSpec({
                                         setOf(CommonAttribute.Public),
                                         "(+)",
                                         listOf(
-                                            Parameter(setOf(CommonAttribute.Public), "a"),
-                                            Parameter(setOf(CommonAttribute.Public), "a"),
-                                            Parameter(setOf(CommonAttribute.Public), "a")
+                                            Parameter("a"),
+                                            Parameter("a"),
+                                            Parameter("a")
                                         )
                                     ),
                                     "(-)" to TraitType.MethodType(
                                         setOf(CommonAttribute.Public),
                                         "(-)",
                                         listOf(
-                                            Parameter(setOf(CommonAttribute.Public), "a"),
-                                            Parameter(setOf(CommonAttribute.Public), "a"),
-                                            Parameter(setOf(CommonAttribute.Public), "a")
+                                            Parameter("a"),
+                                            Parameter("a"),
+                                            Parameter("a")
                                         )
                                     )
                                 )
@@ -721,7 +718,7 @@ class TypeSystemTest : ShouldSpec({
             typeSystem {
                 type(setOf(CommonAttribute.Public), "Int")
                 type(setOf(CommonAttribute.Public), "Char")
-                alias(setOf(CommonAttribute.Public), "OrdNum") {
+                type(setOf(CommonAttribute.Public), "OrdNum") {
                     intersectionType {
                         type("Num")
                         type("Ord")
@@ -740,7 +737,7 @@ class TypeSystemTest : ShouldSpec({
                         parameter("a")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Str") {
+                type(NoAttributes, "Str") {
                     intersectionType {
                         type("Int")
                         type("Char")
@@ -753,8 +750,8 @@ class TypeSystemTest : ShouldSpec({
                             IntersectionType(
                                 setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "Num"),
-                                    Alias(setOf(CommonAttribute.Public), "Ord")
+                                    Alias("Num"),
+                                    Alias("Ord")
                                 )
                             ),
                             "(Num & Ord)"
@@ -778,12 +775,12 @@ class TypeSystemTest : ShouldSpec({
             typeSystem {
                 type(setOf(CommonAttribute.Public), "int")
                 type(setOf(CommonAttribute.Public), "Int")
-                alias(setOf(CommonAttribute.Public), "PInt") {
+                type(NoAttributes, "PInt") {
                     parametricType("Int") {}
                 }
                 parametricType(setOf(CommonAttribute.Public), "Test") {}
-                alias(setOf(CommonAttribute.Public), "Float") {
-                    type("Double")
+                type(NoAttributes, "Float") {
+                    alias("Double")
                 }
                 parametricType(setOf(CommonAttribute.Public), "Float") {
                     type("Double")
@@ -824,19 +821,19 @@ class TypeSystemTest : ShouldSpec({
                     parameter("k", "key")
                     parameter("v", "value")
                 }
-                alias(setOf(CommonAttribute.Public), "User") {
+                type(setOf(CommonAttribute.Public), "User") {
                     tupleType {
                         type("String", "name")
                         type("String", "password")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Point") {
+                type(setOf(CommonAttribute.Public), "Point") {
                     tupleType {
                         parameter("n", "x")
                         parameter("n", "y")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Point2D") {
+                type(setOf(CommonAttribute.Public), "Point2D") {
                     tupleType {
                         parametricType("Num", "x") {
                             parameter("n")
@@ -846,14 +843,14 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Sum") {
+                type(setOf(CommonAttribute.Public), "Sum") {
                     functionType {
                         type("Int", "a")
                         parameter("b")
                         type("Int", "result")
                     }
                 }
-                alias(setOf(CommonAttribute.Public), "Option") {
+                type(setOf(CommonAttribute.Public), "Option") {
                     unionType {
                         clazz("Some") {
                             parameter("v", "value")
@@ -873,8 +870,8 @@ class TypeSystemTest : ShouldSpec({
                         get("Num").shouldBeType(
                             ParametricType(
                                 setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "Num"),
-                                listOf(Parameter(setOf(CommonAttribute.Public), "x"))
+                                Alias("Num"),
+                                listOf(Parameter("x"))
                             ), "(Num x)"
                         )
                     }
@@ -882,10 +879,10 @@ class TypeSystemTest : ShouldSpec({
                         get("Map").shouldBeType(
                             ParametricType(
                                 setOf(CommonAttribute.Public),
-                                Alias(setOf(CommonAttribute.Public), "Map"),
+                                Alias("Map"),
                                 listOf(
-                                    Parameter(setOf(CommonAttribute.Public), "k").labeled("key"),
-                                    Parameter(setOf(CommonAttribute.Public), "v").labeled("value")
+                                    Parameter("k").labeled("key"),
+                                    Parameter("v").labeled("value")
                                 )
                             ), "(Map key: k value: v)"
                         )
@@ -895,8 +892,8 @@ class TypeSystemTest : ShouldSpec({
                             TupleType(
                                 setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "String").labeled("name"),
-                                    Alias(setOf(CommonAttribute.Public), "String").labeled("password")
+                                    Alias("String").labeled("name"),
+                                    Alias("String").labeled("password")
                                 )
                             ),
                             "(name: String, password: String)"
@@ -907,8 +904,8 @@ class TypeSystemTest : ShouldSpec({
                             TupleType(
                                 setOf(CommonAttribute.Public),
                                 listOf(
-                                    Parameter(setOf(CommonAttribute.Public), "n").labeled("x"),
-                                    Parameter(setOf(CommonAttribute.Public), "n").labeled("y")
+                                    Parameter("n").labeled("x"),
+                                    Parameter("n").labeled("y")
                                 )
                             ),
                             "(x: n, y: n)"
@@ -920,14 +917,14 @@ class TypeSystemTest : ShouldSpec({
                                 setOf(CommonAttribute.Public),
                                 listOf(
                                     ParametricType(
-                                        setOf(CommonAttribute.Public),
-                                        Alias(setOf(CommonAttribute.Public), "Num"),
-                                        listOf(Parameter(setOf(CommonAttribute.Public), "n"))
+                                        NoAttributes,
+                                        Alias("Num"),
+                                        listOf(Parameter("n"))
                                     ).labeled("x"),
                                     ParametricType(
-                                        setOf(CommonAttribute.Public),
-                                        Alias(setOf(CommonAttribute.Public), "Num"),
-                                        listOf(Parameter(setOf(CommonAttribute.Public), "n"))
+                                        NoAttributes,
+                                        Alias("Num"),
+                                        listOf(Parameter("n"))
                                     ).labeled("y")
                                 )
                             ),
@@ -939,9 +936,9 @@ class TypeSystemTest : ShouldSpec({
                             FunctionType(
                                 setOf(CommonAttribute.Public),
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "Int").labeled("a"),
-                                    Parameter(setOf(CommonAttribute.Public), "b"),
-                                    Alias(setOf(CommonAttribute.Public), "Int").labeled("result")
+                                    Alias("Int").labeled("a"),
+                                    Parameter("b"),
+                                    Alias("Int").labeled("result")
                                 )
                             ),
                             "(a: Int -> b -> result: Int)"
@@ -953,11 +950,10 @@ class TypeSystemTest : ShouldSpec({
                                 setOf(CommonAttribute.Public),
                                 mapOf(
                                     "Some" to UnionType.ClassType(
-                                        setOf(CommonAttribute.Public),
                                         "Some",
-                                        listOf(Parameter(setOf(CommonAttribute.Public), "v").labeled("value"))
+                                        listOf(Parameter("v").labeled("value"))
                                     ),
-                                    "None" to UnionType.ClassType(setOf(CommonAttribute.Public), "None", listOf())
+                                    "None" to UnionType.ClassType("None", listOf())
                                 )
                             ),
                             "Some value: v\n|None"
@@ -974,7 +970,7 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Order declaration shouldn't affect builder") {
             typeSystem {
-                alias(setOf(CommonAttribute.Public), "Abs") {
+                type(NoAttributes, "Abs") {
                     functionType {
                         type("Int")
                         type("Int")
@@ -989,10 +985,10 @@ class TypeSystemTest : ShouldSpec({
                     should("Int -> Int type") {
                         get("Abs").shouldBeType(
                             FunctionType(
-                                setOf(CommonAttribute.Public),
+                                NoAttributes,
                                 listOf(
-                                    Alias(setOf(CommonAttribute.Public), "Int"),
-                                    Alias(setOf(CommonAttribute.Public), "Int")
+                                    Alias("Int"),
+                                    Alias("Int")
                                 )
                             ),
                             "(Int -> Int)"
@@ -1025,8 +1021,8 @@ class TypeSystemTest : ShouldSpec({
                     get("List").shouldBeType(
                         ParametricType(
                             setOf(CommonAttribute.Public),
-                            Alias(setOf(CommonAttribute.Public), "List"),
-                            listOf(Alias(setOf(CommonAttribute.Public), "Int"))
+                            Alias("List"),
+                            listOf(Alias("Int"))
                         ), "(List Int)"
                     )
                 }
@@ -1063,8 +1059,8 @@ class TypeSystemTest : ShouldSpec({
                     get("List").shouldBeType(
                         ParametricType(
                             setOf(CommonAttribute.Public),
-                            Alias(setOf(CommonAttribute.Public), "List"),
-                            listOf(Alias(setOf(CommonAttribute.Public), "Int"))
+                            Alias("List"),
+                            listOf(Alias("Int"))
                         ), "(List Int)"
                     )
                 }

@@ -28,10 +28,12 @@ data class TupleType internal constructor(
 
     override val compound: Boolean = true
     override fun toString(): String = elements.asSequence().map { it.representation }.joinToString(", ")
+
+    override fun new(attributes: Set<Attribute>): Type = TupleType(attributes, elements)
 }
 
 fun TypeItemBuilder.tupleType(factory: ParametricTypeFactoryBuilder) =
-    ParametricTypeFactory(this).apply(factory).build().map {
+    ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().map {
         TupleType(attributes, it)
     }
 
