@@ -5,11 +5,13 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="graalvm-19" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/compiler" />
+            <option value="$PROJECT_DIR$/ir" />
             <option value="$PROJECT_DIR$/lsp" />
             <option value="$PROJECT_DIR$/module" />
             <option value="$PROJECT_DIR$/nodes" />
