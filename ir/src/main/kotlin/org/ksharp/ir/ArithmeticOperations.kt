@@ -8,4 +8,34 @@ data class IrSum(
     override val left: IrExpression,
     override val right: IrExpression,
     override val location: Location
-): IrBinaryOperation
+) : IrBinaryOperation
+
+
+data class IrSub(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : IrBinaryOperation
+
+data class IrMul(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : IrBinaryOperation
+
+
+data class IrDiv(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : IrBinaryOperation
+
+data class IrPow(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : IrBinaryOperation

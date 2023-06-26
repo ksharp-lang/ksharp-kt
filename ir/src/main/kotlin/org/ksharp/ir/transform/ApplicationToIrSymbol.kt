@@ -1,10 +1,7 @@
 package org.ksharp.ir.transform
 
 import org.ksharp.common.cast
-import org.ksharp.ir.IrExpression
-import org.ksharp.ir.IrPair
-import org.ksharp.ir.IrSum
-import org.ksharp.ir.VariableIndex
+import org.ksharp.ir.*
 import org.ksharp.nodes.semantic.ApplicationNode
 import org.ksharp.nodes.semantic.SemanticNode
 import org.ksharp.semantics.nodes.ApplicationSemanticInfo
@@ -21,7 +18,11 @@ private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::setOf" to IrSetFactory,
     "prelude::mapOf" to IrMapFactory,
     "prelude::pair" to binaryOperationFactory(::IrPair),
-    "prelude::sum" to binaryOperationFactory(::IrSum)
+    "prelude::sum" to binaryOperationFactory(::IrSum),
+    "prelude::sub" to binaryOperationFactory(::IrSub),
+    "prelude::mul" to binaryOperationFactory(::IrMul),
+    "prelude::div" to binaryOperationFactory(::IrDiv),
+    "prelude::pow" to binaryOperationFactory(::IrPow),
 )
 
 fun List<SemanticNode<SemanticInfo>>.toIrSymbols(variableIndex: VariableIndex): Pair<Set<Attribute>, List<IrExpression>> {
