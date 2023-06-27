@@ -5,7 +5,7 @@ import org.ksharp.module.RecordSize
 import org.ksharp.module.prelude.serializer.TypeSerializers
 import org.ksharp.module.prelude.unification.TypeUnifications
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
@@ -28,7 +28,7 @@ data class NumericType internal constructor(
 ) : Type {
 
     override val attributes: Set<Attribute>
-        get() = setOf(CommonAttribute.Public)
+        get() = NoAttributes
 
     override val serializer: TypeSerializer
         get() = TypeSerializers.NumericType
@@ -44,6 +44,7 @@ data class NumericType internal constructor(
     override val representation: String = "numeric<${type}>"
 
     override fun toString(): String = representation
+    override fun new(attributes: Set<Attribute>): Type = this
 }
 
 fun numeric(type: Numeric) = Either.Right(NumericType(type))

@@ -61,15 +61,18 @@ internal fun Attribute.writeTo(buffer: BufferWriter, table: BinaryTable) {
 
 fun Set<Attribute>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
-        add(0)
-        add(this@writeTo.size)
-        forEach {
-            it.writeTo(this, table)
+        if (isEmpty()) {
+            buffer.add(4)
+        } else {
+            add(0)
+            add(this@writeTo.size)
+            forEach {
+                it.writeTo(this, table)
+            }
+            set(0, size)
+            transferTo(buffer)
         }
-        set(0, size)
-        transferTo(buffer)
     }
-
 }
 
 internal fun BufferView.readAttribute(table: BinaryTableView): Attribute {
@@ -82,6 +85,8 @@ internal fun BufferView.readAttribute(table: BinaryTableView): Attribute {
 }
 
 fun BufferView.readAttributes(table: BinaryTableView): Set<Attribute> {
+    val bufferSize = readInt(0)
+    if (bufferSize == 4) return NoAttributes
     val size = readInt(4)
     var position = 8
     val result = mutableSetOf<Attribute>()
@@ -91,4 +96,18 @@ fun BufferView.readAttributes(table: BinaryTableView): Set<Attribute> {
         result.add(itemBuffer.readAttribute(table))
     }
     return result
+}
+
+fun Set<Attribute>.merge(attributes: Set<Attribute>): Set<Attribute> {
+    if (attributes.isEmpty()) {
+        return if (contains(CommonAttribute.Internal)) mutableSetOf<Attribute>().apply {
+            addAll(this@merge)
+            remove(CommonAttribute.Internal)
+        } else this
+    }
+    if (isEmpty()) return attributes
+    return mutableSetOf<Attribute>().apply {
+        addAll(this@merge)
+        addAll(attributes)
+    }
 }

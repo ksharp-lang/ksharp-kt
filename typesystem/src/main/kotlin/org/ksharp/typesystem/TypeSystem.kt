@@ -1,10 +1,8 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.types.Alias
-import org.ksharp.typesystem.types.Labeled
-import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.TypeConstructor
+import org.ksharp.typesystem.attributes.merge
+import org.ksharp.typesystem.types.*
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
 
@@ -22,10 +20,17 @@ interface TypeSystem {
 
     operator fun invoke(type: Type): ErrorOrType =
         when (type) {
-            is Alias -> this[type.name].flatMap { this(it) }
+            is Alias -> this[type.name].flatMap {
+                this(it)
+            }
+
             is Labeled -> this(type.type).map {
                 Labeled(type.label, it)
             }
+
+            is TypeAlias -> this[type.name].flatMap {
+                this(it)
+            }.map { it.new(it.attributes.merge(type.attributes)) }
 
             is TypeConstructor -> this[type.alias]
             else -> Either.Right(type)

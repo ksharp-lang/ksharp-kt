@@ -14,6 +14,7 @@ enum class TypeSerializers(
 ) : TypeSerializer {
     Concrete(ConcreteSerializer()),
     Alias(AliasSerializer()),
+    TypeAlias(TypeAliasSerializer()),
     Parameter(ParameterSerializer()),
     ParametricType(ParametricTypeSerializer()),
     Labeled(LabeledSerializer()),

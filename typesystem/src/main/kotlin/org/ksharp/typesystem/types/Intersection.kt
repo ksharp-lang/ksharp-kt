@@ -31,6 +31,8 @@ data class IntersectionType internal constructor(
         get() = params.asSequence()
 
     override fun toString(): String = params.joinToString(" & ") { it.representation }
+
+    override fun new(attributes: Set<Attribute>): Type = IntersectionType(attributes, params)
 }
 
 class IntersectionTypeFactory(
@@ -41,7 +43,7 @@ class IntersectionTypeFactory(
     fun type(name: String) {
         result = result.flatMap { params ->
             validateTypeName(name).map {
-                params.add(Alias(attributes, it))
+                params.add(Alias(it))
                 params
             }
         }

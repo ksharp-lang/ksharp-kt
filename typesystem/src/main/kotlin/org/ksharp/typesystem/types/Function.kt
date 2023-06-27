@@ -31,10 +31,12 @@ data class FunctionType internal constructor(
         get() = arguments.asSequence()
 
     override fun toString(): String = arguments.asSequence().map { it.representation }.joinToString(" -> ")
+
+    override fun new(attributes: Set<Attribute>): Type = FunctionType(attributes, arguments)
 }
 
 fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
-    ParametricTypeFactory(this).apply(factory).build().flatMap { args ->
+    ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { args ->
         if (args.size < 2) {
             Left(InvalidFunctionType.new())
         } else Right(FunctionType(attributes, args))

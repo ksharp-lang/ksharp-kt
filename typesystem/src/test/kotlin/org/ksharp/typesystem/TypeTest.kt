@@ -13,7 +13,7 @@ class TypeTest : StringSpec({
         Concrete(NoAttributes, "Int").terms.shouldBeEmpty()
     }
     "Given a parameter, should get an empty term sequence" {
-        Parameter(NoAttributes, "a").terms.shouldBeEmpty()
+        Parameter("a").terms.shouldBeEmpty()
     }
     "Given a labeled type, should get the labeled type as term in the sequence" {
         Concrete(NoAttributes, "Int").labeled("x").terms
@@ -34,44 +34,43 @@ class TypeTest : StringSpec({
         UnionType(
             NoAttributes,
             mapOf(
-                "None" to UnionType.ClassType(NoAttributes, "None", listOf()),
+                "None" to UnionType.ClassType("None", listOf()),
                 "Maybe" to UnionType.ClassType(
-                    NoAttributes,
                     "Maybe",
-                    listOf(Parameter(NoAttributes, "a"))
+                    listOf(Parameter("a"))
                 )
             )
         ).terms.toList().shouldBe(
             listOf(
-                UnionType.ClassType(NoAttributes, "None", listOf()),
-                UnionType.ClassType(NoAttributes, "Maybe", listOf(Parameter(NoAttributes, "a")))
+                UnionType.ClassType("None", listOf()),
+                UnionType.ClassType("Maybe", listOf(Parameter("a")))
             )
         )
     }
     "Given a Union Class, should get the elements as terms in the sequence" {
-        UnionType.ClassType(NoAttributes, "Maybe", listOf(Parameter(NoAttributes, "a")))
-            .terms.toList().shouldBe(listOf(Parameter(NoAttributes, "a")))
+        UnionType.ClassType("Maybe", listOf(Parameter("a")))
+            .terms.toList().shouldBe(listOf(Parameter("a")))
     }
     "Given a Parametric type, should get the parameters as terms in the sequence" {
         ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "List"),
-            listOf(Parameter(NoAttributes, "a"))
-        ).terms.toList().shouldBe(listOf(Alias(NoAttributes, "List"), Parameter(NoAttributes, "a")))
+            Alias("List"),
+            listOf(Parameter("a"))
+        ).terms.toList().shouldBe(listOf(Alias("List"), Parameter("a")))
     }
     "Given a function type, should get the arguments and return terms in the sequence" {
         FunctionType(
             NoAttributes,
             listOf(
                 Concrete(NoAttributes, "Int"),
-                Parameter(NoAttributes, "a"),
-                Parameter(NoAttributes, "b")
+                Parameter("a"),
+                Parameter("b")
             )
         ).terms.toList().shouldBe(
             listOf(
                 Concrete(NoAttributes, "Int"),
-                Parameter(NoAttributes, "a"),
-                Parameter(NoAttributes, "b")
+                Parameter("a"),
+                Parameter("b")
             )
         )
     }
