@@ -1,7 +1,9 @@
 package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.*
+import org.ksharp.typesystem.TypeItemBuilder
+import org.ksharp.typesystem.TypeSystemBuilder
+import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
@@ -10,6 +12,7 @@ import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
+import org.ksharp.typesystem.validateTypeParamName
 import java.util.concurrent.atomic.AtomicInteger
 
 private var parameterIdCounter = AtomicInteger(-1)
@@ -70,16 +73,6 @@ class ParametricTypeFactory(
     private val builder: TypeItemBuilder
 ) {
     private var result: ErrorOrValue<ListBuilder<Type>> = Either.Right(listBuilder())
-
-    fun add(typeFactory: TypeFactoryBuilder) {
-        result = result.flatMap { params ->
-            val type = builder.typeFactory()
-            type.map {
-                params.add(it)
-                params
-            }
-        }
-    }
 
     fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->

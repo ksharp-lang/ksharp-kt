@@ -169,6 +169,9 @@ class TypeSystemTest : ShouldSpec({
                     }
                 }
 
+                type(setOf(CommonAttribute.Pure), "EitherAlias") {
+                    alias("Either")
+                }
                 type(NoAttributes, "StringMap") {
                     parametricType("Map") {
                         parameter("a")
@@ -209,9 +212,29 @@ class TypeSystemTest : ShouldSpec({
                             "(Either a (Either a b))"
                         )
                     }
+                    should("Recursive: (Either a (Either a b)) alias type") {
+                        invoke(get("EitherAlias").valueOrNull!!).shouldBeType(
+                            ParametricType(
+                                setOf(CommonAttribute.Public, CommonAttribute.Pure),
+                                Alias("Either"),
+                                listOf(
+                                    Parameter("a"),
+                                    ParametricType(
+                                        NoAttributes,
+                                        Alias("Either"),
+                                        listOf(
+                                            Parameter("a"),
+                                            Parameter("b")
+                                        )
+                                    )
+                                )
+                            ),
+                            "(Either a (Either a b))"
+                        )
+                    }
                 }
                 should("Should contain 3 types") {
-                    size.shouldBe(2)
+                    size.shouldBe(3)
                 }
                 should("Should have errors") {
                     errors.shouldBe(
