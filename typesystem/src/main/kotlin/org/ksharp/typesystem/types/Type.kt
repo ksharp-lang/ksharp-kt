@@ -3,6 +3,7 @@ package org.ksharp.typesystem.types
 import org.ksharp.common.Either
 import org.ksharp.common.ErrorOrValue
 import org.ksharp.common.new
+import org.ksharp.typesystem.TypeFactoryBuilder
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode
@@ -22,11 +23,13 @@ interface Type {
     val terms: Sequence<Type>
     val attributes: Set<Attribute>
     val representation: String get() = toString().let { s -> if (compound) "($s)" else s }
+    fun new(attributes: Set<Attribute>): Type
 }
 
 sealed interface TypeVariable : Type {
     override val compound: Boolean get() = false
     override val terms: Sequence<Type> get() = emptySequence()
+
 }
 
 data class Concrete internal constructor(
@@ -44,12 +47,16 @@ data class Concrete internal constructor(
 
     override val compound: Boolean get() = false
     override val terms: Sequence<Type> get() = emptySequence()
+
     override fun toString(): String = name
+
+    override fun new(attributes: Set<Attribute>): Type =
+        Concrete(attributes, name)
+
 }
 
-
-fun TypeItemBuilder.type(name: String): ErrorOrValue<TypeVariable> =
-    Either.Right(Alias(attributes, name)).also {
+fun TypeItemBuilder.alias(name: String): ErrorOrValue<TypeVariable> =
+    Either.Right(Alias(name)).also {
         validation {
             if (it(name) == null)
                 TypeSystemErrorCode.TypeNotFound.new("type" to name)
@@ -60,4 +67,17 @@ fun TypeItemBuilder.type(name: String): ErrorOrValue<TypeVariable> =
 fun TypeSystemBuilder.type(attributes: Set<Attribute>, name: String) =
     item(attributes, name) {
         Either.Right(Concrete(attributes, name))
+    }
+
+fun TypeSystemBuilder.type(
+    attributes: Set<Attribute>,
+    name: String,
+    factory: TypeFactoryBuilder
+) =
+    item(attributes, name) {
+        factory().map {
+            if (it is Alias) {
+                TypeAlias(attributes, it.name)
+            } else it
+        }
     }

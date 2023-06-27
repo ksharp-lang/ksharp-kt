@@ -55,6 +55,8 @@ data class TraitType internal constructor(
 
         override fun toString(): String =
             "$name :: ${arguments.joinToString(" -> ") { it.representation }}"
+
+        override fun new(attributes: Set<Attribute>): Type = MethodType(attributes, name, arguments)
     }
 
     override val compound: Boolean
@@ -67,6 +69,9 @@ data class TraitType internal constructor(
         |trait $name $param =
         |    ${methods.values.joinToString("\n    ") { it.representation }}
     """.trimMargin("|")
+
+    override fun new(attributes: Set<Attribute>): Type = TraitType(attributes, name, param, methods)
+
 }
 
 class TraitTypeFactory(

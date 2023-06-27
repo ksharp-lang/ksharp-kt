@@ -8,15 +8,12 @@ import org.ksharp.typesystem.types.UnionType
 
 class ClassTypeSerializer : SerializerWriter<UnionType.ClassType>, SerializerReader<UnionType.ClassType> {
     override fun read(buffer: BufferView, table: BinaryTableView): UnionType.ClassType {
-        val offset = buffer.readInt(0)
-        val attributes = buffer.readAttributes(table)
-        val label = table[buffer.readInt(offset)]
-        val types = buffer.bufferFrom(4 + offset).readListOfTypes(table)
-        return UnionType.ClassType(attributes, label, types)
+        val label = table[buffer.readInt(0)]
+        val types = buffer.bufferFrom(4).readListOfTypes(table)
+        return UnionType.ClassType(label, types)
     }
 
     override fun write(input: UnionType.ClassType, buffer: BufferWriter, table: BinaryTable) {
-        input.attributes.writeTo(buffer, table)
         buffer.add(table.add(input.label))
         input.params.writeTo(buffer, table)
     }

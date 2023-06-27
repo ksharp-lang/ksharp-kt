@@ -1,6 +1,7 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
+import org.ksharp.typesystem.attributes.merge
 import org.ksharp.typesystem.types.*
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
@@ -19,10 +20,17 @@ interface TypeSystem {
 
     operator fun invoke(type: Type): ErrorOrType =
         when (type) {
-            is Alias -> this[type.name].flatMap { this(it) }
+            is Alias -> this[type.name].flatMap {
+                this(it)
+            }
+
             is Labeled -> this(type.type).map {
                 Labeled(type.label, it)
             }
+
+            is TypeAlias -> this[type.name].flatMap {
+                this(it)
+            }.map { it.new(it.attributes.merge(type.attributes)) }
 
             is TypeConstructor -> this[type.alias]
             else -> Either.Right(type)
@@ -72,17 +80,3 @@ fun typeSystem(parent: PartialTypeSystem? = null, block: TypeSystemBuilder.() ->
                 )
             } else it
         }
-
-
-fun TypeSystem.resolveAliasForTesting(type: Type): Type =
-    invoke(type).map {
-        if (it == type) {
-            when (it) {
-                is ParametricType -> ParametricType(it.attributes, it.type, it.params.map { p ->
-                    resolveAliasForTesting(p)
-                })
-
-                else -> it
-            }
-        } else it
-    }.valueOrNull!!

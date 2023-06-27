@@ -1,7 +1,9 @@
 package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.*
+import org.ksharp.typesystem.TypeItemBuilder
+import org.ksharp.typesystem.TypeSystemBuilder
+import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
@@ -10,6 +12,7 @@ import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
+import org.ksharp.typesystem.validateTypeParamName
 import java.util.concurrent.atomic.AtomicInteger
 
 private var parameterIdCounter = AtomicInteger(-1)
@@ -17,9 +20,10 @@ private var parameterIdCounter = AtomicInteger(-1)
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
 data class Parameter internal constructor(
-    override val attributes: Set<Attribute>,
     val name: String,
 ) : TypeVariable {
+    override val attributes: Set<Attribute>
+        get() = NoAttributes
     override val serializer: TypeSerializer
         get() = TypeSerializers.Parameter
 
@@ -31,14 +35,16 @@ data class Parameter internal constructor(
 
     val intermediate: Boolean get() = name.startsWith("@")
     override fun toString(): String = name
+
+    override fun new(attributes: Set<Attribute>): Type = this
 }
 
 fun resetParameterCounterForTesting() = parameterIdCounter.set(-1)
-fun newParameterForTesting(id: Int) = Parameter(NoAttributes, "@${id}")
+fun newParameterForTesting(id: Int) = Parameter("@${id}")
 
-fun newParameter() = Parameter(NoAttributes, "@${parameterIdCounter.incrementAndGet()}")
+fun newParameter() = Parameter("@${parameterIdCounter.incrementAndGet()}")
 
-fun newNamedParameter(name: String) = Parameter(NoAttributes, name)
+fun newNamedParameter(name: String) = Parameter(name)
 
 data class ParametricType internal constructor(
     override val attributes: Set<Attribute>,
@@ -58,6 +64,8 @@ data class ParametricType internal constructor(
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()
 
     override fun toString(): String = "$type ${params.asSequence().map { it.representation }.joinToString(" ")}"
+
+    override fun new(attributes: Set<Attribute>): Type = ParametricType(attributes, type, params)
 }
 
 
@@ -66,20 +74,10 @@ class ParametricTypeFactory(
 ) {
     private var result: ErrorOrValue<ListBuilder<Type>> = Either.Right(listBuilder())
 
-    fun add(typeFactory: TypeFactoryBuilder) {
-        result = result.flatMap { params ->
-            val type = builder.typeFactory()
-            type.map {
-                params.add(it)
-                params
-            }
-        }
-    }
-
     fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->
             validateTypeParamName(name).map {
-                params.add(Parameter(builder.attributes, it).labeled(label))
+                params.add(Parameter(it).labeled(label))
                 params
             }
         }
@@ -87,7 +85,7 @@ class ParametricTypeFactory(
 
     fun type(name: String, label: String? = null) {
         result = result.flatMap { params ->
-            builder.type(name).map {
+            builder.alias(name).map {
                 params.add(it.labeled(label))
                 params
             }
@@ -129,24 +127,27 @@ class ParametricTypeFactory(
     internal fun build(): ErrorOrValue<List<Type>> = result.map { it.build() }
 }
 
-fun TypeItemBuilder.parametricType(name: String, factory: ParametricTypeFactoryBuilder) =
+fun TypeItemBuilder.parametricType(
+    name: String,
+    factory: ParametricTypeFactoryBuilder
+) =
     if (name == this.name) {
-        ParametricTypeFactory(this).apply(factory).build().flatMap {
+        ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap {
             if (it.isEmpty()) {
                 Either.Left(
                     TypeSystemErrorCode.ParametricTypeWithoutParameters.new("type" to name)
                 )
             } else
-                Either.Right(ParametricType(attributes, Alias(attributes, name), it))
+                Either.Right(ParametricType(attributes, Alias(name), it))
         }
     } else
-        type(name).flatMap { pType ->
+        alias(name).flatMap { pType ->
             validation {
                 if (it(name) !is ParametricType) {
                     TypeSystemErrorCode.NoParametrizedType.new("type" to pType.representation)
                 } else null
             }
-            ParametricTypeFactory(this).apply(factory).build().flatMap { types ->
+            ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { types ->
                 validation {
                     val type = it(name)
                     if (type is ParametricType && type.params.size != types.size) {

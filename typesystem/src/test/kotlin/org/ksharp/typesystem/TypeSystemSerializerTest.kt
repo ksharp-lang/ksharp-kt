@@ -8,6 +8,7 @@ import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.readType
 import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
@@ -75,8 +76,8 @@ class TypeSystemSerializerTest : StringSpec({
                 get("Map").shouldBeType(
                     ParametricType(
                         setOf(CommonAttribute.Public),
-                        Alias(setOf(CommonAttribute.Public), "Map"),
-                        listOf(Alias(setOf(CommonAttribute.Public), "Int"), Alias(setOf(CommonAttribute.Public), "Int"))
+                        Alias("Map"),
+                        listOf(Alias("Int"), Alias("Int"))
                     ),
                     "(Map Int Int)"
                 )
@@ -86,15 +87,15 @@ class TypeSystemSerializerTest : StringSpec({
         Concrete(setOf(CommonAttribute.Public), "Int").shouldBeSerializable()
     }
     "Serialize Alias Types" {
-        Alias(setOf(CommonAttribute.Public), "Int").shouldBeSerializable()
+        Alias("Int").shouldBeSerializable()
     }
     "Serialize Parameter Types" {
-        Parameter(setOf(CommonAttribute.Public), "Int").shouldBeSerializable()
+        Parameter("Int").shouldBeSerializable()
     }
     "Serialize Parametric Types" {
         ParametricType(
             setOf(CommonAttribute.Public),
-            Alias(setOf(CommonAttribute.Public), "Map"),
+            Alias("Map"),
             listOf(
                 Concrete(setOf(CommonAttribute.Public), "String"),
                 Concrete(setOf(CommonAttribute.Public), "Double")
@@ -117,16 +118,26 @@ class TypeSystemSerializerTest : StringSpec({
             )
         ).shouldBeSerializable()
     }
+    "Serialize type without attributes" {
+        FunctionType(
+            NoAttributes,
+            listOf(
+                Concrete(setOf(CommonAttribute.Internal), "Int"),
+                Concrete(setOf(CommonAttribute.Public), "Int2"),
+                Concrete(setOf(CommonAttribute.Public), "Int3")
+            )
+        ).shouldBeSerializable()
+    }
     "Serialize Intersection Types" {
         IntersectionType(
             setOf(CommonAttribute.Internal),
-            listOf(Alias(setOf(CommonAttribute.Public), "String"), Alias(setOf(CommonAttribute.Internal), "Int"))
+            listOf(Alias("String"), Alias("Int"))
         ).shouldBeSerializable()
     }
     "Serialize Tuple Types" {
         TupleType(
             setOf(CommonAttribute.Internal),
-            listOf(Alias(setOf(CommonAttribute.Internal), "String"), Alias(setOf(CommonAttribute.Internal), "Int"))
+            listOf(Alias("String"), Alias("Int"))
         ).shouldBeSerializable()
     }
     "Serialize Union Types" {
@@ -134,21 +145,18 @@ class TypeSystemSerializerTest : StringSpec({
             setOf(CommonAttribute.Internal),
             mapOf(
                 "String" to UnionType.ClassType(
-                    setOf(CommonAttribute.Internal),
                     "String",
-                    listOf(Parameter(setOf(CommonAttribute.Internal), "a"))
+                    listOf(Parameter("a"))
                 ),
                 "Int" to UnionType.ClassType(
-                    setOf(CommonAttribute.Internal),
                     "Int",
-                    listOf(Parameter(setOf(CommonAttribute.Internal), "b"))
+                    listOf(Parameter("b"))
                 ),
                 "Map" to UnionType.ClassType(
-                    setOf(CommonAttribute.Internal),
                     "Map",
                     listOf(
                         Concrete(setOf(CommonAttribute.Internal), "Int"),
-                        Parameter(setOf(CommonAttribute.Internal), "c")
+                        Parameter("c")
                     )
                 )
             )
@@ -164,18 +172,18 @@ class TypeSystemSerializerTest : StringSpec({
                     setOf(CommonAttribute.Public),
                     "sum",
                     listOf(
-                        Parameter(setOf(CommonAttribute.Public), "a"),
-                        Parameter(setOf(CommonAttribute.Public), "a"),
-                        Parameter(setOf(CommonAttribute.Public), "a")
+                        Parameter("a"),
+                        Parameter("a"),
+                        Parameter("a")
                     )
                 ),
                 "sub" to TraitType.MethodType(
                     setOf(CommonAttribute.Public),
                     "sub",
                     listOf(
-                        Parameter(setOf(CommonAttribute.Public), "a"),
-                        Parameter(setOf(CommonAttribute.Public), "a"),
-                        Parameter(setOf(CommonAttribute.Public), "a")
+                        Parameter("a"),
+                        Parameter("a"),
+                        Parameter("a")
                     )
                 )
             )

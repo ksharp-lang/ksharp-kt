@@ -11,7 +11,7 @@ import org.ksharp.typesystem.unification.TypeUnifications
 data class Labeled internal constructor(
     val label: String,
     val type: Type
-) : Type by type {
+) : Type {
 
     override val attributes: Set<Attribute>
         get() = type.attributes
@@ -32,6 +32,8 @@ data class Labeled internal constructor(
         get() = toString()
 
     override fun toString(): String = "$label: ${type.representation}"
+
+    override fun new(attributes: Set<Attribute>): Type = Labeled(label, type.new(attributes))
 }
 
 internal fun Type.labeled(label: String?) = label?.let { Labeled(it, this) } ?: this

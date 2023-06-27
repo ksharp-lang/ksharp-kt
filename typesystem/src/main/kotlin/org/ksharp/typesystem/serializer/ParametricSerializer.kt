@@ -9,12 +9,11 @@ import org.ksharp.typesystem.types.TypeVariable
 
 class ParameterSerializer : SerializerWriter<Parameter>, SerializerReader<Parameter> {
     override fun write(input: Parameter, buffer: BufferWriter, table: BinaryTable) {
-        input.attributes.writeTo(buffer, table)
         buffer.add(table.add(input.name))
     }
 
     override fun read(buffer: BufferView, table: BinaryTableView): Parameter =
-        Parameter(buffer.readAttributes(table), table[buffer.readInt(buffer.readInt(0))])
+        Parameter(table[buffer.readInt(0)])
 
 }
 

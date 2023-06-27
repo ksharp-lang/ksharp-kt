@@ -206,7 +206,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     }
     "Function with arguments" {
         val internalCharType =
-            preludeModule.typeSystem.alias(setOf(CommonAttribute.Internal), "KernelChar").valueOrNull!!
+            preludeModule.typeSystem.alias("KernelChar").valueOrNull!!
         """
             c :: KernelChar -> KernelChar
             c a = a

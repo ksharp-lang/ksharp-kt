@@ -3,14 +3,13 @@ package org.ksharp.typesystem.substitution
 import org.ksharp.common.ErrorOrValue
 import org.ksharp.common.Location
 import org.ksharp.typesystem.ErrorOrType
-import org.ksharp.typesystem.types.Alias
 import org.ksharp.typesystem.types.Type
 
-class AliasSubstitution : SubstitutionAlgo<Alias> {
+class AliasSubstitution : SubstitutionAlgo<Type> {
     override fun extract(
         context: SubstitutionContext,
         location: Location,
-        type1: Alias,
+        type1: Type,
         type2: Type
     ): ErrorOrValue<Boolean> =
         context.typeSystem(type1).flatMap {
@@ -20,7 +19,7 @@ class AliasSubstitution : SubstitutionAlgo<Alias> {
     override fun substitute(
         context: SubstitutionContext,
         location: Location,
-        type: Alias,
+        type: Type,
         typeContext: Type
     ): ErrorOrType =
         context.typeSystem(type).flatMap {

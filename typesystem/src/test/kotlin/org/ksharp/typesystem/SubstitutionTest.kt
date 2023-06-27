@@ -95,7 +95,7 @@ class SubstitutionTest : StringSpec({
             .shouldBeRight(Concrete(NoAttributes, "String"))
         context.substitute(Location.NoProvided, parameter, intType)
             .shouldBeRight(intType)
-        context.substitute(Location.NoProvided, Parameter(NoAttributes, "b"), intType)
+        context.substitute(Location.NoProvided, Parameter("b"), intType)
             .shouldBeLeft(
                 TypeSystemErrorCode.SubstitutionNotFound.new(
                     Location.NoProvided,
@@ -148,9 +148,9 @@ class SubstitutionTest : StringSpec({
     }
     "Alias substitution" {
         val context = SubstitutionContext(ts)
-        context.extract(Location.NoProvided, Alias(NoAttributes, "Int"), intType)
+        context.extract(Location.NoProvided, Alias("Int"), intType)
             .shouldBeRight(false)
-        context.substitute(Location.NoProvided, Alias(NoAttributes, "Int"), intType)
+        context.substitute(Location.NoProvided, Alias("Int"), intType)
             .shouldBeRight(intType)
         context.errors.build().shouldBeEmpty()
         context.mappings.build().shouldBeEmpty()
@@ -273,19 +273,18 @@ class SubstitutionTest : StringSpec({
         val type1 = UnionType(
             NoAttributes,
             mapOf(
-                "Some" to UnionType.ClassType(NoAttributes, "Some", listOf(newParameter())),
-                "None" to UnionType.ClassType(NoAttributes, "None", emptyList()),
+                "Some" to UnionType.ClassType("Some", listOf(newParameter())),
+                "None" to UnionType.ClassType("None", emptyList()),
             )
         )
         val type2 = UnionType(
             NoAttributes,
             mapOf(
                 "Some" to UnionType.ClassType(
-                    NoAttributes,
                     "Some",
                     listOf(Concrete(NoAttributes, "Int"))
                 ),
-                "None" to UnionType.ClassType(NoAttributes, "None", emptyList()),
+                "None" to UnionType.ClassType("None", emptyList()),
             )
         )
         val context = SubstitutionContext(ts)
@@ -295,23 +294,22 @@ class SubstitutionTest : StringSpec({
     }
     "Union substitution incompatible error" {
         val param = newParameter()
-        val clsType = UnionType.ClassType(NoAttributes, "Some", listOf(param))
+        val clsType = UnionType.ClassType("Some", listOf(param))
         val type1 = UnionType(
             NoAttributes,
             mapOf(
                 "Some" to clsType,
-                "None" to UnionType.ClassType(NoAttributes, "None", emptyList()),
+                "None" to UnionType.ClassType("None", emptyList()),
             )
         )
         val type2 = UnionType(
             NoAttributes,
             mapOf(
                 "Some" to UnionType.ClassType(
-                    NoAttributes,
                     "AnotherSome",
                     listOf(Concrete(NoAttributes, "Int"))
                 ),
-                "None" to UnionType.ClassType(NoAttributes, "None", emptyList()),
+                "None" to UnionType.ClassType("None", emptyList()),
             )
         )
         val context = SubstitutionContext(ts)
@@ -320,7 +318,6 @@ class SubstitutionTest : StringSpec({
                 Location.NoProvided,
                 "type1" to clsType.representation,
                 "type2" to UnionType.ClassType(
-                    NoAttributes,
                     "AnotherSome",
                     listOf(Concrete(NoAttributes, "Int"))
                 ).representation
@@ -364,13 +361,13 @@ class SubstitutionTest : StringSpec({
         val context = SubstitutionContext(typeSystem)
         val p1 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Num"),
-            listOf(Parameter(NoAttributes, "a"))
+            Alias("Num"),
+            listOf(Parameter("a"))
         )
         val p2 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Num"),
-            listOf(Parameter(NoAttributes, "a"))
+            Alias("Num"),
+            listOf(Parameter("a"))
         )
         context.extract(Location.NoProvided, p1, p2).shouldBeRight(true)
         context.substitute(Location.NoProvided, p1, Concrete(NoAttributes, "Int"))
@@ -386,12 +383,12 @@ class SubstitutionTest : StringSpec({
         val context = SubstitutionContext(typeSystem)
         val p1 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Num"),
-            listOf(Parameter(NoAttributes, "a"))
+            Alias("Num"),
+            listOf(Parameter("a"))
         )
         val p2 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Num"),
+            Alias("Num"),
             listOf(Concrete(NoAttributes, "Int"))
         )
         context.extract(Location.NoProvided, p1, p2).shouldBeRight(true)
@@ -404,7 +401,7 @@ class SubstitutionTest : StringSpec({
                 parameter("a")
             }
             type(NoAttributes, "Int")
-            alias(NoAttributes, "Integer") {
+            type(NoAttributes, "Integer") {
                 parametricType("Num") {
                     type("Int")
                 }
@@ -413,17 +410,17 @@ class SubstitutionTest : StringSpec({
         val context = SubstitutionContext(typeSystem)
         val p1 = ParametricType(
             NoAttributes,
-            Alias(NoAttributes, "Num"),
-            listOf(Parameter(NoAttributes, "a"))
+            Alias("Num"),
+            listOf(Parameter("a"))
         )
-        val p2 = Alias(NoAttributes, "Integer")
+        val p2 = Alias("Integer")
         context.extract(Location.NoProvided, p1, p2).shouldBeRight(true)
         context.substitute(Location.NoProvided, p1, Concrete(NoAttributes, "Int"))
             .shouldBeRight(
                 ParametricType(
                     NoAttributes,
-                    Alias(NoAttributes, "Num"),
-                    listOf(Alias(NoAttributes, "Int"))
+                    Alias("Num"),
+                    listOf(Alias("Int"))
                 )
             )
     }
