@@ -301,6 +301,9 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
+                type(setOf(CommonAttribute.Native), "SumAlias") {
+                    alias("Sum")
+                }
             }.apply {
                 context("Should contains the following types:") {
                     should("Int type") {
@@ -386,9 +389,22 @@ class TypeSystemTest : ShouldSpec({
                                 "((List a) -> (a -> b) -> (List b))"
                             )
                     }
+                    should("SumAlias (Int -> Int -> Int) type") {
+                        invoke(get("SumAlias").valueOrNull!!).shouldBeType(
+                            FunctionType(
+                                setOf(CommonAttribute.Public, CommonAttribute.Native),
+                                listOf(
+                                    Alias("Int"),
+                                    Alias("Int"),
+                                    Alias("Int")
+                                )
+                            ),
+                            "(Int -> Int -> Int)"
+                        )
+                    }
                 }
-                should("Should have 6 types") {
-                    size.shouldBe(6)
+                should("Should have 7 types") {
+                    size.shouldBe(7)
                 }
                 should("Should have 2 errors") {
                     errors.shouldBe(
