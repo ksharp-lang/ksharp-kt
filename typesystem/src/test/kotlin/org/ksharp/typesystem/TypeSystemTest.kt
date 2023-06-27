@@ -422,6 +422,9 @@ class TypeSystemTest : ShouldSpec({
                         }
                     }
                 }
+                type(setOf(CommonAttribute.Native), "FloatPoint") {
+                    alias("Point")
+                }
                 type(setOf(CommonAttribute.Public), "NestedTuple") {
                     tupleType {
                         parametricType("Num") {
@@ -467,6 +470,26 @@ class TypeSystemTest : ShouldSpec({
                             "((Num x), (Num x))"
                         )
                     }
+                    should("FloatPoint typealias ((Num x), (Num x)) type") {
+                        invoke(get("FloatPoint").valueOrNull!!).shouldBeType(
+                            TupleType(
+                                setOf(CommonAttribute.Public, CommonAttribute.Native),
+                                listOf(
+                                    ParametricType(
+                                        NoAttributes,
+                                        Alias("Num"),
+                                        listOf(Parameter("x"))
+                                    ),
+                                    ParametricType(
+                                        NoAttributes,
+                                        Alias("Num"),
+                                        listOf(Parameter("x"))
+                                    ),
+                                )
+                            ),
+                            "((Num x), (Num x))"
+                        )
+                    }
                     should("NestedTuple ((Num x), point: (String, x)) type") {
                         get("NestedTuple").shouldBeType(
                             TupleType(
@@ -492,8 +515,8 @@ class TypeSystemTest : ShouldSpec({
                         )
                     }
                 }
-                should("Should have 4 types") {
-                    size.shouldBe(5)
+                should("Should have 6 types") {
+                    size.shouldBe(6)
                 }
                 should("Shouldn't have errors") {
                     errors.shouldBeEmpty()
@@ -733,11 +756,14 @@ class TypeSystemTest : ShouldSpec({
             typeSystem {
                 type(setOf(CommonAttribute.Public), "Int")
                 type(setOf(CommonAttribute.Public), "Char")
-                type(setOf(CommonAttribute.Public), "OrdNum") {
+                type(setOf(CommonAttribute.Internal), "OrdNum") {
                     intersectionType {
                         type("Num")
                         type("Ord")
                     }
+                }
+                type(NoAttributes, "TypeOrdNum") {
+                    alias("OrdNum")
                 }
                 trait(setOf(CommonAttribute.Public), "Num", "a") {
                     method("(+)") {
@@ -763,7 +789,19 @@ class TypeSystemTest : ShouldSpec({
                     should("OrdNum intersection type") {
                         get("OrdNum").shouldBeType(
                             IntersectionType(
-                                setOf(CommonAttribute.Public),
+                                setOf(CommonAttribute.Internal),
+                                listOf(
+                                    Alias("Num"),
+                                    Alias("Ord")
+                                )
+                            ),
+                            "(Num & Ord)"
+                        )
+                    }
+                    should("TypeOrdNum intersection type") {
+                        invoke(get("TypeOrdNum").valueOrNull!!).shouldBeType(
+                            IntersectionType(
+                                NoAttributes,
                                 listOf(
                                     Alias("Num"),
                                     Alias("Ord")
@@ -773,8 +811,8 @@ class TypeSystemTest : ShouldSpec({
                         )
                     }
                 }
-                should("Should have 5 types") {
-                    size.shouldBe(5)
+                should("Should have 6 types") {
+                    size.shouldBe(6)
                 }
                 should("Should have errors") {
                     errors.shouldBe(
