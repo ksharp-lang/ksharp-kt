@@ -529,6 +529,9 @@ class TypeSystemTest : ShouldSpec({
                         clazz("False")
                     }
                 }
+                type(setOf(CommonAttribute.Constant), "Boolean") {
+                    alias("Bool")
+                }
                 type(NoAttributes, "Bool2") {
                     unionType {
                         clazz("True")
@@ -603,9 +606,21 @@ class TypeSystemTest : ShouldSpec({
                             "True"
                         )
                     }
+                    should("Resolve type alias Boolean") {
+                        invoke(get("Boolean").valueOrNull!!).shouldBeType(
+                            UnionType(
+                                setOf(CommonAttribute.Public, CommonAttribute.Constant),
+                                mapOf(
+                                    "True" to UnionType.ClassType("True", listOf()),
+                                    "False" to UnionType.ClassType("False", listOf())
+                                )
+                            ),
+                            "True\n|False"
+                        )
+                    }
                 }
-                should("Should have 7 types") {
-                    size.shouldBe(11)
+                should("Should have 12 types") {
+                    size.shouldBe(12)
                 }
                 should("Should have already registered errors") {
                     errors.shouldBe(
