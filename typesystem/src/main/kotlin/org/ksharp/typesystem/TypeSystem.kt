@@ -64,6 +64,7 @@ operator fun PartialTypeSystem.get(name: String) = value[name]
 
 operator fun PartialTypeSystem.invoke(type: Type) = value(type)
 
+
 fun typeSystem(parent: PartialTypeSystem? = null, block: TypeSystemBuilder.() -> Unit): PartialTypeSystem =
     TypeSystemBuilder(
         parent?.value,

@@ -5,6 +5,11 @@ import org.ksharp.typesystem.attributes.Attribute
 
 sealed interface IrExpression : IrSymbol
 
+sealed interface  IrBinaryOperation : IrExpression {
+    val left: IrExpression
+    val right: IrExpression
+}
+
 data class IrPair(
     override val attributes: Set<Attribute>,
     val first: IrExpression,

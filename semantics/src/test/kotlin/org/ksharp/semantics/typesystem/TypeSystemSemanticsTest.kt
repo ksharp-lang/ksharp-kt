@@ -36,7 +36,7 @@ private fun moduleWithDeclarations(vararg declarations: TypeDeclarationNode) =
         Location.NoProvided
     )
 
-private val Type.representationWithVisibility get() = "${if (attributes.contains(CommonAttribute.Public)) "Public" else "Internal"}-${representation}"
+private val Type.representationWithVisibility get() = "${if (attributes.contains(CommonAttribute.Internal)) "Internal" else "Public"}-${representation}"
 
 class TypeSystemSemanticsTest : StringSpec({
     "Type annotation semantics" {

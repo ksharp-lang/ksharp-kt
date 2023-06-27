@@ -8,12 +8,15 @@ import org.ksharp.common.Offset
 import org.ksharp.common.cast
 import org.ksharp.ir.*
 import org.ksharp.module.prelude.preludeModule
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
+import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.unification.unify
 
 private fun String.getFirstAbstraction() =
     toSemanticModuleInfo()
@@ -23,12 +26,32 @@ private fun String.getFirstAbstraction() =
 private fun createSpec(description: String, code: String, expected: IrNode) =
     Triple(description, code, expected)
 
+private fun Type.resolve(typeSystem: TypeSystem) =
+    typeSystem.unify(Location.NoProvided, this, this).valueOrNull!!
+
+private fun arithmeticExpected(factory: BinaryOperationFactory, typeSystem: TypeSystem) =
+    factory(
+        setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+        IrInteger(
+            1,
+            typeSystem["Byte"].valueOrNull!!.resolve(typeSystem),
+            Location(Line(1) to Offset(5), Line(1) to Offset(6))
+        ),
+        IrInteger(
+            2,
+            typeSystem["Byte"].valueOrNull!!.resolve(typeSystem),
+            Location(Line(1) to Offset(9), Line(1) to Offset(10))
+        ),
+        Location(Line(1) to Offset(7), Line(1) to Offset(8))
+    )
+
 class AbstractionToIrSymbolTest : StringSpec({
-    val byteType = preludeModule.typeSystem["Byte"].valueOrNull!!
-    val doubleType = preludeModule.typeSystem["Double"].valueOrNull!!
-    val charType = preludeModule.typeSystem["Char"].valueOrNull!!
-    val stringType = preludeModule.typeSystem["String"].valueOrNull!!
-    val unitType = preludeModule.typeSystem["Unit"].valueOrNull!!
+    val ts = preludeModule.typeSystem
+    val byteType = ts["Byte"].valueOrNull!!
+    val doubleType = ts["Double"].valueOrNull!!
+    val charType = ts["Char"].valueOrNull!!
+    val stringType = ts["String"].valueOrNull!!
+    val unitType = ts["Unit"].valueOrNull!!
     listOf(
         createSpec(
             "IrInteger expression", "fn = 10", IrInteger(
@@ -140,11 +163,40 @@ class AbstractionToIrSymbolTest : StringSpec({
                 Location(Line(1) to Offset(5), Line(1) to Offset(6))
             )
         ),
+        createSpec(
+            "IrSum expression", """fn = 1 + 2""", arithmeticExpected(::IrSum, ts)
+        ),
+        createSpec(
+            "IrSub expression", """fn = 1 - 2""", arithmeticExpected(::IrSub, ts)
+        ),
+        createSpec(
+            "IrMul expression", """fn = 1 * 2""", arithmeticExpected(::IrMul, ts)
+        ),
+        createSpec(
+            "IrDiv expression", """fn = 1 / 2""", arithmeticExpected(::IrDiv, ts)
+        ),
+        createSpec(
+            "IrPow expression", """fn = 1 ** 2""", IrPow(
+                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                IrInteger(
+                    1,
+                    byteType.resolve(ts),
+                    Location(Line(1) to Offset(5), Line(1) to Offset(6))
+                ),
+                IrInteger(
+                    2,
+                    byteType.resolve(ts),
+                    Location(Line(1) to Offset(10), Line(1) to Offset(11))
+                ),
+                Location(Line(1) to Offset(7), Line(1) to Offset(9))
+            )
+        ),
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
                 .toIrSymbol(emptyVariableIndex)
-                .expr.shouldBe(expected)
+                .expr
+                .shouldBe(expected)
         }
     }
     "irFunction without arguments" {
