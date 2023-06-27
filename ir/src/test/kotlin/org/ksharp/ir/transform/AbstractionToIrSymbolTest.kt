@@ -8,13 +8,15 @@ import org.ksharp.common.Offset
 import org.ksharp.common.cast
 import org.ksharp.ir.*
 import org.ksharp.module.prelude.preludeModule
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
-import org.ksharp.typesystem.resolveAliasForTesting
+import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.unification.unify
 
 private fun String.getFirstAbstraction() =
     toSemanticModuleInfo()
@@ -24,6 +26,25 @@ private fun String.getFirstAbstraction() =
 private fun createSpec(description: String, code: String, expected: IrNode) =
     Triple(description, code, expected)
 
+private fun Type.resolve(typeSystem: TypeSystem) =
+    typeSystem.unify(Location.NoProvided, this, this).valueOrNull!!
+
+private fun arithmeticExpected(factory: BinaryOperationFactory, typeSystem: TypeSystem) =
+    factory(
+        setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+        IrInteger(
+            1,
+            typeSystem["Byte"].valueOrNull!!.resolve(typeSystem),
+            Location(Line(1) to Offset(5), Line(1) to Offset(6))
+        ),
+        IrInteger(
+            2,
+            typeSystem["Byte"].valueOrNull!!.resolve(typeSystem),
+            Location(Line(1) to Offset(9), Line(1) to Offset(10))
+        ),
+        Location(Line(1) to Offset(7), Line(1) to Offset(8))
+    )
+
 class AbstractionToIrSymbolTest : StringSpec({
     val ts = preludeModule.typeSystem
     val byteType = ts["Byte"].valueOrNull!!
@@ -32,130 +53,142 @@ class AbstractionToIrSymbolTest : StringSpec({
     val stringType = ts["String"].valueOrNull!!
     val unitType = ts["Unit"].valueOrNull!!
     listOf(
-//        createSpec(
-//            "IrInteger expression", "fn = 10", IrInteger(
-//                10,
-//                byteType,
-//                Location(Line(1) to Offset(5), Line(1) to Offset(7))
-//            )
-//        ),
-//        createSpec(
-//            "IrDecimal expression", "fn = 10.0", IrDecimal(
-//                10.0,
-//                doubleType,
-//                Location(Line(1) to Offset(5), Line(1) to Offset(9))
-//            )
-//        ),
-//        createSpec(
-//            "IrCharacter expression", "fn = 'a'", IrCharacter(
-//                'a',
-//                charType,
-//                Location(Line(1) to Offset(5), Line(1) to Offset(8))
-//            )
-//        ),
-//        createSpec(
-//            "IrString expression", "fn = \"Hello\"", IrString(
-//                "Hello",
-//                stringType,
-//                Location(Line(1) to Offset(5), Line(1) to Offset(12))
-//            )
-//        ),
-//        createSpec(
-//            "IrList expression", "fn = [1, 2, 3]", IrList(
-//                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-//                listOf(
-//                    IrInteger(
-//                        1,
-//                        byteType,
-//                        Location(Line(1) to Offset(6), Line(1) to Offset(7))
-//                    ),
-//                    IrInteger(
-//                        2,
-//                        byteType,
-//                        Location(Line(1) to Offset(9), Line(1) to Offset(10))
-//                    ),
-//                    IrInteger(
-//                        3,
-//                        byteType,
-//                        Location(Line(1) to Offset(12), Line(1) to Offset(13))
-//                    )
-//                ),
-//                Location(Line(1) to Offset(5), Line(1) to Offset(6))
-//            )
-//        ),
-//        createSpec(
-//            "IrSet expression", "fn = #[1, 2, 3]", IrSet(
-//                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-//                listOf(
-//                    IrInteger(
-//                        1,
-//                        byteType,
-//                        Location(Line(1) to Offset(7), Line(1) to Offset(8))
-//                    ),
-//                    IrInteger(
-//                        2,
-//                        byteType,
-//                        Location(Line(1) to Offset(10), Line(1) to Offset(11))
-//                    ),
-//                    IrInteger(
-//                        3,
-//                        byteType,
-//                        Location(Line(1) to Offset(13), Line(1) to Offset(14))
-//                    )
-//                ),
-//                Location(Line(1) to Offset(5), Line(1) to Offset(7))
-//            )
-//        ),
-//        createSpec(
-//            "IrMap expression", """fn = {"key1": 1, "key2": 2}""", IrMap(
-//                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-//                listOf(
-//                    IrPair(
-//                        setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-//                        IrString(
-//                            "key1",
-//                            stringType,
-//                            Location(Line(1) to Offset(6), Line(1) to Offset(12))
-//                        ),
-//                        IrInteger(
-//                            1,
-//                            byteType,
-//                            Location(Line(1) to Offset(14), Line(1) to Offset(15))
-//                        ),
-//                        Location(Line(1) to Offset(6), Line(1) to Offset(12))
-//                    ),
-//                    IrPair(
-//                        setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-//                        IrString(
-//                            "key2",
-//                            stringType,
-//                            Location(Line(1) to Offset(17), Line(1) to Offset(23))
-//                        ),
-//                        IrInteger(
-//                            2,
-//                            byteType,
-//                            Location(Line(1) to Offset(25), Line(1) to Offset(26))
-//                        ),
-//                        Location(Line(1) to Offset(17), Line(1) to Offset(23))
-//                    )
-//                ),
-//                Location(Line(1) to Offset(5), Line(1) to Offset(6))
-//            )
-//        ),
         createSpec(
-            "IrSum expression", """fn = 1 + 2""", IrSum(
+            "IrInteger expression", "fn = 10", IrInteger(
+                10,
+                byteType,
+                Location(Line(1) to Offset(5), Line(1) to Offset(7))
+            )
+        ),
+        createSpec(
+            "IrDecimal expression", "fn = 10.0", IrDecimal(
+                10.0,
+                doubleType,
+                Location(Line(1) to Offset(5), Line(1) to Offset(9))
+            )
+        ),
+        createSpec(
+            "IrCharacter expression", "fn = 'a'", IrCharacter(
+                'a',
+                charType,
+                Location(Line(1) to Offset(5), Line(1) to Offset(8))
+            )
+        ),
+        createSpec(
+            "IrString expression", "fn = \"Hello\"", IrString(
+                "Hello",
+                stringType,
+                Location(Line(1) to Offset(5), Line(1) to Offset(12))
+            )
+        ),
+        createSpec(
+            "IrList expression", "fn = [1, 2, 3]", IrList(
+                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                listOf(
+                    IrInteger(
+                        1,
+                        byteType,
+                        Location(Line(1) to Offset(6), Line(1) to Offset(7))
+                    ),
+                    IrInteger(
+                        2,
+                        byteType,
+                        Location(Line(1) to Offset(9), Line(1) to Offset(10))
+                    ),
+                    IrInteger(
+                        3,
+                        byteType,
+                        Location(Line(1) to Offset(12), Line(1) to Offset(13))
+                    )
+                ),
+                Location(Line(1) to Offset(5), Line(1) to Offset(6))
+            )
+        ),
+        createSpec(
+            "IrSet expression", "fn = #[1, 2, 3]", IrSet(
+                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                listOf(
+                    IrInteger(
+                        1,
+                        byteType,
+                        Location(Line(1) to Offset(7), Line(1) to Offset(8))
+                    ),
+                    IrInteger(
+                        2,
+                        byteType,
+                        Location(Line(1) to Offset(10), Line(1) to Offset(11))
+                    ),
+                    IrInteger(
+                        3,
+                        byteType,
+                        Location(Line(1) to Offset(13), Line(1) to Offset(14))
+                    )
+                ),
+                Location(Line(1) to Offset(5), Line(1) to Offset(7))
+            )
+        ),
+        createSpec(
+            "IrMap expression", """fn = {"key1": 1, "key2": 2}""", IrMap(
+                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                listOf(
+                    IrPair(
+                        setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                        IrString(
+                            "key1",
+                            stringType,
+                            Location(Line(1) to Offset(6), Line(1) to Offset(12))
+                        ),
+                        IrInteger(
+                            1,
+                            byteType,
+                            Location(Line(1) to Offset(14), Line(1) to Offset(15))
+                        ),
+                        Location(Line(1) to Offset(6), Line(1) to Offset(12))
+                    ),
+                    IrPair(
+                        setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                        IrString(
+                            "key2",
+                            stringType,
+                            Location(Line(1) to Offset(17), Line(1) to Offset(23))
+                        ),
+                        IrInteger(
+                            2,
+                            byteType,
+                            Location(Line(1) to Offset(25), Line(1) to Offset(26))
+                        ),
+                        Location(Line(1) to Offset(17), Line(1) to Offset(23))
+                    )
+                ),
+                Location(Line(1) to Offset(5), Line(1) to Offset(6))
+            )
+        ),
+        createSpec(
+            "IrSum expression", """fn = 1 + 2""", arithmeticExpected(::IrSum, ts)
+        ),
+        createSpec(
+            "IrSub expression", """fn = 1 - 2""", arithmeticExpected(::IrSub, ts)
+        ),
+        createSpec(
+            "IrMul expression", """fn = 1 * 2""", arithmeticExpected(::IrMul, ts)
+        ),
+        createSpec(
+            "IrDiv expression", """fn = 1 / 2""", arithmeticExpected(::IrDiv, ts)
+        ),
+        createSpec(
+            "IrPow expression", """fn = 1 ** 2""", IrPow(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 IrInteger(
                     1,
-                    ts.resolveAliasForTesting(byteType),
+                    byteType.resolve(ts),
                     Location(Line(1) to Offset(5), Line(1) to Offset(6))
                 ),
                 IrInteger(
                     2,
-                    ts.resolveAliasForTesting(byteType),
-                    Location(Line(1) to Offset(9), Line(1) to Offset(10))
+                    byteType.resolve(ts),
+                    Location(Line(1) to Offset(10), Line(1) to Offset(11))
                 ),
-                Location(Line(1) to Offset(7), Line(1) to Offset(8))
+                Location(Line(1) to Offset(7), Line(1) to Offset(9))
             )
         ),
     ).forEach { (description, code, expected) ->

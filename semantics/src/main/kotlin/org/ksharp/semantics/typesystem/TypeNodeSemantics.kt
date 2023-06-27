@@ -10,6 +10,7 @@ import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.*
 
 enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode {
@@ -210,8 +211,8 @@ fun TypeItemBuilder.register(name: String, node: NodeData): ErrorOrType =
     }
 
 private fun List<AnnotationNode>?.checkAnnotations(internal: Boolean): Set<Attribute> =
-    (if (internal) CommonAttribute.Internal else CommonAttribute.Public).let { visibility ->
-        this.toAttributes(setOf(visibility))
+    (if (internal) setOf(CommonAttribute.Internal) else NoAttributes).let { visibility ->
+        this.toAttributes(visibility)
     }
 
 
