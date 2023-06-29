@@ -3,8 +3,8 @@ package org.ksharp.module.bytecode
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.io.bufferView
-import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
+import org.ksharp.module.functionInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.newParameter
@@ -36,18 +36,18 @@ class ModuleInfoSerializerTest : StringSpec({
             }.value,
             mapOf(
                 "sum" to listOf(
-                    FunctionInfo(
+                    functionInfo(
                         setOf(CommonAttribute.Native, CommonAttribute.Public),
                         "sum",
                         listOf(newParameter(), newParameter())
-                    ), FunctionInfo(
+                    ), functionInfo(
                         setOf(CommonAttribute.Public),
                         "sum",
                         listOf(newParameter(), newParameter(), newParameter())
                     )
                 ),
                 "sub" to listOf(
-                    FunctionInfo(
+                    functionInfo(
                         setOf(CommonAttribute.Native, CommonAttribute.Public),
                         "sub",
                         listOf(newParameter(), newParameter())

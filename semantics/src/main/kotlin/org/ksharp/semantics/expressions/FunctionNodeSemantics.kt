@@ -1,15 +1,17 @@
 package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
-import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
+import org.ksharp.module.prelude.kernelModule
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
+import org.ksharp.semantics.inference.ConcreteModuleInfo
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.inference.inferType
+import org.ksharp.semantics.inference.toSemanticModuleInfo
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
@@ -21,7 +23,6 @@ import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.newParameter
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
@@ -146,23 +147,6 @@ private fun FunctionNode.checkSemantics(
         )
     }
 
-internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
-    this.asSequence().map {
-        val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
-        val arguments = semanticInfo
-            .parameters.map { i ->
-                when (val iType = i.getInferredType(it.location)) {
-                    is Either.Right -> iType.value
-                    else -> newParameter()
-                }
-            }
-        val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
-        val attributes = it.attributes
-        if (returnType != null) {
-            FunctionInfo(attributes, it.name, arguments + returnType)
-        } else FunctionInfo(attributes, it.name, arguments)
-    }.groupBy { it.name }
-
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
     val errors = ErrorCollector()
     val (functionTable, functionNodes) = buildFunctionTable(errors, moduleTypeSystemInfo.typeSystem)
@@ -187,12 +171,8 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     val errors = ErrorCollector()
     errors.collectAll(this.errors)
     val inferenceInfo = InferenceInfo(
-        preludeModule,
-        ModuleInfo(
-            emptyList(),
-            moduleTypeSystemInfo.typeSystem,
-            abstractions.toFunctionInfoMap()
-        ),
+        ConcreteModuleInfo(preludeModule, preludeModule == kernelModule),
+        abstractions.toSemanticModuleInfo(moduleTypeSystemInfo.typeSystem),
         emptyMap()
     )
     abstractions.map { it.inferType(inferenceInfo) }

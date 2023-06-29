@@ -37,8 +37,6 @@ private val LiteralCollectionType.applicationName
 
 private fun integer2Type(value: Long): String =
     when {
-        value < 255 -> "Byte"
-        value < 2.0.pow(16.0) -> "Short"
         value < 2.0.pow(32.0) -> "Int"
         else -> "Long"
     }
