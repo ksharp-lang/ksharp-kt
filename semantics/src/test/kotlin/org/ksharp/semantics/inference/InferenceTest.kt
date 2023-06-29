@@ -6,8 +6,8 @@ import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.common.new
-import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
+import org.ksharp.module.functionInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
@@ -29,14 +29,14 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
         typeSystem = typeSystem,
         functions = mapOf(
             "(test+)" to listOf(
-                FunctionInfo(
+                functionInfo(
                     setOf(CommonAttribute.Public),
                     "(test+)",
                     listOf(a, a, a)
                 )
             ),
             "(test*)" to listOf(
-                FunctionInfo(
+                functionInfo(
                     setOf(CommonAttribute.Public),
                     "(test+)",
                     listOf(intType, intType, intType)
@@ -44,7 +44,7 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
             )
         )
     )
-    return InferenceInfo(preludeModule, testModule)
+    return InferenceInfo(ConcreteModuleInfo(preludeModule, false), ConcreteModuleInfo(testModule, false))
 }
 
 class InferenceTest : StringSpec({

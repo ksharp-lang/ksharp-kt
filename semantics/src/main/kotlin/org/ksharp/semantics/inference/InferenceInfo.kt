@@ -4,7 +4,9 @@ import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.ApplicationName
+import org.ksharp.nodes.semantic.SemanticNode
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
+import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.incompatibleType
@@ -54,16 +56,11 @@ internal fun FunctionInfo.unify(
 }
 
 data class InferenceInfo(
-    val prelude: ModuleInfo,
-    val module: ModuleInfo,
+    val prelude: InferenceModuleInfo,
+    val module: InferenceModuleInfo,
     val dependencies: Map<String, ModuleInfo> = emptyMap()
 ) {
     private val cache = cacheOf<Pair<String, List<Type>>, Either<String, Type>>()
-
-    private fun ModuleInfo.findFunction(name: String, numParams: Int): Sequence<FunctionInfo>? =
-        functions[name]?.let { fns ->
-            fns.asSequence().filter { it.types.size == numParams }
-        }
 
     private fun functionName(name: String, arguments: List<Type>) =
         "$name ${
@@ -72,6 +69,14 @@ data class InferenceInfo(
             }
         }"
 
+    private fun FunctionInfo.infer() {
+        if (this is AbstractionFunctionInfo) {
+            this.abstraction
+                .cast<SemanticNode<SemanticInfo>>()
+                .inferType(this@InferenceInfo)
+        }
+    }
+
     private fun Sequence<FunctionInfo>?.unify(
         typeSystem: TypeSystem,
         location: Location,
@@ -79,6 +84,7 @@ data class InferenceInfo(
     ): Either.Right<FunctionType>? =
         if (this != null)
             this.map {
+                it.infer()
                 it.unify(typeSystem, location, arguments)
             }.firstOrNull { it.isRight }
                     as? Either.Right<FunctionType>
