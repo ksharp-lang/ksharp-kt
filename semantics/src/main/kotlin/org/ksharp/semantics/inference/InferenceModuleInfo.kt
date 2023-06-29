@@ -1,6 +1,5 @@
 package org.ksharp.semantics.inference
 
-import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.module.FunctionInfo
@@ -8,12 +7,10 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.SemanticInfo
-import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.newParameter
 
 sealed interface InferenceModuleInfo {
 
@@ -31,18 +28,8 @@ class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemant
     override val types: List<Type>
         get() {
             val info = abstraction.info
-            if (info.hasInferredType()) {
-                return info.getInferredType(Location.NoProvided)
-                    .valueOrNull!!.cast<FunctionType>().arguments
-            }
-            val arguments = info.parameters.map { i ->
-                when (val iType = i.getInferredType(abstraction.location)) {
-                    is Either.Right -> iType.value
-                    else -> newParameter()
-                }
-            }
-            val returnType = info.returnType!!.getType(abstraction.location).valueOrNull!!
-            return arguments + returnType
+            return info.getInferredType(Location.NoProvided)
+                .valueOrNull!!.cast<FunctionType>().arguments
         }
 }
 
