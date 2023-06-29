@@ -6,6 +6,7 @@ import org.ksharp.common.listBuilder
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 import org.ksharp.module.FunctionInfo
+import org.ksharp.module.FunctionInfoImpl
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
 import org.ksharp.typesystem.serializer.readListOfTypes
@@ -27,7 +28,7 @@ fun BufferView.readFunctionInfo(table: BinaryTableView): FunctionInfo {
     val attributes = bufferFrom(4).readAttributes(table)
     val name = table[readInt(4 + offset)]
     val types = bufferFrom(8 + offset).readListOfTypes(table)
-    return FunctionInfo(attributes, name, types)
+    return FunctionInfoImpl(attributes, name, types)
 }
 
 fun List<FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) {

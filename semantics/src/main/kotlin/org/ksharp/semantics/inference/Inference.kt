@@ -1,7 +1,6 @@
 package org.ksharp.semantics.inference
 
 import org.ksharp.common.*
-import org.ksharp.module.prelude.kernelModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.expressions.CollectionFunctionName
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
@@ -55,7 +54,7 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
 ) =
     this.info.cast<AbstractionSemanticInfo>().parameters.let { params ->
         if (params.isEmpty()) {
-            info.prelude.typeSystem[if (info.prelude == kernelModule) "KernelUnit" else "Unit"].map { unitType ->
+            info.prelude.typeSystem[if (info.prelude.isKernelModule) "KernelUnit" else "Unit"].map { unitType ->
                 listOf(unitType, returnType).toFunctionType()
             }
         } else {

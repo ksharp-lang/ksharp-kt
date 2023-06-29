@@ -7,6 +7,7 @@ import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.common.listBuilder
 import org.ksharp.module.FunctionInfo
+import org.ksharp.module.FunctionInfoImpl
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.nameAttribute
@@ -46,21 +47,21 @@ private fun Map<String, List<FunctionInfo>>.shouldBeSerializable() {
 
 class FunctionSerializerTest : StringSpec({
     "Serialize FunctionInfo with dependency = null" {
-        FunctionInfo(
+        FunctionInfoImpl(
             setOf(CommonAttribute.Native, CommonAttribute.Public),
             "sum",
             listOf(newParameter())
         ).shouldBeSerializable()
     }
     "Serialize FunctionInfo" {
-        FunctionInfo(
+        FunctionInfoImpl(
             setOf(CommonAttribute.Internal),
             "sum",
             listOf(newParameter(), newParameter())
         ).shouldBeSerializable()
     }
     "Serialize FunctionInfo with annotations" {
-        FunctionInfo(
+        FunctionInfoImpl(
             setOf(
                 CommonAttribute.Native,
                 CommonAttribute.Internal,
@@ -76,7 +77,7 @@ class FunctionSerializerTest : StringSpec({
             .shouldBe(mapOf("java" to "sum", "c#" to "Sum"))
     }
     "Serialize FunctionInfo complete" {
-        FunctionInfo(
+        FunctionInfoImpl(
             setOf(CommonAttribute.Internal),
             "sum",
             listOf(newParameter(), newParameter())
@@ -85,14 +86,14 @@ class FunctionSerializerTest : StringSpec({
     "Serialize FunctionInfoTable" {
         mapOf(
             "sum" to listOf(
-                FunctionInfo(
+                FunctionInfoImpl(
                     setOf(CommonAttribute.Native, CommonAttribute.Public),
                     "sum",
                     listOf(newParameter(), newParameter())
                 )
             ),
             "sub" to listOf(
-                FunctionInfo(
+                FunctionInfoImpl(
                     setOf(CommonAttribute.Public),
                     "sub",
                     listOf(newParameter(), newParameter())

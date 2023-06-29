@@ -1,15 +1,18 @@
 package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
-import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
+import org.ksharp.module.functionInfo
+import org.ksharp.module.prelude.kernelModule
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.errors.ErrorCollector
+import org.ksharp.semantics.inference.ConcreteModuleInfo
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.inference.inferType
+import org.ksharp.semantics.inference.toSemanticModuleInfo
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
@@ -159,8 +162,8 @@ internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
         val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
         val attributes = it.attributes
         if (returnType != null) {
-            FunctionInfo(attributes, it.name, arguments + returnType)
-        } else FunctionInfo(attributes, it.name, arguments)
+            functionInfo(attributes, it.name, arguments + returnType)
+        } else functionInfo(attributes, it.name, arguments)
     }.groupBy { it.name }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
@@ -187,12 +190,8 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     val errors = ErrorCollector()
     errors.collectAll(this.errors)
     val inferenceInfo = InferenceInfo(
-        preludeModule,
-        ModuleInfo(
-            emptyList(),
-            moduleTypeSystemInfo.typeSystem,
-            abstractions.toFunctionInfoMap()
-        ),
+        ConcreteModuleInfo(preludeModule, preludeModule == kernelModule),
+        abstractions.toSemanticModuleInfo(moduleTypeSystemInfo.typeSystem),
         emptyMap()
     )
     abstractions.map { it.inferType(inferenceInfo) }
