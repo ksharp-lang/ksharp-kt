@@ -191,6 +191,31 @@ class AbstractionToIrSymbolTest : StringSpec({
                 Location(Line(1) to Offset(7), Line(1) to Offset(9))
             )
         ),
+        createSpec(
+            "Constant IrCall expression",
+            """
+                    fn = sum 1 2
+                    
+                    sum a b = a + b
+                """.trimIndent(), IrCall(
+                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                -1,
+                "sum",
+                listOf(
+                    IrInteger(
+                        1,
+                        intType.resolve(ts),
+                        Location(Line(1) to Offset(5), Line(1) to Offset(6))
+                    ),
+                    IrInteger(
+                        2,
+                        intType.resolve(ts),
+                        Location(Line(1) to Offset(10), Line(1) to Offset(11))
+                    )
+                ),
+                Location(Line(1) to Offset(7), Line(1) to Offset(9))
+            )
+        ),
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
