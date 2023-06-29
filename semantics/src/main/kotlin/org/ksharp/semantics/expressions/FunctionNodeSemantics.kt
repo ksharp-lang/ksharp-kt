@@ -2,7 +2,6 @@ package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
 import org.ksharp.module.ModuleInfo
-import org.ksharp.module.functionInfo
 import org.ksharp.module.prelude.kernelModule
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
@@ -24,7 +23,6 @@ import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.newParameter
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
@@ -148,23 +146,6 @@ private fun FunctionNode.checkSemantics(
             location
         )
     }
-
-internal fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
-    this.asSequence().map {
-        val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
-        val arguments = semanticInfo
-            .parameters.map { i ->
-                when (val iType = i.getInferredType(it.location)) {
-                    is Either.Right -> iType.value
-                    else -> newParameter()
-                }
-            }
-        val returnType = semanticInfo.returnType?.getType(it.location)?.valueOrNull
-        val attributes = it.attributes
-        if (returnType != null) {
-            functionInfo(attributes, it.name, arguments + returnType)
-        } else functionInfo(attributes, it.name, arguments)
-    }.groupBy { it.name }
 
 fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
     val errors = ErrorCollector()
