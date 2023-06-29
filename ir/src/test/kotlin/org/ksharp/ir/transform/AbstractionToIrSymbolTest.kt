@@ -205,15 +205,15 @@ class AbstractionToIrSymbolTest : StringSpec({
                     IrInteger(
                         1,
                         intType.resolve(ts),
-                        Location(Line(1) to Offset(5), Line(1) to Offset(6))
+                        Location(Line(1) to Offset(9), Line(1) to Offset(10))
                     ),
                     IrInteger(
                         2,
                         intType.resolve(ts),
-                        Location(Line(1) to Offset(10), Line(1) to Offset(11))
+                        Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
                 ),
-                Location(Line(1) to Offset(7), Line(1) to Offset(9))
+                Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )
         ),
     ).forEach { (description, code, expected) ->

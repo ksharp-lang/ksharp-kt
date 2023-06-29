@@ -61,5 +61,15 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex): IrEx
         irNodeFactory[it] ?: throw RuntimeException("Ir symbol factory $it not found")
     }
     return if (factory != null) factory(variableIndex)
-    else TODO("Application $this")
+    else {
+        val (attributes, arguments) = arguments.toIrSymbols(variableIndex)
+        IrCall(
+            attributes,
+            -1,
+            functionName.name,
+            arguments,
+            location,
+        )
+
+    }
 }
