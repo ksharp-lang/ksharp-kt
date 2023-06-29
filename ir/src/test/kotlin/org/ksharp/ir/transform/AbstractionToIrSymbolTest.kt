@@ -34,12 +34,12 @@ private fun arithmeticExpected(factory: BinaryOperationFactory, typeSystem: Type
         setOf(CommonAttribute.Constant, CommonAttribute.Pure),
         IrInteger(
             1,
-            typeSystem["Byte"].valueOrNull!!.resolve(typeSystem),
+            typeSystem["Int"].valueOrNull!!.resolve(typeSystem),
             Location(Line(1) to Offset(5), Line(1) to Offset(6))
         ),
         IrInteger(
             2,
-            typeSystem["Byte"].valueOrNull!!.resolve(typeSystem),
+            typeSystem["Int"].valueOrNull!!.resolve(typeSystem),
             Location(Line(1) to Offset(9), Line(1) to Offset(10))
         ),
         Location(Line(1) to Offset(7), Line(1) to Offset(8))
@@ -47,7 +47,7 @@ private fun arithmeticExpected(factory: BinaryOperationFactory, typeSystem: Type
 
 class AbstractionToIrSymbolTest : StringSpec({
     val ts = preludeModule.typeSystem
-    val byteType = ts["Byte"].valueOrNull!!
+    val intType = ts["Int"].valueOrNull!!
     val doubleType = ts["Double"].valueOrNull!!
     val charType = ts["Char"].valueOrNull!!
     val stringType = ts["String"].valueOrNull!!
@@ -56,7 +56,7 @@ class AbstractionToIrSymbolTest : StringSpec({
         createSpec(
             "IrInteger expression", "fn = 10", IrInteger(
                 10,
-                byteType,
+                intType,
                 Location(Line(1) to Offset(5), Line(1) to Offset(7))
             )
         ),
@@ -87,17 +87,17 @@ class AbstractionToIrSymbolTest : StringSpec({
                 listOf(
                     IrInteger(
                         1,
-                        byteType,
+                        intType,
                         Location(Line(1) to Offset(6), Line(1) to Offset(7))
                     ),
                     IrInteger(
                         2,
-                        byteType,
+                        intType,
                         Location(Line(1) to Offset(9), Line(1) to Offset(10))
                     ),
                     IrInteger(
                         3,
-                        byteType,
+                        intType,
                         Location(Line(1) to Offset(12), Line(1) to Offset(13))
                     )
                 ),
@@ -110,17 +110,17 @@ class AbstractionToIrSymbolTest : StringSpec({
                 listOf(
                     IrInteger(
                         1,
-                        byteType,
+                        intType,
                         Location(Line(1) to Offset(7), Line(1) to Offset(8))
                     ),
                     IrInteger(
                         2,
-                        byteType,
+                        intType,
                         Location(Line(1) to Offset(10), Line(1) to Offset(11))
                     ),
                     IrInteger(
                         3,
-                        byteType,
+                        intType,
                         Location(Line(1) to Offset(13), Line(1) to Offset(14))
                     )
                 ),
@@ -140,7 +140,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                         ),
                         IrInteger(
                             1,
-                            byteType,
+                            intType,
                             Location(Line(1) to Offset(14), Line(1) to Offset(15))
                         ),
                         Location(Line(1) to Offset(6), Line(1) to Offset(12))
@@ -154,7 +154,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                         ),
                         IrInteger(
                             2,
-                            byteType,
+                            intType,
                             Location(Line(1) to Offset(25), Line(1) to Offset(26))
                         ),
                         Location(Line(1) to Offset(17), Line(1) to Offset(23))
@@ -180,12 +180,12 @@ class AbstractionToIrSymbolTest : StringSpec({
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 IrInteger(
                     1,
-                    byteType.resolve(ts),
+                    intType.resolve(ts),
                     Location(Line(1) to Offset(5), Line(1) to Offset(6))
                 ),
                 IrInteger(
                     2,
-                    byteType.resolve(ts),
+                    intType.resolve(ts),
                     Location(Line(1) to Offset(10), Line(1) to Offset(11))
                 ),
                 Location(Line(1) to Offset(7), Line(1) to Offset(9))
@@ -208,10 +208,10 @@ class AbstractionToIrSymbolTest : StringSpec({
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
                     "ten",
                     listOf(),
-                    listOf(unitType, byteType).toFunctionType(NoAttributes),
+                    listOf(unitType, intType).toFunctionType(NoAttributes),
                     IrInteger(
                         10,
-                        byteType,
+                        intType,
                         Location(Line(1) to Offset(6), Line(1) to Offset(8))
                     ),
                     Location(Line(1) to Offset(0), Line(1) to Offset(3))

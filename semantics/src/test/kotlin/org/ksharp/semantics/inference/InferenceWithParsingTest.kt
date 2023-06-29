@@ -42,7 +42,7 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "sum :: ((Num a) -> (Num a) -> (Num a))",
-                "fn :: (KernelUnit -> (Num numeric<Byte>))"
+                "fn :: (KernelUnit -> (Num numeric<Int>))"
             )
     }
 })

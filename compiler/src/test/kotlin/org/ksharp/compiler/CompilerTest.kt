@@ -38,7 +38,7 @@ class CompilerTestModuleInfo : StringSpec({
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.typeSystem["Byte"]),
+                                    info = TypeSemanticInfo(type = it.typeSystem["Int"]),
                                     location = Location(
                                         Line(value = 2) to Offset(value = 6), Line(value = 2) to Offset(value = 8)
                                     )
@@ -73,7 +73,7 @@ class CompilerTestModuleInfo : StringSpec({
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.typeSystem["Byte"]),
+                                    info = TypeSemanticInfo(type = it.typeSystem["Int"]),
                                     location = Location(
                                         Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )
@@ -106,7 +106,7 @@ class CompilerTestModuleInfo : StringSpec({
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.typeSystem["Byte"]),
+                                    info = TypeSemanticInfo(type = it.typeSystem["Int"]),
                                     location = Location(
                                         Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )
@@ -139,7 +139,7 @@ class CompilerTestModuleInfo : StringSpec({
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.typeSystem["Byte"]),
+                                    info = TypeSemanticInfo(type = it.typeSystem["Int"]),
                                     location = Location(
                                         Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )
@@ -166,7 +166,7 @@ class CompilerTestModuleInfo : StringSpec({
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location(Line(1) to Offset(6), Line(value = 1) to Offset(value = 18)),
-                        "function" to "no-exist-fun (Num NativeByte)"
+                        "function" to "no-exist-fun (Num NativeInt)"
                     )
                 )
             )
