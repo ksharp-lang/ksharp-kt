@@ -71,4 +71,18 @@ class InferenceWithParsingTest : StringSpec({
                 )
             )
     }
+    "Inference module - function not found 2" {
+        """
+            fn = (+) 10
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    InferenceErrorCode.FunctionNotFound.new(
+                        Location.NoProvided,
+                        "function" to "(+) (Num NativeInt)"
+                    )
+                )
+            )
+    }
 })
