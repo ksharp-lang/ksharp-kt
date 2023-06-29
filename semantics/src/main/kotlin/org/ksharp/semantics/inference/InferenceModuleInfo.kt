@@ -17,7 +17,7 @@ import org.ksharp.typesystem.types.newParameter
 
 sealed interface InferenceModuleInfo {
 
-    val isKernelModule: Boolean
+    val isKernelModule: Boolean get() = false
 
     val typeSystem: TypeSystem
 
@@ -30,18 +30,19 @@ class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemant
     override val name: String = abstraction.name
     override val types: List<Type>
         get() {
-            if (abstraction.info.hasInferredType()) {
-                return abstraction.info.getInferredType(Location.NoProvided)
+            val info = abstraction.info
+            if (info.hasInferredType()) {
+                return info.getInferredType(Location.NoProvided)
                     .valueOrNull!!.cast<FunctionType>().arguments
             }
-            val arguments = abstraction.info.parameters.map { i ->
+            val arguments = info.parameters.map { i ->
                 when (val iType = i.getInferredType(abstraction.location)) {
                     is Either.Right -> iType.value
                     else -> newParameter()
                 }
             }
-            val returnType = abstraction.info.returnType?.getType(abstraction.location)?.valueOrNull
-            return if (returnType != null) arguments + returnType else arguments
+            val returnType = info.returnType!!.getType(abstraction.location).valueOrNull!!
+            return arguments + returnType
         }
 }
 
@@ -61,8 +62,6 @@ class SemanticModuleInfo(
     override val typeSystem: TypeSystem,
     private val abstractions: Map<String, List<AbstractionNode<AbstractionSemanticInfo>>>
 ) : InferenceModuleInfo {
-
-    override val isKernelModule: Boolean = false
     override fun findFunction(name: String, numParams: Int): Sequence<FunctionInfo>? =
         abstractions[name]?.let { fns ->
             fns.asSequence().filter { (it.info.parameters.size + 1) == numParams }
