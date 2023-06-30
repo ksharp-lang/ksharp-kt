@@ -21,13 +21,11 @@ fun ConstantNode<SemanticInfo>.toIrSymbol() =
 
         is Char -> IrCharacter(
             value.cast(),
-            inferredType,
             location
         )
 
         is String -> IrString(
             value.cast(),
-            inferredType,
             location
         )
 
@@ -52,3 +50,10 @@ fun SemanticNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex): IrExpre
         is LetNode -> TODO()
         is VarNode -> toIrSymbol(variableIndex)
     }
+
+val IrBoolFactory: CustomApplicationIrNode = {
+    IrBool(
+        functionName.name == "True",
+        location
+    )
+}

@@ -25,12 +25,15 @@ data class IrDecimal(
 
 data class IrCharacter(
     val value: Char,
-    val type: Type,
     override val location: Location
 ) : Literal
 
 data class IrString(
     val value: String,
-    val type: Type,
+    override val location: Location
+) : Literal
+
+data class IrBool(
+    val value: Boolean,
     override val location: Location
 ) : Literal

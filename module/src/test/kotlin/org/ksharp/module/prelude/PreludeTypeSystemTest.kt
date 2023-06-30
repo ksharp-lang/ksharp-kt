@@ -41,7 +41,7 @@ class PreludeTypeSystemTest : StringSpec({
             repr("Float").shouldBeRight("Num NativeFloat")
             repr("Double").shouldBeRight("Num NativeDouble")
             repr("BigDecimal").shouldBeRight("Num NativeBigDecimal")
-            repr("String").shouldBeRight("List Char")
+            repr("String").shouldBeRight("String")
             repr("Num").shouldBeRight("Num a")
             repr("List").shouldBeRight("List v")
             repr("Set").shouldBeRight("Set v")
