@@ -23,6 +23,14 @@ data class IrVar(
     override val location: Location
 ) : IrExpression
 
+data class IrIf(
+    override val attributes: Set<Attribute>,
+    val condition: IrExpression,
+    val thenExpr: IrExpression,
+    val elseExpr: IrExpression,
+    override val location: Location
+) : IrExpression
+
 data class IrCall(
     override val attributes: Set<Attribute>,
     val module: Int,

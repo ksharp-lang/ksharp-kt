@@ -49,8 +49,6 @@ class AbstractionToIrSymbolTest : StringSpec({
     val ts = preludeModule.typeSystem
     val intType = ts["Int"].valueOrNull!!
     val doubleType = ts["Double"].valueOrNull!!
-    val charType = ts["Char"].valueOrNull!!
-    val stringType = ts["String"].valueOrNull!!
     val unitType = ts["Unit"].valueOrNull!!
     listOf(
         createSpec(
@@ -70,14 +68,12 @@ class AbstractionToIrSymbolTest : StringSpec({
         createSpec(
             "IrCharacter expression", "fn = 'a'", IrCharacter(
                 'a',
-                charType,
                 Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )
         ),
         createSpec(
             "IrString expression", "fn = \"Hello\"", IrString(
                 "Hello",
-                stringType,
                 Location(Line(1) to Offset(5), Line(1) to Offset(12))
             )
         ),
@@ -135,7 +131,6 @@ class AbstractionToIrSymbolTest : StringSpec({
                         setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                         IrString(
                             "key1",
-                            stringType,
                             Location(Line(1) to Offset(6), Line(1) to Offset(12))
                         ),
                         IrInteger(
@@ -149,7 +144,6 @@ class AbstractionToIrSymbolTest : StringSpec({
                         setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                         IrString(
                             "key2",
-                            stringType,
                             Location(Line(1) to Offset(17), Line(1) to Offset(23))
                         ),
                         IrInteger(
@@ -217,28 +211,37 @@ class AbstractionToIrSymbolTest : StringSpec({
             )
         ),
         createSpec(
-            "Constant IrCall expression",
+            "If expression",
             """
                     fn = if True
                          then 10
                          else 20
-                """.trimIndent(), IrCall(
+                """.trimIndent(), IrIf(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-                -1,
-                "sum",
-                listOf(
-                    IrInteger(
-                        1,
-                        intType.resolve(ts),
-                        Location(Line(1) to Offset(9), Line(1) to Offset(10))
-                    ),
-                    IrInteger(
-                        2,
-                        intType.resolve(ts),
-                        Location(Line(1) to Offset(11), Line(1) to Offset(12))
+                condition = IrBool(
+                    true,
+                    Location(
+                        (Line(value = 1) to Offset(value = 8)),
+                        (Line(value = 1) to Offset(value = 12))
                     )
                 ),
-                Location(Line(1) to Offset(5), Line(1) to Offset(8))
+                thenExpr = IrInteger(
+                    10,
+                    intType.resolve(ts),
+                    Location(
+                        (Line(value = 2) to Offset(value = 10)),
+                        (Line(value = 2) to Offset(value = 12))
+                    )
+                ),
+                elseExpr = IrInteger(
+                    20,
+                    intType.resolve(ts),
+                    Location(
+                        (Line(value = 3) to Offset(value = 10)),
+                        (Line(value = 3) to Offset(value = 12))
+                    )
+                ),
+                Location((Line(value = 1) to Offset(value = 5)), (Line(value = 1) to Offset(value = 7)))
             )
         ),
     ).forEach { (description, code, expected) ->
