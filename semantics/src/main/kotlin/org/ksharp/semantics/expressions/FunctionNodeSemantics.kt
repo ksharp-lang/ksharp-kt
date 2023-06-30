@@ -2,7 +2,6 @@ package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
 import org.ksharp.module.ModuleInfo
-import org.ksharp.module.prelude.kernelModule
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
@@ -171,7 +170,7 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     val errors = ErrorCollector()
     errors.collectAll(this.errors)
     val inferenceInfo = InferenceInfo(
-        ConcreteModuleInfo(preludeModule, preludeModule == kernelModule),
+        ConcreteModuleInfo(preludeModule),
         abstractions.toSemanticModuleInfo(moduleTypeSystemInfo.typeSystem),
         emptyMap()
     )

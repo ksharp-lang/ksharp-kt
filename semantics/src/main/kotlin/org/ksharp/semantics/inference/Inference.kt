@@ -54,7 +54,7 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
 ) =
     this.info.cast<AbstractionSemanticInfo>().parameters.let { params ->
         if (params.isEmpty()) {
-            info.prelude.typeSystem[if (info.prelude.isKernelModule) "KernelUnit" else "Unit"].map { unitType ->
+            info.prelude.typeSystem["Unit"].map { unitType ->
                 listOf(unitType, returnType).toFunctionType()
             }
         } else {

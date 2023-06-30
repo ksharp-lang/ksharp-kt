@@ -8,15 +8,12 @@ import org.ksharp.common.Offset
 import org.ksharp.common.cast
 import org.ksharp.ir.*
 import org.ksharp.module.prelude.preludeModule
-import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
-import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.toFunctionType
-import org.ksharp.typesystem.unification.unify
 
 private fun String.getFirstAbstraction() =
     toSemanticModuleInfo()
@@ -26,20 +23,15 @@ private fun String.getFirstAbstraction() =
 private fun createSpec(description: String, code: String, expected: IrNode) =
     Triple(description, code, expected)
 
-private fun Type.resolve(typeSystem: TypeSystem) =
-    typeSystem.unify(Location.NoProvided, this, this).valueOrNull!!
-
-private fun arithmeticExpected(factory: BinaryOperationFactory, typeSystem: TypeSystem) =
+private fun arithmeticExpected(factory: BinaryOperationFactory) =
     factory(
         setOf(CommonAttribute.Constant, CommonAttribute.Pure),
         IrInteger(
             1,
-            typeSystem["Int"].valueOrNull!!.resolve(typeSystem),
             Location(Line(1) to Offset(5), Line(1) to Offset(6))
         ),
         IrInteger(
             2,
-            typeSystem["Int"].valueOrNull!!.resolve(typeSystem),
             Location(Line(1) to Offset(9), Line(1) to Offset(10))
         ),
         Location(Line(1) to Offset(7), Line(1) to Offset(8))
@@ -47,21 +39,18 @@ private fun arithmeticExpected(factory: BinaryOperationFactory, typeSystem: Type
 
 class AbstractionToIrSymbolTest : StringSpec({
     val ts = preludeModule.typeSystem
-    val intType = ts["Int"].valueOrNull!!
-    val doubleType = ts["Double"].valueOrNull!!
+    val longType = ts["Long"].valueOrNull!!
     val unitType = ts["Unit"].valueOrNull!!
     listOf(
         createSpec(
             "IrInteger expression", "fn = 10", IrInteger(
                 10,
-                intType,
                 Location(Line(1) to Offset(5), Line(1) to Offset(7))
             )
         ),
         createSpec(
             "IrDecimal expression", "fn = 10.0", IrDecimal(
                 10.0,
-                doubleType,
                 Location(Line(1) to Offset(5), Line(1) to Offset(9))
             )
         ),
@@ -83,17 +72,14 @@ class AbstractionToIrSymbolTest : StringSpec({
                 listOf(
                     IrInteger(
                         1,
-                        intType,
                         Location(Line(1) to Offset(6), Line(1) to Offset(7))
                     ),
                     IrInteger(
                         2,
-                        intType,
                         Location(Line(1) to Offset(9), Line(1) to Offset(10))
                     ),
                     IrInteger(
                         3,
-                        intType,
                         Location(Line(1) to Offset(12), Line(1) to Offset(13))
                     )
                 ),
@@ -106,17 +92,14 @@ class AbstractionToIrSymbolTest : StringSpec({
                 listOf(
                     IrInteger(
                         1,
-                        intType,
                         Location(Line(1) to Offset(7), Line(1) to Offset(8))
                     ),
                     IrInteger(
                         2,
-                        intType,
                         Location(Line(1) to Offset(10), Line(1) to Offset(11))
                     ),
                     IrInteger(
                         3,
-                        intType,
                         Location(Line(1) to Offset(13), Line(1) to Offset(14))
                     )
                 ),
@@ -135,7 +118,6 @@ class AbstractionToIrSymbolTest : StringSpec({
                         ),
                         IrInteger(
                             1,
-                            intType,
                             Location(Line(1) to Offset(14), Line(1) to Offset(15))
                         ),
                         Location(Line(1) to Offset(6), Line(1) to Offset(12))
@@ -148,7 +130,6 @@ class AbstractionToIrSymbolTest : StringSpec({
                         ),
                         IrInteger(
                             2,
-                            intType,
                             Location(Line(1) to Offset(25), Line(1) to Offset(26))
                         ),
                         Location(Line(1) to Offset(17), Line(1) to Offset(23))
@@ -158,28 +139,26 @@ class AbstractionToIrSymbolTest : StringSpec({
             )
         ),
         createSpec(
-            "IrSum expression", """fn = 1 + 2""", arithmeticExpected(::IrSum, ts)
+            "IrSum expression", """fn = 1 + 2""", arithmeticExpected(::IrSum)
         ),
         createSpec(
-            "IrSub expression", """fn = 1 - 2""", arithmeticExpected(::IrSub, ts)
+            "IrSub expression", """fn = 1 - 2""", arithmeticExpected(::IrSub)
         ),
         createSpec(
-            "IrMul expression", """fn = 1 * 2""", arithmeticExpected(::IrMul, ts)
+            "IrMul expression", """fn = 1 * 2""", arithmeticExpected(::IrMul)
         ),
         createSpec(
-            "IrDiv expression", """fn = 1 / 2""", arithmeticExpected(::IrDiv, ts)
+            "IrDiv expression", """fn = 1 / 2""", arithmeticExpected(::IrDiv)
         ),
         createSpec(
             "IrPow expression", """fn = 1 ** 2""", IrPow(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 IrInteger(
                     1,
-                    intType.resolve(ts),
                     Location(Line(1) to Offset(5), Line(1) to Offset(6))
                 ),
                 IrInteger(
                     2,
-                    intType.resolve(ts),
                     Location(Line(1) to Offset(10), Line(1) to Offset(11))
                 ),
                 Location(Line(1) to Offset(7), Line(1) to Offset(9))
@@ -198,12 +177,10 @@ class AbstractionToIrSymbolTest : StringSpec({
                 listOf(
                     IrInteger(
                         1,
-                        intType.resolve(ts),
                         Location(Line(1) to Offset(9), Line(1) to Offset(10))
                     ),
                     IrInteger(
                         2,
-                        intType.resolve(ts),
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
                 ),
@@ -227,7 +204,6 @@ class AbstractionToIrSymbolTest : StringSpec({
                 ),
                 thenExpr = IrInteger(
                     10,
-                    intType.resolve(ts),
                     Location(
                         (Line(value = 2) to Offset(value = 10)),
                         (Line(value = 2) to Offset(value = 12))
@@ -235,7 +211,6 @@ class AbstractionToIrSymbolTest : StringSpec({
                 ),
                 elseExpr = IrInteger(
                     20,
-                    intType.resolve(ts),
                     Location(
                         (Line(value = 3) to Offset(value = 10)),
                         (Line(value = 3) to Offset(value = 12))
@@ -261,10 +236,9 @@ class AbstractionToIrSymbolTest : StringSpec({
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
                     "ten",
                     listOf(),
-                    listOf(unitType, intType).toFunctionType(NoAttributes),
+                    listOf(unitType, longType).toFunctionType(NoAttributes),
                     IrInteger(
                         10,
-                        intType,
                         Location(Line(1) to Offset(6), Line(1) to Offset(8))
                     ),
                     Location(Line(1) to Offset(0), Line(1) to Offset(3))
@@ -292,9 +266,9 @@ class AbstractionToIrSymbolTest : StringSpec({
     }
     "Function with arguments" {
         val internalCharType =
-            preludeModule.typeSystem.alias("KernelChar").valueOrNull!!
+            preludeModule.typeSystem.alias("Char").valueOrNull!!
         """
-            c :: KernelChar -> KernelChar
+            c :: Char -> Char
             c a = a
         """.trimIndent()
             .getFirstAbstraction()

@@ -9,13 +9,11 @@ fun ConstantNode<SemanticInfo>.toIrSymbol() =
     when (value) {
         is Long -> IrInteger(
             value.cast(),
-            inferredType,
             location
         )
 
         is Double -> IrDecimal(
             value.cast(),
-            inferredType,
             location
         )
 
