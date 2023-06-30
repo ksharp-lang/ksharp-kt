@@ -11,7 +11,7 @@ import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.toFunctionType
 
 class ModuleTest : StringSpec({
-    val intType = preludeModule.typeSystem["Int"].valueOrNull!!
+    val longType = preludeModule.typeSystem["Long"].valueOrNull!!
     val unitType = preludeModule.typeSystem["Unit"].valueOrNull!!
     "IrModule " {
         "ten = 10"
@@ -25,10 +25,9 @@ class ModuleTest : StringSpec({
                             setOf(CommonAttribute.Internal, CommonAttribute.Constant),
                             "ten",
                             listOf(),
-                            listOf(unitType, intType).toFunctionType(NoAttributes),
+                            listOf(unitType, longType).toFunctionType(NoAttributes),
                             IrInteger(
                                 10,
-                                intType,
                                 Location(Line(1) to Offset(6), Line(1) to Offset(8))
                             ),
                             Location(Line(1) to Offset(0), Line(1) to Offset(3))

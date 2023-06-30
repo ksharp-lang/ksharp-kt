@@ -1,6 +1,5 @@
 package org.ksharp.module.prelude.types
 
-import org.ksharp.common.Either
 import org.ksharp.module.RecordSize
 import org.ksharp.module.prelude.serializer.TypeSerializers
 import org.ksharp.module.prelude.unification.TypeUnifications
@@ -9,6 +8,8 @@ import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
+import org.ksharp.typesystem.types.ParametricTypeFactory
+import org.ksharp.typesystem.types.ParametricTypeParam
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.TypeUnification
 
@@ -25,7 +26,7 @@ enum class Numeric(val size: kotlin.Int, val isInteger: Boolean, val recordSize:
 
 data class NumericType internal constructor(
     val type: Numeric
-) : Type {
+) : ParametricTypeParam {
 
     override val attributes: Set<Attribute>
         get() = NoAttributes
@@ -47,4 +48,4 @@ data class NumericType internal constructor(
     override fun new(attributes: Set<Attribute>): Type = this
 }
 
-fun numeric(type: Numeric) = Either.Right(NumericType(type))
+fun ParametricTypeFactory.numeric(type: Numeric) = this.add(NumericType(type))
