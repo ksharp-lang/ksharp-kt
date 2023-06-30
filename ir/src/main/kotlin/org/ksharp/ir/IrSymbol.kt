@@ -18,7 +18,7 @@ interface IrTopLevelSymbol : IrSymbol {
 
 data class IrFunction(
     override val attributes: Set<Attribute>,
-    override val name: String,
+    @get:JvmName("getSymbolName") override val name: String,
     val arguments: List<String>,
     val type: Type,
     override val expr: IrExpression,
