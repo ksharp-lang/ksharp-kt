@@ -23,4 +23,6 @@ data class IrFunction(
     val type: Type,
     override val expr: IrExpression,
     override val location: Location
-) : FunctionNode(expr.cast()), IrTopLevelSymbol, IrExpression
+) : FunctionNode(expr.cast()), IrTopLevelSymbol, IrExpression {
+    fun call(vararg arguments: Any): Any = callTarget.call(arguments)
+}
