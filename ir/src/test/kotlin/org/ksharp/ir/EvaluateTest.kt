@@ -23,7 +23,9 @@ private fun createSpec(description: String, code: String, expected: Any, vararg 
 
 class EvaluateTest : StringSpec({
     listOf(
-        createSpec("Integer expression", "fn = 10", 10.toLong())
+        createSpec("Integer expression", "fn = 10", 10.toLong()),
+        createSpec("Decimal expression", "fn = 10.5", 10.5),
+        createSpec("Sum expression", "fn = 1 + 2", 3.toLong())
     ).forEach { (description, code, call) ->
         description {
             code.evaluateFirstFunction(call.arguments)
