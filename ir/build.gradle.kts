@@ -13,6 +13,10 @@ dependencies {
     implementation(project(":semantics"))
     implementation(project(":typesystem"))
     implementation(project(":module"))
+
+    implementation("org.graalvm.truffle:truffle-api:23.0.0")
+    annotationProcessor("org.graalvm.truffle:truffle-dsl-processor:23.0.0")
+
     testImplementation(project(":parser"))
     testImplementation(project(":test"))
     testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
