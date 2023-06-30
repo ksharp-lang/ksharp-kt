@@ -77,7 +77,8 @@ fun TypeSystemBuilder.type(
     item(attributes, name) {
         factory().map {
             if (it is Alias) {
-                TypeAlias(attributes, it.name)
+                if (it.name == name) Concrete(attributes, it.name)
+                else TypeAlias(attributes, it.name)
             } else it
         }
     }

@@ -478,7 +478,7 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         ).inferType(module)
             .map { it.representation }
-            .shouldBeRight("(KernelUnit -> (Map (List char<Char>) (Num numeric<Byte>)))")
+            .shouldBeRight("(KernelUnit -> (Map String (Num numeric<Byte>)))")
     }
     "setOf inference" {
         val module = createInferenceInfo(ts)

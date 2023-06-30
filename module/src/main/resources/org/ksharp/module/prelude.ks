@@ -16,7 +16,7 @@ type BigDecimal = Num NativeBigDecimal
 type List v = List v
 type Set v = Set v
 type Map k v = Map k v
-type String = List Char
+type String = String
 
 @name("prelude::bool" for="ir")
 type Bool = True | False
