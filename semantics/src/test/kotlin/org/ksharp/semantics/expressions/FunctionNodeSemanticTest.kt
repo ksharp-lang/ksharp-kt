@@ -399,17 +399,16 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
 class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     val ts = preludeModule.typeSystem
     val longTypePromise = ts.getTypeSemanticInfo("Long")
-    val intTypePromise = ts.getTypeSemanticInfo("Int")
     val strTypePromise = ts.getTypeSemanticInfo("String")
     val unitTypePromise = ts.getTypeSemanticInfo("Unit")
     context("Semantic node: constant function") {
         listOf<Tuple4<LiteralValueType, TypePromise, String, Any>>(
-            Tuple4(LiteralValueType.Integer, intTypePromise, "10", 10.toLong()),
-            Tuple4(LiteralValueType.BinaryInteger, intTypePromise, "0b0001", 1.toLong()),
-            Tuple4(LiteralValueType.HexInteger, intTypePromise, "0xFF", 255.toLong()),
-            Tuple4(LiteralValueType.Integer, intTypePromise, "500000", 500000.toLong()),
+            Tuple4(LiteralValueType.Integer, longTypePromise, "10", 10.toLong()),
+            Tuple4(LiteralValueType.BinaryInteger, longTypePromise, "0b0001", 1.toLong()),
+            Tuple4(LiteralValueType.HexInteger, longTypePromise, "0xFF", 255.toLong()),
+            Tuple4(LiteralValueType.Integer, longTypePromise, "500000", 500000.toLong()),
             Tuple4(LiteralValueType.Integer, longTypePromise, "5000000000", 5000000000),
-            Tuple4(LiteralValueType.OctalInteger, intTypePromise, "0o01", 1.toLong()),
+            Tuple4(LiteralValueType.OctalInteger, longTypePromise, "0o01", 1.toLong()),
             Tuple4(LiteralValueType.Decimal, ts.getTypeSemanticInfo("Double"), "1.5", 1.5),
             Tuple4(LiteralValueType.String, strTypePromise, "\"Hello\"", "Hello"),
             Tuple4(LiteralValueType.MultiLineString, strTypePromise, "\"\"\"Hello\nWorld\"\"\"", "Hello\nWorld"),
@@ -501,12 +500,12 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     2.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 )
                             ),
@@ -568,12 +567,12 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     2.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 )
                             ),
@@ -643,12 +642,12 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     2.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 )
                             ),
@@ -721,12 +720,12 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     2.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 )
                             ),
@@ -792,7 +791,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     listOf(
                                         ConstantNode(
                                             4.toLong(),
-                                            intTypePromise,
+                                            longTypePromise,
                                             Location.NoProvided
                                         ),
                                         VarNode(
@@ -806,12 +805,12 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 ),
                                 ConstantNode(
                                     10.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     20.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                             ),
@@ -881,7 +880,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     listOf(
                                         ConstantNode(
                                             4.toLong(),
-                                            intTypePromise,
+                                            longTypePromise,
                                             Location.NoProvided
                                         ),
                                         VarNode(
@@ -895,7 +894,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                 ),
                                 ConstantNode(
                                     10.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
@@ -968,7 +967,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ApplicationNode(
@@ -976,12 +975,12 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     listOf(
                                         ConstantNode(
                                             2.toLong(),
-                                            intTypePromise,
+                                            longTypePromise,
                                             Location.NoProvided
                                         ),
                                         ConstantNode(
                                             1.toLong(),
-                                            intTypePromise,
+                                            longTypePromise,
                                             Location.NoProvided
                                         )
                                     ),
@@ -1048,17 +1047,17 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             listOf(
                                 ConstantNode(
                                     1.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     2.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 ),
                                 ConstantNode(
                                     3.toLong(),
-                                    intTypePromise,
+                                    longTypePromise,
                                     Location.NoProvided
                                 )
                             ),
@@ -1211,7 +1210,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     ApplicationName(null, "pair"),
                                     listOf(
                                         ConstantNode("key1", strTypePromise, Location.NoProvided),
-                                        ConstantNode(1.toLong(), intTypePromise, Location.NoProvided)
+                                        ConstantNode(1.toLong(), longTypePromise, Location.NoProvided)
                                     ),
                                     ApplicationSemanticInfo(),
                                     Location.NoProvided
@@ -1220,7 +1219,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     ApplicationName(null, "pair"),
                                     listOf(
                                         ConstantNode("key2", strTypePromise, Location.NoProvided),
-                                        ConstantNode(2.toLong(), intTypePromise, Location.NoProvided)
+                                        ConstantNode(2.toLong(), longTypePromise, Location.NoProvided)
                                     ),
                                     ApplicationSemanticInfo(),
                                     Location.NoProvided
@@ -1319,7 +1318,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         listOf(
                                             ConstantNode(
                                                 10.toLong(),
-                                                intTypePromise,
+                                                longTypePromise,
                                                 Location.NoProvided
                                             )
                                         ),
@@ -1337,7 +1336,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     ),
                                     ConstantNode(
                                         20.toLong(),
-                                        intTypePromise,
+                                        longTypePromise,
                                         Location.NoProvided
                                     ),
                                     EmptySemanticInfo(),
@@ -1523,7 +1522,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "no-function True (Num NativeLong) @0"
+                        "function" to "no-function True (Num numeric<Long>) @0"
                     )
                 )
             )

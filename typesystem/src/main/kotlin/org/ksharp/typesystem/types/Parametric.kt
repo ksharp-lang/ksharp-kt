@@ -68,11 +68,19 @@ data class ParametricType internal constructor(
     override fun new(attributes: Set<Attribute>): Type = ParametricType(attributes, type, params)
 }
 
+interface ParametricTypeParam : Type
 
 class ParametricTypeFactory(
     private val builder: TypeItemBuilder
 ) {
     private var result: ErrorOrValue<ListBuilder<Type>> = Either.Right(listBuilder())
+
+    fun add(type: ParametricTypeParam) {
+        result = result.map { params ->
+            params.add(type)
+            params
+        }
+    }
 
     fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->

@@ -14,8 +14,6 @@ import org.ksharp.typesystem.types.Type
 
 sealed interface InferenceModuleInfo {
 
-    val isKernelModule: Boolean get() = false
-
     val typeSystem: TypeSystem
 
     fun findFunction(name: String, numParams: Int): Sequence<FunctionInfo>?
@@ -33,7 +31,7 @@ class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemant
         }
 }
 
-class ConcreteModuleInfo(private val moduleInfo: ModuleInfo, override val isKernelModule: Boolean) :
+class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
     InferenceModuleInfo {
 
     override val typeSystem: TypeSystem = moduleInfo.typeSystem

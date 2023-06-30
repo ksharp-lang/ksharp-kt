@@ -3,7 +3,6 @@ package org.ksharp.ir
 import org.ksharp.common.Location
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
-import org.ksharp.typesystem.types.Type
 
 sealed interface Literal : IrExpression {
     override val attributes: Set<Attribute>
@@ -13,13 +12,11 @@ sealed interface Literal : IrExpression {
 
 data class IrInteger(
     val value: Long,
-    val type: Type,
     override val location: Location
 ) : Literal
 
 data class IrDecimal(
     val value: Double,
-    val type: Type,
     override val location: Location
 ) : Literal
 

@@ -1,18 +1,3 @@
-type Unit = KernelUnit
-
-type Char = KernelChar
-
-type Num a = Num a
-
-type Byte = Num NativeByte
-type Short = Num NativeShort
-type Int = Num NativeInt
-type Long = Num NativeLong
-type BigInt = Num NativeBigInt
-type Float = Num NativeFloat
-type Double = Num NativeDouble
-type BigDecimal = Num NativeBigDecimal
-
 type List v = List v
 type Set v = Set v
 type Map k v = Map k v

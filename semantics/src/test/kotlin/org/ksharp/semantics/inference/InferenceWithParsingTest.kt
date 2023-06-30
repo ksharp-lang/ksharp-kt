@@ -42,7 +42,7 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "sum :: ((Num a) -> (Num a) -> (Num a))",
-                "fn :: (KernelUnit -> (Num numeric<Int>))"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference module 2" {
@@ -53,7 +53,7 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "sum :: ((Num a) -> (Num a) -> (Num a))",
-                "fn :: (KernelUnit -> (Num numeric<Int>))"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference module - function not found" {
@@ -66,7 +66,7 @@ class InferenceWithParsingTest : StringSpec({
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "sum (Num NativeInt)"
+                        "function" to "sum (Num numeric<Long>)"
                     )
                 )
             )
@@ -80,7 +80,7 @@ class InferenceWithParsingTest : StringSpec({
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "(+) (Num NativeInt)"
+                        "function" to "(+) (Num numeric<Long>)"
                     )
                 )
             )
