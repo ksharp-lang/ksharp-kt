@@ -1,6 +1,8 @@
 package org.ksharp.ir
 
 import org.ksharp.common.Location
+import org.ksharp.common.cast
+import org.ksharp.ir.truffle.FunctionNode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.Type
 
@@ -21,4 +23,4 @@ data class IrFunction(
     val type: Type,
     override val expr: IrExpression,
     override val location: Location
-) : IrTopLevelSymbol, IrExpression
+) : FunctionNode(expr.cast()), IrTopLevelSymbol, IrExpression

@@ -1,6 +1,8 @@
 package org.ksharp.ir
 
 import org.ksharp.common.Location
+import org.ksharp.common.cast
+import org.ksharp.ir.truffle.SumNode
 import org.ksharp.typesystem.attributes.Attribute
 
 data class IrSum(
@@ -8,7 +10,7 @@ data class IrSum(
     override val left: IrExpression,
     override val right: IrExpression,
     override val location: Location
-) : IrBinaryOperation
+) : SumNode(left.cast(), right.cast()), IrBinaryOperation
 
 
 data class IrSub(
