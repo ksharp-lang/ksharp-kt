@@ -193,6 +193,17 @@ class AbstractionToIrSymbolTest : StringSpec({
             )
         ),
         createSpec(
+            "Cast expression",
+            "fn = byte(10)".trimIndent(), IrNumCast(
+                IrInteger(
+                    10,
+                    Location(Line(1) to Offset(10), Line(1) to Offset(12))
+                ),
+                CastType.Byte,
+                Location(Line(1) to Offset(5), Line(1) to Offset(9))
+            )
+        ),
+        createSpec(
             "If expression",
             """
                     fn = if True

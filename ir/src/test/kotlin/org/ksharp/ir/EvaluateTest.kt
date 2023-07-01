@@ -4,6 +4,8 @@ import com.oracle.truffle.api.strings.TruffleString
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.cast
+import java.math.BigDecimal
+import java.math.BigInteger
 
 private data class Call(
     val arguments: List<Any>,
@@ -64,6 +66,14 @@ class EvaluateTest : StringSpec({
             sum a b = a + b
         """.trimIndent(), 30.toLong()
         ),
+        createSpec("Sum byte expression", "fn = byte(1) + byte(2)", 3.toByte()),
+        createSpec("Sum short expression", "fn = short(1) + short(2)", 3.toShort()),
+        createSpec("Sum int expression", "fn = int(1) + int(2)", 3),
+        createSpec("Sum long expression", "fn = long(1) + long(2)", 3.toLong()),
+        createSpec("Sum bigint expression", "fn = bigint(1) + bigint(2)", BigInteger.valueOf(3)),
+        createSpec("Sum float expression", "fn = float(1.0) + float(2.0)", (3.0).toFloat()),
+        createSpec("Sum double expression", "fn = double(1.0) + double(2.0)", (3.0).toDouble()),
+        createSpec("Sum BigDecimal expression", "fn = bigdec(1.0) + bigdec(2.0)", BigDecimal.valueOf(3.0)),
     ).forEach { (description, code, call) ->
         description {
             code.evaluateFirstFunction(call.arguments)

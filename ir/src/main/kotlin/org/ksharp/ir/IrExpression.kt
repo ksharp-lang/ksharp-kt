@@ -8,7 +8,9 @@ import org.ksharp.ir.truffle.ArgAccessNode
 import org.ksharp.ir.truffle.IfNode
 import org.ksharp.ir.truffle.KSharpNode
 import org.ksharp.ir.truffle.call.CallNode
+import org.ksharp.ir.truffle.cast.NumCastNode
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.Type
 
 sealed interface IrExpression : IrSymbol
@@ -16,6 +18,26 @@ sealed interface IrExpression : IrSymbol
 sealed interface IrBinaryOperation : IrExpression {
     val left: IrExpression
     val right: IrExpression
+}
+
+enum class CastType {
+    Byte,
+    Short,
+    Int,
+    Long,
+    Float,
+    Double,
+    BigInt,
+    BigDecimal,
+}
+
+data class IrNumCast(
+    val expr: IrExpression,
+    val type: CastType,
+    override val location: Location
+) : NumCastNode(type, expr.cast()), IrExpression {
+    override val attributes: Set<Attribute>
+        get() = NoAttributes
 }
 
 data class IrPair(

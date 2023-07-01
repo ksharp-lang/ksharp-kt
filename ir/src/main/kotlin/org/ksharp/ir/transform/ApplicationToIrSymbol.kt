@@ -26,6 +26,25 @@ val IrIfFactory: CustomApplicationIrNode = { fLookup, variableIndex ->
     )
 }
 
+val IrNumCastFactory: CustomApplicationIrNode = { fLookup, variableIndex ->
+    val (_, symbols) = arguments.toIrSymbols(fLookup, variableIndex)
+
+    IrNumCast(
+        symbols[0],
+        when (this.functionName.name) {
+            "byte" -> CastType.Byte
+            "short" -> CastType.Short
+            "int" -> CastType.Int
+            "long" -> CastType.Long
+            "float" -> CastType.Float
+            "double" -> CastType.Double
+            "bigint" -> CastType.BigInt
+            else -> CastType.BigDecimal
+        },
+        location
+    )
+}
+
 private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::listOf" to IrListFactory,
     "prelude::setOf" to IrSetFactory,
@@ -38,6 +57,7 @@ private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::div" to binaryOperationFactory(::IrDiv),
     "prelude::pow" to binaryOperationFactory(::IrPow),
     "prelude::mod" to binaryOperationFactory(::IrMod),
+    "prelude::num-cast" to IrNumCastFactory,
     "prelude::if" to IrIfFactory
 )
 
