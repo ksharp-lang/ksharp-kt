@@ -32,7 +32,8 @@ class PreludeModuleTest : StringSpec({
                     "(-) :: (Num a) -> (Num a) -> (Num a)",
                     "(*) :: (Num a) -> (Num a) -> (Num a)",
                     "(/) :: (Num a) -> (Num a) -> (Num a)",
-                    "(**) :: (Num a) -> (Num a) -> (Num a)"
+                    "(**) :: (Num a) -> (Num a) -> (Num a)",
+                    "(%) :: (Num a) -> (Num a) -> (Num a)"
                 )
             )
     }
