@@ -1,9 +1,8 @@
 package org.ksharp.ir.truffle;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.RootNode;
 
-public class FunctionNode extends RootNode {
+public class FunctionNode extends KSharpRootNode {
 
     @SuppressWarnings("FieldMayBeFinal")
     @Child

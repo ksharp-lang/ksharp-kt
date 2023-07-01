@@ -1,6 +1,7 @@
-package org.ksharp.ir.truffle;
+package org.ksharp.ir.truffle.literals;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
+import org.ksharp.ir.truffle.KSharpNode;
 
 public class DecimalNode extends KSharpNode {
 

@@ -38,6 +38,7 @@ private fun arithmeticExpected(factory: BinaryOperationFactory) =
     )
 
 class AbstractionToIrSymbolTest : StringSpec({
+    val functionLookup = FunctionLookup { _, _, _ -> null }
     val ts = preludeModule.typeSystem
     val longType = ts["Long"].valueOrNull!!
     val unitType = ts["Unit"].valueOrNull!!
@@ -151,6 +152,9 @@ class AbstractionToIrSymbolTest : StringSpec({
             "IrDiv expression", """fn = 1 / 2""", arithmeticExpected(::IrDiv)
         ),
         createSpec(
+            "IrMod expression", """fn = 1 % 2""", arithmeticExpected(::IrMod)
+        ),
+        createSpec(
             "IrPow expression", """fn = 1 ** 2""", IrPow(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 IrInteger(
@@ -172,7 +176,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                     sum a b = a + b
                 """.trimIndent(), IrCall(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-                -1,
+                null,
                 "sum",
                 listOf(
                     IrInteger(
@@ -184,6 +188,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
                 ),
+                listOf(longType, longType, longType).toFunctionType(setOf(CommonAttribute.Internal)),
                 Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )
         ),
@@ -222,7 +227,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
-                .toIrSymbol(emptyVariableIndex)
+                .toIrSymbol(functionLookup, emptyVariableIndex)
                 .expr
                 .shouldBe(expected)
         }
@@ -230,7 +235,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
-            .toIrSymbol(emptyVariableIndex)
+            .toIrSymbol({ _, _, _ -> null }, emptyVariableIndex)
             .shouldBe(
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
@@ -251,7 +256,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             ten = 10
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(emptyVariableIndex)
+            .toIrSymbol(functionLookup, emptyVariableIndex)
             .attributes
             .apply {
                 shouldBe(
@@ -272,7 +277,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             c a = a
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(emptyVariableIndex)
+            .toIrSymbol(functionLookup, emptyVariableIndex)
             .apply {
                 shouldBe(
                     IrFunction(
@@ -280,7 +285,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                         "c",
                         listOf("a"),
                         listOf(internalCharType, internalCharType).toFunctionType(NoAttributes),
-                        IrVar(
+                        IrArg(
                             setOf(CommonAttribute.Pure),
                             0,
                             Location(Line(2) to Offset(6), Line(2) to Offset(7))

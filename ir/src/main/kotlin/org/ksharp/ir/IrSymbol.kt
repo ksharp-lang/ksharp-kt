@@ -4,7 +4,7 @@ import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.ir.truffle.FunctionNode
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.FunctionType
 
 interface IrSymbol : IrNode {
     val location: Location
@@ -14,15 +14,16 @@ interface IrSymbol : IrNode {
 interface IrTopLevelSymbol : IrSymbol {
     val name: String
     val expr: IrExpression
+    val type: FunctionType
 }
 
 data class IrFunction(
     override val attributes: Set<Attribute>,
     @get:JvmName("getSymbolName") override val name: String,
     val arguments: List<String>,
-    val type: Type,
+    override val type: FunctionType,
     override val expr: IrExpression,
     override val location: Location
 ) : FunctionNode(expr.cast()), IrTopLevelSymbol, IrExpression {
-    fun call(vararg arguments: Any): Any = callTarget.call(arguments)
+    fun call(vararg arguments: Any): Any = callTarget.call(*arguments)
 }

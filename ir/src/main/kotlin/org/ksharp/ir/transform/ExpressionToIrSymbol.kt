@@ -5,7 +5,7 @@ import org.ksharp.ir.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.nodes.SemanticInfo
 
-fun ConstantNode<SemanticInfo>.toIrSymbol() =
+fun ConstantNode<SemanticInfo>.toIrSymbol(): IrExpression =
     when (value) {
         is Long -> IrInteger(
             value.cast(),
@@ -32,24 +32,32 @@ fun ConstantNode<SemanticInfo>.toIrSymbol() =
 
 fun VarNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex) =
     variableIndex[name]!!.let {
-        IrVar(
-            it.attributes,
-            it.index,
-            location
-        )
+        when (it.kind) {
+            VarKind.Arg -> IrArg(
+                it.attributes,
+                it.index,
+                location
+            )
+
+            VarKind.Var -> IrVar(
+                it.attributes,
+                it.index,
+                location
+            )
+        }
     }
 
-fun SemanticNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex): IrExpression =
+fun SemanticNode<SemanticInfo>.toIrSymbol(lookup: FunctionLookup, variableIndex: VariableIndex): IrExpression =
     when (this) {
         is ConstantNode -> toIrSymbol()
-        is ApplicationNode -> toIrSymbol(variableIndex)
-        is AbstractionNode -> toIrSymbol(variableIndex)
+        is ApplicationNode -> toIrSymbol(lookup, variableIndex)
+        is AbstractionNode -> toIrSymbol(lookup, variableIndex)
         is LetBindingNode -> TODO()
         is LetNode -> TODO()
         is VarNode -> toIrSymbol(variableIndex)
     }
 
-val IrBoolFactory: CustomApplicationIrNode = {
+val IrBoolFactory: CustomApplicationIrNode = { _, _ ->
     IrBool(
         functionName.name == "True",
         location

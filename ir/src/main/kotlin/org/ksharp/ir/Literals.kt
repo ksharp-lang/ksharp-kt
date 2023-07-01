@@ -1,8 +1,7 @@
 package org.ksharp.ir
 
 import org.ksharp.common.Location
-import org.ksharp.ir.truffle.DecimalNode
-import org.ksharp.ir.truffle.IntegerNode
+import org.ksharp.ir.truffle.literals.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 
@@ -25,14 +24,14 @@ data class IrDecimal(
 data class IrCharacter(
     val value: Char,
     override val location: Location
-) : Literal
+) : CharacterNode(value), Literal
 
 data class IrString(
     val value: String,
     override val location: Location
-) : Literal
+) : StringNode(value), Literal
 
 data class IrBool(
     val value: Boolean,
     override val location: Location
-) : Literal
+) : BooleanNode(value), Literal

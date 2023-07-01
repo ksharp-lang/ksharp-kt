@@ -2,8 +2,14 @@ package org.ksharp.ir
 
 import org.ksharp.typesystem.attributes.Attribute
 
+enum class VarKind {
+    Var,
+    Arg
+}
+
 data class VarInfo(
     val index: Int,
+    val kind: VarKind,
     val attributes: Set<Attribute>
 )
 

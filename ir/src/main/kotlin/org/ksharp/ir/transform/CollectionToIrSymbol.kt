@@ -5,8 +5,8 @@ import org.ksharp.ir.IrList
 import org.ksharp.ir.IrMap
 import org.ksharp.ir.IrSet
 
-val IrListFactory: CustomApplicationIrNode = {
-    val (attributes, symbols) = arguments.toIrSymbols(it)
+val IrListFactory: CustomApplicationIrNode = { fLookup, variableIndex ->
+    val (attributes, symbols) = arguments.toIrSymbols(fLookup, variableIndex)
     IrList(
         attributes,
         symbols,
@@ -14,8 +14,8 @@ val IrListFactory: CustomApplicationIrNode = {
     )
 }
 
-val IrSetFactory: CustomApplicationIrNode = {
-    val (attributes, symbols) = arguments.toIrSymbols(it)
+val IrSetFactory: CustomApplicationIrNode = { fLookup, variableIndex ->
+    val (attributes, symbols) = arguments.toIrSymbols(fLookup, variableIndex)
     IrSet(
         attributes,
         symbols,
@@ -23,8 +23,8 @@ val IrSetFactory: CustomApplicationIrNode = {
     )
 }
 
-val IrMapFactory: CustomApplicationIrNode = {
-    val (attributes, symbols) = arguments.toIrSymbols(it)
+val IrMapFactory: CustomApplicationIrNode = { fLookup, variableIndex ->
+    val (attributes, symbols) = arguments.toIrSymbols(fLookup, variableIndex)
     IrMap(
         attributes,
         symbols.cast(),

@@ -63,3 +63,7 @@ native pub (/) a b
 @name("prelude::pow" for="ir")
 (**) a :: (Num a) -> (Num a) -> (Num a)
 native pub (**) a b
+
+@name("prelude::mod" for="ir")
+(%) a :: (Num a) -> (Num a) -> (Num a)
+native pub (%) a b

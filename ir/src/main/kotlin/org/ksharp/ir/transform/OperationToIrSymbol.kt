@@ -6,8 +6,8 @@ import org.ksharp.typesystem.attributes.Attribute
 
 typealias BinaryOperationFactory = (attributes: Set<Attribute>, left: IrExpression, right: IrExpression, location: Location) -> IrExpression
 
-fun binaryOperationFactory(factory: BinaryOperationFactory): CustomApplicationIrNode = {
-    val (attributes, symbols) = arguments.toIrSymbols(it)
+fun binaryOperationFactory(factory: BinaryOperationFactory): CustomApplicationIrNode = { fLookup, variableIndex ->
+    val (attributes, symbols) = arguments.toIrSymbols(fLookup, variableIndex)
     factory(
         attributes,
         symbols.first(),
