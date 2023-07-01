@@ -31,12 +31,6 @@ data class IrArg(
     override val location: Location
 ) : ArgAccessNode(index), IrExpression
 
-data class IrVar(
-    override val attributes: Set<Attribute>,
-    val index: Int,
-    override val location: Location
-) : IrExpression
-
 data class IrIf(
     override val attributes: Set<Attribute>,
     val condition: IrExpression,

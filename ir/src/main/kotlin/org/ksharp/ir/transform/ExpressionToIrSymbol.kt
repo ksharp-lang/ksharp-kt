@@ -39,11 +39,7 @@ fun VarNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex) =
                 location
             )
 
-            VarKind.Var -> IrVar(
-                it.attributes,
-                it.index,
-                location
-            )
+            VarKind.Var -> TODO()
         }
     }
 
