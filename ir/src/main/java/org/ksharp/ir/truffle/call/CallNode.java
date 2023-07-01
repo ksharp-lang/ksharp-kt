@@ -16,7 +16,7 @@ public abstract class CallNode extends KSharpNode {
     @Children
     private final KSharpNode[] arguments;
 
-    CallNode(KSharpNode[] arguments) {
+    public CallNode(KSharpNode[] arguments) {
         this.arguments = arguments;
         this.dispatchNode = FunctionDispatchNodeGen.create();
     }
