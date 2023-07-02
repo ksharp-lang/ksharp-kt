@@ -82,7 +82,7 @@ class EvaluateTest : StringSpec({
         createSpec("Sub long expression", "fn = long(1) - long(2)", (-1).toLong()),
         createSpec("Sub bigint expression", "fn = bigint(1) - bigint(2)", BigInteger.valueOf(-1)),
         createSpec("Sub float expression", "fn = float(1.0) - float(2.0)", (-1.0).toFloat()),
-        createSpec("Sub double expression", "fn = double(1.0) - double(2.0)", (-1.0).toDouble()),
+        createSpec("Sub double expression", "fn = double(1.0) - double(2.0)", -1.0),
         createSpec("Sub BigDecimal expression", "fn = bigdec(1.0) - bigdec(2.0)", BigDecimal.valueOf(-1.0)),
 
         createSpec("Mul byte expression", "fn = byte(1) * byte(2)", 2.toByte()),

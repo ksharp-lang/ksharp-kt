@@ -17,7 +17,7 @@ public class MapNode extends KSharpNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        var result = new HashMap<Object, Object>();
+        var result = new HashMap<>();
         for (var entry : nodes) {
             result.put(((KSharpNode) entry.getFirst()).execute(frame), ((KSharpNode) entry.getSecond()).execute(frame));
         }

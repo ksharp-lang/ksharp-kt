@@ -50,5 +50,5 @@ fun SemanticModuleInfo.toIrModule(): Pair<IrModule, FunctionLookup> {
         abstractions.map { it.toIrSymbol(lookup, emptyVariableIndex) }
     )
     lookup.functions = module.symbols.cast()
-    return module to lookup;
+    return module to lookup
 }
