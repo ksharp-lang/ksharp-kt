@@ -66,6 +66,7 @@ class EvaluateTest : StringSpec({
             sum a b = a + b
         """.trimIndent(), 30.toLong()
         ),
+
         createSpec("Sum byte expression", "fn = byte(1) + byte(2)", 3.toByte()),
         createSpec("Sum short expression", "fn = short(1) + short(2)", 3.toShort()),
         createSpec("Sum int expression", "fn = int(1) + int(2)", 3),
@@ -74,6 +75,28 @@ class EvaluateTest : StringSpec({
         createSpec("Sum float expression", "fn = float(1.0) + float(2.0)", (3.0).toFloat()),
         createSpec("Sum double expression", "fn = double(1.0) + double(2.0)", (3.0).toDouble()),
         createSpec("Sum BigDecimal expression", "fn = bigdec(1.0) + bigdec(2.0)", BigDecimal.valueOf(3.0)),
+
+        createSpec("Sub byte expression", "fn = byte(1) - byte(2)", (-1).toByte()),
+        createSpec("Sub short expression", "fn = short(1) - short(2)", (-1).toShort()),
+        createSpec("Sub int expression", "fn = int(1) - int(2)", -1),
+        createSpec("Sub long expression", "fn = long(1) - long(2)", (-1).toLong()),
+        createSpec("Sub bigint expression", "fn = bigint(1) - bigint(2)", BigInteger.valueOf(-1)),
+        createSpec("Sub float expression", "fn = float(1.0) - float(2.0)", (-1.0).toFloat()),
+        createSpec("Sub double expression", "fn = double(1.0) - double(2.0)", (-1.0).toDouble()),
+        createSpec("Sub BigDecimal expression", "fn = bigdec(1.0) - bigdec(2.0)", BigDecimal.valueOf(-1.0)),
+
+        createSpec("Mul byte expression", "fn = byte(1) * byte(2)", 2.toByte()),
+        createSpec("Mul short expression", "fn = short(1) * short(2)", 2.toShort()),
+        createSpec("Mul int expression", "fn = int(1) * int(2)", 2),
+        createSpec("Mul long expression", "fn = long(1) * long(2)", 2.toLong()),
+        createSpec("Mul bigint expression", "fn = bigint(1) * bigint(2)", BigInteger.valueOf(2)),
+        createSpec("Mul float expression", "fn = float(1.0) * float(2.0)", (2.0).toFloat()),
+        createSpec("Mul double expression", "fn = double(1.0) * double(2.0)", (2.0).toDouble()),
+        createSpec(
+            "Mul BigDecimal expression",
+            "fn = bigdec(1.0) * bigdec(2.0)",
+            BigDecimal.valueOf(1.0).multiply(BigDecimal.valueOf(2.0))
+        ),
     ).forEach { (description, code, call) ->
         description {
             code.evaluateFirstFunction(call.arguments)
