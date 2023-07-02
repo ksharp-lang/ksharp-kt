@@ -17,6 +17,7 @@ class ModuleTest : StringSpec({
         "ten = 10"
             .toSemanticModuleInfo()
             .toIrModule()
+            .first
             .shouldBe(
                 IrModule(
                     listOf(),

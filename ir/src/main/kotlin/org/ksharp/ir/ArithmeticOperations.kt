@@ -1,6 +1,8 @@
 package org.ksharp.ir
 
 import org.ksharp.common.Location
+import org.ksharp.common.cast
+import org.ksharp.ir.truffle.arithmetic.*
 import org.ksharp.typesystem.attributes.Attribute
 
 data class IrSum(
@@ -8,7 +10,7 @@ data class IrSum(
     override val left: IrExpression,
     override val right: IrExpression,
     override val location: Location
-) : IrBinaryOperation
+) : SumNode(left.cast(), right.cast()), IrBinaryOperation
 
 
 data class IrSub(
@@ -16,14 +18,14 @@ data class IrSub(
     override val left: IrExpression,
     override val right: IrExpression,
     override val location: Location
-) : IrBinaryOperation
+) : SubNode(left.cast(), right.cast()), IrBinaryOperation
 
 data class IrMul(
     override val attributes: Set<Attribute>,
     override val left: IrExpression,
     override val right: IrExpression,
     override val location: Location
-) : IrBinaryOperation
+) : MulNode(left.cast(), right.cast()), IrBinaryOperation
 
 
 data class IrDiv(
@@ -31,11 +33,18 @@ data class IrDiv(
     override val left: IrExpression,
     override val right: IrExpression,
     override val location: Location
-) : IrBinaryOperation
+) : DivNode(left.cast(), right.cast()), IrBinaryOperation
 
 data class IrPow(
     override val attributes: Set<Attribute>,
     override val left: IrExpression,
     override val right: IrExpression,
     override val location: Location
-) : IrBinaryOperation
+) : PowNode(left.cast(), right.cast()), IrBinaryOperation
+
+data class IrMod(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : ModNode(left.cast(), right.cast()), IrBinaryOperation

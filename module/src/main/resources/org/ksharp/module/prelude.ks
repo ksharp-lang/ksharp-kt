@@ -8,6 +8,38 @@ type Bool = True | False
 
 type Pair a b = Pair a b
 
+@name("prelude::num-cast" for="ir")
+byte a :: (Num a) -> Byte
+native pub byte a
+
+@name("prelude::num-cast" for="ir")
+short a :: (Num a) -> Short
+native pub short a
+
+@name("prelude::num-cast" for="ir")
+int a :: (Num a) -> Int
+native pub int a
+
+@name("prelude::num-cast" for="ir")
+long a :: (Num a) -> Long
+native pub long a
+
+@name("prelude::num-cast" for="ir")
+bigint a :: (Num a) -> BigInt
+native pub bigint a
+
+@name("prelude::num-cast" for="ir")
+float a :: (Num a) -> Float
+native pub float a
+
+@name("prelude::num-cast" for="ir")
+double a :: (Num a) -> Double
+native pub double a
+
+@name("prelude::num-cast" for="ir")
+bigdec a :: (Num a) -> BigDecimal
+native pub bigdec a
+
 @name("prelude::if" for="ir")
 if a :: Bool -> a -> a -> a
 native pub if a b c
@@ -63,3 +95,7 @@ native pub (/) a b
 @name("prelude::pow" for="ir")
 (**) a :: (Num a) -> (Num a) -> (Num a)
 native pub (**) a b
+
+@name("prelude::mod" for="ir")
+(%) a :: (Num a) -> (Num a) -> (Num a)
+native pub (%) a b

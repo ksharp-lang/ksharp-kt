@@ -32,7 +32,16 @@ class PreludeModuleTest : StringSpec({
                     "(-) :: (Num a) -> (Num a) -> (Num a)",
                     "(*) :: (Num a) -> (Num a) -> (Num a)",
                     "(/) :: (Num a) -> (Num a) -> (Num a)",
-                    "(**) :: (Num a) -> (Num a) -> (Num a)"
+                    "(**) :: (Num a) -> (Num a) -> (Num a)",
+                    "(%) :: (Num a) -> (Num a) -> (Num a)",
+                    "byte :: (Num a) -> Byte",
+                    "short :: (Num a) -> Short",
+                    "int :: (Num a) -> Int",
+                    "long :: (Num a) -> Long",
+                    "bigint :: (Num a) -> BigInt",
+                    "float :: (Num a) -> Float",
+                    "double :: (Num a) -> Double",
+                    "bigdec :: (Num a) -> BigDecimal"
                 )
             )
     }

@@ -1,6 +1,7 @@
 package org.ksharp.ir
 
 import org.ksharp.common.Location
+import org.ksharp.ir.truffle.literals.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 
@@ -13,24 +14,24 @@ sealed interface Literal : IrExpression {
 data class IrInteger(
     val value: Long,
     override val location: Location
-) : Literal
+) : IntegerNode(value), Literal
 
 data class IrDecimal(
     val value: Double,
     override val location: Location
-) : Literal
+) : DecimalNode(value), Literal
 
 data class IrCharacter(
     val value: Char,
     override val location: Location
-) : Literal
+) : CharacterNode(value), Literal
 
 data class IrString(
     val value: String,
     override val location: Location
-) : Literal
+) : StringNode(value), Literal
 
 data class IrBool(
     val value: Boolean,
     override val location: Location
-) : Literal
+) : BooleanNode(value), Literal
