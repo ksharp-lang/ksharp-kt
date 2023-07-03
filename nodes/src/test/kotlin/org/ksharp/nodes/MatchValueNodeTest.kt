@@ -99,4 +99,49 @@ class MatchValueNodeTest : StringSpec({
             )
         }
     }
+    "Test Node Interface over MatchExpressionBranchNode" {
+        MatchExpressionBranchNode(
+            listOf(
+                MatchValueNode(
+                    MatchValueType.Expression,
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided
+                )
+            ),
+            LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+            Location.NoProvided
+        ).node.apply {
+            cast<MatchExpressionBranchNode>().apply {
+                matchValue.shouldBe(
+                    listOf(
+                        MatchValueNode(
+                            MatchValueType.Expression,
+                            UnitNode(Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ),
+                )
+                expression.shouldBe(LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided))
+                location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(
+                        this, Location.NoProvided, MatchValueNode(
+                            MatchValueType.Expression,
+                            UnitNode(Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ),
+                    Node(
+                        this,
+                        Location.NoProvided,
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
+                    )
+                )
+            )
+        }
+    }
 })

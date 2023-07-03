@@ -42,6 +42,34 @@ internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
             }
     }
 
+internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserResult =
+    this.collect()
+        .thenLoopIndexed { lexer, index ->
+            if (index != 0) {
+                lexer.consume({ it.text == "&&" || it.text == "||" }, false)
+                    .consume { it.consumeMatchValue() }
+                    .build {
+                        val token = it.first().cast<Token>()
+                        MatchValueNode(
+                            if (token.type == KSharpTokenType.Operator3) MatchValueType.And else MatchValueType.Or,
+                            it.last().cast(),
+                            token.location
+                        )
+                    }
+            } else lexer.consumeMatchValue()
+        }
+        .then(KSharpTokenType.Then, false)
+        .consume { it.consumeExpression() }
+        .discardNewLines()
+        .build {
+            MatchExpressionBranchNode(
+                it.dropLast(2).cast(),
+                it.last().cast(),
+                it[it.size - 2].cast<Token>().location
+            )
+        }
+
+
 internal fun KSharpLexerIterator.consumeMatchAssignment() =
     consumeMatchValue()
         .resume()

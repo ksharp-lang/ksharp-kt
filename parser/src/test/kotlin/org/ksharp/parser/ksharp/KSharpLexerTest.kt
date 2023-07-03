@@ -511,35 +511,12 @@ class KSharpLexerTest : StringSpec({
                 ),
             )
     }
-    "if then else mapIfThenKeyword disabled" {
+    "if then else" {
         "if then else"
             .kSharpLexer()
             .enableLookAhead()
             .collapseKSharpTokens()
             .asSequence().toList()
-            .shouldContainAll(
-                LexerToken(
-                    type = KSharpTokenType.If,
-                    token = TextToken(text = "if", startOffset = 0, endOffset = 2)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.LowerCaseWord,
-                    token = TextToken(text = "then", startOffset = 3, endOffset = 7)
-                ),
-                LexerToken(
-                    type = KSharpTokenType.LowerCaseWord,
-                    token = TextToken(text = "else", startOffset = 8, endOffset = 12)
-                )
-            )
-    }
-    "if then else mapIfThenKeyword enabled" {
-        "if then else"
-            .kSharpLexer()
-            .enableLookAhead()
-            .collapseKSharpTokens()
-            .enableMapElseThenKeywords {
-                it.asSequence().toList()
-            }
             .shouldContainAll(
                 LexerToken(
                     type = KSharpTokenType.If,
@@ -555,26 +532,24 @@ class KSharpLexerTest : StringSpec({
                 )
             )
     }
-    "let then  mapLetThenKeyword enabled" {
-        "let then"
+    "match with" {
+        "match with"
             .kSharpLexer()
             .enableLookAhead()
             .collapseKSharpTokens()
-            .enableMapThenKeywords {
-                it.asSequence().toList()
-            }
+            .asSequence().toList()
             .shouldContainAll(
                 LexerToken(
-                    type = KSharpTokenType.Let,
-                    token = TextToken(text = "let", startOffset = 0, endOffset = 3)
+                    type = KSharpTokenType.Match,
+                    token = TextToken(text = "match", startOffset = 0, endOffset = 5)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.Then,
-                    token = TextToken(text = "then", startOffset = 4, endOffset = 8)
+                    type = KSharpTokenType.With,
+                    token = TextToken(text = "with", startOffset = 6, endOffset = 10)
                 )
             )
     }
-    "let then  mapLetThenKeyword disabled" {
+    "let then" {
         "let then"
             .kSharpLexer()
             .enableLookAhead()
@@ -586,7 +561,7 @@ class KSharpLexerTest : StringSpec({
                     token = TextToken(text = "let", startOffset = 0, endOffset = 3)
                 ),
                 LexerToken(
-                    type = KSharpTokenType.LowerCaseWord,
+                    type = KSharpTokenType.Then,
                     token = TextToken(text = "then", startOffset = 4, endOffset = 8)
                 )
             )
@@ -1052,12 +1027,12 @@ class KSharpLexerExpressionBlocks : StringSpec({
                         "If:if",
                         "LowerCaseWord:true",
                         "BeginBlock",
-                        "LowerCaseWord:then",
+                        "Then:then",
                         "Integer:10",
                         "Operator10:+",
                         "Integer:20",
                         "NewLine",
-                        "LowerCaseWord:else",
+                        "Else:else",
                         "Integer:30",
                         "Operator10:+",
                         "Integer:40",
