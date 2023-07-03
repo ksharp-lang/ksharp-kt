@@ -1055,4 +1055,54 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "match expression" {
+        """match 1 with
+           |   1 then "one"
+           |   2 || 3 then "other"
+        """.trimMargin()
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                MatchExpressionNode(
+                    listOf(
+                        MatchExpressionBranchNode(
+                            listOf(
+                                MatchValueNode(
+                                    MatchValueType.Expression,
+                                    LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                                    Location.NoProvided
+                                )
+                            ),
+                            LiteralValueNode("\"one\"", LiteralValueType.String, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        MatchExpressionBranchNode(
+                            listOf(
+                                MatchValueNode(
+                                    MatchValueType.Expression,
+                                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                    Location.NoProvided
+                                ),
+                                MatchValueNode(
+                                    MatchValueType.Or,
+                                    MatchValueNode(
+                                        MatchValueType.Expression,
+                                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
+                                        Location.NoProvided
+                                    ),
+                                    Location.NoProvided
+                                )
+                            ),
+                            LiteralValueNode("\"other\"", LiteralValueType.String, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                    ),
+                    LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                    Location.NoProvided,
+                    MatchExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
+                )
+            )
+    }
 })

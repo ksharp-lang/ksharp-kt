@@ -5,6 +5,8 @@ import org.ksharp.common.Location
 enum class MatchValueType {
     Expression,
     List,
+    Or,
+    And,
 }
 
 data class MatchListValueNodeLocations(
@@ -13,6 +15,10 @@ data class MatchListValueNodeLocations(
 
 data class MatchAssignNodeLocations(
     val assignOperatorLocation: Location
+) : NodeLocations
+
+data class MatchExpressionBranchNodeLocations(
+    val thenLocation: Location
 ) : NodeLocations
 
 data class MatchValueNode(
@@ -48,4 +54,16 @@ data class MatchAssignNode(
 ) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = sequenceOf(matchValue, expression)
+}
+
+data class MatchExpressionBranchNode(
+    val matchValue: List<MatchValueNode>,
+    val expression: NodeData,
+    override val location: Location
+) : NodeData(), ExpressionParserNode {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(matchValue.asSequence(), sequenceOf(expression)).flatten()
+
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
 }

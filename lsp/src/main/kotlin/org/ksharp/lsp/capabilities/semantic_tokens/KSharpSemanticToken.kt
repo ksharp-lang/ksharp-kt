@@ -77,9 +77,8 @@ fun TokenType.semanticToken(text: String): String? =
 
         KSharpTokenType.Alt -> SemanticTokenTypes.Operator
         KSharpTokenType.If -> SemanticTokenTypes.Keyword
-        KSharpTokenType.Then -> SemanticTokenTypes.Keyword
-        KSharpTokenType.Else -> SemanticTokenTypes.Keyword
         KSharpTokenType.Let -> SemanticTokenTypes.Keyword
+        KSharpTokenType.Match -> SemanticTokenTypes.Keyword
         else -> null
     }
 

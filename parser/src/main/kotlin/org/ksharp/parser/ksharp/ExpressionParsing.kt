@@ -43,62 +43,77 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
 
 fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.If, false) { ifLexer ->
-        ifLexer.enableIfKeywords {
-            it.consume { l -> l.consumeExpression() }
-                .thenOptional(BaseTokenType.NewLine, true)
-                .then(KSharpTokenType.Then, false)
-                .consume { l -> l.consumeExpression() }
-                .thenOptional(BaseTokenType.NewLine, true)
-                .thenIf(KSharpTokenType.Else, false) { el ->
-                    el.consume { l -> l.consumeExpression() }
-                }
-        }.build {
-            val location = it.first().cast<Token>().location
-            val locations = IfNodeLocations(
-                it[0].cast<Token>().location,
-                it[2].cast<Token>().location,
-                if (it.size == 4) Location.NoProvided else it[4].cast<Token>().location
-            )
-            if (it.size == 4) IfNode(
-                it[1] as NodeData,
-                it[3] as NodeData,
-                UnitNode(location),
-                location,
-                locations,
-            ) else IfNode(
-                it[1] as NodeData,
-                it[3] as NodeData,
-                it[5] as NodeData,
-                location,
-                locations
-            )
-        }
+        ifLexer.consume { l -> l.consumeExpression() }
+            .thenOptional(BaseTokenType.NewLine, true)
+            .then(KSharpTokenType.Then, false)
+            .consume { l -> l.consumeExpression() }
+            .thenOptional(BaseTokenType.NewLine, true)
+            .thenIf(KSharpTokenType.Else, false) { el ->
+                el.consume { l -> l.consumeExpression() }
+            }.build {
+                val location = it.first().cast<Token>().location
+                val locations = IfNodeLocations(
+                    it[0].cast<Token>().location,
+                    it[2].cast<Token>().location,
+                    if (it.size == 4) Location.NoProvided else it[4].cast<Token>().location
+                )
+                if (it.size == 4) IfNode(
+                    it[1] as NodeData,
+                    it[3] as NodeData,
+                    UnitNode(location),
+                    location,
+                    locations,
+                ) else IfNode(
+                    it[1] as NodeData,
+                    it[3] as NodeData,
+                    it[5] as NodeData,
+                    location,
+                    locations
+                )
+            }
+    }
+
+fun KSharpLexerIterator.consumeMatchExpression(): KSharpParserResult =
+    ifConsume(KSharpTokenType.Match, false) { ifLexer ->
+        ifLexer.consume { it.consumeExpression() }
+            .then(KSharpTokenType.With, false)
+            .enableDiscardBlockAndNewLineTokens { block ->
+                block.thenLoop { it.consumeMatchExpressionBranch() }
+            }.build {
+                val matchToken = it.first().cast<Token>()
+                val expr = it[1].cast<NodeData>()
+                val withToken = it[2].cast<Token>()
+                val branches = it.drop(3).cast<List<MatchExpressionBranchNode>>()
+                MatchExpressionNode(
+                    branches, expr, matchToken.location,
+                    MatchExpressionNodeLocations(matchToken.location, withToken.location)
+                )
+            }
     }
 
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.Let, false) { ifLexer ->
-        ifLexer.enableLetKeywords { l ->
-            l.enableDiscardBlockAndNewLineTokens { d ->
-                d.thenLoop {
-                    it.consumeMatchAssignment()
-                        .resume()
-                        .discardNewLines()
-                        .build { items ->
-                            items.first().cast<NodeData>()
-                        }
-                }
-            }.thenOptional(KSharpTokenType.EndBlock, true)
-                .then(KSharpTokenType.Then, false)
-                .consume { it.consumeExpression() }
-        }.build {
-            val letToken = it.first().cast<Token>()
-            val expr = it.last().cast<NodeData>()
-            val matches = it.asSequence().filterIsInstance<MatchAssignNode>().toList()
-            LetExpressionNode(
-                matches, expr, letToken.location,
-                LetExpressionNodeLocations(letToken.location, it[it.size - 2].cast<Token>().location)
-            )
-        }
+        ifLexer.enableDiscardBlockAndNewLineTokens { d ->
+            d.thenLoop {
+                it.consumeMatchAssignment()
+                    .resume()
+                    .discardNewLines()
+                    .build { items ->
+                        items.first().cast<NodeData>()
+                    }
+            }
+        }.thenOptional(KSharpTokenType.EndBlock, true)
+            .then(KSharpTokenType.Then, false)
+            .consume { it.consumeExpression() }
+            .build {
+                val letToken = it.first().cast<Token>()
+                val expr = it.last().cast<NodeData>()
+                val matches = it.asSequence().filterIsInstance<MatchAssignNode>().toList()
+                LetExpressionNode(
+                    matches, expr, letToken.location,
+                    LetExpressionNodeLocations(letToken.location, it[it.size - 2].cast<Token>().location)
+                )
+            }
     }
 
 private fun KSharpLexerIterator.ifBeginNewLineExpression(
@@ -164,6 +179,7 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
         l.consumeLiteral(withBindings)
     }.or { it.consumeIfExpression() }
         .or { it.consumeLetExpression() }
+        .or { it.consumeMatchExpression() }
 
     val withFunctionCall =
         if (!withBindings) literal.or {
