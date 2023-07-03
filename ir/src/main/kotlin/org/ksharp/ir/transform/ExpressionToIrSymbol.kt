@@ -50,6 +50,7 @@ fun SemanticNode<SemanticInfo>.toIrSymbol(lookup: FunctionLookup, variableIndex:
         is AbstractionNode -> toIrSymbol(lookup, variableIndex)
         is LetBindingNode -> TODO()
         is LetNode -> TODO()
+        is ListMatchNode -> TODO()
         is VarNode -> toIrSymbol(variableIndex)
     }
 
