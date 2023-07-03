@@ -2,34 +2,14 @@ package org.ksharp.nodes
 
 import org.ksharp.common.Location
 
-enum class MatchValueType {
-    Expression,
-    List,
+enum class MatchConditionalType {
     Or,
-    And,
-    Group,
+    And
 }
 
 data class MatchListValueNodeLocations(
     val tailSeparatorLocation: Location
 ) : NodeLocations
-
-data class MatchAssignNodeLocations(
-    val assignOperatorLocation: Location
-) : NodeLocations
-
-data class MatchValueNode(
-    val type: MatchValueType,
-    val value: NodeData,
-    override val location: Location
-) : NodeData(), ExpressionParserNode {
-
-    override val children: Sequence<NodeData>
-        get() = sequenceOf(value)
-
-    override val locations: NodeLocations
-        get() = NoLocationsDefined
-}
 
 data class MatchListValueNode(
     val head: List<NodeData>,
@@ -43,31 +23,34 @@ data class MatchListValueNode(
 
 }
 
-data class GroupMatchValueNode(
-    val matches: List<MatchValueNode>,
+data class MatchConditionValueNode(
+    val type: MatchConditionalType,
+    val left: NodeData,
+    val right: NodeData,
     override val location: Location
-) :
-    NodeData(), ExpressionParserNode {
+) : NodeData(), ExpressionParserNode {
 
     override val locations: NodeLocations
         get() = NoLocationsDefined
     override val children: Sequence<NodeData>
-        get() = matches.asSequence()
+        get() = sequenceOf(left, right)
 
 }
 
 data class MatchAssignNode(
-    val matchValue: MatchValueNode,
+    val match: NodeData,
     val expression: NodeData,
-    override val location: Location,
-    override val locations: MatchAssignNodeLocations
+    override val location: Location
 ) : NodeData(), ExpressionParserNode {
+
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
     override val children: Sequence<NodeData>
-        get() = sequenceOf(matchValue, expression)
+        get() = sequenceOf(match, expression)
 }
 
 data class MatchExpressionBranchNode(
-    val match: MatchValueNode,
+    val match: NodeData,
     val expression: NodeData,
     override val location: Location
 ) : NodeData(), ExpressionParserNode {

@@ -191,7 +191,7 @@ internal fun ExpressionParserNode.toSemanticNode(
             val letInfo = info.cast<LetSemanticInfo>()
             val matchInfo = MatchSemanticInfo(letInfo.table)
             LetBindingNode(
-                matchValue.toSemanticNode(errors, matchInfo, typeSystem),
+                match.cast<ExpressionParserNode>().toSemanticNode(errors, matchInfo, typeSystem),
                 expression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
                 EmptySemanticInfo(),
                 location
@@ -208,13 +208,7 @@ internal fun ExpressionParserNode.toSemanticNode(
                 location
             )
         }
-
-        is MatchValueNode -> when (type) {
-            MatchValueType.Or, MatchValueType.And -> TODO()
-            else -> value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
-        }
-
-
+        
         else -> TODO("No supported $this")
     }
 

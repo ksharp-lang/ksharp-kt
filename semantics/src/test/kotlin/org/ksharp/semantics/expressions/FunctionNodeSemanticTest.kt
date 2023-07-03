@@ -1253,28 +1253,18 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 LetExpressionNode(
                     listOf(
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                             FunctionCallNode(
                                 "sum", FunctionType.Function, listOf(
                                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
                                 ), Location.NoProvided
                             ),
-                            Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided
                         ),
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
                             LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided
                         )
                     ),
                     OperatorNode(
@@ -1388,22 +1378,19 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 LetExpressionNode(
                     matches = listOf(
                         MatchAssignNode(
-                            matchValue = MatchValueNode(
-                                type = MatchValueType.List, value = MatchListValueNode(
-                                    head = listOf(
-                                        FunctionCallNode(
-                                            name = "x", type = FunctionType.Function, arguments = listOf(),
-                                            location = Location.NoProvided
-                                        )
-                                    ),
-                                    tail = LiteralValueNode(
-                                        value = "y", type = LiteralValueType.Binding,
+                            MatchListValueNode(
+                                head = listOf(
+                                    FunctionCallNode(
+                                        name = "x", type = FunctionType.Function, arguments = listOf(),
                                         location = Location.NoProvided
-                                    ),
-                                    location = Location.NoProvided,
-                                    locations = MatchListValueNodeLocations(tailSeparatorLocation = Location.NoProvided)
+                                    )
                                 ),
-                                location = Location.NoProvided
+                                tail = LiteralValueNode(
+                                    value = "y", type = LiteralValueType.Binding,
+                                    location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided,
+                                locations = MatchListValueNodeLocations(tailSeparatorLocation = Location.NoProvided)
                             ),
                             expression = LiteralCollectionNode(
                                 values = listOf(
@@ -1418,8 +1405,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     )
                                 ), type = LiteralCollectionType.List, location = Location.NoProvided
                             ),
-                            location = Location.NoProvided,
-                            locations = MatchAssignNodeLocations(assignOperatorLocation = Location.NoProvided)
+                            location = Location.NoProvided
                         )
                     ),
                     expression = OperatorNode(

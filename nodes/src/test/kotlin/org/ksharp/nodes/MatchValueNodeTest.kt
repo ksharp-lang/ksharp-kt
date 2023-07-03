@@ -6,26 +6,6 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 
 class MatchValueNodeTest : StringSpec({
-    "Test Node Interface over MatchValueNode" {
-        MatchValueNode(
-            MatchValueType.Expression,
-            UnitNode(Location.NoProvided),
-            Location.NoProvided
-        ).node.apply {
-            cast<MatchValueNode>().apply {
-                type.shouldBe(MatchValueType.Expression)
-                value.shouldBe(UnitNode(Location.NoProvided))
-                location.shouldBe(Location.NoProvided)
-                locations.shouldBe(NoLocationsDefined)
-            }
-            parent.shouldBeNull()
-            children.toList().shouldBe(
-                listOf(
-                    Node(this, Location.NoProvided, UnitNode(Location.NoProvided))
-                )
-            )
-        }
-    }
     "Test Node Interface over MatchListValueNode" {
         MatchListValueNode(
             listOf(
@@ -60,36 +40,24 @@ class MatchValueNodeTest : StringSpec({
     }
     "Test Node Interface over MatchAssignmentNode" {
         MatchAssignNode(
-            MatchValueNode(
-                MatchValueType.Expression,
-                UnitNode(Location.NoProvided),
-                Location.NoProvided
-            ),
+            UnitNode(Location.NoProvided),
             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
             Location.NoProvided,
-            MatchAssignNodeLocations(Location.NoProvided)
         ).node.apply {
             cast<MatchAssignNode>().apply {
-                matchValue.shouldBe(
-                    MatchValueNode(
-                        MatchValueType.Expression,
-                        UnitNode(Location.NoProvided),
-                        Location.NoProvided
-                    )
+                match.shouldBe(
+                    UnitNode(Location.NoProvided)
                 )
                 expression.shouldBe(LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
-                locations.shouldBe(MatchAssignNodeLocations(Location.NoProvided))
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
                 listOf(
                     Node(
-                        this, Location.NoProvided, MatchValueNode(
-                            MatchValueType.Expression,
-                            UnitNode(Location.NoProvided),
-                            Location.NoProvided
-                        )
+                        this, Location.NoProvided,
+                        UnitNode(Location.NoProvided)
                     ),
                     Node(
                         this,
@@ -102,21 +70,13 @@ class MatchValueNodeTest : StringSpec({
     }
     "Test Node Interface over MatchExpressionBranchNode" {
         MatchExpressionBranchNode(
-            MatchValueNode(
-                MatchValueType.Expression,
-                UnitNode(Location.NoProvided),
-                Location.NoProvided
-            ),
+            UnitNode(Location.NoProvided),
             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
             Location.NoProvided
         ).node.apply {
             cast<MatchExpressionBranchNode>().apply {
                 match.shouldBe(
-                    MatchValueNode(
-                        MatchValueType.Expression,
-                        UnitNode(Location.NoProvided),
-                        Location.NoProvided
-                    )
+                    UnitNode(Location.NoProvided)
                 )
                 expression.shouldBe(LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
@@ -126,11 +86,8 @@ class MatchValueNodeTest : StringSpec({
             children.toList().shouldBe(
                 listOf(
                     Node(
-                        this, Location.NoProvided, MatchValueNode(
-                            MatchValueType.Expression,
-                            UnitNode(Location.NoProvided),
-                            Location.NoProvided
-                        )
+                        this, Location.NoProvided,
+                        UnitNode(Location.NoProvided)
                     ),
                     Node(
                         this,
@@ -141,27 +98,19 @@ class MatchValueNodeTest : StringSpec({
             )
         }
     }
-    "Test Node interface over GroupMatchValueNode" {
-        GroupMatchValueNode(
-            listOf(
-                MatchValueNode(
-                    MatchValueType.Expression,
-                    UnitNode(Location.NoProvided),
-                    Location.NoProvided
-                )
-            ),
+    "Test Node interface over MatchConditionValueNode" {
+        MatchConditionValueNode(
+            MatchConditionalType.And,
+            UnitNode(Location.NoProvided),
+            LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
             Location.NoProvided
         ).node.apply {
-            cast<GroupMatchValueNode>().apply {
-                matches.shouldBe(
-                    listOf(
-                        MatchValueNode(
-                            MatchValueType.Expression,
-                            UnitNode(Location.NoProvided),
-                            Location.NoProvided
-                        )
-                    ),
+            cast<MatchConditionValueNode>().apply {
+                type.shouldBe(MatchConditionalType.And)
+                left.shouldBe(
+                    UnitNode(Location.NoProvided)
                 )
+                right.shouldBe(LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
                 locations.shouldBe(NoLocationsDefined)
             }
@@ -169,14 +118,17 @@ class MatchValueNodeTest : StringSpec({
             children.toList().shouldBe(
                 listOf(
                     Node(
-                        this, Location.NoProvided, MatchValueNode(
-                            MatchValueType.Expression,
-                            UnitNode(Location.NoProvided),
-                            Location.NoProvided
-                        )
+                        this, Location.NoProvided,
+                        UnitNode(Location.NoProvided)
+                    ),
+                    Node(
+                        this,
+                        Location.NoProvided,
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
                     )
                 )
             )
         }
+
     }
 })

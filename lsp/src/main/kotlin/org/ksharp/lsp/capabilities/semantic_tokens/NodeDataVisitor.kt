@@ -34,7 +34,6 @@ fun NodeData.visit(encoder: TokenEncoder) {
         is LetExpressionNode -> semanticTokens(encoder)
         is MatchListValueNode -> semanticTokens(encoder)
         is MatchAssignNode -> semanticTokens(encoder)
-        is MatchValueNode -> semanticTokens(encoder)
         else -> Unit
     }
 }

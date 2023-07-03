@@ -66,13 +66,9 @@ fun LetExpressionNode.semanticTokens(encoder: TokenEncoder) {
     expression.visit(encoder)
 }
 
-fun MatchValueNode.semanticTokens(encoder: TokenEncoder) {
-    value.visit(encoder)
-}
-
 fun MatchAssignNode.semanticTokens(encoder: TokenEncoder) {
-    matchValue.visit(encoder)
-    encoder.register(locations.assignOperatorLocation, SemanticTokenTypes.Operator)
+    match.visit(encoder)
+    encoder.register(location, SemanticTokenTypes.Operator)
     expression.visit(encoder)
 }
 

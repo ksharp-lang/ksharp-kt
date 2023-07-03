@@ -10,14 +10,9 @@ class LetExpressionNodeTest : StringSpec({
         LetExpressionNode(
             listOf(
                 MatchAssignNode(
-                    MatchValueNode(
-                        MatchValueType.Expression,
-                        UnitNode(Location.NoProvided),
-                        Location.NoProvided
-                    ),
+                    UnitNode(Location.NoProvided),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                    Location.NoProvided,
-                    MatchAssignNodeLocations(Location.NoProvided)
+                    Location.NoProvided
                 )
             ),
             LiteralValueNode("5", LiteralValueType.Integer, Location.NoProvided),
@@ -28,14 +23,9 @@ class LetExpressionNodeTest : StringSpec({
                 matches.shouldBe(
                     listOf(
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                UnitNode(Location.NoProvided),
-                                Location.NoProvided,
-                            ),
+                            UnitNode(Location.NoProvided),
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided
                         )
                     )
                 )
@@ -48,14 +38,9 @@ class LetExpressionNodeTest : StringSpec({
                 listOf(
                     Node(
                         this, Location.NoProvided, MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                UnitNode(Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            UnitNode(Location.NoProvided),
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided
                         )
                     ),
                     Node(

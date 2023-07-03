@@ -38,7 +38,6 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
             is MatchBranchNode -> TODO()
 
             is ListMatchValueNode -> TODO()
-            is GroupMatchValueNode -> TODO()
             is ConditionalMatchValueNode -> TODO()
         }.also { this.info.setInferredType(it) }
     }
