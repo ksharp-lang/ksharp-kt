@@ -95,7 +95,7 @@ class MatchNodeTest : StringSpec({
                         Location.NoProvided
                     )
                 )
-                left.shouldBe(
+                right.shouldBe(
                     VarNode(
                         "b",
                         "VarInfo",

@@ -55,7 +55,7 @@ private fun KSharpLexerIterator.consumeMatchLiteralValue(): KSharpParserResult =
     }
 
 private fun KSharpLexerIterator.consumeConditionalOrMatchValue(): KSharpParserResult =
-    consumeMatchLiteralValue().thenMatchConditionOperator(MatchConditionalType.And, "||") {
+    consumeMatchLiteralValue().thenMatchConditionOperator(MatchConditionalType.Or, "||") {
         it.consumeConditionalOrMatchValue()
     }
 

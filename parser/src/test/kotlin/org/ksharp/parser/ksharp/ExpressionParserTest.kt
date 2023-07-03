@@ -1029,7 +1029,28 @@ class ExpressionParserTest : StringSpec({
                 LetExpressionNode(
                     matches = listOf(
                         MatchAssignNode(
-                            UnitNode(Location.NoProvided),
+                            match = MatchConditionValueNode(
+                                type = MatchConditionalType.And,
+                                left = FunctionCallNode(
+                                    name = "x",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "isEven",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(
+                                        LiteralValueNode(
+                                            value = "x",
+                                            type = LiteralValueType.Binding,
+                                            Location.NoProvided
+                                        )
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ),
                             expression = LiteralValueNode(
                                 value = "10",
                                 type = LiteralValueType.Integer,
@@ -1140,7 +1161,12 @@ class ExpressionParserTest : StringSpec({
                             Location.NoProvided
                         ),
                         MatchExpressionBranchNode(
-                            UnitNode(Location.NoProvided),
+                            MatchConditionValueNode(
+                                type = MatchConditionalType.Or,
+                                left = LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                right = LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
                             LiteralValueNode("\"other\"", LiteralValueType.String, Location.NoProvided),
                             Location.NoProvided
                         )
