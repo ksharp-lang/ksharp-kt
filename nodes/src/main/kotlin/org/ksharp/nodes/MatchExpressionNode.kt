@@ -8,8 +8,8 @@ data class MatchExpressionNodeLocations(
 ) : NodeLocations
 
 data class MatchExpressionNode(
-    val branches: List<MatchExpressionBranchNode>,
     val expression: NodeData,
+    val branches: List<MatchExpressionBranchNode>,
     override val location: Location,
     override val locations: MatchExpressionNodeLocations
 ) : NodeData(), ExpressionParserNode {

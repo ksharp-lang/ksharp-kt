@@ -85,7 +85,7 @@ fun KSharpLexerIterator.consumeMatchExpression(): KSharpParserResult =
                 val withToken = it[2].cast<Token>()
                 val branches = it.drop(3).cast<List<MatchExpressionBranchNode>>()
                 MatchExpressionNode(
-                    branches, expr, matchToken.location,
+                    expr, branches, matchToken.location,
                     MatchExpressionNodeLocations(matchToken.location, withToken.location)
                 )
             }

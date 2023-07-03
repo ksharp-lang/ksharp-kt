@@ -1066,6 +1066,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 MatchExpressionNode(
+                    LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                     listOf(
                         MatchExpressionBranchNode(
                             listOf(
@@ -1099,7 +1100,6 @@ class ExpressionParserTest : StringSpec({
                             Location.NoProvided
                         ),
                     ),
-                    LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided,
                     MatchExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 )
