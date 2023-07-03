@@ -1041,6 +1041,71 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "let expression 4" {
+        """let x && isEven x = 10       
+           |then x
+        """.trimMargin()
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value.also(::println) }
+            .shouldBeRight(
+                LetExpressionNode(
+                    matches = listOf(
+                        MatchAssignNode(
+                            matchValue = MatchValueNode(
+                                type = MatchValueType.Group,
+                                value = GroupMatchValueNode(
+                                    matches = listOf(
+                                        MatchValueNode(
+                                            type = MatchValueType.Expression,
+                                            value = FunctionCallNode(
+                                                name = "x",
+                                                type = FunctionType.Function,
+                                                arguments = listOf(),
+                                                Location.NoProvided
+                                            ), Location.NoProvided
+                                        ),
+                                        MatchValueNode(
+                                            type = MatchValueType.And, value = MatchValueNode(
+                                                type = MatchValueType.Expression,
+                                                value = FunctionCallNode(
+                                                    name = "isEven", type = FunctionType.Function,
+                                                    arguments = listOf(
+                                                        LiteralValueNode(
+                                                            value = "x",
+                                                            type = LiteralValueType.Binding,
+                                                            Location.NoProvided
+                                                        )
+                                                    ),
+                                                    Location.NoProvided
+                                                ), Location.NoProvided
+                                            ), Location.NoProvided
+                                        )
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            ),
+                            expression = LiteralValueNode(
+                                value = "10",
+                                type = LiteralValueType.Integer,
+                                Location.NoProvided
+                            ), Location.NoProvided,
+                            locations = MatchAssignNodeLocations(assignOperatorLocation = Location.NoProvided)
+                        )
+                    ),
+                    expression = FunctionCallNode(
+                        name = "x",
+                        type = FunctionType.Function,
+                        arguments = listOf(),
+                        Location.NoProvided
+                    ), Location.NoProvided,
+                    locations = LetExpressionNodeLocations(
+                        letLocation = Location.NoProvided,
+                        thenLocation = Location.NoProvided
+                    )
+                )
+            )
+    }
     "nested let expression" {
         """let x = let a2 = a * 2
           |            b2 = b * 2
@@ -1137,36 +1202,41 @@ class ExpressionParserTest : StringSpec({
                     LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                     listOf(
                         MatchExpressionBranchNode(
-                            listOf(
-                                MatchValueNode(
-                                    MatchValueType.Expression,
-                                    LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                                    Location.NoProvided
-                                )
+                            MatchValueNode(
+                                MatchValueType.Expression,
+                                LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
                             ),
                             LiteralValueNode("\"one\"", LiteralValueType.String, Location.NoProvided),
                             Location.NoProvided
                         ),
                         MatchExpressionBranchNode(
-                            listOf(
-                                MatchValueNode(
-                                    MatchValueType.Expression,
-                                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                    Location.NoProvided
-                                ),
-                                MatchValueNode(
-                                    MatchValueType.Or,
-                                    MatchValueNode(
-                                        MatchValueType.Expression,
-                                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
-                                        Location.NoProvided
+                            MatchValueNode(
+                                MatchValueType.Group,
+                                GroupMatchValueNode(
+                                    listOf(
+                                        MatchValueNode(
+                                            MatchValueType.Expression,
+                                            LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                            Location.NoProvided
+                                        ),
+                                        MatchValueNode(
+                                            MatchValueType.Or,
+                                            MatchValueNode(
+                                                MatchValueType.Expression,
+                                                LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
+                                                Location.NoProvided
+                                            ),
+                                            Location.NoProvided
+                                        )
                                     ),
                                     Location.NoProvided
-                                )
+                                ),
+                                Location.NoProvided
                             ),
                             LiteralValueNode("\"other\"", LiteralValueType.String, Location.NoProvided),
                             Location.NoProvided
-                        ),
+                        )
                     ),
                     Location.NoProvided,
                     MatchExpressionNodeLocations(Location.NoProvided, Location.NoProvided)

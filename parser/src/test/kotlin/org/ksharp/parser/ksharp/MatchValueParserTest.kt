@@ -214,6 +214,84 @@ class MatchValueParserTest : StringSpec({
                 )
             )
     }
+    "Conditional matches" {
+        "x && isEven x".kSharpLexer()
+            .prepareLexerForMatchValueParsing()
+            .consumeMatchValue()
+            .map { it.value.also(::println) }
+            .shouldBeRight(
+                MatchValueNode(
+                    type = MatchValueType.Group, value = GroupMatchValueNode(
+                        matches = listOf(
+                            MatchValueNode(
+                                type = MatchValueType.Expression,
+                                value = FunctionCallNode(
+                                    name = "x",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ), MatchValueNode(
+                                type = MatchValueType.And, value = MatchValueNode(
+                                    type = MatchValueType.Expression, value = FunctionCallNode(
+                                        name = "isEven", type = FunctionType.Function,
+                                        arguments = listOf(
+                                            LiteralValueNode(
+                                                value = "x",
+                                                type = LiteralValueType.Binding,
+                                                Location.NoProvided
+                                            )
+                                        ),
+                                        Location.NoProvided
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            )
+                        ),
+                        Location.NoProvided
+                    ), Location.NoProvided
+                )
+            )
+    }
+    "Group matches" {
+        "(x && isEven x)".kSharpLexer()
+            .prepareLexerForMatchValueParsing()
+            .consumeMatchValue()
+            .map { it.value.also(::println) }
+            .shouldBeRight(
+                MatchValueNode(
+                    type = MatchValueType.Group, value = GroupMatchValueNode(
+                        matches = listOf(
+                            MatchValueNode(
+                                type = MatchValueType.Expression,
+                                value = FunctionCallNode(
+                                    name = "x",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ), MatchValueNode(
+                                type = MatchValueType.And, value = MatchValueNode(
+                                    type = MatchValueType.Expression, value = FunctionCallNode(
+                                        name = "isEven", type = FunctionType.Function,
+                                        arguments = listOf(
+                                            LiteralValueNode(
+                                                value = "x",
+                                                type = LiteralValueType.Binding,
+                                                Location.NoProvided
+                                            )
+                                        ),
+                                        Location.NoProvided
+                                    ), Location.NoProvided
+                                ), Location.NoProvided
+                            )
+                        ),
+                        Location.NoProvided
+                    ), Location.NoProvided
+                )
+            )
+    }
     "Match assignment" {
         "x, y = 1, 2".kSharpLexer()
             .prepareLexerForMatchValueParsing()

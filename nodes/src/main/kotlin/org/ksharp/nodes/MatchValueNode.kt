@@ -67,12 +67,12 @@ data class MatchAssignNode(
 }
 
 data class MatchExpressionBranchNode(
-    val matchValue: List<MatchValueNode>,
+    val match: MatchValueNode,
     val expression: NodeData,
     override val location: Location
 ) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
-        get() = sequenceOf(matchValue.asSequence(), sequenceOf(expression)).flatten()
+        get() = sequenceOf(match, expression)
 
     override val locations: NodeLocations
         get() = NoLocationsDefined

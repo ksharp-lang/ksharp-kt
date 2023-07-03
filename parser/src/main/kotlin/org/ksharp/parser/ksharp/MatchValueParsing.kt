@@ -1,10 +1,20 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.cast
+import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
-internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
+private object NoMatch : NodeData() {
+    override val locations: NodeLocations = NoLocationsDefined
+    override val location: Location = Location.NoProvided
+    override val children: Sequence<NodeData> = emptySequence()
+}
+
+private enum class MatchParsingErrorCode(override val description: String) : ErrorCode {
+    NoMatchFound("No match found"),
+}
+
+private fun KSharpLexerIterator.consumeMatchLiteralValue(): KSharpParserResult =
     lookAHead { l ->
         l.ifConsume(KSharpTokenType.OpenBracket, true) { ifLexer ->
             ifLexer.thenLoopIndexed { it, index ->
@@ -42,7 +52,7 @@ internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
             }
     }
 
-internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserResult =
+private fun KSharpLexerIterator.consumeConditionalMatchValue(): KSharpParserResult =
     this.collect()
         .thenLoopIndexed { lexer, index ->
             if (index != 0) {
@@ -56,19 +66,53 @@ internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserRes
                             token.location
                         )
                     }
-            } else lexer.consumeMatchValue()
+            } else lexer.consumeMatchLiteralValue()
+        }.build {
+            if (it.isEmpty()) NoMatch
+            else {
+                val first = it.first().cast<NodeData>()
+                if (it.size == 1) first
+                else MatchValueNode(
+                    MatchValueType.Group,
+                    GroupMatchValueNode(
+                        it.cast(),
+                        first.location
+                    ),
+                    first.location
+                )
+            }
+        }.flatMap {
+            if (it.value == NoMatch) Either.Left(
+                ParserError(
+                    MatchParsingErrorCode.NoMatchFound.new(Location.NoProvided),
+                    listBuilder(),
+                    false,
+                    it.remainTokens
+                )
+            )
+            else Either.Right(it)
         }
+
+internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
+    ifConsume(KSharpTokenType.OpenParenthesis, true) { l ->
+        l.consume { it.consumeConditionalMatchValue() }
+            .then(KSharpTokenType.CloseParenthesis, true)
+            .build { it.first().cast<NodeData>() }
+    }.or { consumeConditionalMatchValue() }
+
+internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserResult =
+    this.consumeMatchValue()
+        .resume()
         .then(KSharpTokenType.Then, false)
         .consume { it.consumeExpression() }
         .discardNewLines()
         .build {
             MatchExpressionBranchNode(
-                it.dropLast(2).cast(),
+                it.first().cast(),
                 it.last().cast(),
-                it[it.size - 2].cast<Token>().location
+                it[1].cast<Token>().location
             )
         }
-
 
 internal fun KSharpLexerIterator.consumeMatchAssignment() =
     consumeMatchValue()
