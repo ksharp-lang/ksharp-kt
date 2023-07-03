@@ -173,34 +173,24 @@ class FunctionParserTest : StringSpec({
                     LetExpressionNode(
                         listOf(
                             MatchAssignNode(
-                                MatchValueNode(
-                                    MatchValueType.Expression,
-                                    FunctionCallNode("a2", FunctionType.Function, listOf(), Location.NoProvided),
-                                    Location.NoProvided
-                                ),
+                                FunctionCallNode("a2", FunctionType.Function, listOf(), Location.NoProvided),
                                 OperatorNode(
                                     "*",
                                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                                     Location.NoProvided,
                                 ),
-                                Location.NoProvided,
-                                MatchAssignNodeLocations(Location.NoProvided)
+                                Location.NoProvided
                             ),
                             MatchAssignNode(
-                                MatchValueNode(
-                                    MatchValueType.Expression,
-                                    FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
-                                    Location.NoProvided
-                                ),
+                                FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
                                 OperatorNode(
                                     "*",
                                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                                     Location.NoProvided,
                                 ),
-                                Location.NoProvided,
-                                MatchAssignNodeLocations(Location.NoProvided)
+                                Location.NoProvided
                             )
                         ),
                         OperatorNode(

@@ -11,13 +11,7 @@ class MatchExpressionNodeTest : StringSpec({
             LiteralValueNode("5", LiteralValueType.Integer, Location.NoProvided),
             listOf(
                 MatchExpressionBranchNode(
-                    listOf(
-                        MatchValueNode(
-                            MatchValueType.Expression,
-                            UnitNode(Location.NoProvided),
-                            Location.NoProvided
-                        )
-                    ),
+                    UnitNode(Location.NoProvided),
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided
                 )
@@ -29,13 +23,7 @@ class MatchExpressionNodeTest : StringSpec({
                 branches.shouldBe(
                     listOf(
                         MatchExpressionBranchNode(
-                            listOf(
-                                MatchValueNode(
-                                    MatchValueType.Expression,
-                                    UnitNode(Location.NoProvided),
-                                    Location.NoProvided
-                                )
-                            ),
+                            UnitNode(Location.NoProvided),
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                             Location.NoProvided
                         )
@@ -55,13 +43,7 @@ class MatchExpressionNodeTest : StringSpec({
                     ),
                     Node(
                         this, Location.NoProvided, MatchExpressionBranchNode(
-                            listOf(
-                                MatchValueNode(
-                                    MatchValueType.Expression,
-                                    UnitNode(Location.NoProvided),
-                                    Location.NoProvided
-                                )
-                            ),
+                            UnitNode(Location.NoProvided),
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                             Location.NoProvided
                         )

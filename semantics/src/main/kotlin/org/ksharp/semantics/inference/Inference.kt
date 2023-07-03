@@ -30,8 +30,15 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
             is ApplicationNode -> infer(info)
             is ConstantNode -> infer()
             is VarNode -> infer()
+
             is LetNode -> infer(info)
             is LetBindingNode -> infer(info)
+
+            is MatchNode -> TODO()
+            is MatchBranchNode -> TODO()
+
+            is ListMatchValueNode -> TODO()
+            is ConditionalMatchValueNode -> TODO()
         }.also { this.info.setInferredType(it) }
     }
 

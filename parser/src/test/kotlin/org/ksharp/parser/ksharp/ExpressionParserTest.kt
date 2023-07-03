@@ -297,14 +297,14 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
-                    "*",
+                    "+",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     OperatorNode(
-                        "+",
-                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        "*",
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                         Location.NoProvided,
                     ),
-                    LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided,
                 )
             )
@@ -524,14 +524,14 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
-                    "*",
+                    "+>",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     OperatorNode(
-                        "+>",
-                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        "*",
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                         Location.NoProvided,
                     ),
-                    LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided,
                 )
             )
@@ -894,24 +894,14 @@ class ExpressionParserTest : StringSpec({
                 LetExpressionNode(
                     listOf(
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                             LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided
                         ),
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
                             LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided
                         )
                     ),
                     OperatorNode(
@@ -938,28 +928,18 @@ class ExpressionParserTest : StringSpec({
                 LetExpressionNode(
                     listOf(
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                             FunctionCallNode(
                                 "sum", FunctionType.Function, listOf(
                                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
                                 ), Location.NoProvided
                             ),
                             Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
                         ),
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
                             LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
                             Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
                         )
                     ),
                     OperatorNode(
@@ -970,6 +950,125 @@ class ExpressionParserTest : StringSpec({
                     ),
                     Location.NoProvided,
                     LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
+                )
+            )
+    }
+    "let expression 3" {
+        "let [ x | y ] = [1, 2] then x + y".trimMargin()
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LetExpressionNode(
+                    matches = listOf(
+                        MatchAssignNode(
+                            MatchListValueNode(
+                                head = listOf(
+                                    FunctionCallNode(
+                                        name = "x", type = FunctionType.Function, arguments = listOf(),
+                                        location = Location.NoProvided
+                                    )
+                                ),
+                                tail = LiteralValueNode(
+                                    value = "y", type = LiteralValueType.Binding,
+                                    location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided,
+                                locations = MatchListValueNodeLocations(tailSeparatorLocation = Location.NoProvided)
+                            ),
+                            expression = LiteralCollectionNode(
+                                values = listOf(
+                                    LiteralValueNode(
+                                        value = "1",
+                                        type = LiteralValueType.Integer,
+                                        location = Location.NoProvided
+                                    ),
+                                    LiteralValueNode(
+                                        value = "2", type = LiteralValueType.Integer,
+                                        location = Location.NoProvided
+                                    )
+                                ), type = LiteralCollectionType.List, location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                        )
+                    ),
+                    expression = OperatorNode(
+                        operator = "+",
+                        left = FunctionCallNode(
+                            name = "x",
+                            type = FunctionType.Function,
+                            arguments = listOf(),
+                            location = Location.NoProvided
+                        ),
+                        right = FunctionCallNode(
+                            name = "y",
+                            type = FunctionType.Function,
+                            arguments = listOf(),
+                            location = Location.NoProvided
+                        ),
+                        location = Location.NoProvided
+                    ),
+                    location = Location.NoProvided,
+                    locations = LetExpressionNodeLocations(
+                        letLocation = Location.NoProvided,
+                        thenLocation = Location.NoProvided
+                    )
+                )
+            )
+    }
+    "let expression 4" {
+        """let x && isEven x = 10       
+           |then x
+        """.trimMargin()
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value.also(::println) }
+            .shouldBeRight(
+                LetExpressionNode(
+                    matches = listOf(
+                        MatchAssignNode(
+                            match = MatchConditionValueNode(
+                                type = MatchConditionalType.And,
+                                left = FunctionCallNode(
+                                    name = "x",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "isEven",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(
+                                        LiteralValueNode(
+                                            value = "x",
+                                            type = LiteralValueType.Binding,
+                                            Location.NoProvided
+                                        )
+                                    ),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ),
+                            expression = LiteralValueNode(
+                                value = "10",
+                                type = LiteralValueType.Integer,
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided,
+                        )
+                    ),
+                    expression = FunctionCallNode(
+                        name = "x",
+                        type = FunctionType.Function,
+                        arguments = listOf(),
+                        Location.NoProvided
+                    ), Location.NoProvided,
+                    locations = LetExpressionNodeLocations(
+                        letLocation = Location.NoProvided,
+                        thenLocation = Location.NoProvided
+                    )
                 )
             )
     }
@@ -987,22 +1086,14 @@ class ExpressionParserTest : StringSpec({
                 LetExpressionNode(
                     listOf(
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                             LetExpressionNode(
                                 listOf(
                                     MatchAssignNode(
-                                        MatchValueNode(
-                                            MatchValueType.Expression,
-                                            FunctionCallNode(
-                                                "a2",
-                                                FunctionType.Function,
-                                                listOf(),
-                                                Location.NoProvided
-                                            ),
+                                        FunctionCallNode(
+                                            "a2",
+                                            FunctionType.Function,
+                                            listOf(),
                                             Location.NoProvided
                                         ),
                                         OperatorNode(
@@ -1011,17 +1102,13 @@ class ExpressionParserTest : StringSpec({
                                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                                             Location.NoProvided,
                                         ),
-                                        Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
+                                        Location.NoProvided,
                                     ),
                                     MatchAssignNode(
-                                        MatchValueNode(
-                                            MatchValueType.Expression,
-                                            FunctionCallNode(
-                                                "b2",
-                                                FunctionType.Function,
-                                                listOf(),
-                                                Location.NoProvided
-                                            ),
+                                        FunctionCallNode(
+                                            "b2",
+                                            FunctionType.Function,
+                                            listOf(),
                                             Location.NoProvided
                                         ),
                                         OperatorNode(
@@ -1030,7 +1117,7 @@ class ExpressionParserTest : StringSpec({
                                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                                             Location.NoProvided,
                                         ),
-                                        Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
+                                        Location.NoProvided
                                     )
                                 ),
                                 OperatorNode(
@@ -1042,7 +1129,7 @@ class ExpressionParserTest : StringSpec({
                                 Location.NoProvided,
                                 LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                             ),
-                            Location.NoProvided, MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided,
                         )
                     ),
                     OperatorNode(
@@ -1069,36 +1156,20 @@ class ExpressionParserTest : StringSpec({
                     LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                     listOf(
                         MatchExpressionBranchNode(
-                            listOf(
-                                MatchValueNode(
-                                    MatchValueType.Expression,
-                                    LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
-                                    Location.NoProvided
-                                )
-                            ),
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("\"one\"", LiteralValueType.String, Location.NoProvided),
                             Location.NoProvided
                         ),
                         MatchExpressionBranchNode(
-                            listOf(
-                                MatchValueNode(
-                                    MatchValueType.Expression,
-                                    LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
-                                    Location.NoProvided
-                                ),
-                                MatchValueNode(
-                                    MatchValueType.Or,
-                                    MatchValueNode(
-                                        MatchValueType.Expression,
-                                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
-                                        Location.NoProvided
-                                    ),
-                                    Location.NoProvided
-                                )
+                            MatchConditionValueNode(
+                                type = MatchConditionalType.Or,
+                                left = LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                right = LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
                             ),
                             LiteralValueNode("\"other\"", LiteralValueType.String, Location.NoProvided),
                             Location.NoProvided
-                        ),
+                        )
                     ),
                     Location.NoProvided,
                     MatchExpressionNodeLocations(Location.NoProvided, Location.NoProvided)

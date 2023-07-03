@@ -551,11 +551,9 @@ class ParserLocationsTest : StringSpec({
             }.map {
                 it.value.cast<LetExpressionNode>()
                     .matches.last()
-                    .locations.also(::println)
+                    .location.also(::println)
             }.shouldBeRight(
-                MatchAssignNodeLocations(
-                    Location((Line(value = 2) to Offset(value = 5)), Line(value = 2) to Offset(value = 6))
-                )
+                Location((Line(value = 2) to Offset(value = 5)), Line(value = 2) to Offset(value = 6))
             )
     }
     "let expression node locations" {
@@ -591,7 +589,7 @@ class ParserLocationsTest : StringSpec({
             }.map {
                 it.value.cast<LetExpressionNode>()
                     .matches.last()
-                    .matchValue.value.cast<MatchListValueNode>()
+                    .match.cast<MatchListValueNode>()
                     .locations.also(::println)
             }.shouldBeRight(
                 MatchListValueNodeLocations(

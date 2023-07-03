@@ -46,11 +46,11 @@ fun VarNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex) =
 fun SemanticNode<SemanticInfo>.toIrSymbol(lookup: FunctionLookup, variableIndex: VariableIndex): IrExpression =
     when (this) {
         is ConstantNode -> toIrSymbol()
+        is VarNode -> toIrSymbol(variableIndex)
         is ApplicationNode -> toIrSymbol(lookup, variableIndex)
         is AbstractionNode -> toIrSymbol(lookup, variableIndex)
-        is LetBindingNode -> TODO()
-        is LetNode -> TODO()
-        is VarNode -> toIrSymbol(variableIndex)
+
+        else -> TODO()
     }
 
 val IrBoolFactory: CustomApplicationIrNode = { _, _ ->

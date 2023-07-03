@@ -48,6 +48,7 @@ private fun ModuleNode.buildFunctionTable(moduleTypeSystemInfo: ModuleTypeSystem
     )
 }
 
+
 class FunctionNodeSemanticFunctionTableTest : StringSpec({
     "table: function with invalid name" {
         module(
@@ -1252,28 +1253,18 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 LetExpressionNode(
                     listOf(
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                             FunctionCallNode(
                                 "sum", FunctionType.Function, listOf(
                                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
                                 ), Location.NoProvided
                             ),
-                            Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided
                         ),
                         MatchAssignNode(
-                            MatchValueNode(
-                                MatchValueType.Expression,
-                                FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
-                                Location.NoProvided
-                            ),
+                            FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
                             LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
-                            Location.NoProvided,
-                            MatchAssignNodeLocations(Location.NoProvided)
+                            Location.NoProvided
                         )
                     ),
                     OperatorNode(
@@ -1371,6 +1362,155 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             )
                         ),
                         Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
+    should("Semantic node: let with list match") {
+        module(
+            FunctionNode(
+                false,
+                true,
+                null,
+                "n",
+                listOf(),
+                LetExpressionNode(
+                    matches = listOf(
+                        MatchAssignNode(
+                            MatchListValueNode(
+                                head = listOf(
+                                    FunctionCallNode(
+                                        name = "x", type = FunctionType.Function, arguments = listOf(),
+                                        location = Location.NoProvided
+                                    )
+                                ),
+                                tail = LiteralValueNode(
+                                    value = "y", type = LiteralValueType.Binding,
+                                    location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided,
+                                locations = MatchListValueNodeLocations(tailSeparatorLocation = Location.NoProvided)
+                            ),
+                            expression = LiteralCollectionNode(
+                                values = listOf(
+                                    LiteralValueNode(
+                                        value = "1",
+                                        type = LiteralValueType.Integer,
+                                        location = Location.NoProvided
+                                    ),
+                                    LiteralValueNode(
+                                        value = "2", type = LiteralValueType.Integer,
+                                        location = Location.NoProvided
+                                    )
+                                ), type = LiteralCollectionType.List, location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided
+                        )
+                    ),
+                    expression = OperatorNode(
+                        operator = "+",
+                        left = FunctionCallNode(
+                            name = "x",
+                            type = FunctionType.Function,
+                            arguments = listOf(),
+                            location = Location.NoProvided
+                        ),
+                        right = FunctionCallNode(
+                            name = "y",
+                            type = FunctionType.Function,
+                            arguments = listOf(),
+                            location = Location.NoProvided
+                        ),
+                        location = Location.NoProvided
+                    ),
+                    location = Location.NoProvided,
+                    locations = LetExpressionNodeLocations(
+                        letLocation = Location.NoProvided,
+                        thenLocation = Location.NoProvided
+                    )
+                ),
+                Location.NoProvided, FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        attributes = setOf(CommonAttribute.Public),
+                        name = "n",
+                        expression = LetNode(
+                            bindings = listOf(
+                                LetBindingNode(
+                                    match = ListMatchValueNode(
+                                        head = listOf(
+                                            VarNode(
+                                                name = "x",
+                                                info = Symbol(name = "x", type = typeParameterForTesting(1)),
+                                                location = Location.NoProvided
+                                            )
+                                        ),
+                                        tail = VarNode(
+                                            name = "y",
+                                            info = Symbol(name = "y", type = typeParameterForTesting(2)),
+                                            location = Location.NoProvided
+                                        ),
+                                        info = EmptySemanticInfo(),
+                                        location = Location.NoProvided
+                                    ),
+                                    expression = ApplicationNode(
+                                        functionName = ApplicationName(pck = "::collection", name = "listOf"),
+                                        arguments = listOf(
+                                            ConstantNode(
+                                                value = 1.toLong(),
+                                                info = longTypePromise, location = Location.NoProvided
+                                            ),
+                                            ConstantNode(
+                                                value = 2.toLong(),
+                                                info = longTypePromise,
+                                                location = Location.NoProvided
+                                            )
+                                        ),
+                                        info = ApplicationSemanticInfo(), location = Location.NoProvided
+                                    ), info = EmptySemanticInfo(), location = Location.NoProvided
+                                )
+                            ),
+                            expression = ApplicationNode(
+                                functionName = ApplicationName(pck = null, name = "(+)"),
+                                arguments = listOf(
+                                    VarNode(
+                                        name = "x",
+                                        info = Symbol(name = "x", type = typeParameterForTesting(1)),
+                                        location = Location.NoProvided
+                                    ),
+                                    VarNode(
+                                        name = "y",
+                                        info = Symbol(name = "y", type = typeParameterForTesting(2)),
+                                        location = Location.NoProvided
+                                    )
+                                ),
+                                info = ApplicationSemanticInfo(),
+                                location = Location.NoProvided
+                            ),
+                            info = EmptySemanticInfo(),
+                            location = Location.NoProvided
+                        ),
+                        info = AbstractionSemanticInfo(
+                            parameters = listOf(),
+                            returnType = typeParameterForTesting(0)
+                        ),
+                        location = Location.NoProvided
                     )
                 )
             )

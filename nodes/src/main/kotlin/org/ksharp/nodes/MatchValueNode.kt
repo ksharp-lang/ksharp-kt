@@ -2,33 +2,14 @@ package org.ksharp.nodes
 
 import org.ksharp.common.Location
 
-enum class MatchValueType {
-    Expression,
-    List,
+enum class MatchConditionalType {
     Or,
-    And,
+    And
 }
 
 data class MatchListValueNodeLocations(
     val tailSeparatorLocation: Location
 ) : NodeLocations
-
-data class MatchAssignNodeLocations(
-    val assignOperatorLocation: Location
-) : NodeLocations
-
-data class MatchValueNode(
-    val type: MatchValueType,
-    val value: NodeData,
-    override val location: Location
-) : NodeData(), ExpressionParserNode {
-
-    override val children: Sequence<NodeData>
-        get() = sequenceOf(value)
-
-    override val locations: NodeLocations
-        get() = NoLocationsDefined
-}
 
 data class MatchListValueNode(
     val head: List<NodeData>,
@@ -42,23 +23,39 @@ data class MatchListValueNode(
 
 }
 
-data class MatchAssignNode(
-    val matchValue: MatchValueNode,
-    val expression: NodeData,
-    override val location: Location,
-    override val locations: MatchAssignNodeLocations
+data class MatchConditionValueNode(
+    val type: MatchConditionalType,
+    val left: NodeData,
+    val right: NodeData,
+    override val location: Location
 ) : NodeData(), ExpressionParserNode {
+
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
     override val children: Sequence<NodeData>
-        get() = sequenceOf(matchValue, expression)
+        get() = sequenceOf(left, right)
+
+}
+
+data class MatchAssignNode(
+    val match: NodeData,
+    val expression: NodeData,
+    override val location: Location
+) : NodeData(), ExpressionParserNode {
+
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(match, expression)
 }
 
 data class MatchExpressionBranchNode(
-    val matchValue: List<MatchValueNode>,
+    val match: NodeData,
     val expression: NodeData,
     override val location: Location
 ) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
-        get() = sequenceOf(matchValue.asSequence(), sequenceOf(expression)).flatten()
+        get() = sequenceOf(match, expression)
 
     override val locations: NodeLocations
         get() = NoLocationsDefined
