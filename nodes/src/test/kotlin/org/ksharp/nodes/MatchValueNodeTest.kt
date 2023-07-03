@@ -144,4 +144,41 @@ class MatchValueNodeTest : StringSpec({
             )
         }
     }
+    "Test Node interface over GroupMatchValueNode" {
+        GroupMatchValueNode(
+            listOf(
+                MatchValueNode(
+                    MatchValueType.Expression,
+                    UnitNode(Location.NoProvided),
+                    Location.NoProvided
+                )
+            ),
+            Location.NoProvided
+        ).node.apply {
+            cast<GroupMatchValueNode>().apply {
+                matches.shouldBe(
+                    listOf(
+                        MatchValueNode(
+                            MatchValueType.Expression,
+                            UnitNode(Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ),
+                )
+                location.shouldBe(Location.NoProvided)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(
+                        this, Location.NoProvided, MatchValueNode(
+                            MatchValueType.Expression,
+                            UnitNode(Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    )
+                )
+            )
+        }
+    }
 })

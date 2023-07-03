@@ -8,68 +8,6 @@ import org.ksharp.nodes.NoLocationsDefined
 import org.ksharp.nodes.Node
 
 class LetNodeTest : StringSpec({
-    "Test Node Interface over ListMatchNode" {
-        ListMatchNode(
-            listOf(
-                VarNode(
-                    "a",
-                    "VarInfo",
-                    Location.NoProvided
-                )
-            ),
-            VarNode(
-                "b",
-                "VarInfo",
-                Location.NoProvided
-            ),
-            "ListMatchInfo",
-            Location.NoProvided
-        ).node.apply {
-            cast<ListMatchNode<String>>().apply {
-                head.shouldBe(
-                    listOf(
-                        VarNode(
-                            "a",
-                            "VarInfo",
-                            Location.NoProvided
-                        )
-                    )
-                )
-                tail.shouldBe(
-                    VarNode(
-                        "b",
-                        "VarInfo",
-                        Location.NoProvided
-                    )
-                )
-                info.shouldBe("ListMatchInfo")
-                location.shouldBe(Location.NoProvided)
-            }
-            parent.shouldBeNull()
-            children.toList().shouldBe(
-                listOf(
-                    Node(
-                        this,
-                        Location.NoProvided,
-                        VarNode(
-                            "a",
-                            "VarInfo",
-                            Location.NoProvided
-                        )
-                    ),
-                    Node(
-                        this,
-                        Location.NoProvided,
-                        VarNode(
-                            "b",
-                            "VarInfo",
-                            Location.NoProvided
-                        )
-                    )
-                )
-            )
-        }
-    }
     "Test Node Interface over LetBindingNode" {
         LetBindingNode(
             VarNode(

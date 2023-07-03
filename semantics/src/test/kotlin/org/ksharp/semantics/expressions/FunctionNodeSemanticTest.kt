@@ -1467,7 +1467,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         expression = LetNode(
                             bindings = listOf(
                                 LetBindingNode(
-                                    match = ListMatchNode(
+                                    match = ListMatchValueNode(
                                         head = listOf(
                                             VarNode(
                                                 name = "x",

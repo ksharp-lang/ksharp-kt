@@ -199,7 +199,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         }
 
         is MatchListValueNode -> {
-            ListMatchNode(
+            ListMatchValueNode(
                 head.map {
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
                 },

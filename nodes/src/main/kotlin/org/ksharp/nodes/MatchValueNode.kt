@@ -7,6 +7,7 @@ enum class MatchValueType {
     List,
     Or,
     And,
+    Group,
 }
 
 data class MatchListValueNodeLocations(
@@ -39,6 +40,19 @@ data class MatchListValueNode(
 
     override val children: Sequence<NodeData>
         get() = sequenceOf(head, listOf(tail)).flatten()
+
+}
+
+data class GroupMatchValueNode(
+    val matches: List<MatchValueNode>,
+    override val location: Location
+) :
+    NodeData(), ExpressionParserNode {
+
+    override val locations: NodeLocations
+        get() = NoLocationsDefined
+    override val children: Sequence<NodeData>
+        get() = matches.asSequence()
 
 }
 
