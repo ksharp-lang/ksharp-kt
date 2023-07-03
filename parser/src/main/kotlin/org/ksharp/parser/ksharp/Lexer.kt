@@ -561,13 +561,6 @@ fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {
     }.cast()
 }
 
-
-private fun Token.checkKeywordsCollection(keywords: Map<String, KSharpTokenType>): Token {
-    val type = keywords[text]
-    return if (type != null) new(type)
-    else this
-}
-
 private fun Token.mapToKeyword(): Token =
     when {
         text == "if" -> {

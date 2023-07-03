@@ -17,10 +17,6 @@ data class MatchAssignNodeLocations(
     val assignOperatorLocation: Location
 ) : NodeLocations
 
-data class MatchExpressionBranchNodeLocations(
-    val thenLocation: Location
-) : NodeLocations
-
 data class MatchValueNode(
     val type: MatchValueType,
     val value: NodeData,
