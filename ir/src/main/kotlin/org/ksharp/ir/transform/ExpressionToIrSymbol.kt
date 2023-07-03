@@ -50,15 +50,7 @@ fun SemanticNode<SemanticInfo>.toIrSymbol(lookup: FunctionLookup, variableIndex:
         is ApplicationNode -> toIrSymbol(lookup, variableIndex)
         is AbstractionNode -> toIrSymbol(lookup, variableIndex)
 
-        is LetNode -> TODO()
-        is LetBindingNode -> TODO()
-
-        is MatchNode -> TODO()
-        is MatchBranchNode -> TODO()
-
-        is ListMatchValueNode -> TODO()
-        is GroupMatchValueNode -> TODO()
-        is ConditionalMatchValueNode -> TODO()
+        else -> TODO()
     }
 
 val IrBoolFactory: CustomApplicationIrNode = { _, _ ->
