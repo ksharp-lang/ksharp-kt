@@ -54,23 +54,23 @@ private fun KSharpLexerIterator.consumeMatchLiteralValue(): KSharpParserResult =
         it.consumeExpressionValue()
     }
 
-private fun KSharpLexerIterator.consumeConditionalOrMatchValue(): KSharpParserResult =
-    consumeMatchLiteralValue().thenMatchConditionOperator(MatchConditionalType.Or, "||") {
-        it.consumeConditionalOrMatchValue()
+private fun KSharpLexerIterator.consumeConditionalAndMatchValue(): KSharpParserResult =
+    consumeMatchLiteralValue().thenMatchConditionOperator(MatchConditionalType.And, "&&") {
+        it.consumeConditionalAndMatchValue()
     }
 
-private fun KSharpLexerIterator.consumeConditionalAndMatchValue(): KSharpParserResult =
-    consumeConditionalOrMatchValue()
-        .thenMatchConditionOperator(MatchConditionalType.And, "&&") {
-            it.consumeConditionalAndMatchValue()
+private fun KSharpLexerIterator.consumeConditionalOrMatchValue(): KSharpParserResult =
+    consumeConditionalAndMatchValue()
+        .thenMatchConditionOperator(MatchConditionalType.Or, "||") {
+            it.consumeConditionalOrMatchValue()
         }
 
 internal fun KSharpLexerIterator.consumeMatchValue(): KSharpParserResult =
     ifConsume(KSharpTokenType.OpenParenthesis, true) { l ->
-        l.consume { it.consumeConditionalAndMatchValue() }
+        l.consume { it.consumeConditionalOrMatchValue() }
             .then(KSharpTokenType.CloseParenthesis, true)
             .build { it.first().cast<NodeData>() }
-    }.or { consumeConditionalAndMatchValue() }
+    }.or { consumeConditionalOrMatchValue() }
 
 internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserResult =
     this.consumeMatchValue()

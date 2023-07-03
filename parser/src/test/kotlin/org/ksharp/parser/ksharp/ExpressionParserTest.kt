@@ -297,14 +297,14 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
-                    "*",
+                    "+",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     OperatorNode(
-                        "+",
-                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        "*",
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                         Location.NoProvided,
                     ),
-                    LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided,
                 )
             )
@@ -524,14 +524,14 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
-                    "*",
+                    "+>",
+                    LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     OperatorNode(
-                        "+>",
-                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+                        "*",
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                        LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                         Location.NoProvided,
                     ),
-                    LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
                     Location.NoProvided,
                 )
             )

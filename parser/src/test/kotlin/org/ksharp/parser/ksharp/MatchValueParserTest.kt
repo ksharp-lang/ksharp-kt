@@ -180,7 +180,28 @@ class MatchValueParserTest : StringSpec({
             .consumeMatchValue()
             .map { it.value.also(::println) }
             .shouldBeRight(
-                Unit
+                MatchConditionValueNode(
+                    type = MatchConditionalType.And,
+                    left = FunctionCallNode(
+                        name = "x",
+                        type = FunctionType.Function,
+                        arguments = listOf(),
+                        Location.NoProvided
+                    ),
+                    right = FunctionCallNode(
+                        name = "isEven",
+                        type = FunctionType.Function,
+                        arguments = listOf(
+                            LiteralValueNode(
+                                value = "x",
+                                type = LiteralValueType.Binding,
+                                Location.NoProvided
+                            )
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
             )
     }
     "Group matches" {
@@ -189,7 +210,28 @@ class MatchValueParserTest : StringSpec({
             .consumeMatchValue()
             .map { it.value.also(::println) }
             .shouldBeRight(
-                Unit
+                MatchConditionValueNode(
+                    type = MatchConditionalType.And,
+                    left = FunctionCallNode(
+                        name = "x",
+                        type = FunctionType.Function,
+                        arguments = listOf(),
+                        Location.NoProvided
+                    ),
+                    right = FunctionCallNode(
+                        name = "isEven",
+                        type = FunctionType.Function,
+                        arguments = listOf(
+                            LiteralValueNode(
+                                value = "x",
+                                type = LiteralValueType.Binding,
+                                Location.NoProvided
+                            )
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
             )
     }
     "Group matches and operator functions" {
@@ -198,7 +240,35 @@ class MatchValueParserTest : StringSpec({
             .consumeMatchValue()
             .map { it.value.also(::println) }
             .shouldBeRight(
-                Unit
+                MatchConditionValueNode(
+                    type = MatchConditionalType.Or,
+                    left = MatchConditionValueNode(
+                        type = MatchConditionalType.And, left = FunctionCallNode(
+                            name = "x", type = FunctionType.Function, arguments = listOf(),
+                            Location.NoProvided
+                        ),
+                        right = FunctionCallNode(
+                            name = "(<)", type = FunctionType.Operator,
+                            arguments = listOf(
+                                LiteralValueNode(value = "x", type = LiteralValueType.Binding, Location.NoProvided),
+                                LiteralValueNode(value = "9", type = LiteralValueType.Integer, Location.NoProvided)
+                            ), Location.NoProvided
+                        ), Location.NoProvided
+                    ),
+                    right = FunctionCallNode(
+                        name = "isEven",
+                        type = FunctionType.Function,
+                        arguments = listOf(
+                            LiteralValueNode(
+                                value = "x",
+                                type = LiteralValueType.Binding,
+                                Location.NoProvided
+                            )
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
             )
     }
     "Match assignment" {
