@@ -1,20 +1,8 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.ErrorCode
-import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
-
-private object NoMatch : NodeData() {
-    override val locations: NodeLocations = NoLocationsDefined
-    override val location: Location = Location.NoProvided
-    override val children: Sequence<NodeData> = emptySequence()
-}
-
-private enum class MatchParsingErrorCode(override val description: String) : ErrorCode {
-    NoMatchFound("No match found"),
-}
 
 private fun KSharpConsumeResult.buildConditionalMatchValueNode(type: MatchConditionalType): KSharpParserResult =
     build {
@@ -67,7 +55,7 @@ private fun KSharpLexerIterator.consumeMatchLiteralValue(): KSharpParserResult =
     }
 
 private fun KSharpLexerIterator.consumeConditionalOrMatchValue(): KSharpParserResult =
-    consumeMatchValue().thenMatchConditionOperator(MatchConditionalType.And, "||") {
+    consumeMatchLiteralValue().thenMatchConditionOperator(MatchConditionalType.And, "||") {
         it.consumeConditionalOrMatchValue()
     }
 
