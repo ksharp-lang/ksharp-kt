@@ -16,6 +16,7 @@ class MatchValueNodeTest : StringSpec({
                 type.shouldBe(MatchValueType.Expression)
                 value.shouldBe(UnitNode(Location.NoProvided))
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
@@ -166,6 +167,7 @@ class MatchValueNodeTest : StringSpec({
                     ),
                 )
                 location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
             }
             parent.shouldBeNull()
             children.toList().shouldBe(
