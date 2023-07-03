@@ -973,6 +973,74 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "let expression 3" {
+        "let [ x | y ] = [1, 2] then x + y".trimMargin()
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                LetExpressionNode(
+                    matches = listOf(
+                        MatchAssignNode(
+                            matchValue = MatchValueNode(
+                                type = MatchValueType.List, value = MatchListValueNode(
+                                    head = listOf(
+                                        FunctionCallNode(
+                                            name = "x", type = FunctionType.Function, arguments = listOf(),
+                                            location = Location.NoProvided
+                                        )
+                                    ),
+                                    tail = LiteralValueNode(
+                                        value = "y", type = LiteralValueType.Binding,
+                                        location = Location.NoProvided
+                                    ),
+                                    location = Location.NoProvided,
+                                    locations = MatchListValueNodeLocations(tailSeparatorLocation = Location.NoProvided)
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            expression = LiteralCollectionNode(
+                                values = listOf(
+                                    LiteralValueNode(
+                                        value = "1",
+                                        type = LiteralValueType.Integer,
+                                        location = Location.NoProvided
+                                    ),
+                                    LiteralValueNode(
+                                        value = "2", type = LiteralValueType.Integer,
+                                        location = Location.NoProvided
+                                    )
+                                ), type = LiteralCollectionType.List, location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = MatchAssignNodeLocations(assignOperatorLocation = Location.NoProvided)
+                        )
+                    ),
+                    expression = OperatorNode(
+                        operator = "+",
+                        left = FunctionCallNode(
+                            name = "x",
+                            type = FunctionType.Function,
+                            arguments = listOf(),
+                            location = Location.NoProvided
+                        ),
+                        right = FunctionCallNode(
+                            name = "y",
+                            type = FunctionType.Function,
+                            arguments = listOf(),
+                            location = Location.NoProvided
+                        ),
+                        location = Location.NoProvided
+                    ),
+                    location = Location.NoProvided,
+                    locations = LetExpressionNodeLocations(
+                        letLocation = Location.NoProvided,
+                        thenLocation = Location.NoProvided
+                    )
+                )
+            )
+    }
     "nested let expression" {
         """let x = let a2 = a * 2
           |            b2 = b * 2

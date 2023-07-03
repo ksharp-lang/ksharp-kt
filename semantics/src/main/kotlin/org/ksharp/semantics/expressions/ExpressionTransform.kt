@@ -90,13 +90,21 @@ internal fun ExpressionParserNode.toSemanticNode(
     typeSystem: TypeSystem
 ): SemanticNode<SemanticInfo> =
     when (this) {
-        is LiteralValueNode -> with(value.toValue(type)) {
-            ConstantNode(
-                this,
-                type.toSemanticInfo(typeSystem),
-                location
-            )
-        }
+        is LiteralValueNode ->
+            if (type == LiteralValueType.Binding) {
+                val varInfo = info.getVarSemanticInfo(value, location)
+                VarNode(
+                    value,
+                    varInfo,
+                    location
+                )
+            } else with(value.toValue(type)) {
+                ConstantNode(
+                    this,
+                    type.toSemanticInfo(typeSystem),
+                    location
+                )
+            }
 
         is OperatorNode -> ApplicationNode(
             ApplicationName(null, "($operator)"),
@@ -120,22 +128,7 @@ internal fun ExpressionParserNode.toSemanticNode(
         )
 
         is FunctionCallNode -> if (arguments.isEmpty()) {
-            val varInfo = info.getVarSemanticInfo(name, location)
-            if (varInfo is Symbol) {
-                VarNode(
-                    name,
-                    varInfo,
-                    location
-                )
-            } else {
-                val callInfo = info.callSemanticInfo()
-                ApplicationNode(
-                    name.toApplicationName(),
-                    listOf(UnitNode(location).toSemanticNode(errors, callInfo, typeSystem)),
-                    ApplicationSemanticInfo(),
-                    location
-                )
-            }
+            name.variableOrFunctionCallNode(errors, typeSystem, info, location)
         } else {
             val callInfo = info.callSemanticInfo()
             ApplicationNode(
@@ -205,10 +198,46 @@ internal fun ExpressionParserNode.toSemanticNode(
             )
         }
 
-        is MatchValueNode -> when (type) {
-            MatchValueType.Expression -> value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
-            else -> TODO()
+        is MatchListValueNode -> {
+            ListMatchNode(
+                head.map {
+                    it.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
+                },
+                tail.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+                EmptySemanticInfo(),
+                location
+            )
         }
+
+        is MatchValueNode -> when (type) {
+            MatchValueType.Or, MatchValueType.And -> TODO()
+            else -> value.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
+        }
+
 
         else -> TODO("No supported $this")
     }
+
+private fun String.variableOrFunctionCallNode(
+    errors: ErrorCollector,
+    typeSystem: TypeSystem,
+    info: SemanticInfo,
+    location: Location
+): SemanticNode<SemanticInfo> {
+    val varInfo = info.getVarSemanticInfo(this, location)
+    return if (varInfo is Symbol) {
+        VarNode(
+            this,
+            varInfo,
+            location
+        )
+    } else {
+        val callInfo = info.callSemanticInfo()
+        ApplicationNode(
+            this.toApplicationName(),
+            listOf(UnitNode(location).toSemanticNode(errors, callInfo, typeSystem)),
+            ApplicationSemanticInfo(),
+            location
+        )
+    }
+}

@@ -14,6 +14,17 @@ data class LetBindingNode<SemanticInfo>(
 
 }
 
+data class ListMatchNode<SemanticInfo>(
+    val head: List<SemanticNode<SemanticInfo>>,
+    val tail: SemanticNode<SemanticInfo>,
+    override val info: SemanticInfo,
+    override val location: Location
+) : SemanticNode<SemanticInfo>() {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(head, listOf(tail)).flatten()
+
+}
+
 data class LetNode<SemanticInfo>(
     val bindings: List<LetBindingNode<SemanticInfo>>,
     val expression: SemanticNode<SemanticInfo>,
