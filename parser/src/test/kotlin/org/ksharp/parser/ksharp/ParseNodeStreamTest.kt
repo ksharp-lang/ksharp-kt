@@ -117,6 +117,7 @@ class ParseNodeStreamTest : StringSpec({
                     FunctionNode(
                         native = false, pub = false, annotations = null, name = "sum", parameters = listOf("a"),
                         expression = OperatorNode(
+                            "Operator10",
                             operator = "+",
                             left = FunctionCallNode(
                                 name = "a",

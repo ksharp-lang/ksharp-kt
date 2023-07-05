@@ -252,6 +252,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator12",
                     "**",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -267,6 +268,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator11",
                     "*",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -282,6 +284,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator10",
                     "+",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -297,9 +300,11 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator10",
                     "+",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     OperatorNode(
+                        "Operator11",
                         "*",
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                         LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
@@ -317,6 +322,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator9",
                     ">>",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -332,6 +338,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator8",
                     ">",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -347,6 +354,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator7",
                     "!=",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -362,6 +370,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator6",
                     "&",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -377,6 +386,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator5",
                     "^",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -392,6 +402,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator4",
                     "|",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -407,6 +418,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator3",
                     "&&",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -422,6 +434,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator2",
                     "||",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -437,6 +450,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator1",
                     "$",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -452,6 +466,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator0",
                     ".",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -467,6 +482,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator",
                     ":",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -482,6 +498,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator10",
                     "+",
                     LiteralCollectionNode(
                         listOf(
@@ -506,6 +523,7 @@ class ExpressionParserTest : StringSpec({
                     listOf(
                         LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                         OperatorNode(
+                            "Operator10",
                             "+",
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
@@ -524,9 +542,11 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator10",
                     "+>",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     OperatorNode(
+                        "Operator11",
                         "*",
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                         LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
@@ -547,6 +567,7 @@ class ExpressionParserTest : StringSpec({
                     listOf(
                         LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                         OperatorNode(
+                            "Operator10",
                             "+",
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
@@ -568,12 +589,14 @@ class ExpressionParserTest : StringSpec({
                     listOf(
                         LiteralMapEntryNode(
                             OperatorNode(
+                                "Operator10",
                                 "+",
                                 LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                                 Location.NoProvided,
                             ),
                             OperatorNode(
+                                "Operator10",
                                 "+",
                                 LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("20", LiteralValueType.Integer, Location.NoProvided),
@@ -616,6 +639,7 @@ class ExpressionParserTest : StringSpec({
                             Location.NoProvided
                         ),
                         OperatorNode(
+                            "Operator10",
                             "+",
                             LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
@@ -637,6 +661,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator10",
                     "+",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     FunctionCallNode(
@@ -649,6 +674,7 @@ class ExpressionParserTest : StringSpec({
                                 Location.NoProvided
                             ),
                             OperatorNode(
+                                "Operator10",
                                 "+",
                                 LiteralValueNode("30", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("15", LiteralValueType.Integer, Location.NoProvided),
@@ -661,6 +687,47 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "function and operators in block expressions 2" {
+        """10
+           | >> sum 15
+           | >> 20
+        """.trimMargin()
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value.also(::println) }
+            .shouldBeRight(
+                OperatorNode(
+                    "Operator9",
+                    operator = ">>",
+                    OperatorNode(
+                        "Operator9",
+                        ">>",
+                        LiteralValueNode(value = "10", type = LiteralValueType.Integer, Location.NoProvided),
+                        FunctionCallNode(
+                            "sum",
+                            FunctionType.Function,
+                            listOf(
+                                LiteralValueNode(
+                                    "15",
+                                    LiteralValueType.Integer,
+                                    Location.NoProvided
+                                )
+                            ),
+                            Location.NoProvided
+                        ),
+                        Location.NoProvided
+                    ),
+                    LiteralValueNode(
+                        value = "20",
+                        type = LiteralValueType.Integer,
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+
+            )
+    }
     "function and operator expressions" {
         """sum 10 20 30 + 15
         """.trimMargin()
@@ -670,6 +737,7 @@ class ExpressionParserTest : StringSpec({
             .map { it.value }
             .shouldBeRight(
                 OperatorNode(
+                    "Operator10",
                     "+",
                     FunctionCallNode(
                         "sum",
@@ -703,6 +771,7 @@ class ExpressionParserTest : StringSpec({
             .shouldBeRight(
                 IfNode(
                     OperatorNode(
+                        "Operator8",
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
@@ -723,6 +792,7 @@ class ExpressionParserTest : StringSpec({
             .shouldBeRight(
                 IfNode(
                     OperatorNode(
+                        "Operator8",
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
@@ -745,6 +815,7 @@ class ExpressionParserTest : StringSpec({
             .shouldBeRight(
                 IfNode(
                     OperatorNode(
+                        "Operator8",
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
@@ -779,6 +850,7 @@ class ExpressionParserTest : StringSpec({
                         ),
                         IfNode(
                             OperatorNode(
+                                "Operator7",
                                 "!=",
                                 LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -821,6 +893,7 @@ class ExpressionParserTest : StringSpec({
                         ),
                         IfNode(
                             OperatorNode(
+                                "Operator7",
                                 "!=",
                                 LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
                                 LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -850,6 +923,7 @@ class ExpressionParserTest : StringSpec({
             .shouldBeRight(
                 IfNode(
                     OperatorNode(
+                        "Operator8",
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
@@ -905,6 +979,7 @@ class ExpressionParserTest : StringSpec({
                         )
                     ),
                     OperatorNode(
+                        "Operator10",
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
@@ -943,6 +1018,7 @@ class ExpressionParserTest : StringSpec({
                         )
                     ),
                     OperatorNode(
+                        "Operator10",
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
@@ -994,6 +1070,7 @@ class ExpressionParserTest : StringSpec({
                         )
                     ),
                     expression = OperatorNode(
+                        "Operator10",
                         operator = "+",
                         left = FunctionCallNode(
                             name = "x",
@@ -1097,6 +1174,7 @@ class ExpressionParserTest : StringSpec({
                                             Location.NoProvided
                                         ),
                                         OperatorNode(
+                                            "Operator11",
                                             "*",
                                             FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -1112,6 +1190,7 @@ class ExpressionParserTest : StringSpec({
                                             Location.NoProvided
                                         ),
                                         OperatorNode(
+                                            "Operator11",
                                             "*",
                                             FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
                                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -1121,6 +1200,7 @@ class ExpressionParserTest : StringSpec({
                                     )
                                 ),
                                 OperatorNode(
+                                    "Operator10",
                                     "+",
                                     FunctionCallNode("a2", FunctionType.Function, listOf(), Location.NoProvided),
                                     FunctionCallNode("b2", FunctionType.Function, listOf(), Location.NoProvided),
@@ -1133,6 +1213,7 @@ class ExpressionParserTest : StringSpec({
                         )
                     ),
                     OperatorNode(
+                        "Operator10",
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),

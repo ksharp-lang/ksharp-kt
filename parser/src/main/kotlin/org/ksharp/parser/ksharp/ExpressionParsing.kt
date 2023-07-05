@@ -208,29 +208,76 @@ private fun KSharpConsumeResult.buildOperatorExpression(): KSharpParserResult =
         if (it.size == 1) it.first().cast<NodeData>()
         else {
             val operator = it[1] as Token
-            OperatorNode(
+            val category = operator.type.toString()
+            val left = it.first().cast<NodeData>()
+            val right = it.last().cast<NodeData>()
+            if (right is OperatorNode && right.category == category) {
+                OperatorNode(
+                    category,
+                    right.operator,
+                    OperatorNode(
+                        category,
+                        operator.text,
+                        left,
+                        right.left,
+                        operator.location,
+                    ),
+                    right.right,
+                    operator.location,
+                )
+            } else OperatorNode(
+                category,
                 operator.text,
-                it.first().cast(),
-                it.last().cast(),
+                left,
+                right,
                 operator.location,
             )
         }
     }
 
-private fun KSharpParserResult.thenOperatorRightExpression(
+private fun KSharpLexerIterator.filter(
+    predicate: (Token) -> Boolean
+): Token? {
+    while (hasNext()) {
+        val token = next()
+        if (predicate(token)) {
+            return token
+        }
+    }
+    return null
+}
+
+private fun KSharpParserResult.thenOperatorExpression(
     type: KSharpTokenType,
     block: (KSharpLexerIterator) -> KSharpParserResult
 ): KSharpParserResult =
-    resume().thenIf(type) { then ->
-        then.consume(block)
-    }.buildOperatorExpression()
+    resume()
+        .flatMap {
+            val tokens = it.tokens
+            val checkpoint = tokens.state.lookAHeadState.checkpoint()
+            val token = tokens.filter { t -> !(t.type == BaseTokenType.NewLine && t.text.length > 1) }
+            if (token != null && token.type == type) {
+                checkpoint.end(ConsumeTokens)
+                it.collection.add(token)
+                block(tokens).map { p ->
+                    it.collection.add(p.value as Any)
+                    NodeCollector(
+                        it.collection,
+                        p.remainTokens
+                    )
+                }
+            } else {
+                checkpoint.end(PreserveTokens)
+                Either.Right(it)
+            }
+        }.buildOperatorExpression()
 
 private fun KSharpLexerIterator.consumeOperator(
     tupleWithoutParenthesis: Boolean
 ): KSharpParserResult =
     consumeExpressionValue(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator) {
+    ).thenOperatorExpression(KSharpTokenType.Operator) {
         it.consumeOperator(
             tupleWithoutParenthesis
         )
@@ -242,7 +289,7 @@ private fun KSharpLexerIterator.consumeOperator12(
 ): KSharpParserResult =
     consumeOperator(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator12) {
+    ).thenOperatorExpression(KSharpTokenType.Operator12) {
         it.consumeOperator12(
             tupleWithoutParenthesis
         )
@@ -253,7 +300,7 @@ private fun KSharpLexerIterator.consumeOperator11(
 ): KSharpParserResult =
     consumeOperator12(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator11) {
+    ).thenOperatorExpression(KSharpTokenType.Operator11) {
         it.consumeOperator11(
             tupleWithoutParenthesis
         )
@@ -264,7 +311,7 @@ private fun KSharpLexerIterator.consumeOperator10(
 ): KSharpParserResult =
     consumeOperator11(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator10) {
+    ).thenOperatorExpression(KSharpTokenType.Operator10) {
         it.consumeOperator10(
             tupleWithoutParenthesis
         )
@@ -275,7 +322,7 @@ private fun KSharpLexerIterator.consumeOperator09(
 ): KSharpParserResult =
     consumeOperator10(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator9) {
+    ).thenOperatorExpression(KSharpTokenType.Operator9) {
         it.consumeOperator09(
             tupleWithoutParenthesis
         )
@@ -286,7 +333,7 @@ private fun KSharpLexerIterator.consumeOperator08(
 ): KSharpParserResult =
     consumeOperator09(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator8) {
+    ).thenOperatorExpression(KSharpTokenType.Operator8) {
         it.consumeOperator08(
             tupleWithoutParenthesis
         )
@@ -297,7 +344,7 @@ private fun KSharpLexerIterator.consumeOperator07(
 ): KSharpParserResult =
     consumeOperator08(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator7) {
+    ).thenOperatorExpression(KSharpTokenType.Operator7) {
         it.consumeOperator07(
             tupleWithoutParenthesis
         )
@@ -308,7 +355,7 @@ private fun KSharpLexerIterator.consumeOperator06(
 ): KSharpParserResult =
     consumeOperator07(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator6) {
+    ).thenOperatorExpression(KSharpTokenType.Operator6) {
         it.consumeOperator06(
             tupleWithoutParenthesis
         )
@@ -319,7 +366,7 @@ private fun KSharpLexerIterator.consumeOperator05(
 ): KSharpParserResult =
     consumeOperator06(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator5) {
+    ).thenOperatorExpression(KSharpTokenType.Operator5) {
         it.consumeOperator05(
             tupleWithoutParenthesis
         )
@@ -330,7 +377,7 @@ private fun KSharpLexerIterator.consumeOperator04(
 ): KSharpParserResult =
     consumeOperator05(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator4) {
+    ).thenOperatorExpression(KSharpTokenType.Operator4) {
         it.consumeOperator04(
             tupleWithoutParenthesis
         )
@@ -341,7 +388,7 @@ private fun KSharpLexerIterator.consumeOperator03(
 ): KSharpParserResult =
     consumeOperator04(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator3) {
+    ).thenOperatorExpression(KSharpTokenType.Operator3) {
         it.consumeOperator03(
             tupleWithoutParenthesis
         )
@@ -352,7 +399,7 @@ private fun KSharpLexerIterator.consumeOperator02(
 ): KSharpParserResult =
     consumeOperator03(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator2) {
+    ).thenOperatorExpression(KSharpTokenType.Operator2) {
         it.consumeOperator02(
             tupleWithoutParenthesis
         )
@@ -363,7 +410,7 @@ private fun KSharpLexerIterator.consumeOperator01(
 ): KSharpParserResult =
     consumeOperator02(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator1) {
+    ).thenOperatorExpression(KSharpTokenType.Operator1) {
         it.consumeOperator01(
             tupleWithoutParenthesis
         )
@@ -374,7 +421,7 @@ private fun KSharpLexerIterator.consumeOperator0(
 ): KSharpParserResult =
     consumeOperator01(
         tupleWithoutParenthesis
-    ).thenOperatorRightExpression(KSharpTokenType.Operator0) {
+    ).thenOperatorExpression(KSharpTokenType.Operator0) {
         it.consumeOperator0(
             tupleWithoutParenthesis
         )

@@ -59,6 +59,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 "dot.sum",
                 listOf("a", "b"),
                 OperatorNode(
+                    "Operator10",
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -97,6 +98,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 "sum",
                 listOf("a", "b"),
                 OperatorNode(
+                    "Operator10",
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -154,6 +156,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 "sum",
                 listOf("a", "b"),
                 OperatorNode(
+                    "Operator10",
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -210,6 +213,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 "sum",
                 listOf("a", "b"),
                 OperatorNode(
+                    "Operator10",
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -307,6 +311,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 "sum",
                 listOf("a", "b"),
                 OperatorNode(
+                    "Operator10",
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -357,6 +362,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 "sum",
                 listOf(),
                 OperatorNode(
+                    "Operator10",
                     "+",
                     FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                     FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -470,6 +476,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 "n",
                 listOf(),
                 OperatorNode(
+                    "Operator12",
                     "**",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -537,6 +544,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 "n",
                 listOf(),
                 OperatorNode(
+                    "Operator12",
                     "**",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -612,6 +620,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 "n",
                 listOf(),
                 OperatorNode(
+                    "Operator12",
                     "**",
                     LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                     LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
@@ -753,6 +762,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 listOf("a"),
                 IfNode(
                     OperatorNode(
+                        "Operator8",
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
@@ -842,6 +852,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 listOf("a"),
                 IfNode(
                     OperatorNode(
+                        "Operator8",
                         ">",
                         LiteralValueNode("4", LiteralValueType.Integer, Location.NoProvided),
                         FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
@@ -933,6 +944,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     listOf(
                         LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
                         OperatorNode(
+                            "Operator10",
                             "+",
                             LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
                             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
@@ -1268,6 +1280,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         )
                     ),
                     OperatorNode(
+                        "Operator10",
                         "+",
                         FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
                         FunctionCallNode("y", FunctionType.Function, listOf(), Location.NoProvided),
@@ -1409,6 +1422,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         )
                     ),
                     expression = OperatorNode(
+                        "Operator10",
                         operator = "+",
                         left = FunctionCallNode(
                             name = "x",
