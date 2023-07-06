@@ -187,6 +187,10 @@ internal fun ExpressionParserNode.toSemanticNode(
             )
         }
 
+        is MatchExpressionNode -> TODO()
+
+        is MatchExpressionBranchNode -> TODO()
+
         is MatchAssignNode -> {
             val letInfo = info.cast<LetSemanticInfo>()
             val matchInfo = MatchSemanticInfo(letInfo.table)
@@ -208,8 +212,8 @@ internal fun ExpressionParserNode.toSemanticNode(
                 location
             )
         }
-        
-        else -> TODO("No supported $this")
+
+        is MatchConditionValueNode -> TODO()
     }
 
 private fun String.variableOrFunctionCallNode(

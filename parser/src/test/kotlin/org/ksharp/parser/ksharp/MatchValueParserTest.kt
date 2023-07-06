@@ -271,6 +271,43 @@ class MatchValueParserTest : StringSpec({
                 )
             )
     }
+    "matches operator associativity" {
+        "x && (<) x 9 && isEven x".kSharpLexer()
+            .prepareLexerForMatchValueParsing()
+            .consumeMatchValue()
+            .map { it.value.also(::println) }
+            .shouldBeRight(
+                MatchConditionValueNode(
+                    type = MatchConditionalType.And,
+                    left = MatchConditionValueNode(
+                        type = MatchConditionalType.And, left = FunctionCallNode(
+                            name = "x", type = FunctionType.Function, arguments = listOf(),
+                            Location.NoProvided
+                        ),
+                        right = FunctionCallNode(
+                            name = "(<)", type = FunctionType.Operator,
+                            arguments = listOf(
+                                LiteralValueNode(value = "x", type = LiteralValueType.Binding, Location.NoProvided),
+                                LiteralValueNode(value = "9", type = LiteralValueType.Integer, Location.NoProvided)
+                            ), Location.NoProvided
+                        ), Location.NoProvided
+                    ),
+                    right = FunctionCallNode(
+                        name = "isEven",
+                        type = FunctionType.Function,
+                        arguments = listOf(
+                            LiteralValueNode(
+                                value = "x",
+                                type = LiteralValueType.Binding,
+                                Location.NoProvided
+                            )
+                        ),
+                        Location.NoProvided
+                    ),
+                    Location.NoProvided
+                )
+            )
+    }
     "Match assignment" {
         "x, y = 1, 2".kSharpLexer()
             .prepareLexerForMatchValueParsing()

@@ -27,7 +27,6 @@ data class ListMatchValueNode<SemanticInfo>(
 
 }
 
-
 data class MatchBranchNode<SemanticInfo>(
     val matches: List<SemanticNode<SemanticInfo>>,
     val expression: SemanticNode<SemanticInfo>,
