@@ -109,12 +109,10 @@ class MatchNodeTest : StringSpec({
     }
     "Test Node Interface over MatchBranchNode" {
         MatchBranchNode(
-            listOf(
-                VarNode(
-                    "a",
-                    "VarInfo",
-                    Location.NoProvided
-                )
+            VarNode(
+                "a",
+                "VarInfo",
+                Location.NoProvided
             ),
             VarNode(
                 "b",
@@ -125,13 +123,11 @@ class MatchNodeTest : StringSpec({
             Location.NoProvided
         ).node.apply {
             cast<MatchBranchNode<String>>().apply {
-                matches.shouldBe(
-                    listOf(
-                        VarNode(
-                            "a",
-                            "VarInfo",
-                            Location.NoProvided
-                        )
+                match.shouldBe(
+                    VarNode(
+                        "a",
+                        "VarInfo",
+                        Location.NoProvided
                     )
                 )
                 expression.shouldBe(
@@ -148,14 +144,17 @@ class MatchNodeTest : StringSpec({
     }
     "Test Node Interface over MatchNode" {
         MatchNode(
+            VarNode(
+                "c",
+                "VarInfo",
+                Location.NoProvided
+            ),
             listOf(
                 MatchBranchNode(
-                    listOf(
-                        VarNode(
-                            "a",
-                            "VarInfo",
-                            Location.NoProvided
-                        )
+                    VarNode(
+                        "a",
+                        "VarInfo",
+                        Location.NoProvided
                     ),
                     VarNode(
                         "b",
@@ -166,11 +165,6 @@ class MatchNodeTest : StringSpec({
                     Location.NoProvided
                 )
             ),
-            VarNode(
-                "c",
-                "VarInfo",
-                Location.NoProvided
-            ),
             "MatchInfo",
             Location.NoProvided
         ).node.apply {
@@ -178,12 +172,10 @@ class MatchNodeTest : StringSpec({
                 branches.shouldBe(
                     listOf(
                         MatchBranchNode(
-                            listOf(
-                                VarNode(
-                                    "a",
-                                    "VarInfo",
-                                    Location.NoProvided
-                                )
+                            VarNode(
+                                "a",
+                                "VarInfo",
+                                Location.NoProvided
                             ),
                             VarNode(
                                 "b",

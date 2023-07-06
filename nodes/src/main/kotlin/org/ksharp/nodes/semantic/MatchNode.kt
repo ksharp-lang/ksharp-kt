@@ -28,18 +28,18 @@ data class ListMatchValueNode<SemanticInfo>(
 }
 
 data class MatchBranchNode<SemanticInfo>(
-    val matches: List<SemanticNode<SemanticInfo>>,
+    val match: SemanticNode<SemanticInfo>,
     val expression: SemanticNode<SemanticInfo>,
     override val info: SemanticInfo,
     override val location: Location
 ) : SemanticNode<SemanticInfo>() {
     override val children: Sequence<NodeData>
-        get() = sequenceOf(matches, listOf(expression)).flatten()
+        get() = sequenceOf(match, expression)
 }
 
 data class MatchNode<SemanticInfo>(
-    val branches: List<MatchBranchNode<SemanticInfo>>,
     val expression: SemanticNode<SemanticInfo>,
+    val branches: List<MatchBranchNode<SemanticInfo>>,
     override val info: SemanticInfo,
     override val location: Location
 ) : SemanticNode<SemanticInfo>() {
