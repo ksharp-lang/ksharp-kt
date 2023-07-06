@@ -187,6 +187,23 @@ internal fun ExpressionParserNode.toSemanticNode(
             )
         }
 
+        is MatchExpressionNode -> MatchNode(
+            expression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+            branches.map {
+                it.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
+                    .cast()
+            },
+            EmptySemanticInfo(),
+            location
+        )
+
+        is MatchExpressionBranchNode -> MatchBranchNode(
+            match.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+            expression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+            EmptySemanticInfo(),
+            location
+        )
+
         is MatchAssignNode -> {
             val letInfo = info.cast<LetSemanticInfo>()
             val matchInfo = MatchSemanticInfo(letInfo.table)
@@ -198,18 +215,22 @@ internal fun ExpressionParserNode.toSemanticNode(
             )
         }
 
-        is MatchListValueNode -> {
-            ListMatchValueNode(
-                head.map {
-                    it.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
-                },
-                tail.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
-                EmptySemanticInfo(),
-                location
-            )
-        }
-        
-        else -> TODO("No supported $this")
+        is MatchListValueNode -> ListMatchValueNode(
+            head.map {
+                it.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem)
+            },
+            tail.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+            EmptySemanticInfo(),
+            location
+        )
+
+        is MatchConditionValueNode -> ConditionalMatchValueNode(
+            type,
+            left.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+            right.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
+            EmptySemanticInfo(),
+            location
+        )
     }
 
 private fun String.variableOrFunctionCallNode(

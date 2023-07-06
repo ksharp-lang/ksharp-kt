@@ -1530,6 +1530,106 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
             )
         }
     }
+    should("Semantic node: match expression") {
+        module(
+            FunctionNode(
+                false,
+                true,
+                null,
+                "n",
+                listOf(),
+                MatchExpressionNode(
+                    LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                    listOf(
+                        MatchExpressionBranchNode(
+                            LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),
+                            LiteralValueNode("\"one\"", LiteralValueType.String, Location.NoProvided),
+                            Location.NoProvided
+                        ),
+                        MatchExpressionBranchNode(
+                            MatchConditionValueNode(
+                                type = MatchConditionalType.Or,
+                                left = LiteralValueNode("2", LiteralValueType.Integer, Location.NoProvided),
+                                right = LiteralValueNode("3", LiteralValueType.Integer, Location.NoProvided),
+                                Location.NoProvided
+                            ),
+                            LiteralValueNode("\"other\"", LiteralValueType.String, Location.NoProvided),
+                            Location.NoProvided
+                        )
+                    ),
+                    Location.NoProvided,
+                    MatchExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
+                ),
+                Location.NoProvided, FunctionNodeLocations(
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    Location.NoProvided,
+                    listOf(),
+                    Location.NoProvided
+                )
+            )
+        ).checkFunctionSemantics(
+            ModuleTypeSystemInfo(
+                listOf(),
+                ts
+            )
+        ).apply {
+            errors.shouldBeEmpty()
+            abstractions.shouldBe(
+                listOf(
+                    AbstractionNode(
+                        attributes = setOf(CommonAttribute.Public),
+                        name = "n",
+                        expression = MatchNode(
+                            expression = ConstantNode(value = 1.toLong(), info = longTypePromise, Location.NoProvided),
+                            branches = listOf(
+                                MatchBranchNode(
+                                    match = ConstantNode(
+                                        value = 1.toLong(),
+                                        info = longTypePromise,
+                                        Location.NoProvided
+                                    ),
+                                    expression = ConstantNode(
+                                        value = "one",
+                                        info = strTypePromise,
+                                        Location.NoProvided
+                                    ),
+                                    info = EmptySemanticInfo(), Location.NoProvided
+                                ),
+                                MatchBranchNode(
+                                    match = ConditionalMatchValueNode(
+                                        type = MatchConditionalType.Or,
+                                        left = ConstantNode(
+                                            value = 2.toLong(),
+                                            info = longTypePromise,
+                                            Location.NoProvided
+                                        ),
+                                        right = ConstantNode(
+                                            value = 3.toLong(),
+                                            info = longTypePromise,
+                                            Location.NoProvided
+                                        ),
+                                        info = EmptySemanticInfo(), Location.NoProvided
+                                    ),
+                                    expression = ConstantNode(
+                                        value = "other",
+                                        info = strTypePromise,
+                                        Location.NoProvided
+                                    ),
+                                    info = EmptySemanticInfo(), Location.NoProvided
+                                )
+                            ), info = EmptySemanticInfo(), Location.NoProvided
+                        ),
+                        info = AbstractionSemanticInfo(
+                            parameters = listOf(),
+                            returnType = typeParameterForTesting(0)
+                        ),
+                        location = Location.NoProvided
+                    )
+                )
+            )
+        }
+    }
 }) {
     override suspend fun beforeAny(testCase: TestCase) {
         super.beforeAny(testCase)

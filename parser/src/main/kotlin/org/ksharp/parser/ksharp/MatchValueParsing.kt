@@ -8,11 +8,26 @@ private fun KSharpConsumeResult.buildConditionalMatchValueNode(type: MatchCondit
     build {
         if (it.size == 1) it.first().cast<NodeData>()
         else {
-            MatchConditionValueNode(
+            val left = it.first().cast<NodeData>()
+            val right = it.last().cast<NodeData>()
+            val location = it[1].cast<Token>().location
+            if (right is MatchConditionValueNode && right.type == type) {
+                MatchConditionValueNode(
+                    type,
+                    MatchConditionValueNode(
+                        type,
+                        left,
+                        right.left,
+                        location
+                    ),
+                    right.right,
+                    location
+                )
+            } else MatchConditionValueNode(
                 type,
-                it.first().cast(),
-                it.last().cast(),
-                it[1].cast<Token>().location
+                left,
+                right,
+                location
             )
         }
     }
