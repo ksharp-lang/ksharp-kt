@@ -8,6 +8,7 @@ import org.ksharp.common.Location
 class OperatorNodeTest : StringSpec({
     "Test Node Interface over OperatorNode" {
         OperatorNode(
+            "Operator10",
             "+",
             LiteralValueNode("1000.0", LiteralValueType.Decimal, Location.NoProvided),
             LiteralValueNode("1", LiteralValueType.Integer, Location.NoProvided),

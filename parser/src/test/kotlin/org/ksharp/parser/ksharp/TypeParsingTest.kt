@@ -1368,14 +1368,17 @@ class TypeParserTest : StringSpec({
                     ConstrainedTypeNode(
                         ConcreteTypeNode("Int", Location.NoProvided),
                         OperatorNode(
+                            "Operator3",
                             "&&",
                             OperatorNode(
+                                "Operator8",
                                 ">",
                                 FunctionCallNode("it", FunctionType.Function, listOf(), Location.NoProvided),
                                 LiteralValueNode("0", LiteralValueType.Integer, Location.NoProvided),
                                 Location.NoProvided
                             ),
                             OperatorNode(
+                                "Operator8",
                                 "<",
                                 FunctionCallNode("it", FunctionType.Function, listOf(), Location.NoProvided),
                                 LiteralValueNode("70", LiteralValueType.Integer, Location.NoProvided),

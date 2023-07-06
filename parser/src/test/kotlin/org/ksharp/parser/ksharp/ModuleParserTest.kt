@@ -435,6 +435,7 @@ class ModuleParserTest : StringSpec({
                             "sum",
                             listOf("a", "b"),
                             OperatorNode(
+                                "Operator10",
                                 "+",
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -475,6 +476,7 @@ class ModuleParserTest : StringSpec({
                             "sum",
                             listOf("a", "b"),
                             OperatorNode(
+                                "Operator10",
                                 "+",
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -560,6 +562,7 @@ class ModuleParserTest : StringSpec({
                             "sum",
                             listOf("a", "b"),
                             OperatorNode(
+                                "Operator10",
                                 "+",
                                 FunctionCallNode("a", FunctionType.Function, listOf(), Location.NoProvided),
                                 FunctionCallNode("b", FunctionType.Function, listOf(), Location.NoProvided),
@@ -597,6 +600,7 @@ class ModuleParserTest : StringSpec({
                             name = "sum",
                             parameters = listOf("a", "b"),
                             expression = OperatorNode(
+                                "Operator10",
                                 operator = "+",
                                 left = FunctionCallNode(
                                     name = "a",
@@ -627,6 +631,7 @@ class ModuleParserTest : StringSpec({
                             name = "sum2",
                             parameters = listOf("a", "b"),
                             expression = OperatorNode(
+                                "Operator10",
                                 operator = "+",
                                 left = FunctionCallNode(
                                     name = "a",
