@@ -139,7 +139,9 @@ private fun FunctionNode.checkSemantics(
             name,
             semanticNode,
             AbstractionSemanticInfo(
-                parameters.map { symbolTable[it]!!.first }.toList(),
+                if (parameters.isEmpty()) {
+                    listOf(TypeSemanticInfo(typeSystem["Unit"]))
+                } else parameters.map { symbolTable[it]!!.first }.toList(),
                 function.type.last()
             ),
             location

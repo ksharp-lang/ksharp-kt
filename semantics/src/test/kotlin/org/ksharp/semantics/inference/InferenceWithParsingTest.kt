@@ -10,6 +10,7 @@ import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.nodes.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.TypeSystemErrorCode
 
 fun String.toSemanticModuleInfo(): Either<List<Error>, SemanticModuleInfo> =
     this.parseModule("irTest.ks", false)
@@ -81,6 +82,195 @@ class InferenceWithParsingTest : StringSpec({
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
                         "function" to "(+) (Num numeric<Long>)"
+                    )
+                )
+            )
+    }
+    "Inference let expression - variable binding" {
+        """
+            fn = let a = 10 
+                 then a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference let expression - tuple variable binding" {
+        """
+            fn = let x, y = 10, 20 
+                 then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference let expression - tuple variable binding 2" {
+        """
+            fn = let 10, y = 10, 20 
+                 then y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference let expression - not a tuple binding" {
+        """
+            fn = let x, y = 20 
+                 then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    InferenceErrorCode.NoATuple.new(
+                        Location.NoProvided,
+                        "type" to "(Num numeric<Long>)"
+                    )
+                )
+            )
+    }
+    "Inference let expression - incompatible tuple binding" {
+        """
+            fn = let x, y = 20, 10, 30 
+                 then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    InferenceErrorCode.IncompatibleType.new(
+                        Location.NoProvided,
+                        "type" to "((Num numeric<Long>), (Num numeric<Long>), (Num numeric<Long>))"
+                    )
+                )
+            )
+    }
+    "Inference let expression - list item binding" {
+        """
+            fn = let [x, y] = [20, 10, 30] 
+                 then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference let expression - no a list" {
+        """
+            fn :: (Long, Long) -> Long
+            fn a = let [x, y] = a 
+                 then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    InferenceErrorCode.NoAList.new(
+                        Location.NoProvided,
+                        "type" to "(Long, Long)"
+                    )
+                )
+            )
+    }
+    "Inference let expression - incompatible list binding" {
+        """
+            fn :: (Map Int Int) -> Long
+            fn a = let [x, y] = a 
+                 then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    InferenceErrorCode.NoAList.new(
+                        Location.NoProvided,
+                        "type" to "(Map Int Int)"
+                    )
+                )
+            )
+    }
+    "Inference let expression - list binding with tail" {
+        """
+            fn = let [x, y | rest] = [20, 10, 30] 
+                 then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference let expression - binding with guards" {
+        """
+            isEven :: Long -> Bool
+            isEven a = True
+            
+            fn = let x && isEven x && isEven x = 10 
+                 then x
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "isEven :: (Long -> True)",
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference let expression - list binding used as guard" {
+        """
+            fn = let x && [1, 2 | rest] = 10 
+                 then a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    InferenceErrorCode.BindingUsedAsGuard.new(
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
+    "Inference let expression - type binding" {
+        """
+            fn = let Bool a = True 
+                 then a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "fn :: (Unit -> True\n|False)"
+            )
+    }
+    "Inference match expression" {
+        """
+            ten = 10
+            fn = match ten with
+                       10 then ten
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "ten :: (Unit -> (Num numeric<Long>))",
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference match expression 2" {
+        """
+            fn = match [1, 2] with
+                       [x, y] then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference match expression with error" {
+        """
+            fn = match [1, 2] with
+                       [x, y] then (x + y)
+                       z then True
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    TypeSystemErrorCode.IncompatibleTypes.new(
+                        Location.NoProvided,
+                        "type1" to "(Num numeric<Long>)",
+                        "type2" to "True"
                     )
                 )
             )

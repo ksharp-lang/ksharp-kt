@@ -72,9 +72,10 @@ private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location): S
     } else cast<SymbolResolver>().getSymbol(name)
         ?: paramTypePromise()
 
-private fun SemanticInfo.callSemanticInfo(): SemanticInfo =
+private fun SemanticInfo.callSemanticInfo(fnName: String): SemanticInfo =
     if (this is MatchSemanticInfo) {
-        LetSemanticInfo(table)
+        if (fnName.first().isUpperCase()) this
+        else LetSemanticInfo(table)
     } else this
 
 private fun String.toApplicationName(): ApplicationName {
@@ -130,9 +131,10 @@ internal fun ExpressionParserNode.toSemanticNode(
         is FunctionCallNode -> if (arguments.isEmpty()) {
             name.variableOrFunctionCallNode(errors, typeSystem, info, location)
         } else {
-            val callInfo = info.callSemanticInfo()
+            val appName = name.toApplicationName()
+            val callInfo = info.callSemanticInfo(appName.name)
             ApplicationNode(
-                name.toApplicationName(),
+                appName,
                 arguments.map {
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
                 },
@@ -197,12 +199,16 @@ internal fun ExpressionParserNode.toSemanticNode(
             location
         )
 
-        is MatchExpressionBranchNode -> MatchBranchNode(
-            match.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
-            expression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
-            EmptySemanticInfo(),
-            location
-        )
+        is MatchExpressionBranchNode -> {
+            val table = SymbolTableBuilder(info.cast<SymbolTable>(), errors)
+            val matchInfo = MatchSemanticInfo(table)
+            MatchBranchNode(
+                match.cast<ExpressionParserNode>().toSemanticNode(errors, matchInfo, typeSystem),
+                expression.cast<ExpressionParserNode>().toSemanticNode(errors, LetSemanticInfo(table), typeSystem),
+                EmptySemanticInfo(),
+                location
+            )
+        }
 
         is MatchAssignNode -> {
             val letInfo = info.cast<LetSemanticInfo>()
@@ -247,9 +253,10 @@ private fun String.variableOrFunctionCallNode(
             location
         )
     } else {
-        val callInfo = info.callSemanticInfo()
+        val appName = this.toApplicationName()
+        val callInfo = info.callSemanticInfo(appName.name)
         ApplicationNode(
-            this.toApplicationName(),
+            appName,
             listOf(UnitNode(location).toSemanticNode(errors, callInfo, typeSystem)),
             ApplicationSemanticInfo(),
             location
