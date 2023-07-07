@@ -199,12 +199,16 @@ internal fun ExpressionParserNode.toSemanticNode(
             location
         )
 
-        is MatchExpressionBranchNode -> MatchBranchNode(
-            match.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
-            expression.cast<ExpressionParserNode>().toSemanticNode(errors, info, typeSystem),
-            EmptySemanticInfo(),
-            location
-        )
+        is MatchExpressionBranchNode -> {
+            val table = SymbolTableBuilder(info.cast<SymbolTable>(), errors)
+            val matchInfo = MatchSemanticInfo(table)
+            MatchBranchNode(
+                match.cast<ExpressionParserNode>().toSemanticNode(errors, matchInfo, typeSystem),
+                expression.cast<ExpressionParserNode>().toSemanticNode(errors, LetSemanticInfo(table), typeSystem),
+                EmptySemanticInfo(),
+                location
+            )
+        }
 
         is MatchAssignNode -> {
             val letInfo = info.cast<LetSemanticInfo>()

@@ -10,6 +10,7 @@ import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.nodes.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.TypeSystemErrorCode
 
 fun String.toSemanticModuleInfo(): Either<List<Error>, SemanticModuleInfo> =
     this.parseModule("irTest.ks", false)
@@ -233,6 +234,45 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "fn :: (Unit -> True\n|False)"
+            )
+    }
+    "Inference match expression" {
+        """
+            ten = 10
+            fn = match ten with
+                       10 then ten
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "ten :: (Unit -> (Num numeric<Long>))",
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference match expression 2" {
+        """
+            fn = match [1, 2] with
+                       [x, y] then x + y
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "fn :: (Unit -> (Num numeric<Long>))"
+            )
+    }
+    "Inference match expression with error" {
+        """
+            fn = match [1, 2] with
+                       [x, y] then (x + y)
+                       z then True
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    TypeSystemErrorCode.IncompatibleTypes.new(
+                        Location.NoProvided,
+                        "type1" to "(Num numeric<Long>)",
+                        "type2" to "True"
+                    )
+                )
             )
     }
 })

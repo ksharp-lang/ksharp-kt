@@ -562,28 +562,28 @@ fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {
 }
 
 private fun Token.mapToKeyword(): Token =
-    when {
-        text == "if" -> {
+    when (text) {
+        "if" -> {
             new(KSharpTokenType.If)
         }
 
-        text == "let" -> {
+        "let" -> {
             new(KSharpTokenType.Let)
         }
 
-        text == "match" -> {
+        "match" -> {
             new(KSharpTokenType.Match)
         }
 
-        text == "then" -> {
+        "then" -> {
             new(KSharpTokenType.Then)
         }
 
-        text == "else" -> {
+        "else" -> {
             new(KSharpTokenType.Else)
         }
 
-        text == "with" -> {
+        "with" -> {
             new(KSharpTokenType.With)
         }
 

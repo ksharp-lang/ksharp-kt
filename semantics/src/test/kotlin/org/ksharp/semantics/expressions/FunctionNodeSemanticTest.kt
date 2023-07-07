@@ -456,7 +456,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                                 AbstractionSemanticInfo(
-                                    listOf(),
+                                    listOf(unitTypePromise),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 Location.NoProvided
@@ -521,7 +521,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(),
+                            listOf(unitTypePromise),
                             TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                         ),
                         Location.NoProvided
@@ -589,7 +589,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(),
+                            listOf(unitTypePromise),
                             TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                         ),
                         Location.NoProvided
@@ -665,7 +665,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(),
+                            listOf(unitTypePromise),
                             TypeSemanticInfo(fnType!!)
                         ),
                         Location.NoProvided
@@ -743,7 +743,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(),
+                            listOf(unitTypePromise),
                             TypeSemanticInfo(fnType!!)
                         ),
                         Location.NoProvided
@@ -1005,7 +1005,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(), TypeSemanticInfo(
+                            listOf(unitTypePromise), TypeSemanticInfo(
                                 Either.Right(
                                     newParameterForTesting(0)
                                 )
@@ -1078,7 +1078,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(), TypeSemanticInfo(
+                            listOf(unitTypePromise), TypeSemanticInfo(
                                 Either.Right(
                                     newParameterForTesting(0)
                                 )
@@ -1242,7 +1242,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(), TypeSemanticInfo(
+                            listOf(unitTypePromise), TypeSemanticInfo(
                                 Either.Right(
                                     newParameterForTesting(0)
                                 )
@@ -1368,7 +1368,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(), TypeSemanticInfo(
+                            listOf(unitTypePromise), TypeSemanticInfo(
                                 Either.Right(
                                     newParameterForTesting(0)
                                 )
@@ -1521,7 +1521,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             location = Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(),
+                            parameters = listOf(unitTypePromise),
                             returnType = typeParameterForTesting(0)
                         ),
                         location = Location.NoProvided
@@ -1621,7 +1621,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             ), info = EmptySemanticInfo(), Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(),
+                            parameters = listOf(unitTypePromise),
                             returnType = typeParameterForTesting(0)
                         ),
                         location = Location.NoProvided

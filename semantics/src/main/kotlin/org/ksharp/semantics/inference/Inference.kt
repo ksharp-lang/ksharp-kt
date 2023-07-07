@@ -59,16 +59,15 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
             is LetNode -> infer(info)
             is LetBindingNode -> infer(info)
 
-            is MatchNode -> TODO()
+            is MatchNode -> infer(info)
             is MatchBranchNode -> TODO()
 
             is ConditionalMatchValueNode -> {
-                val ts = info.module.typeSystem
                 val boolType = info.prelude.typeSystem["Bool"].valueOrNull!!
                 left.inferType(info).flatMap { lType ->
-                    ts.unify(location, lType, boolType).flatMap {
+                    info.unify(location, lType, boolType).flatMap {
                         right.inferType(info).flatMap { rType ->
-                            ts.unify(location, rType, boolType)
+                            info.unify(location, rType, boolType)
                         }
                     }
                 }
@@ -119,9 +118,9 @@ private fun SemanticNode<SemanticInfo>.bindParametricType(
                 .new(location, "type" to type.representation)
                 .let { Either.Left(it) }
                 .cast()
-        else info.prelude.typeSystem[rootType]
+        else info.getType(rootType)
             .flatMap {
-                info.module.typeSystem.unify(location, it, type).map { uType ->
+                info.unify(location, it, type).map { uType ->
                     bind(uType.cast())
                     uType
                 }
@@ -155,7 +154,7 @@ private fun SemanticNode<SemanticInfo>.bindType(type: Type, info: InferenceInfo)
             left.bindType(type, info).flatMap { bType ->
                 left.info.setInferredType(Either.Right(bType))
                 right.inferType(info).flatMap {
-                    info.module.typeSystem.unify(location, it, info.prelude.typeSystem["Bool"].valueOrNull!!).map {
+                    info.unify(location, it, info.prelude.typeSystem["Bool"].valueOrNull!!).map {
                         bType
                     }
                 }
@@ -179,7 +178,7 @@ private fun SemanticNode<SemanticInfo>.bindType(type: Type, info: InferenceInfo)
         }
 
         else -> inferType(info).flatMap {
-            info.module.typeSystem.unify(location, it, type)
+            info.unify(location, it, type)
         }
     }.also {
         this.info.setInferredType(it)
@@ -195,6 +194,31 @@ private fun LetNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
         it.inferType(info)
     }.firstOrNull { it.isLeft }
         ?: expression.inferType(info)
+
+private fun MatchNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
+    this.expression.inferType(info).flatMap { exprType ->
+        this.branches.map { branch ->
+            branch.infer(info, exprType).also {
+                branch.info.setInferredType(it)
+            }
+        }.unwrap()
+            .flatMap {
+                var result: ErrorOrType = Either.Right(it.first())
+                for (right in it.drop(1)) {
+                    result = result.flatMap { left ->
+                        info.unify(location, left, right)
+                    }
+                    if (result.isLeft) break
+                }
+                result
+            }
+    }
+
+private fun MatchBranchNode<SemanticInfo>.infer(info: InferenceInfo, exprType: Type): ErrorOrType =
+    match.bindType(exprType, info).flatMap {
+        expression.inferType(info)
+    }
+
 
 private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
     isNative: Boolean,
@@ -257,11 +281,10 @@ private fun Sequence<ErrorOrType>.unifyArguments(
 ): Sequence<ErrorOrType> =
     when (CollectionFunctionName.values().first { it.applicationName == name }) {
         CollectionFunctionName.List, CollectionFunctionName.Set, CollectionFunctionName.Map -> {
-            val typeSystem = info.module.typeSystem
             val unifiedType = reduceOrNull { acc, type ->
                 acc.flatMap { left ->
                     type.flatMap { right ->
-                        typeSystem.unify(location, left, right)
+                        info.unify(location, left, right)
                     }
                 }
             }

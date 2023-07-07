@@ -148,4 +148,10 @@ data class InferenceInfo(
             }
         }
 
+
+    fun unify(location: Location, left: Type, right: Type): ErrorOrType =
+        module.typeSystem.unify(location, left, right)
+
+    fun getType(name: String): ErrorOrType =
+        module.typeSystem[name]
 }
