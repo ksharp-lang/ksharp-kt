@@ -24,9 +24,7 @@ enum class InferenceErrorCode(override val description: String) : ErrorCode {
 }
 
 private fun ApplicationName.calculateType(info: InferenceInfo): ErrorOrType =
-    info.module.typeSystem[name].flatMapLeft {
-        info.prelude.typeSystem[name]
-    }
+    info.module.typeSystem[name]
 
 private fun ApplicationName.getTypeSystem(info: InferenceInfo): TypeSystem =
     info.module.typeSystem
