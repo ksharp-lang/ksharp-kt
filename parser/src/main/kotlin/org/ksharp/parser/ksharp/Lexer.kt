@@ -63,7 +63,7 @@ enum class KSharpTokenType : TokenType {
 
     BeginBlock,
     EndBlock,
-    
+
     UnitValue,
 
     //Keywords
@@ -100,7 +100,7 @@ fun Char.isSpace() = this == ' ' || this == '\t'
 fun Char.isOperator() = operators.contains(this)
 fun Char.isDot() = this == '.'
 
-fun Char.shouldIgnore() = false
+fun shouldIgnore() = false
 
 private inline fun KSharpLexer.ifChar(
     predicate: Char.() -> Boolean,
