@@ -87,9 +87,14 @@ private val mappings = mapOf(
 
 private val operators = "+-*/%><=!&$#^?.\\|:".toSet()
 private val hexLetterDigit = "0123456789abcdefABCDEF".toSet()
+private val decimalDigit = "0123456789".toSet()
 private val octalLetterDigit = "01234567".toSet()
 private val binaryDigit = "01".toSet()
 private val escapeCharacters = "t'\"rnf\\b".toSet()
+
+fun Char.isLetter() = isLowerCase() || isUpperCase() || isTitleCase()
+
+fun Char.isDigit() = decimalDigit.contains(this)
 
 fun Char.isEscapeCharacter() = escapeCharacters.contains(this)
 
@@ -98,6 +103,7 @@ fun Char.isNewLine() = this == '\n' || this == '\r'
 fun Char.isSpace() = this == ' ' || this == '\t'
 
 fun Char.isOperator() = operators.contains(this)
+
 fun Char.isDot() = this == '.'
 
 fun shouldIgnore() = false

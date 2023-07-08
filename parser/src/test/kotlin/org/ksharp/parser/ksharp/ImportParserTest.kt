@@ -14,7 +14,7 @@ class ImportParserTest : StringSpec({
             .filterAndCollapseTokens()
             .collapseNewLines()
             .enableLookAhead()
-            .consumeBlock { it.consumeImport() }
+            .consumeImport()
             .map { it.value }
             .shouldBeRight(
                 ImportNode(
@@ -37,7 +37,7 @@ class ImportParserTest : StringSpec({
             .filterAndCollapseTokens()
             .collapseNewLines()
             .enableLookAhead()
-            .consumeBlock { it.consumeImport() }
+            .consumeImport()
             .map { it.value }
             .shouldBeRight(
                 ImportNode(
