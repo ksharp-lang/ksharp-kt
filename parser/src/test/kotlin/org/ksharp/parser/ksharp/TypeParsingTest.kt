@@ -10,9 +10,8 @@ import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
     filterAndCollapseTokens()
-        .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+        .collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
 
 class TypeParserTest : StringSpec({
     "Invalid type separator" {

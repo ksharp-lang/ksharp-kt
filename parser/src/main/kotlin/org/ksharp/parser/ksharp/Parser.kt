@@ -160,13 +160,8 @@ fun Reader.lexerModule(withLocations: Boolean) =
         .let {
             if (withLocations) it.toLogicalLexerToken()
             else it
-        }.markBlocks {
-            val token = LexerToken(it, TextToken("", 0, 0))
-            if (withLocations) LogicalLexerToken(token, ZeroPosition, ZeroPosition)
-            else token
-        }
+        }.collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
 
 
 fun Reader.parseModule(

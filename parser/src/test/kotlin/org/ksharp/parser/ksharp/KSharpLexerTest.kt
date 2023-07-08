@@ -592,16 +592,9 @@ private fun <T> List<T>.printTokens() = onEach { println("\"$it\",") }
 
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForMarkBlockTests(): KSharpLexerIterator {
-    val endExpression: (TokenType) -> LexerToken = {
-        LexerToken(
-            type = it,
-            token = TextToken("", 0, 0)
-        )
-    }
     return filterAndCollapseTokens()
-        .markBlocks(endExpression)
+        .collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
 }
 
 class KSharpLexerMarkBlocksTest : ShouldSpec({

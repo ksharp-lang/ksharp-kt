@@ -3,17 +3,14 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.*
-import org.ksharp.parser.LexerToken
-import org.ksharp.parser.TextToken
 import org.ksharp.parser.TokenLexerIterator
 import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForFunctionParsing() =
     filterAndCollapseTokens()
-        .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+        .collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
 
 class FunctionParserTest : StringSpec({
     "native function" {
