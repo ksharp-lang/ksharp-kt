@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.ErrorCode
 import org.ksharp.common.new
-import org.ksharp.parser.ksharp.enableDiscardBlockAndNewLineTokens
 import org.ksharp.parser.ksharp.lexerModule
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -202,22 +201,20 @@ class LookAHeadTest : StringSpec({
     "KSharp Look ahead" {
         "sum 10 20"
             .lexerModule(false)
-            .enableDiscardBlockAndNewLineTokens {
-                it.lookAHead { l ->
-                    l.consume(1)
-                    10.asLookAHeadResult()
-                }.remainTokens
-                    .asSequence()
-                    .take(2)
-                    .map(Token::text)
-                    .toList()
-                    .also(::println)
-                    .shouldBe(
-                        listOf(
-                            "10",
-                            "20"
-                        )
-                    )
-            }
+            .lookAHead { l ->
+                l.consume(1)
+                10.asLookAHeadResult()
+            }.remainTokens
+            .asSequence()
+            .take(2)
+            .map(Token::text)
+            .toList()
+            .also(::println)
+            .shouldBe(
+                listOf(
+                    "10",
+                    "20"
+                )
+            )
     }
 })

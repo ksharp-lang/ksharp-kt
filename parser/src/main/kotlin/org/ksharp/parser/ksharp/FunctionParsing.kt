@@ -76,7 +76,7 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean, emitLocations: Boo
         it.type == KSharpTokenType.LowerCaseWord && it.text == "pub"
     }, false) { it }
         .thenFunctionName()
-        .enableDiscardBlockAndNewLineTokens { lx ->
+        .let { lx ->
             val funcDecl = lx.thenLoop {
                 it.consume(KSharpTokenType.LowerCaseWord)
                     .build { l -> l.first() }
@@ -84,7 +84,7 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean, emitLocations: Boo
             run {
                 if (!native) {
                     funcDecl.thenAssignOperator()
-                        .consume { it.disableDiscardNewLineToken { l -> l.consumeExpression() } }
+                        .consume { l -> l.consumeExpression() }
                 } else funcDecl
             }.build {
                 createFunctionNode(native, emitLocations, it)

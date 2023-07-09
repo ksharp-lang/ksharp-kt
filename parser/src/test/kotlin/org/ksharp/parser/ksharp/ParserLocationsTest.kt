@@ -546,7 +546,7 @@ class ParserLocationsTest : StringSpec({
             .lexerModule(true)
             .emitLocations(true) {
                 it.consumeBlock { l ->
-                    l.enableDiscardBlockAndNewLineTokens(KSharpLexerIterator::consumeExpression)
+                    l.consumeExpression()
                 }
             }.map {
                 it.value.cast<LetExpressionNode>()
@@ -564,7 +564,7 @@ class ParserLocationsTest : StringSpec({
             .lexerModule(true)
             .emitLocations(true) {
                 it.consumeBlock { l ->
-                    l.enableDiscardBlockAndNewLineTokens(KSharpLexerIterator::consumeExpression)
+                    l.consumeExpression()
                 }
             }.map {
                 it.value.cast<LetExpressionNode>()
@@ -584,7 +584,7 @@ class ParserLocationsTest : StringSpec({
             .lexerModule(true)
             .emitLocations(true) {
                 it.consumeBlock { l ->
-                    l.enableDiscardBlockAndNewLineTokens(KSharpLexerIterator::consumeExpression)
+                    l.consumeExpression()
                 }
             }.map {
                 it.value.cast<LetExpressionNode>()

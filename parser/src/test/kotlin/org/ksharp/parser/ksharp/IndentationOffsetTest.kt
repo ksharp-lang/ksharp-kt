@@ -9,17 +9,17 @@ class IndentationOffsetTest : StringSpec({
     "Check add new offsets" {
         IndentationOffset()
             .apply {
-                add(0).shouldBeTrue()
-                add(5).shouldBeTrue()
-                add(4).shouldBeFalse()
-                add(5).shouldBeFalse()
-                add(10).shouldBeTrue()
+                add(0, false).shouldBeTrue()
+                add(5, false).shouldBeTrue()
+                add(4, false).shouldBeFalse()
+                add(5, false).shouldBeFalse()
+                add(10, false).shouldBeTrue()
             }
     }
     "Check update offsets" {
         IndentationOffset()
             .apply {
-                add(0).shouldBeTrue()
+                add(0, false).shouldBeTrue()
                 update(5).shouldBe(OffsetAction.SAME)
                 update(5).shouldBe(OffsetAction.SAME)
                 update(10).shouldBe(OffsetAction.INVALID)
@@ -29,8 +29,8 @@ class IndentationOffsetTest : StringSpec({
     "Nested offsets update" {
         IndentationOffset()
             .apply {
-                add(0).shouldBeTrue()
-                add(5).shouldBeTrue()
+                add(0, false).shouldBeTrue()
+                add(5, false).shouldBeTrue()
                 update(5).shouldBe(OffsetAction.SAME)
                 update(5).shouldBe(OffsetAction.SAME)
                 update(4).shouldBe(OffsetAction.PREVIOUS)

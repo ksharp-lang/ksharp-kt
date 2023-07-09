@@ -17,6 +17,10 @@ open class LexerState<V>(
 
 interface LexerIterator<out T : Token, V> {
     val state: LexerState<V>
+
+    val lastStartOffset: Int
+    val lastEndOffset: Int
+
     fun hasNext(): Boolean
     fun next(): T
 }
@@ -60,11 +64,22 @@ inline fun <T : Token, V> generateLexerIterator(
 ): LexerIterator<T, V> =
     object : LexerIterator<T, V> {
         private var current: T? = null
+        override var lastStartOffset = 0
+            private set
+
+        override var lastEndOffset = 0
+            private set
+
         override val state: LexerState<V> = state
+
 
         override fun hasNext(): Boolean {
             current = generator()
-            return current != null
+            return if (current != null) {
+                lastStartOffset = current!!.startOffset
+                lastEndOffset = current!!.endOffset
+                true
+            } else false
         }
 
         override fun next(): T = current ?: throw NoSuchElementException()

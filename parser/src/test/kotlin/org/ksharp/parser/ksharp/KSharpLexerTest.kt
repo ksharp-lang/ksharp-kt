@@ -672,11 +672,9 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
            | Integer
         """.trimMargin().kSharpLexer()
             .prepareLexerForMarkBlockTests()
-            .enableDiscardBlockAndNewLineTokens {
-                it.asSequence()
-                    .asStringSequence()
-                    .toList()
-            }
+            .asSequence()
+            .asStringSequence()
+            .toList()
             .apply {
                 should("Should return one expression") {
                     printTokens()

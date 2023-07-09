@@ -46,13 +46,14 @@ private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueR
         .orAnnotationValue({
             it.type == KSharpTokenType.UpperCaseWord && it.text.isBooleanLiteral
         }).orAnnotationValue(KSharpTokenType.OpenBracket) {
-            it.thenLoop { tl ->
-                tl.optionalConsume(KSharpTokenType.Comma, true)
-                tl.consumeAnnotationValue()
-            }
+            it.addIndentationOffset(true)
+                .thenLoop { tl ->
+                    tl.optionalConsume(KSharpTokenType.Comma, true)
+                    tl.consumeAnnotationValue()
+                }
                 .then(KSharpTokenType.CloseBracket, true)
                 .build { v -> v.drop(1) }
-        }
+        }.addIndentationOffset(true)
 
 private fun KSharpLexerIterator.consumeAnnotationKeyValue(): KSharpAnnotationKeyValueResult =
     ifConsume({
@@ -138,9 +139,10 @@ private fun Any.toAnnotationLocation(): Any =
 private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpParserResult =
     then(KSharpTokenType.LowerCaseWord)
         .thenIf(KSharpTokenType.OpenParenthesis, true) {
-            it.thenLoop { itAttr ->
-                itAttr.consumeAnnotationKeyValue()
-            }.then(KSharpTokenType.CloseParenthesis, true)
+            it.addIndentationOffset(true)
+                .thenLoop { itAttr ->
+                    itAttr.consumeAnnotationKeyValue()
+                }.then(KSharpTokenType.CloseParenthesis, true)
         }.thenIf(KSharpTokenType.UnitValue, true) { it }
         .build {
             val altToken = it[0].cast<Token>()
@@ -177,9 +179,8 @@ private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpPa
 
 internal fun KSharpLexerIterator.consumeAnnotation(): KSharpParserResult =
     ifConsume(KSharpTokenType.Alt, false) { l ->
-        l.enableDiscardBlockAndNewLineTokens { dbL ->
-            dbL.disableCollapseAssignOperatorRule {
+        l.addIndentationOffset(false)
+            .disableCollapseAssignOperatorRule {
                 it.thenAnnotation(this.state.value.emitLocations)
             }
-        }
     }

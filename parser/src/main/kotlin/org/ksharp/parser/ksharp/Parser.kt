@@ -1,6 +1,9 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.*
+import org.ksharp.common.Either
+import org.ksharp.common.add
+import org.ksharp.common.cast
+import org.ksharp.common.listBuilder
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.NodeData
 import org.ksharp.parser.*
@@ -43,14 +46,6 @@ fun <R> KSharpConsumeResult.enableLabelToken(code: (KSharpConsumeResult) -> Eith
     flatMap { collector ->
         val result = this@enableLabelToken
         collector.tokens.enableLabelToken {
-            code(result)
-        }
-    }
-
-fun <R> KSharpConsumeResult.enableDiscardBlockAndNewLineTokens(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
-    flatMap { collector ->
-        val result = this@enableDiscardBlockAndNewLineTokens
-        collector.tokens.enableDiscardBlockAndNewLineTokens {
             code(result)
         }
     }
@@ -161,6 +156,7 @@ fun Reader.lexerModule(withLocations: Boolean) =
             if (withLocations) it.toLogicalLexerToken()
             else it
         }.collapseNewLines()
+        .enableIndentationOffset()
         .enableLookAhead()
 
 

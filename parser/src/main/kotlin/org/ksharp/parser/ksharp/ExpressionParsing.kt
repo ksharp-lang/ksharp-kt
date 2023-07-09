@@ -77,9 +77,8 @@ fun KSharpLexerIterator.consumeMatchExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.Match, false) { ifLexer ->
         ifLexer.consume { it.consumeExpression() }
             .then(KSharpTokenType.With, false)
-            .enableDiscardBlockAndNewLineTokens { block ->
-                block.thenLoop { it.consumeMatchExpressionBranch() }
-            }.build {
+            .thenLoop { it.consumeMatchExpressionBranch() }
+            .build {
                 val matchToken = it.first().cast<Token>()
                 val expr = it[1].cast<NodeData>()
                 val withToken = it[2].cast<Token>()
@@ -93,8 +92,8 @@ fun KSharpLexerIterator.consumeMatchExpression(): KSharpParserResult =
 
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.Let, false) { ifLexer ->
-        ifLexer.enableDiscardBlockAndNewLineTokens { d ->
-            d.thenLoop {
+        ifLexer
+            .thenLoop {
                 it.consumeMatchAssignment()
                     .resume()
                     .discardNewLines()
@@ -102,7 +101,7 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
                         items.first().cast<NodeData>()
                     }
             }
-        }.thenOptional(KSharpTokenType.EndBlock, true)
+            .thenOptional(KSharpTokenType.EndBlock, true)
             .then(KSharpTokenType.Then, false)
             .consume { it.consumeExpression() }
             .build {

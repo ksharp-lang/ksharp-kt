@@ -11,6 +11,7 @@ import org.ksharp.test.shouldBeRight
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
     filterAndCollapseTokens()
         .collapseNewLines()
+        .enableIndentationOffset()
         .enableLookAhead()
 
 class TypeParserTest : StringSpec({
@@ -18,7 +19,7 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = List -- Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
@@ -40,10 +41,6 @@ class TypeParserTest : StringSpec({
                         type = BaseTokenType.NewLine,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     ),
-                    LexerToken(
-                        type = KSharpTokenType.EndBlock,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
-                    )
                 )
             )
     }

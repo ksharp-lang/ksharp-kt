@@ -2,7 +2,7 @@ package org.ksharp.parser.ksharp
 
 import java.util.*
 
-private data class Offset(var size: Int, var fixed: Boolean)
+private data class Offset(var size: Int, var fixed: Boolean, var optional: Boolean)
 
 enum class OffsetAction {
     INVALID,
@@ -11,6 +11,7 @@ enum class OffsetAction {
     END
 }
 
+
 class IndentationOffset {
 
     private val offsets = Stack<Offset>()
@@ -18,22 +19,23 @@ class IndentationOffset {
         if (offsets.isEmpty()) return OffsetAction.END
         val last = offsets.peek()
         if (last.size > size) {
-            offsets.pop()
-            return update(size, OffsetAction.PREVIOUS)
+            val isOptional = offsets.pop().optional
+            return update(size, if (isOptional) sameResult else OffsetAction.PREVIOUS)
         }
         if (last.size < size) {
             if (last.fixed) return OffsetAction.INVALID
             last.size = size
             last.fixed = true
+            last.optional = false
         }
         return sameResult
     }
 
-    fun add(size: Int): Boolean {
+    fun add(size: Int, optional: Boolean): Boolean {
         val allowed = if (offsets.isEmpty()) true else {
             offsets.peek().size < size
         }
-        if (allowed) offsets.push(Offset(size, false))
+        if (allowed) offsets.push(Offset(size, false, optional))
         return allowed
     }
 

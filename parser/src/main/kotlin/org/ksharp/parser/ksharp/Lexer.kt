@@ -4,15 +4,15 @@ import org.ksharp.common.*
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.parser.*
 import java.io.Reader
+import java.util.concurrent.atomic.AtomicInteger
 
 data class KSharpLexerState(
     val lastError: ResettableValue<Error> = resettableValue(),
     val indentationOffset: IndentationOffset = IndentationOffset(),
+    val lineStartOffset: AtomicInteger = AtomicInteger(0),
     val emitLocations: Boolean = false,
     val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
-    val discardBlockTokens: Boolean = false,
-    val discardNewLineToken: Boolean = false,
     val collapseDotOperatorRule: Boolean = true,
     val collapseAssignOperatorRule: Boolean = true,
     val enableExpressionStartingNewLine: Boolean = true
@@ -194,35 +194,6 @@ fun <R> KSharpLexerIterator.enableLabelToken(code: (KSharpLexerIterator) -> R): 
         code(this).also {
             state.update(state.value.copy(consumeLabels = initValue))
         }
-    }
-
-fun <R> KSharpLexerIterator.enableDiscardBlocksTokens(code: (KSharpLexerIterator) -> R): R =
-    state.value.discardBlockTokens.let { initValue ->
-        state.update(state.value.copy(discardBlockTokens = true))
-        code(this).also {
-            state.update(state.value.copy(discardBlockTokens = initValue))
-        }
-    }
-
-fun <R> KSharpLexerIterator.enableDiscardNewLineToken(code: (KSharpLexerIterator) -> R): R =
-    state.value.discardNewLineToken.let { initValue ->
-        state.update(state.value.copy(discardNewLineToken = true))
-        code(this).also {
-            state.update(state.value.copy(discardNewLineToken = initValue))
-        }
-    }
-
-fun <R> KSharpLexerIterator.disableDiscardNewLineToken(code: (KSharpLexerIterator) -> R): R =
-    state.value.discardNewLineToken.let { initValue ->
-        state.update(state.value.copy(discardNewLineToken = false))
-        code(this).also {
-            state.update(state.value.copy(discardNewLineToken = initValue))
-        }
-    }
-
-fun <R> KSharpLexerIterator.enableDiscardBlockAndNewLineTokens(code: (KSharpLexerIterator) -> R): R =
-    enableDiscardBlocksTokens {
-        enableDiscardNewLineToken(code)
     }
 
 fun KSharpLexer.operator(): LexerToken = loopChar({ isOperator() }, KSharpTokenType.Operator)
@@ -497,18 +468,33 @@ fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
     }
 }
 
-fun KSharpConsumeResult.addIndentationOffset(size: Int): KSharpConsumeResult =
+fun KSharpLexerIterator.addIndentationOffset(optional: Boolean): KSharpLexerIterator {
+    val lexerState = state.value
+    lexerState.indentationOffset.add(lastEndOffset - lexerState.lineStartOffset.get(), optional)
+    return this
+}
+
+@JvmName("addIndentationOffset2")
+fun <S> ParserResult<S, KSharpLexerState>.addIndentationOffset(optional: Boolean): ParserResult<S, KSharpLexerState> =
     map {
-        it.tokens.state.value.indentationOffset.add(size)
+        it.remainTokens.addIndentationOffset(optional)
+        it
+    }
+
+fun KSharpConsumeResult.addIndentationOffset(optional: Boolean): KSharpConsumeResult =
+    map {
+        it.tokens.addIndentationOffset(optional)
         it
     }
 
 fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
-    val indentationOffset = state.value.indentationOffset
+    val lexerState = state.value
+    val indentationOffset = lexerState.indentationOffset
     return generateLexerIterator(state) {
         while (hasNext()) {
             val token = next()
             if (token.type == BaseTokenType.NewLine) {
+                lexerState.lineStartOffset.set(lastStartOffset)
                 when (indentationOffset.update(token.text.length - 1)) {
                     OffsetAction.SAME, OffsetAction.END -> continue
                     else -> Unit
