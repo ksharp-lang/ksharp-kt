@@ -105,9 +105,7 @@ internal fun KSharpLexerIterator.consumeMatchAssignment() =
     consumeMatchValue()
         .resume()
         .thenAssignOperator()
-        .disableExpressionStartingNewLine {
-            it.consume { l -> l.consumeExpression() }
-        }
+        .consume { l -> l.consumeExpression() }
         .build {
             val match = it.first().cast<NodeData>()
             MatchAssignNode(

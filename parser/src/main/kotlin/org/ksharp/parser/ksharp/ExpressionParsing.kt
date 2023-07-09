@@ -155,35 +155,27 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
 ): KSharpParserResult {
     val groupExpression = ifConsume(KSharpTokenType.OpenParenthesis, true) {
         it.consume { l ->
-            l.enableExpressionStartingNewLine { nL ->
-                nL.consumeExpression()
-            }
+            l.consumeExpression()
         }.then(KSharpTokenType.CloseParenthesis, true)
             .build { l ->
                 l.first().cast<NodeData>()
             }
-    }
-
-    val newLineExpression = if (state.value.enableExpressionStartingNewLine) {
-        groupExpression.or {
-            it.ifBeginNewLineExpression { ifL ->
-                ifL.discardNewLines()
-                    .consume { l -> l.consumeExpression() }
-                    .build { l -> l.first().cast<NodeData>() }
-            }
+    }.or {
+        it.ifBeginNewLineExpression { ifL ->
+            ifL.discardNewLines()
+                .consume { l -> l.consumeExpression() }
+                .build { l -> l.first().cast<NodeData>() }
         }
-    } else groupExpression
-
-    val literal = newLineExpression.or { l ->
+    }.or { l ->
         l.consumeLiteral(withBindings)
     }.or { it.consumeIfExpression() }
         .or { it.consumeLetExpression() }
         .or { it.consumeMatchExpression() }
 
     val withFunctionCall =
-        if (!withBindings) literal.or {
+        if (!withBindings) groupExpression.or {
             it.consumeFunctionCall()
-        } else literal
+        } else groupExpression
 
     return if (tupleWithoutParenthesis) {
         withFunctionCall

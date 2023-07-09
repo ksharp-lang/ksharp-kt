@@ -9,6 +9,8 @@ import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForExpressionParsing() =
     filterAndCollapseTokens()
+        .collapseNewLines()
+        .enableIndentationOffset()
         .enableLookAhead()
 
 class ExpressionParserTest : StringSpec({
@@ -617,7 +619,7 @@ class ExpressionParserTest : StringSpec({
     "block expressions" {
         """sum 10
            |   20
-           |        30 + 15
+           |   30 + 15
         """.trimMargin()
             .kSharpLexer()
             .prepareLexerForExpressionParsing()

@@ -14,8 +14,7 @@ data class KSharpLexerState(
     val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
     val collapseDotOperatorRule: Boolean = true,
-    val collapseAssignOperatorRule: Boolean = true,
-    val enableExpressionStartingNewLine: Boolean = true
+    val collapseAssignOperatorRule: Boolean = true
 )
 
 typealias KSharpLexer = Lexer<KSharpLexerState>
@@ -154,23 +153,6 @@ fun <R> KSharpLexerIterator.emitLocations(withLocations: Boolean, code: (KSharpL
             state.update(state.value.copy(emitLocations = initValue))
         }
     }
-
-fun <R> KSharpLexerIterator.disableExpressionStartingNewLine(code: (KSharpLexerIterator) -> R): R =
-    state.value.enableExpressionStartingNewLine.let { initValue ->
-        state.update(state.value.copy(enableExpressionStartingNewLine = false))
-        code(this).also {
-            state.update(state.value.copy(enableExpressionStartingNewLine = initValue))
-        }
-    }
-
-fun <R> KSharpLexerIterator.enableExpressionStartingNewLine(code: (KSharpLexerIterator) -> R): R =
-    state.value.enableExpressionStartingNewLine.let { initValue ->
-        state.update(state.value.copy(enableExpressionStartingNewLine = true))
-        code(this).also {
-            state.update(state.value.copy(enableExpressionStartingNewLine = initValue))
-        }
-    }
-
 
 fun <R> KSharpLexerIterator.disableCollapseDotOperatorRule(code: (KSharpLexerIterator) -> R): R =
     state.value.collapseDotOperatorRule.let { initValue ->

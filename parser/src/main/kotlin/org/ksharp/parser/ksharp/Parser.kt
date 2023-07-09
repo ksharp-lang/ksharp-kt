@@ -50,14 +50,6 @@ fun <R> KSharpConsumeResult.enableLabelToken(code: (KSharpConsumeResult) -> Eith
         }
     }
 
-fun <R> KSharpConsumeResult.disableExpressionStartingNewLine(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
-    flatMap { collector ->
-        val result = this@disableExpressionStartingNewLine
-        collector.tokens.disableExpressionStartingNewLine {
-            code(result)
-        }
-    }
-
 fun <R> KSharpConsumeResult.disableCollapseAssignOperatorRule(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
     flatMap { collector ->
         val result = this@disableCollapseAssignOperatorRule
