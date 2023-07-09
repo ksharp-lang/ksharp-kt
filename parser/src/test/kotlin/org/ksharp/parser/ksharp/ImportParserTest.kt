@@ -54,4 +54,29 @@ class ImportParserTest : StringSpec({
                 )
             )
     }
+    "Parse import with indentation offset" {
+        """import 
+           |    ksharp as math""".trimMargin()
+            .kSharpLexer()
+            .filterAndCollapseTokens()
+            .collapseNewLines()
+            .enableIndentationOffset()
+            .enableLookAhead()
+            .consumeImport()
+            .map { it.value }
+            .shouldBeRight(
+                ImportNode(
+                    "ksharp",
+                    "math",
+                    Location.NoProvided,
+                    ImportNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
 })

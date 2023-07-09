@@ -7,6 +7,7 @@ import java.io.Reader
 
 data class KSharpLexerState(
     val lastError: ResettableValue<Error> = resettableValue(),
+    val indentationOffset: IndentationOffset = IndentationOffset(),
     val emitLocations: Boolean = false,
     val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
@@ -490,6 +491,29 @@ fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
                 if (length == lastIndent) continue
                 else length
             } else 0
+            return@generateLexerIterator token
+        }
+        null
+    }
+}
+
+fun KSharpConsumeResult.addIndentationOffset(size: Int): KSharpConsumeResult =
+    map {
+        it.tokens.state.value.indentationOffset.add(size)
+        it
+    }
+
+fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
+    val indentationOffset = state.value.indentationOffset
+    return generateLexerIterator(state) {
+        while (hasNext()) {
+            val token = next()
+            if (token.type == BaseTokenType.NewLine) {
+                when (indentationOffset.update(token.text.length - 1)) {
+                    OffsetAction.SAME, OffsetAction.END -> continue
+                    else -> Unit
+                }
+            }
             return@generateLexerIterator token
         }
         null
