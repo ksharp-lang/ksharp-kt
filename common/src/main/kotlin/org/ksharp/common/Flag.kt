@@ -7,4 +7,5 @@ class Flag {
     fun activate() {
         enabled = true
     }
+
 }

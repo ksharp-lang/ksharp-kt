@@ -46,14 +46,14 @@ private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueR
         .orAnnotationValue({
             it.type == KSharpTokenType.UpperCaseWord && it.text.isBooleanLiteral
         }).orAnnotationValue(KSharpTokenType.OpenBracket) {
-            it.addIndentationOffset(true)
+            it.addIndentationOffset(OffsetType.Optional)
                 .thenLoop { tl ->
                     tl.optionalConsume(KSharpTokenType.Comma, true)
                     tl.consumeAnnotationValue()
                 }
                 .then(KSharpTokenType.CloseBracket, true)
                 .build { v -> v.drop(1) }
-        }.addIndentationOffset(true)
+        }.addIndentationOffset(OffsetType.Optional)
 
 private fun KSharpLexerIterator.consumeAnnotationKeyValue(): KSharpAnnotationKeyValueResult =
     ifConsume({
@@ -139,7 +139,7 @@ private fun Any.toAnnotationLocation(): Any =
 private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpParserResult =
     then(KSharpTokenType.LowerCaseWord)
         .thenIf(KSharpTokenType.OpenParenthesis, true) {
-            it.addIndentationOffset(true)
+            it.addIndentationOffset(OffsetType.Optional)
                 .thenLoop { itAttr ->
                     itAttr.consumeAnnotationKeyValue()
                 }.then(KSharpTokenType.CloseParenthesis, true)
@@ -179,7 +179,7 @@ private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpPa
 
 internal fun KSharpLexerIterator.consumeAnnotation(): KSharpParserResult =
     ifConsume(KSharpTokenType.Alt, false) { l ->
-        l.addIndentationOffset(false)
+        l.addIndentationOffset(OffsetType.Normal)
             .disableCollapseAssignOperatorRule {
                 it.thenAnnotation(this.state.value.emitLocations)
             }

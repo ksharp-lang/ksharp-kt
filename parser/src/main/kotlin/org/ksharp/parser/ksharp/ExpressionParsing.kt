@@ -1,6 +1,9 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.*
+import org.ksharp.common.Either
+import org.ksharp.common.Location
+import org.ksharp.common.add
+import org.ksharp.common.cast
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
@@ -43,11 +46,11 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
 
 fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.If, false) { ifLexer ->
-        ifLexer.consume { l -> l.consumeExpression() }
-            .thenOptional(BaseTokenType.NewLine, true)
+        ifLexer
+            .addRelativeIndentationOffset(1, OffsetType.Optional)
+            .consume { l -> l.consumeExpression() }
             .then(KSharpTokenType.Then, false)
             .consume { l -> l.consumeExpression() }
-            .thenOptional(BaseTokenType.NewLine, true)
             .thenIf(KSharpTokenType.Else, false) { el ->
                 el.consume { l -> l.consumeExpression() }
             }.build {
@@ -94,14 +97,12 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.Let, false) { ifLexer ->
         ifLexer
             .thenLoop {
-                it.consumeMatchAssignment()
+                it.addRelativeIndentationOffset(0, OffsetType.Normal)
+                    .consumeMatchAssignment()
                     .resume()
-                    .discardNewLines()
-                    .build { items ->
-                        items.first().cast<NodeData>()
-                    }
+                    .thenNewLine()
+                    .build { i -> i.first().cast<NodeData>() }
             }
-            .thenOptional(KSharpTokenType.EndBlock, true)
             .then(KSharpTokenType.Then, false)
             .consume { it.consumeExpression() }
             .build {
@@ -115,60 +116,26 @@ fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
             }
     }
 
-private fun KSharpLexerIterator.ifBeginNewLineExpression(
-    block: (tokens: KSharpConsumeResult) -> KSharpParserResult
-): KSharpParserResult {
-    val checkpoint = state.lookAHeadState.checkpoint()
-
-    val isNewLine = if (hasNext()) {
-        val token = next()
-        token.type == BaseTokenType.NewLine
-    } else false
-
-    val token = if (isNewLine && hasNext()) {
-        next()
-    } else null
-
-    checkpoint.end(PreserveTokens)
-    return if (token != null && token.type != KSharpTokenType.EndBlock) {
-        block(
-            Either.Right(
-                NodeCollector(
-                    listBuilder(),
-                    this
-                )
-            )
-        )
-    } else Either.Left(
-        ParserError(
-            BaseParserErrorCode.ConsumeTokenFailed.new(Location.NoProvided, "token" to "<no newline>"),
-            listBuilder(),
-            false,
-            this
-        )
-    )
-}
-
 internal fun KSharpLexerIterator.consumeExpressionValue(
     tupleWithoutParenthesis: Boolean = true,
     withBindings: Boolean = false
 ): KSharpParserResult {
-    val groupExpression = ifConsume(KSharpTokenType.OpenParenthesis, true) {
-        it.consume { l ->
-            l.consumeExpression()
-        }.then(KSharpTokenType.CloseParenthesis, true)
-            .build { l ->
-                l.first().cast<NodeData>()
+    val groupExpression = addIndentationOffset(OffsetType.Optional)
+        .ifConsume(KSharpTokenType.OpenParenthesis, true) {
+            it.consume { l ->
+                l.consumeExpression()
+            }.then(KSharpTokenType.CloseParenthesis, true)
+                .build { l ->
+                    l.first().cast<NodeData>()
+                }
+        }.or {
+            it.ifStartRepeatingLine { l ->
+                l.consume { cL -> cL.consumeExpression() }
+                    .build { b -> b.first().cast() }
             }
-    }.or {
-        it.ifBeginNewLineExpression { ifL ->
-            ifL.discardNewLines()
-                .consume { l -> l.consumeExpression() }
-                .build { l -> l.first().cast<NodeData>() }
-        }
-    }.or { l ->
-        l.consumeLiteral(withBindings)
-    }.or { it.consumeIfExpression() }
+        }.or { l ->
+            l.consumeLiteral(withBindings)
+        }.or { it.consumeIfExpression() }
         .or { it.consumeLetExpression() }
         .or { it.consumeMatchExpression() }
 

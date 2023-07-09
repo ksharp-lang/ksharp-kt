@@ -450,34 +450,34 @@ fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
     }
 }
 
-fun KSharpLexerIterator.addIndentationOffset(optional: Boolean): KSharpLexerIterator {
+fun KSharpLexerIterator.addIndentationOffset(type: OffsetType): KSharpLexerIterator {
     val lexerState = state.value
-    lexerState.indentationOffset.add(lastEndOffset - lexerState.lineStartOffset.get(), optional)
+    lexerState.indentationOffset.add(lastEndOffset - lexerState.lineStartOffset.get(), type)
     return this
 }
 
-fun KSharpLexerIterator.addRelativeIndentationOffset(relative: Int, optional: Boolean): KSharpLexerIterator {
+fun KSharpLexerIterator.addRelativeIndentationOffset(relative: Int, type: OffsetType): KSharpLexerIterator {
     val lexerState = state.value
-    lexerState.indentationOffset.addRelative(relative, optional)
+    lexerState.indentationOffset.addRelative(relative, type)
     return this
 }
 
 @JvmName("addIndentationOffset2")
-fun <S> ParserResult<S, KSharpLexerState>.addIndentationOffset(optional: Boolean): ParserResult<S, KSharpLexerState> =
+fun <S> ParserResult<S, KSharpLexerState>.addIndentationOffset(type: OffsetType): ParserResult<S, KSharpLexerState> =
     map {
-        it.remainTokens.addIndentationOffset(optional)
+        it.remainTokens.addIndentationOffset(type)
         it
     }
 
-fun KSharpConsumeResult.addIndentationOffset(optional: Boolean): KSharpConsumeResult =
+fun KSharpConsumeResult.addIndentationOffset(type: OffsetType): KSharpConsumeResult =
     map {
-        it.tokens.addIndentationOffset(optional)
+        it.tokens.addIndentationOffset(type)
         it
     }
 
-fun KSharpConsumeResult.addRelativeIndentationOffset(relative: Int, optional: Boolean): KSharpConsumeResult =
+fun KSharpConsumeResult.addRelativeIndentationOffset(relative: Int, type: OffsetType): KSharpConsumeResult =
     map {
-        it.tokens.addRelativeIndentationOffset(relative, optional)
+        it.tokens.addRelativeIndentationOffset(relative, type)
         it
     }
 
@@ -490,7 +490,7 @@ fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
             if (token.type == BaseTokenType.NewLine) {
                 lexerState.lineStartOffset.set(lastStartOffset)
                 when (indentationOffset.update(token.text.length - 1)) {
-                    OffsetAction.SAME, OffsetAction.END -> continue
+                    OffsetAction.Same -> continue
                     else -> Unit
                 }
             }

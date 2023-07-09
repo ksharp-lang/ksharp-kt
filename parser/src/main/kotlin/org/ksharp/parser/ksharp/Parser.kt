@@ -129,6 +129,11 @@ private fun KSharpParserResult.endBlock(): KSharpParserResult =
 fun KSharpConsumeResult.thenAssignOperator() =
     then(KSharpTokenType.AssignOperator, false)
 
+fun KSharpLexerIterator.ifStartRepeatingLine(action: (KSharpConsumeResult) -> KSharpParserResult) =
+    ifConsume({
+        it.type == BaseTokenType.NewLine && state.value.indentationOffset.currentType == OffsetType.Repeating
+    }, true, action)
+
 fun String.lexerModule(withLocations: Boolean) =
     this.reader().lexerModule(withLocations)
 

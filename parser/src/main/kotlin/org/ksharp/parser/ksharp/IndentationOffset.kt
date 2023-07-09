@@ -1,50 +1,72 @@
 package org.ksharp.parser.ksharp
 
+import org.ksharp.common.Flag
 import java.util.*
 
-private data class Offset(var size: Int, var fixed: Boolean, var optional: Boolean)
+private data class Offset(var size: Int, var fixed: Boolean, var type: OffsetType)
 
 enum class OffsetAction {
-    INVALID,
-    SAME,
-    PREVIOUS,
-    END
+    Invalid,
+    Same,
+    Repeating,
+    Previous,
+    End
+}
+
+enum class OffsetType(val action: OffsetAction) {
+    Normal(OffsetAction.Previous),
+    Optional(OffsetAction.Same),
+    Repeating(OffsetAction.Repeating)
 }
 
 
 class IndentationOffset {
 
     private val offsets = Stack<Offset>()
+    private val newLine = Flag()
+
+    val currentType: OffsetType get() = if (offsets.isEmpty()) OffsetType.Normal else offsets.peek().type
+
     private fun update(size: Int, sameResult: OffsetAction): OffsetAction {
-        if (offsets.isEmpty()) return OffsetAction.END
+        if (offsets.isEmpty()) {
+            newLine.activate()
+            return OffsetAction.End
+        }
+
         val last = offsets.peek()
         if (last.size > size) {
-            val isOptional = offsets.pop().optional
-            return update(size, if (isOptional) sameResult else OffsetAction.PREVIOUS)
+            return update(size, offsets.pop().type.action)
         }
+
         if (last.size < size) {
-            if (last.fixed) return OffsetAction.INVALID
+            if (last.fixed) return OffsetAction.Invalid
             last.size = size
             last.fixed = true
-            last.optional = false
+            if (last.type == OffsetType.Optional)
+                last.type = OffsetType.Normal
         }
-        return sameResult
+
+        newLine.activate()
+        return if (last.type == OffsetType.Repeating) {
+            OffsetAction.Repeating
+        } else sameResult
     }
 
-    fun add(size: Int, optional: Boolean): Boolean {
+    fun add(size: Int, type: OffsetType): Boolean {
         val allowed = if (offsets.isEmpty()) true else {
             offsets.peek().size < size
         }
-        if (allowed) offsets.push(Offset(size, false, optional))
+        if (allowed) offsets.push(Offset(size, false, type))
         return allowed
     }
 
-    fun addRelative(size: Int, optional: Boolean) {
+    fun addRelative(size: Int, type: OffsetType) {
         val position = if (offsets.isEmpty()) 0 else {
             offsets.peek().size + size
         }
-        offsets.push(Offset(position, false, optional))
+        offsets.push(Offset(position, false, type))
     }
-    
-    fun update(size: Int) = update(size, OffsetAction.SAME)
+
+    fun update(size: Int) = update(size, OffsetAction.Same)
+
 }

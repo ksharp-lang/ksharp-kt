@@ -192,7 +192,7 @@ private fun List<Any>.asTypeExpressionLocations(emitLocations: Boolean): List<Lo
     if (emitLocations) filterIsInstance<SetElement>().map { it.cast<SetElement>().location } else listOf()
 
 private fun KSharpLexerIterator.consumeTypeExpr(emitLocations: Boolean): KSharpParserResult =
-    addIndentationOffset(true)
+    addIndentationOffset(OffsetType.Optional)
         .consumeTypeValue(true, emitLocations)
         .resume()
         .thenLoop {
@@ -228,13 +228,13 @@ private fun KSharpLexerIterator.consumeTypeExpr(emitLocations: Boolean): KSharpP
             }
         }
 
-private fun KSharpLexerIterator.consumeTraitFunction(emitLocations: Boolean): KSharpParserResult =
-    consumeLowerCaseWord()
+private fun KSharpConsumeResult.thenTraitFunction(emitLocations: Boolean): KSharpParserResult =
+    thenLowerCaseWord()
         .then(KSharpTokenType.Operator, "::", false)
-        .addRelativeIndentationOffset(1, false)
-        .addIndentationOffset(true)
-        .consume { it.consumeTypeValue(true, emitLocations) }
-        .thenNewLine()
+        .addRelativeIndentationOffset(1, OffsetType.Optional)
+        .consume {
+            it.consumeTypeValue(true, emitLocations)
+        }
         .build {
             val name = it.first().cast<Token>()
             val type = it.last().cast<NodeData>()
@@ -283,8 +283,10 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
             it.consumeLowerCaseWord()
                 .build { param -> param.last() }
         }.thenAssignOperator()
-        .addRelativeIndentationOffset(1, false)
-        .thenLoop { it.consumeTraitFunction(emitLocations) }
+        .addRelativeIndentationOffset(1, OffsetType.Repeating)
+        .thenLoop {
+            it.ifStartRepeatingLine { l -> l.thenTraitFunction(emitLocations) }
+        }
         .build {
             (it.filter { f -> f !is TraitFunctionNode } +
                     TraitFunctionsNode(it.filterIsInstance<TraitFunctionNode>().cast()))
@@ -312,7 +314,7 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
         }
 
 private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
-    addRelativeIndentationOffset(1, false)
+    addRelativeIndentationOffset(1, OffsetType.Normal)
         .thenIfConsume({
             it.type == KSharpTokenType.LowerCaseWord && it.text == "type"
         }, false) { l ->
@@ -383,7 +385,7 @@ internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserR
                     .build { param -> param.last() }
             }
             .then(KSharpTokenType.Operator, "::", false)
-            .addRelativeIndentationOffset(1, false)
+            .addRelativeIndentationOffset(1, OffsetType.Normal)
             .consume { l -> l.consumeTypeValue(true, state.value.emitLocations) }
             .build { i ->
                 val emitLocations = state.value.emitLocations

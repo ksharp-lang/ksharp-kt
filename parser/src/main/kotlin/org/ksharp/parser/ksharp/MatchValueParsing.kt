@@ -102,7 +102,8 @@ internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserRes
         }
 
 internal fun KSharpLexerIterator.consumeMatchAssignment() =
-    consumeMatchValue()
+    addIndentationOffset(OffsetType.Optional)
+        .consumeMatchValue()
         .resume()
         .thenAssignOperator()
         .consume { l -> l.consumeExpression() }
