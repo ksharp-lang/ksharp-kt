@@ -1186,6 +1186,44 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "Labels on tuples with indentation" {
+        """type Point2D = x: Double, 
+            |             y: Double""".trimMargin()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    null,
+                    "Point2D",
+                    listOf(),
+                    TupleTypeNode(
+                        listOf(
+                            LabelTypeNode(
+                                "x",
+                                ConcreteTypeNode("Double", Location.NoProvided),
+                                Location.NoProvided,
+                            ),
+                            LabelTypeNode(
+                                "y",
+                                ConcreteTypeNode("Double", Location.NoProvided),
+                                Location.NoProvided,
+                            )
+                        ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
     "Labels with composite types" {
         "type Composite a = n: (Num a), point: (x: Double, y: Double)"
             .kSharpLexer()
@@ -1562,6 +1600,69 @@ class TypeParserTest : StringSpec({
                 TypeDeclarationNode(
                     null,
                     "wire->internal",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "Type declaration with indentation" {
+        """sum :: 
+           |  Int -> Int -> Int""".trimMargin()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeFunctionTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "sum",
+                    listOf(),
+                    FunctionTypeNode(
+                        listOf(
+                            ConcreteTypeNode("Int", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "Type declaration with params and indentation" {
+        """sum a :: (Num a) 
+            |           -> (Num a) 
+            |           -> Int""".trimMargin()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeFunctionTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "sum",
                     listOf("a"),
                     FunctionTypeNode(
                         listOf(

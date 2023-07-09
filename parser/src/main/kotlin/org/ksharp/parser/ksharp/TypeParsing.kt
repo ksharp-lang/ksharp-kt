@@ -192,7 +192,8 @@ private fun List<Any>.asTypeExpressionLocations(emitLocations: Boolean): List<Lo
     if (emitLocations) filterIsInstance<SetElement>().map { it.cast<SetElement>().location } else listOf()
 
 private fun KSharpLexerIterator.consumeTypeExpr(emitLocations: Boolean): KSharpParserResult =
-    consumeTypeValue(true, emitLocations)
+    addIndentationOffset(true)
+        .consumeTypeValue(true, emitLocations)
         .resume()
         .thenLoop {
             it.consumeTypeSetSeparator()
@@ -231,6 +232,7 @@ private fun KSharpLexerIterator.consumeTraitFunction(emitLocations: Boolean): KS
     consumeLowerCaseWord()
         .then(KSharpTokenType.Operator, "::", false)
         .addRelativeIndentationOffset(1, false)
+        .addIndentationOffset(true)
         .consume { it.consumeTypeValue(true, emitLocations) }
         .thenNewLine()
         .build {
@@ -310,68 +312,68 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
         }
 
 private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
-    thenIfConsume({
-        it.type == KSharpTokenType.LowerCaseWord && it.text == "type"
-    }, false) { l ->
-        l.enableLabelToken { withLabels ->
-            withLabels.thenUpperCaseWord()
-                .thenLoop {
-                    it.consumeLowerCaseWord()
-                        .build { param ->
-                            param.last()
+    addRelativeIndentationOffset(1, false)
+        .thenIfConsume({
+            it.type == KSharpTokenType.LowerCaseWord && it.text == "type"
+        }, false) { l ->
+            l.enableLabelToken { withLabels ->
+                withLabels.thenUpperCaseWord()
+                    .thenLoop {
+                        it.consumeLowerCaseWord()
+                            .build { param ->
+                                param.last()
+                            }
+                    }
+                    .thenAssignOperator()
+                    .consume { it.consumeTypeExpr(emitLocations) }
+                    .build {
+                        it.createTypeNode(
+                            internal,
+                            emitLocations
+                        ) { internalLoc, keywordLoc, name, params, paramsLocations, assignLoc, definition ->
+                            TypeNode(
+                                internal, null, name.text, params, definition.cast(),
+                                name.location,
+                                TypeNodeLocations(internalLoc, keywordLoc, name.location, paramsLocations, assignLoc)
+                            )
                         }
-                }
-                .thenAssignOperator()
-                .consume { it.consumeTypeExpr(emitLocations) }
-                .build {
-                    it.createTypeNode(
-                        internal,
-                        emitLocations
-                    ) { internalLoc, keywordLoc, name, params, paramsLocations, assignLoc, definition ->
-                        TypeNode(
-                            internal, null, name.text, params, definition.cast(),
-                            name.location,
-                            TypeNodeLocations(internalLoc, keywordLoc, name.location, paramsLocations, assignLoc)
+                    }.map {
+                        ParserValue(
+                            it.value.cast<TypeNode>()
+                                .copy(annotations = it.remainTokens.state.value.annotations.build()),
+                            it.remainTokens
                         )
                     }
-                }.map {
-                    ParserValue(
-                        it.value.cast<TypeNode>()
-                            .copy(annotations = it.remainTokens.state.value.annotations.build()),
-                        it.remainTokens
-                    )
-                }
-        }.resume()
-            .thenIf(KSharpTokenType.Operator7, "=>", false) { opL ->
-                opL.consume { it.consumeExpression() }
-            }.build {
-                val type = it.first().cast<TypeNode>()
-                if (it.size == 1) type.cast<NodeData>()
-                else {
-                    val expr = it.last().cast<NodeData>()
-                    type.copy(
-                        expr = ConstrainedTypeNode(
-                            type.expr.cast(), expr, expr.location,
-                            ConstrainedTypeNodeLocations(
-                                if (emitLocations)
-                                    it[1].cast<Token>().location
-                                else Location.NoProvided
+            }.resume()
+                .thenIf(KSharpTokenType.Operator7, "=>", false) { opL ->
+                    opL.consume { it.consumeExpression() }
+                }.build {
+                    val type = it.first().cast<TypeNode>()
+                    if (it.size == 1) type.cast<NodeData>()
+                    else {
+                        val expr = it.last().cast<NodeData>()
+                        type.copy(
+                            expr = ConstrainedTypeNode(
+                                type.expr.cast(), expr, expr.location,
+                                ConstrainedTypeNodeLocations(
+                                    if (emitLocations)
+                                        it[1].cast<Token>().location
+                                    else Location.NoProvided
+                                )
                             )
                         )
-                    )
+                    }
                 }
-            }
-    }.orCollect {
-        it.consumeTrait(internal, emitLocations)
-    }
+        }.orCollect {
+            it.consumeTrait(internal, emitLocations)
+        }
 
 fun KSharpLexerIterator.consumeTypeDeclaration(): KSharpParserResult =
-    addIndentationOffset(false)
-        .ifConsume(KSharpTokenType.LowerCaseWord, "internal", false) {
-            it.consumeType(true, state.value.emitLocations)
-        }.or {
-            it.collect().consumeType(false, state.value.emitLocations)
-        }
+    ifConsume(KSharpTokenType.LowerCaseWord, "internal", false) {
+        it.consumeType(true, state.value.emitLocations)
+    }.or {
+        it.collect().consumeType(false, state.value.emitLocations)
+    }
 
 internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserResult =
     lookAHead {
@@ -381,6 +383,7 @@ internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserR
                     .build { param -> param.last() }
             }
             .then(KSharpTokenType.Operator, "::", false)
+            .addRelativeIndentationOffset(1, false)
             .consume { l -> l.consumeTypeValue(true, state.value.emitLocations) }
             .build { i ->
                 val emitLocations = state.value.emitLocations
