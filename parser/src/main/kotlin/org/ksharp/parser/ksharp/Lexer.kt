@@ -474,6 +474,12 @@ fun KSharpLexerIterator.addIndentationOffset(optional: Boolean): KSharpLexerIter
     return this
 }
 
+fun KSharpLexerIterator.addRelativeIndentationOffset(relative: Int, optional: Boolean): KSharpLexerIterator {
+    val lexerState = state.value
+    lexerState.indentationOffset.addRelative(relative, optional)
+    return this
+}
+
 @JvmName("addIndentationOffset2")
 fun <S> ParserResult<S, KSharpLexerState>.addIndentationOffset(optional: Boolean): ParserResult<S, KSharpLexerState> =
     map {
@@ -484,6 +490,12 @@ fun <S> ParserResult<S, KSharpLexerState>.addIndentationOffset(optional: Boolean
 fun KSharpConsumeResult.addIndentationOffset(optional: Boolean): KSharpConsumeResult =
     map {
         it.tokens.addIndentationOffset(optional)
+        it
+    }
+
+fun KSharpConsumeResult.addRelativeIndentationOffset(relative: Int, optional: Boolean): KSharpConsumeResult =
+    map {
+        it.tokens.addRelativeIndentationOffset(relative, optional)
         it
     }
 

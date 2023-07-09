@@ -74,14 +74,6 @@ fun KSharpLexerIterator.consumeBlock(action: (KSharpLexerIterator) -> KSharpPars
         }
 
 
-fun KSharpConsumeResult.thenInBlock(action: (KSharpLexerIterator) -> KSharpParserResult): KSharpConsumeResult =
-    consume {
-        it.consumeBlock { block ->
-            action(block)
-        }
-    }
-
-
 fun KSharpLexerIterator.consumeDot() = consume(KSharpTokenType.Operator0, ".")
 
 fun KSharpLexerIterator.consumeLowerCaseWord(text: String? = null, discardToken: Boolean = false) =

@@ -39,5 +39,12 @@ class IndentationOffset {
         return allowed
     }
 
+    fun addRelative(size: Int, optional: Boolean) {
+        val position = if (offsets.isEmpty()) 0 else {
+            offsets.peek().size + size
+        }
+        offsets.push(Offset(position, false, optional))
+    }
+    
     fun update(size: Int) = update(size, OffsetAction.SAME)
 }

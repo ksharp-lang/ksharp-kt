@@ -230,6 +230,7 @@ private fun KSharpLexerIterator.consumeTypeExpr(emitLocations: Boolean): KSharpP
 private fun KSharpLexerIterator.consumeTraitFunction(emitLocations: Boolean): KSharpParserResult =
     consumeLowerCaseWord()
         .then(KSharpTokenType.Operator, "::", false)
+        .addRelativeIndentationOffset(1, false)
         .consume { it.consumeTypeValue(true, emitLocations) }
         .thenNewLine()
         .build {
@@ -280,27 +281,26 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
             it.consumeLowerCaseWord()
                 .build { param -> param.last() }
         }.thenAssignOperator()
-        .thenInBlock { block ->
-            block.collect()
-                .thenLoop { it.consumeTraitFunction(emitLocations) }
-                .build { TraitFunctionsNode(it.cast()) }
-        }
+        .addRelativeIndentationOffset(1, false)
+        .thenLoop { it.consumeTraitFunction(emitLocations) }
         .build {
-            it.createTypeNode(
-                internal,
-                emitLocations
-            ) { internalLoc, keywordLoc, name, params, paramsLocations, assignLoc, definition ->
-                TraitNode(
-                    internal, null, name.text, params, definition.cast(), name.location,
-                    TraitNodeLocations(
-                        internalLoc,
-                        keywordLoc,
-                        name.location,
-                        paramsLocations,
-                        assignLoc
+            (it.filter { f -> f !is TraitFunctionNode } +
+                    TraitFunctionsNode(it.filterIsInstance<TraitFunctionNode>().cast()))
+                .createTypeNode(
+                    internal,
+                    emitLocations
+                ) { internalLoc, keywordLoc, name, params, paramsLocations, assignLoc, definition ->
+                    TraitNode(
+                        internal, null, name.text, params, definition.cast(), name.location,
+                        TraitNodeLocations(
+                            internalLoc,
+                            keywordLoc,
+                            name.location,
+                            paramsLocations,
+                            assignLoc
+                        )
                     )
-                )
-            }
+                }
         }.map {
             ParserValue(
                 it.value.cast<TraitNode>()
