@@ -25,10 +25,11 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
             else -> false
         }
     }) { l ->
-        l.thenLoop {
-            val r = it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
-            r
-        }
+        l.addIndentationOffset(OffsetType.Repeating)
+            .thenLoop {
+                val r = it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
+                r
+            }
             .build {
                 val fnName = it.first().cast<Token>()
                 FunctionCallNode(
@@ -94,14 +95,13 @@ fun KSharpLexerIterator.consumeMatchExpression(): KSharpParserResult =
     }
 
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
-    ifConsume(KSharpTokenType.Let, false) { ifLexer ->
-        ifLexer
-            .thenLoop {
-                it.addRelativeIndentationOffset(0, OffsetType.Normal)
-                    .consumeMatchAssignment()
-                    .resume()
-                    .thenNewLine()
-                    .build { i -> i.first().cast<NodeData>() }
+    ifConsume(KSharpTokenType.Let, false) { letLexer ->
+        letLexer
+            .addRelativeIndentationOffset(0, OffsetType.Repeating)
+            .thenReapingIndentation(false) { l ->
+                l.consume { cl -> cl.consumeMatchAssignment() }
+                    .build { i -> i.first().cast() }
+
             }
             .then(KSharpTokenType.Then, false)
             .consume { it.consumeExpression() }
@@ -120,22 +120,21 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
     tupleWithoutParenthesis: Boolean = true,
     withBindings: Boolean = false
 ): KSharpParserResult {
-    val groupExpression = addIndentationOffset(OffsetType.Optional)
-        .ifConsume(KSharpTokenType.OpenParenthesis, true) {
-            it.consume { l ->
-                l.consumeExpression()
-            }.then(KSharpTokenType.CloseParenthesis, true)
-                .build { l ->
-                    l.first().cast<NodeData>()
-                }
-        }.or {
-            it.ifStartRepeatingLine { l ->
-                l.consume { cL -> cL.consumeExpression() }
-                    .build { b -> b.first().cast() }
+    val groupExpression = ifConsume(KSharpTokenType.OpenParenthesis, true) {
+        it.consume { l ->
+            l.consumeExpression()
+        }.then(KSharpTokenType.CloseParenthesis, true)
+            .build { l ->
+                l.first().cast<NodeData>()
             }
-        }.or { l ->
-            l.consumeLiteral(withBindings)
-        }.or { it.consumeIfExpression() }
+    }.or {
+        it.ifStartRepeatingLine { l ->
+            l.consume { cL -> cL.consumeExpression() }
+                .build { b -> b.first().cast() }
+        }
+    }.or { l ->
+        l.consumeLiteral(withBindings)
+    }.or { it.consumeIfExpression() }
         .or { it.consumeLetExpression() }
         .or { it.consumeMatchExpression() }
 
@@ -387,4 +386,6 @@ private fun KSharpLexerIterator.consumeOperator0(
 
 fun KSharpLexerIterator.consumeExpression(
     tupleWithoutParenthesis: Boolean = true
-): KSharpParserResult = consumeOperator0(tupleWithoutParenthesis)
+): KSharpParserResult =
+    addIndentationOffset(OffsetType.Optional)
+        .consumeOperator0(tupleWithoutParenthesis)

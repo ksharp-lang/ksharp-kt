@@ -481,25 +481,6 @@ fun KSharpConsumeResult.addRelativeIndentationOffset(relative: Int, type: Offset
         it
     }
 
-fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
-    val lexerState = state.value
-    val indentationOffset = lexerState.indentationOffset
-    return generateLexerIterator(state) {
-        while (hasNext()) {
-            val token = next()
-            if (token.type == BaseTokenType.NewLine) {
-                lexerState.lineStartOffset.set(lastStartOffset)
-                when (indentationOffset.update(token.text.length - 1)) {
-                    OffsetAction.Same -> continue
-                    else -> Unit
-                }
-            }
-            return@generateLexerIterator token
-        }
-        null
-    }
-}
-
 fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {
     var lastTokenIsNewLine = false
     var lastToken: Token? = null

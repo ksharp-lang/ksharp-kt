@@ -284,10 +284,9 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
                 .build { param -> param.last() }
         }.thenAssignOperator()
         .addRelativeIndentationOffset(1, OffsetType.Repeating)
-        .thenLoop {
-            it.ifStartRepeatingLine { l -> l.thenTraitFunction(emitLocations) }
-        }
-        .build {
+        .thenReapingIndentation(true) { l ->
+            l.thenTraitFunction(emitLocations)
+        }.build {
             (it.filter { f -> f !is TraitFunctionNode } +
                     TraitFunctionsNode(it.filterIsInstance<TraitFunctionNode>().cast()))
                 .createTypeNode(

@@ -101,9 +101,8 @@ internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserRes
             )
         }
 
-internal fun KSharpLexerIterator.consumeMatchAssignment() =
-    addIndentationOffset(OffsetType.Optional)
-        .consumeMatchValue()
+internal fun KSharpLexerIterator.consumeMatchAssignment(): KSharpParserResult =
+    consumeMatchValue()
         .resume()
         .thenAssignOperator()
         .consume { l -> l.consumeExpression() }
