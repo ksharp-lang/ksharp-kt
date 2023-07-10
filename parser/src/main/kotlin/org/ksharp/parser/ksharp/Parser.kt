@@ -87,9 +87,6 @@ fun KSharpLexerIterator.consumeKeyword(text: String, discardToken: Boolean = fal
 fun KSharpConsumeResult.thenKeyword(text: String, discardToken: Boolean = false) =
     thenLowerCaseWord(text, discardToken)
 
-fun KSharpConsumeResult.thenNewLine() =
-    then(BaseTokenType.NewLine, true)
-
 private fun KSharpParserResult.endBlock(): KSharpParserResult =
     when (this) {
         is Either.Left -> {
