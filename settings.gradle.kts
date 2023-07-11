@@ -20,7 +20,7 @@ dependencyResolutionManagement {
             version("kotest", "5.6.2")
             version("eclipse.lsp4j", "0.21.0")
             version("graalvm", "22.3.0")
-            version("netty", "4.1.93.Final")
+            version("netty", "4.1.94.Final")
 
             // Tooling
             version("jacoco", "0.8.10")
