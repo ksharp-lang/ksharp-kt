@@ -3,12 +3,6 @@ plugins {
     java
 }
 
-repositories {
-    mavenCentral()
-}
-
-val graalVersion = "22.3.0"
-
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":common"))
@@ -17,12 +11,12 @@ dependencies {
     implementation(project(":typesystem"))
     implementation(project(":module"))
 
-    implementation("org.graalvm.truffle:truffle-api:$graalVersion")
-    annotationProcessor("org.graalvm.truffle:truffle-dsl-processor:$graalVersion")
+    implementation(libs.graalvm.truffle.api)
+    annotationProcessor(libs.graalvm.truffle.dsl.processor)
 
     testImplementation(project(":parser"))
     testImplementation(project(":test"))
-    testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
+    testImplementation(libs.kotest)
 }
 
 
