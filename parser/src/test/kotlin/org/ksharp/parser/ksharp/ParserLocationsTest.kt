@@ -31,7 +31,7 @@ class ParserLocationsTest : StringSpec({
         "@native(True for=[\"java\" \"c#\"] wire->internal=@native(\"String\") Flag=False)"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeAnnotation)
+                it.consumeAnnotation()
             }
             .map { it.value }
             .shouldBeRight(
@@ -123,7 +123,7 @@ class ParserLocationsTest : StringSpec({
         "type ListOfInt a b = Int"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map { it.value.cast<TypeNode>().locations }
             .shouldBeRight(
                 TypeNodeLocations(
@@ -146,7 +146,7 @@ class ParserLocationsTest : StringSpec({
         "internal type ListOfInt a b = Int"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map { it.value.cast<TypeNode>().locations }
             .shouldBeRight(
                 TypeNodeLocations(
@@ -177,7 +177,7 @@ class ParserLocationsTest : StringSpec({
         """.trimIndent()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map { it.value.cast<TraitNode>().locations.also(::println) }
             .shouldBeRight(
                 TraitNodeLocations(
@@ -206,7 +206,7 @@ class ParserLocationsTest : StringSpec({
         """.trimIndent()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map { it.value.cast<TraitNode>().locations.also(::println) }
             .shouldBeRight(
                 TraitNodeLocations(
@@ -235,7 +235,7 @@ class ParserLocationsTest : StringSpec({
         "type ListOfInt = (List Int) -> a -> a -> b"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map {
                 it.value.cast<TypeNode>()
                     .expr
@@ -255,7 +255,7 @@ class ParserLocationsTest : StringSpec({
         "type Point = Double , Double, Int"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map {
                 it.value.cast<TypeNode>()
                     .expr
@@ -274,7 +274,7 @@ class ParserLocationsTest : StringSpec({
         "type Bool = True | False | NoSet"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map {
                 it.value.cast<TypeNode>()
                     .expr
@@ -293,7 +293,7 @@ class ParserLocationsTest : StringSpec({
         "type Bool = True & False & NoSet"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map {
                 it.value.cast<TypeNode>()
                     .expr
@@ -312,7 +312,7 @@ class ParserLocationsTest : StringSpec({
         "type Age = Int => (it > 0) && (it < 70)"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map {
                 it.value.cast<TypeNode>()
                     .expr
@@ -331,7 +331,7 @@ class ParserLocationsTest : StringSpec({
         """.trimIndent()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+                it.consumeTypeDeclaration()
             }.map {
                 it.value.cast<TraitNode>().definition.functions.map {
                     it.locations
@@ -354,7 +354,7 @@ class ParserLocationsTest : StringSpec({
         "sum a :: (Num a) -> (Num a) -> Int"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+                it.consumeFunctionTypeDeclaration()
             }.map {
                 it.value.cast<TypeDeclarationNode>().locations
             }.shouldBeRight(
@@ -369,7 +369,7 @@ class ParserLocationsTest : StringSpec({
         "import ksharp.math as math"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeImport)
+                it.consumeImport()
             }.map {
                 it.value.cast<ImportNode>().locations.also(::println)
             }.shouldBeRight(
@@ -386,7 +386,7 @@ class ParserLocationsTest : StringSpec({
         "import ksharp as math"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeImport)
+                it.consumeImport()
             }.map {
                 it.value.cast<ImportNode>().locations.also(::println)
             }.shouldBeRight(
@@ -403,7 +403,7 @@ class ParserLocationsTest : StringSpec({
         "native sum a b"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+                it.consumeFunction()
             }.map {
                 it.value.cast<FunctionNode>().locations.also(::println)
             }.shouldBeRight(
@@ -423,7 +423,7 @@ class ParserLocationsTest : StringSpec({
         "native pub sum a b"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+                it.consumeFunction()
             }.map {
                 it.value.cast<FunctionNode>().locations.also(::println)
             }.shouldBeRight(
@@ -443,7 +443,7 @@ class ParserLocationsTest : StringSpec({
         "native pub sum"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+                it.consumeFunction()
             }.map {
                 it.value.cast<FunctionNode>().locations.also(::println)
             }.shouldBeRight(
@@ -460,7 +460,7 @@ class ParserLocationsTest : StringSpec({
         "sum a b = a + b"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+                it.consumeFunction()
             }.map {
                 it.value.cast<FunctionNode>().locations.also(::println)
             }.shouldBeRight(
@@ -480,7 +480,7 @@ class ParserLocationsTest : StringSpec({
         "pub ten = 10"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeFunction)
+                it.consumeFunction()
             }.map {
                 it.value.cast<FunctionNode>().locations.also(::println)
             }.shouldBeRight(
@@ -497,7 +497,7 @@ class ParserLocationsTest : StringSpec({
         "if 4 > a then 10 else 20"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+                it.consumeExpression()
             }.map {
                 it.value.cast<IfNode>().locations.also(::println)
             }.shouldBeRight(
@@ -512,7 +512,7 @@ class ParserLocationsTest : StringSpec({
         "if 4 > a then 10"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+                it.consumeExpression()
             }.map {
                 it.value.cast<IfNode>().locations.also(::println)
             }.shouldBeRight(
@@ -527,7 +527,7 @@ class ParserLocationsTest : StringSpec({
         "{\"key1\": 1}"
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock(KSharpLexerIterator::consumeExpression)
+                it.consumeExpression()
             }.map {
                 it.value.cast<LiteralCollectionNode>()
                     .values.first().cast<LiteralMapEntryNode>()
@@ -545,9 +545,7 @@ class ParserLocationsTest : StringSpec({
         """.trimMargin()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock { l ->
-                    l.consumeExpression()
-                }
+                it.consumeExpression()
             }.map {
                 it.value.cast<LetExpressionNode>()
                     .matches.last()
@@ -563,9 +561,7 @@ class ParserLocationsTest : StringSpec({
         """.trimMargin()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock { l ->
-                    l.consumeExpression()
-                }
+                it.consumeExpression()
             }.map {
                 it.value.cast<LetExpressionNode>()
                     .locations.also(::println)
@@ -583,9 +579,7 @@ class ParserLocationsTest : StringSpec({
         """.trimMargin()
             .lexerModule(true)
             .emitLocations(true) {
-                it.consumeBlock { l ->
-                    l.consumeExpression()
-                }
+                it.consumeExpression()
             }.map {
                 it.value.cast<LetExpressionNode>()
                     .matches.last()

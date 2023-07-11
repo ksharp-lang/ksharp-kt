@@ -142,8 +142,8 @@ fun Reader.lexerModule(withLocations: Boolean) =
             if (withLocations) it.toLogicalLexerToken()
             else it
         }.collapseNewLines()
-        .enableIndentationOffset()
         .enableLookAhead()
+        .enableIndentationOffset()
 
 
 fun Reader.parseModule(

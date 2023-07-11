@@ -6,8 +6,6 @@ pluginManagement {
 
     plugins {
         kotlin("jvm") version kotlinVersion apply false
-        kotlin("kapt") version kotlinVersion apply false
-        kotlin("plugin.serialization") version kotlinVersion apply false
         id("org.sonarqube") version sonarqubeVersion
         jacoco
     }
@@ -16,7 +14,6 @@ pluginManagement {
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("kotlin", "1.9.0")
             version("kotest", "5.6.2")
             version("eclipse.lsp4j", "0.21.0")
             version("graalvm", "22.3.0")

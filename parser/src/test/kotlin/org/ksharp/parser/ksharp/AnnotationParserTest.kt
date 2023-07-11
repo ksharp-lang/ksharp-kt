@@ -11,8 +11,8 @@ import org.ksharp.test.shouldBeRight
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForAnnotationParsing() =
     filterAndCollapseTokens()
         .collapseNewLines()
-        .enableIndentationOffset()
         .enableLookAhead()
+        .enableIndentationOffset()
 
 
 class AnnotationParserTest : StringSpec({

@@ -11,8 +11,8 @@ import org.ksharp.test.shouldBeRight
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
     filterAndCollapseTokens()
         .collapseNewLines()
-        .enableIndentationOffset()
         .enableLookAhead()
+        .enableIndentationOffset()
 
 class TypeParserTest : StringSpec({
     "Invalid type separator" {

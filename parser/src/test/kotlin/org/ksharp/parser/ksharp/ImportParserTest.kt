@@ -60,8 +60,8 @@ class ImportParserTest : StringSpec({
             .kSharpLexer()
             .filterAndCollapseTokens()
             .collapseNewLines()
-            .enableIndentationOffset()
             .enableLookAhead()
+            .enableIndentationOffset()
             .consumeImport()
             .map { it.value }
             .shouldBeRight(

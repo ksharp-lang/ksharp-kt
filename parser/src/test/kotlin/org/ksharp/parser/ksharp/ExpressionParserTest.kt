@@ -10,8 +10,8 @@ import org.ksharp.test.shouldBeRight
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForExpressionParsing() =
     filterAndCollapseTokens()
         .collapseNewLines()
-        .enableIndentationOffset()
         .enableLookAhead()
+        .enableIndentationOffset()
 
 class ExpressionParserTest : StringSpec({
     "function call" {
