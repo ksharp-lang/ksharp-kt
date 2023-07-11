@@ -47,6 +47,10 @@ allprojects {
     System.getenv("CUSTOM_GRADLE_BUILD_DIR")?.run {
         project.buildDir = File("$this/ksharp-kt/${project.name}")
     }
+
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
@@ -70,7 +74,7 @@ subprojects {
     }
 
     extensions.configure(JacocoPluginExtension::class) {
-        this.toolVersion = "0.8.10"
+        this.toolVersion = rootProject.libs.versions.jacoco.get()
         reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
     }
 }
