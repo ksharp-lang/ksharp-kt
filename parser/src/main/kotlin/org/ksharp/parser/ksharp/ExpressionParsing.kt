@@ -97,13 +97,14 @@ fun KSharpLexerIterator.consumeMatchExpression(): KSharpParserResult =
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.Let, false) { letLexer ->
         letLexer
-            .addRelativeIndentationOffset(0, OffsetType.Repeating)
-            .thenReapingIndentation(false) { l ->
-                l.consume { cl -> cl.consumeMatchAssignment() }
-                    .build { i -> i.first().cast() }
+            .withIndentationOffset(true) {
+                it.addRelativeIndentationOffset(1, OffsetType.Repeating)
+                    .thenReapingIndentation(false) { l ->
+                        l.consume { cl -> cl.consumeMatchAssignment() }
+                            .build { i -> i.first().cast() }
 
-            }
-            .then(KSharpTokenType.Then, false)
+                    }
+            }.then(KSharpTokenType.Then, false)
             .consume { it.consumeExpression() }
             .build {
                 val letToken = it.first().cast<Token>()

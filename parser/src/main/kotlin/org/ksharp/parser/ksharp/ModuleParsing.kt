@@ -25,41 +25,40 @@ data class InvalidNode(
 private fun isTopLevelNewLine(token: Token): Boolean =
     token.type == BaseTokenType.NewLine && token.text.indentLength() == 1
 
-private fun KSharpLexerIterator.consumeInvalidTokens(error: Error): KSharpParserResult =
-    collect()
-        .thenLoop { t ->
-            t.consume({ !isTopLevelNewLine(it) })
-                .build { it.first() }
-        }.build {
-            InvalidNode(
-                it.asSequence()
-                    .map { i ->
-                        val t = i.cast<Token>()
-                        InvalidToken(
-                            t.text,
-                            t.type,
-                            t.location
-                        )
-                    }.toList(),
-                error
+private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParserResult =
+    thenLoop { t ->
+        t.consume({ !isTopLevelNewLine(it) })
+            .build { it.first() }
+    }.build {
+        InvalidNode(
+            it.asSequence()
+                .map { i ->
+                    val t = i.cast<Token>()
+                    InvalidToken(
+                        t.text,
+                        t.type,
+                        t.location
+                    )
+                }.toList(),
+            error
+        )
+    }.flatMap {
+        if (it.value.tokens.isEmpty()) Either.Left(
+            ParserError(
+                it.value.error,
+                listBuilder(),
+                false,
+                it.remainTokens
             )
-        }.flatMap {
-            if (it.value.tokens.isEmpty()) Either.Left(
-                ParserError(
-                    it.value.error,
-                    listBuilder(),
-                    false,
-                    it.remainTokens
-                )
-            )
-            else Either.Right(ParserValue(it.value, it.remainTokens))
-        }
+        )
+        else Either.Right(ParserValue(it.value, it.remainTokens))
+    }
 
 private fun KSharpParserResult.consumeInvalidTokens(state: KSharpLexerState): KSharpParserResult =
     mapLeft { e ->
         state.lastError.set(e.error)
         e
-    }.or { l -> l.consumeInvalidTokens(state.lastError.get()!!) }
+    }.orCollect { l -> l.consumeInvalidTokens(state.lastError.get()!!) }
 
 private fun KSharpLexerIterator.thenTopLevelSymbol(
     block: (KSharpLexerIterator) -> KSharpParserResult

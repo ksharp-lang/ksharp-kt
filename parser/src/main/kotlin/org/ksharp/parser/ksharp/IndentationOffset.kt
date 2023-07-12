@@ -63,9 +63,10 @@ class IndentationOffset {
     }
 
     fun add(size: Int, type: OffsetType): Boolean {
-        val allowed = if (offsets.isEmpty()) true else {
-            offsets.peek().size < size
-        }
+        val allowed = if (offsets.isEmpty()) true else
+            if (type != OffsetType.Optional) offsets.peek().size <= size
+            else offsets.peek().size < size
+
         if (allowed) offsets.push(OffsetImpl(size, false, type))
         return allowed
     }
@@ -121,6 +122,7 @@ fun KSharpConsumeResult.addIndentationOffset(
 
 fun KSharpConsumeResult.addRelativeIndentationOffset(relative: Int, type: OffsetType): KSharpConsumeResult =
     map {
+        assert(relative > 0) { "relative offsets should be greater than zero" }
         it.tokens.addRelativeIndentationOffset(relative, type)
         it
     }
@@ -166,6 +168,21 @@ fun KSharpConsumeResult.thenReapingIndentation(
                         block(l.collect())
                     }
             }
+    }
+
+fun KSharpConsumeResult.withIndentationOffset(
+    useStartTokenOffset: Boolean,
+    block: (KSharpConsumeResult) -> KSharpConsumeResult
+): KSharpConsumeResult =
+    flatMap {
+        val lexer = it.tokens.addIndentationOffset(OffsetType.Normal, useStartTokenOffset)
+        val indentationOffset = lexer.state.value.indentationOffset
+        val offset = indentationOffset.currentOffset
+        val tokenPredicate: (Token) -> Boolean = { tk ->
+            tk.type == BaseTokenType.NewLine && indentationOffset.currentOffset == offset
+        }
+        block(Either.Right(it))
+            .thenOptional(tokenPredicate, true)
     }
 
 fun KSharpLexerIterator.ifStartRepeatingLine(action: (KSharpConsumeResult) -> KSharpParserResult) =

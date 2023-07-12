@@ -12,7 +12,7 @@ class IndentationOffsetTest : StringSpec({
                 add(0, OffsetType.Normal).shouldBeTrue()
                 add(5, OffsetType.Normal).shouldBeTrue()
                 add(4, OffsetType.Normal).shouldBeFalse()
-                add(5, OffsetType.Normal).shouldBeFalse()
+                add(5, OffsetType.Normal).shouldBeTrue()
                 add(10, OffsetType.Normal).shouldBeTrue()
             }
     }
