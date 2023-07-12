@@ -447,37 +447,6 @@ fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
     }
 }
 
-fun KSharpLexerIterator.addIndentationOffset(type: OffsetType): KSharpLexerIterator {
-    val lexerState = state.value
-    lexerState.indentationOffset.add(lastEndOffset - lexerState.lineStartOffset.get(), type)
-    return this
-}
-
-fun KSharpLexerIterator.addRelativeIndentationOffset(relative: Int, type: OffsetType): KSharpLexerIterator {
-    val lexerState = state.value
-    lexerState.indentationOffset.addRelative(relative, type)
-    return this
-}
-
-@JvmName("addIndentationOffset2")
-fun <S> ParserResult<S, KSharpLexerState>.addIndentationOffset(type: OffsetType): ParserResult<S, KSharpLexerState> =
-    map {
-        it.remainTokens.addIndentationOffset(type)
-        it
-    }
-
-fun KSharpConsumeResult.addIndentationOffset(type: OffsetType): KSharpConsumeResult =
-    map {
-        it.tokens.addIndentationOffset(type)
-        it
-    }
-
-fun KSharpConsumeResult.addRelativeIndentationOffset(relative: Int, type: OffsetType): KSharpConsumeResult =
-    map {
-        it.tokens.addRelativeIndentationOffset(relative, type)
-        it
-    }
-
 fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {
     var lastTokenIsNewLine = false
     var lastToken: Token? = null
