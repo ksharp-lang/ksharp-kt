@@ -92,7 +92,6 @@ internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserRes
         .resume()
         .then(KSharpTokenType.Then, false)
         .consume { it.consumeExpression() }
-        .discardNewLines()
         .build {
             MatchExpressionBranchNode(
                 it.first().cast(),

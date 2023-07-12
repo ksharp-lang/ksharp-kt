@@ -32,10 +32,9 @@ enum class OffsetType(val action: OffsetAction) {
 class IndentationOffset {
 
     private val offsets = Stack<OffsetImpl>()
-    private val newLine = Flag()
+    private val newLine = Flag() //TODO review delete
 
     val currentType: OffsetType get() = if (offsets.isEmpty()) OffsetType.Normal else offsets.peek().type
-
     val currentOffset: Offset get() = offsets.peek()
 
     private fun update(size: Int, sameResult: OffsetAction): OffsetAction {

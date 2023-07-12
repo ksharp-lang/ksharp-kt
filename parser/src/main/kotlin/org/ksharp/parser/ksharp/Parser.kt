@@ -16,25 +16,6 @@ import java.nio.file.Path
 typealias KSharpParserResult = ParserResult<NodeData, KSharpLexerState>
 typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
 
-fun KSharpConsumeResult.discardNewLines() =
-    map {
-        val lexer = it.tokens
-        val checkpoint = lexer.state.lookAHeadState.checkpoint()
-        while (lexer.hasNext()) {
-            val token = lexer.next()
-            if (token.type == BaseTokenType.NewLine) {
-                continue
-            }
-            checkpoint.end(1)
-            return@map NodeCollector(
-                it.collection,
-                lexer
-            )
-        }
-        checkpoint.end(ConsumeTokens)
-        it
-    }
-
 fun KSharpConsumeResult.appendNode(block: (items: List<Any>) -> NodeData): KSharpConsumeResult =
     map {
         val items = it.collection.build()
