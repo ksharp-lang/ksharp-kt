@@ -90,8 +90,9 @@ fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
             val token = next()
             if (token.type == BaseTokenType.NewLine) {
                 lexerState.lineStartOffset.set(lastStartOffset)
-                when (indentationOffset.update(token.text.length - 1)) {
-                    OffsetAction.Same -> continue
+                val indentLength = token.text.indentLength() - 1
+                when (indentationOffset.update(indentLength)) {
+                    OffsetAction.Same -> if (indentLength == 0) Unit else continue
                     else -> Unit
                 }
             }

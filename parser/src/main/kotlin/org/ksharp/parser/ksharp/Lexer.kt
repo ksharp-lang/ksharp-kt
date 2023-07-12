@@ -61,9 +61,6 @@ enum class KSharpTokenType : TokenType {
     Operator11,
     Operator12,
 
-    BeginBlock,
-    EndBlock,
-
     UnitValue,
 
     //Keywords

@@ -58,13 +58,6 @@ fun <R> KSharpConsumeResult.disableCollapseAssignOperatorRule(code: (KSharpConsu
         }
     }
 
-fun KSharpLexerIterator.consumeBlock(action: (KSharpLexerIterator) -> KSharpParserResult): KSharpParserResult =
-    consume(KSharpTokenType.BeginBlock, true)
-        .flatMap { collector ->
-            action(collector.tokens)
-                .endBlock()
-        }
-
 
 fun KSharpLexerIterator.consumeDot() = consume(KSharpTokenType.Operator0, ".")
 
@@ -86,42 +79,6 @@ fun KSharpLexerIterator.consumeKeyword(text: String, discardToken: Boolean = fal
 
 fun KSharpConsumeResult.thenKeyword(text: String, discardToken: Boolean = false) =
     thenLowerCaseWord(text, discardToken)
-
-private fun KSharpParserResult.endBlock(): KSharpParserResult =
-    when (this) {
-        is Either.Left -> {
-            if (value.consumedTokens) {
-                val iter = value.remainTokens
-                var result = Either.Left(
-                    ParserError(
-                        value.error,
-                        value.collection,
-                        true,
-                        emptyLexerIterator(value.remainTokens.state)
-                    )
-                )
-                while (iter.hasNext()) {
-                    val tk = iter.next()
-                    if (tk.type == KSharpTokenType.EndBlock) {
-                        result = Either.Left(ParserError(value.error, value.collection, true, iter))
-                        break
-                    }
-                }
-                result
-            } else this
-        }
-
-        is Either.Right -> {
-            value.remainTokens.optionalConsume(BaseTokenType.NewLine)
-                .then(KSharpTokenType.EndBlock, false)
-                .map {
-                    ParserValue(value.value, it.tokens)
-                }.mapLeft {
-                    it.collection.add(value.value)
-                    it
-                }
-        }
-    }
 
 fun KSharpConsumeResult.thenAssignOperator() =
     then(KSharpTokenType.AssignOperator, false)

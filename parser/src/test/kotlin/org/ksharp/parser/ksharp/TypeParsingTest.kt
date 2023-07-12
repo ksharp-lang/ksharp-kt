@@ -69,10 +69,6 @@ class TypeParserTest : StringSpec({
                     LexerToken(
                         type = BaseTokenType.NewLine,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
-                    ),
-                    LexerToken(
-                        type = KSharpTokenType.EndBlock,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     )
                 )
             )
@@ -101,10 +97,6 @@ class TypeParserTest : StringSpec({
                     ),
                     LexerToken(
                         type = BaseTokenType.NewLine,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
-                    ),
-                    LexerToken(
-                        type = KSharpTokenType.EndBlock,
                         token = TextToken(text = "", startOffset = 0, endOffset = 0)
                     )
                 )

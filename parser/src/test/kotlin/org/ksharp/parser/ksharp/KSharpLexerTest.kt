@@ -579,8 +579,6 @@ private fun Sequence<Token>.asLspPositionsSequence() =
     filterIsInstance<LogicalLexerToken>()
         .map {
             when (it.type) {
-                KSharpTokenType.BeginBlock -> null
-                KSharpTokenType.EndBlock -> null
                 BaseTokenType.NewLine -> null
                 else -> "${it.text}:${it.startPosition.first.value}:${it.startPosition.second.value}"
             }
