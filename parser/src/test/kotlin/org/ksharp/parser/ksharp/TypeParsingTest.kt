@@ -20,13 +20,15 @@ class TypeParserTest : StringSpec({
             .kSharpLexer()
             .prepareLexerForTypeParsing()
             .consumeTypeDeclaration()
+            .resume()
+            .then(BaseTokenType.NewLine)
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     Location.NoProvided,
-                    "token" to "<EndBlock>",
+                    "token" to "<NewLine>",
                     "received-token" to "Operator10:--"
                 ) to listOf(
                     LexerToken(
@@ -39,7 +41,7 @@ class TypeParserTest : StringSpec({
                     ),
                     LexerToken(
                         type = BaseTokenType.NewLine,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                        token = TextToken(text = "\n", startOffset = 29, endOffset = 29)
                     ),
                 )
             )
@@ -49,13 +51,15 @@ class TypeParserTest : StringSpec({
             .kSharpLexer()
             .prepareLexerForTypeParsing()
             .consumeTypeDeclaration()
+            .resume()
+            .then(BaseTokenType.NewLine)
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     Location.NoProvided,
-                    "token" to "<EndBlock>",
+                    "token" to "<NewLine>",
                     "received-token" to "Operator4:|-"
                 ) to listOf(
                     LexerToken(
@@ -68,7 +72,7 @@ class TypeParserTest : StringSpec({
                     ),
                     LexerToken(
                         type = BaseTokenType.NewLine,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                        token = TextToken(text = "\n", startOffset = 26, endOffset = 26)
                     )
                 )
             )
@@ -78,13 +82,15 @@ class TypeParserTest : StringSpec({
             .kSharpLexer()
             .prepareLexerForTypeParsing()
             .consumeTypeDeclaration()
+            .resume()
+            .then(BaseTokenType.NewLine)
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     Location.NoProvided,
-                    "token" to "<EndBlock>",
+                    "token" to "<NewLine>",
                     "received-token" to "Operator6:&-"
                 ) to listOf(
                     LexerToken(
@@ -97,7 +103,7 @@ class TypeParserTest : StringSpec({
                     ),
                     LexerToken(
                         type = BaseTokenType.NewLine,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                        token = TextToken(text = "\n", startOffset = 26, endOffset = 26)
                     )
                 )
             )

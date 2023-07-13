@@ -48,7 +48,7 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
 fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.If, false) { ifLexer ->
         ifLexer
-            .addRelativeIndentationOffset(1, OffsetType.Optional)
+            .addIndentationOffset(OffsetType.Optional, true)
             .consume { l -> l.consumeExpression() }
             .then(KSharpTokenType.Then, false)
             .consume { l -> l.consumeExpression() }

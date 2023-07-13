@@ -32,6 +32,7 @@ private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParser
     }.build {
         InvalidNode(
             it.asSequence()
+                .filter { t -> t.cast<Token>().type != BaseTokenType.NewLine }
                 .map { i ->
                     val t = i.cast<Token>()
                     InvalidToken(
@@ -58,7 +59,7 @@ private fun KSharpParserResult.consumeInvalidTokens(state: KSharpLexerState): KS
     mapLeft { e ->
         state.lastError.set(e.error)
         e
-    }.orCollect { l -> l.consumeInvalidTokens(state.lastError.get()!!) }
+    }.or { l -> l.collect().consumeInvalidTokens(state.lastError.get()!!) }
 
 private fun KSharpLexerIterator.thenTopLevelSymbol(
     block: (KSharpLexerIterator) -> KSharpParserResult
@@ -83,7 +84,11 @@ private fun KSharpLexerIterator.consumeModuleNodesLogic(): KSharpConsumeResult =
                 true
             ).build {
                 it.first().cast<NodeData>()
-            }
+            }.flatMapLeft {
+                if (it.collection.size() != 0) {
+                    Either.Right(ParserValue(it.collection.build().first(), it.remainTokens))
+                } else Either.Left(it)
+            }.cast<KSharpParserResult>()
     }
 
 
