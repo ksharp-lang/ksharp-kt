@@ -25,24 +25,21 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
             else -> false
         }
     }) { l ->
-        l.addIndentationOffset(OffsetType.Repeating)
-            .thenLoop {
-                val r = it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
-                r
-            }
-            .build {
-                val fnName = it.first().cast<Token>()
-                FunctionCallNode(
-                    fnName.text,
-                    fnName.functionType,
-                    it.drop(1).map { arg ->
-                        if (arg is LiteralValueNode && arg.type == LiteralValueType.Binding && arg.value.endsWith(":")) {
-                            arg.copy(type = LiteralValueType.Label)
-                        } else arg as NodeData
-                    },
-                    fnName.location
-                )
-            }
+        l.thenLoop {
+            it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
+        }.build {
+            val fnName = it.first().cast<Token>()
+            FunctionCallNode(
+                fnName.text,
+                fnName.functionType,
+                it.drop(1).map { arg ->
+                    if (arg is LiteralValueNode && arg.type == LiteralValueType.Binding && arg.value.endsWith(":")) {
+                        arg.copy(type = LiteralValueType.Label)
+                    } else arg as NodeData
+                },
+                fnName.location
+            )
+        }
     }
 
 fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
@@ -128,11 +125,6 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
             .build { l ->
                 l.first().cast<NodeData>()
             }
-    }.or {
-        it.ifStartRepeatingLine { l ->
-            l.consume { cL -> cL.consumeExpression() }
-                .build { b -> b.first().cast() }
-        }
     }.or { l ->
         l.consumeLiteral(withBindings)
     }.or { it.consumeIfExpression() }

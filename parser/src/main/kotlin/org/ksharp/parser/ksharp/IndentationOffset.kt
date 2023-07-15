@@ -160,7 +160,7 @@ fun KSharpConsumeResult.thenReapingIndentation(
         }
         Either.Right(it)
             .thenLoopIndexed { l, index ->
-                if (index != 0 || requireAlwaysNewLine) {
+                if (requireAlwaysNewLine) {
                     l.consume(tokenPredicate, true)
                         .let(block)
                 } else
@@ -184,8 +184,3 @@ fun KSharpConsumeResult.withIndentationOffset(
         block(Either.Right(it))
             .thenOptional(tokenPredicate, true)
     }
-
-fun KSharpLexerIterator.ifStartRepeatingLine(action: (KSharpConsumeResult) -> KSharpParserResult) =
-    ifConsume({
-        it.type == BaseTokenType.NewLine && state.value.indentationOffset.currentType == OffsetType.Repeating
-    }, true, action)
