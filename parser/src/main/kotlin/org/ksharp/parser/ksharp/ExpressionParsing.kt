@@ -15,6 +15,28 @@ private val Token.functionType
             else -> FunctionType.Function
         }
 
+private fun KSharpConsumeResult.thenRepeatingFunCallIndentation(): KSharpConsumeResult =
+    flatMap { nc ->
+        val lexer = nc.tokens
+        val indentationOffset = lexer.state.value.indentationOffset
+        lexer.withNextTokenIndentationOffset(OffsetType.Repeating) {
+            val offset = indentationOffset.currentOffset
+            val tokenPredicate: (Token) -> Boolean = { tk ->
+                tk.type == BaseTokenType.NewLine && indentationOffset.currentOffset == offset
+            }
+            Either.Right(nc)
+                .thenLoop { l ->
+                    l.ifConsume(tokenPredicate, true) { iL ->
+                        iL.consume { c ->
+                            c.consumeExpression(true)
+                        }.build { b -> b.last().cast<NodeData>() }
+                    }.or { o ->
+                        o.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
+                    }
+                }
+        }
+    }
+
 fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
     ifConsume({
         when (it.type) {
@@ -25,9 +47,7 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
             else -> false
         }
     }) { l ->
-        l.thenLoop {
-            it.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
-        }.build {
+        l.thenRepeatingFunCallIndentation().build {
             val fnName = it.first().cast<Token>()
             FunctionCallNode(
                 fnName.text,
@@ -45,7 +65,6 @@ fun KSharpLexerIterator.consumeFunctionCall(): KSharpParserResult =
 fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.If, false) { ifLexer ->
         ifLexer
-            .addIndentationOffset(OffsetType.Optional, true)
             .consume { l -> l.consumeExpression() }
             .then(KSharpTokenType.Then, false)
             .consume { l -> l.consumeExpression() }
@@ -94,13 +113,11 @@ fun KSharpLexerIterator.consumeMatchExpression(): KSharpParserResult =
 fun KSharpLexerIterator.consumeLetExpression(): KSharpParserResult =
     ifConsume(KSharpTokenType.Let, false) { letLexer ->
         letLexer
-            .withIndentationOffset(true) {
-                it.addRelativeIndentationOffset(1, OffsetType.Repeating)
-                    .thenReapingIndentation(false) { l ->
-                        l.consume { cl -> cl.consumeMatchAssignment() }
-                            .build { i -> i.first().cast() }
-
-                    }
+            .withAlignedIndentationOffset(IndentationOffsetType.StartOffset) {
+                it.thenRepeatingIndentation(false) { l ->
+                    l.consume { cl -> cl.consumeMatchAssignment() }
+                        .build { i -> i.first().cast() }
+                }
             }.then(KSharpTokenType.Then, false)
             .consume { it.consumeExpression() }
             .build {
@@ -185,18 +202,6 @@ private fun KSharpConsumeResult.buildOperatorExpression(): KSharpParserResult =
         }
     }
 
-private fun KSharpLexerIterator.filter(
-    predicate: (Token) -> Boolean
-): Token? {
-    while (hasNext()) {
-        val token = next()
-        if (predicate(token)) {
-            return token
-        }
-    }
-    return null
-}
-
 private fun KSharpParserResult.thenOperatorExpression(
     type: KSharpTokenType,
     block: (KSharpLexerIterator) -> KSharpParserResult
@@ -205,7 +210,7 @@ private fun KSharpParserResult.thenOperatorExpression(
         .flatMap {
             val tokens = it.tokens
             val checkpoint = tokens.state.lookAHeadState.checkpoint()
-            val token = tokens.filter { t -> !(t.type == BaseTokenType.NewLine && t.text.length > 1) }
+            val token = if (tokens.hasNext()) tokens.next() else null
             if (token != null && token.type == type) {
                 checkpoint.end(ConsumeTokens)
                 it.collection.add(token)
@@ -379,6 +384,6 @@ private fun KSharpLexerIterator.consumeOperator0(
 
 fun KSharpLexerIterator.consumeExpression(
     tupleWithoutParenthesis: Boolean = true
-): KSharpParserResult =
-    addIndentationOffset(OffsetType.Optional)
-        .consumeOperator0(tupleWithoutParenthesis)
+): KSharpParserResult = withNextTokenIndentationOffset(OffsetType.Optional) {
+    it.consumeOperator0(tupleWithoutParenthesis)
+}

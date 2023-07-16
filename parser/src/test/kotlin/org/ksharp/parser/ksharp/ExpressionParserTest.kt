@@ -618,8 +618,8 @@ class ExpressionParserTest : StringSpec({
     }
     "block expressions" {
         """sum 10
-           |   20
-           |   30 + 15
+          |    20
+          |    30 + 15
         """.trimMargin()
             .kSharpLexer()
             .prepareLexerForExpressionParsing()
@@ -653,10 +653,12 @@ class ExpressionParserTest : StringSpec({
             )
     }
     "function and operators in block expressions" {
-        """10 +
-           |   sum 5
-           |       30 + 15
+        """
+        |10 +
+        |    sum 5
+        |        30 + 15
         """.trimMargin()
+            .also { println(it) }
             .kSharpLexer()
             .prepareLexerForExpressionParsing()
             .consumeExpression()
@@ -830,11 +832,11 @@ class ExpressionParserTest : StringSpec({
             )
     }
     "function with if expressions" {
-        """sum 10
-           |   if 1 != 2 
+        """|sum 10
+           |    if 1 != 2 
            |      then 1
            |      else 2
-           |   15
+           |    15
         """.trimMargin()
             .kSharpLexer()
             .prepareLexerForExpressionParsing()
@@ -958,8 +960,9 @@ class ExpressionParserTest : StringSpec({
             )
     }
     "let expression" {
-        """let x = 10
-           |   y = 20
+        """
+           |let x = 10
+           |    y = 20
            |then x + y
         """.trimMargin()
             .kSharpLexer()
@@ -1152,11 +1155,11 @@ class ExpressionParserTest : StringSpec({
             )
     }
     "nested let expression" {
-        """let x = let a2 = a * 2
-          |            b2 = b * 2
-          |        then a2 + b2
-          |then x + 2
-        """.trimMargin()
+        """|let x = let a2 = a * 2
+           |            b2 = b * 2
+           |        then a2 + b2
+           |then x + 2
+        """.trimMargin().also(::println)
             .kSharpLexer()
             .prepareLexerForExpressionParsing()
             .consumeExpression()

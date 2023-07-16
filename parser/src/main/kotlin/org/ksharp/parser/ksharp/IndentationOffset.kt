@@ -1,7 +1,6 @@
 package org.ksharp.parser.ksharp
 
 import org.ksharp.common.Either
-import org.ksharp.common.Flag
 import org.ksharp.parser.*
 import java.util.*
 
@@ -29,17 +28,15 @@ enum class OffsetType(val action: OffsetAction) {
 }
 
 
+private val EmptyOffset = OffsetImpl(0, true, OffsetType.Optional)
+
 class IndentationOffset {
 
     private val offsets = Stack<OffsetImpl>()
-    private val newLine = Flag() //TODO review delete
-
-    val currentType: OffsetType get() = if (offsets.isEmpty()) OffsetType.Normal else offsets.peek().type
-    val currentOffset: Offset get() = offsets.peek()
+    val currentOffset: Offset get() = if (offsets.isEmpty()) EmptyOffset else offsets.peek()
 
     private fun update(size: Int, sameResult: OffsetAction): OffsetAction {
         if (offsets.isEmpty()) {
-            newLine.activate()
             return OffsetAction.End
         }
 
@@ -55,75 +52,83 @@ class IndentationOffset {
             if (last.type == OffsetType.Optional)
                 last.type = OffsetType.Normal
         }
-
-        newLine.activate()
         return if (last.type == OffsetType.Repeating) {
             OffsetAction.Repeating
         } else sameResult
     }
 
     fun add(size: Int, type: OffsetType): Boolean {
-        val allowed = if (offsets.isEmpty()) true else
-            if (type != OffsetType.Optional) offsets.peek().size <= size
-            else offsets.peek().size < size
-
-        if (allowed) offsets.push(OffsetImpl(size, false, type))
+        val allowed = offsets.isEmpty() || offsets.peek().size <= size
+        if (allowed) {
+            if (offsets.isNotEmpty()) {
+                val last = offsets.peek()
+                if (last.type == OffsetType.Optional && last.size == size) {
+                    last.type = type
+                    return true
+                }
+            }
+            offsets.push(OffsetImpl(size, false, type))
+        }
         return allowed
     }
 
-    fun addRelative(size: Int, type: OffsetType) {
+    fun addRelative(type: OffsetType) {
         val position = if (offsets.isEmpty()) 0 else {
-            offsets.peek().size + size
+            offsets.peek().size + 1
         }
         offsets.push(OffsetImpl(position, false, type))
     }
 
     fun update(size: Int) = update(size, OffsetAction.Same)
 
+    fun remove(offset: Offset) {
+        if (offsets.isNotEmpty() && offsets.peek() == offset) {
+            offsets.pop()
+        }
+    }
+
 }
 
+enum class IndentationOffsetType {
+    StartOffset,
+    EndOffset,
+    Relative,
+    NextToken
+}
 
-fun KSharpLexerIterator.addIndentationOffset(
-    type: OffsetType,
-    useStartTokenOffset: Boolean = false
+private fun KSharpLexerIterator.addIndentationOffset(
+    indentationType: IndentationOffsetType = IndentationOffsetType.EndOffset,
+    type: OffsetType = OffsetType.Optional,
 ): KSharpLexerIterator {
     val lexerState = state.value
-    lexerState.indentationOffset.add(
-        if (useStartTokenOffset) lastStartOffset else lastEndOffset - lexerState.lineStartOffset.get(),
-        type
-    )
+    val indentationOffset = lexerState.indentationOffset
+
+    when (indentationType) {
+        IndentationOffsetType.StartOffset -> indentationOffset.add(
+            lastStartOffset - lexerState.lineStartOffset.get(),
+            type
+        )
+
+        IndentationOffsetType.EndOffset -> indentationOffset.add(lastEndOffset - lexerState.lineStartOffset.get(), type)
+        IndentationOffsetType.Relative -> indentationOffset.addRelative(type)
+        IndentationOffsetType.NextToken -> {
+            val lookAHeadCheckPoint = state.lookAHeadState.checkpoint()
+            if (hasNext()) {
+                next()
+                indentationOffset.add(
+                    lastStartOffset - lexerState.lineStartOffset.get(),
+                    type
+                )
+            }
+            lookAHeadCheckPoint.end(PreserveTokens)
+        }
+    }
     return this
 }
 
-fun KSharpLexerIterator.addRelativeIndentationOffset(relative: Int, type: OffsetType): KSharpLexerIterator {
-    val lexerState = state.value
-    lexerState.indentationOffset.addRelative(relative, type)
-    return this
-}
-
-@JvmName("addIndentationOffset2")
-fun <S> ParserResult<S, KSharpLexerState>.addIndentationOffset(
-    type: OffsetType,
-    useStartTokenOffset: Boolean = false
-): ParserResult<S, KSharpLexerState> =
+fun KSharpConsumeResult.addRelativeIndentationOffset(type: OffsetType): KSharpConsumeResult =
     map {
-        it.remainTokens.addIndentationOffset(type, useStartTokenOffset)
-        it
-    }
-
-fun KSharpConsumeResult.addIndentationOffset(
-    type: OffsetType,
-    useStartTokenOffset: Boolean = false
-): KSharpConsumeResult =
-    map {
-        it.tokens.addIndentationOffset(type, useStartTokenOffset)
-        it
-    }
-
-fun KSharpConsumeResult.addRelativeIndentationOffset(relative: Int, type: OffsetType): KSharpConsumeResult =
-    map {
-        assert(relative > 0) { "relative offsets should be greater than zero" }
-        it.tokens.addRelativeIndentationOffset(relative, type)
+        it.tokens.addIndentationOffset(IndentationOffsetType.Relative, type)
         it
     }
 
@@ -134,7 +139,7 @@ fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
         while (hasNext()) {
             val token = next()
             if (token.type == BaseTokenType.NewLine) {
-                lexerState.lineStartOffset.set(lastStartOffset)
+                lexerState.lineStartOffset.set(lastEndOffset)
                 val indentLength = token.text.indentLength() - 1
                 when (indentationOffset.update(indentLength)) {
                     OffsetAction.Same -> if (indentLength == 0) Unit else continue
@@ -147,12 +152,12 @@ fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
     }
 }
 
-fun KSharpConsumeResult.thenReapingIndentation(
+fun KSharpConsumeResult.thenRepeatingIndentation(
     requireAlwaysNewLine: Boolean,
     block: (KSharpConsumeResult) -> KSharpParserResult
 ): KSharpConsumeResult =
     flatMap {
-        val lexer = it.tokens.addRelativeIndentationOffset(1, OffsetType.Repeating)
+        val lexer = it.tokens.addIndentationOffset(IndentationOffsetType.Relative, OffsetType.Repeating)
         val indentationOffset = lexer.state.value.indentationOffset
         val offset = indentationOffset.currentOffset
         val tokenPredicate: (Token) -> Boolean = { tk ->
@@ -160,22 +165,22 @@ fun KSharpConsumeResult.thenReapingIndentation(
         }
         Either.Right(it)
             .thenLoopIndexed { l, index ->
-                if (requireAlwaysNewLine) {
+                if (index != 0 || requireAlwaysNewLine) {
                     l.consume(tokenPredicate, true)
                         .let(block)
                 } else
                     l.ifConsume(tokenPredicate, true, block).or {
                         block(l.collect())
                     }
-            }
+            }.also { indentationOffset.remove(offset) }
     }
 
-fun KSharpConsumeResult.withIndentationOffset(
-    useStartTokenOffset: Boolean,
+fun KSharpConsumeResult.withAlignedIndentationOffset(
+    indentationType: IndentationOffsetType,
     block: (KSharpConsumeResult) -> KSharpConsumeResult
 ): KSharpConsumeResult =
     flatMap {
-        val lexer = it.tokens.addIndentationOffset(OffsetType.Normal, useStartTokenOffset)
+        val lexer = it.tokens.addIndentationOffset(indentationType, OffsetType.Normal)
         val indentationOffset = lexer.state.value.indentationOffset
         val offset = indentationOffset.currentOffset
         val tokenPredicate: (Token) -> Boolean = { tk ->
@@ -183,4 +188,41 @@ fun KSharpConsumeResult.withIndentationOffset(
         }
         block(Either.Right(it))
             .thenOptional(tokenPredicate, true)
+            .also {
+                indentationOffset.remove(offset)
+            }
     }
+
+fun <T> KSharpLexerIterator.withNextTokenIndentationOffset(
+    type: OffsetType,
+    block: (KSharpLexerIterator) -> T
+): T {
+    val lexerState = state.value
+    val indentationOffset = lexerState.indentationOffset
+    addIndentationOffset(IndentationOffsetType.NextToken, type)
+    val currentOffset = indentationOffset.currentOffset
+    return block(this).also {
+        indentationOffset.remove(currentOffset)
+    }
+}
+
+fun <T> KSharpLexerIterator.withIndentationOffset(
+    indentationType: IndentationOffsetType,
+    type: OffsetType,
+    block: (KSharpLexerIterator) -> T
+): T {
+    val indentationOffset = state.value.indentationOffset
+    addIndentationOffset(indentationType, type)
+    val currentOffset = indentationOffset.currentOffset
+    return block(this).also {
+        indentationOffset.remove(currentOffset)
+    }
+}
+
+fun KSharpConsumeResult.withIndentationOffset(
+    indentationType: IndentationOffsetType,
+    type: OffsetType,
+    block: (KSharpLexerIterator) -> KSharpParserResult
+): KSharpConsumeResult = consume {
+    it.withIndentationOffset(indentationType, type, block)
+}
