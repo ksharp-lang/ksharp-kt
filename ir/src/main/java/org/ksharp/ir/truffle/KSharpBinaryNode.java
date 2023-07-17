@@ -5,5 +5,5 @@ import com.oracle.truffle.api.dsl.NodeChild;
 
 @NodeChild("left")
 @NodeChild("right")
-public class KSharpBinaryNode {
+public abstract class KSharpBinaryNode {
 }
