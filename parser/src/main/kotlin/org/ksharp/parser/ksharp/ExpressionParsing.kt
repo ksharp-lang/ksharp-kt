@@ -29,7 +29,7 @@ private fun KSharpConsumeResult.thenRepeatingFunCallIndentation(): KSharpConsume
                     l.ifConsume(tokenPredicate, true) { iL ->
                         iL.consume { c ->
                             c.consumeExpression(true)
-                        }.build { b -> b.last().cast<NodeData>() }
+                        }.lastNodeData()
                     }.or { o ->
                         o.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
                     }

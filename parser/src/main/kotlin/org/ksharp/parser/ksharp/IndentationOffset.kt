@@ -52,6 +52,7 @@ class IndentationOffset {
             if (last.type == OffsetType.Optional)
                 last.type = OffsetType.Normal
         }
+
         return if (last.type == OffsetType.Repeating) {
             OffsetAction.Repeating
         } else sameResult
@@ -82,11 +83,10 @@ class IndentationOffset {
     fun update(size: Int) = update(size, OffsetAction.Same)
 
     fun remove(offset: Offset) {
-        if (offsets.isNotEmpty() && offsets.peek() == offset) {
+        if (offsets.isNotEmpty() && offsets.peek() === offset) {
             offsets.pop()
         }
     }
-
 }
 
 enum class IndentationOffsetType {
@@ -126,6 +126,22 @@ private fun KSharpLexerIterator.addIndentationOffset(
     return this
 }
 
+private fun Token.sameAsOffset(offset: Offset) =
+    type == BaseTokenType.NewLine && text.indentLength() == offset.size
+
+private fun <T> T.discardOffset(lexer: KSharpLexerIterator, offset: Offset): T {
+    val lookAhead = lexer.state.lookAHeadState.checkpoint()
+    lexer.state.value.indentationOffset.remove(offset)
+    if (lexer.hasNext()) {
+        val token = lexer.next()
+        val action = if (token.sameAsOffset(offset)) {
+            ConsumeTokens
+        } else PreserveTokens
+        lookAhead.end(action)
+    }
+    return this
+}
+
 fun KSharpConsumeResult.addIndentationOffset(
     indentationType: IndentationOffsetType,
     type: OffsetType
@@ -146,12 +162,10 @@ fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
         while (hasNext()) {
             val token = next()
             if (token.type == BaseTokenType.NewLine) {
-                val indentLength = token.text.indentLength() - 1
+                val indentLength = token.text.indentLength()
                 lexerState.lineStartOffset.set(token.newLineStartOffset)
-                when (indentationOffset.update(indentLength)) {
-                    OffsetAction.Same -> if (indentLength == 0) Unit else continue
-                    else -> Unit
-                }
+                val result = indentationOffset.update(indentLength)
+                if (result == OffsetAction.Same && indentLength != 0) continue
             }
             return@generateLexerIterator token
         }
@@ -179,7 +193,7 @@ fun KSharpConsumeResult.thenRepeatingIndentation(
                     l.ifConsume(tokenPredicate, true, block).or {
                         block(l.collect())
                     }
-            }.also { indentationOffset.remove(offset) }
+            }.discardOffset(lexer, offset)
     }
 
 fun KSharpConsumeResult.withAlignedIndentationOffset(
@@ -195,9 +209,7 @@ fun KSharpConsumeResult.withAlignedIndentationOffset(
         }
         block(Either.Right(it))
             .thenOptional(tokenPredicate, true)
-            .also {
-                indentationOffset.remove(offset)
-            }
+            .discardOffset(lexer, offset)
     }
 
 fun <T> KSharpLexerIterator.withNextTokenIndentationOffset(
@@ -208,9 +220,7 @@ fun <T> KSharpLexerIterator.withNextTokenIndentationOffset(
     val indentationOffset = lexerState.indentationOffset
     addIndentationOffset(IndentationOffsetType.NextToken, type)
     val currentOffset = indentationOffset.currentOffset
-    return block(this).also {
-        indentationOffset.remove(currentOffset)
-    }
+    return block(this).discardOffset(this, currentOffset)
 }
 
 fun <T> KSharpLexerIterator.withIndentationOffset(
@@ -221,15 +231,15 @@ fun <T> KSharpLexerIterator.withIndentationOffset(
     val indentationOffset = state.value.indentationOffset
     addIndentationOffset(indentationType, type)
     val currentOffset = indentationOffset.currentOffset
-    return block(this).also {
-        indentationOffset.remove(currentOffset)
-    }
+    return block(this).discardOffset(this, currentOffset)
 }
 
-fun KSharpConsumeResult.withIndentationOffset(
+fun KSharpConsumeResult.thenWithIndentationOffset(
     indentationType: IndentationOffsetType,
     type: OffsetType,
-    block: (KSharpLexerIterator) -> KSharpParserResult
-): KSharpConsumeResult = consume {
-    it.withIndentationOffset(indentationType, type, block)
+    block: (KSharpConsumeResult) -> KSharpConsumeResult
+): KSharpConsumeResult = flatMap {
+    it.tokens.withIndentationOffset(indentationType, type) { _ ->
+        block(Either.Right(it))
+    }
 }

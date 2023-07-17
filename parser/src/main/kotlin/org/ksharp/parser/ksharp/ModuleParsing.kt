@@ -23,7 +23,7 @@ data class InvalidNode(
 }
 
 private fun isTopLevelNewLine(token: Token): Boolean =
-    token.type == BaseTokenType.NewLine && token.text.indentLength() == 1
+    token.type == BaseTokenType.NewLine && token.text.indentLength() == 0
 
 private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParserResult =
     thenLoop { t ->
@@ -65,7 +65,7 @@ private fun KSharpLexerIterator.thenTopLevelSymbol(
     block: (KSharpLexerIterator) -> KSharpParserResult
 ): KSharpConsumeResult =
     collect()
-        .thenLoopIndexed { l, index ->
+        .thenLoop { l ->
             block(l)
         }
 

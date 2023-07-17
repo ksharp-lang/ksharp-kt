@@ -76,8 +76,7 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean, emitLocations: Boo
         it.type == KSharpTokenType.LowerCaseWord && it.text == "pub"
     }, false) { it }
         .thenFunctionName()
-        .addIndentationOffset(IndentationOffsetType.Relative, OffsetType.Normal)
-        .let { lx ->
+        .thenWithIndentationOffset(IndentationOffsetType.Relative, OffsetType.Normal) { lx ->
             val funcDecl = lx.thenLoop {
                 it.consume(KSharpTokenType.LowerCaseWord)
                     .build { l -> l.first() }
@@ -87,15 +86,16 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean, emitLocations: Boo
                     funcDecl.thenAssignOperator()
                         .consume { l -> l.consumeExpression() }
                 } else funcDecl
-            }.build {
-                createFunctionNode(native, emitLocations, it)
-            }.map {
-                ParserValue(
-                    it.value.cast<FunctionNode>()
-                        .copy(annotations = it.remainTokens.state.value.annotations.build()),
-                    it.remainTokens
-                )
             }
+        }.build {
+            createFunctionNode(native, emitLocations, it)
+        }
+        .map {
+            ParserValue(
+                it.value.cast<FunctionNode>()
+                    .copy(annotations = it.remainTokens.state.value.annotations.build()),
+                it.remainTokens
+            )
         }
 
 fun KSharpLexerIterator.consumeFunction(): KSharpParserResult =

@@ -876,10 +876,10 @@ class ExpressionParserTest : StringSpec({
             )
     }
     "function with if without else expressions" {
-        """sum 10
-           |   if 1 != 2 
+        """|sum 10
+           |    if 1 != 2 
            |      then 1
-           |   15
+           |    15
         """.trimMargin()
             .kSharpLexer()
             .prepareLexerForExpressionParsing()

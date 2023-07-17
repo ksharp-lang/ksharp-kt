@@ -39,6 +39,8 @@ fun <R> KSharpConsumeResult.disableCollapseAssignOperatorRule(code: (KSharpConsu
         }
     }
 
+fun KSharpConsumeResult.lastNodeData(): KSharpParserResult =
+    build { it.last().cast<NodeData>() }
 
 fun KSharpLexerIterator.consumeDot() = consume(KSharpTokenType.Operator0, ".")
 

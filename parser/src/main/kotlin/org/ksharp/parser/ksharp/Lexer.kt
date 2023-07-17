@@ -429,7 +429,7 @@ private fun Token.mapOperatorToken(): Token = when (type) {
 internal fun String.indentLength() =
     replace("\n", "").replace("\r", "") //normalize newline to zero spaces
         .replace("\t", "  ") //normalize tab to two spaces
-        .length + 1 // add one that represent the newline
+        .length
 
 fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
     var lastIndent = 0
@@ -440,7 +440,7 @@ fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
                 val length = token.text.indentLength()
                 if (length == lastIndent) continue
                 else length
-            } else 0
+            } else -1
             return@generateLexerIterator token
         }
         null
