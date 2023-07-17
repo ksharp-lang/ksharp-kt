@@ -98,8 +98,8 @@ enum class IndentationOffsetType {
 }
 
 private fun KSharpLexerIterator.addIndentationOffset(
-    indentationType: IndentationOffsetType = IndentationOffsetType.EndOffset,
-    type: OffsetType = OffsetType.Optional,
+    indentationType: IndentationOffsetType,
+    type: OffsetType,
 ): KSharpLexerIterator {
     val lexerState = state.value
     val indentationOffset = lexerState.indentationOffset
