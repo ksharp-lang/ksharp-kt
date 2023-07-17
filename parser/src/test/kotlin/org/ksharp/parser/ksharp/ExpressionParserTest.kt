@@ -1262,4 +1262,77 @@ class ExpressionParserTest : StringSpec({
                 )
             )
     }
+    "match expression ambiguity" {
+        """|match 1 with
+           |      [x, y] then x + y
+           |      z then True
+        """.trimMargin()
+            .kSharpLexer()
+            .prepareLexerForExpressionParsing()
+            .consumeExpression()
+            .map { it.value }
+            .shouldBeRight(
+                MatchExpressionNode(
+                    expression = LiteralValueNode(value = "1", type = LiteralValueType.Integer, Location.NoProvided),
+                    branches = listOf(
+                        MatchExpressionBranchNode(
+                            match = LiteralCollectionNode(
+                                values = listOf(
+                                    FunctionCallNode(
+                                        name = "x",
+                                        type = FunctionType.Function,
+                                        arguments = listOf(),
+                                        Location.NoProvided
+                                    ),
+                                    FunctionCallNode(
+                                        name = "y",
+                                        type = FunctionType.Function,
+                                        arguments = listOf(),
+                                        Location.NoProvided
+                                    )
+                                ),
+                                type = LiteralCollectionType.List, Location.NoProvided
+                            ),
+                            expression = OperatorNode(
+                                category = "Operator10",
+                                operator = "+",
+                                left = FunctionCallNode(
+                                    name = "x",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "y",
+                                    type = FunctionType.Function,
+                                    arguments = listOf(),
+                                    Location.NoProvided
+                                ),
+                                Location.NoProvided
+                            ),
+                            Location.NoProvided
+                        ),
+                        MatchExpressionBranchNode(
+                            match = FunctionCallNode(
+                                name = "z",
+                                type = FunctionType.Function,
+                                arguments = listOf(),
+                                Location.NoProvided
+                            ),
+                            expression = FunctionCallNode(
+                                name = "True",
+                                type = FunctionType.TypeInstance,
+                                arguments = listOf(),
+                                Location.NoProvided
+                            ), Location.NoProvided
+                        )
+                    ),
+                    Location.NoProvided,
+                    locations = MatchExpressionNodeLocations(
+                        matchLocation = Location.NoProvided,
+                        withLocation = Location.NoProvided
+                    )
+                )
+            )
+    }
 })

@@ -261,7 +261,7 @@ class InferenceWithParsingTest : StringSpec({
     "Inference match expression with error" {
         """
             fn = match [1, 2] with
-                       [x, y] then (x + y)
+                       [x, y] then x + y
                        z then True
         """.trimIndent()
             .toSemanticModuleInfo()

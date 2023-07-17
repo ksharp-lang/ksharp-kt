@@ -285,7 +285,6 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
             it.consumeLowerCaseWord()
                 .build { param -> param.last() }
         }.thenAssignOperator()
-        .addIndentationOffset(IndentationOffsetType.Relative, OffsetType.Repeating)
         .thenRepeatingIndentation(true) { l ->
             l.thenTraitFunction(emitLocations)
         }.build {
