@@ -132,6 +132,10 @@ fun KSharpConsumeResult.addRelativeIndentationOffset(type: OffsetType): KSharpCo
         it
     }
 
+private val Token.newLineStartOffset: Int
+    get() =
+        startOffset + (if (text.startsWith("\r\n")) 2 else 1)
+
 fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
     val lexerState = state.value
     val indentationOffset = lexerState.indentationOffset
@@ -139,8 +143,8 @@ fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
         while (hasNext()) {
             val token = next()
             if (token.type == BaseTokenType.NewLine) {
-                lexerState.lineStartOffset.set(lastEndOffset)
                 val indentLength = token.text.indentLength() - 1
+                lexerState.lineStartOffset.set(token.newLineStartOffset)
                 when (indentationOffset.update(indentLength)) {
                     OffsetAction.Same -> if (indentLength == 0) Unit else continue
                     else -> Unit
