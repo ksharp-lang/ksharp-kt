@@ -59,9 +59,17 @@ class IndentationOffset {
     }
 
     fun add(size: Int, type: OffsetType): Boolean {
-        val allowed = offsets.isEmpty() || offsets.peek().size <= size
+        val (allowed, calculatedSize) = if (offsets.isEmpty()) true to size
+        else if (offsets.peek().size <= size) {
+            val last = offsets.peek()
+            // avoid ambiguity
+            if (last.type == OffsetType.Repeating && last.size == size) {
+                true to (size + 1)
+            } else true to size
+        } else (false to 0)
+
         if (allowed) {
-            offsets.push(OffsetImpl(size, false, type))
+            offsets.push(OffsetImpl(calculatedSize, false, type))
         }
         return allowed
     }
