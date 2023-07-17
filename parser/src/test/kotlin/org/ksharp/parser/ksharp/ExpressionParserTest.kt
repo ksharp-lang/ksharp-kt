@@ -620,7 +620,7 @@ class ExpressionParserTest : StringSpec({
         """|sum 10
            |    20
            |    30 + 15
-        """.trimMargin()
+        """.trimMargin().also(::println)
             .kSharpLexer()
             .prepareLexerForExpressionParsing()
             .consumeExpression()

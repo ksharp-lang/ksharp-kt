@@ -61,13 +61,6 @@ class IndentationOffset {
     fun add(size: Int, type: OffsetType): Boolean {
         val allowed = offsets.isEmpty() || offsets.peek().size <= size
         if (allowed) {
-            if (offsets.isNotEmpty()) {
-                val last = offsets.peek()
-                if (last.type == OffsetType.Optional && last.size == size) {
-                    last.type = type
-                    return true
-                }
-            }
             offsets.push(OffsetImpl(size, false, type))
         }
         return allowed
@@ -105,11 +98,11 @@ private fun KSharpLexerIterator.addIndentationOffset(
 
     when (indentationType) {
         IndentationOffsetType.StartOffset -> indentationOffset.add(
-            lastStartOffset - lexerState.lineStartOffset.get(),
+            lexerState.lineOffset.size(lastStartOffset),
             type
         )
 
-        IndentationOffsetType.EndOffset -> indentationOffset.add(lastEndOffset - lexerState.lineStartOffset.get(), type)
+        IndentationOffsetType.EndOffset -> indentationOffset.add(lexerState.lineOffset.size(lastEndOffset), type)
         IndentationOffsetType.Relative -> indentationOffset.addRelative(type)
         IndentationOffsetType.NextToken -> {
             val lookAHeadCheckPoint = state.lookAHeadState.checkpoint()
@@ -119,7 +112,7 @@ private fun KSharpLexerIterator.addIndentationOffset(
                     indentationOffset.addRelative(type)
                 } else
                     indentationOffset.add(
-                        t.startOffset - lexerState.lineStartOffset.get(),
+                        lexerState.lineOffset.size(t.startOffset),
                         type
                     )
             }
@@ -166,7 +159,7 @@ fun KSharpLexerIterator.enableIndentationOffset(): KSharpLexerIterator {
             val token = next()
             if (token.type == BaseTokenType.NewLine) {
                 val indentLength = token.text.indentLength()
-                lexerState.lineStartOffset.set(token.newLineStartOffset)
+                lexerState.lineOffset.add(token.newLineStartOffset)
                 val result = indentationOffset.update(indentLength)
                 if (result == OffsetAction.Same && indentLength != 0) continue
             }

@@ -4,12 +4,11 @@ import org.ksharp.common.*
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.parser.*
 import java.io.Reader
-import java.util.concurrent.atomic.AtomicInteger
 
 data class KSharpLexerState(
     val lastError: ResettableValue<Error> = resettableValue(),
     val indentationOffset: IndentationOffset = IndentationOffset(),
-    val lineStartOffset: AtomicInteger = AtomicInteger(0),
+    val lineOffset: LineOffset = LineOffset(),
     val emitLocations: Boolean = false,
     val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
