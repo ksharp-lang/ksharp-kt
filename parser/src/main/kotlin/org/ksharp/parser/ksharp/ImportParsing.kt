@@ -49,7 +49,7 @@ private fun KSharpLexerIterator.consumeModuleName() =
 
 fun KSharpLexerIterator.consumeImport(): KSharpParserResult =
     consumeKeyword("import", false)
-        .addRelativeIndentationOffset(OffsetType.Normal)
+        .addIndentationOffset(IndentationOffsetType.Relative, OffsetType.Normal)
         .consume {
             it.consumeModuleName()
         }.thenKeyword("as", false)

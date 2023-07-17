@@ -76,7 +76,7 @@ private fun KSharpConsumeResult.thenFunction(native: Boolean, emitLocations: Boo
         it.type == KSharpTokenType.LowerCaseWord && it.text == "pub"
     }, false) { it }
         .thenFunctionName()
-        .addRelativeIndentationOffset(OffsetType.Normal)
+        .addIndentationOffset(IndentationOffsetType.Relative, OffsetType.Normal)
         .let { lx ->
             val funcDecl = lx.thenLoop {
                 it.consume(KSharpTokenType.LowerCaseWord)

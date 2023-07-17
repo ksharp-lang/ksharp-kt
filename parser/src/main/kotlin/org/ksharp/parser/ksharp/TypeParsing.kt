@@ -283,7 +283,7 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
             it.consumeLowerCaseWord()
                 .build { param -> param.last() }
         }.thenAssignOperator()
-        .addRelativeIndentationOffset(OffsetType.Repeating)
+        .addIndentationOffset(IndentationOffsetType.Relative, OffsetType.Repeating)
         .thenRepeatingIndentation(true) { l ->
             l.thenTraitFunction(emitLocations)
         }.build {
@@ -314,7 +314,7 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
 
 
 private fun KSharpConsumeResult.consumeType(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
-    addRelativeIndentationOffset(OffsetType.Normal)
+    addIndentationOffset(IndentationOffsetType.Relative, OffsetType.Normal)
         .thenIfConsume({
             it.type == KSharpTokenType.LowerCaseWord && it.text == "type"
         }, false) { l ->
@@ -385,7 +385,7 @@ internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserR
                     .build { param -> param.last() }
             }
             .then(KSharpTokenType.Operator, "::", false)
-            .withIndentationOffset(IndentationOffsetType.StartOffset, OffsetType.Normal) { l ->
+            .withIndentationOffset(IndentationOffsetType.Relative, OffsetType.Normal) { l ->
                 l.consumeTypeValue(true, state.value.emitLocations)
             }
             .build { i ->

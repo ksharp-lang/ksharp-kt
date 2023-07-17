@@ -126,9 +126,12 @@ private fun KSharpLexerIterator.addIndentationOffset(
     return this
 }
 
-fun KSharpConsumeResult.addRelativeIndentationOffset(type: OffsetType): KSharpConsumeResult =
+fun KSharpConsumeResult.addIndentationOffset(
+    indentationType: IndentationOffsetType,
+    type: OffsetType
+): KSharpConsumeResult =
     map {
-        it.tokens.addIndentationOffset(IndentationOffsetType.Relative, type)
+        it.tokens.addIndentationOffset(indentationType, type)
         it
     }
 
