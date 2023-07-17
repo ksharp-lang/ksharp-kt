@@ -94,11 +94,14 @@ fun KSharpLexerIterator.consumeIfExpression(): KSharpParserResult =
     }
 
 fun KSharpLexerIterator.consumeMatchExpression(): KSharpParserResult =
-    ifConsume(KSharpTokenType.Match, false) { ifLexer ->
-        ifLexer.consume { it.consumeExpression() }
+    ifConsume(KSharpTokenType.Match, false) { matchLexer ->
+        matchLexer.consume { it.consumeExpression() }
             .then(KSharpTokenType.With, false)
-            .thenLoop { it.consumeMatchExpressionBranch() }
-            .build {
+            .thenRepeatingIndentation(true) { t ->
+                t.consume {
+                    it.consumeMatchExpressionBranch()
+                }.lastNodeData()
+            }.build {
                 val matchToken = it.first().cast<Token>()
                 val expr = it[1].cast<NodeData>()
                 val withToken = it[2].cast<Token>()
