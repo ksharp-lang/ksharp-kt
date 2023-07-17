@@ -6,6 +6,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @TypeSystem({byte.class, short.class, int.class, long.class, float.class, double.class, BigInteger.class, BigDecimal.class})
-public class PreludeTypeSystem {
+public abstract class PreludeTypeSystem {
 
 }
