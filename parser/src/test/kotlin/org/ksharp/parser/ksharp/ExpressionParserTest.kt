@@ -617,9 +617,9 @@ class ExpressionParserTest : StringSpec({
             )
     }
     "block expressions" {
-        """sum 10
-          |    20
-          |    30 + 15
+        """|sum 10
+           |    20
+           |    30 + 15
         """.trimMargin()
             .kSharpLexer()
             .prepareLexerForExpressionParsing()

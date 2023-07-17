@@ -114,11 +114,14 @@ private fun KSharpLexerIterator.addIndentationOffset(
         IndentationOffsetType.NextToken -> {
             val lookAHeadCheckPoint = state.lookAHeadState.checkpoint()
             if (hasNext()) {
-                next()
-                indentationOffset.add(
-                    lastStartOffset - lexerState.lineStartOffset.get(),
-                    type
-                )
+                val t = next()
+                if (t.type == BaseTokenType.NewLine) {
+                    indentationOffset.addRelative(type)
+                } else
+                    indentationOffset.add(
+                        t.startOffset - lexerState.lineStartOffset.get(),
+                        type
+                    )
             }
             lookAHeadCheckPoint.end(PreserveTokens)
         }
