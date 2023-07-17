@@ -10,23 +10,25 @@ import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
     filterAndCollapseTokens()
-        .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+        .collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
+        .enableIndentationOffset()
 
 class TypeParserTest : StringSpec({
     "Invalid type separator" {
         "type ListOfInt = List -- Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
+            .resume()
+            .then(BaseTokenType.NewLine)
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     Location.NoProvided,
-                    "token" to "<EndBlock>",
+                    "token" to "<NewLine>",
                     "received-token" to "Operator10:--"
                 ) to listOf(
                     LexerToken(
@@ -39,12 +41,8 @@ class TypeParserTest : StringSpec({
                     ),
                     LexerToken(
                         type = BaseTokenType.NewLine,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                        token = TextToken(text = "\n", startOffset = 29, endOffset = 29)
                     ),
-                    LexerToken(
-                        type = KSharpTokenType.EndBlock,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
-                    )
                 )
             )
     }
@@ -52,14 +50,16 @@ class TypeParserTest : StringSpec({
         "type Bool = True |- False"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
+            .resume()
+            .then(BaseTokenType.NewLine)
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     Location.NoProvided,
-                    "token" to "<EndBlock>",
+                    "token" to "<NewLine>",
                     "received-token" to "Operator4:|-"
                 ) to listOf(
                     LexerToken(
@@ -72,11 +72,7 @@ class TypeParserTest : StringSpec({
                     ),
                     LexerToken(
                         type = BaseTokenType.NewLine,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
-                    ),
-                    LexerToken(
-                        type = KSharpTokenType.EndBlock,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                        token = TextToken(text = "\n", startOffset = 26, endOffset = 26)
                     )
                 )
             )
@@ -85,14 +81,16 @@ class TypeParserTest : StringSpec({
         "type Bool = True &- False"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
+            .resume()
+            .then(BaseTokenType.NewLine)
             .shouldBeLeft()
             .mapLeft {
                 (it.error to it.remainTokens.asSequence().toList())
             }.shouldBeLeft(
                 BaseParserErrorCode.ExpectingToken.new(
                     Location.NoProvided,
-                    "token" to "<EndBlock>",
+                    "token" to "<NewLine>",
                     "received-token" to "Operator6:&-"
                 ) to listOf(
                     LexerToken(
@@ -105,11 +103,7 @@ class TypeParserTest : StringSpec({
                     ),
                     LexerToken(
                         type = BaseTokenType.NewLine,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
-                    ),
-                    LexerToken(
-                        type = KSharpTokenType.EndBlock,
-                        token = TextToken(text = "", startOffset = 0, endOffset = 0)
+                        token = TextToken(text = "\n", startOffset = 26, endOffset = 26)
                     )
                 )
             )
@@ -118,7 +112,7 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = (List Int)"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -147,7 +141,7 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = (List Int) -> a -> a"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -184,7 +178,7 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = (Int -> Int) -> a -> a"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -221,7 +215,7 @@ class TypeParserTest : StringSpec({
         "type Integer = Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -245,7 +239,7 @@ class TypeParserTest : StringSpec({
         "internal type Integer = Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -269,7 +263,7 @@ class TypeParserTest : StringSpec({
         "type ListOfInt = List Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -298,7 +292,7 @@ class TypeParserTest : StringSpec({
         "type KVStore k v = Map k v"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -328,7 +322,7 @@ class TypeParserTest : StringSpec({
         "type Num n = n"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -352,7 +346,7 @@ class TypeParserTest : StringSpec({
         "type Num n = n String"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -382,7 +376,7 @@ class TypeParserTest : StringSpec({
         "type Sum a = a -> a -> a"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -414,7 +408,7 @@ class TypeParserTest : StringSpec({
         "type ToString a = a -> String"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -444,7 +438,7 @@ class TypeParserTest : StringSpec({
         "type Point = Double , Double"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -475,7 +469,7 @@ class TypeParserTest : StringSpec({
         "internal type ToString a = a -> String"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -505,7 +499,7 @@ class TypeParserTest : StringSpec({
         "type Bool = True | False"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -538,7 +532,7 @@ class TypeParserTest : StringSpec({
         "type Bool = True | False |  NoDefined"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -574,7 +568,7 @@ class TypeParserTest : StringSpec({
         "type Maybe a = Just a | Nothing"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -613,7 +607,7 @@ class TypeParserTest : StringSpec({
         "type Maybe a = a | Nothing"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -646,7 +640,7 @@ class TypeParserTest : StringSpec({
         "type Maybe = Just a | Nothing"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -685,7 +679,7 @@ class TypeParserTest : StringSpec({
         "type Maybe = Just a | Nothing, Name"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -732,7 +726,7 @@ class TypeParserTest : StringSpec({
         "type Maybe = Just a | a Name"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -779,7 +773,7 @@ class TypeParserTest : StringSpec({
         "type Maybe a a = Just a | Nothing"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -818,7 +812,7 @@ class TypeParserTest : StringSpec({
         "type Bool = True | False & NoDefined"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -844,7 +838,7 @@ class TypeParserTest : StringSpec({
         "type Num = Eq & Ord"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -877,7 +871,7 @@ class TypeParserTest : StringSpec({
         "type Num = a & Ord"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -914,7 +908,7 @@ class TypeParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TraitNode(
@@ -969,7 +963,7 @@ class TypeParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TraitNode(
@@ -1027,7 +1021,7 @@ class TypeParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TraitNode(
@@ -1081,7 +1075,7 @@ class TypeParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TraitNode(
@@ -1120,7 +1114,7 @@ class TypeParserTest : StringSpec({
         "type KVStore k v = Map key: k value: v"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -1157,7 +1151,45 @@ class TypeParserTest : StringSpec({
         "type Point2D = x: Double, y: Double"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    null,
+                    "Point2D",
+                    listOf(),
+                    TupleTypeNode(
+                        listOf(
+                            LabelTypeNode(
+                                "x",
+                                ConcreteTypeNode("Double", Location.NoProvided),
+                                Location.NoProvided,
+                            ),
+                            LabelTypeNode(
+                                "y",
+                                ConcreteTypeNode("Double", Location.NoProvided),
+                                Location.NoProvided,
+                            )
+                        ), Location.NoProvided, TupleTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
+    "Labels on tuples with indentation" {
+        """type Point2D = x: Double, 
+            |             y: Double""".trimMargin()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -1194,7 +1226,7 @@ class TypeParserTest : StringSpec({
         "type Composite a = n: (Num a), point: (x: Double, y: Double)"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -1247,7 +1279,7 @@ class TypeParserTest : StringSpec({
         "type Composite a = n: (), point: (x: Double, y: Double)"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -1300,7 +1332,7 @@ class TypeParserTest : StringSpec({
         "type Composite a = n: (Int -> Int), point: (x: Double, y: Double)"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -1357,7 +1389,7 @@ class TypeParserTest : StringSpec({
         "type Age = Int => (it > 0) && (it < 70)"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -1403,7 +1435,7 @@ class TypeParserTest : StringSpec({
         "type Unit = ()"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeTypeDeclaration)
+            .consumeTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeNode(
@@ -1423,7 +1455,7 @@ class TypeParserTest : StringSpec({
         "ten :: () -> Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .consumeFunctionTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
@@ -1443,7 +1475,7 @@ class TypeParserTest : StringSpec({
         "if :: () -> Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .consumeFunctionTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
@@ -1464,7 +1496,7 @@ class TypeParserTest : StringSpec({
         "sum :: Int -> Int -> Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .consumeFunctionTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
@@ -1488,7 +1520,7 @@ class TypeParserTest : StringSpec({
         "sum a :: (Num a) -> (Num a) -> Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .consumeFunctionTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
@@ -1524,7 +1556,7 @@ class TypeParserTest : StringSpec({
         "(+) a :: (Num a) -> (Num a) -> Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .consumeFunctionTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
@@ -1560,12 +1592,75 @@ class TypeParserTest : StringSpec({
         "wire->internal a :: (Num a) -> (Num a) -> Int"
             .kSharpLexer()
             .prepareLexerForTypeParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunctionTypeDeclaration)
+            .consumeFunctionTypeDeclaration()
             .map { it.value }
             .shouldBeRight(
                 TypeDeclarationNode(
                     null,
                     "wire->internal",
+                    listOf("a"),
+                    FunctionTypeNode(
+                        listOf(
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                listOf(
+                                    ConcreteTypeNode("Num", Location.NoProvided),
+                                    ParameterTypeNode("a", Location.NoProvided),
+                                ),
+                                Location.NoProvided
+                            ),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "Type declaration with indentation" {
+        """sum :: 
+           |  Int -> Int -> Int""".trimMargin()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeFunctionTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "sum",
+                    listOf(),
+                    FunctionTypeNode(
+                        listOf(
+                            ConcreteTypeNode("Int", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided),
+                            ConcreteTypeNode("Int", Location.NoProvided)
+                        ),
+                        Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "Type declaration with params and indentation" {
+        """sum a :: (Num a) 
+            |           -> (Num a) 
+            |           -> Int""".trimMargin()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeFunctionTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    null,
+                    "sum",
                     listOf("a"),
                     FunctionTypeNode(
                         listOf(

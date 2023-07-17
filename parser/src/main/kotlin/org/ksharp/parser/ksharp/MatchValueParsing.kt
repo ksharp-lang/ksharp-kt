@@ -92,7 +92,6 @@ internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserRes
         .resume()
         .then(KSharpTokenType.Then, false)
         .consume { it.consumeExpression() }
-        .discardNewLines()
         .build {
             MatchExpressionBranchNode(
                 it.first().cast(),
@@ -101,13 +100,11 @@ internal fun KSharpLexerIterator.consumeMatchExpressionBranch(): KSharpParserRes
             )
         }
 
-internal fun KSharpLexerIterator.consumeMatchAssignment() =
+internal fun KSharpLexerIterator.consumeMatchAssignment(): KSharpParserResult =
     consumeMatchValue()
         .resume()
         .thenAssignOperator()
-        .disableExpressionStartingNewLine {
-            it.consume { l -> l.consumeExpression() }
-        }
+        .consume { l -> l.consumeExpression() }
         .build {
             val match = it.first().cast<NodeData>()
             MatchAssignNode(

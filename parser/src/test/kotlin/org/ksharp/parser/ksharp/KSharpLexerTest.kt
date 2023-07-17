@@ -570,9 +570,7 @@ class KSharpLexerTest : StringSpec({
 
 private fun Sequence<Token>.asStringSequence() = map {
     when (it.type) {
-        BaseTokenType.NewLine -> "NewLine"
-        KSharpTokenType.BeginBlock -> "BeginBlock"
-        KSharpTokenType.EndBlock -> "EndBlock"
+        BaseTokenType.NewLine -> "NewLine:${it.text.length - 1}"
         else -> "${it.type}:${it.text}"
     }
 }
@@ -581,8 +579,6 @@ private fun Sequence<Token>.asLspPositionsSequence() =
     filterIsInstance<LogicalLexerToken>()
         .map {
             when (it.type) {
-                KSharpTokenType.BeginBlock -> null
-                KSharpTokenType.EndBlock -> null
                 BaseTokenType.NewLine -> null
                 else -> "${it.text}:${it.startPosition.first.value}:${it.startPosition.second.value}"
             }
@@ -592,16 +588,9 @@ private fun <T> List<T>.printTokens() = onEach { println("\"$it\",") }
 
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForMarkBlockTests(): KSharpLexerIterator {
-    val endExpression: (TokenType) -> LexerToken = {
-        LexerToken(
-            type = it,
-            token = TextToken("", 0, 0)
-        )
-    }
     return filterAndCollapseTokens()
-        .markBlocks(endExpression)
+        .collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
 }
 
 class KSharpLexerMarkBlocksTest : ShouldSpec({
@@ -617,13 +606,11 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                         .printTokens()
                         .shouldBe(
                             listOf(
-                                "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
                                 "AssignOperator:=",
                                 "UpperCaseWord:Integer",
-                                "NewLine",
-                                "EndBlock",
+                                "NewLine:0"
                             )
                         )
                 }
@@ -641,13 +628,11 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                         .printTokens()
                         .shouldBe(
                             listOf(
-                                "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
                                 "AssignOperator:=",
                                 "UpperCaseWord:Integer",
-                                "NewLine",
-                                "EndBlock"
+                                "NewLine:0",
                             )
                         )
                 }
@@ -667,17 +652,13 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                         .printTokens()
                         .shouldBe(
                             listOf(
-                                "BeginBlock",
-                                /**/"LowerCaseWord:type",
-                                /**/"BeginBlock",
-                                /**//**/"UpperCaseWord:Int",
-                                /**//**/"AssignOperator:=",
-                                /**//**/"NewLine",
-                                /**//**/"UpperCaseWord:Integer",
-                                /**//**/"NewLine",
-                                /**/"EndBlock",
-                                /**/"NewLine",
-                                "EndBlock"
+                                "LowerCaseWord:type",
+                                "NewLine:1",
+                                "UpperCaseWord:Int",
+                                "AssignOperator:=",
+                                "NewLine:1",
+                                "UpperCaseWord:Integer",
+                                "NewLine:0",
                             )
                         )
                 }
@@ -689,20 +670,21 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
            | Integer
         """.trimMargin().kSharpLexer()
             .prepareLexerForMarkBlockTests()
-            .enableDiscardBlockAndNewLineTokens {
-                it.asSequence()
-                    .asStringSequence()
-                    .toList()
-            }
+            .asSequence()
+            .asStringSequence()
+            .toList()
             .apply {
                 should("Should return one expression") {
                     printTokens()
                         .shouldBe(
                             listOf(
-                                /**/"LowerCaseWord:type",
-                                /**//**/"UpperCaseWord:Int",
-                                /**//**/"AssignOperator:=",
-                                /**//**/"UpperCaseWord:Integer",
+                                "LowerCaseWord:type",
+                                "NewLine:1",
+                                "UpperCaseWord:Int",
+                                "AssignOperator:=",
+                                "NewLine:1",
+                                "UpperCaseWord:Integer",
+                                "NewLine:0",
                             )
                         )
                 }
@@ -725,25 +707,18 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                         .printTokens()
                         .shouldBe(
                             listOf(
-                                "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
                                 "AssignOperator:=",
                                 "UpperCaseWord:Integer",
-                                "NewLine",
-                                "EndBlock",
-
-                                "BeginBlock",
+                                "NewLine:0",
                                 "LowerCaseWord:type",
-                                "BeginBlock",
+                                "NewLine:1",
                                 "UpperCaseWord:Int",
                                 "AssignOperator:=",
-                                "NewLine",
+                                "NewLine:1",
                                 "UpperCaseWord:Integer",
-                                "NewLine",
-                                "EndBlock",
-                                "NewLine",
-                                "EndBlock",
+                                "NewLine:0"
                             )
                         )
                 }
@@ -766,33 +741,25 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                         .printTokens()
                         .shouldBe(
                             listOf(
-                                "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
                                 "AssignOperator:=",
                                 "UpperCaseWord:Integer",
-                                "NewLine",
-                                "EndBlock",
-                                "BeginBlock",
+                                "NewLine:0",
                                 "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
-                                "BeginBlock",
+                                "NewLine:1",
                                 "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
-                                "BeginBlock",
+                                "NewLine:3",
                                 "LowerCaseWord:a",
                                 "Operator10:+",
                                 "Integer:3",
-                                "NewLine",
-                                "EndBlock",
-                                "NewLine",
-                                "EndBlock",
-                                "NewLine",
-                                "EndBlock",
+                                "NewLine:0"
                             )
                         )
                 }
@@ -816,40 +783,28 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                         .printTokens()
                         .shouldBe(
                             listOf(
-                                "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
                                 "AssignOperator:=",
                                 "UpperCaseWord:Integer",
-                                "NewLine",
-                                "EndBlock",
-
-                                "BeginBlock",
+                                "NewLine:0",
                                 "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
-                                "BeginBlock",
+                                "NewLine:1",
                                 "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
-
-                                "BeginBlock",
+                                "NewLine:3",
                                 "LowerCaseWord:a",
                                 "Operator10:+",
                                 "Integer:3",
-                                "NewLine",
-                                "EndBlock",
-
-                                "NewLine",
-
+                                "NewLine:1",
                                 "LowerCaseWord:println",
                                 "Integer:10",
-                                "NewLine",
-                                "EndBlock",
-                                "NewLine",
-                                "EndBlock",
+                                "NewLine:0"
                             )
                         )
                 }
@@ -872,38 +827,25 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                         .toList().printTokens()
                         .shouldBe(
                             listOf(
-                                "BeginBlock",
                                 "LowerCaseWord:type",
                                 "UpperCaseWord:Int",
                                 "AssignOperator:=",
                                 "UpperCaseWord:Integer",
-                                "NewLine",
-                                "EndBlock",
-
-                                "BeginBlock",
+                                "NewLine:0",
                                 "Let:let",
                                 "LowerCaseWord:sum3",
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
-
-                                "BeginBlock",
+                                "NewLine:1",
                                 "Let:let",
                                 "LowerCaseWord:x",
                                 "AssignOperator:=",
                                 "Integer:3",
-
-                                "BeginBlock",
+                                "NewLine:3",
                                 "LowerCaseWord:a",
                                 "Operator10:+",
                                 "Integer:3",
-                                "NewLine",
-                                "EndBlock",
-                                "NewLine",
-                                "EndBlock",
-                                "NewLine",
-                                "EndBlock",
-
-                                "BeginBlock",
+                                "NewLine:0",
                                 "Let:let",
                                 "LowerCaseWord:sum",
                                 "LowerCaseWord:a",
@@ -912,8 +854,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                                 "LowerCaseWord:a",
                                 "AssignOperator:=",
                                 "LowerCaseWord:b",
-                                "NewLine",
-                                "EndBlock",
+                                "NewLine:0",
                             )
                         )
                 }
@@ -935,20 +876,16 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
                 should("Should return the two new lines and one endExpression") {
                     asSequence().asStringSequence().toList().printTokens().shouldBe(
                         listOf(
-                            "BeginBlock",
                             "LowerCaseWord:trait",
                             "UpperCaseWord:Num",
                             "AssignOperator:=",
-                            "BeginBlock",
+                            "NewLine:4",
                             "LowerCaseWord:sum",
-                            "NewLine",
+                            "NewLine:4",
                             "LowerCaseWord:prod",
-                            "NewLine",
+                            "NewLine:4",
                             "LowerCaseWord:div",
-                            "NewLine",
-                            "EndBlock",
-                            "NewLine",
-                            "EndBlock"
+                            "NewLine:0"
                         )
                     )
                 }
@@ -956,7 +893,7 @@ class KSharpLexerMarkBlocksTest : ShouldSpec({
     }
 })
 
-class KSharpLexerExpressionBlocks : StringSpec({
+class KSharpLexerIndentations : StringSpec({
     "Block Expression" {
         """
             10 +
@@ -967,17 +904,13 @@ class KSharpLexerExpressionBlocks : StringSpec({
             .apply {
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
-                        "BeginBlock",
                         "Integer:10",
                         "Operator10:+",
-                        "BeginBlock",
+                        "NewLine:3",
                         "LowerCaseWord:calc",
                         "Integer:10",
                         "Integer:20",
-                        "NewLine",
-                        "EndBlock",
-                        "NewLine",
-                        "EndBlock",
+                        "NewLine:0"
                     )
                 )
             }
@@ -993,21 +926,17 @@ class KSharpLexerExpressionBlocks : StringSpec({
             .apply {
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
-                        "BeginBlock",
                         "Integer:10",
                         "Operator10:+",
-                        "BeginBlock",
+                        "NewLine:3",
                         "LowerCaseWord:calc",
                         "Integer:10",
                         "Integer:20",
                         "Operator10:+",
-                        "NewLine",
+                        "NewLine:3",
                         "LowerCaseWord:inc",
                         "Integer:2",
-                        "NewLine",
-                        "EndBlock",
-                        "NewLine",
-                        "EndBlock",
+                        "NewLine:0",
                     )
                 )
             }
@@ -1023,23 +952,19 @@ class KSharpLexerExpressionBlocks : StringSpec({
             .apply {
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
-                        "BeginBlock",
                         "If:if",
                         "LowerCaseWord:true",
-                        "BeginBlock",
+                        "NewLine:3",
                         "Then:then",
                         "Integer:10",
                         "Operator10:+",
                         "Integer:20",
-                        "NewLine",
+                        "NewLine:3",
                         "Else:else",
                         "Integer:30",
                         "Operator10:+",
                         "Integer:40",
-                        "NewLine",
-                        "EndBlock",
-                        "NewLine",
-                        "EndBlock",
+                        "NewLine:0",
                     )
                 )
             }
@@ -1056,29 +981,25 @@ class KSharpLexerExpressionBlocks : StringSpec({
             .apply {
                 asSequence().asStringSequence().toList().printTokens().shouldBe(
                     listOf(
-                        "BeginBlock",
                         "Let:let",
                         "LowerCaseWord:x",
                         "AssignOperator:=",
                         "Integer:10",
-                        "BeginBlock",
+                        "NewLine:4",
                         "LowerCaseWord:y",
                         "AssignOperator:=",
                         "Integer:20",
-                        "NewLine",
+                        "NewLine:4",
                         "LowerCaseWord:z",
                         "AssignOperator:=",
                         "Integer:30",
-                        "NewLine",
+                        "NewLine:4",
                         "LowerCaseWord:x",
                         "Operator10:+",
                         "LowerCaseWord:y",
                         "Operator10:+",
                         "LowerCaseWord:z",
-                        "NewLine",
-                        "EndBlock",
-                        "NewLine",
-                        "EndBlock",
+                        "NewLine:0",
                     )
                 )
             }

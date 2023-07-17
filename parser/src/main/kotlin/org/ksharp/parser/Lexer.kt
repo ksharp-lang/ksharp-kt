@@ -76,6 +76,10 @@ fun <V> TokenLexerIterator<V>.toLogicalLexerToken(): BaseLexerIterator<V> =
         private var startPosition: Position = Line(1) to Offset(0)
         private var lineOffset: Int = 0
 
+        override val lastEndOffset: Int get() = this@toLogicalLexerToken.lastEndOffset
+        
+        override val lastStartOffset: Int get() = this@toLogicalLexerToken.lastStartOffset
+
         override val state: LexerState<V> = this@toLogicalLexerToken.state
 
         override fun hasNext(): Boolean = this@toLogicalLexerToken.hasNext()

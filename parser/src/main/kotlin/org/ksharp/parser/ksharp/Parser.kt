@@ -1,6 +1,9 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.*
+import org.ksharp.common.Either
+import org.ksharp.common.add
+import org.ksharp.common.cast
+import org.ksharp.common.listBuilder
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.NodeData
 import org.ksharp.parser.*
@@ -12,25 +15,6 @@ import java.nio.file.Path
 
 typealias KSharpParserResult = ParserResult<NodeData, KSharpLexerState>
 typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
-
-fun KSharpConsumeResult.discardNewLines() =
-    map {
-        val lexer = it.tokens
-        val checkpoint = lexer.state.lookAHeadState.checkpoint()
-        while (lexer.hasNext()) {
-            val token = lexer.next()
-            if (token.type == BaseTokenType.NewLine) {
-                continue
-            }
-            checkpoint.end(1)
-            return@map NodeCollector(
-                it.collection,
-                lexer
-            )
-        }
-        checkpoint.end(ConsumeTokens)
-        it
-    }
 
 fun KSharpConsumeResult.appendNode(block: (items: List<Any>) -> NodeData): KSharpConsumeResult =
     map {
@@ -47,22 +31,6 @@ fun <R> KSharpConsumeResult.enableLabelToken(code: (KSharpConsumeResult) -> Eith
         }
     }
 
-fun <R> KSharpConsumeResult.enableDiscardBlockAndNewLineTokens(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
-    flatMap { collector ->
-        val result = this@enableDiscardBlockAndNewLineTokens
-        collector.tokens.enableDiscardBlockAndNewLineTokens {
-            code(result)
-        }
-    }
-
-fun <R> KSharpConsumeResult.disableExpressionStartingNewLine(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
-    flatMap { collector ->
-        val result = this@disableExpressionStartingNewLine
-        collector.tokens.disableExpressionStartingNewLine {
-            code(result)
-        }
-    }
-
 fun <R> KSharpConsumeResult.disableCollapseAssignOperatorRule(code: (KSharpConsumeResult) -> Either<ParserError<KSharpLexerState>, R>): Either<ParserError<KSharpLexerState>, R> =
     flatMap { collector ->
         val result = this@disableCollapseAssignOperatorRule
@@ -71,21 +39,8 @@ fun <R> KSharpConsumeResult.disableCollapseAssignOperatorRule(code: (KSharpConsu
         }
     }
 
-fun KSharpLexerIterator.consumeBlock(action: (KSharpLexerIterator) -> KSharpParserResult): KSharpParserResult =
-    consume(KSharpTokenType.BeginBlock, true)
-        .flatMap { collector ->
-            action(collector.tokens)
-                .endBlock()
-        }
-
-
-fun KSharpConsumeResult.thenInBlock(action: (KSharpLexerIterator) -> KSharpParserResult): KSharpConsumeResult =
-    consume {
-        it.consumeBlock { block ->
-            action(block)
-        }
-    }
-
+fun KSharpConsumeResult.lastNodeData(): KSharpParserResult =
+    build { it.last().cast<NodeData>() }
 
 fun KSharpLexerIterator.consumeDot() = consume(KSharpTokenType.Operator0, ".")
 
@@ -108,47 +63,9 @@ fun KSharpLexerIterator.consumeKeyword(text: String, discardToken: Boolean = fal
 fun KSharpConsumeResult.thenKeyword(text: String, discardToken: Boolean = false) =
     thenLowerCaseWord(text, discardToken)
 
-fun KSharpConsumeResult.thenNewLine() =
-    then(BaseTokenType.NewLine, true)
-
-private fun KSharpParserResult.endBlock(): KSharpParserResult =
-    when (this) {
-        is Either.Left -> {
-            if (value.consumedTokens) {
-                val iter = value.remainTokens
-                var result = Either.Left(
-                    ParserError(
-                        value.error,
-                        value.collection,
-                        true,
-                        emptyLexerIterator(value.remainTokens.state)
-                    )
-                )
-                while (iter.hasNext()) {
-                    val tk = iter.next()
-                    if (tk.type == KSharpTokenType.EndBlock) {
-                        result = Either.Left(ParserError(value.error, value.collection, true, iter))
-                        break
-                    }
-                }
-                result
-            } else this
-        }
-
-        is Either.Right -> {
-            value.remainTokens.optionalConsume(BaseTokenType.NewLine)
-                .then(KSharpTokenType.EndBlock, false)
-                .map {
-                    ParserValue(value.value, it.tokens)
-                }.mapLeft {
-                    it.collection.add(value.value)
-                    it
-                }
-        }
-    }
-
 fun KSharpConsumeResult.thenAssignOperator() =
     then(KSharpTokenType.AssignOperator, false)
+
 
 fun String.lexerModule(withLocations: Boolean) =
     this.reader().lexerModule(withLocations)
@@ -160,13 +77,9 @@ fun Reader.lexerModule(withLocations: Boolean) =
         .let {
             if (withLocations) it.toLogicalLexerToken()
             else it
-        }.markBlocks {
-            val token = LexerToken(it, TextToken("", 0, 0))
-            if (withLocations) LogicalLexerToken(token, ZeroPosition, ZeroPosition)
-            else token
-        }
+        }.collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
+        .enableIndentationOffset()
 
 
 fun Reader.parseModule(

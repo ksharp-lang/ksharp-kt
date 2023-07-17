@@ -44,8 +44,8 @@ class LexerTokenTest : StringSpec({
             BaseTokenType.Unknown,
             TextToken("H", 2, 10)
         )
-        val collapsed = token1.collapse(KSharpTokenType.EndBlock, "J", token2) as LexerToken
-        collapsed.type.shouldBe(KSharpTokenType.EndBlock)
+        val collapsed = token1.collapse(KSharpTokenType.Then, "J", token2) as LexerToken
+        collapsed.type.shouldBe(KSharpTokenType.Then)
         collapsed.text.shouldBe("J")
         collapsed.startOffset.shouldBe(2)
         collapsed.endOffset.shouldBe(10)
@@ -65,8 +65,8 @@ class LexerTokenTest : StringSpec({
         val logicalToken2 = LogicalLexerToken(
             token2, Line(3) to Offset(0), Line(4) to Offset(0)
         )
-        val collapsed = logicalToken1.collapse(KSharpTokenType.EndBlock, "J", logicalToken2) as LogicalLexerToken
-        collapsed.type.shouldBe(KSharpTokenType.EndBlock)
+        val collapsed = logicalToken1.collapse(KSharpTokenType.Then, "J", logicalToken2) as LogicalLexerToken
+        collapsed.type.shouldBe(KSharpTokenType.Then)
         collapsed.text.shouldBe("J")
         collapsed.startOffset.shouldBe(2)
         collapsed.endOffset.shouldBe(10)

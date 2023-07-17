@@ -4,24 +4,23 @@ import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.AnnotationNodeLocations
-import org.ksharp.parser.LexerToken
-import org.ksharp.parser.TextToken
 import org.ksharp.parser.TokenLexerIterator
 import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForAnnotationParsing() =
     filterAndCollapseTokens()
-        .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+        .collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
+        .enableIndentationOffset()
+
 
 class AnnotationParserTest : StringSpec({
     "Annotation without attributes" {
         "@native"
             .kSharpLexer()
             .prepareLexerForAnnotationParsing()
-            .consumeBlock(KSharpLexerIterator::consumeAnnotation)
+            .consumeAnnotation()
             .map { it.value.also { println(it) } }
             .shouldBeRight(
                 AnnotationNode(
@@ -36,7 +35,7 @@ class AnnotationParserTest : StringSpec({
         "@native()"
             .kSharpLexer()
             .prepareLexerForAnnotationParsing()
-            .consumeBlock(KSharpLexerIterator::consumeAnnotation)
+            .consumeAnnotation()
             .map { it.value.also { println(it) } }
             .shouldBeRight(
                 AnnotationNode(
@@ -51,7 +50,7 @@ class AnnotationParserTest : StringSpec({
         "@native(True for=[\"java\" \"c#\"] wire->internal=@native(\"String\") Flag=False)"
             .kSharpLexer()
             .prepareLexerForAnnotationParsing()
-            .consumeBlock(KSharpLexerIterator::consumeAnnotation)
+            .consumeAnnotation()
             .map { it.value.also { println(it) } }
             .shouldBeRight(
                 AnnotationNode(
@@ -68,7 +67,7 @@ class AnnotationParserTest : StringSpec({
                 )
             )
     }
-    "Annotation with attributes and block" {
+    "Annotation with attributes and indentation" {
         """
         @native(
             for=True
@@ -76,12 +75,38 @@ class AnnotationParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForAnnotationParsing()
-            .consumeBlock(KSharpLexerIterator::consumeAnnotation)
+            .consumeAnnotation()
             .map { it.value.also { println(it) } }
             .shouldBeRight(
                 AnnotationNode(
                     "native", mapOf(
                         "for" to true,
+                        "Flag" to false
+                    ), Location.NoProvided, AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "Annotation with attributes and indentation 2" {
+        """
+        @native(True for=[
+                          "java" 
+                          "c#"] 
+                      wire->internal=@native("String") Flag=False)
+        """.trimIndent()
+            .kSharpLexer()
+            .prepareLexerForAnnotationParsing()
+            .consumeAnnotation()
+            .map { it.value.also { println(it) } }
+            .shouldBeRight(
+                AnnotationNode(
+                    "native", mapOf(
+                        "default" to true,
+                        "for" to listOf("java", "c#"),
+                        "wire->internal" to AnnotationNode(
+                            "native", mapOf("default" to "String"), Location.NoProvided, AnnotationNodeLocations(
+                                Location.NoProvided, Location.NoProvided, listOf()
+                            )
+                        ),
                         "Flag" to false
                     ), Location.NoProvided, AnnotationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
                 )

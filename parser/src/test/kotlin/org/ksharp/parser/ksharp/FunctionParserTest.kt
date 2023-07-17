@@ -3,24 +3,22 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.*
-import org.ksharp.parser.LexerToken
-import org.ksharp.parser.TextToken
 import org.ksharp.parser.TokenLexerIterator
 import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForFunctionParsing() =
     filterAndCollapseTokens()
-        .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+        .collapseNewLines()
         .enableLookAhead()
-        .discardBlocksOrNewLineTokens()
+        .enableIndentationOffset()
 
 class FunctionParserTest : StringSpec({
     "native function" {
         "native sum a b"
             .kSharpLexer()
             .prepareLexerForFunctionParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .consumeFunction()
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(
@@ -45,7 +43,7 @@ class FunctionParserTest : StringSpec({
         "native pub sum a b"
             .kSharpLexer()
             .prepareLexerForFunctionParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .consumeFunction()
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(
@@ -70,7 +68,7 @@ class FunctionParserTest : StringSpec({
         "pub sum a b = a + b"
             .kSharpLexer()
             .prepareLexerForFunctionParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .consumeFunction()
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(
@@ -101,7 +99,7 @@ class FunctionParserTest : StringSpec({
         "pub if a b = a + b"
             .kSharpLexer()
             .prepareLexerForFunctionParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .consumeFunction()
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(
@@ -131,7 +129,7 @@ class FunctionParserTest : StringSpec({
         "sum a b = a + b"
             .kSharpLexer()
             .prepareLexerForFunctionParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .consumeFunction()
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(
@@ -164,7 +162,7 @@ class FunctionParserTest : StringSpec({
         """.trimMargin()
             .kSharpLexer()
             .prepareLexerForFunctionParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .consumeFunction()
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(
@@ -223,7 +221,7 @@ class FunctionParserTest : StringSpec({
         "(+) a b = a + b"
             .kSharpLexer()
             .prepareLexerForFunctionParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .consumeFunction()
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(
@@ -254,7 +252,7 @@ class FunctionParserTest : StringSpec({
         "internal->wire a b = a + b"
             .kSharpLexer()
             .prepareLexerForFunctionParsing()
-            .consumeBlock(KSharpLexerIterator::consumeFunction)
+            .consumeFunction()
             .map { it.value }
             .shouldBeRight(
                 FunctionNode(

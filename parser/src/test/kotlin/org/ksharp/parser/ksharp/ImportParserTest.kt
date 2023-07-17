@@ -4,8 +4,6 @@ import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.ImportNode
 import org.ksharp.nodes.ImportNodeLocations
-import org.ksharp.parser.LexerToken
-import org.ksharp.parser.TextToken
 import org.ksharp.parser.enableLookAhead
 import org.ksharp.test.shouldBeRight
 
@@ -14,10 +12,9 @@ class ImportParserTest : StringSpec({
         "import ksharp.math as math"
             .kSharpLexer()
             .filterAndCollapseTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .collapseNewLines()
             .enableLookAhead()
-            .discardBlocksOrNewLineTokens()
-            .consumeBlock { it.consumeImport() }
+            .consumeImport()
             .map { it.value }
             .shouldBeRight(
                 ImportNode(
@@ -38,10 +35,34 @@ class ImportParserTest : StringSpec({
         "import ksharp as math"
             .kSharpLexer()
             .filterAndCollapseTokens()
-            .markBlocks { LexerToken(it, TextToken("", 0, 0)) }
+            .collapseNewLines()
             .enableLookAhead()
-            .discardBlocksOrNewLineTokens()
-            .consumeBlock { it.consumeImport() }
+            .consumeImport()
+            .map { it.value }
+            .shouldBeRight(
+                ImportNode(
+                    "ksharp",
+                    "math",
+                    Location.NoProvided,
+                    ImportNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
+    "Parse import with indentation offset" {
+        """import 
+           |    ksharp as math""".trimMargin()
+            .kSharpLexer()
+            .filterAndCollapseTokens()
+            .collapseNewLines()
+            .enableLookAhead()
+            .enableIndentationOffset()
+            .consumeImport()
             .map { it.value }
             .shouldBeRight(
                 ImportNode(

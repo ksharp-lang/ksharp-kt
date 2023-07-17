@@ -4,18 +4,16 @@ import org.ksharp.common.*
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.parser.*
 import java.io.Reader
-import java.util.concurrent.atomic.AtomicInteger
 
 data class KSharpLexerState(
     val lastError: ResettableValue<Error> = resettableValue(),
+    val indentationOffset: IndentationOffset = IndentationOffset(),
+    val lineOffset: LineOffset = LineOffset(),
     val emitLocations: Boolean = false,
     val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
-    val discardBlockTokens: Boolean = false,
-    val discardNewLineToken: Boolean = false,
     val collapseDotOperatorRule: Boolean = true,
-    val collapseAssignOperatorRule: Boolean = true,
-    val enableExpressionStartingNewLine: Boolean = true
+    val collapseAssignOperatorRule: Boolean = true
 )
 
 typealias KSharpLexer = Lexer<KSharpLexerState>
@@ -62,12 +60,9 @@ enum class KSharpTokenType : TokenType {
     Operator11,
     Operator12,
 
-    BeginBlock,
-    EndBlock,
-
     UnitValue,
 
-    //?Keywords
+    //Keywords
     If,
     Let,
     Match,
@@ -88,9 +83,14 @@ private val mappings = mapOf(
 
 private val operators = "+-*/%><=!&$#^?.\\|:".toSet()
 private val hexLetterDigit = "0123456789abcdefABCDEF".toSet()
+private val decimalDigit = "0123456789".toSet()
 private val octalLetterDigit = "01234567".toSet()
 private val binaryDigit = "01".toSet()
 private val escapeCharacters = "t'\"rnf\\b".toSet()
+
+fun Char.isLetter() = isLowerCase() || isUpperCase() || isTitleCase()
+
+fun Char.isDigit() = decimalDigit.contains(this)
 
 fun Char.isEscapeCharacter() = escapeCharacters.contains(this)
 
@@ -99,9 +99,10 @@ fun Char.isNewLine() = this == '\n' || this == '\r'
 fun Char.isSpace() = this == ' ' || this == '\t'
 
 fun Char.isOperator() = operators.contains(this)
+
 fun Char.isDot() = this == '.'
 
-fun Char.shouldIgnore() = false
+fun shouldIgnore() = false
 
 private inline fun KSharpLexer.ifChar(
     predicate: Char.() -> Boolean,
@@ -149,23 +150,6 @@ fun <R> KSharpLexerIterator.emitLocations(withLocations: Boolean, code: (KSharpL
         }
     }
 
-fun <R> KSharpLexerIterator.disableExpressionStartingNewLine(code: (KSharpLexerIterator) -> R): R =
-    state.value.enableExpressionStartingNewLine.let { initValue ->
-        state.update(state.value.copy(enableExpressionStartingNewLine = false))
-        code(this).also {
-            state.update(state.value.copy(enableExpressionStartingNewLine = initValue))
-        }
-    }
-
-fun <R> KSharpLexerIterator.enableExpressionStartingNewLine(code: (KSharpLexerIterator) -> R): R =
-    state.value.enableExpressionStartingNewLine.let { initValue ->
-        state.update(state.value.copy(enableExpressionStartingNewLine = true))
-        code(this).also {
-            state.update(state.value.copy(enableExpressionStartingNewLine = initValue))
-        }
-    }
-
-
 fun <R> KSharpLexerIterator.disableCollapseDotOperatorRule(code: (KSharpLexerIterator) -> R): R =
     state.value.collapseDotOperatorRule.let { initValue ->
         state.update(state.value.copy(collapseDotOperatorRule = false))
@@ -188,35 +172,6 @@ fun <R> KSharpLexerIterator.enableLabelToken(code: (KSharpLexerIterator) -> R): 
         code(this).also {
             state.update(state.value.copy(consumeLabels = initValue))
         }
-    }
-
-fun <R> KSharpLexerIterator.enableDiscardBlocksTokens(code: (KSharpLexerIterator) -> R): R =
-    state.value.discardBlockTokens.let { initValue ->
-        state.update(state.value.copy(discardBlockTokens = true))
-        code(this).also {
-            state.update(state.value.copy(discardBlockTokens = initValue))
-        }
-    }
-
-fun <R> KSharpLexerIterator.enableDiscardNewLineToken(code: (KSharpLexerIterator) -> R): R =
-    state.value.discardNewLineToken.let { initValue ->
-        state.update(state.value.copy(discardNewLineToken = true))
-        code(this).also {
-            state.update(state.value.copy(discardNewLineToken = initValue))
-        }
-    }
-
-fun <R> KSharpLexerIterator.disableDiscardNewLineToken(code: (KSharpLexerIterator) -> R): R =
-    state.value.discardNewLineToken.let { initValue ->
-        state.update(state.value.copy(discardNewLineToken = false))
-        code(this).also {
-            state.update(state.value.copy(discardNewLineToken = initValue))
-        }
-    }
-
-fun <R> KSharpLexerIterator.enableDiscardBlockAndNewLineTokens(code: (KSharpLexerIterator) -> R): R =
-    enableDiscardBlocksTokens {
-        enableDiscardNewLineToken(code)
     }
 
 fun KSharpLexer.operator(): LexerToken = loopChar({ isOperator() }, KSharpTokenType.Operator)
@@ -473,9 +428,9 @@ private fun Token.mapOperatorToken(): Token = when (type) {
 internal fun String.indentLength() =
     replace("\n", "").replace("\r", "") //normalize newline to zero spaces
         .replace("\t", "  ") //normalize tab to two spaces
-        .length + 1 // add one that represent the newline
+        .length
 
-private fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
+fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
     var lastIndent = 0
     return generateLexerIterator(state) {
         while (hasNext()) {
@@ -484,61 +439,10 @@ private fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
                 val length = token.text.indentLength()
                 if (length == lastIndent) continue
                 else length
-            } else 0
+            } else -1
             return@generateLexerIterator token
         }
         null
-    }
-}
-
-private fun Token.shouldDiscardToken(discardBlockTokens: Boolean, blockCounter: AtomicInteger): Boolean {
-    if (discardBlockTokens) {
-        if (type == KSharpTokenType.BeginBlock) {
-            blockCounter.incrementAndGet()
-            return true
-        }
-        if (type == KSharpTokenType.EndBlock) {
-            if (blockCounter.get() == 0) {
-                return false
-            }
-            blockCounter.decrementAndGet()
-            return true
-        }
-    }
-    return false
-}
-
-fun KSharpLexerIterator.discardBlocksOrNewLineTokens(): KSharpLexerIterator {
-    val blockCounter = AtomicInteger(0)
-    return generateLexerIterator(state) {
-        while (hasNext()) {
-            val item = next()
-            if (item.type == BaseTokenType.NewLine && state.value.discardNewLineToken) {
-                continue
-            }
-            if (item.shouldDiscardToken(state.value.discardBlockTokens, blockCounter)) {
-                continue
-            }
-            return@generateLexerIterator item
-        }
-        null
-    }
-}
-
-fun KSharpLexerIterator.markBlocks(
-    expressionToken: (TokenType) -> Token,
-): KSharpLexerIterator {
-    val collapseNewLines = this.collapseNewLines()
-    val controller = BlockController(expressionToken)
-    return generateLexerIterator(state) {
-        val pendingToken = controller.pendingToken()
-        if (pendingToken != null) {
-            return@generateLexerIterator pendingToken
-        }
-        if (collapseNewLines.hasNext()) {
-            return@generateLexerIterator controller.processToken(collapseNewLines.next())
-        }
-        controller.end()
     }
 }
 

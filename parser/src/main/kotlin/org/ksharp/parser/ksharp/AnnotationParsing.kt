@@ -46,11 +46,11 @@ private fun KSharpLexerIterator.consumeAnnotationValue(): KSharpAnnotationValueR
         .orAnnotationValue({
             it.type == KSharpTokenType.UpperCaseWord && it.text.isBooleanLiteral
         }).orAnnotationValue(KSharpTokenType.OpenBracket) {
-            it.thenLoop { tl ->
-                tl.optionalConsume(KSharpTokenType.Comma, true)
-                tl.consumeAnnotationValue()
-            }
-                .then(KSharpTokenType.CloseBracket, true)
+            it.addIndentationOffset(IndentationOffsetType.EndOffset, OffsetType.Optional)
+                .thenLoop { tl ->
+                    tl.optionalConsume(KSharpTokenType.Comma, true)
+                    tl.consumeAnnotationValue()
+                }.then(KSharpTokenType.CloseBracket, true)
                 .build { v -> v.drop(1) }
         }
 
@@ -138,9 +138,10 @@ private fun Any.toAnnotationLocation(): Any =
 private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpParserResult =
     then(KSharpTokenType.LowerCaseWord)
         .thenIf(KSharpTokenType.OpenParenthesis, true) {
-            it.thenLoop { itAttr ->
-                itAttr.consumeAnnotationKeyValue()
-            }.then(KSharpTokenType.CloseParenthesis, true)
+            it.addIndentationOffset(IndentationOffsetType.EndOffset, OffsetType.Optional)
+                .thenLoop { itAttr ->
+                    itAttr.consumeAnnotationKeyValue()
+                }.then(KSharpTokenType.CloseParenthesis, true)
         }.thenIf(KSharpTokenType.UnitValue, true) { it }
         .build {
             val altToken = it[0].cast<Token>()
@@ -177,9 +178,7 @@ private fun KSharpConsumeResult.thenAnnotation(emitLocations: Boolean): KSharpPa
 
 internal fun KSharpLexerIterator.consumeAnnotation(): KSharpParserResult =
     ifConsume(KSharpTokenType.Alt, false) { l ->
-        l.enableDiscardBlockAndNewLineTokens { dbL ->
-            dbL.disableCollapseAssignOperatorRule {
-                it.thenAnnotation(this.state.value.emitLocations)
-            }
+        l.addIndentationOffset(IndentationOffsetType.EndOffset, OffsetType.Normal).disableCollapseAssignOperatorRule {
+            it.thenAnnotation(this.state.value.emitLocations)
         }
     }

@@ -22,59 +22,75 @@ data class InvalidNode(
         get() = Location.NoProvided
 }
 
-private fun KSharpLexerIterator.consumeInvalidTokens(error: Error): KSharpParserResult =
-    collect()
-        .thenLoop { t ->
-            t.consume({
-                it.type != KSharpTokenType.EndBlock
-            }).build { it.first() }
-        }.thenLoop { t ->
-            t.consume({
-                it.type != KSharpTokenType.BeginBlock
-            }).build { it.first() }
-        }.build {
-            InvalidNode(
-                it.asSequence()
-                    .filter { i ->
-                        when (i.cast<Token>().type) {
-                            KSharpTokenType.BeginBlock, BaseTokenType.NewLine, KSharpTokenType.EndBlock -> false
-                            else -> true
-                        }
-                    }
-                    .map { i ->
-                        val t = i.cast<Token>()
-                        InvalidToken(
-                            t.text,
-                            t.type,
-                            t.location
-                        )
-                    }.toList(),
-                error
+private fun isTopLevelNewLine(token: Token): Boolean =
+    token.type == BaseTokenType.NewLine && token.text.indentLength() == 0
+
+private fun KSharpConsumeResult.consumeInvalidTokens(error: Error): KSharpParserResult =
+    thenLoop { t ->
+        t.consume({ !isTopLevelNewLine(it) })
+            .build { it.first() }
+    }.build {
+        InvalidNode(
+            it.asSequence()
+                .filter { t -> t.cast<Token>().type != BaseTokenType.NewLine }
+                .map { i ->
+                    val t = i.cast<Token>()
+                    InvalidToken(
+                        t.text,
+                        t.type,
+                        t.location
+                    )
+                }.toList(),
+            error
+        )
+    }.flatMap {
+        if (it.value.tokens.isEmpty()) Either.Left(
+            ParserError(
+                it.value.error,
+                listBuilder(),
+                false,
+                it.remainTokens
             )
-        }
+        )
+        else Either.Right(ParserValue(it.value, it.remainTokens))
+    }
 
 private fun KSharpParserResult.consumeInvalidTokens(state: KSharpLexerState): KSharpParserResult =
     mapLeft { e ->
         state.lastError.set(e.error)
         e
-    }.or { l -> l.consumeInvalidTokens(state.lastError.get()!!) }
+    }.or { l -> l.collect().consumeInvalidTokens(state.lastError.get()!!) }
+
+private fun KSharpLexerIterator.thenTopLevelSymbol(
+    block: (KSharpLexerIterator) -> KSharpParserResult
+): KSharpConsumeResult =
+    collect()
+        .thenLoop { l ->
+            block(l)
+        }
 
 private fun KSharpLexerIterator.consumeModuleNodesLogic(): KSharpConsumeResult =
-    collect()
-        .thenLoop { then ->
-            then.consumeBlock {
-                it.consumeImport()
-                    .or { l -> l.consumeFunctionTypeDeclaration() }
-                    .or { l -> l.consumeTypeDeclaration() }
-                    .or { l -> l.consumeAnnotation() }
-                    .or { l -> l.consumeFunction() }
-                    .consumeInvalidTokens(state.value)
+    thenTopLevelSymbol { then ->
+        then.consumeImport()
+            .or { l -> l.consumeFunctionTypeDeclaration() }
+            .or { l -> l.consumeTypeDeclaration() }
+            .or { l -> l.consumeAnnotation() }
+            .or { l -> l.consumeFunction() }
+            .consumeInvalidTokens(state.value)
+            .resume()
+            .then(
+                ::isTopLevelNewLine,
+                { createExpectedTokenError("Newline", it) },
+                true
+            ).build {
+                it.first().cast<NodeData>()
             }.flatMapLeft {
                 if (it.collection.size() != 0) {
                     Either.Right(ParserValue(it.collection.build().first(), it.remainTokens))
                 } else Either.Left(it)
             }.cast<KSharpParserResult>()
-        }
+    }
+
 
 fun Sequence<NodeData>.toModuleNode(name: String): ModuleNode {
     val location = firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
