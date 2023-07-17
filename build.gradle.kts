@@ -1,7 +1,9 @@
+import kotlinx.kover.gradle.plugin.KoverGradlePlugin
+
 plugins {
     base
     id("org.sonarqube")
-    id("jacoco-report-aggregation")
+    id("org.jetbrains.kotlinx.kover")
 }
 
 repositories {
@@ -15,27 +17,24 @@ sonarqube {
         property("sonar.host.url", "https://sonarcloud.io")
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
-            "${project.buildDir}/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
+            "${project.buildDir}/reports/kover/report.xml"
         )
     }
 }
 
 dependencies {
     subprojects.forEach {
-        jacocoAggregation(project(":${it.name}"))
+        kover(project(":${it.name}"))
     }
 }
 
-reporting {
-    reports {
-        val testCodeCoverageReport by creating(JacocoCoverageReport::class) {
-            testType.set(TestSuiteType.UNIT_TEST)
-        }
+buildscript {
+    repositories {
+        mavenCentral()
     }
-}
-
-tasks.check {
-    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
+    dependencies {
+        classpath(libs.kover)
+    }
 }
 
 allprojects {
@@ -54,27 +53,11 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "jacoco")
+    apply(plugin = "org.jetbrains.kotlinx.kover")
 
     tasks {
         withType<Test> {
             useJUnitPlatform()
-            configure<JacocoTaskExtension> {
-                isEnabled = true
-                setDestinationFile(layout.buildDirectory.file("jacoco/${name}.exec").get().asFile)
-            }
         }
-        withType<JacocoReport> {
-            reports.apply {
-                xml.required.set(true)
-                csv.required.set(false)
-                html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
-            }
-        }
-    }
-
-    extensions.configure(JacocoPluginExtension::class) {
-        this.toolVersion = rootProject.libs.versions.jacoco.get()
-        reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
     }
 }
