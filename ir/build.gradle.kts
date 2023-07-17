@@ -33,3 +33,9 @@ tasks {
         )
     }
 }
+
+kover {
+    excludeInstrumentation {
+        classes("org.ksharp.ir.truffle.KSharpBinaryNode","org.ksharp.ir.truffle.PreludeTypeSystem")
+    }
+}
