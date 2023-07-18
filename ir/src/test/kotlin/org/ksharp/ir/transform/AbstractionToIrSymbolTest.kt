@@ -235,6 +235,38 @@ class AbstractionToIrSymbolTest : StringSpec({
                 Location((Line(value = 1) to Offset(value = 5)), (Line(value = 1) to Offset(value = 7)))
             )
         ),
+//        createSpec(
+//            "Let expression",
+//                """
+//                    fn = let x = 10
+//                             y = 20
+//                         then x + y
+//                """.trimIndent(), IrIf(
+//                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+//                condition = IrBool(
+//                    true,
+//                    Location(
+//                        (Line(value = 1) to Offset(value = 8)),
+//                        (Line(value = 1) to Offset(value = 12))
+//                    )
+//                ),
+//                thenExpr = IrInteger(
+//                    10,
+//                    Location(
+//                        (Line(value = 2) to Offset(value = 10)),
+//                        (Line(value = 2) to Offset(value = 12))
+//                    )
+//                ),
+//                elseExpr = IrInteger(
+//                    20,
+//                    Location(
+//                        (Line(value = 3) to Offset(value = 10)),
+//                        (Line(value = 3) to Offset(value = 12))
+//                    )
+//                ),
+//                Location((Line(value = 1) to Offset(value = 5)), (Line(value = 1) to Offset(value = 7)))
+//            )
+//        ),
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
