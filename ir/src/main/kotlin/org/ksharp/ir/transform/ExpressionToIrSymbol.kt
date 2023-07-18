@@ -30,7 +30,7 @@ fun ConstantNode<SemanticInfo>.toIrSymbol(): IrExpression =
         else -> TODO("Constant node value not supported $value: ${value.javaClass}")
     }
 
-fun VarNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex) =
+fun VarNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex): IrExpression =
     variableIndex[name]!!.let {
         when (it.kind) {
             VarKind.Arg -> IrArg(
@@ -39,7 +39,11 @@ fun VarNode<SemanticInfo>.toIrSymbol(variableIndex: VariableIndex) =
                 location
             )
 
-            VarKind.Var -> TODO()
+            VarKind.Var -> IrVar(
+                it.attributes,
+                it.index,
+                location
+            )
         }
     }
 
@@ -48,9 +52,10 @@ fun SemanticNode<SemanticInfo>.toIrSymbol(lookup: FunctionLookup, variableIndex:
         is ConstantNode -> toIrSymbol()
         is VarNode -> toIrSymbol(variableIndex)
         is ApplicationNode -> toIrSymbol(lookup, variableIndex)
-        is AbstractionNode -> toIrSymbol(lookup, variableIndex)
+        is AbstractionNode -> toIrSymbol(lookup)
+        is LetNode -> toIrSymbol(lookup, variableIndex)
 
-        else -> TODO()
+        else -> TODO("$this")
     }
 
 val IrBoolFactory: CustomApplicationIrNode = { _, _ ->

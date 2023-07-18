@@ -235,42 +235,77 @@ class AbstractionToIrSymbolTest : StringSpec({
                 Location((Line(value = 1) to Offset(value = 5)), (Line(value = 1) to Offset(value = 7)))
             )
         ),
-//        createSpec(
-//            "Let expression",
-//                """
-//                    fn = let x = 10
-//                             y = 20
-//                         then x + y
-//                """.trimIndent(), IrIf(
-//                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-//                condition = IrBool(
-//                    true,
-//                    Location(
-//                        (Line(value = 1) to Offset(value = 8)),
-//                        (Line(value = 1) to Offset(value = 12))
-//                    )
-//                ),
-//                thenExpr = IrInteger(
-//                    10,
-//                    Location(
-//                        (Line(value = 2) to Offset(value = 10)),
-//                        (Line(value = 2) to Offset(value = 12))
-//                    )
-//                ),
-//                elseExpr = IrInteger(
-//                    20,
-//                    Location(
-//                        (Line(value = 3) to Offset(value = 10)),
-//                        (Line(value = 3) to Offset(value = 12))
-//                    )
-//                ),
-//                Location((Line(value = 1) to Offset(value = 5)), (Line(value = 1) to Offset(value = 7)))
-//            )
-//        ),
+        createSpec(
+            "Let expression, with simple bindings",
+            """
+                    fn = let x = 10
+                             y = 20
+                         then x + y
+                """.trimIndent(),
+            IrLet(
+                attributes = setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                expressions = listOf(
+                    IrSetVar(
+                        attributes = setOf(CommonAttribute.Constant),
+                        index = 0,
+                        value = IrInteger(
+                            value = 10,
+                            location = Location(
+                                start = (Line(value = 1) to Offset(value = 13)),
+                                end = (Line(value = 1) to Offset(value = 15))
+                            )
+                        ),
+                        location = Location(
+                            start = (Line(value = 1) to Offset(value = 11)),
+                            end = (Line(value = 1) to Offset(value = 12))
+                        )
+                    ),
+                    IrSetVar(
+                        attributes = setOf(CommonAttribute.Constant), index = 1,
+                        value = IrInteger(
+                            value = 20,
+                            location = Location(
+                                start = (Line(value = 2) to Offset(value = 13)),
+                                end = (Line(value = 2) to Offset(value = 15))
+                            )
+                        ),
+                        location = Location(
+                            start = (Line(value = 2) to Offset(value = 11)),
+                            end = (Line(value = 2) to Offset(value = 12))
+                        )
+                    ),
+                    IrSum(
+                        attributes = setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                        left = IrVar(
+                            attributes = setOf(CommonAttribute.Constant), index = 0,
+                            location = Location(
+                                start = (Line(value = 3) to Offset(value = 10)),
+                                end = (Line(value = 3) to Offset(value = 11))
+                            )
+                        ),
+                        right = IrVar(
+                            attributes = setOf(CommonAttribute.Constant), index = 1,
+                            location = Location(
+                                start = (Line(value = 3) to Offset(value = 14)),
+                                end = (Line(value = 3) to Offset(value = 15))
+                            )
+                        ),
+                        location = Location(
+                            start = (Line(value = 3) to Offset(value = 12)),
+                            end = (Line(value = 3) to Offset(value = 13))
+                        )
+                    )
+                ),
+                location = Location(
+                    start = (Line(value = 1) to Offset(value = 5)),
+                    end = (Line(value = 1) to Offset(value = 8))
+                )
+            )
+        ),
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
-                .toIrSymbol(functionLookup, emptyVariableIndex)
+                .toIrSymbol(functionLookup)
                 .expr
                 .shouldBe(expected)
         }

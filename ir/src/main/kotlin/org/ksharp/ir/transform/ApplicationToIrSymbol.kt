@@ -61,6 +61,14 @@ private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::if" to IrIfFactory
 )
 
+fun computeAttributes(exprsCounter: Int, constantCounter: Int, pureCounter: Int): Set<Attribute> {
+    val attributes = mutableSetOf<Attribute>()
+    if (constantCounter == exprsCounter) {
+        attributes.add(CommonAttribute.Constant)
+    }
+    attributes.add(if (pureCounter == exprsCounter) CommonAttribute.Pure else CommonAttribute.Impure)
+    return attributes
+}
 
 fun List<SemanticNode<SemanticInfo>>.toIrSymbols(
     functionLookup: FunctionLookup,
@@ -80,13 +88,7 @@ fun List<SemanticNode<SemanticInfo>>.toIrSymbols(
         }
         symbol
     }
-    val attributes = mutableSetOf<Attribute>()
-    val expressions = symbols.size
-    if (constantCounter.get() == expressions) {
-        attributes.add(CommonAttribute.Constant)
-    }
-    attributes.add(if (pureCounter.get() == expressions) CommonAttribute.Pure else CommonAttribute.Impure)
-    return attributes to symbols
+    return computeAttributes(symbols.size, constantCounter.get(), pureCounter.get()) to symbols
 }
 
 private val Type?.irCustomNode: String?
