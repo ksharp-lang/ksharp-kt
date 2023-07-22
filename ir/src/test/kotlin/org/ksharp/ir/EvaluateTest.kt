@@ -151,6 +151,14 @@ class EvaluateTest : StringSpec({
             30
         ),
         createSpec(
+            "Let expressions with var binding - short",
+            """|fn = let x = short 10
+               |         y = short 20
+               |     then x + y
+            """.trimMargin(),
+            30
+        ),
+        createSpec(
             "Let expressions with var binding - float",
             """|fn = let x = float 10
                |         y = float 20
