@@ -3,6 +3,7 @@ package org.ksharp.ir.transform
 import org.ksharp.common.cast
 import org.ksharp.ir.*
 import org.ksharp.nodes.semantic.ApplicationNode
+import org.ksharp.nodes.semantic.ConstantNode
 import org.ksharp.nodes.semantic.SemanticNode
 import org.ksharp.semantics.nodes.ApplicationSemanticInfo
 import org.ksharp.semantics.nodes.SemanticInfo
@@ -10,6 +11,7 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.TypeConstructor
 import org.ksharp.typesystem.types.UnionType
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -70,12 +72,17 @@ fun computeAttributes(exprsCounter: Int, constantCounter: Int, pureCounter: Int)
     return attributes
 }
 
+fun SemanticNode<SemanticInfo>.isUnitConstant() =
+    this is ConstantNode && this.value == Unit
+
 fun List<SemanticNode<SemanticInfo>>.toIrSymbols(
     state: IrState
 ): Pair<Set<Attribute>, List<IrExpression>> {
     val constantCounter = AtomicInteger()
     val pureCounter = AtomicInteger()
-    val symbols = this.map {
+    val symbols = if (this.size == 1 && this.first().isUnitConstant()) {
+        emptyList()
+    } else this.map {
         val symbol = it.toIrSymbol(state)
         val symbolAttrs = symbol.attributes
         val isConstant = symbolAttrs.contains(CommonAttribute.Constant)
@@ -100,7 +107,7 @@ val ApplicationNode<SemanticInfo>.customIrNode: String?
     get() =
         info.cast<ApplicationSemanticInfo>().let { info ->
             info.function.irCustomNode ?: with(inferredType) {
-                if (info.function == null && this is UnionType) irCustomNode else null
+                if (info.function == null && (this is UnionType || this is TypeConstructor)) irCustomNode else null
             }
         }
 

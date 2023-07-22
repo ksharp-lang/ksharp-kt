@@ -27,7 +27,7 @@ fun ConstantNode<SemanticInfo>.toIrSymbol(): IrExpression =
             location
         )
 
-        else -> TODO("Constant node value not supported $value: ${value.javaClass}")
+        else -> TODO("Constant node value not supported $value: ${this}")
     }
 
 fun VarNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression =

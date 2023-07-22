@@ -14,6 +14,9 @@ private data class Call(
 
 private fun String.evaluateFirstFunction(arguments: List<Any>) =
     toSemanticModuleInfo()
+        .also {
+            println(it.abstractions)
+        }
         .toIrModule()
         .first
         .symbols
@@ -130,6 +133,53 @@ class EvaluateTest : StringSpec({
                |     then x + y
             """.trimMargin(),
             30.toLong()
+        ),
+        createSpec(
+            "Let expressions with var binding - byte",
+            """|fn = let x = byte 10
+               |         y = byte 20
+               |     then x + y
+            """.trimMargin(),
+            30.toByte()
+        ),
+        createSpec(
+            "Let expressions with var binding - int",
+            """|fn = let x = int 10
+               |         y = int 20
+               |     then x + y
+            """.trimMargin(),
+            30
+        ),
+        createSpec(
+            "Let expressions with var binding - float",
+            """|fn = let x = float 10
+               |         y = float 20
+               |     then x + y
+            """.trimMargin(),
+            30.toFloat()
+        ),
+        createSpec(
+            "Let expressions with var binding - double",
+            """|fn = let x = double 10
+               |         y = double 20
+               |     then x + y
+            """.trimMargin(),
+            30.toDouble()
+        ),
+        createSpec(
+            "Let expressions with var binding - object",
+            """|fn = let x = bigint 10
+               |         y = bigint 20
+               |     then x + y
+            """.trimMargin(),
+            BigInteger.valueOf(30)
+        ),
+        createSpec(
+            "Let expressions with var binding - boolean",
+            """|fn = let x = True
+               |     then x
+            """.trimMargin(),
+            true
         ),
     ).forEach { (description, code, call) ->
         description {
