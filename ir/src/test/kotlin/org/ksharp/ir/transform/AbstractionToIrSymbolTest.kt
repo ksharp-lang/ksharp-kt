@@ -313,12 +313,13 @@ class AbstractionToIrSymbolTest : StringSpec({
     "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
-            .toIrSymbol({ _, _, _ -> null }, emptyVariableIndex)
+            .toIrSymbol(IrState({ _, _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
             .shouldBe(
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
                     "ten",
                     listOf(),
+                    0,
                     listOf(unitType, longType).toFunctionType(NoAttributes),
                     IrInteger(
                         10,
@@ -334,7 +335,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             ten = 10
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(functionLookup, emptyVariableIndex)
+            .toIrSymbol(IrState(functionLookup, mutableVariableIndexes(emptyVariableIndex)))
             .attributes
             .apply {
                 shouldBe(
@@ -355,13 +356,14 @@ class AbstractionToIrSymbolTest : StringSpec({
             c a = a
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(functionLookup, emptyVariableIndex)
+            .toIrSymbol(IrState(functionLookup, mutableVariableIndexes(emptyVariableIndex)))
             .apply {
                 shouldBe(
                     IrFunction(
                         setOf(CommonAttribute.Internal),
                         "c",
                         listOf("a"),
+                        0,
                         listOf(internalCharType, internalCharType).toFunctionType(NoAttributes),
                         IrArg(
                             setOf(CommonAttribute.Pure),

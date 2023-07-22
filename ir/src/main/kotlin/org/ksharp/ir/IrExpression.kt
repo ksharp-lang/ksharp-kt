@@ -7,7 +7,7 @@ import org.ksharp.common.cast
 import org.ksharp.ir.truffle.ArgAccessNode
 import org.ksharp.ir.truffle.IfNode
 import org.ksharp.ir.truffle.KSharpNode
-import org.ksharp.ir.truffle.VarAccessNode
+import org.ksharp.ir.truffle.variable.VarAccessNode
 import org.ksharp.ir.truffle.call.CallNode
 import org.ksharp.ir.truffle.cast.NumCastNode
 import org.ksharp.typesystem.attributes.Attribute

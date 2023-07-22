@@ -21,9 +21,10 @@ data class IrFunction(
     override val attributes: Set<Attribute>,
     @get:JvmName("getSymbolName") override val name: String,
     val arguments: List<String>,
+    val frameSlots: Int,
     override val type: FunctionType,
     override val expr: IrExpression,
     override val location: Location
-) : FunctionNode(expr.cast()), IrTopLevelSymbol, IrExpression {
+) : FunctionNode(frameSlots, expr.cast()), IrTopLevelSymbol, IrExpression {
     fun call(vararg arguments: Any): Any = callTarget.call(*arguments)
 }

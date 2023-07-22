@@ -13,10 +13,10 @@ import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.UnionType
 import java.util.concurrent.atomic.AtomicInteger
 
-typealias CustomApplicationIrNode = ApplicationNode<SemanticInfo>.(functionLookup: FunctionLookup, variableIndex: VariableIndex) -> IrExpression
+typealias CustomApplicationIrNode = ApplicationNode<SemanticInfo>.(state: IrState) -> IrExpression
 
-val IrIfFactory: CustomApplicationIrNode = { fLookup, variableIndex ->
-    val (attributes, symbols) = arguments.toIrSymbols(fLookup, variableIndex)
+val IrIfFactory: CustomApplicationIrNode = { state ->
+    val (attributes, symbols) = arguments.toIrSymbols(state)
     IrIf(
         attributes,
         symbols[0],
@@ -26,8 +26,8 @@ val IrIfFactory: CustomApplicationIrNode = { fLookup, variableIndex ->
     )
 }
 
-val IrNumCastFactory: CustomApplicationIrNode = { fLookup, variableIndex ->
-    val (_, symbols) = arguments.toIrSymbols(fLookup, variableIndex)
+val IrNumCastFactory: CustomApplicationIrNode = { state ->
+    val (_, symbols) = arguments.toIrSymbols(state)
 
     IrNumCast(
         symbols[0],
@@ -71,13 +71,12 @@ fun computeAttributes(exprsCounter: Int, constantCounter: Int, pureCounter: Int)
 }
 
 fun List<SemanticNode<SemanticInfo>>.toIrSymbols(
-    functionLookup: FunctionLookup,
-    variableIndex: VariableIndex
+    state: IrState
 ): Pair<Set<Attribute>, List<IrExpression>> {
     val constantCounter = AtomicInteger()
     val pureCounter = AtomicInteger()
     val symbols = this.map {
-        val symbol = it.toIrSymbol(functionLookup, variableIndex)
+        val symbol = it.toIrSymbol(state)
         val symbolAttrs = symbol.attributes
         val isConstant = symbolAttrs.contains(CommonAttribute.Constant)
         if (isConstant) {
@@ -106,16 +105,15 @@ val ApplicationNode<SemanticInfo>.customIrNode: String?
         }
 
 fun ApplicationNode<SemanticInfo>.toIrSymbol(
-    functionLookup: FunctionLookup,
-    variableIndex: VariableIndex
+    state: IrState
 ): IrExpression {
     val factory = customIrNode?.let {
         irNodeFactory[it] ?: throw RuntimeException("Ir symbol factory $it not found")
     }
-    return if (factory != null) factory(functionLookup, variableIndex)
+    return if (factory != null) factory(state)
     else {
         val info = this.info.cast<ApplicationSemanticInfo>()
-        val (attributes, arguments) = arguments.toIrSymbols(functionLookup, variableIndex)
+        val (attributes, arguments) = arguments.toIrSymbols(state)
         IrCall(
             attributes,
             null,
@@ -124,7 +122,7 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
             info.function!!,
             location,
         ).apply {
-            this.functionLookup = functionLookup
+            this.functionLookup = state.functionLookup
         }
     }
 }

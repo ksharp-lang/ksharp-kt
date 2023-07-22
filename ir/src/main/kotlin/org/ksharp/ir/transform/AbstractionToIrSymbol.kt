@@ -32,12 +32,14 @@ fun AbstractionNode<SemanticInfo>.toIrSymbol(
         .let {
             argIndex(it)
         }
-    val expression = expression.toIrSymbol(functionLookup, variableIndex)
+    val irState = IrState(functionLookup, mutableVariableIndexes(variableIndex))
+    val expression = expression.toIrSymbol(irState)
     return IrFunction(
         //all functions are pure, except if it is marked impure
         expression.addExpressionAttributes(attributes, CommonAttribute.Constant, CommonAttribute.Impure),
         name,
         arguments,
+        irState.variableIndex.size,
         inferredType.cast(),
         expression,
         location

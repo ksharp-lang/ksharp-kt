@@ -22,7 +22,7 @@ private fun String.evaluateFirstFunction(arguments: List<Any>) =
         .call(*arguments.toTypedArray())
 
 private fun createSpec(description: String, code: String, expected: Any, vararg arguments: Any) =
-    Triple(description, code, Call(arguments.toList(), expected))
+    Triple(description, code.also(::println), Call(arguments.toList(), expected))
 
 
 class EvaluateTest : StringSpec({
@@ -122,6 +122,14 @@ class EvaluateTest : StringSpec({
             "Mod BigDecimal expression",
             "fn = (bigdec 2.0) % (bigdec 2.0)",
             BigDecimal.valueOf(0.0)
+        ),
+        createSpec(
+            "Let expressions with var binding",
+            """|fn = let x = 10
+               |         y = 20
+               |     then x + y
+            """.trimMargin(),
+            30.toLong()
         ),
     ).forEach { (description, code, call) ->
         description {

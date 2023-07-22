@@ -8,8 +8,8 @@ public class FunctionNode extends KSharpRootNode {
     @Child
     private KSharpNode expr;
 
-    public FunctionNode(KSharpNode expr) {
-        super(null);
+    public FunctionNode(int slots, KSharpNode expr) {
+        super(null, slots);
         this.expr = expr;
     }
 

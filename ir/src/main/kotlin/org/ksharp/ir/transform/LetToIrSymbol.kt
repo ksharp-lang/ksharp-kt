@@ -1,6 +1,9 @@
 package org.ksharp.ir.transform
 
-import org.ksharp.ir.*
+import org.ksharp.ir.IrExpression
+import org.ksharp.ir.IrLet
+import org.ksharp.ir.IrSetVar
+import org.ksharp.ir.IrState
 import org.ksharp.nodes.semantic.LetBindingNode
 import org.ksharp.nodes.semantic.LetNode
 import org.ksharp.nodes.semantic.VarNode
@@ -9,19 +12,15 @@ import org.ksharp.typesystem.attributes.CommonAttribute
 import java.util.concurrent.atomic.AtomicInteger
 
 fun LetBindingNode<SemanticInfo>.toIrSymbol(
-    lookup: FunctionLookup,
-    variableIndex: MutableVariableIndex,
-    bindingCounter: AtomicInteger
+    state: IrState
 ): IrExpression {
-    val expr = expression.toIrSymbol(lookup, variableIndex)
+    val expr = expression.toIrSymbol(state)
     return when (val m = match) {
         is VarNode -> {
-            VarInfo(
-                bindingCounter.incrementAndGet(),
-                VarKind.Var,
+            state.addVariable(
+                m.name,
                 expr.attributes
             ).let {
-                variableIndex[m.name] = it
                 IrSetVar(expr.attributes, it.index, expr, location)
             }
         }
@@ -30,14 +29,12 @@ fun LetBindingNode<SemanticInfo>.toIrSymbol(
     }
 }
 
-fun LetNode<SemanticInfo>.toIrSymbol(lookup: FunctionLookup, variableIndex: VariableIndex): IrExpression {
-    val bindingCounter = AtomicInteger(variableIndex.size - 1)
-    val letVariableIndex = mutableVariableIndexes(variableIndex)
+fun LetNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression {
     return sequenceOf(
         bindings.map {
-            it.toIrSymbol(lookup, letVariableIndex, bindingCounter)
+            it.toIrSymbol(state)
         }.asSequence(),
-        sequenceOf(expression.toIrSymbol(lookup, letVariableIndex))
+        sequenceOf(expression.toIrSymbol(state))
     ).flatten()
         .toList()
         .let {
