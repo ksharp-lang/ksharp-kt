@@ -26,6 +26,7 @@ class ModuleTest : StringSpec({
                             setOf(CommonAttribute.Internal, CommonAttribute.Constant),
                             "ten",
                             listOf(),
+                            0,
                             listOf(unitType, longType).toFunctionType(NoAttributes),
                             IrInteger(
                                 10,

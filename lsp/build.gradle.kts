@@ -28,8 +28,10 @@ tasks.shadowJar {
     archiveFileName.set("ks-lsp-all.jar")
 }
 
-kover {
-    excludeInstrumentation {
-        classes("org.ksharp.lsp.KsLspMain")
+koverReport {
+    filters {
+        excludes {
+            classes("org.ksharp.lsp.KsLspMain")
+        }
     }
 }

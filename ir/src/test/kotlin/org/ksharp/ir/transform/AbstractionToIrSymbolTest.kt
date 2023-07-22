@@ -235,10 +235,77 @@ class AbstractionToIrSymbolTest : StringSpec({
                 Location((Line(value = 1) to Offset(value = 5)), (Line(value = 1) to Offset(value = 7)))
             )
         ),
+        createSpec(
+            "Let expression, with simple bindings",
+            """
+                    fn = let x = 10
+                             y = 20
+                         then x + y
+                """.trimIndent(),
+            IrLet(
+                attributes = setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                expressions = listOf(
+                    IrSetVar(
+                        attributes = setOf(CommonAttribute.Constant),
+                        index = 0,
+                        value = IrInteger(
+                            value = 10,
+                            location = Location(
+                                start = (Line(value = 1) to Offset(value = 13)),
+                                end = (Line(value = 1) to Offset(value = 15))
+                            )
+                        ),
+                        location = Location(
+                            start = (Line(value = 1) to Offset(value = 11)),
+                            end = (Line(value = 1) to Offset(value = 12))
+                        )
+                    ),
+                    IrSetVar(
+                        attributes = setOf(CommonAttribute.Constant), index = 1,
+                        value = IrInteger(
+                            value = 20,
+                            location = Location(
+                                start = (Line(value = 2) to Offset(value = 13)),
+                                end = (Line(value = 2) to Offset(value = 15))
+                            )
+                        ),
+                        location = Location(
+                            start = (Line(value = 2) to Offset(value = 11)),
+                            end = (Line(value = 2) to Offset(value = 12))
+                        )
+                    ),
+                    IrSum(
+                        attributes = setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                        left = IrVar(
+                            attributes = setOf(CommonAttribute.Constant), index = 0,
+                            location = Location(
+                                start = (Line(value = 3) to Offset(value = 10)),
+                                end = (Line(value = 3) to Offset(value = 11))
+                            )
+                        ),
+                        right = IrVar(
+                            attributes = setOf(CommonAttribute.Constant), index = 1,
+                            location = Location(
+                                start = (Line(value = 3) to Offset(value = 14)),
+                                end = (Line(value = 3) to Offset(value = 15))
+                            )
+                        ),
+                        location = Location(
+                            start = (Line(value = 3) to Offset(value = 12)),
+                            end = (Line(value = 3) to Offset(value = 13))
+                        )
+                    )
+                ),
+                location = Location(
+                    start = (Line(value = 1) to Offset(value = 5)),
+                    end = (Line(value = 1) to Offset(value = 8))
+                )
+            )
+        ),
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
-                .toIrSymbol(functionLookup, emptyVariableIndex)
+                .toIrSymbol(functionLookup)
                 .expr
                 .shouldBe(expected)
         }
@@ -246,12 +313,13 @@ class AbstractionToIrSymbolTest : StringSpec({
     "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
-            .toIrSymbol({ _, _, _ -> null }, emptyVariableIndex)
+            .toIrSymbol(IrState({ _, _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
             .shouldBe(
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
                     "ten",
                     listOf(),
+                    0,
                     listOf(unitType, longType).toFunctionType(NoAttributes),
                     IrInteger(
                         10,
@@ -267,7 +335,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             ten = 10
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(functionLookup, emptyVariableIndex)
+            .toIrSymbol(IrState(functionLookup, mutableVariableIndexes(emptyVariableIndex)))
             .attributes
             .apply {
                 shouldBe(
@@ -288,13 +356,14 @@ class AbstractionToIrSymbolTest : StringSpec({
             c a = a
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(functionLookup, emptyVariableIndex)
+            .toIrSymbol(IrState(functionLookup, mutableVariableIndexes(emptyVariableIndex)))
             .apply {
                 shouldBe(
                     IrFunction(
                         setOf(CommonAttribute.Internal),
                         "c",
                         listOf("a"),
+                        0,
                         listOf(internalCharType, internalCharType).toFunctionType(NoAttributes),
                         IrArg(
                             setOf(CommonAttribute.Pure),

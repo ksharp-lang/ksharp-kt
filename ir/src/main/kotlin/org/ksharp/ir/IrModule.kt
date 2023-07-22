@@ -47,7 +47,7 @@ fun SemanticModuleInfo.toIrModule(): Pair<IrModule, FunctionLookup> {
     val lookup = FunctionLookupImpl(typeSystem)
     val module = IrModule(
         listOf(),
-        abstractions.map { it.toIrSymbol(lookup, emptyVariableIndex) }
+        abstractions.map { it.toIrSymbol(lookup) }
     )
     lookup.functions = module.symbols.cast()
     return module to lookup
