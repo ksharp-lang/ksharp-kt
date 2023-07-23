@@ -40,7 +40,7 @@ data class Concrete internal constructor(
     val name: String,
 ) : Type {
     override val reducer: Reducer
-        get() = Reducers.NoDefined
+        get() = Reducers.Passthrough
     override val serializer: TypeSerializer
         get() = TypeSerializers.Concrete
 
