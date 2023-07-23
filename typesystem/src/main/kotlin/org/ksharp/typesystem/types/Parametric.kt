@@ -27,7 +27,7 @@ data class Parameter internal constructor(
     override val attributes: Set<Attribute>
         get() = NoAttributes
     override val reducer: Reducer
-        get() = Reducers.NoDefined
+        get() = Reducers.Passthrough
     override val serializer: TypeSerializer
         get() = TypeSerializers.Parameter
 
