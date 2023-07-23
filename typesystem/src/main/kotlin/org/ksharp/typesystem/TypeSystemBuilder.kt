@@ -4,6 +4,7 @@ import org.ksharp.common.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.TypeAlias
 
 typealias TypeEntry = Pair<String, Type>
 typealias ErrorOrType = ErrorOrValue<Type>
@@ -19,7 +20,11 @@ class TypeItemBuilder(
     private val builder: PartialItemBuilder<TypeEntry>,
     private val partialBuilder: PartialBuilder<TypeEntry, TypeSystem>
 ) {
-    operator fun get(key: String): Type? = storeView[key]
+    operator fun get(key: String): Type? = storeView[key]?.let {
+        if (it is TypeAlias) {
+            get(it.name)
+        } else it
+    }
 
     fun isTypeNameTaken(name: String) = storeView.containsKey(name)!!
 

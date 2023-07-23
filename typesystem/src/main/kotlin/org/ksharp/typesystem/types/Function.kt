@@ -7,10 +7,10 @@ import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystemErrorCode.InvalidFunctionType
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
-import org.ksharp.typesystem.reducer.Reducer
-import org.ksharp.typesystem.reducer.Reducers
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.solver.Solver
+import org.ksharp.typesystem.solver.Solvers
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
@@ -20,8 +20,8 @@ data class FunctionType internal constructor(
     override val attributes: Set<Attribute>,
     val arguments: List<Type>,
 ) : Type {
-    override val reducer: Reducer
-        get() = Reducers.NoDefined
+    override val solver: Solver
+        get() = Solvers.NoDefined
     override val serializer: TypeSerializer
         get() = TypeSerializers.FunctionType
 

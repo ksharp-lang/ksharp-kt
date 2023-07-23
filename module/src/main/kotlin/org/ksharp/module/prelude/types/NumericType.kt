@@ -4,9 +4,9 @@ import org.ksharp.module.prelude.serializer.TypeSerializers
 import org.ksharp.module.prelude.unification.TypeUnifications
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
-import org.ksharp.typesystem.reducer.Reducer
-import org.ksharp.typesystem.reducer.Reducers
 import org.ksharp.typesystem.serializer.TypeSerializer
+import org.ksharp.typesystem.solver.Solver
+import org.ksharp.typesystem.solver.Solvers
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.types.ParametricTypeFactory
@@ -32,8 +32,8 @@ data class NumericType internal constructor(
     override val attributes: Set<Attribute>
         get() = NoAttributes
 
-    override val reducer: Reducer
-        get() = Reducers.Passthrough
+    override val solver: Solver
+        get() = Solvers.PassThrough
 
     override val serializer: TypeSerializer
         get() = TypeSerializers.NumericType
