@@ -1,6 +1,8 @@
 package org.ksharp.typesystem.types
 
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.reducer.Reducer
+import org.ksharp.typesystem.reducer.Reducers
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -12,7 +14,8 @@ data class Labeled internal constructor(
     val label: String,
     val type: Type
 ) : Type {
-
+    override val reducer: Reducer
+        get() = Reducers.NoDefined
     override val attributes: Set<Attribute>
         get() = type.attributes
 

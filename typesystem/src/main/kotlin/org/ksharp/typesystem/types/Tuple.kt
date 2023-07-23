@@ -3,6 +3,8 @@ package org.ksharp.typesystem.types
 import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.reducer.Reducer
+import org.ksharp.typesystem.reducer.Reducers
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.substitution.Substitution
@@ -14,6 +16,8 @@ data class TupleType internal constructor(
     override val attributes: Set<Attribute>,
     val elements: List<Type>,
 ) : Type {
+    override val reducer: Reducer
+        get() = Reducers.NoDefined
     override val serializer: TypeSerializer
         get() = TypeSerializers.TupleType
 
