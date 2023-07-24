@@ -8,7 +8,7 @@ import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.ParametricType
 import org.ksharp.typesystem.types.Type
 
-class ParametricReducer : Solver {
+class ParametricSolver : Solver {
 
     private fun resolveParametricType(typeSystem: TypeSystem, type: Type): ErrorOrType =
         typeSystem.solve(type).flatMap {
@@ -18,7 +18,7 @@ class ParametricReducer : Solver {
             } else resolveParametricType(typeSystem, it)
         }
 
-    override fun reduce(typeSystem: TypeSystem, type: Type): ErrorOrType {
+    override fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType {
         val parametricType = type.cast<ParametricType>()
         return resolveParametricType(typeSystem, parametricType.type).flatMap { t ->
             parametricType.params.map { p ->

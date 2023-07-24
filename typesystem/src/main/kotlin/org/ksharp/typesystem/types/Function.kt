@@ -21,7 +21,7 @@ data class FunctionType internal constructor(
     val arguments: List<Type>,
 ) : Type {
     override val solver: Solver
-        get() = Solvers.NoDefined
+        get() = Solvers.Function
     override val serializer: TypeSerializer
         get() = TypeSerializers.FunctionType
 

@@ -6,7 +6,7 @@ import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 
 fun interface Solver {
-    fun reduce(typeSystem: TypeSystem, type: Type): ErrorOrType
+    fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType
 }
 
 enum class Solvers(reducer: Solver) : Solver by reducer {
@@ -14,8 +14,9 @@ enum class Solvers(reducer: Solver) : Solver by reducer {
         TODO("No defined reducer for type $type")
     }),
     PassThrough(Solver { _, type -> Either.Right(type) }),
-    Alias(AliasReducer()),
-    Parametric(ParametricReducer()),
+    Alias(AliasSolver()),
+    Parametric(ParametricSolver()),
+    Function(FunctionSolver()),
 }
 
-fun TypeSystem.solve(type: Type): ErrorOrType = type.solver.reduce(this, type)
+fun TypeSystem.solve(type: Type): ErrorOrType = type.solver.solve(this, type)
