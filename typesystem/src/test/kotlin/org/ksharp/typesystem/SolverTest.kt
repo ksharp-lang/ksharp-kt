@@ -30,6 +30,12 @@ class SolverTest : StringSpec({
                 type("String")
             }
         }
+        type(NoAttributes, "Tuple") {
+            tupleType {
+                type("String")
+                type("String")
+            }
+        }
     }.let {
         it.errors.shouldBeEmpty()
         it.value
@@ -54,6 +60,18 @@ class SolverTest : StringSpec({
                 FunctionType(
                     NoAttributes, listOf(
                         ParametricType(NoAttributes, Alias("List"), listOf(Concrete(NoAttributes, "String"))),
+                        Concrete(NoAttributes, "String")
+                    )
+                )
+            )
+    }
+    "solve tuple type" {
+        val type = ts["Tuple"].valueOrNull.shouldNotBeNull()
+        ts.solve(type).also { println(it) }
+            .shouldBeRight(
+                TupleType(
+                    NoAttributes, listOf(
+                        Concrete(NoAttributes, "String"),
                         Concrete(NoAttributes, "String")
                     )
                 )

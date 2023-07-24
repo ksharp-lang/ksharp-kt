@@ -17,6 +17,7 @@ enum class Solvers(reducer: Solver) : Solver by reducer {
     Alias(AliasSolver()),
     Parametric(ParametricSolver()),
     Function(FunctionSolver()),
+    Tuple(TupleSolver()),
 }
 
 fun TypeSystem.solve(type: Type): ErrorOrType = type.solver.solve(this, type)

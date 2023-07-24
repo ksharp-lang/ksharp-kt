@@ -17,7 +17,7 @@ data class TupleType internal constructor(
     val elements: List<Type>,
 ) : Type {
     override val solver: Solver
-        get() = Solvers.NoDefined
+        get() = Solvers.Tuple
     override val serializer: TypeSerializer
         get() = TypeSerializers.TupleType
 
