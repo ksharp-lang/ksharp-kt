@@ -48,6 +48,10 @@ class SolverTest : StringSpec({
         val type = Concrete(NoAttributes, "Int")
         ts.solve(type).shouldBeRight(type)
     }
+    "solve type alias" {
+        val type = TypeAlias(NoAttributes, "String")
+        ts.solve(type).shouldBeRight(Concrete(NoAttributes, "String"))
+    }
     "solve parametric type" {
         val type = ts["StringList"].valueOrNull.shouldNotBeNull()
         ts.solve(type).also { println(it) }
