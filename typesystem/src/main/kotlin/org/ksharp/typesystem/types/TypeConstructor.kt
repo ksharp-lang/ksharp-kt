@@ -16,7 +16,7 @@ data class TypeConstructor(
     val alias: String
 ) : Type {
     override val solver: Solver
-        get() = Solvers.NoDefined
+        get() = Solvers.PassThrough
     override val substitution: Substitution
         get() = Substitutions.TypeConstructor
 

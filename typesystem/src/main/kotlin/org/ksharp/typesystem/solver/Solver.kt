@@ -11,13 +11,15 @@ fun interface Solver {
 
 enum class Solvers(reducer: Solver) : Solver by reducer {
     NoDefined(Solver { _, type ->
-        TODO("No defined reducer for type $type")
+        TODO("No defined solver for type $type")
     }),
     PassThrough(Solver { _, type -> Either.Right(type) }),
     Alias(AliasSolver()),
     Parametric(ParametricSolver()),
     Function(FunctionSolver()),
     Tuple(TupleSolver()),
+    Union(UnionSolver()),
+    UnionClass(ClassSolver()),
 }
 
 fun TypeSystem.solve(type: Type): ErrorOrType = type.solver.solve(this, type)

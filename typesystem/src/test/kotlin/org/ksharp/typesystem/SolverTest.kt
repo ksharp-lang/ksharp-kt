@@ -39,6 +39,16 @@ class SolverTest : StringSpec({
                 type("String")
             }
         }
+        type(NoAttributes, "Either") {
+            unionType {
+                clazz("Left") {
+                    type("Str")
+                }
+                clazz("Right") {
+                    type("String")
+                }
+            }
+        }
     }.let {
         it.errors.shouldBeEmpty()
         it.value
@@ -84,6 +94,18 @@ class SolverTest : StringSpec({
                     NoAttributes, listOf(
                         Concrete(NoAttributes, "String"),
                         Concrete(NoAttributes, "String")
+                    )
+                )
+            )
+    }
+    "solve union type" {
+        val type = ts["Either"].valueOrNull.shouldNotBeNull()
+        ts.solve(type).also { println(it) }
+            .shouldBeRight(
+                UnionType(
+                    NoAttributes, mapOf(
+                        "Left" to UnionType.ClassType("Left", listOf(Concrete(NoAttributes, "String"))),
+                        "Right" to UnionType.ClassType("Right", listOf(Concrete(NoAttributes, "String")))
                     )
                 )
             )

@@ -21,7 +21,7 @@ data class UnionType internal constructor(
     val arguments: Map<String, ClassType>,
 ) : Type {
     override val solver: Solver
-        get() = Solvers.NoDefined
+        get() = Solvers.Union
     override val serializer: TypeSerializer
         get() = TypeSerializers.UnionType
 
@@ -49,7 +49,7 @@ data class UnionType internal constructor(
             get() = NoAttributes
 
         override val solver: Solver
-            get() = Solvers.NoDefined
+            get() = Solvers.UnionClass
         override val serializer: TypeSerializer
             get() = TypeSerializers.ClassType
 
