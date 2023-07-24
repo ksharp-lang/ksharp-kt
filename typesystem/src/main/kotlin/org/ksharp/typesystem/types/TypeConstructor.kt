@@ -3,6 +3,8 @@ package org.ksharp.typesystem.types
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.solver.Solver
+import org.ksharp.typesystem.solver.Solvers
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
@@ -13,6 +15,8 @@ data class TypeConstructor(
     val name: String,
     val alias: String
 ) : Type {
+    override val solver: Solver
+        get() = Solvers.PassThrough
     override val substitution: Substitution
         get() = Substitutions.TypeConstructor
 

@@ -10,6 +10,8 @@ import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.solver.Solver
+import org.ksharp.typesystem.solver.Solvers
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
@@ -19,6 +21,7 @@ interface Type {
     val serializer: TypeSerializer
     val unification: TypeUnification
     val substitution: Substitution
+    val solver: Solver
     val compound: Boolean get() = true
     val terms: Sequence<Type>
     val attributes: Set<Attribute>
@@ -36,6 +39,8 @@ data class Concrete internal constructor(
     override val attributes: Set<Attribute>,
     val name: String,
 ) : Type {
+    override val solver: Solver
+        get() = Solvers.PassThrough
     override val serializer: TypeSerializer
         get() = TypeSerializers.Concrete
 

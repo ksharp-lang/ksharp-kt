@@ -6,6 +6,8 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.solver.Solver
+import org.ksharp.typesystem.solver.Solvers
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
@@ -18,6 +20,8 @@ data class UnionType internal constructor(
     override val attributes: Set<Attribute>,
     val arguments: Map<String, ClassType>,
 ) : Type {
+    override val solver: Solver
+        get() = Solvers.Union
     override val serializer: TypeSerializer
         get() = TypeSerializers.UnionType
 
@@ -44,6 +48,8 @@ data class UnionType internal constructor(
         override val attributes: Set<Attribute>
             get() = NoAttributes
 
+        override val solver: Solver
+            get() = Solvers.UnionClass
         override val serializer: TypeSerializer
             get() = TypeSerializers.ClassType
 

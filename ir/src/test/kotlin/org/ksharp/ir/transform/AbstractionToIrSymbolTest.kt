@@ -12,6 +12,7 @@ import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
+import org.ksharp.typesystem.solver.solve
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.toFunctionType
 
@@ -364,7 +365,10 @@ class AbstractionToIrSymbolTest : StringSpec({
                         "c",
                         listOf("a"),
                         0,
-                        listOf(internalCharType, internalCharType).toFunctionType(NoAttributes),
+                        listOf(
+                            preludeModule.typeSystem.solve(internalCharType).valueOrNull!!,
+                            preludeModule.typeSystem.solve(internalCharType).valueOrNull!!
+                        ).toFunctionType(NoAttributes),
                         IrArg(
                             setOf(CommonAttribute.Pure),
                             0,

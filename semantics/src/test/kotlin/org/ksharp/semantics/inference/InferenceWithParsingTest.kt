@@ -208,7 +208,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "isEven :: (Long -> True)",
+                "isEven :: ((Num numeric<Long>) -> True)",
                 "fn :: (Unit -> (Num numeric<Long>))"
             )
     }

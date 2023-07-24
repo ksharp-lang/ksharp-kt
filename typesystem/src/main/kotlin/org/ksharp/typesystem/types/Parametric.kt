@@ -8,6 +8,8 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.solver.Solver
+import org.ksharp.typesystem.solver.Solvers
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
@@ -24,6 +26,8 @@ data class Parameter internal constructor(
 ) : TypeVariable {
     override val attributes: Set<Attribute>
         get() = NoAttributes
+    override val solver: Solver
+        get() = Solvers.PassThrough
     override val serializer: TypeSerializer
         get() = TypeSerializers.Parameter
 
@@ -51,6 +55,8 @@ data class ParametricType internal constructor(
     val type: Type,
     val params: List<Type>
 ) : Type {
+    override val solver: Solver
+        get() = Solvers.Parametric
     override val serializer: TypeSerializer
         get() = TypeSerializers.ParametricType
 

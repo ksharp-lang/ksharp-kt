@@ -11,6 +11,7 @@ import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.solver.solve
 import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.unify
 
@@ -74,7 +75,11 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
             }
 
             is ListMatchValueNode -> Either.Left(InferenceErrorCode.BindingUsedAsGuard.new(location))
-        }.also { this.info.setInferredType(it) }
+        }.also {
+            this.info.setInferredType(it.flatMap { t ->
+                info.module.typeSystem.solve(t)
+            })
+        }
     }
 
 private fun SemanticNode<SemanticInfo>.bindTuple(type: Type, info: InferenceInfo): ErrorOrType =

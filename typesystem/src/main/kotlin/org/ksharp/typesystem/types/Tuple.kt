@@ -5,6 +5,8 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
+import org.ksharp.typesystem.solver.Solver
+import org.ksharp.typesystem.solver.Solvers
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
@@ -14,6 +16,8 @@ data class TupleType internal constructor(
     override val attributes: Set<Attribute>,
     val elements: List<Type>,
 ) : Type {
+    override val solver: Solver
+        get() = Solvers.Tuple
     override val serializer: TypeSerializer
         get() = TypeSerializers.TupleType
 
