@@ -11,6 +11,9 @@ import org.ksharp.typesystem.types.*
 class SolverTest : StringSpec({
     val ts = typeSystem {
         type(NoAttributes, "String")
+        type(NoAttributes, "Str") {
+            alias("String")
+        }
         parametricType(NoAttributes, "List") {
             parameter("a")
         }
@@ -50,6 +53,10 @@ class SolverTest : StringSpec({
     }
     "solve type alias" {
         val type = TypeAlias(NoAttributes, "String")
+        ts.solve(type).shouldBeRight(Concrete(NoAttributes, "String"))
+    }
+    "solve alias" {
+        val type = Alias("Str")
         ts.solve(type).shouldBeRight(Concrete(NoAttributes, "String"))
     }
     "solve parametric type" {
