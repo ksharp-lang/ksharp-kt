@@ -19,7 +19,7 @@ class PreludeModuleTest : StringSpec({
             .toSet()
             .shouldBe(
                 setOf(
-                    "if :: Bool -> a -> a -> a",
+                    "if :: True\n|False -> a -> a -> a",
                     "pair :: a -> b -> (Pair a b)",
                     "tupleOf :: a -> a",
                     "listOf :: a -> (List a)",
@@ -34,14 +34,14 @@ class PreludeModuleTest : StringSpec({
                     "(/) :: (Num a) -> (Num a) -> (Num a)",
                     "(**) :: (Num a) -> (Num a) -> (Num a)",
                     "(%) :: (Num a) -> (Num a) -> (Num a)",
-                    "byte :: (Num a) -> Byte",
-                    "short :: (Num a) -> Short",
-                    "int :: (Num a) -> Int",
-                    "long :: (Num a) -> Long",
-                    "bigint :: (Num a) -> BigInt",
-                    "float :: (Num a) -> Float",
-                    "double :: (Num a) -> Double",
-                    "bigdec :: (Num a) -> BigDecimal"
+                    "byte :: (Num a) -> (Num numeric<Byte>)",
+                    "short :: (Num a) -> (Num numeric<Short>)",
+                    "int :: (Num a) -> (Num numeric<Int>)",
+                    "long :: (Num a) -> (Num numeric<Long>)",
+                    "bigint :: (Num a) -> (Num numeric<BigInt>)",
+                    "float :: (Num a) -> (Num numeric<Float>)",
+                    "double :: (Num a) -> (Num numeric<Double>)",
+                    "bigdec :: (Num a) -> (Num numeric<BigDecimal>)"
                 )
             )
     }
