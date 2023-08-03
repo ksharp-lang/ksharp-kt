@@ -265,6 +265,19 @@ private fun TraitNode.checkTypesSemantics(
         }
     }
 
+private fun TypeExpression.isUnitType(): Boolean = when {
+    this is UnitTypeNode -> true
+    this is ConcreteTypeNode && this.name == "Unit" -> true
+    this is LabelTypeNode -> this.expr.isUnitType()
+    else -> false
+}
+
+private val FunctionTypeNode.arity: Int
+    get() =
+        params.size - params.first().isUnitType().let {
+            if (it) 1 else 0
+        }
+
 private fun TypeDeclarationNode.checkTypesSemantics(
     errors: ErrorCollector,
     builder: TypeSystemBuilder
@@ -276,7 +289,10 @@ private fun TypeDeclarationNode.checkTypesSemantics(
                     .FunctionDeclarationShouldBeAFunctionType
                     .new(location, "name" to name, "repr" to type.representation)
             )
-        else builder.type(annotations.checkAnnotations(true), "Decl__$name") {
+        else builder.type(
+            annotations.checkAnnotations(true),
+            "Decl__$name/${type.cast<FunctionTypeNode>().arity}"
+        ) {
             this.register(name, type.cast())
         }
     }

@@ -35,23 +35,20 @@ class ModuleInfoSerializerTest : StringSpec({
                 type(setOf(CommonAttribute.Public), "String")
             }.value,
             mapOf(
-                "sum" to listOf(
-                    functionInfo(
-                        setOf(CommonAttribute.Native, CommonAttribute.Public),
-                        "sum",
-                        listOf(newParameter(), newParameter())
-                    ), functionInfo(
-                        setOf(CommonAttribute.Public),
-                        "sum",
-                        listOf(newParameter(), newParameter(), newParameter())
-                    )
+                "sum/2" to functionInfo(
+                    setOf(CommonAttribute.Native, CommonAttribute.Public),
+                    "sum",
+                    listOf(newParameter(), newParameter())
                 ),
-                "sub" to listOf(
-                    functionInfo(
-                        setOf(CommonAttribute.Native, CommonAttribute.Public),
-                        "sub",
-                        listOf(newParameter(), newParameter())
-                    )
+                "sum/3" to functionInfo(
+                    setOf(CommonAttribute.Public),
+                    "sum",
+                    listOf(newParameter(), newParameter(), newParameter())
+                ),
+                "sub/2" to functionInfo(
+                    setOf(CommonAttribute.Native, CommonAttribute.Public),
+                    "sub",
+                    listOf(newParameter(), newParameter())
                 )
             )
         ).shouldBeSerializable()

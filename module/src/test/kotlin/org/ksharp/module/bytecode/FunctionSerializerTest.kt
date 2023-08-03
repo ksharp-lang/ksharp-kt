@@ -31,7 +31,7 @@ private fun FunctionInfo.shouldBeSerializable(): FunctionInfo {
     }
 }
 
-private fun Map<String, List<FunctionInfo>>.shouldBeSerializable() {
+private fun Map<String, FunctionInfo>.shouldBeSerializable() {
     val stringPool = listBuilder<String>()
     val buffer = newBufferWriter()
     val table = mockStringTable(stringPool)
@@ -85,19 +85,15 @@ class FunctionSerializerTest : StringSpec({
     }
     "Serialize FunctionInfoTable" {
         mapOf(
-            "sum" to listOf(
-                FunctionInfoImpl(
-                    setOf(CommonAttribute.Native, CommonAttribute.Public),
-                    "sum",
-                    listOf(newParameter(), newParameter())
-                )
+            "sum" to FunctionInfoImpl(
+                setOf(CommonAttribute.Native, CommonAttribute.Public),
+                "sum",
+                listOf(newParameter(), newParameter())
             ),
-            "sub" to listOf(
-                FunctionInfoImpl(
-                    setOf(CommonAttribute.Public),
-                    "sub",
-                    listOf(newParameter(), newParameter())
-                )
+            "sub" to FunctionInfoImpl(
+                setOf(CommonAttribute.Public),
+                "sub",
+                listOf(newParameter(), newParameter())
             )
         ).shouldBeSerializable()
     }

@@ -39,7 +39,7 @@ internal fun FunctionInfo.unify(
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
-): ErrorOrValue<FunctionType> {
+): ErrorOrType {
     return typeSystem(types.last()).flatMap { returnType ->
         types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
             typeSystem.unify(location, item1, item2)
@@ -77,19 +77,6 @@ data class InferenceInfo(
         }
     }
 
-    private fun Sequence<FunctionInfo>?.unify(
-        typeSystem: TypeSystem,
-        location: Location,
-        arguments: List<Type>
-    ): Either.Right<FunctionType>? =
-        if (this != null)
-            this.map {
-                it.infer()
-                it.unify(typeSystem, location, arguments)
-            }.firstOrNull { it.isRight }
-                    as? Either.Right<FunctionType>
-        else null
-
     fun findAppType(
         location: Location,
         appName: ApplicationName,
@@ -112,10 +99,13 @@ data class InferenceInfo(
             cache.get(funName to arguments) {
                 val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else module
                 val secondSearch = if (appName.pck == null) prelude else null
+
                 firstSearch.findFunction(name, numArguments + 1)
-                    .unify(module.typeSystem, location, arguments)
+                    ?.unify(module.typeSystem, location, arguments)
+                    ?.mapLeft { it.toString() }
                     ?: secondSearch?.findFunction(name, numArguments + 1)
-                        .unify(prelude.typeSystem, location, arguments)
+                        ?.unify(prelude.typeSystem, location, arguments)
+                        ?.mapLeft { it.toString() }
                     ?: Either.Left(functionName(name, arguments))
             }.mapLeft {
                 InferenceErrorCode.FunctionNotFound.new(

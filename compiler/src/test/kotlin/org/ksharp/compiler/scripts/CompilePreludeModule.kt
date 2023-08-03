@@ -19,7 +19,11 @@ class CompilePreludeModule : StringSpec({
             .shouldBeRight()
             .map {
                 it.toModuleInfo()
-                    .also(::println).writeTo(FileOutputStream("prelude.ksm"))
+                    .also { m ->
+                        m.functions.keys.onEach(::println)
+                    }
+                    .writeTo(FileOutputStream("prelude.ksm"))
             }
+
     }
 })

@@ -120,7 +120,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["sum"]
+            functionTable["sum/3"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -140,7 +140,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            type(setOf(CommonAttribute.Internal), "Decl__sum") {
+            type(setOf(CommonAttribute.Internal), "Decl__sum/3") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -177,7 +177,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["sum"]
+            functionTable["sum/3"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -197,7 +197,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration 2" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            type(setOf(CommonAttribute.Internal), "Decl__sum") {
+            type(setOf(CommonAttribute.Internal), "Decl__sum/3") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -234,7 +234,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["sum"]
+            functionTable["sum/3"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -277,7 +277,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["ten"]
+            functionTable["ten/1"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -296,7 +296,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration mismatch" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            type(setOf(CommonAttribute.Internal), "Decl__sum") {
+            type(setOf(CommonAttribute.Internal), "Decl__sum/2") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -331,23 +331,28 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 typeSystem
             )
         ).apply {
-            errors.shouldBe(
-                listOf(
-                    FunctionSemanticsErrorCode.WrongNumberOfParameters.new(
-                        Location.NoProvided,
-                        "name" to "sum",
-                        "fnParams" to 3,
-                        "declParams" to 2
+            errors.shouldBeEmpty()
+            functionTable["sum/3"]
+                .shouldNotBeNull()
+                .apply {
+                    first.shouldBe(
+                        Function(
+                            setOf(CommonAttribute.Public),
+                            "sum",
+                            listOf(
+                                TypeSemanticInfo(Either.Right(newParameterForTesting(0))),
+                                TypeSemanticInfo(Either.Right(newParameterForTesting(1))),
+                                TypeSemanticInfo(Either.Right(newParameterForTesting(2))),
+                            )
+                        )
                     )
-                )
-            )
-            functionTable["sum"]
-                .shouldBeNull()
+                    second.shouldBe(Location.NoProvided)
+                }
         }
     }
     "table: function with declaration mismatch 2" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            type(setOf(CommonAttribute.Internal), "Decl__sum") {
+            type(setOf(CommonAttribute.Internal), "Decl__sum/2") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -382,18 +387,22 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 typeSystem
             )
         ).apply {
-            errors.shouldBe(
-                listOf(
-                    FunctionSemanticsErrorCode.ParamMismatch.new(
-                        Location.NoProvided,
-                        "name" to "sum",
-                        "fnParam" to "()",
-                        "declParam" to "Int"
+            errors.shouldBeEmpty()
+            functionTable["sum/1"]
+                .shouldNotBeNull()
+                .apply {
+                    first.shouldBe(
+                        Function(
+                            setOf(CommonAttribute.Public),
+                            "sum",
+                            listOf(
+                                TypeSemanticInfo(typeSystem["Unit"]),
+                                TypeSemanticInfo(Either.Right(newParameterForTesting(0))),
+                            )
+                        )
                     )
-                )
-            )
-            functionTable["sum"]
-                .shouldBeNull()
+                    second.shouldBe(Location.NoProvided)
+                }
         }
     }
 }) {
@@ -1715,7 +1724,9 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             ModuleTypeSystemInfo(
                 listOf(),
                 ts
-            ), preludeModule
+            ), preludeModule.also {
+                it.functions.keys.onEach { println(it) }
+            }
         ).apply {
             this.shouldBe(info)
             this.abstractions.first()
