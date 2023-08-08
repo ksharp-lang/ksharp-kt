@@ -39,7 +39,7 @@ internal fun FunctionInfo.unify(
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
-): ErrorOrValue<FunctionType> {
+): ErrorOrType {
     return typeSystem(types.last()).flatMap { returnType ->
         types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
             typeSystem.unify(location, item1, item2)
@@ -69,26 +69,14 @@ data class InferenceInfo(
             }
         }"
 
-    private fun FunctionInfo.infer() {
+    private fun FunctionInfo.infer(): FunctionInfo {
         if (this is AbstractionFunctionInfo) {
             this.abstraction
                 .cast<SemanticNode<SemanticInfo>>()
                 .inferType(this@InferenceInfo)
         }
+        return this
     }
-
-    private fun Sequence<FunctionInfo>?.unify(
-        typeSystem: TypeSystem,
-        location: Location,
-        arguments: List<Type>
-    ): Either.Right<FunctionType>? =
-        if (this != null)
-            this.map {
-                it.infer()
-                it.unify(typeSystem, location, arguments)
-            }.firstOrNull { it.isRight }
-                    as? Either.Right<FunctionType>
-        else null
 
     fun findAppType(
         location: Location,
@@ -101,21 +89,29 @@ data class InferenceInfo(
             } else findFunctionType(location, appName, arguments)
         }
 
+    private val List<Type>.calculateNumArguments: Int
+        get() = if (size == 1 && first().representation == "Unit") 0 else size
+
     private fun findFunctionType(
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
     ): ErrorOrType =
-        arguments.size.let { numArguments ->
+        arguments.calculateNumArguments.let { numArguments ->
             val name = appName.name
             val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
             cache.get(funName to arguments) {
                 val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else module
                 val secondSearch = if (appName.pck == null) prelude else null
+
                 firstSearch.findFunction(name, numArguments + 1)
-                    .unify(module.typeSystem, location, arguments)
+                    ?.infer()
+                    ?.unify(module.typeSystem, location, arguments)
+                    ?.mapLeft { it.toString() }
                     ?: secondSearch?.findFunction(name, numArguments + 1)
-                        .unify(prelude.typeSystem, location, arguments)
+                        ?.infer()
+                        ?.unify(prelude.typeSystem, location, arguments)
+                        ?.mapLeft { it.toString() }
                     ?: Either.Left(functionName(name, arguments))
             }.mapLeft {
                 InferenceErrorCode.FunctionNotFound.new(
