@@ -143,7 +143,7 @@ private fun FunctionNode.checkSemantics(
             semanticNode,
             AbstractionSemanticInfo(
                 if (parameters.isEmpty()) {
-                    listOf(TypeSemanticInfo(typeSystem["Unit"]))
+                    emptyList()
                 } else parameters.map { symbolTable[it]!!.first }.toList(),
                 function.type.last()
             ),

@@ -69,12 +69,13 @@ data class InferenceInfo(
             }
         }"
 
-    private fun FunctionInfo.infer() {
+    private fun FunctionInfo.infer(): FunctionInfo {
         if (this is AbstractionFunctionInfo) {
             this.abstraction
                 .cast<SemanticNode<SemanticInfo>>()
                 .inferType(this@InferenceInfo)
         }
+        return this
     }
 
     fun findAppType(
@@ -88,12 +89,15 @@ data class InferenceInfo(
             } else findFunctionType(location, appName, arguments)
         }
 
+    private val List<Type>.calculateNumArguments: Int
+        get() = if (size == 1 && first().representation == "Unit") 0 else size
+
     private fun findFunctionType(
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
     ): ErrorOrType =
-        arguments.size.let { numArguments ->
+        arguments.calculateNumArguments.let { numArguments ->
             val name = appName.name
             val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
             cache.get(funName to arguments) {
@@ -101,9 +105,11 @@ data class InferenceInfo(
                 val secondSearch = if (appName.pck == null) prelude else null
 
                 firstSearch.findFunction(name, numArguments + 1)
+                    ?.infer()
                     ?.unify(module.typeSystem, location, arguments)
                     ?.mapLeft { it.toString() }
                     ?: secondSearch?.findFunction(name, numArguments + 1)
+                        ?.infer()
                         ?.unify(prelude.typeSystem, location, arguments)
                         ?.mapLeft { it.toString() }
                     ?: Either.Left(functionName(name, arguments))

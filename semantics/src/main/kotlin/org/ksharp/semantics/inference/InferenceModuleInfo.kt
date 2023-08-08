@@ -48,12 +48,13 @@ class SemanticModuleInfo(
         abstractions["$name/$numParams"]?.let {
             AbstractionFunctionInfo(it)
         }
-
 }
 
 fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(typeSystem: TypeSystem) =
     SemanticModuleInfo(
         typeSystem,
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
-            .associateBy { "${it.name}/${it.info.parameters.size}" }
+            .associateBy {
+                "${it.name}/${it.info.parameters.size + 1}"
+            }
     )

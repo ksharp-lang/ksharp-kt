@@ -465,7 +465,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                     Location.NoProvided
                                 ),
                                 AbstractionSemanticInfo(
-                                    listOf(unitTypePromise),
+                                    emptyList(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 Location.NoProvided
@@ -530,7 +530,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(unitTypePromise),
+                            emptyList(),
                             TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                         ),
                         Location.NoProvided
@@ -598,7 +598,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(unitTypePromise),
+                            emptyList(),
                             TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                         ),
                         Location.NoProvided
@@ -610,7 +610,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: operator with function declaration") {
         var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
-            type(setOf(CommonAttribute.Public), "Decl__n") {
+            type(setOf(CommonAttribute.Public), "Decl__n/1") {
                 functionType {
                     type("Unit")
                     type("Long")
@@ -674,7 +674,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(unitTypePromise),
+                            emptyList(),
                             TypeSemanticInfo(fnType!!)
                         ),
                         Location.NoProvided
@@ -686,7 +686,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: function with module name") {
         var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
-            type(setOf(CommonAttribute.Public), "Decl__n") {
+            type(setOf(CommonAttribute.Public), "Decl__n/1") {
                 functionType {
                     type("Unit")
                     type("Long")
@@ -752,7 +752,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(unitTypePromise),
+                            emptyList(),
                             TypeSemanticInfo(fnType!!)
                         ),
                         Location.NoProvided
@@ -1014,7 +1014,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(unitTypePromise), TypeSemanticInfo(
+                            emptyList(), TypeSemanticInfo(
                                 Either.Right(
                                     newParameterForTesting(0)
                                 )
@@ -1087,7 +1087,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(unitTypePromise), TypeSemanticInfo(
+                            emptyList(), TypeSemanticInfo(
                                 Either.Right(
                                     newParameterForTesting(0)
                                 )
@@ -1251,7 +1251,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(unitTypePromise), TypeSemanticInfo(
+                            emptyList(), TypeSemanticInfo(
                                 Either.Right(
                                     newParameterForTesting(0)
                                 )
@@ -1377,7 +1377,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             Location.NoProvided
                         ),
                         AbstractionSemanticInfo(
-                            listOf(unitTypePromise), TypeSemanticInfo(
+                            emptyList(), TypeSemanticInfo(
                                 Either.Right(
                                     newParameterForTesting(0)
                                 )
@@ -1530,7 +1530,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             location = Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(unitTypePromise),
+                            emptyList(),
                             returnType = typeParameterForTesting(0)
                         ),
                         location = Location.NoProvided
@@ -1630,7 +1630,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                             ), info = EmptySemanticInfo(), Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(unitTypePromise),
+                            emptyList(),
                             returnType = typeParameterForTesting(0)
                         ),
                         location = Location.NoProvided
