@@ -65,14 +65,15 @@ data class TraitFunctionNode(
 }
 
 data class TraitFunctionsNode(
-    val functions: List<TraitFunctionNode>
+    val definitions: List<TraitFunctionNode>,
+    val functions: List<FunctionNode>,
 ) : NodeData() {
     override val location: Location
         get() = Location.NoProvided
     override val locations: NodeLocations
         get() = NoLocationsDefined
     override val children: Sequence<NodeData>
-        get() = functions.asSequence()
+        get() = definitions.asSequence()
 }
 
 data class TraitNode(

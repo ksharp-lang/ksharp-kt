@@ -289,7 +289,7 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
             l.thenTraitFunction(emitLocations)
         }.build {
             (it.filter { f -> f !is TraitFunctionNode } +
-                    TraitFunctionsNode(it.filterIsInstance<TraitFunctionNode>().cast()))
+                    TraitFunctionsNode(it.filterIsInstance<TraitFunctionNode>().cast(), emptyList()))
                 .createTypeNode(
                     internal,
                     emitLocations

@@ -333,7 +333,7 @@ class ParserLocationsTest : StringSpec({
             .emitLocations(true) {
                 it.consumeTypeDeclaration()
             }.map {
-                it.value.cast<TraitNode>().definition.functions.map {
+                it.value.cast<TraitNode>().definition.definitions.map {
                     it.locations
                 }
             }
