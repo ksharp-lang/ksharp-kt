@@ -13,9 +13,12 @@ private val FunctionInfo.representation: String
 
 class PreludeModuleTest : StringSpec({
     "Test prelude module" {
-        preludeModule.functions.values
-            .flatten()
-            .map { it.representation }
+        preludeModule.functions
+            .values
+            .map {
+                println(it.representation)
+                it.representation
+            }
             .toSet()
             .shouldBe(
                 setOf(

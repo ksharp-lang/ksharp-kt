@@ -16,7 +16,7 @@ sealed interface InferenceModuleInfo {
 
     val typeSystem: TypeSystem
 
-    fun findFunction(name: String, numParams: Int): Sequence<FunctionInfo>?
+    fun findFunction(name: String, numParams: Int): FunctionInfo?
 
 }
 
@@ -36,29 +36,25 @@ class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
 
     override val typeSystem: TypeSystem = moduleInfo.typeSystem
 
-    override fun findFunction(name: String, numParams: Int): Sequence<FunctionInfo>? =
-        moduleInfo.functions[name]?.let { fns ->
-            fns.asSequence().filter { it.types.size == numParams }
-        }
-
+    override fun findFunction(name: String, numParams: Int): FunctionInfo? =
+        moduleInfo.functions["$name/$numParams"]
 }
 
 class SemanticModuleInfo(
     override val typeSystem: TypeSystem,
-    private val abstractions: Map<String, List<AbstractionNode<AbstractionSemanticInfo>>>
+    private val abstractions: Map<String, AbstractionNode<AbstractionSemanticInfo>>
 ) : InferenceModuleInfo {
-    override fun findFunction(name: String, numParams: Int): Sequence<FunctionInfo>? =
-        abstractions[name]?.let { fns ->
-            fns.asSequence().filter { (it.info.parameters.size + 1) == numParams }
-                .map {
-                    AbstractionFunctionInfo(it)
-                }
+    override fun findFunction(name: String, numParams: Int): FunctionInfo? =
+        abstractions["$name/$numParams"]?.let {
+            AbstractionFunctionInfo(it)
         }
-
 }
 
 fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(typeSystem: TypeSystem) =
     SemanticModuleInfo(
         typeSystem,
-        this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>().groupBy { it.name }
+        this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
+            .associateBy {
+                "${it.name}/${it.info.parameters.size + 1}"
+            }
     )

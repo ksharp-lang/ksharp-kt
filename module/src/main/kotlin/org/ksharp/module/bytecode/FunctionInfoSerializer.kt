@@ -1,8 +1,6 @@
 package org.ksharp.module.bytecode
 
-import org.ksharp.common.add
 import org.ksharp.common.io.*
-import org.ksharp.common.listBuilder
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 import org.ksharp.module.FunctionInfo
@@ -31,14 +29,7 @@ fun BufferView.readFunctionInfo(table: BinaryTableView): FunctionInfo {
     return FunctionInfoImpl(attributes, name, types)
 }
 
-fun List<FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) {
-    buffer.add(size)
-    forEach {
-        it.writeTo(buffer, table)
-    }
-}
-
-fun Map<String, List<FunctionInfo>>.writeTo(buffer: BufferWriter, table: BinaryTable) {
+fun Map<String, FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     buffer.add(size)
     forEach { (name, function) ->
         buffer.add(table.add(name))
@@ -46,29 +37,22 @@ fun Map<String, List<FunctionInfo>>.writeTo(buffer: BufferWriter, table: BinaryT
     }
 }
 
-fun BufferView.readFunctionList(table: BinaryTableView): Pair<Int, List<FunctionInfo>> {
-    val size = readInt(0)
-    val result = listBuilder<FunctionInfo>()
-    var position = 4
-    repeat(size) {
-        val functionBuffer = bufferFrom(position)
-        position += functionBuffer.readInt(0)
-        result.add(functionBuffer.readFunctionInfo(table))
-    }
-    return position to result.build()
+fun BufferView.readFunctionList(table: BinaryTableView): Pair<Int, FunctionInfo> {
+    val position = readInt(0)
+    return position to readFunctionInfo(table)
 }
 
-fun BufferView.readFunctionInfoTable(table: BinaryTableView): Map<String, List<FunctionInfo>> {
+fun BufferView.readFunctionInfoTable(table: BinaryTableView): Map<String, FunctionInfo> {
     val paramsSize = readInt(0)
-    val types = mapBuilder<String, List<FunctionInfo>>()
+    val types = mapBuilder<String, FunctionInfo>()
     var position = 4
     repeat(paramsSize) {
         val typeBuffer = bufferFrom(position)
         val key = table[typeBuffer.readInt(0)]
-        val (newPosition, functions) = typeBuffer.bufferFrom(4).readFunctionList(table)
+        val (newPosition, function) = typeBuffer.bufferFrom(4).readFunctionList(table)
         types.put(
             key,
-            functions
+            function
         )
         position += newPosition + 4
     }

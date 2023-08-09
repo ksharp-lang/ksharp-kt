@@ -74,6 +74,9 @@ internal fun String.checkFunctionName(location: Location): ErrorOrValue<Unit> {
     else Either.Left(FunctionSemanticsErrorCode.InvalidFunctionName.new(location, "name" to this))
 }
 
+private val FunctionNode.nameWithArity: String
+    get() = "$name/${parameters.size + 1}"
+
 internal fun ModuleNode.buildFunctionTable(
     errors: ErrorCollector,
     typeSystem: TypeSystem
@@ -82,7 +85,7 @@ internal fun ModuleNode.buildFunctionTable(
         val listBuilder = listBuilder<FunctionNode>()
         functions.forEach { f ->
             errors.collect(f.name.checkFunctionName(location)).map {
-                val type = typeSystem["Decl__${f.name}"].valueOrNull
+                val type = typeSystem["Decl__${f.nameWithArity}"].valueOrNull
                 errors.collect(type.let { it?.typePromise(f) ?: Either.Right(f.typePromise(typeSystem)) })
                     .map {
                         val visibility = if (f.pub) CommonAttribute.Public else CommonAttribute.Internal
@@ -95,7 +98,7 @@ internal fun ModuleNode.buildFunctionTable(
                             }
                         } else setOf<Attribute>(visibility)
                         table.register(
-                            f.name,
+                            f.nameWithArity,
                             Function(
                                 attributes,
                                 f.name,
@@ -140,7 +143,7 @@ private fun FunctionNode.checkSemantics(
             semanticNode,
             AbstractionSemanticInfo(
                 if (parameters.isEmpty()) {
-                    listOf(TypeSemanticInfo(typeSystem["Unit"]))
+                    emptyList()
                 } else parameters.map { symbolTable[it]!!.first }.toList(),
                 function.type.last()
             ),
@@ -154,7 +157,7 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
     val abstractions = functionNodes
         .asSequence()
         .map {
-            it.checkSemantics(errors, functionTable[it.name]!!.first, moduleTypeSystemInfo.typeSystem)
+            it.checkSemantics(errors, functionTable[it.nameWithArity]!!.first, moduleTypeSystemInfo.typeSystem)
         }
         .filter { it.isRight }
         .map { (it as Either.Right).value }

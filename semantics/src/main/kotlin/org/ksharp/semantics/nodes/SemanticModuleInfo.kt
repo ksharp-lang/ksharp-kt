@@ -2,6 +2,7 @@ package org.ksharp.semantics.nodes
 
 import org.ksharp.common.Error
 import org.ksharp.common.cast
+import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.functionInfo
 import org.ksharp.nodes.ModuleNode
@@ -35,12 +36,17 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
     )
 }
 
+private val FunctionInfo.nameWithArity: String
+    get() = if (types.first().representation == "Unit") {
+        "$name/${types.size - 1}"
+    } else "$name/${types.size}"
+
 private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
     this.asSequence().map {
         val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
         val type = semanticInfo.getInferredType(it.location).valueOrNull!!.cast<FunctionType>()
         functionInfo(it.attributes, it.name, type.arguments)
-    }.groupBy { it.name }
+    }.associateBy { it.nameWithArity }
 
 
 fun SemanticModuleInfo.toModuleInfo(): ModuleInfo =

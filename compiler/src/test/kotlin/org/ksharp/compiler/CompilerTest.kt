@@ -44,7 +44,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    parameters = listOf(TypeSemanticInfo(it.typeSystem["Unit"])),
+                                    parameters = emptyList(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(
@@ -79,7 +79,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    parameters = listOf(TypeSemanticInfo(it.typeSystem["Unit"])),
+                                    parameters = emptyList(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(
@@ -112,7 +112,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    parameters = listOf(TypeSemanticInfo(it.typeSystem["Unit"])),
+                                    parameters = emptyList(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(
@@ -145,7 +145,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    parameters = listOf(TypeSemanticInfo(it.typeSystem["Unit"])),
+                                    parameters = emptyList(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(

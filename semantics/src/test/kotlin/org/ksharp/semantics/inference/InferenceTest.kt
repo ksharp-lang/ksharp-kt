@@ -28,19 +28,15 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
         listOf(),
         typeSystem = typeSystem,
         functions = mapOf(
-            "(test+)" to listOf(
-                functionInfo(
-                    setOf(CommonAttribute.Public),
-                    "(test+)",
-                    listOf(a, a, a)
-                )
+            "(test+)/3" to functionInfo(
+                setOf(CommonAttribute.Public),
+                "(test+)",
+                listOf(a, a, a)
             ),
-            "(test*)" to listOf(
-                functionInfo(
-                    setOf(CommonAttribute.Public),
-                    "(test+)",
-                    listOf(intType, intType, intType)
-                )
+            "(test*)/3" to functionInfo(
+                setOf(CommonAttribute.Public),
+                "(test+)",
+                listOf(intType, intType, intType)
             )
         )
     )
