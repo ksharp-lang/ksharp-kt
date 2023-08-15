@@ -942,7 +942,7 @@ class TypeParserTest : StringSpec({
                                 ),
                                 Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             )
-                        )
+                        ), emptyList()
                     ),
                     Location.NoProvided,
                     TraitNodeLocations(
@@ -1000,7 +1000,7 @@ class TypeParserTest : StringSpec({
                                 Location.NoProvided,
                                 TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             )
-                        )
+                        ), emptyList()
                     ),
                     Location.NoProvided,
                     TraitNodeLocations(
@@ -1055,7 +1055,7 @@ class TypeParserTest : StringSpec({
                                 ),
                                 Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             )
-                        )
+                        ), emptyList()
                     ),
                     Location.NoProvided,
                     TraitNodeLocations(
@@ -1097,7 +1097,7 @@ class TypeParserTest : StringSpec({
                                 ),
                                 Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             )
-                        )
+                        ), emptyList()
                     ),
                     Location.NoProvided,
                     TraitNodeLocations(

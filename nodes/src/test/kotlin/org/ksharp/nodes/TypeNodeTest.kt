@@ -39,10 +39,10 @@ class TypeNodeTest : StringSpec({
                     testLocation,
                     TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                 )
-            )
+            ), emptyList()
         ).node.apply {
             cast<TraitFunctionsNode>().apply {
-                functions.shouldBe(
+                definitions.shouldBe(
                     listOf(
                         TraitFunctionNode(
                             "sum",
@@ -75,7 +75,7 @@ class TypeNodeTest : StringSpec({
             emptyList(),
             "Num",
             listOf("a"),
-            TraitFunctionsNode(listOf()),
+            TraitFunctionsNode(listOf(), emptyList()),
             testLocation,
             TraitNodeLocations(
                 Location.NoProvided,
@@ -90,7 +90,7 @@ class TypeNodeTest : StringSpec({
                 annotations.shouldBeEmpty()
                 name.shouldBe("Num")
                 params.shouldBe(listOf("a"))
-                definition.shouldBe(TraitFunctionsNode(listOf()))
+                definition.shouldBe(TraitFunctionsNode(listOf(), emptyList()))
                 location.shouldBe(testLocation)
                 locations.shouldBe(
                     TraitNodeLocations(
@@ -106,7 +106,7 @@ class TypeNodeTest : StringSpec({
             children.toList().shouldBe(
                 listOf(
                     Node(
-                        this, testLocation, TraitFunctionsNode(listOf())
+                        this, testLocation, TraitFunctionsNode(listOf(), emptyList())
                     )
                 )
             )

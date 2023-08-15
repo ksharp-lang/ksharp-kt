@@ -103,7 +103,7 @@ fun TraitNode.semanticTokens(encoder: TokenEncoder) {
 }
 
 fun TraitFunctionsNode.semanticTokens(encoder: TokenEncoder) {
-    functions.forEach { it.visit(encoder) }
+    definitions.forEach { it.visit(encoder) }
 }
 
 fun TraitFunctionNode.semanticTokens(encoder: TokenEncoder) {

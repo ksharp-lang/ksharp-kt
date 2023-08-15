@@ -244,7 +244,7 @@ private fun TraitNode.checkTypesSemantics(
             name,
             params.first()
         ) {
-            definition.functions.forEach { f ->
+            definition.definitions.forEach { f ->
                 errors.collect(f.checkParams(f.name, f.location, params.asSequence()))
                     .let { paramsCheckResult ->
                         paramsCheckResult.mapLeft {
