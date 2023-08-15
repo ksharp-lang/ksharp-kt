@@ -230,7 +230,7 @@ private fun KSharpLexerIterator.consumeTypeExpr(emitLocations: Boolean): KSharpP
     }
 
 private fun KSharpConsumeResult.thenTraitFunction(emitLocations: Boolean): KSharpParserResult =
-    thenLowerCaseWord()
+    thenFunctionName()
         .then(KSharpTokenType.Operator, "::", false)
         .thenWithIndentationOffset(IndentationOffsetType.StartOffset, OffsetType.Optional) { l ->
             l.consume {
@@ -278,6 +278,15 @@ private fun List<Any>.createTypeNode(
     return builder(internalLoc, keywordLoc, name, params, paramsLocations.build(), assignLoc, definition)
 }
 
+private fun KSharpConsumeResult.thenTraitFunctionOrDeclaration(emitLocations: Boolean): KSharpParserResult =
+    consume {
+        it.lookAHead { l ->
+            l.collect().thenTraitFunction(emitLocations).asLookAHeadResult()
+        }.or { l -> l.consumeFunction() }
+    }.build {
+        it.first().cast()
+    }
+
 private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
     thenKeyword("trait", false)
         .thenUpperCaseWord()
@@ -286,10 +295,13 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
                 .build { param -> param.last() }
         }.thenAssignOperator()
         .thenRepeatingIndentation(true) { l ->
-            l.thenTraitFunction(emitLocations)
+            l.thenTraitFunctionOrDeclaration(emitLocations)
         }.build {
-            (it.filter { f -> f !is TraitFunctionNode } +
-                    TraitFunctionsNode(it.filterIsInstance<TraitFunctionNode>().cast(), emptyList()))
+            (it.filter { f -> !(f is TraitFunctionNode || f is FunctionNode) } +
+                    TraitFunctionsNode(
+                        it.filterIsInstance<TraitFunctionNode>().cast(),
+                        it.filterIsInstance<FunctionNode>().cast()
+                    ))
                 .createTypeNode(
                     internal,
                     emitLocations

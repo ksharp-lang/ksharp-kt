@@ -339,7 +339,7 @@ class ModuleParserTest : StringSpec({
                                         Location.NoProvided,
                                         TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                                     )
-                                )
+                                ), emptyList()
                             ),
                             Location.NoProvided,
                             TraitNodeLocations(
@@ -405,7 +405,7 @@ class ModuleParserTest : StringSpec({
                                         Location.NoProvided,
                                         TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                                     )
-                                )
+                                ), emptyList()
                             ),
                             Location.NoProvided,
                             TraitNodeLocations(
