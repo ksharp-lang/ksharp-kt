@@ -16,9 +16,10 @@ private fun KSharpConsumeResult.thenImplFunction(): KSharpParserResult =
 
 fun KSharpLexerIterator.consumeImpl(): KSharpParserResult =
     consumeKeyword("impl", false)
-        .also {
+        .map {
             //remove all annotations, impl doesn't support annotations
             state.value.annotations.build()
+            it
         }
         .thenUpperCaseWord()
         .thenKeyword("for", false)
