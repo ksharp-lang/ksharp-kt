@@ -10,6 +10,7 @@ data class KSharpLexerState(
     val indentationOffset: IndentationOffset = IndentationOffset(),
     val lineOffset: LineOffset = LineOffset(),
     val emitLocations: Boolean = false,
+    val traitAnnotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val annotations: ResettableListBuilder<AnnotationNode> = resettableListBuilder(),
     val consumeLabels: Boolean = false,
     val collapseDotOperatorRule: Boolean = true,
