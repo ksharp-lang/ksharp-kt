@@ -283,12 +283,22 @@ private fun KSharpConsumeResult.thenTraitFunctionOrDeclaration(emitLocations: Bo
         it.lookAHead { l ->
             l.collect().thenTraitFunction(emitLocations).asLookAHeadResult()
         }.or { l -> l.consumeFunction() }
+            .or { l -> l.consumeAnnotation() }
     }.build {
         it.first().cast()
     }
 
 private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
     thenKeyword("trait", false)
+        .map {
+            val annotations = it.tokens.state.value.annotations.build()
+            if (annotations != null) {
+                it.tokens.state.value.traitAnnotations.update { list ->
+                    list.addAll(annotations)
+                }
+            }
+            it
+        }
         .thenUpperCaseWord()
         .thenLoop {
             it.consumeLowerCaseWord()
@@ -318,9 +328,11 @@ private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: B
                     )
                 }
         }.map {
+            //clear inner annotations
+            it.remainTokens.state.value.annotations.build()
             ParserValue(
                 it.value.cast<TraitNode>()
-                    .copy(annotations = it.remainTokens.state.value.annotations.build()),
+                    .copy(annotations = it.remainTokens.state.value.traitAnnotations.build()),
                 it.remainTokens
             )
         }
@@ -389,6 +401,7 @@ fun KSharpLexerIterator.consumeTypeDeclaration(): KSharpParserResult =
     }.or {
         it.collect().consumeType(false, state.value.emitLocations)
     }
+
 
 internal fun KSharpLexerIterator.consumeFunctionTypeDeclaration(): KSharpParserResult =
     lookAHead {

@@ -74,6 +74,7 @@ private fun KSharpLexerIterator.consumeModuleNodesLogic(): KSharpConsumeResult =
         then.consumeImport()
             .or { l -> l.consumeFunctionTypeDeclaration() }
             .or { l -> l.consumeTypeDeclaration() }
+            .or { l -> l.consumeImpl() }
             .or { l -> l.consumeAnnotation() }
             .or { l -> l.consumeFunction() }
             .consumeInvalidTokens(state.value)

@@ -233,4 +233,254 @@ class TraitParsingTest : StringSpec({
                 )
             )
     }
+    "Parsing a trait with default impl on a method with annotations" {
+        """
+            trait Num a =
+                sum :: a -> a -> a
+                prod :: a -> a -> a
+                
+                @native(lang="java")
+                sum a b = a + b
+        """.trimIndent()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TraitNode(
+                    false,
+                    null,
+                    "Num",
+                    params = listOf("a"),
+                    definition = TraitFunctionsNode(
+                        definitions = listOf(
+                            TraitFunctionNode(
+                                name = "sum",
+                                type = FunctionTypeNode(
+                                    params = listOf(
+                                        ParameterTypeNode(
+                                            name = "a",
+                                            location = Location.NoProvided
+                                        ),
+                                        ParameterTypeNode(
+                                            name = "a",
+                                            location = Location.NoProvided
+                                        ),
+                                        ParameterTypeNode(name = "a", location = Location.NoProvided)
+                                    ),
+                                    location = Location.NoProvided,
+                                    locations = FunctionTypeNodeLocations(separators = listOf())
+                                ),
+                                location = Location.NoProvided,
+                                locations = TraitFunctionNodeLocation(
+                                    name = Location.NoProvided,
+                                    operator = Location.NoProvided
+                                )
+                            ), TraitFunctionNode(
+                                name = "prod",
+                                type = FunctionTypeNode(
+                                    params = listOf(
+                                        ParameterTypeNode(
+                                            name = "a",
+                                            location = Location.NoProvided
+                                        ), ParameterTypeNode(
+                                            name = "a",
+                                            location = Location.NoProvided
+                                        ), ParameterTypeNode(name = "a", location = Location.NoProvided)
+                                    ),
+                                    location = Location.NoProvided,
+                                    locations = FunctionTypeNodeLocations(separators = listOf())
+                                ),
+                                location = Location.NoProvided,
+                                locations = TraitFunctionNodeLocation(
+                                    name = Location.NoProvided,
+                                    operator = Location.NoProvided
+                                )
+                            )
+                        ), functions = listOf(
+                            FunctionNode(
+                                native = false,
+                                pub = false,
+                                annotations = listOf(
+                                    AnnotationNode(
+                                        name = "native",
+                                        attrs = mapOf("lang" to "java"),
+                                        location = Location.NoProvided,
+                                        locations = AnnotationNodeLocations(
+                                            altLocation = Location.NoProvided,
+                                            name = Location.NoProvided,
+                                            attrs = emptyList()
+                                        )
+                                    )
+                                ),
+                                name = "sum",
+                                parameters = listOf("a", "b"),
+                                expression = OperatorNode(
+                                    category = "Operator10",
+                                    operator = "+",
+                                    left = FunctionCallNode(
+                                        name = "a",
+                                        type = FunctionType.Function,
+                                        arguments = listOf(),
+                                        location = Location.NoProvided
+                                    ),
+                                    right = FunctionCallNode(
+                                        name = "b",
+                                        type = FunctionType.Function,
+                                        arguments = listOf(),
+                                        location = Location.NoProvided
+                                    ),
+                                    location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided,
+                                locations = FunctionNodeLocations(
+                                    nativeLocation = Location.NoProvided,
+                                    pubLocation = Location.NoProvided,
+                                    name = Location.NoProvided,
+                                    parameters = listOf(),
+                                    assignOperator = Location.NoProvided
+                                )
+                            )
+                        )
+                    ),
+                    location = Location.NoProvided,
+                    locations = TraitNodeLocations(
+                        internalLocation = Location.NoProvided,
+                        traitLocation = Location.NoProvided,
+                        name = Location.NoProvided,
+                        params = listOf(),
+                        assignOperatorLocation = Location.NoProvided
+                    )
+                )
+            )
+    }
+    "Parsing a trait with inner annotations" {
+        """
+            trait Num a =
+                sum :: a -> a -> a
+                prod :: a -> a -> a
+                
+                @native(lang="java")
+        """.trimIndent()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TraitNode(
+                    false,
+                    null,
+                    "Num",
+                    params = listOf("a"),
+                    definition = TraitFunctionsNode(
+                        definitions = listOf(
+                            TraitFunctionNode(
+                                name = "sum",
+                                type = FunctionTypeNode(
+                                    params = listOf(
+                                        ParameterTypeNode(
+                                            name = "a",
+                                            location = Location.NoProvided
+                                        ),
+                                        ParameterTypeNode(
+                                            name = "a",
+                                            location = Location.NoProvided
+                                        ),
+                                        ParameterTypeNode(name = "a", location = Location.NoProvided)
+                                    ),
+                                    location = Location.NoProvided,
+                                    locations = FunctionTypeNodeLocations(separators = listOf())
+                                ),
+                                location = Location.NoProvided,
+                                locations = TraitFunctionNodeLocation(
+                                    name = Location.NoProvided,
+                                    operator = Location.NoProvided
+                                )
+                            ), TraitFunctionNode(
+                                name = "prod",
+                                type = FunctionTypeNode(
+                                    params = listOf(
+                                        ParameterTypeNode(
+                                            name = "a",
+                                            location = Location.NoProvided
+                                        ), ParameterTypeNode(
+                                            name = "a",
+                                            location = Location.NoProvided
+                                        ), ParameterTypeNode(name = "a", location = Location.NoProvided)
+                                    ),
+                                    location = Location.NoProvided,
+                                    locations = FunctionTypeNodeLocations(separators = listOf())
+                                ),
+                                location = Location.NoProvided,
+                                locations = TraitFunctionNodeLocation(
+                                    name = Location.NoProvided,
+                                    operator = Location.NoProvided
+                                )
+                            )
+                        ), functions = listOf()
+                    ),
+                    location = Location.NoProvided,
+                    locations = TraitNodeLocations(
+                        internalLocation = Location.NoProvided,
+                        traitLocation = Location.NoProvided,
+                        name = Location.NoProvided,
+                        params = listOf(),
+                        assignOperatorLocation = Location.NoProvided
+                    )
+                )
+            )
+    }
+    "Parsing a impl" {
+        """
+            impl Eq for Num =
+                (=) a b = a == b
+                (!=) a b = a != b
+        """.trimIndent()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeImpl()
+            .map { it.value }
+            .shouldBeRight(
+                ImplNode(
+                    traitName = "Eq",
+                    forName = "Num",
+                    functions = listOf(
+                        FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = null,
+                            name = "(=)",
+                            parameters = listOf("a", "b"),
+                            expression = OperatorNode(
+                                category = "Operator7", operator = "==",
+                                left = FunctionCallNode(
+                                    name = "a", type = FunctionType.Function, arguments = emptyList(),
+                                    location = Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "b", type = FunctionType.Function,
+                                    arguments = emptyList(),
+                                    location = Location.NoProvided
+                                ), location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = emptyList(),
+                                assignOperator = Location.NoProvided
+                            )
+                        )
+                    ),
+                    location = Location.NoProvided,
+                    locations = ImplNodeLocations(
+                        traitName = Location.NoProvided,
+                        forName = Location.NoProvided,
+                        forKeyword = Location.NoProvided,
+                        assignOperator = Location.NoProvided
+                    )
+                )
+            )
+    }
 })
