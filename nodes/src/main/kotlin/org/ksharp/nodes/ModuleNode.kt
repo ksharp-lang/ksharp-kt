@@ -7,7 +7,9 @@ import org.ksharp.common.cast
 data class ModuleNode(
     val name: String,
     val imports: List<ImportNode>,
-    val types: List<NodeData>,
+    val types: List<TypeNode>,
+    val traits: List<TraitNode>,
+    val impls: List<ImplNode>,
     val typeDeclarations: List<TypeDeclarationNode>,
     val functions: List<FunctionNode>,
     val errors: List<Error>,
@@ -21,6 +23,8 @@ data class ModuleNode(
         get() = sequenceOf(
             imports.asSequence(),
             types.asSequence(),
+            traits.asSequence(),
+            impls.asSequence(),
             typeDeclarations.asSequence(),
             functions.asSequence()
         ).flatten().cast()
