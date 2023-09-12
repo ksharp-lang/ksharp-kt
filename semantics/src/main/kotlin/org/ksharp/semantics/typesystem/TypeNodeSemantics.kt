@@ -319,6 +319,7 @@ fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemI
     val errors = ErrorCollector()
     val typeSystem = sequenceOf(
         types.asSequence(),
+        traits.asSequence(),
         typeDeclarations.asSequence()
     ).flatten().checkTypesSemantics(errors, preludeModule)
     errors.collectAll(typeSystem.errors)

@@ -96,13 +96,15 @@ private fun KSharpLexerIterator.consumeModuleNodesLogic(): KSharpConsumeResult =
 fun Sequence<NodeData>.toModuleNode(name: String): ModuleNode {
     val location = firstOrNull()?.cast<NodeData>()?.location ?: Location.NoProvided
     val imports = filterIsInstance<ImportNode>().toList()
-    val types = filter { n -> n is TypeNode || n is TraitNode }.toList()
+    val types = filterIsInstance<TypeNode>().toList()
+    val traits = filterIsInstance<TraitNode>().toList()
+    val impls = filterIsInstance<ImplNode>().toList()
     val typeDeclarations = filterIsInstance<TypeDeclarationNode>().toList()
     val functions = filterIsInstance<FunctionNode>().toList()
     val errors = asSequence().filterIsInstance<InvalidNode>().map {
         it.error
     }.toList()
-    return ModuleNode(name, imports, types, typeDeclarations, functions, errors, location)
+    return ModuleNode(name, imports, types, traits, impls, typeDeclarations, functions, errors, location)
 }
 
 fun KSharpLexerIterator.consumeModule(name: String): ParserResult<ModuleNode, KSharpLexerState> =

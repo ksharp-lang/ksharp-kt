@@ -14,22 +14,51 @@ import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.Type
 
-private fun module(vararg types: NodeData) =
+private fun module(types: List<TypeNode>, traits: List<TraitNode>) =
     ModuleNode(
         "module",
         listOf(),
-        listOf(*types),
+        types,
+        traits,
+        emptyList(),
         listOf(),
         listOf(),
         listOf(),
         Location.NoProvided
     )
 
+private fun module(vararg types: TypeNode) =
+    ModuleNode(
+        "module",
+        listOf(),
+        listOf(*types),
+        emptyList(), emptyList(),
+        listOf(),
+        listOf(),
+        listOf(),
+        Location.NoProvided
+    )
+
+private fun module(vararg traits: TraitNode) =
+    ModuleNode(
+        "module",
+        listOf(),
+        emptyList(),
+        listOf(*traits),
+        emptyList(),
+        listOf(),
+        listOf(),
+        listOf(),
+        Location.NoProvided
+    )
+
+
 private fun moduleWithDeclarations(vararg declarations: TypeDeclarationNode) =
     ModuleNode(
         "module",
         listOf(),
         listOf(),
+        emptyList(), emptyList(),
         listOf(*declarations),
         listOf(),
         listOf(),
@@ -1019,93 +1048,97 @@ class TypeSystemSemanticsTest : StringSpec({
     }
     "Interceptor types semantics" {
         module(
-            TraitNode(
-                false,
-                null,
-                "EqTest",
-                listOf("a"),
-                TraitFunctionsNode(
-                    listOf(
-                        TraitFunctionNode(
-                            "eq",
-                            FunctionTypeNode(
-                                listOf(
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    ConcreteTypeNode("Bool", Location.NoProvided)
-                                ),
-                                Location.NoProvided,
-                                FunctionTypeNodeLocations(listOf())
-                            ),
-                            Location.NoProvided,
-                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
-                        )
-                    ), emptyList()
-                ),
-                Location.NoProvided,
-                TraitNodeLocations(
-                    Location.NoProvided,
-                    Location.NoProvided,
-                    Location.NoProvided,
+            listOf(
+                TypeNode(
+                    false,
+                    null,
+                    "Number",
                     listOf(),
-                    Location.NoProvided
+                    IntersectionTypeNode(
+                        listOf(
+                            ConcreteTypeNode(
+                                "EqTest", Location.NoProvided
+                            ),
+                            ConcreteTypeNode(
+                                "OrdTest", Location.NoProvided
+                            )
+                        ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
+                    ),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             ),
-            TraitNode(
-                false,
-                null,
-                "OrdTest",
-                listOf("a"),
-                TraitFunctionsNode(
-                    listOf(
-                        TraitFunctionNode(
-                            "eq",
-                            FunctionTypeNode(
-                                listOf(
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    ConcreteTypeNode("Int", Location.NoProvided)
+            listOf(
+                TraitNode(
+                    false,
+                    null,
+                    "EqTest",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "eq",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ConcreteTypeNode("Bool", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided,
+                                    FunctionTypeNodeLocations(listOf())
                                 ),
                                 Location.NoProvided,
-                                FunctionTypeNodeLocations(listOf())
-                            ),
-                            Location.NoProvided,
-                            TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
-                        )
-                    ), emptyList()
+                                TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
+                            )
+                        ), emptyList()
+                    ),
+                    Location.NoProvided,
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 ),
-                Location.NoProvided,
-                TraitNodeLocations(
+                TraitNode(
+                    false,
+                    null,
+                    "OrdTest",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "eq",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ConcreteTypeNode("Int", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided,
+                                    FunctionTypeNodeLocations(listOf())
+                                ),
+                                Location.NoProvided,
+                                TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
+                            )
+                        ), emptyList()
+                    ),
                     Location.NoProvided,
-                    Location.NoProvided,
-                    Location.NoProvided,
-                    listOf(),
-                    Location.NoProvided
-                )
-            ),
-            TypeNode(
-                false,
-                null,
-                "Number",
-                listOf(),
-                IntersectionTypeNode(
-                    listOf(
-                        ConcreteTypeNode(
-                            "EqTest", Location.NoProvided
-                        ),
-                        ConcreteTypeNode(
-                            "OrdTest", Location.NoProvided
-                        )
-                    ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 ),
-                Location.NoProvided,
-                TypeNodeLocations(
-                    Location.NoProvided,
-                    Location.NoProvided,
-                    Location.NoProvided,
-                    listOf(),
-                    Location.NoProvided
-                )
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
@@ -1114,90 +1147,94 @@ class TypeSystemSemanticsTest : StringSpec({
     }
     "Interceptor types semantics invalid type arm" {
         module(
-            TraitNode(
-                false,
-                null,
-                "EqTest",
-                listOf("a"),
-                TraitFunctionsNode(
-                    listOf(
-                        TraitFunctionNode(
-                            "eq",
-                            FunctionTypeNode(
-                                listOf(
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    ConcreteTypeNode("Bool", Location.NoProvided)
-                                ),
-                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
+            listOf(
+                TypeNode(
+                    false,
+                    null,
+                    "Number",
+                    listOf("a"),
+                    IntersectionTypeNode(
+                        listOf(
+                            ConcreteTypeNode(
+                                "EqTest", Location.NoProvided
                             ),
-                            Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
-                        )
-                    ), emptyList()
-                ),
-                Location.NoProvided,
-                TraitNodeLocations(
+                            ConcreteTypeNode(
+                                "OrdTest", Location.NoProvided
+                            ),
+                            ParameterTypeNode("a", Location.NoProvided),
+                        ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
+                    ),
                     Location.NoProvided,
-                    Location.NoProvided,
-                    Location.NoProvided,
-                    listOf(),
-                    Location.NoProvided
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 )
             ),
-            TraitNode(
-                false,
-                null,
-                "OrdTest",
-                listOf("a"),
-                TraitFunctionsNode(
-                    listOf(
-                        TraitFunctionNode(
-                            "eq",
-                            FunctionTypeNode(
-                                listOf(
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    ParameterTypeNode("a", Location.NoProvided),
-                                    ConcreteTypeNode("Int", Location.NoProvided)
+            listOf(
+                TraitNode(
+                    false,
+                    null,
+                    "EqTest",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "eq",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ConcreteTypeNode("Bool", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided, FunctionTypeNodeLocations(listOf())
                                 ),
-                                Location.NoProvided, FunctionTypeNodeLocations(listOf())
-                            ),
-                            Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
-                        )
-                    ), emptyList()
+                                Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
+                            )
+                        ), emptyList()
+                    ),
+                    Location.NoProvided,
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 ),
-                Location.NoProvided,
-                TraitNodeLocations(
+                TraitNode(
+                    false,
+                    null,
+                    "OrdTest",
+                    listOf("a"),
+                    TraitFunctionsNode(
+                        listOf(
+                            TraitFunctionNode(
+                                "eq",
+                                FunctionTypeNode(
+                                    listOf(
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ParameterTypeNode("a", Location.NoProvided),
+                                        ConcreteTypeNode("Int", Location.NoProvided)
+                                    ),
+                                    Location.NoProvided, FunctionTypeNodeLocations(listOf())
+                                ),
+                                Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
+                            )
+                        ), emptyList()
+                    ),
                     Location.NoProvided,
-                    Location.NoProvided,
-                    Location.NoProvided,
-                    listOf(),
-                    Location.NoProvided
-                )
-            ),
-            TypeNode(
-                false,
-                null,
-                "Number",
-                listOf("a"),
-                IntersectionTypeNode(
-                    listOf(
-                        ConcreteTypeNode(
-                            "EqTest", Location.NoProvided
-                        ),
-                        ConcreteTypeNode(
-                            "OrdTest", Location.NoProvided
-                        ),
-                        ParameterTypeNode("a", Location.NoProvided),
-                    ), Location.NoProvided, IntersectionTypeNodeLocations(listOf())
+                    TraitNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
                 ),
-                Location.NoProvided,
-                TypeNodeLocations(
-                    Location.NoProvided,
-                    Location.NoProvided,
-                    Location.NoProvided,
-                    listOf(),
-                    Location.NoProvided
-                )
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBe(

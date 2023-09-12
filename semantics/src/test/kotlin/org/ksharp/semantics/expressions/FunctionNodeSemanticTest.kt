@@ -35,7 +35,15 @@ private fun typeParameterForTesting(id: Int) = TypeSemanticInfo(Either.Right(new
 
 private fun module(vararg functions: FunctionNode) =
     ModuleNode(
-        "module", listOf(), listOf(), listOf(), listOf(*functions), listOf(), Location.NoProvided
+        "module",
+        listOf(),
+        listOf(),
+        emptyList(),
+        emptyList(),
+        listOf(),
+        listOf(*functions),
+        listOf(),
+        Location.NoProvided
     )
 
 
