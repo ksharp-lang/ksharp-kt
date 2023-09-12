@@ -30,7 +30,7 @@ class ModuleParserTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ), listOf(), listOf(), listOf(), listOf(), Location.NoProvided
+        ), listOf(), emptyList(), emptyList(), listOf(), listOf(), listOf(), Location.NoProvided
     )
     val expectedModuleWithLocations: (String) -> ModuleNode = {
         ModuleNode(
@@ -93,6 +93,8 @@ class ModuleParserTest : StringSpec({
             ),
             listOf(),
             listOf(),
+            emptyList(),
+            emptyList(),
             listOf(),
             listOf(),
             Location(Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 6))
@@ -153,7 +155,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), listOf(), listOf(), Location.NoProvided
+                    ), listOf(), emptyList(), emptyList(), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -164,7 +166,7 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", listOf(), listOf(), listOf(
+                    "File", listOf(), listOf(), emptyList(), emptyList(), listOf(
                         TypeDeclarationNode(
                             null,
                             "sum",
@@ -192,7 +194,7 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", listOf(), listOf(), listOf(
+                    "File", listOf(), listOf(), emptyList(), emptyList(), listOf(
                         TypeDeclarationNode(
                             listOf(
                                 AnnotationNode(
@@ -241,7 +243,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), listOf(), Location.NoProvided
+                    ), emptyList(), emptyList(), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -290,7 +292,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), listOf(), Location.NoProvided
+                    ), emptyList(), emptyList(), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -318,7 +320,8 @@ class ModuleParserTest : StringSpec({
                                 listOf(),
                                 Location.NoProvided
                             )
-                        ),
+                        )
+                    ), listOf(
                         TraitNode(
                             false,
                             null,
@@ -350,7 +353,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), listOf(), Location.NoProvided
+                    ), emptyList(), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -379,7 +382,9 @@ class ModuleParserTest : StringSpec({
                                 listOf(),
                                 Location.NoProvided
                             )
-                        ),
+                        )
+                    ),
+                    listOf(
                         TraitNode(
                             false,
                             listOf(
@@ -416,7 +421,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(), listOf(), listOf(), Location.NoProvided
+                    ), emptyList(), listOf(), listOf(), listOf(), Location.NoProvided
                 )
             )
     }
@@ -427,7 +432,7 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", listOf(), listOf(), listOf(), listOf(
+                    "File", listOf(), emptyList(), emptyList(), listOf(), listOf(), listOf(
                         FunctionNode(
                             false,
                             false,
@@ -463,7 +468,7 @@ class ModuleParserTest : StringSpec({
             .parseModule("File", false)
             .shouldBeRight(
                 ModuleNode(
-                    "File", listOf(), listOf(), listOf(), listOf(
+                    "File", listOf(), listOf(), emptyList(), emptyList(), listOf(), listOf(
                         FunctionNode(
                             false,
                             false,
@@ -537,7 +542,7 @@ class ModuleParserTest : StringSpec({
                                 Location.NoProvided
                             )
                         )
-                    ), listOf(
+                    ), emptyList(), emptyList(), listOf(
                         TypeDeclarationNode(
                             null,
                             "sum",
@@ -591,6 +596,7 @@ class ModuleParserTest : StringSpec({
                     "File",
                     listOf(),
                     listOf(),
+                    emptyList(), emptyList(),
                     listOf(),
                     listOf(
                         FunctionNode(
@@ -673,6 +679,7 @@ class ModuleParserTest : StringSpec({
                     "File",
                     listOf(),
                     listOf(),
+                    emptyList(), emptyList(),
                     listOf(),
                     listOf(
                         FunctionNode(
@@ -751,6 +758,7 @@ class ModuleParserTest : StringSpec({
                             )
                         )
                     ),
+                    emptyList(), emptyList(),
                     listOf(),
                     listOf(),
                     listOf(),

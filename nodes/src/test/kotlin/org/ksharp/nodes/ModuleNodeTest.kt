@@ -36,6 +36,8 @@ class ModuleNodeTest : StringSpec({
                     )
                 )
             ),
+            emptyList(),
+            emptyList(),
             listOf(
                 TypeDeclarationNode(
                     null, "sum", listOf(), ConcreteTypeNode("Int", testLocation), testLocation,
