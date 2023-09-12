@@ -16,6 +16,7 @@ import org.ksharp.typesystem.types.FunctionType
 data class SemanticModuleInfo(
     val name: String,
     val errors: List<Error>,
+    val impls: Map<String, Set<String>>,
     val typeSystem: TypeSystem,
     val abstractions: List<AbstractionNode<SemanticInfo>>
 )
@@ -31,6 +32,7 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
             else name
         },
         errors + typeSemantics.errors + moduleSemantics.errors,
+        emptyMap(),
         typeSemantics.typeSystem,
         moduleSemantics.abstractions
     )

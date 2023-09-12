@@ -27,7 +27,9 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     TraitWithInvalidMethod("Trait '{name}' has invalid methods"),
     InterceptorTypeWithInvalidType("Interceptor type '{name}' has invalid type arm"),
     ParametricTypeShouldStartWithName("Parametric type should start with a name not a parameter. e.g Num a"),
-    FunctionDeclarationShouldBeAFunctionType("Function declaration '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int. parsed as {repr}")
+    FunctionDeclarationShouldBeAFunctionType("Function declaration '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int. parsed as {repr}"),
+    TraitMethodShouldBeAFunctionType("Trait method '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int."),
+    DuplicateTraitMethod("Duplicate trait method '{name}'")
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -231,39 +233,63 @@ private fun TypeNode.checkTypesSemantics(
     builder.register(this)
 }
 
+private fun TraitFunctionsNode.checkTraitFunctions(): ErrorOrValue<Boolean> {
+    val traitMethods = mutableSetOf<String>()
+    return definitions.map {
+        if (it.type !is FunctionTypeNode) {
+            return@map Either.Left(
+                TypeSemanticsErrorCode.TraitMethodShouldBeAFunctionType.new(location, "name" to it.name)
+            )
+        }
+        val funcType = it.type.cast<FunctionTypeNode>()
+        val methodArity = "${it.name}/${funcType.arity}"
+        if (traitMethods.add(methodArity)) {
+            Either.Right(methodArity)
+        } else Either.Left(
+            TypeSemanticsErrorCode.DuplicateTraitMethod.new(location, "name" to methodArity)
+        )
+    }.unwrap()
+        .map { true }
+}
+
 private fun TraitNode.checkTypesSemantics(
     errors: ErrorCollector,
     builder: TypeSystemBuilder
-) = (if (params.size != 1) Either.Left(
-    TypeSemanticsErrorCode.TraitShouldHaveJustOneParameter.new(location, "name" to name)
-) else Either.Right(true))
-    .let { errors.collect(it) }
-    .map {
-        builder.trait(
-            annotations.checkAnnotations(internal),
-            name,
-            params.first()
-        ) {
-            definition.definitions.forEach { f ->
-                errors.collect(f.checkParams(f.name, f.location, params.asSequence()))
-                    .let { paramsCheckResult ->
-                        paramsCheckResult.mapLeft {
-                            error(TypeSemanticsErrorCode.TraitWithInvalidMethod.new(location, "name" to name))
-                        }
-                        paramsCheckResult.map {
-                            method(f.name) {
-                                f.type
-                                    .cast<FunctionTypeNode>()
-                                    .params
-                                    .forEach {
-                                        register(it as NodeData)
-                                    }
-                            }
+) = when {
+    params.size != 1 -> Either.Left(
+        TypeSemanticsErrorCode.TraitShouldHaveJustOneParameter.new(location, "name" to name)
+    )
+
+    else -> definition.checkTraitFunctions()
+}.mapLeft {
+    errors.collect(it)
+    it
+}.map {
+    builder.trait(
+        annotations.checkAnnotations(internal),
+        name,
+        params.first()
+    ) {
+        definition.definitions.forEach { f ->
+            errors.collect(f.checkParams(f.name, f.location, params.asSequence()))
+                .let { paramsCheckResult ->
+                    paramsCheckResult.mapLeft {
+                        error(TypeSemanticsErrorCode.TraitWithInvalidMethod.new(location, "name" to name))
+                    }
+                    paramsCheckResult.map {
+                        method(f.name) {
+                            f.type
+                                .cast<FunctionTypeNode>()
+                                .params
+                                .forEach {
+                                    register(it as NodeData)
+                                }
                         }
                     }
-            }
+                }
         }
     }
+}
 
 private fun TypeExpression.isUnitType(): Boolean = when {
     this is UnitTypeNode -> true

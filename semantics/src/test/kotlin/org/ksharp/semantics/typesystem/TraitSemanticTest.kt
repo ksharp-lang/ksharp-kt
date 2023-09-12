@@ -1,6 +1,8 @@
 package org.ksharp.semantics.typesystem
 
 import io.kotest.core.spec.style.StringSpec
+import org.ksharp.common.Location
+import org.ksharp.common.new
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 
@@ -12,8 +14,22 @@ class TraitSemanticTest : StringSpec({
              sum :: a -> a -> a
         """.trimIndent()
             .toSemanticModuleInfo()
-            .mapLeft {
-                println(it)
-            }.shouldBeLeft(emptyList<Error>())
+            .shouldBeLeft(
+                listOf(
+                    TypeSemanticsErrorCode.DuplicateTraitMethod.new(Location.NoProvided, "name" to "sum/3")
+                )
+            )
+    }
+    "Trait method not a function type" {
+        """
+            trait Sum a =
+             sum :: Map String Int
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    TypeSemanticsErrorCode.TraitMethodShouldBeAFunctionType.new(Location.NoProvided, "name" to "sum")
+                )
+            )
     }
 })
