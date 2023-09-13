@@ -5,6 +5,7 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.expressions.checkFunctionName
+import org.ksharp.semantics.expressions.nameWithArity
 import org.ksharp.semantics.expressions.toAttributes
 import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
 import org.ksharp.typesystem.*
@@ -235,20 +236,32 @@ private fun TypeNode.checkTypesSemantics(
 
 private fun TraitFunctionsNode.checkTraitFunctions(): ErrorOrValue<Boolean> {
     val traitMethods = mutableSetOf<String>()
-    return definitions.map {
-        if (it.type !is FunctionTypeNode) {
-            return@map Either.Left(
-                TypeSemanticsErrorCode.TraitMethodShouldBeAFunctionType.new(location, "name" to it.name)
+    val traitImplMethods = mutableSetOf<String>()
+    return sequenceOf(
+        definitions.map {
+            if (it.type !is FunctionTypeNode) {
+                return@map Either.Left(
+                    TypeSemanticsErrorCode.TraitMethodShouldBeAFunctionType.new(location, "name" to it.name)
+                )
+            }
+            val funcType = it.type.cast<FunctionTypeNode>()
+            val methodArity = "${it.name}/${funcType.arity}"
+            if (traitMethods.add(methodArity)) {
+                Either.Right(methodArity)
+            } else Either.Left(
+                TypeSemanticsErrorCode.DuplicateTraitMethod.new(location, "name" to methodArity)
             )
-        }
-        val funcType = it.type.cast<FunctionTypeNode>()
-        val methodArity = "${it.name}/${funcType.arity}"
-        if (traitMethods.add(methodArity)) {
-            Either.Right(methodArity)
-        } else Either.Left(
-            TypeSemanticsErrorCode.DuplicateTraitMethod.new(location, "name" to methodArity)
-        )
-    }.unwrap()
+        },
+        functions.map {
+            val methodArity = it.nameWithArity
+            if (traitImplMethods.add(methodArity)) {
+                Either.Right(methodArity)
+            } else Either.Left(
+                TypeSemanticsErrorCode.DuplicateTraitMethod.new(location, "name" to methodArity)
+            )
+        },
+    ).flatten()
+        .unwrap()
         .map { true }
 }
 

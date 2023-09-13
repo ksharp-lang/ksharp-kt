@@ -32,4 +32,20 @@ class TraitSemanticTest : StringSpec({
                 )
             )
     }
+
+    "Trait with two functions with same arity and name" {
+        """
+            trait Sum a =
+             sum :: a -> a -> a
+             
+             sum a b = a + b
+             sum a b = a + b
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    TypeSemanticsErrorCode.DuplicateTraitMethod.new(Location.NoProvided, "name" to "sum/3")
+                )
+            )
+    }
 })
