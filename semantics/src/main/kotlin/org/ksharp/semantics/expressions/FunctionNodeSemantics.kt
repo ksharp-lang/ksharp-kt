@@ -74,7 +74,7 @@ internal fun String.checkFunctionName(location: Location): ErrorOrValue<Unit> {
     else Either.Left(FunctionSemanticsErrorCode.InvalidFunctionName.new(location, "name" to this))
 }
 
-private val FunctionNode.nameWithArity: String
+val FunctionNode.nameWithArity: String
     get() = "$name/${parameters.size + 1}"
 
 internal fun ModuleNode.buildFunctionTable(

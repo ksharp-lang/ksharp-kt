@@ -13,6 +13,7 @@ fun semanticModuleInfoAction(moduleName: String, builder: ActionsGraphBuilder<Se
         SemanticModuleInfo(
             moduleName,
             listOf(),
+            emptyMap(),
             preludeModule.typeSystem,
             listOf()
         )
