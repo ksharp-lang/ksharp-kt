@@ -5,6 +5,7 @@ import org.ksharp.common.cast
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.functionInfo
+import org.ksharp.module.traitInfo
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.expressions.checkFunctionSemantics
@@ -12,12 +13,14 @@ import org.ksharp.semantics.expressions.checkInferenceSemantics
 import org.ksharp.semantics.typesystem.checkTypesSemantics
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.TraitType
 
 data class SemanticModuleInfo(
     val name: String,
     val errors: List<Error>,
-    val impls: Map<String, Set<String>>,
     val typeSystem: TypeSystem,
+    val traits: List<TraitType>,
+    val traitsAbstractions: Map<String, List<AbstractionNode<SemanticInfo>>>,
     val abstractions: List<AbstractionNode<SemanticInfo>>
 )
 
@@ -32,9 +35,10 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
             else name
         },
         errors + typeSemantics.errors + moduleSemantics.errors,
-        emptyMap(),
         typeSemantics.typeSystem,
-        moduleSemantics.abstractions
+        typeSemantics.traits,
+        moduleSemantics.traitsAbstractions,
+        moduleSemantics.abstractions,
     )
 }
 
@@ -51,9 +55,15 @@ private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
     }.associateBy { it.nameWithArity }
 
 
-fun SemanticModuleInfo.toModuleInfo(): ModuleInfo =
-    ModuleInfo(
+fun SemanticModuleInfo.toModuleInfo(): ModuleInfo {
+    return ModuleInfo(
         dependencies = listOf(),
         typeSystem = typeSystem,
-        functions = abstractions.toFunctionInfoMap()
+        functions = abstractions.toFunctionInfoMap(),
+        traits = traits.associate {
+            it.name to traitInfo(it.name, it.methods.values.associate { method ->
+                "${method.name}/${method.arguments.size}" to method
+            }, (traitsAbstractions[it.name] ?: emptyList()).toFunctionInfoMap())
+        }
     )
+}
