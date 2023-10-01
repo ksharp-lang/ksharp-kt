@@ -37,7 +37,7 @@ fun Map<String, FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) 
     }
 }
 
-fun BufferView.readFunctionList(table: BinaryTableView): Pair<Int, FunctionInfo> {
+fun BufferView.readFunctionInfoAndPosition(table: BinaryTableView): Pair<Int, FunctionInfo> {
     val position = readInt(0)
     return position to readFunctionInfo(table)
 }
@@ -49,7 +49,7 @@ fun BufferView.readFunctionInfoTable(table: BinaryTableView): Map<String, Functi
     repeat(paramsSize) {
         val typeBuffer = bufferFrom(position)
         val key = table[typeBuffer.readInt(0)]
-        val (newPosition, function) = typeBuffer.bufferFrom(4).readFunctionList(table)
+        val (newPosition, function) = typeBuffer.bufferFrom(4).readFunctionInfoAndPosition(table)
         types.put(
             key,
             function

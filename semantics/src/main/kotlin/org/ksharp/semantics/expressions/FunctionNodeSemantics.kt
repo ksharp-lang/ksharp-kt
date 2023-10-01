@@ -164,7 +164,8 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
         .toList()
     return ModuleFunctionInfo(
         errors = errors.build(),
-        abstractions = abstractions
+        abstractions = abstractions,
+        traitsAbstractions = emptyMap() //TODO: build the traits for the module
     )
 }
 
@@ -189,6 +190,7 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     }
     return ModuleFunctionInfo(
         errors = errors.build(),
-        abstractions = abstractions
+        abstractions = abstractions,
+        traitsAbstractions = emptyMap() //TODO: build the traits for the module
     )
 }

@@ -5,5 +5,6 @@ import org.ksharp.nodes.semantic.AbstractionNode
 
 data class ModuleFunctionInfo(
     val errors: List<Error>,
-    val abstractions: List<AbstractionNode<SemanticInfo>>
+    val abstractions: List<AbstractionNode<SemanticInfo>>,
+    val traitsAbstractions: Map<String, List<AbstractionNode<SemanticInfo>>>,
 )

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.io.bufferView
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.functionInfo
+import org.ksharp.module.traitInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.newParameter
@@ -50,7 +51,21 @@ class ModuleInfoSerializerTest : StringSpec({
                     "sub",
                     listOf(newParameter(), newParameter())
                 )
-            )
+            ),
+            mapOf(
+                "Eq" to traitInfo(
+                    "Eq",
+                    mapOf(
+                        "sum/2" to newParameter(),
+                    ), mapOf(
+                        "sum/2" to functionInfo(
+                            setOf(CommonAttribute.Native, CommonAttribute.Public),
+                            "sum",
+                            listOf(newParameter(), newParameter())
+                        )
+                    )
+                )
+            ),
         ).shouldBeSerializable()
     }
 })
