@@ -5,6 +5,7 @@ import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
+import org.ksharp.test.shouldBeRight
 
 class TraitSemanticTest : StringSpec({
     "Not allow duplicate functions. (Same name and arity)" {
@@ -45,6 +46,25 @@ class TraitSemanticTest : StringSpec({
             .shouldBeLeft(
                 listOf(
                     TypeSemanticsErrorCode.DuplicateTraitMethod.new(Location.NoProvided, "name" to "sum/3")
+                )
+            )
+    }
+
+    "Valid trait with default implementation" {
+        """
+            trait Sum a =
+             sum :: a -> a -> a
+
+             sum a b = a + b
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .map { it.traits.map { t -> t.representation } }
+            .shouldBeRight(
+                listOf(
+                    """
+                    trait Sum a =
+                        sum :: a -> a -> a
+                    """.trimIndent()
                 )
             )
     }
