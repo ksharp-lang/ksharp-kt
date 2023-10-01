@@ -61,9 +61,11 @@ fun SemanticModuleInfo.toModuleInfo(): ModuleInfo {
         typeSystem = typeSystem,
         functions = abstractions.toFunctionInfoMap(),
         traits = traits.associate {
-            it.name to traitInfo(it.name, it.methods.values.associate { method ->
-                "${method.name}/${method.arguments.size}" to method
-            }, (traitsAbstractions[it.name] ?: emptyList()).toFunctionInfoMap())
+            it.name to traitInfo(
+                it.name,
+                it.methods.values.associateBy { method -> "${method.name}/${method.arguments.size}" },
+                (traitsAbstractions[it.name] ?: emptyList()).toFunctionInfoMap()
+            )
         }
     )
 }
