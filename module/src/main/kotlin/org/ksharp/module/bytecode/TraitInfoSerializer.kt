@@ -17,7 +17,8 @@ fun TraitInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
     }
     newBufferWriter().apply {
         add(0) // 0
-        add(table.add(name))
+        add(definitionsTable.size) // 4
+        add(table.add(name)) // 8
         definitionsTable.transferTo(this)
         functionTable.transferTo(this)
         set(0, size)
@@ -26,9 +27,9 @@ fun TraitInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
 }
 
 fun BufferView.readTraitInfo(table: BinaryTableView): TraitInfo {
-    val name = table[readInt(4)]
-    val definitions = bufferFrom(8).readMapOfTypes(table)
-    val functions = bufferFrom(8 + readInt(8)).readFunctionInfoTable(table)
+    val name = table[readInt(8)]
+    val definitions = bufferFrom(12).readMapOfTypes(table)
+    val functions = bufferFrom(12 + readInt(4)).readFunctionInfoTable(table)
     return TraitInfoImpl(name, definitions, functions)
 }
 
@@ -51,9 +52,9 @@ fun BufferView.readTraitInfoTable(table: BinaryTableView): Map<String, TraitInfo
     val types = mapBuilder<String, TraitInfo>()
     var position = 4
     repeat(paramsSize) {
-        val typeBuffer = bufferFrom(position)
-        val key = table[typeBuffer.readInt(0)]
-        val (newPosition, function) = typeBuffer.bufferFrom(4).readTraitInfoAndPosition(table)
+        val traitBuffer = bufferFrom(position)
+        val key = table[traitBuffer.readInt(0)]
+        val (newPosition, function) = traitBuffer.bufferFrom(4).readTraitInfoAndPosition(table)
         types.put(
             key,
             function

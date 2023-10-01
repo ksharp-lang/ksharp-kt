@@ -42,11 +42,12 @@ fun ModuleInfo.writeTo(output: OutputStream) {
         traits.writeTo(this, stringPool)
     }
     val header = newBufferWriter()
-    header.add(stringPool.size)
-    header.add(dependencies.size)
-    header.add(typeSystem.size)
-    header.add(functionTable.size)
-    header.add(traitTable.size)
+    header.add(stringPool.size) // 0
+    header.add(dependencies.size) // 4
+    header.add(typeSystem.size) // 8
+    header.add(functionTable.size) // 12
+    header.add(traitTable.size) // 16
+
     header.transferTo(output)
     stringPool.writeTo(output)
     dependencies.transferTo(output)
