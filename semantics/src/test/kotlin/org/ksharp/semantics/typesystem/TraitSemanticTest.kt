@@ -22,7 +22,7 @@ class TraitSemanticTest : StringSpec({
                 )
             )
     }
-    
+
     "Trait method not a function type" {
         """
             trait Sum a =
@@ -79,6 +79,25 @@ class TraitSemanticTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .map { it.traits.map { t -> t.representation } }
+            .shouldBeRight(
+                listOf(
+                    """
+                    trait Sum a =
+                        sum :: a -> a -> a
+                    """.trimIndent()
+                )
+            )
+    }
+
+    "Invalid trait function" {
+        """
+            trait Sum a =
+              sum :: a -> a -> a
+              sum a b = a + b
+              mul a b = a * b
+        """.trimIndent()
+            .also { println(it) }
+            .toSemanticModuleInfo()
             .shouldBeRight(
                 listOf(
                     """

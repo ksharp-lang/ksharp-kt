@@ -20,7 +20,6 @@ import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.TraitType
-import org.ksharp.typesystem.types.Type
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
@@ -63,9 +62,6 @@ private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<Type
         TypeSemanticInfo(Either.Right(it))
     })
 }
-
-private fun Type.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> =
-    this.cast<FunctionType>().typePromise(node)
 
 internal fun String.checkFunctionName(location: Location): ErrorOrValue<Unit> {
     val ix = this.indexOf(".")
@@ -179,7 +175,7 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
                 it to traitType
             } else null
         }.associate {
-            val traitContext = TraitSemanticContext(typeSystem, it.second);
+            val traitContext = TraitSemanticContext(typeSystem, it.second)
             val trait = it.first
             trait.name to trait.definition.functions.checkFunctionSemantics(errors, traitContext)
         }
