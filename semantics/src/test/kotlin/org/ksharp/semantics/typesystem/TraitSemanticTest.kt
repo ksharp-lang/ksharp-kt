@@ -6,6 +6,7 @@ import org.ksharp.common.new
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.TypeSystemErrorCode
 
 class TraitSemanticTest : StringSpec({
     "Not allow duplicate functions. (Same name and arity)" {
@@ -21,6 +22,7 @@ class TraitSemanticTest : StringSpec({
                 )
             )
     }
+    
     "Trait method not a function type" {
         """
             trait Sum a =
@@ -46,6 +48,24 @@ class TraitSemanticTest : StringSpec({
             .shouldBeLeft(
                 listOf(
                     TypeSemanticsErrorCode.DuplicateTraitMethod.new(Location.NoProvided, "name" to "sum/3")
+                )
+            )
+    }
+
+    "Duplicate traits" {
+        """
+            trait Sum a =
+              sum :: a -> a -> a
+              sum a b = a + b
+            
+            trait Sum a =
+              sum2 :: a -> a -> a
+              sum2 a b = a + b
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "Sum")
                 )
             )
     }

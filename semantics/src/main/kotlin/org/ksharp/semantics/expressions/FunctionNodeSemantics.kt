@@ -12,15 +12,14 @@ import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.inference.inferType
 import org.ksharp.semantics.inference.toSemanticModuleInfo
 import org.ksharp.semantics.nodes.*
+import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
-import org.ksharp.semantics.scopes.FunctionTable
-import org.ksharp.semantics.scopes.FunctionTableBuilder
-import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
@@ -77,16 +76,16 @@ internal fun String.checkFunctionName(location: Location): ErrorOrValue<Unit> {
 val FunctionNode.nameWithArity: String
     get() = "$name/${parameters.size + 1}"
 
-internal fun ModuleNode.buildFunctionTable(
+internal fun List<FunctionNode>.buildFunctionTable(
     errors: ErrorCollector,
-    typeSystem: TypeSystem
+    context: SemanticContext
 ): Pair<FunctionTable, List<FunctionNode>> =
     FunctionTableBuilder(errors).let { table ->
         val listBuilder = listBuilder<FunctionNode>()
-        functions.forEach { f ->
-            errors.collect(f.name.checkFunctionName(location)).map {
-                val type = typeSystem["Decl__${f.nameWithArity}"].valueOrNull
-                errors.collect(type.let { it?.typePromise(f) ?: Either.Right(f.typePromise(typeSystem)) })
+        this.forEach { f ->
+            errors.collect(f.name.checkFunctionName(f.location)).map {
+                val type = context.findFunctionType(f.nameWithArity)
+                errors.collect(type.let { it?.typePromise(f) ?: Either.Right(f.typePromise(context.typeSystem)) })
                     .map {
                         val visibility = if (f.pub) CommonAttribute.Public else CommonAttribute.Internal
                         val attributes = if (type != null) {
@@ -151,21 +150,43 @@ private fun FunctionNode.checkSemantics(
         )
     }
 
-fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
-    val errors = ErrorCollector()
-    val (functionTable, functionNodes) = buildFunctionTable(errors, moduleTypeSystemInfo.typeSystem)
+private fun List<FunctionNode>.checkFunctionSemantics(
+    errors: ErrorCollector,
+    context: SemanticContext
+): List<AbstractionNode<SemanticInfo>> {
+    val (functionTable, functionNodes) = buildFunctionTable(errors, context)
     val abstractions = functionNodes
         .asSequence()
         .map {
-            it.checkSemantics(errors, functionTable[it.nameWithArity]!!.first, moduleTypeSystemInfo.typeSystem)
+            it.checkSemantics(errors, functionTable[it.nameWithArity]!!.first, context.typeSystem)
         }
         .filter { it.isRight }
         .map { (it as Either.Right).value }
         .toList()
+    return abstractions
+}
+
+fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
+    val errors = ErrorCollector()
+    val typeSystem = moduleTypeSystemInfo.typeSystem
+    val moduleContext = TypeSystemSemanticContext(typeSystem)
+    val functionAbstractions = functions.checkFunctionSemantics(errors, moduleContext)
+    val traitAbstractions = traits.asSequence()
+        .filter { it.definition.functions.isNotEmpty() }
+        .mapNotNull {
+            val traitType = typeSystem[it.name].valueOrNull as? TraitType
+            if (traitType != null) {
+                it to traitType
+            } else null
+        }.associate {
+            val traitContext = TraitSemanticContext(typeSystem, it.second);
+            val trait = it.first
+            trait.name to trait.definition.functions.checkFunctionSemantics(errors, traitContext)
+        }
     return ModuleFunctionInfo(
-        errors = errors.build(),
-        abstractions = abstractions,
-        traitsAbstractions = emptyMap() //TODO: build the traits for the module
+        errors.build(),
+        functionAbstractions,
+        traitAbstractions
     )
 }
 
