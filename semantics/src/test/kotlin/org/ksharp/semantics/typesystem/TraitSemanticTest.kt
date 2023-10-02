@@ -3,6 +3,7 @@ package org.ksharp.semantics.typesystem
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.common.new
+import org.ksharp.semantics.scopes.TableErrorCode
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -94,16 +95,12 @@ class TraitSemanticTest : StringSpec({
             trait Sum a =
               sum :: a -> a -> a
               sum a b = a + b
-              mul a b = a * b
+              mul a a = a * b
         """.trimIndent()
-            .also { println(it) }
             .toSemanticModuleInfo()
-            .shouldBeRight(
+            .shouldBeLeft(
                 listOf(
-                    """
-                    trait Sum a =
-                        sum :: a -> a -> a
-                    """.trimIndent()
+                    TableErrorCode.AlreadyDefined.new(Location.NoProvided, "classifier" to "Variable", "name" to "a"),
                 )
             )
     }

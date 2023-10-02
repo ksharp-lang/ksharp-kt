@@ -81,7 +81,7 @@ internal fun List<FunctionNode>.buildFunctionTable(
         this.forEach { f ->
             errors.collect(f.name.checkFunctionName(f.location)).map {
                 val type = context.findFunctionType(f.nameWithArity)
-                errors.collect(type.let { it?.typePromise(f) ?: Either.Right(f.typePromise(context.typeSystem)) })
+                errors.collect(type?.typePromise(f) ?: Either.Right(f.typePromise(context.typeSystem)))
                     .map {
                         val visibility = if (f.pub) CommonAttribute.Public else CommonAttribute.Internal
                         val attributes = if (type != null) {
