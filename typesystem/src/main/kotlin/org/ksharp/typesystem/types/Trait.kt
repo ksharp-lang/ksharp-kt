@@ -1,8 +1,7 @@
 package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.TypeItemBuilder
-import org.ksharp.typesystem.TypeSystemBuilder
+import org.ksharp.typesystem.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
@@ -12,8 +11,6 @@ import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
-import org.ksharp.typesystem.validateFunctionName
-import org.ksharp.typesystem.validateTypeParamName
 
 typealias TraitTypeFactoryBuilder = TraitTypeFactory.() -> Unit
 
@@ -82,6 +79,7 @@ data class TraitType internal constructor(
 }
 
 class TraitTypeFactory(
+    private val traitName: String,
     private val factory: TypeItemBuilder
 ) {
     private var result: ErrorOrValue<MapBuilder<String, TraitType.MethodType>> = Either.Right(mapBuilder())
@@ -89,15 +87,24 @@ class TraitTypeFactory(
     fun method(name: String, arguments: ParametricTypeFactoryBuilder = {}) {
         result = result.flatMap { params ->
             validateFunctionName(name).flatMap {
-                ParametricTypeFactory(factory).apply(arguments).build().map { args ->
+                ParametricTypeFactory(factory).apply(arguments).build().flatMap traitMethod@{ args ->
+                    val traitMethodName = "${name}/${args.size}"
+                    if (params.containsKey(traitMethodName) == true) {
+                        return@traitMethod Either.Left(
+                            TypeSystemErrorCode.DuplicateTraitMethod.new(
+                                "name" to traitMethodName,
+                                "trait" to traitName
+                            )
+                        )
+                    }
                     params.put(
-                        "${name}/${args.size}", TraitType.MethodType(
+                        traitMethodName, TraitType.MethodType(
                             factory.attributes,
                             name,
                             args
                         )
                     )
-                    params
+                    Either.Right(params)
                 }
             }
         }
@@ -118,7 +125,7 @@ fun TypeSystemBuilder.trait(
 ) =
     item(attributes, name) {
         validateTypeParamName(paramName).flatMap {
-            TraitTypeFactory(this).apply(factory).build().map {
+            TraitTypeFactory(name, this).apply(factory).build().map {
                 TraitType(attributes, name, paramName, it)
             }
         }

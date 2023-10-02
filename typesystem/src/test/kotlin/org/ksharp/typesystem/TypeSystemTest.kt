@@ -720,6 +720,18 @@ class TypeSystemTest : ShouldSpec({
                         parameter("a")
                     }
                 }
+                trait(setOf(CommonAttribute.Public), "Num2", "a") {
+                    method("(+)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                    method("(+)") {
+                        parameter("a")
+                        parameter("a")
+                        parameter("a")
+                    }
+                }
                 trait(setOf(CommonAttribute.Public), "num", "a") {
                     method("(+)") {
                         parameter("a")
@@ -783,6 +795,7 @@ class TypeSystemTest : ShouldSpec({
                 should("Shouldn't have errors") {
                     errors.shouldBe(
                         listOf(
+                            TypeSystemErrorCode.DuplicateTraitMethod.new("name" to "(+)/3", "trait" to "Num2"),
                             TypeSystemErrorCode.TypeNameShouldStartWithUpperCase.new("name" to "num"),
                             TypeSystemErrorCode.TypeParamNameShouldStartWithLowerCase.new("name" to "F"),
                             TypeSystemErrorCode.FunctionNameShouldntHaveSpaces.new("name" to "map ing"),
