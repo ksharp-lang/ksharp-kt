@@ -4,6 +4,7 @@ import org.ksharp.common.*
 import org.ksharp.typesystem.types.Type
 
 enum class TypeSystemErrorCode(override val description: String) : ErrorCode {
+    DuplicateTraitMethod("Duplicate method '{name}' in trait '{trait}'"),
     InvalidName("Name should contains [a-zA-Z0-9_]: {name}"),
     NoParametrizedType("Type '{type}' is not parametrized"),
     ParametricTypeWithoutParameters("Parametric Type '{type}' without parameters"),

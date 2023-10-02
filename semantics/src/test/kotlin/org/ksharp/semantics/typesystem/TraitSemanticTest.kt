@@ -3,9 +3,11 @@ package org.ksharp.semantics.typesystem
 import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.common.new
+import org.ksharp.semantics.scopes.TableErrorCode
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.TypeSystemErrorCode
 
 class TraitSemanticTest : StringSpec({
     "Not allow duplicate functions. (Same name and arity)" {
@@ -21,6 +23,7 @@ class TraitSemanticTest : StringSpec({
                 )
             )
     }
+
     "Trait method not a function type" {
         """
             trait Sum a =
@@ -50,6 +53,24 @@ class TraitSemanticTest : StringSpec({
             )
     }
 
+    "Duplicate traits" {
+        """
+            trait Sum a =
+              sum :: a -> a -> a
+              sum a b = a + b
+            
+            trait Sum a =
+              sum2 :: a -> a -> a
+              sum2 a b = a + b
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to "Sum")
+                )
+            )
+    }
+
     "Valid trait with default implementation" {
         """
             trait Sum a =
@@ -65,6 +86,21 @@ class TraitSemanticTest : StringSpec({
                     trait Sum a =
                         sum :: a -> a -> a
                     """.trimIndent()
+                )
+            )
+    }
+
+    "Invalid trait function" {
+        """
+            trait Sum a =
+              sum :: a -> a -> a
+              sum a b = a + b
+              mul a a = a * b
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    TableErrorCode.AlreadyDefined.new(Location.NoProvided, "classifier" to "Variable", "name" to "a"),
                 )
             )
     }

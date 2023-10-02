@@ -430,6 +430,112 @@ class TraitParsingTest : StringSpec({
                 )
             )
     }
+    "Parsing trait with definition methods" {
+        """
+            trait Sum a =
+              sum :: a -> a -> a
+              
+              sum a b = a + b
+              mul a b = a * b
+        """.trimIndent()
+            .also { println(it) }
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeTypeDeclaration()
+            .map { it.value.also { println(it) } }
+            .shouldBeRight(
+                TraitNode(
+                    internal = false, annotations = null, name = "Sum", params = listOf("a"),
+                    definition = TraitFunctionsNode(
+                        definitions = listOf(
+                            TraitFunctionNode(
+                                name = "sum",
+                                type = FunctionTypeNode(
+                                    params = listOf(
+                                        ParameterTypeNode(name = "a", location = Location.NoProvided),
+                                        ParameterTypeNode(name = "a", location = Location.NoProvided),
+                                        ParameterTypeNode(name = "a", location = Location.NoProvided)
+                                    ),
+                                    location = Location.NoProvided,
+                                    locations = FunctionTypeNodeLocations(separators = listOf())
+                                ),
+                                location = Location.NoProvided,
+                                locations = TraitFunctionNodeLocation(
+                                    name = Location.NoProvided,
+                                    operator = Location.NoProvided
+                                )
+                            )
+                        ),
+                        functions = listOf(
+                            FunctionNode(
+                                native = false,
+                                pub = false,
+                                annotations = null,
+                                name = "sum",
+                                parameters = listOf("a", "b"),
+                                expression = OperatorNode(
+                                    category = "Operator10", operator = "+",
+                                    left = FunctionCallNode(
+                                        name = "a", type = FunctionType.Function, arguments = listOf(),
+                                        location = Location.NoProvided
+                                    ),
+                                    right = FunctionCallNode(
+                                        name = "b", type = FunctionType.Function, arguments = listOf(),
+                                        location = Location.NoProvided
+                                    ), location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided,
+                                locations = FunctionNodeLocations(
+                                    nativeLocation = Location.NoProvided,
+                                    pubLocation = Location.NoProvided,
+                                    name = Location.NoProvided, parameters = listOf(),
+                                    assignOperator = Location.NoProvided
+                                )
+                            ),
+                            FunctionNode(
+                                native = false,
+                                pub = false,
+                                annotations = null,
+                                name = "mul",
+                                parameters = listOf("a", "b"),
+                                expression = OperatorNode(
+                                    category = "Operator11",
+                                    operator = "*",
+                                    left = FunctionCallNode(
+                                        name = "a",
+                                        type = FunctionType.Function,
+                                        arguments = listOf(),
+                                        location = Location.NoProvided
+                                    ),
+                                    right = FunctionCallNode(
+                                        name = "b",
+                                        type = FunctionType.Function,
+                                        arguments = listOf(),
+                                        location = Location.NoProvided
+                                    ), location = Location.NoProvided
+                                ),
+                                location = Location.NoProvided,
+                                locations = FunctionNodeLocations(
+                                    nativeLocation = Location.NoProvided,
+                                    pubLocation = Location.NoProvided,
+                                    name = Location.NoProvided,
+                                    parameters = listOf(),
+                                    assignOperator = Location.NoProvided
+                                )
+                            )
+                        )
+                    ),
+                    location = Location.NoProvided,
+                    locations = TraitNodeLocations(
+                        internalLocation = Location.NoProvided,
+                        traitLocation = Location.NoProvided,
+                        name = Location.NoProvided,
+                        params = emptyList(),
+                        assignOperatorLocation = Location.NoProvided
+                    )
+                )
+            )
+    }
     "Parsing a impl" {
         """
             impl Eq for Num =
