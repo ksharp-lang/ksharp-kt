@@ -18,6 +18,7 @@ import org.ksharp.semantics.inference.InferenceErrorCode
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
+import org.ksharp.semantics.scopes.TypeSystemSemanticContext
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.PartialTypeSystem
@@ -49,7 +50,10 @@ private fun module(vararg functions: FunctionNode) =
 
 private fun ModuleNode.buildFunctionTable(moduleTypeSystemInfo: ModuleTypeSystemInfo): FunctionTableResult {
     val errors = ErrorCollector()
-    val (functionTable, _) = buildFunctionTable(errors, moduleTypeSystemInfo.typeSystem)
+    val (functionTable, _) = functions.buildFunctionTable(
+        errors,
+        TypeSystemSemanticContext(moduleTypeSystemInfo.typeSystem)
+    )
     return FunctionTableResult(
         errors.build(),
         functionTable
