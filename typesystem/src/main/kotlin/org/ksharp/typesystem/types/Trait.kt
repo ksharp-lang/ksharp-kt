@@ -59,7 +59,9 @@ data class TraitType internal constructor(
             get() = arguments.asSequence()
 
         override fun toString(): String =
-            "$name :: ${arguments.joinToString(" -> ") { it.representation }}"
+            "${
+                name.indexOf('/').let { if (it == -1) name else name.substring(0, it) }
+            } :: ${arguments.joinToString(" -> ") { it.representation }}"
 
         override fun new(attributes: Set<Attribute>): Type = MethodType(attributes, name, arguments)
     }
@@ -89,7 +91,7 @@ class TraitTypeFactory(
             validateFunctionName(name).flatMap {
                 ParametricTypeFactory(factory).apply(arguments).build().map { args ->
                     params.put(
-                        name, TraitType.MethodType(
+                        "${name}/${args.size}", TraitType.MethodType(
                             factory.attributes,
                             name,
                             args

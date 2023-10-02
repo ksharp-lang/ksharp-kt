@@ -752,7 +752,7 @@ class TypeSystemTest : ShouldSpec({
                             TraitType(
                                 setOf(CommonAttribute.Public),
                                 "Num", "a", mapOf(
-                                    "(+)" to TraitType.MethodType(
+                                    "(+)/3" to TraitType.MethodType(
                                         setOf(CommonAttribute.Public),
                                         "(+)",
                                         listOf(
@@ -761,7 +761,7 @@ class TypeSystemTest : ShouldSpec({
                                             Parameter("a")
                                         )
                                     ),
-                                    "(-)" to TraitType.MethodType(
+                                    "(-)/3" to TraitType.MethodType(
                                         setOf(CommonAttribute.Public),
                                         "(-)",
                                         listOf(
