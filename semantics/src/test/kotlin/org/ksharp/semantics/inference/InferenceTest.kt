@@ -39,7 +39,8 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
                 listOf(intType, intType, intType)
             )
         ),
-        emptyMap()
+        emptyMap(),
+        emptySet()
     )
     return InferenceInfo(ConcreteModuleInfo(preludeModule), ConcreteModuleInfo(testModule))
 }

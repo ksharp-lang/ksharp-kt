@@ -14,7 +14,8 @@ private fun createKernelModule(): ModuleInfo = kernelTypeSystem
             listOf(),
             typeSystem = ts,
             functions = mapOf(),
-            traits = mapOf()
+            traits = mapOf(),
+            impls = setOf(),
         )
     }
 
