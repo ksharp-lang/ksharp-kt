@@ -34,7 +34,9 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
         },
         errors + typeSemantics.errors + moduleSemantics.errors,
         typeSemantics.typeSystem,
-        typeSemantics.traits,
+        typeSemantics.traits.filter { trait ->
+            moduleSemantics.traitsAbstractions.containsKey(trait.name)
+        },
         setOf(),
         moduleSemantics.traitsAbstractions,
         moduleSemantics.abstractions,

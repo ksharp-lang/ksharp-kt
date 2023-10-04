@@ -1,8 +1,11 @@
 package org.ksharp.semantics.typesystem
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 import org.ksharp.common.new
+import org.ksharp.semantics.getSemanticModuleInfo
 import org.ksharp.semantics.scopes.TableErrorCode
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
@@ -97,11 +100,19 @@ class TraitSemanticTest : StringSpec({
               sum a b = a + b
               mul a a = a * b
         """.trimIndent()
-            .toSemanticModuleInfo()
-            .shouldBeLeft(
-                listOf(
-                    TableErrorCode.AlreadyDefined.new(Location.NoProvided, "classifier" to "Variable", "name" to "a"),
+            .getSemanticModuleInfo()
+            .shouldBeRight()
+            .map {
+                it.traits.shouldBeEmpty()
+                it.errors.shouldBe(
+                    listOf(
+                        TableErrorCode.AlreadyDefined.new(
+                            Location.NoProvided,
+                            "classifier" to "Variable",
+                            "name" to "a"
+                        ),
+                    )
                 )
-            )
+            }
     }
 })
