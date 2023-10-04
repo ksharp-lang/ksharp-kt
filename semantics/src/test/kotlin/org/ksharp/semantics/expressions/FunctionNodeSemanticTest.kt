@@ -13,12 +13,12 @@ import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.*
 import org.ksharp.nodes.FunctionType
 import org.ksharp.nodes.semantic.*
+import org.ksharp.semantics.context.TypeSystemSemanticContext
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.InferenceErrorCode
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
-import org.ksharp.semantics.scopes.TypeSystemSemanticContext
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.PartialTypeSystem

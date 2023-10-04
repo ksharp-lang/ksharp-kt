@@ -1,4 +1,4 @@
-package org.ksharp.semantics.scopes
+package org.ksharp.semantics.context
 
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
@@ -23,5 +23,4 @@ class TraitSemanticContext(override val typeSystem: TypeSystem, private val trai
         trait.methods[name]?.let {
             it.arguments.toFunctionType(it.attributes);
         }
-
 }

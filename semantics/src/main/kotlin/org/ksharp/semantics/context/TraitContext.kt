@@ -1,4 +1,4 @@
-package org.ksharp.semantics.scopes
+package org.ksharp.semantics.context
 
 import org.ksharp.module.TraitInfo
 import org.ksharp.nodes.semantic.AbstractionNode
@@ -24,12 +24,12 @@ class TraitInfoTaitContext(private val info: TraitInfo) : TraitContext {
 
 class TraitTypeTraitContext(
     private val type: TraitType,
-    private val abstractions: List<AbstractionNode<SemanticInfo>>
+    abstractions: List<AbstractionNode<SemanticInfo>>
 ) : TraitContext {
 
     private val impls: Set<String> = abstractions.asSequence().map {
         it.name
-    }.toSet();
+    }.toSet()
 
     override val definitionMethods: Sequence<String>
         get() = type.methods.keys.asSequence()
