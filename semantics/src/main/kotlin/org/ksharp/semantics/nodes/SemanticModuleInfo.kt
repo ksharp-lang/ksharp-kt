@@ -26,6 +26,10 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
     val typeSemantics = this.checkTypesSemantics(preludeModule)
     val moduleSemantics = this.checkFunctionSemantics(typeSemantics)
         .checkInferenceSemantics(typeSemantics, preludeModule)
+    val traitsWithoutDefaultImpl = traits.asSequence()
+        .filter {
+            it.definition.functions.isEmpty()
+        }.map { it.name }.toSet()
     return SemanticModuleInfo(
         name.let {
             val ix = name.indexOf(".")
@@ -35,7 +39,8 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
         errors + typeSemantics.errors + moduleSemantics.errors,
         typeSemantics.typeSystem,
         typeSemantics.traits.filter { trait ->
-            moduleSemantics.traitsAbstractions.containsKey(trait.name)
+            traitsWithoutDefaultImpl.contains(trait.name) ||
+                    moduleSemantics.traitsAbstractions.containsKey(trait.name)
         },
         setOf(),
         moduleSemantics.traitsAbstractions,

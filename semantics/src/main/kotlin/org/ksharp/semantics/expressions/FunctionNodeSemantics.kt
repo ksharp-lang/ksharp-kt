@@ -88,7 +88,7 @@ internal fun List<FunctionNode>.buildFunctionTable(
                 val type = context.findFunctionType(f.nameWithArity)
                 errors.collect(type?.typePromise(f) ?: Either.Right(f.typePromise(context.typeSystem)))
                     .map {
-                        val visibility = if (f.pub) CommonAttribute.Public else CommonAttribute.Internal
+                        val visibility = context.calculateVisibility(f)
                         val attributes = if (type != null) {
                             mutableSetOf<Attribute>().apply {
                                 addAll(type.attributes)
@@ -179,11 +179,13 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
             if (traitType != null) {
                 it to traitType
             } else null
-        }.associate {
+        }.map {
             val traitContext = TraitSemanticContext(typeSystem, it.second)
             val trait = it.first
             trait.name to trait.definition.functions.checkFunctionSemantics(errors, traitContext)
-        }
+        }.filter {
+            it.second.isNotEmpty()
+        }.toMap()
     return ModuleFunctionInfo(
         errors.build(),
         functionAbstractions,
@@ -213,6 +215,6 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     return ModuleFunctionInfo(
         errors = errors.build(),
         abstractions = abstractions,
-        traitsAbstractions = emptyMap() //TODO: build the traits for the module
+        traitsAbstractions = traitsAbstractions //TODO: build the traits for the module
     )
 }

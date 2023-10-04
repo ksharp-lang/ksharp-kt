@@ -1,16 +1,27 @@
 package org.ksharp.semantics.typesystem
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.new
+import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.ApplicationName
+import org.ksharp.nodes.semantic.ApplicationNode
+import org.ksharp.nodes.semantic.VarNode
 import org.ksharp.semantics.getSemanticModuleInfo
+import org.ksharp.semantics.nodes.AbstractionSemanticInfo
+import org.ksharp.semantics.nodes.ApplicationSemanticInfo
+import org.ksharp.semantics.nodes.Symbol
+import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.semantics.scopes.TableErrorCode
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.newNamedParameter
 
 class TraitSemanticTest : StringSpec({
     "Not allow duplicate functions. (Same name and arity)" {
@@ -77,9 +88,25 @@ class TraitSemanticTest : StringSpec({
     "Valid trait with default implementation" {
         """
             trait Sum a =
-             sum :: a -> a -> a
+                sum :: a -> a -> a
+                sum a b = a + b
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .map { it.traits.map { t -> t.representation } }
+            .shouldBeRight(
+                listOf(
+                    """
+                    trait Sum a =
+                        sum :: a -> a -> a
+                    """.trimIndent()
+                )
+            )
+    }
 
-             sum a b = a + b
+    "Valid trait" {
+        """
+            trait Sum a =
+                sum :: a -> a -> a
         """.trimIndent()
             .toSemanticModuleInfo()
             .map { it.traits.map { t -> t.representation } }
@@ -103,7 +130,47 @@ class TraitSemanticTest : StringSpec({
             .getSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                it.traits.shouldBeEmpty()
+                // should contains the sum implementation only in sum abstractions
+                it.traits.shouldNotBeEmpty()
+                val paramA = TypeSemanticInfo(type = Either.Right(newNamedParameter("a")))
+                it.traitsAbstractions["Sum"].shouldBe(
+                    listOf(
+                        AbstractionNode(
+                            attributes = setOf(CommonAttribute.Public),
+                            name = "sum",
+                            expression = ApplicationNode(
+                                functionName = ApplicationName(pck = null, name = "(+)"),
+                                arguments = listOf(
+                                    VarNode(
+                                        name = "a",
+                                        info = Symbol(
+                                            name = "a",
+                                            type = paramA
+                                        ),
+                                        location = Location.NoProvided
+                                    ), VarNode(
+                                        name = "b",
+                                        info = Symbol(
+                                            name = "b",
+                                            type = paramA
+                                        ),
+                                        location = Location.NoProvided
+                                    )
+                                ), info = ApplicationSemanticInfo(function = null), location = Location.NoProvided
+                            ),
+                            info = AbstractionSemanticInfo(
+                                parameters = listOf(
+                                    Symbol(
+                                        name = "a",
+                                        type = paramA
+                                    ), Symbol(name = "b", type = paramA)
+                                ),
+                                returnType = paramA
+                            ),
+                            location = Location.NoProvided
+                        )
+                    )
+                )
                 it.errors.shouldBe(
                     listOf(
                         TableErrorCode.AlreadyDefined.new(
