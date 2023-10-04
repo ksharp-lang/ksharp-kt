@@ -91,7 +91,6 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 listOf(),
                 preludeModule.typeSystem,
                 emptyList(),
-                emptySet(),
             )
         ).apply {
             errors.shouldBe(
@@ -130,7 +129,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                preludeModule.typeSystem, emptyList(), emptySet()
+                preludeModule.typeSystem, emptyList()
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -187,7 +186,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                typeSystem, emptyList(), emptySet()
+                typeSystem, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -244,7 +243,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                typeSystem, emptyList(), emptySet()
+                typeSystem, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -287,7 +286,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                typeSystem, emptyList(), emptySet()
+                typeSystem, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -342,7 +341,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                typeSystem, emptyList(), emptySet()
+                typeSystem, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -398,7 +397,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
         ).buildFunctionTable(
             ModuleTypeSystemInfo(
                 listOf(),
-                typeSystem, emptyList(), emptySet()
+                typeSystem, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -465,7 +464,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                 ).checkFunctionSemantics(
                     ModuleTypeSystemInfo(
                         listOf(),
-                        ts, emptyList(), emptySet()
+                        ts, emptyList(),
                     )
                 ).apply {
                     errors.shouldBeEmpty()
@@ -517,7 +516,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -585,7 +584,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -661,7 +660,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                nTs.value, emptyList(), emptySet()
+                nTs.value, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -739,7 +738,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                nTs.value, emptyList(), emptySet()
+                nTs.value, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -808,7 +807,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -898,7 +897,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -989,7 +988,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -1069,7 +1068,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -1140,7 +1139,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -1230,7 +1229,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -1323,7 +1322,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -1478,7 +1477,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -1594,7 +1593,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
         ).checkFunctionSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             )
         ).apply {
             errors.shouldBeEmpty()
@@ -1683,7 +1682,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             ), preludeModule
         ).apply {
             this.shouldBe(info)
@@ -1737,7 +1736,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             ), preludeModule.also {
                 it.functions.keys.onEach { println(it) }
             }
@@ -1793,7 +1792,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
                 listOf(),
-                ts, emptyList(), emptySet()
+                ts, emptyList(),
             ), preludeModule
         ).apply {
             this.abstractions.shouldBeEmpty()

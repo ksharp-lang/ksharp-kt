@@ -369,6 +369,5 @@ fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemI
             .asSequence().map {
                 it.second
             }.filterIsInstance<TraitType>().toList(),
-        emptySet()
     )
 }
