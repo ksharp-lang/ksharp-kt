@@ -17,6 +17,7 @@ fun semanticModuleInfoAction(moduleName: String, builder: ActionsGraphBuilder<Se
             listOf(),
             setOf(),
             emptyMap(),
+            emptyMap(),
             listOf(),
         )
     ) {
