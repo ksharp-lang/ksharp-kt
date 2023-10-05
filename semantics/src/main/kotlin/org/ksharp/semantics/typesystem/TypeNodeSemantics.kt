@@ -34,6 +34,7 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     DuplicateTraitMethod("Duplicate trait method '{name}'"),
     DuplicateImplMethod("Duplicate impl method '{name}'"),
     MissingImplMethods("Missing methods '{methods}' in impl '{trait}' for '{impl}'"),
+    DuplicateImpl("Duplicate impl '{trait}' for '{impl}'"),
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -347,8 +348,21 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
                     )
                 }
             }
-        }.map {
-            impls.add(Impl(impl.forName, impl.traitName))
+        }.flatMap {
+            if (impls.add(Impl(impl.forName, impl.traitName))) {
+                Either.Right(true)
+            } else {
+                Either.Left(
+                    TypeSemanticsErrorCode.DuplicateImpl.new(
+                        impl.location,
+                        "impl" to impl.forName,
+                        "trait" to impl.traitName
+                    )
+                )
+            }
+        }.mapLeft { error ->
+            errors.collect(error)
+            error
         }
     }
     return impls
