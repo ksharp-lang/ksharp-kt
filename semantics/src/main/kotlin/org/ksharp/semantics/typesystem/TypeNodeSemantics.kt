@@ -1,6 +1,7 @@
 package org.ksharp.semantics.typesystem
 
 import org.ksharp.common.*
+import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
@@ -354,6 +355,16 @@ private fun Sequence<NodeData>.checkTypesSemantics(
     return typeSystem
 }
 
+private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: TypeSystem): Set<Impl> {
+    val impls = mutableSetOf<Impl>()
+    this.forEach { impl ->
+        val result = errors.collect(typeSystem[impl.traitName]).map { traitType ->
+
+        }
+    }
+    return impls
+}
+
 fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemInfo {
     val errors = ErrorCollector()
     val typeSystem = sequenceOf(
@@ -361,6 +372,7 @@ fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemI
         traits.asSequence(),
         typeDeclarations.asSequence()
     ).flatten().checkTypesSemantics(errors, preludeModule)
+    val impls = impls.checkSemantics(errors, typeSystem.value)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(
         errors.build(),
@@ -369,5 +381,6 @@ fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemI
             .asSequence().map {
                 it.second
             }.filterIsInstance<TraitType>().toList(),
+        setOf()
     )
 }

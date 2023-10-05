@@ -709,7 +709,7 @@ class TypeSystemTest : ShouldSpec({
         context("Trait types") {
             typeSystem {
                 trait(setOf(CommonAttribute.Public), "Num", "a") {
-                    method("(+)") {
+                    method("(+)", true) {
                         parameter("a")
                         parameter("a")
                         parameter("a")
@@ -771,7 +771,7 @@ class TypeSystemTest : ShouldSpec({
                                             Parameter("a"),
                                             Parameter("a"),
                                             Parameter("a")
-                                        )
+                                        ), true
                                     ),
                                     "(-)/3" to TraitType.MethodType(
                                         setOf(CommonAttribute.Public),
@@ -780,7 +780,7 @@ class TypeSystemTest : ShouldSpec({
                                             Parameter("a"),
                                             Parameter("a"),
                                             Parameter("a")
-                                        )
+                                        ), false
                                     )
                                 )
                             ), "trait Num a =\n" +

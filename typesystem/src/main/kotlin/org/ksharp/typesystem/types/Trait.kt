@@ -37,6 +37,7 @@ data class TraitType internal constructor(
         override val attributes: Set<Attribute>,
         val name: String,
         val arguments: List<Type>,
+        val withDefaultImpl: Boolean,
     ) : Type {
 
         override val solver: Solver
@@ -60,7 +61,7 @@ data class TraitType internal constructor(
                 name.indexOf('/').let { if (it == -1) name else name.substring(0, it) }
             } :: ${arguments.joinToString(" -> ") { it.representation }}"
 
-        override fun new(attributes: Set<Attribute>): Type = MethodType(attributes, name, arguments)
+        override fun new(attributes: Set<Attribute>): Type = MethodType(attributes, name, arguments, withDefaultImpl)
     }
 
     override val compound: Boolean
@@ -84,7 +85,7 @@ class TraitTypeFactory(
 ) {
     private var result: ErrorOrValue<MapBuilder<String, TraitType.MethodType>> = Either.Right(mapBuilder())
 
-    fun method(name: String, arguments: ParametricTypeFactoryBuilder = {}) {
+    fun method(name: String, withDefaultImpl: Boolean = false, arguments: ParametricTypeFactoryBuilder = {}) {
         result = result.flatMap { params ->
             validateFunctionName(name).flatMap {
                 ParametricTypeFactory(factory).apply(arguments).build().flatMap traitMethod@{ args ->
@@ -101,7 +102,8 @@ class TraitTypeFactory(
                         traitMethodName, TraitType.MethodType(
                             factory.attributes,
                             name,
-                            args
+                            args,
+                            withDefaultImpl
                         )
                     )
                     Either.Right(params)
