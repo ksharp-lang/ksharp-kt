@@ -266,6 +266,10 @@ private fun TraitFunctionsNode.checkTraitFunctions(): ErrorOrValue<Boolean> {
         .map { true }
 }
 
+private val TraitFunctionNode.nameWithArity: String
+    get() = "${name}/${type.cast<FunctionTypeNode>().arity}"
+
+
 private fun TraitNode.checkTypesSemantics(
     errors: ErrorCollector,
     builder: TypeSystemBuilder
@@ -279,6 +283,9 @@ private fun TraitNode.checkTypesSemantics(
     errors.collect(it)
     it
 }.map {
+    val defaultImpls = definition.functions.map {
+        it.nameWithArity
+    }.toSet()
     builder.trait(
         annotations.checkAnnotations(internal),
         name,
@@ -291,7 +298,7 @@ private fun TraitNode.checkTypesSemantics(
                         error(TypeSemanticsErrorCode.TraitWithInvalidMethod.new(location, "name" to name))
                     }
                     paramsCheckResult.map {
-                        method(f.name) {
+                        method(f.name, defaultImpls.contains(f.nameWithArity)) {
                             f.type
                                 .cast<FunctionTypeNode>()
                                 .params
@@ -381,6 +388,6 @@ fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemI
             .asSequence().map {
                 it.second
             }.filterIsInstance<TraitType>().toList(),
-        setOf()
+        impls
     )
 }

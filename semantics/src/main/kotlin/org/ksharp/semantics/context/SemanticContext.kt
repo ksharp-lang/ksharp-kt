@@ -19,7 +19,7 @@ interface SemanticContext {
 
 class TypeSystemSemanticContext(override val typeSystem: TypeSystem) : SemanticContext {
     override fun findFunctionType(name: String): FunctionType? =
-        typeSystem["Decl__$name"].valueOrNull as? FunctionType;
+        typeSystem["Decl__$name"].valueOrNull as? FunctionType
 
     override fun calculateVisibility(function: FunctionNode): CommonAttribute =
         if (function.pub) CommonAttribute.Public else CommonAttribute.Internal
@@ -28,7 +28,7 @@ class TypeSystemSemanticContext(override val typeSystem: TypeSystem) : SemanticC
 class TraitSemanticContext(override val typeSystem: TypeSystem, private val trait: TraitType) : SemanticContext {
     override fun findFunctionType(name: String): FunctionType? =
         trait.methods[name]?.let {
-            it.arguments.toFunctionType(it.attributes);
+            it.arguments.toFunctionType(it.attributes)
         }
 
     override fun calculateVisibility(function: FunctionNode): CommonAttribute {

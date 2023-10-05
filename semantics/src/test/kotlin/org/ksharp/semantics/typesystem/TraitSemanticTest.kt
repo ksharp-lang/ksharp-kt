@@ -21,7 +21,19 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.newNamedParameter
+
+private fun Collection<TraitType>.shouldDefine(methods: Map<String, Boolean>): Collection<TraitType> {
+    asSequence().map { t ->
+        t.methods.asSequence().map { m ->
+            "${t.name}::${m.key}" to m.value.withDefaultImpl
+        }
+    }.flatten()
+        .toMap()
+        .shouldBe(methods)
+    return this
+}
 
 class TraitSemanticTest : StringSpec({
     "Not allow duplicate functions. (Same name and arity)" {
@@ -92,7 +104,11 @@ class TraitSemanticTest : StringSpec({
                 sum a b = a + b
         """.trimIndent()
             .toSemanticModuleInfo()
-            .map { it.traits.map { t -> t.representation } }
+            .map {
+                it.traits
+                    .shouldDefine(mapOf("Sum::sum/3" to true))
+                    .map { t -> t.representation }
+            }
             .shouldBeRight(
                 listOf(
                     """
@@ -109,7 +125,11 @@ class TraitSemanticTest : StringSpec({
                 sum :: a -> a -> a
         """.trimIndent()
             .toSemanticModuleInfo()
-            .map { it.traits.map { t -> t.representation } }
+            .map {
+                it.traits
+                    .shouldDefine(mapOf("Sum::sum/3" to false))
+                    .map { t -> t.representation }
+            }
             .shouldBeRight(
                 listOf(
                     """
@@ -130,8 +150,10 @@ class TraitSemanticTest : StringSpec({
             .getSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                // should contains the sum implementation only in sum abstractions
-                it.traits.shouldNotBeEmpty()
+                // should contains the trait with only one method sum/3 with default implementation
+                it.traits
+                    .shouldNotBeEmpty()
+                    .shouldDefine(mapOf("Sum::sum/3" to true))
                 val paramA = TypeSemanticInfo(type = Either.Right(newNamedParameter("a")))
                 it.traitsAbstractions["Sum"].shouldBe(
                     listOf(

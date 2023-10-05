@@ -19,6 +19,7 @@ data class SemanticModuleInfo(
     val traits: List<TraitType>,
     val impls: Set<Impl>,
     val traitsAbstractions: Map<String, List<AbstractionNode<SemanticInfo>>>,
+    val implAbstractions: Map<Impl, List<AbstractionNode<SemanticInfo>>>,
     val abstractions: List<AbstractionNode<SemanticInfo>>
 )
 
@@ -44,6 +45,7 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
         },
         setOf(),
         moduleSemantics.traitsAbstractions,
+        emptyMap(),
         moduleSemantics.abstractions,
     )
 }
