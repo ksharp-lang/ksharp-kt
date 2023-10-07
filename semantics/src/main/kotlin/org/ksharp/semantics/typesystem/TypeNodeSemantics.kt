@@ -318,7 +318,7 @@ private fun TraitNode.checkTypesSemantics(
 private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: TypeSystem): Set<Impl> {
     val impls = mutableSetOf<Impl>()
     this.forEach { impl ->
-        errors.collect(typeSystem[impl.traitName]).flatMap { traitType ->
+        typeSystem[impl.traitName].flatMap { traitType ->
             val requiredMethodsToImplement = traitType.cast<TraitType>()
                 .methods
                 .values

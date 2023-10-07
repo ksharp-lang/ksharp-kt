@@ -11,6 +11,9 @@ import org.ksharp.semantics.nodes.toSemanticModuleInfo
 fun String.toSemanticModuleInfo(): Either<List<Error>, SemanticModuleInfo> =
     this.parseModule("irTest.ks", false)
         .flatMap {
+            if (it.errors.isNotEmpty()) {
+                return@flatMap Either.Left(it.errors)
+            }
             val moduleInfo = it.toSemanticModuleInfo(preludeModule)
             if (moduleInfo.errors.isNotEmpty()) {
                 Either.Left(moduleInfo.errors)
