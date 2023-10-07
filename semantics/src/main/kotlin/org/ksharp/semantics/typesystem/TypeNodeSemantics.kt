@@ -323,7 +323,7 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
                 .methods
                 .values
                 .filter { !it.withDefaultImpl }
-                .map { it.name }.toSet()
+                .map { "${it.name}/${it.arguments.size}" }.toSet()
 
             val implMethods = mutableSetOf<String>()
             impl.functions.map {
@@ -349,7 +349,7 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
                 }
             }
         }.flatMap {
-            if (impls.add(Impl(impl.forName, impl.traitName))) {
+            if (impls.add(Impl(impl.traitName, impl.forName))) {
                 Either.Right(true)
             } else {
                 Either.Left(

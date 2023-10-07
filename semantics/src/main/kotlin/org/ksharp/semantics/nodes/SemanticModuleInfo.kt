@@ -43,7 +43,7 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
             traitsWithoutDefaultImpl.contains(trait.name) ||
                     moduleSemantics.traitsAbstractions.containsKey(trait.name)
         },
-        setOf(),
+        typeSemantics.impls,
         moduleSemantics.traitsAbstractions,
         emptyMap(),
         moduleSemantics.abstractions,
