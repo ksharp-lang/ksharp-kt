@@ -175,7 +175,7 @@ class TypeSystemSerializerTest : StringSpec({
                         Parameter("a"),
                         Parameter("a"),
                         Parameter("a")
-                    )
+                    ), true
                 ),
                 "sub" to TraitType.MethodType(
                     setOf(CommonAttribute.Public),
@@ -184,7 +184,7 @@ class TypeSystemSerializerTest : StringSpec({
                         Parameter("a"),
                         Parameter("a"),
                         Parameter("a")
-                    )
+                    ), false
                 )
             )
         ).shouldBeSerializable()

@@ -3,6 +3,7 @@ package org.ksharp.module.bytecode
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.io.bufferView
+import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.functionInfo
 import org.ksharp.module.traitInfo
@@ -66,6 +67,7 @@ class ModuleInfoSerializerTest : StringSpec({
                     )
                 )
             ),
+            setOf(Impl("Eq", "Int"))
         ).shouldBeSerializable()
     }
 })

@@ -15,8 +15,10 @@ fun semanticModuleInfoAction(moduleName: String, builder: ActionsGraphBuilder<Se
             listOf(),
             preludeModule.typeSystem,
             listOf(),
+            setOf(),
             emptyMap(),
-            listOf()
+            emptyMap(),
+            listOf(),
         )
     ) {
         execution { _, nodes ->

@@ -35,7 +35,7 @@ fun KSharpLexerIterator.consumeImpl(): KSharpParserResult =
             val forKeywordToken = it[2].cast<Token>()
             val typeToken = it[3].cast<Token>()
             val assignOperatorToken = it[4].cast<Token>()
-            val functions = it.subList(5, it.size - 1).cast<List<FunctionNode>>()
+            val functions = it.subList(5, it.size).cast<List<FunctionNode>>()
             ImplNode(
                 traitNameToken.text,
                 typeToken.text,

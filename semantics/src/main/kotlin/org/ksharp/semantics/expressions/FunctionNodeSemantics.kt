@@ -1,19 +1,25 @@
 package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
+import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.semantics.context.SemanticContext
+import org.ksharp.semantics.context.TraitSemanticContext
+import org.ksharp.semantics.context.TypeSystemSemanticContext
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.ConcreteModuleInfo
 import org.ksharp.semantics.inference.InferenceInfo
 import org.ksharp.semantics.inference.inferType
 import org.ksharp.semantics.inference.toSemanticModuleInfo
 import org.ksharp.semantics.nodes.*
-import org.ksharp.semantics.scopes.*
 import org.ksharp.semantics.scopes.Function
+import org.ksharp.semantics.scopes.FunctionTable
+import org.ksharp.semantics.scopes.FunctionTableBuilder
+import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
@@ -83,7 +89,7 @@ internal fun List<FunctionNode>.buildFunctionTable(
                 val type = context.findFunctionType(f.nameWithArity)
                 errors.collect(type?.typePromise(f) ?: Either.Right(f.typePromise(context.typeSystem)))
                     .map {
-                        val visibility = if (f.pub) CommonAttribute.Public else CommonAttribute.Internal
+                        val visibility = context.calculateVisibility(f)
                         val attributes = if (type != null) {
                             mutableSetOf<Attribute>().apply {
                                 addAll(type.attributes)
@@ -174,15 +180,25 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
             if (traitType != null) {
                 it to traitType
             } else null
-        }.associate {
+        }.map {
             val traitContext = TraitSemanticContext(typeSystem, it.second)
             val trait = it.first
             trait.name to trait.definition.functions.checkFunctionSemantics(errors, traitContext)
-        }
+        }.filter {
+            it.second.isNotEmpty()
+        }.toMap()
+    val impls = moduleTypeSystemInfo.impls
+    val implAbstractions = this.impls.asSequence()
+        .filter { impls.contains(Impl(it.traitName, it.forName)) }
+        .map {
+            val traitContext = TraitSemanticContext(typeSystem, typeSystem[it.traitName].valueOrNull!!.cast())
+            Impl(it.traitName, it.forName) to it.functions.checkFunctionSemantics(errors, traitContext)
+        }.toMap()
     return ModuleFunctionInfo(
         errors.build(),
         functionAbstractions,
-        traitAbstractions
+        traitAbstractions,
+        implAbstractions
     )
 }
 
@@ -207,7 +223,8 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     }
     return ModuleFunctionInfo(
         errors = errors.build(),
-        abstractions = abstractions,
-        traitsAbstractions = emptyMap() //TODO: build the traits for the module
+        abstractions,
+        traitsAbstractions, //TODO: build the traits for the module
+        implAbstractions, //TODO: build the impls for the module
     )
 }

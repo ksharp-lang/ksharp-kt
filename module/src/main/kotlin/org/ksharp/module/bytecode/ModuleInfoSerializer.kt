@@ -3,6 +3,7 @@ package org.ksharp.module.bytecode
 import org.ksharp.common.add
 import org.ksharp.common.io.*
 import org.ksharp.common.listBuilder
+import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.kernelTypeSystem
 import org.ksharp.typesystem.serializer.readTypeSystem
@@ -14,6 +15,30 @@ private fun List<String>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     forEach {
         buffer.add(table.add(it))
     }
+}
+
+fun Set<Impl>.writeTo(buffer: BufferWriter, table: BinaryTable) {
+    buffer.add(size)
+    forEach { impl ->
+        buffer.add(table.add(impl.trait))
+        buffer.add(table.add(impl.type))
+    }
+}
+
+fun BufferView.readImpls(table: BinaryTableView): Set<Impl> {
+    val size = readInt(0)
+    val result = mutableSetOf<Impl>()
+    var position = 4
+    repeat(size) {
+        result.add(
+            Impl(
+                table[readInt(position)],
+                table[readInt(position + 4)]
+            )
+        )
+        position += 8
+    }
+    return result
 }
 
 private fun BufferView.readStringList(table: BinaryTableView): List<String> {
@@ -41,6 +66,9 @@ fun ModuleInfo.writeTo(output: OutputStream) {
     val traitTable = newBufferWriter().apply {
         traits.writeTo(this, stringPool)
     }
+    val implsTable = newBufferWriter().apply {
+        impls.writeTo(this, stringPool)
+    }
     val header = newBufferWriter()
     header.add(stringPool.size) // 0
     header.add(dependencies.size) // 4
@@ -54,6 +82,7 @@ fun ModuleInfo.writeTo(output: OutputStream) {
     typeSystem.transferTo(output)
     functionTable.transferTo(output)
     traitTable.transferTo(output)
+    implsTable.transferTo(output)
 }
 
 fun BufferView.readModuleInfo(): ModuleInfo {
@@ -61,6 +90,7 @@ fun BufferView.readModuleInfo(): ModuleInfo {
     val dependenciesSize = readInt(4)
     val typeSystemSize = readInt(8)
     val functionsSize = readInt(12)
+    val traitsSize = readInt(16)
     val offset = 20
 
     val stringPool = StringPoolView(bufferFrom(offset))
@@ -72,5 +102,7 @@ fun BufferView.readModuleInfo(): ModuleInfo {
     val traits =
         bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize)
             .readTraitInfoTable(stringPool)
-    return ModuleInfo(dependencies, typeSystem, functions, traits)
+    val impls = bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize + traitsSize)
+        .readImpls(stringPool)
+    return ModuleInfo(dependencies, typeSystem, functions, traits, impls)
 }

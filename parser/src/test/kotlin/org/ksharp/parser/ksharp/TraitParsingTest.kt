@@ -577,6 +577,33 @@ class TraitParsingTest : StringSpec({
                                 parameters = emptyList(),
                                 assignOperator = Location.NoProvided
                             )
+                        ),
+                        FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = null,
+                            name = "(!=)",
+                            parameters = listOf("a", "b"),
+                            expression = OperatorNode(
+                                category = "Operator7", operator = "!=",
+                                left = FunctionCallNode(
+                                    name = "a", type = FunctionType.Function, arguments = emptyList(),
+                                    location = Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "b", type = FunctionType.Function,
+                                    arguments = emptyList(),
+                                    location = Location.NoProvided
+                                ), location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = emptyList(),
+                                assignOperator = Location.NoProvided
+                            )
                         )
                     ),
                     location = Location.NoProvided,

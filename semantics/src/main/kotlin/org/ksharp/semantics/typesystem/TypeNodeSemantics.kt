@@ -1,6 +1,7 @@
 package org.ksharp.semantics.typesystem
 
 import org.ksharp.common.*
+import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.*
 import org.ksharp.semantics.errors.ErrorCollector
@@ -30,7 +31,10 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     ParametricTypeShouldStartWithName("Parametric type should start with a name not a parameter. e.g Num a"),
     FunctionDeclarationShouldBeAFunctionType("Function declaration '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int. parsed as {repr}"),
     TraitMethodShouldBeAFunctionType("Trait method '{name}' should be a function literal type e.g. sum :: Int -> Int -> Int."),
-    DuplicateTraitMethod("Duplicate trait method '{name}'")
+    DuplicateTraitMethod("Duplicate trait method '{name}'"),
+    DuplicateImplMethod("Duplicate impl method '{name}'"),
+    MissingImplMethods("Missing methods '{methods}' in impl '{trait}' for '{impl}'"),
+    DuplicateImpl("Duplicate impl '{trait}' for '{impl}'"),
 }
 
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
@@ -265,6 +269,10 @@ private fun TraitFunctionsNode.checkTraitFunctions(): ErrorOrValue<Boolean> {
         .map { true }
 }
 
+private val TraitFunctionNode.nameWithArity: String
+    get() = "${name}/${type.cast<FunctionTypeNode>().arity}"
+
+
 private fun TraitNode.checkTypesSemantics(
     errors: ErrorCollector,
     builder: TypeSystemBuilder
@@ -278,6 +286,9 @@ private fun TraitNode.checkTypesSemantics(
     errors.collect(it)
     it
 }.map {
+    val defaultImpls = definition.functions.map {
+        it.nameWithArity
+    }.toSet()
     builder.trait(
         annotations.checkAnnotations(internal),
         name,
@@ -290,7 +301,7 @@ private fun TraitNode.checkTypesSemantics(
                         error(TypeSemanticsErrorCode.TraitWithInvalidMethod.new(location, "name" to name))
                     }
                     paramsCheckResult.map {
-                        method(f.name) {
+                        method(f.name, defaultImpls.contains(f.nameWithArity)) {
                             f.type
                                 .cast<FunctionTypeNode>()
                                 .params
@@ -302,6 +313,59 @@ private fun TraitNode.checkTypesSemantics(
                 }
         }
     }
+}
+
+private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: TypeSystem): Set<Impl> {
+    val impls = mutableSetOf<Impl>()
+    this.forEach { impl ->
+        typeSystem[impl.traitName].flatMap { traitType ->
+            val requiredMethodsToImplement = traitType.cast<TraitType>()
+                .methods
+                .values
+                .filter { !it.withDefaultImpl }
+                .map { "${it.name}/${it.arguments.size}" }.toSet()
+
+            val implMethods = mutableSetOf<String>()
+            impl.functions.map {
+                val methodArity = it.nameWithArity
+                if (implMethods.add(methodArity)) {
+                    Either.Right(methodArity)
+                } else Either.Left(
+                    TypeSemanticsErrorCode.DuplicateImplMethod.new(impl.location, "name" to methodArity)
+                )
+            }.unwrap().flatMap {
+                val missingMethods = requiredMethodsToImplement.minus(it.toSet())
+                if (missingMethods.isEmpty()) {
+                    Either.Right(true)
+                } else {
+                    Either.Left(
+                        TypeSemanticsErrorCode.MissingImplMethods.new(
+                            impl.location,
+                            "methods" to missingMethods.joinToString(", "),
+                            "impl" to impl.forName,
+                            "trait" to impl.traitName
+                        )
+                    )
+                }
+            }
+        }.flatMap {
+            if (impls.add(Impl(impl.traitName, impl.forName))) {
+                Either.Right(true)
+            } else {
+                Either.Left(
+                    TypeSemanticsErrorCode.DuplicateImpl.new(
+                        impl.location,
+                        "impl" to impl.forName,
+                        "trait" to impl.traitName
+                    )
+                )
+            }
+        }.mapLeft { error ->
+            errors.collect(error)
+            error
+        }
+    }
+    return impls
 }
 
 private fun TypeExpression.isUnitType(): Boolean = when {
@@ -361,6 +425,7 @@ fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemI
         traits.asSequence(),
         typeDeclarations.asSequence()
     ).flatten().checkTypesSemantics(errors, preludeModule)
+    val impls = impls.checkSemantics(errors, typeSystem.value)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(
         errors.build(),
@@ -368,6 +433,7 @@ fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemI
         typeSystem.value
             .asSequence().map {
                 it.second
-            }.filterIsInstance<TraitType>().toList()
+            }.filterIsInstance<TraitType>().toList(),
+        impls
     )
 }

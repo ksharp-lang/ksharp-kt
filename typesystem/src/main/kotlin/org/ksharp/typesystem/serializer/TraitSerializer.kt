@@ -10,6 +10,7 @@ class MethodTypeSerializer : SerializerWriter<TraitType.MethodType>, SerializerR
     override fun write(input: TraitType.MethodType, buffer: BufferWriter, table: BinaryTable) {
         input.attributes.writeTo(buffer, table)
         buffer.add(table.add(input.name))
+        buffer.add(if (input.withDefaultImpl) 1 else 0)
         input.arguments.writeTo(buffer, table)
     }
 
@@ -17,8 +18,9 @@ class MethodTypeSerializer : SerializerWriter<TraitType.MethodType>, SerializerR
         val offset = buffer.readInt(0)
         val attributes = buffer.readAttributes(table)
         val name = table[buffer.readInt(offset)]
-        val arguments = buffer.bufferFrom(4 + offset).readListOfTypes(table)
-        return TraitType.MethodType(attributes, name, arguments)
+        val withDefaultImpl = buffer.readInt(offset + 4) == 1
+        val arguments = buffer.bufferFrom(8 + offset).readListOfTypes(table)
+        return TraitType.MethodType(attributes, name, arguments, withDefaultImpl)
     }
 
 }
