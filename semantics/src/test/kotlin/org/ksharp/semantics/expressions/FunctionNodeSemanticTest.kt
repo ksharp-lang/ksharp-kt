@@ -1678,7 +1678,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                     AbstractionSemanticInfo(listOf()),
                     Location.NoProvided
                 )
-            ), emptyMap()
+            ), emptyMap(), emptyMap()
         )
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
@@ -1732,7 +1732,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                     ),
                     Location.NoProvided
                 )
-            ), emptyMap()
+            ), emptyMap(), emptyMap()
         )
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(
@@ -1788,7 +1788,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                     ),
                     Location.NoProvided
                 )
-            ), emptyMap()
+            ), emptyMap(), emptyMap()
         )
         info.checkInferenceSemantics(
             ModuleTypeSystemInfo(

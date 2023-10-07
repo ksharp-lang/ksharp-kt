@@ -45,7 +45,7 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
         },
         typeSemantics.impls,
         moduleSemantics.traitsAbstractions,
-        emptyMap(),
+        moduleSemantics.implAbstractions,
         moduleSemantics.abstractions,
     )
 }
