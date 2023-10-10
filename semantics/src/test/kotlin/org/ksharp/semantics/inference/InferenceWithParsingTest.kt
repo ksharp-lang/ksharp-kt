@@ -4,22 +4,54 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
+import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 
-fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg types: String) {
+private fun List<AbstractionNode<SemanticInfo>>.stringRepresentation(prefix: String) =
+    map {
+        it.info.getInferredType(Location.NoProvided)
+            .map { type ->
+                "${prefix}${it.name} :: ${type.representation}"
+            }
+    }.unwrap()
+
+private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg types: String) {
     shouldBeRight().value.apply {
         abstractions.size.shouldBe(types.size)
-        abstractions.map {
-            it.info.getInferredType(Location.NoProvided)
-                .map { type ->
-                    "${it.name} :: ${type.representation}"
-                }
-        }.unwrap().shouldBeRight()
+        abstractions.stringRepresentation("")
+            .shouldBeRight()
             .value.shouldContainExactlyInAnyOrder(types.toList())
+    }
+}
+
+private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTraitAbstractionsTypesBe(
+    vararg types: String
+) {
+    shouldBeRight().value.apply {
+        traitsAbstractions.map {
+            it.value.stringRepresentation("${it.key} ::")
+        }.unwrap().shouldBeRight()
+            .value
+            .flatten()
+            .shouldContainExactlyInAnyOrder(types.toList())
+    }
+}
+
+private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredImplAbstractionsTypesBe(
+    vararg types: String
+) {
+    shouldBeRight().value.apply {
+        implAbstractions.map {
+            it.value.stringRepresentation("${it.key} ::")
+        }.unwrap().shouldBeRight()
+            .value
+            .flatten()
+            .shouldContainExactlyInAnyOrder(types.toList())
     }
 }
 
