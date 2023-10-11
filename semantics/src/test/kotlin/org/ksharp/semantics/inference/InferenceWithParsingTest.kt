@@ -349,6 +349,9 @@ class InferenceWithParsingTest : StringSpec({
                     "s :: Long"
                 )
             }
+    }
+
+    "Inference impl using a default trait method" {
 
     }
 })

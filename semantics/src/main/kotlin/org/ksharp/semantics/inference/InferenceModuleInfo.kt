@@ -10,13 +10,75 @@ import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
+
+typealias AbstractionNodeMap = Map<String, AbstractionNode<AbstractionSemanticInfo>>
 
 sealed interface InferenceModuleInfo {
 
     val typeSystem: TypeSystem
 
     fun findFunction(name: String, numParams: Int): FunctionInfo?
+
+    fun methodName(name: String, numParams: Int) = "$name/$numParams"
+
+}
+
+class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
+    InferenceModuleInfo {
+
+    override val typeSystem: TypeSystem = moduleInfo.typeSystem
+
+    override fun findFunction(name: String, numParams: Int): FunctionInfo? =
+        moduleInfo.functions["$name/$numParams"]
+}
+
+class SemanticModuleInfo(
+    override val typeSystem: TypeSystem,
+    private val abstractions: AbstractionNodeMap
+) : InferenceModuleInfo {
+    override fun findFunction(name: String, numParams: Int): FunctionInfo? =
+        abstractions[methodName(name, numParams)]?.let {
+            AbstractionFunctionInfo(it)
+        }
+}
+
+class TraitSemanticInfo(
+    private val moduleInfo: InferenceModuleInfo,
+    private val abstractions: AbstractionNodeMap
+) : InferenceModuleInfo {
+    override val typeSystem: TypeSystem
+        get() = moduleInfo.typeSystem
+
+    override fun findFunction(name: String, numParams: Int): FunctionInfo? =
+        abstractions[methodName(name, numParams)]?.let {
+            AbstractionFunctionInfo(it)
+        } ?: moduleInfo.findFunction(name, numParams)
+
+}
+
+class ImplSemanticInfo(
+    private val moduleInfo: InferenceModuleInfo,
+    private val traitType: TraitType,
+    private val traitAbstractions: AbstractionNodeMap,
+    private val abstractions: AbstractionNodeMap
+) : InferenceModuleInfo {
+
+    override val typeSystem: TypeSystem
+        get() = moduleInfo.typeSystem
+
+    override fun findFunction(name: String, numParams: Int): FunctionInfo? =
+        methodName(name, numParams).let { methodName ->
+            abstractions[methodName]?.let {
+                AbstractionFunctionInfo(it)
+            } ?: traitType.methods[methodName]?.let {
+                traitAbstractions[methodName]?.let {
+                    AbstractionFunctionInfo(it)
+                }
+            } ?: moduleInfo.findFunction(name, numParams)
+        }
+
 
 }
 
@@ -31,30 +93,21 @@ class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemant
         }
 }
 
-class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
-    InferenceModuleInfo {
-
-    override val typeSystem: TypeSystem = moduleInfo.typeSystem
-
-    override fun findFunction(name: String, numParams: Int): FunctionInfo? =
-        moduleInfo.functions["$name/$numParams"]
-}
-
-class SemanticModuleInfo(
-    override val typeSystem: TypeSystem,
-    private val abstractions: Map<String, AbstractionNode<AbstractionSemanticInfo>>
-) : InferenceModuleInfo {
-    override fun findFunction(name: String, numParams: Int): FunctionInfo? =
-        abstractions["$name/$numParams"]?.let {
-            AbstractionFunctionInfo(it)
-        }
-}
+private fun List<AbstractionNode<AbstractionSemanticInfo>>.toMap() =
+    associateBy {
+        "${it.name}/${it.info.parameters.size + 1}"
+    }
 
 fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(typeSystem: TypeSystem) =
     SemanticModuleInfo(
         typeSystem,
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
-            .associateBy {
-                "${it.name}/${it.info.parameters.size + 1}"
-            }
+            .toMap()
+    )
+
+fun List<AbstractionNode<SemanticInfo>>.toTraitSemanticModuleInfo(semanticInfo: InferenceModuleInfo) =
+    TraitSemanticInfo(
+        semanticInfo,
+        this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
+            .toMap()
     )
