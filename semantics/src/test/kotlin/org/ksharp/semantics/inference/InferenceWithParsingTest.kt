@@ -297,6 +297,21 @@ class InferenceWithParsingTest : StringSpec({
             )
     }
 
+    "Inference trait abstraction" {
+        """
+            ten = 10
+            
+            trait Op a =
+                len :: a -> Int
+                 
+                len a = ten                
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTraitAbstractionsTypesBe(
+                "Op :: len :: (Op a -> Int)"
+            )
+    }
+
     "Inference impl abstraction" {
         """
             trait Op a =
@@ -325,8 +340,15 @@ class InferenceWithParsingTest : StringSpec({
             s = fn 10 20
         """.trimIndent()
             .toSemanticModuleInfo()
-            .shouldInferredImplAbstractionsTypesBe(
-                "Op for Int :: sum :: (Int -> Int -> Int)"
-            )
+            .apply {
+                shouldInferredImplAbstractionsTypesBe(
+                    "Op for Int :: sum :: (Int -> Int -> Int)"
+                )
+                shouldInferredTypesBe(
+                    "fn :: ((Op a) -> (Op a) -> (Op a))",
+                    "s :: Long"
+                )
+            }
+
     }
 })
