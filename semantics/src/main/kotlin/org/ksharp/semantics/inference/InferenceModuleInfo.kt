@@ -3,13 +3,13 @@ package org.ksharp.semantics.inference
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.module.FunctionInfo
+import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.types.Concrete
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
@@ -20,9 +20,11 @@ sealed interface InferenceModuleInfo {
 
     val typeSystem: TypeSystem
 
+    val impls: Sequence<Impl>
+
     fun findFunction(name: String, numParams: Int): FunctionInfo?
 
-    fun getTraitsImplemented(type: Type): List<TraitType>
+    fun getTraitsImplemented(type: Type): Sequence<TraitType> = getTraitsImplemented(type, this)
 
     fun methodName(name: String, numParams: Int) = "$name/$numParams"
 
@@ -33,17 +35,8 @@ class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
 
     override val typeSystem: TypeSystem = moduleInfo.typeSystem
 
-    override fun getTraitsImplemented(type: Type): List<TraitType> =
-        typeSystem.invoke(type).map { resolvedType ->
-            if (resolvedType is Concrete) {
-                resolvedType.name.let { typeName ->
-                    moduleInfo.impls
-                        .filter { it.type == typeName }
-                        .flatMap { it.traits }
-                }
-            } else emptyList()
-        }.valueOrNull ?: emptyList()
-
+    override val impls: Sequence<Impl>
+        get() = moduleInfo.impls.asSequence()
 
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         moduleInfo.functions["$name/$numParams"]
@@ -51,18 +44,24 @@ class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
 
 class SemanticModuleInfo(
     override val typeSystem: TypeSystem,
+    override val impls: Sequence<Impl>,
     private val abstractions: AbstractionNodeMap
 ) : InferenceModuleInfo {
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         abstractions[methodName(name, numParams)]?.let {
             AbstractionFunctionInfo(it)
         }
+
 }
 
 class TraitSemanticInfo(
     private val moduleInfo: InferenceModuleInfo,
     private val abstractions: AbstractionNodeMap
 ) : InferenceModuleInfo {
+
+    override val impls: Sequence<Impl>
+        get() = moduleInfo.impls.asSequence()
+
     override val typeSystem: TypeSystem
         get() = moduleInfo.typeSystem
 
@@ -79,6 +78,9 @@ class ImplSemanticInfo(
     private val traitAbstractions: AbstractionNodeMap,
     private val abstractions: AbstractionNodeMap
 ) : InferenceModuleInfo {
+
+    override val impls: Sequence<Impl>
+        get() = moduleInfo.impls.asSequence()
 
     override val typeSystem: TypeSystem
         get() = moduleInfo.typeSystem
@@ -113,9 +115,10 @@ private fun List<AbstractionNode<AbstractionSemanticInfo>>.toMap() =
         "${it.name}/${it.info.parameters.size + 1}"
     }
 
-fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(typeSystem: TypeSystem) =
+fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(typeSystem: TypeSystem, impls: Set<Impl>) =
     SemanticModuleInfo(
         typeSystem,
+        impls.asSequence(),
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()
     )
