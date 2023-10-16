@@ -11,6 +11,8 @@ interface TypeSystem {
 
     val parent: TypeSystem?
 
+    val handle: HandlePromise<TypeSystem>
+
     fun asSequence(): Sequence<Pair<String, Type>>
 
     /**
@@ -39,6 +41,7 @@ interface TypeSystem {
 
 class TypeSystemImpl internal constructor(
     override val parent: TypeSystem?,
+    override val handle: HandlePromise<TypeSystem>,
     private val types: Map<String, Type>
 ) : TypeSystem {
     override val size: Int = types.size
@@ -60,24 +63,28 @@ class TypeSystemImpl internal constructor(
 
 val PartialTypeSystem.size get() = value.size
 
+val PartialTypeSystem.handle get() = value.handle
 operator fun PartialTypeSystem.get(name: String) = value[name]
 
 operator fun PartialTypeSystem.invoke(type: Type) = value(type)
 
-
 fun typeSystem(parent: PartialTypeSystem? = null, block: TypeSystemBuilder.() -> Unit): PartialTypeSystem =
-    TypeSystemBuilder(
-        parent?.value,
-        store = mapBuilder(),
-        builder = partialBuilder {
-            TypeSystemImpl(parent?.value, it.toMap())
-        }
-    ).apply(block)
-        .build().let {
-            if (parent?.isPartial == true) {
-                PartialTypeSystem(
-                    it.value,
-                    parent.errors + it.errors
-                )
-            } else it
-        }
+    handlePromise<TypeSystem>().let { handle ->
+        TypeSystemBuilder(
+            parent?.value,
+            handle,
+            store = mapBuilder(),
+            builder = partialBuilder {
+                TypeSystemImpl(parent?.value, handle, it.toMap())
+            }
+        ).apply(block)
+            .build().let {
+                handle.set(it.value)
+                if (parent?.isPartial == true) {
+                    PartialTypeSystem(
+                        it.value,
+                        parent.errors + it.errors
+                    )
+                } else it
+            }
+    }

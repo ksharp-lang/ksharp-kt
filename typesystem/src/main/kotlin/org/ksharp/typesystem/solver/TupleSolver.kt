@@ -15,7 +15,7 @@ class TupleSolver : Solver {
                 typeSystem.solve(p)
             }.unwrap()
             .map { elements ->
-                elements.toTupleType(type.attributes)
+                elements.toTupleType(typeSystem, type.attributes)
             }
 
 

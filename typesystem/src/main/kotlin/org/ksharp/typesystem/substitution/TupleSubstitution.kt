@@ -25,6 +25,6 @@ class TupleSubstitution : CompoundSubstitution<TupleType>() {
     ): ErrorOrType =
         type.elements
             .substitute(context, location, typeContext)
-            .map { TupleType(type.attributes, it) }
+            .map { TupleType(type.typeSystem, type.attributes, it) }
 
 }

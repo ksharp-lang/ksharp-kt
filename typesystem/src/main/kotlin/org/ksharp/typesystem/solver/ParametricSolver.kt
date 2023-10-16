@@ -25,7 +25,7 @@ class ParametricSolver : Solver {
                 typeSystem.solve(p)
             }.unwrap()
                 .map { params ->
-                    ParametricType(t.attributes + type.attributes, t, params)
+                    ParametricType(t.typeSystem, t.attributes + type.attributes, t, params)
                 }
         }
     }

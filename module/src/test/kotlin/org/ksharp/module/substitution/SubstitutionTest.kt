@@ -31,7 +31,7 @@ class SubstitutionTest : StringSpec({
     "Parameters and numeric types substitution" {
         val intType = NumericType(Numeric.Int)
         val longType = NumericType(Numeric.Long)
-        val parameter = newParameter()
+        val parameter = preludeTypeSystem.value.newParameter()
         val context = SubstitutionContext(preludeTypeSystem.value)
         context.extract(Location.NoProvided, parameter, intType)
             .shouldBeRight(true)

@@ -1,5 +1,7 @@
 package org.ksharp.typesystem.types
 
+import org.ksharp.common.HandlePromise
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
@@ -14,6 +16,8 @@ data class Labeled internal constructor(
     val label: String,
     val type: Type
 ) : Type {
+    override val typeSystem: HandlePromise<TypeSystem>
+        get() = type.typeSystem
     override val solver: Solver
         get() = Solvers.NoDefined
     override val attributes: Set<Attribute>

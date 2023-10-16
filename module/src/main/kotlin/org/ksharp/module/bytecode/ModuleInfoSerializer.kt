@@ -98,10 +98,13 @@ fun BufferView.readModuleInfo(): ModuleInfo {
     val kernelTypeSystem = kernelTypeSystem.value
     val typeSystem = bufferFrom(offset + dependenciesSize + stringPoolSize).readTypeSystem(stringPool, kernelTypeSystem)
     val functions =
-        bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize).readFunctionInfoTable(stringPool)
+        bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize).readFunctionInfoTable(
+            typeSystem.handle,
+            stringPool
+        )
     val traits =
         bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize)
-            .readTraitInfoTable(stringPool)
+            .readTraitInfoTable(typeSystem.handle, stringPool)
     val impls = bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize + traitsSize)
         .readImpls(stringPool)
     return ModuleInfo(dependencies, typeSystem, functions, traits, impls)

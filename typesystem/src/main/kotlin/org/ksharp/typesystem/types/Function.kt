@@ -2,8 +2,10 @@ package org.ksharp.typesystem.types
 
 import org.ksharp.common.Either.Left
 import org.ksharp.common.Either.Right
+import org.ksharp.common.HandlePromise
 import org.ksharp.common.new
 import org.ksharp.typesystem.TypeItemBuilder
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode.InvalidFunctionType
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
@@ -17,6 +19,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class FunctionType internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val arguments: List<Type>,
 ) : Type {
@@ -36,14 +39,15 @@ data class FunctionType internal constructor(
 
     override fun toString(): String = arguments.asSequence().map { it.representation }.joinToString(" -> ")
 
-    override fun new(attributes: Set<Attribute>): Type = FunctionType(attributes, arguments)
+    override fun new(attributes: Set<Attribute>): Type = FunctionType(typeSystem, attributes, arguments)
 }
 
 fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
     ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { args ->
         if (args.size < 2) {
             Left(InvalidFunctionType.new())
-        } else Right(FunctionType(attributes, args))
+        } else Right(FunctionType(handle, attributes, args))
     }
 
-fun List<Type>.toFunctionType(attributes: Set<Attribute> = NoAttributes) = FunctionType(attributes, this)
+fun List<Type>.toFunctionType(typeSystem: TypeSystem, attributes: Set<Attribute> = NoAttributes) =
+    FunctionType(typeSystem.handle, attributes, this)

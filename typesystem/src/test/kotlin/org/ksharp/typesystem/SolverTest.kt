@@ -54,34 +54,47 @@ class SolverTest : StringSpec({
         it.value
     }
     "solve param" {
-        val param = newParameter()
+        val param = ts.newParameter()
         ts.solve(param).shouldBeRight(param)
     }
     "solve concrete type" {
-        val type = Concrete(NoAttributes, "Int")
+        val type = Concrete(ts.handle, NoAttributes, "Int")
         ts.solve(type).shouldBeRight(type)
     }
     "solve type alias" {
-        val type = TypeAlias(NoAttributes, "String")
-        ts.solve(type).shouldBeRight(Concrete(NoAttributes, "String"))
+        val type = TypeAlias(ts.handle, NoAttributes, "String")
+        ts.solve(type).shouldBeRight(Concrete(ts.handle, NoAttributes, "String"))
     }
     "solve alias" {
-        val type = Alias("Str")
-        ts.solve(type).shouldBeRight(Concrete(NoAttributes, "String"))
+        val type = Alias(ts.handle, "Str")
+        ts.solve(type).shouldBeRight(Concrete(ts.handle, NoAttributes, "String"))
     }
     "solve parametric type" {
         val type = ts["StringList"].valueOrNull.shouldNotBeNull()
         ts.solve(type).also { println(it) }
-            .shouldBeRight(ParametricType(NoAttributes, Alias("List"), listOf(Concrete(NoAttributes, "String"))))
+            .shouldBeRight(
+                ParametricType(
+                    ts.handle,
+                    NoAttributes,
+                    Alias(ts.handle, "List"),
+                    listOf(Concrete(ts.handle, NoAttributes, "String"))
+                )
+            )
     }
     "solve function type" {
         val type = ts["Sum"].valueOrNull.shouldNotBeNull()
         ts.solve(type).also { println(it) }
             .shouldBeRight(
                 FunctionType(
+                    ts.handle,
                     NoAttributes, listOf(
-                        ParametricType(NoAttributes, Alias("List"), listOf(Concrete(NoAttributes, "String"))),
-                        Concrete(NoAttributes, "String")
+                        ParametricType(
+                            ts.handle,
+                            NoAttributes,
+                            Alias(ts.handle, "List"),
+                            listOf(Concrete(ts.handle, NoAttributes, "String"))
+                        ),
+                        Concrete(ts.handle, NoAttributes, "String")
                     )
                 )
             )
@@ -91,9 +104,10 @@ class SolverTest : StringSpec({
         ts.solve(type).also { println(it) }
             .shouldBeRight(
                 TupleType(
+                    ts.handle,
                     NoAttributes, listOf(
-                        Concrete(NoAttributes, "String"),
-                        Concrete(NoAttributes, "String")
+                        Concrete(ts.handle, NoAttributes, "String"),
+                        Concrete(ts.handle, NoAttributes, "String")
                     )
                 )
             )
@@ -103,9 +117,18 @@ class SolverTest : StringSpec({
         ts.solve(type).also { println(it) }
             .shouldBeRight(
                 UnionType(
+                    ts.handle,
                     NoAttributes, mapOf(
-                        "Left" to UnionType.ClassType("Left", listOf(Concrete(NoAttributes, "String"))),
-                        "Right" to UnionType.ClassType("Right", listOf(Concrete(NoAttributes, "String")))
+                        "Left" to UnionType.ClassType(
+                            ts.handle,
+                            "Left",
+                            listOf(Concrete(ts.handle, NoAttributes, "String"))
+                        ),
+                        "Right" to UnionType.ClassType(
+                            ts.handle,
+                            "Right",
+                            listOf(Concrete(ts.handle, NoAttributes, "String"))
+                        )
                     )
                 )
             )

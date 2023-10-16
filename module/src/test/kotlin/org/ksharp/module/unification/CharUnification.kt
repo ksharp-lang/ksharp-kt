@@ -16,7 +16,7 @@ import org.ksharp.typesystem.unification.unify
 class CharUnification : StringSpec({
     "chart type and parameter" {
         val type1 = charType
-        val type2 = newParameter()
+        val type2 = preludeTypeSystem.value.newParameter()
         preludeTypeSystem.value.unify(Location.NoProvided, type1, type2).shouldBeRight(type1)
     }
     "chart type and other type" {

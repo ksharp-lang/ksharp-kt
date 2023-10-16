@@ -27,6 +27,7 @@ class ParametricUnification : CompoundUnification<ParametricType>() {
             type.flatMap {
                 unifyListOfTypes(location, typeSystem, type1, type2, type1.params, type2.params).map { params ->
                     ParametricType(
+                        it.typeSystem,
                         it.attributes,
                         it,
                         params

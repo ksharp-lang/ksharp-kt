@@ -15,7 +15,7 @@ class FunctionSolver : Solver {
                 typeSystem.solve(p)
             }.unwrap()
             .map { arguments ->
-                arguments.toFunctionType(type.attributes)
+                arguments.toFunctionType(typeSystem, type.attributes)
             }
 
 

@@ -29,6 +29,7 @@ private fun ModuleInfo.shouldBeSerializable() {
 }
 
 class ModuleInfoSerializerTest : StringSpec({
+    val ts = typeSystem { }.value
     "Serialize ModuleInfo" {
         ModuleInfo(
             listOf("module1", "module2"),
@@ -40,29 +41,29 @@ class ModuleInfoSerializerTest : StringSpec({
                 "sum/2" to functionInfo(
                     setOf(CommonAttribute.Native, CommonAttribute.Public),
                     "sum",
-                    listOf(newParameter(), newParameter())
+                    listOf(ts.newParameter(), ts.newParameter())
                 ),
                 "sum/3" to functionInfo(
                     setOf(CommonAttribute.Public),
                     "sum",
-                    listOf(newParameter(), newParameter(), newParameter())
+                    listOf(ts.newParameter(), ts.newParameter(), ts.newParameter())
                 ),
                 "sub/2" to functionInfo(
                     setOf(CommonAttribute.Native, CommonAttribute.Public),
                     "sub",
-                    listOf(newParameter(), newParameter())
+                    listOf(ts.newParameter(), ts.newParameter())
                 )
             ),
             mapOf(
                 "Eq" to traitInfo(
                     "Eq",
                     mapOf(
-                        "sum/2" to newParameter(),
+                        "sum/2" to ts.newParameter(),
                     ), mapOf(
                         "sum/2" to functionInfo(
                             setOf(CommonAttribute.Native, CommonAttribute.Public),
                             "sum",
-                            listOf(newParameter(), newParameter())
+                            listOf(ts.newParameter(), ts.newParameter())
                         )
                     )
                 )

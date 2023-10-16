@@ -39,9 +39,9 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
     buffer.transferTo(output)
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
-    input.bufferView {
-        it.readType<T>(stringPoolView).also { t -> println(t) }
-    }.shouldBe(this)
+    this.shouldBe(input.bufferView {
+        it.readType<T>(typeSystem, stringPoolView).also { t -> println(t) }
+    })
 }
 
 private fun TypeSystem.shouldBeSerializable(): TypeSystem {
@@ -59,6 +59,7 @@ private fun TypeSystem.shouldBeSerializable(): TypeSystem {
 }
 
 class TypeSystemSerializerTest : StringSpec({
+    val mockHandle = MockHandlePromise<TypeSystem>()
     "Serialize TypeSystem" {
         typeSystem {
             type(setOf(CommonAttribute.Public), "Int")
@@ -71,92 +72,93 @@ class TypeSystemSerializerTest : StringSpec({
             .shouldBeSerializable()
             .apply {
                 size.shouldBe(3)
-                get("Int").shouldBeType(Concrete(setOf(CommonAttribute.Public), "Int"), "Int")
-                get("String").shouldBeType(Concrete(setOf(CommonAttribute.Public), "String"), "String")
+                get("Int").shouldBeType(Concrete(handle, setOf(CommonAttribute.Public), "Int"), "Int")
+                get("String").shouldBeType(Concrete(handle, setOf(CommonAttribute.Public), "String"), "String")
                 get("Map").shouldBeType(
                     ParametricType(
+                        handle,
                         setOf(CommonAttribute.Public),
-                        Alias("Map"),
-                        listOf(Alias("Int"), Alias("Int"))
+                        Alias(handle, "Map"),
+                        listOf(Alias(handle, "Int"), Alias(handle, "Int"))
                     ),
                     "(Map Int Int)"
                 )
             }
     }
     "Serialize Concrete Types" {
-        Concrete(setOf(CommonAttribute.Public), "Int").shouldBeSerializable()
+        Concrete(mockHandle, setOf(CommonAttribute.Public), "Int").shouldBeSerializable()
     }
     "Serialize Alias Types" {
-        Alias("Int").shouldBeSerializable()
+        Alias(mockHandle, "Int").shouldBeSerializable()
     }
     "Serialize Parameter Types" {
-        Parameter("Int").shouldBeSerializable()
+        Parameter(mockHandle, "Int").shouldBeSerializable()
     }
     "Serialize Parametric Types" {
         ParametricType(
-            setOf(CommonAttribute.Public),
-            Alias("Map"),
+            mockHandle, setOf(CommonAttribute.Public),
+            Alias(mockHandle, "Map"),
             listOf(
-                Concrete(setOf(CommonAttribute.Public), "String"),
-                Concrete(setOf(CommonAttribute.Public), "Double")
+                Concrete(mockHandle, setOf(CommonAttribute.Public), "String"),
+                Concrete(mockHandle, setOf(CommonAttribute.Public), "Double")
             )
         ).shouldBeSerializable()
     }
     "Serialize Labeled Types" {
         Labeled(
             "Label",
-            Concrete(setOf(CommonAttribute.Public), "String")
+            Concrete(mockHandle, setOf(CommonAttribute.Public), "String")
         ).shouldBeSerializable()
     }
     "Serialize Function Types" {
         FunctionType(
-            setOf(CommonAttribute.Public),
+            mockHandle, setOf(CommonAttribute.Public),
             listOf(
-                Concrete(setOf(CommonAttribute.Internal), "Int"),
-                Concrete(setOf(CommonAttribute.Public), "Int2"),
-                Concrete(setOf(CommonAttribute.Public), "Int3")
+                Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
+                Concrete(mockHandle, setOf(CommonAttribute.Public), "Int2"),
+                Concrete(mockHandle, setOf(CommonAttribute.Public), "Int3")
             )
         ).shouldBeSerializable()
     }
     "Serialize type without attributes" {
         FunctionType(
-            NoAttributes,
+            mockHandle, NoAttributes,
             listOf(
-                Concrete(setOf(CommonAttribute.Internal), "Int"),
-                Concrete(setOf(CommonAttribute.Public), "Int2"),
-                Concrete(setOf(CommonAttribute.Public), "Int3")
+                Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
+                Concrete(mockHandle, setOf(CommonAttribute.Public), "Int2"),
+                Concrete(mockHandle, setOf(CommonAttribute.Public), "Int3")
             )
         ).shouldBeSerializable()
     }
     "Serialize Intersection Types" {
         IntersectionType(
-            setOf(CommonAttribute.Internal),
-            listOf(Alias("String"), Alias("Int"))
+            mockHandle, setOf(CommonAttribute.Internal),
+            listOf(Alias(mockHandle, "String"), Alias(mockHandle, "Int"))
         ).shouldBeSerializable()
     }
     "Serialize Tuple Types" {
         TupleType(
-            setOf(CommonAttribute.Internal),
-            listOf(Alias("String"), Alias("Int"))
+            mockHandle, setOf(CommonAttribute.Internal),
+            listOf(Alias(mockHandle, "String"), Alias(mockHandle, "Int"))
         ).shouldBeSerializable()
     }
     "Serialize Union Types" {
         UnionType(
-            setOf(CommonAttribute.Internal),
+            mockHandle, setOf(CommonAttribute.Internal),
             mapOf(
                 "String" to UnionType.ClassType(
-                    "String",
-                    listOf(Parameter("a"))
+                    mockHandle, "String",
+                    listOf(Parameter(mockHandle, "a"))
                 ),
                 "Int" to UnionType.ClassType(
-                    "Int",
-                    listOf(Parameter("b"))
+                    mockHandle, "Int",
+                    listOf(Parameter(mockHandle, "b"))
                 ),
                 "Map" to UnionType.ClassType(
-                    "Map",
+                    mockHandle, "Map",
                     listOf(
-                        Concrete(setOf(CommonAttribute.Internal), "Int"),
-                        Parameter("c")
+                        Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
+                        Parameter(mockHandle, "c")
                     )
                 )
             )
@@ -164,26 +166,26 @@ class TypeSystemSerializerTest : StringSpec({
     }
     "Serialize Trait Types" {
         TraitType(
-            setOf(CommonAttribute.Internal),
+            mockHandle, setOf(CommonAttribute.Internal),
             "Num",
             "a",
             mapOf(
                 "sum" to TraitType.MethodType(
-                    setOf(CommonAttribute.Public),
+                    mockHandle, setOf(CommonAttribute.Public),
                     "sum",
                     listOf(
-                        Parameter("a"),
-                        Parameter("a"),
-                        Parameter("a")
+                        Parameter(mockHandle, "a"),
+                        Parameter(mockHandle, "a"),
+                        Parameter(mockHandle, "a")
                     ), true
                 ),
                 "sub" to TraitType.MethodType(
-                    setOf(CommonAttribute.Public),
+                    mockHandle, setOf(CommonAttribute.Public),
                     "sub",
                     listOf(
-                        Parameter("a"),
-                        Parameter("a"),
-                        Parameter("a")
+                        Parameter(mockHandle, "a"),
+                        Parameter(mockHandle, "a"),
+                        Parameter(mockHandle, "a")
                     ), false
                 )
             )
@@ -191,7 +193,7 @@ class TypeSystemSerializerTest : StringSpec({
     }
     "Serialize TypeConstructor Types" {
         TypeConstructor(
-            setOf(CommonAttribute.Public),
+            mockHandle, setOf(CommonAttribute.Public),
             "True",
             "Bool"
         ).shouldBeSerializable()

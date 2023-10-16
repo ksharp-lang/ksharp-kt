@@ -17,6 +17,7 @@ typealias TraitTypeFactoryBuilder = TraitTypeFactory.() -> Unit
 interface IsTrait
 
 data class TraitType internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val name: String,
     val param: String,
@@ -34,6 +35,7 @@ data class TraitType internal constructor(
         get() = Substitutions.NoDefined
 
     data class MethodType internal constructor(
+        override val typeSystem: HandlePromise<TypeSystem>,
         override val attributes: Set<Attribute>,
         val name: String,
         val arguments: List<Type>,
@@ -61,7 +63,8 @@ data class TraitType internal constructor(
                 name.indexOf('/').let { if (it == -1) name else name.substring(0, it) }
             } :: ${arguments.joinToString(" -> ") { it.representation }}"
 
-        override fun new(attributes: Set<Attribute>): Type = MethodType(attributes, name, arguments, withDefaultImpl)
+        override fun new(attributes: Set<Attribute>): Type =
+            MethodType(typeSystem, attributes, name, arguments, withDefaultImpl)
     }
 
     override val compound: Boolean
@@ -75,7 +78,7 @@ data class TraitType internal constructor(
         |    ${methods.values.joinToString("\n    ") { it.representation }}
     """.trimMargin("|")
 
-    override fun new(attributes: Set<Attribute>): Type = TraitType(attributes, name, param, methods)
+    override fun new(attributes: Set<Attribute>): Type = TraitType(typeSystem, attributes, name, param, methods)
 
 }
 
@@ -100,6 +103,7 @@ class TraitTypeFactory(
                     }
                     params.put(
                         traitMethodName, TraitType.MethodType(
+                            factory.handle,
                             factory.attributes,
                             name,
                             args,
@@ -128,7 +132,7 @@ fun TypeSystemBuilder.trait(
     item(attributes, name) {
         validateTypeParamName(paramName).flatMap {
             TraitTypeFactory(name, this).apply(factory).build().map {
-                TraitType(attributes, name, paramName, it)
+                TraitType(handle, attributes, name, paramName, it)
             }
         }
     }

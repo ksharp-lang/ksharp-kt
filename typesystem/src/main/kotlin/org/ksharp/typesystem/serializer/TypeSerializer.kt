@@ -1,9 +1,15 @@
 package org.ksharp.typesystem.serializer
 
+import org.ksharp.common.HandlePromise
+import org.ksharp.common.handlePromise
 import org.ksharp.common.io.*
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemImpl
 import org.ksharp.typesystem.types.Type
+
+fun interface TypeSerializerReader<T : Type> {
+    fun read(handle: HandlePromise<TypeSystem>, buffer: BufferView, table: BinaryTableView): T
+}
 
 interface TypeSerializer {
     val writer: SerializerWriter<out Type>
@@ -42,12 +48,12 @@ fun Type.writeTo(buffer: BufferWriter, table: BinaryTable) {
 }
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> BufferView.readType(table: BinaryTableView): T {
+inline fun <reified T : Type> BufferView.readType(typeSystem: HandlePromise<TypeSystem>, table: BinaryTableView): T {
     val serializerName = table[readInt(4)]
     val serializer = Class.forName(serializerName)
         .getDeclaredConstructor()
-        .newInstance() as SerializerReader<T>
-    return serializer.read(bufferFrom(8), table)
+        .newInstance() as TypeSerializerReader<T>
+    return serializer.read(typeSystem, bufferFrom(8), table)
 }
 
 fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
@@ -55,5 +61,8 @@ fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
 }
 
 fun BufferView.readTypeSystem(table: BinaryTableView, parent: TypeSystem? = null): TypeSystem {
-    return TypeSystemImpl(parent, readMapOfTypes(table))
+    val handle = handlePromise<TypeSystem>()
+    return TypeSystemImpl(parent, handle, readMapOfTypes(handle, table)).also {
+        handle.set(it)
+    }
 }
