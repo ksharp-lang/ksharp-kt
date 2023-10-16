@@ -4,6 +4,7 @@ import org.ksharp.common.*
 import org.ksharp.typesystem.types.Type
 
 class ModuleTypeSystem(
+    override val handle: HandlePromise<TypeSystem>,
     override val parent: TypeSystem?,
     private val imports: Map<String, TypeSystem>
 ) : TypeSystem {
@@ -44,10 +45,15 @@ class ModuleTypeSystemBuilder(
         errors = errors + typeSystem.errors
     }
 
-    internal fun build() = PartialTypeSystem(
-        ModuleTypeSystem(parent, builder.build()),
-        errors
-    )
+    internal fun build() =
+        handlePromise<TypeSystem>().let { handle ->
+            PartialTypeSystem(
+                ModuleTypeSystem(handle, parent, builder.build()).also {
+                    handle.set(it)
+                },
+                errors
+            )
+        }
 }
 
 fun moduleTypeSystem(parent: PartialTypeSystem? = null, block: ModuleTypeSystemBuilder.() -> Unit): PartialTypeSystem =

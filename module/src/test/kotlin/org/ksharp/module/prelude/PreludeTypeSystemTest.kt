@@ -12,11 +12,10 @@ import org.ksharp.module.prelude.types.charType
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.get
-import org.ksharp.typesystem.invoke
 
 private fun PartialTypeSystem.repr(name: String): ErrorOrValue<String> =
     this[name].flatMap {
-        this(it).flatMap {
+        it().flatMap {
             Either.Right(it.toString())
         }
     }

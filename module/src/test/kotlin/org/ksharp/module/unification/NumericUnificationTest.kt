@@ -16,26 +16,26 @@ import org.ksharp.typesystem.unification.unify
 class NumericUnificationTest : StringSpec({
     "numeric and parameter type" {
         val type1 = NumericType(Numeric.Int)
-        val type2 = newParameter()
-        preludeTypeSystem.value.unify(Location.NoProvided, type1, type2)
+        val type2 = preludeTypeSystem.value.newParameter()
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(type1)
     }
     "Same numeric type" {
         val type1 = NumericType(Numeric.Int)
         val type2 = NumericType(Numeric.Int)
-        preludeTypeSystem.value.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(type1)
     }
     "Right numeric type same type and less size" {
         val type1 = NumericType(Numeric.Int)
         val type2 = NumericType(Numeric.Short)
-        preludeTypeSystem.value.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(type1)
     }
     "Right numeric type same type and greater size" {
         val type1 = NumericType(Numeric.Int)
         val type2 = NumericType(Numeric.Long)
-        preludeTypeSystem.value.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -47,7 +47,7 @@ class NumericUnificationTest : StringSpec({
     "Right numeric type different type" {
         val type1 = NumericType(Numeric.Int)
         val type2 = NumericType(Numeric.Float)
-        preludeTypeSystem.value.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -59,7 +59,7 @@ class NumericUnificationTest : StringSpec({
     "Numeric and not numeric type" {
         val type1 = NumericType(Numeric.Int)
         val type2 = charType
-        preludeTypeSystem.value.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,

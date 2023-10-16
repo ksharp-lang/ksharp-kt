@@ -1,7 +1,10 @@
 package org.ksharp.module.prelude.types
 
+import org.ksharp.common.HandlePromise
+import org.ksharp.module.prelude.preludeTypeSystem
 import org.ksharp.module.prelude.serializer.TypeSerializers
 import org.ksharp.module.prelude.unification.TypeUnifications
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
@@ -28,6 +31,8 @@ enum class Numeric(val size: kotlin.Int, val isInteger: Boolean) {
 data class NumericType internal constructor(
     val type: Numeric
 ) : ParametricTypeParam {
+    override val typeSystem: HandlePromise<TypeSystem>
+        get() = preludeTypeSystem.value.handle
 
     override val attributes: Set<Attribute>
         get() = NoAttributes

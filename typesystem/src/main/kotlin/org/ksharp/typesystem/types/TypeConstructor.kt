@@ -1,5 +1,7 @@
 package org.ksharp.typesystem.types
 
+import org.ksharp.common.HandlePromise
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
@@ -11,6 +13,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class TypeConstructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val name: String,
     val alias: String
@@ -35,6 +38,6 @@ data class TypeConstructor(
     override val compound: Boolean
         get() = false
 
-    override fun new(attributes: Set<Attribute>): Type = TypeConstructor(attributes, name, alias)
+    override fun new(attributes: Set<Attribute>): Type = TypeConstructor(typeSystem, attributes, name, alias)
 
 }

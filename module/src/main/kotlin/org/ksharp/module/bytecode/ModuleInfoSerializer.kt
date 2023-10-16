@@ -1,11 +1,14 @@
 package org.ksharp.module.bytecode
 
+import org.ksharp.common.HandlePromise
 import org.ksharp.common.add
+import org.ksharp.common.handlePromise
 import org.ksharp.common.io.*
 import org.ksharp.common.listBuilder
 import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.kernelTypeSystem
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
 import java.io.OutputStream
@@ -85,7 +88,7 @@ fun ModuleInfo.writeTo(output: OutputStream) {
     implsTable.transferTo(output)
 }
 
-fun BufferView.readModuleInfo(): ModuleInfo {
+fun BufferView.readModuleInfo(handle: HandlePromise<TypeSystem> = handlePromise()): ModuleInfo {
     val stringPoolSize = readInt(0)
     val dependenciesSize = readInt(4)
     val typeSystemSize = readInt(8)
@@ -96,12 +99,16 @@ fun BufferView.readModuleInfo(): ModuleInfo {
     val stringPool = StringPoolView(bufferFrom(offset))
     val dependencies = bufferFrom(offset + stringPoolSize).readStringList(stringPool)
     val kernelTypeSystem = kernelTypeSystem.value
-    val typeSystem = bufferFrom(offset + dependenciesSize + stringPoolSize).readTypeSystem(stringPool, kernelTypeSystem)
+    val typeSystem =
+        bufferFrom(offset + dependenciesSize + stringPoolSize).readTypeSystem(stringPool, kernelTypeSystem, handle)
     val functions =
-        bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize).readFunctionInfoTable(stringPool)
+        bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize).readFunctionInfoTable(
+            typeSystem.handle,
+            stringPool
+        )
     val traits =
         bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize)
-            .readTraitInfoTable(stringPool)
+            .readTraitInfoTable(typeSystem.handle, stringPool)
     val impls = bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize + traitsSize)
         .readImpls(stringPool)
     return ModuleInfo(dependencies, typeSystem, functions, traits, impls)

@@ -3,11 +3,10 @@ package org.ksharp.typesystem.unification
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.typesystem.ErrorOrType
-import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 
 fun interface UnificationAlgo<T : Type> {
-    fun unify(location: Location, typeSystem: TypeSystem, type1: T, type2: Type): ErrorOrType
+    fun unify(location: Location, type1: T, type2: Type): ErrorOrType
 }
 
 interface TypeUnification {
@@ -23,8 +22,8 @@ enum class TypeUnifications(override val algo: UnificationAlgo<out Type>) : Type
     Tuple(TupleUnification()),
     TypeConstructor(TypeConstructorUnification()),
     Union(UnionUnification()),
-    NoDefined(UnificationAlgo { _, _, _, _ -> TODO("Not yet implemented") })
+    NoDefined(UnificationAlgo { _, _, _ -> TODO("Not yet implemented") })
 }
 
-fun TypeSystem.unify(location: Location, type1: Type, type2: Type): ErrorOrType =
-    type1.unification.algo.cast<UnificationAlgo<Type>>().unify(location, this, type1, type2)
+fun Type.unify(location: Location, type2: Type): ErrorOrType =
+    unification.algo.cast<UnificationAlgo<Type>>().unify(location, this, type2)

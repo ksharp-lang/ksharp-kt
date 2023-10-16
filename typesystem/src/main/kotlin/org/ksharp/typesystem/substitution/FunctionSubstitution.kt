@@ -27,5 +27,5 @@ class FunctionSubstitution : CompoundSubstitution<FunctionType>() {
     ): ErrorOrType =
         type.arguments
             .substitute(context, location, typeContext)
-            .map { FunctionType(type.attributes, it) }
+            .map { FunctionType(type.typeSystem, type.attributes, it) }
 }

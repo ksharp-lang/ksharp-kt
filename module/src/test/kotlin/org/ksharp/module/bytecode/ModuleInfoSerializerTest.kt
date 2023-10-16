@@ -2,6 +2,7 @@ package org.ksharp.module.bytecode
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.MockHandlePromise
 import org.ksharp.common.io.bufferView
 import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
@@ -19,16 +20,17 @@ private fun ModuleInfo.shouldBeSerializable() {
     writeTo(output)
     val input = ByteArrayInputStream(output.toByteArray())
     input.bufferView {
-        it.readModuleInfo()
+        it.readModuleInfo(MockHandlePromise())
     }.apply {
-        dependencies.shouldBe(this@shouldBeSerializable.dependencies)
-        functions.shouldBe(this@shouldBeSerializable.functions)
-        typeSystem.asSequence().toList()
-            .shouldBe(this@shouldBeSerializable.typeSystem.asSequence().toList())
+        this@shouldBeSerializable.dependencies.shouldBe(dependencies)
+        this@shouldBeSerializable.functions.shouldBe(functions)
+        this@shouldBeSerializable.typeSystem.asSequence().toList()
+            .shouldBe(typeSystem.asSequence().toList())
     }
 }
 
 class ModuleInfoSerializerTest : StringSpec({
+    val ts = typeSystem { }.value
     "Serialize ModuleInfo" {
         ModuleInfo(
             listOf("module1", "module2"),
@@ -40,29 +42,29 @@ class ModuleInfoSerializerTest : StringSpec({
                 "sum/2" to functionInfo(
                     setOf(CommonAttribute.Native, CommonAttribute.Public),
                     "sum",
-                    listOf(newParameter(), newParameter())
+                    listOf(ts.newParameter(), ts.newParameter())
                 ),
                 "sum/3" to functionInfo(
                     setOf(CommonAttribute.Public),
                     "sum",
-                    listOf(newParameter(), newParameter(), newParameter())
+                    listOf(ts.newParameter(), ts.newParameter(), ts.newParameter())
                 ),
                 "sub/2" to functionInfo(
                     setOf(CommonAttribute.Native, CommonAttribute.Public),
                     "sub",
-                    listOf(newParameter(), newParameter())
+                    listOf(ts.newParameter(), ts.newParameter())
                 )
             ),
             mapOf(
                 "Eq" to traitInfo(
                     "Eq",
                     mapOf(
-                        "sum/2" to newParameter(),
+                        "sum/2" to ts.newParameter(),
                     ), mapOf(
                         "sum/2" to functionInfo(
                             setOf(CommonAttribute.Native, CommonAttribute.Public),
                             "sum",
-                            listOf(newParameter(), newParameter())
+                            listOf(ts.newParameter(), ts.newParameter())
                         )
                     )
                 )

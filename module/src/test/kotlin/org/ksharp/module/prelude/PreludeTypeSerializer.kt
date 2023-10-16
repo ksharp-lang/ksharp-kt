@@ -2,9 +2,10 @@ package org.ksharp.module.prelude
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.*
+import org.ksharp.common.MockHandlePromise
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
+import org.ksharp.common.listBuilder
 import org.ksharp.module.bytecode.mockStringTable
 import org.ksharp.module.bytecode.mockStringTableView
 import org.ksharp.module.prelude.types.Numeric
@@ -27,7 +28,7 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
     input.bufferView {
-        it.readType<T>(stringPoolView)
+        it.readType<T>(MockHandlePromise(), stringPoolView)
     }.shouldBe(this)
 }
 

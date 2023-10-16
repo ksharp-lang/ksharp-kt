@@ -2,12 +2,11 @@ package org.ksharp.typesystem.types
 
 import org.ksharp.common.Either
 import org.ksharp.common.ErrorOrValue
+import org.ksharp.common.HandlePromise
 import org.ksharp.common.new
-import org.ksharp.typesystem.TypeFactoryBuilder
-import org.ksharp.typesystem.TypeItemBuilder
-import org.ksharp.typesystem.TypeSystemBuilder
-import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.*
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.merge
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.solver.Solver
@@ -17,16 +16,44 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
+private fun TypeSystem.resolve(type: Type): ErrorOrType =
+    when (type) {
+        is Alias -> this[type.name].flatMap {
+            it()
+        }
+
+        is Labeled -> type.type().map {
+            Labeled(type.label, it)
+        }
+
+        is TypeAlias -> this[type.name].flatMap {
+            it()
+        }.map { it.new(it.attributes.merge(type.attributes)) }
+
+        is TypeConstructor -> this[type.alias]
+        else -> Either.Right(type)
+    }
+
 interface Type {
+    val typeSystem: HandlePromise<TypeSystem>
+
     val serializer: TypeSerializer
     val unification: TypeUnification
     val substitution: Substitution
     val solver: Solver
+
     val compound: Boolean get() = true
     val terms: Sequence<Type>
     val attributes: Set<Attribute>
+
     val representation: String get() = toString().let { s -> if (compound) "($s)" else s }
+
     fun new(attributes: Set<Attribute>): Type
+
+    operator fun invoke(): ErrorOrType {
+        val handle = typeSystem.handle
+        return handle?.resolve(this) ?: throw IllegalStateException("TypeSystem not initialized")
+    }
 }
 
 sealed interface TypeVariable : Type {
@@ -36,6 +63,7 @@ sealed interface TypeVariable : Type {
 }
 
 data class Concrete internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val name: String,
 ) : Type {
@@ -56,12 +84,12 @@ data class Concrete internal constructor(
     override fun toString(): String = name
 
     override fun new(attributes: Set<Attribute>): Type =
-        Concrete(attributes, name)
+        Concrete(typeSystem, attributes, name)
 
 }
 
 fun TypeItemBuilder.alias(name: String): ErrorOrValue<TypeVariable> =
-    Either.Right(Alias(name)).also {
+    Either.Right(Alias(handle, name)).also {
         validation {
             if (it(name) == null)
                 TypeSystemErrorCode.TypeNotFound.new("type" to name)
@@ -71,7 +99,7 @@ fun TypeItemBuilder.alias(name: String): ErrorOrValue<TypeVariable> =
 
 fun TypeSystemBuilder.type(attributes: Set<Attribute>, name: String) =
     item(attributes, name) {
-        Either.Right(Concrete(attributes, name))
+        Either.Right(Concrete(this@type.handle, attributes, name))
     }
 
 fun TypeSystemBuilder.type(
@@ -82,8 +110,8 @@ fun TypeSystemBuilder.type(
     item(attributes, name) {
         factory().map {
             if (it is Alias) {
-                if (it.name == name) Concrete(attributes, it.name)
-                else TypeAlias(attributes, it.name)
+                if (it.name == name) Concrete(it.typeSystem, attributes, it.name)
+                else TypeAlias(it.typeSystem, attributes, it.name)
             } else it
         }
     }

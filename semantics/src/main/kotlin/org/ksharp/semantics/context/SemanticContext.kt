@@ -28,7 +28,7 @@ class TypeSystemSemanticContext(override val typeSystem: TypeSystem) : SemanticC
 class TraitSemanticContext(override val typeSystem: TypeSystem, private val trait: TraitType) : SemanticContext {
     override fun findFunctionType(name: String): FunctionType? =
         trait.methods[name]?.let {
-            it.arguments.toFunctionType(it.attributes)
+            it.arguments.toFunctionType(it.typeSystem.handle!!, it.attributes)
         }
 
     override fun calculateVisibility(function: FunctionNode): CommonAttribute {

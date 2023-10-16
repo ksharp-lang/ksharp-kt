@@ -12,7 +12,7 @@ class AliasSubstitution : SubstitutionAlgo<Type> {
         type1: Type,
         type2: Type
     ): ErrorOrValue<Boolean> =
-        context.typeSystem(type1).flatMap {
+        type1().flatMap {
             context.extract(location, it, type2)
         }
 
@@ -22,7 +22,7 @@ class AliasSubstitution : SubstitutionAlgo<Type> {
         type: Type,
         typeContext: Type
     ): ErrorOrType =
-        context.typeSystem(type).flatMap {
+        type().flatMap {
             context.substitute(location, it, typeContext)
         }
 }

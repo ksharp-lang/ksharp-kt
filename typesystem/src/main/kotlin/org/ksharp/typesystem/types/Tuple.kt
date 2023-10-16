@@ -1,6 +1,8 @@
 package org.ksharp.typesystem.types
 
+import org.ksharp.common.HandlePromise
 import org.ksharp.typesystem.TypeItemBuilder
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
@@ -13,6 +15,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class TupleType internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val elements: List<Type>,
 ) : Type {
@@ -33,13 +36,14 @@ data class TupleType internal constructor(
     override val compound: Boolean = true
     override fun toString(): String = elements.asSequence().map { it.representation }.joinToString(", ")
 
-    override fun new(attributes: Set<Attribute>): Type = TupleType(attributes, elements)
+    override fun new(attributes: Set<Attribute>): Type = TupleType(typeSystem, attributes, elements)
 }
 
 fun TypeItemBuilder.tupleType(factory: ParametricTypeFactoryBuilder) =
     ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().map {
-        TupleType(attributes, it)
+        TupleType(handle, attributes, it)
     }
 
 
-fun List<Type>.toTupleType(attributes: Set<Attribute> = NoAttributes) = TupleType(attributes, this)
+fun List<Type>.toTupleType(typeSystem: TypeSystem, attributes: Set<Attribute> = NoAttributes) =
+    TupleType(typeSystem.handle, attributes, this)

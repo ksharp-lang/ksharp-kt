@@ -1,9 +1,7 @@
 package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.TypeItemBuilder
-import org.ksharp.typesystem.TypeSystemBuilder
-import org.ksharp.typesystem.TypeSystemErrorCode
+import org.ksharp.typesystem.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
@@ -14,7 +12,6 @@ import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
-import org.ksharp.typesystem.validateTypeParamName
 import java.util.concurrent.atomic.AtomicInteger
 
 private var parameterIdCounter = AtomicInteger(-1)
@@ -22,6 +19,7 @@ private var parameterIdCounter = AtomicInteger(-1)
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
 data class Parameter internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     val name: String,
 ) : TypeVariable {
     override val attributes: Set<Attribute>
@@ -44,13 +42,14 @@ data class Parameter internal constructor(
 }
 
 fun resetParameterCounterForTesting() = parameterIdCounter.set(-1)
-fun newParameterForTesting(id: Int) = Parameter("@${id}")
+fun newParameterForTesting(id: Int) = Parameter(MockHandlePromise(), "@${id}")
 
-fun newParameter() = Parameter("@${parameterIdCounter.incrementAndGet()}")
+fun TypeSystem.newParameter() = Parameter(handle, "@${parameterIdCounter.incrementAndGet()}")
 
-fun newNamedParameter(name: String) = Parameter(name)
+fun TypeSystem.newNamedParameter(name: String) = Parameter(handle, name)
 
 data class ParametricType internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val type: Type,
     val params: List<Type>
@@ -71,7 +70,7 @@ data class ParametricType internal constructor(
 
     override fun toString(): String = "$type ${params.asSequence().map { it.representation }.joinToString(" ")}"
 
-    override fun new(attributes: Set<Attribute>): Type = ParametricType(attributes, type, params)
+    override fun new(attributes: Set<Attribute>): Type = ParametricType(typeSystem, attributes, type, params)
 }
 
 interface ParametricTypeParam : Type
@@ -91,7 +90,7 @@ class ParametricTypeFactory(
     fun parameter(name: String, label: String? = null) {
         result = result.flatMap { params ->
             validateTypeParamName(name).map {
-                params.add(Parameter(it).labeled(label))
+                params.add(Parameter(builder.handle, it).labeled(label))
                 params
             }
         }
@@ -152,7 +151,7 @@ fun TypeItemBuilder.parametricType(
                     TypeSystemErrorCode.ParametricTypeWithoutParameters.new("type" to name)
                 )
             } else
-                Either.Right(ParametricType(attributes, Alias(name), it))
+                Either.Right(ParametricType(handle, attributes, Alias(handle, name), it))
         }
     } else
         alias(name).flatMap { pType ->
@@ -168,11 +167,11 @@ fun TypeItemBuilder.parametricType(
                         TypeSystemErrorCode.InvalidNumberOfParameters.new(
                             "type" to type,
                             "number" to type.params.size,
-                            "configuredType" to ParametricType(attributes, type.type, types)
+                            "configuredType" to ParametricType(handle, attributes, type.type, types)
                         )
                     } else null
                 }
-                Either.Right(ParametricType(attributes, pType, types))
+                Either.Right(ParametricType(handle, attributes, pType, types))
             }
         }
 

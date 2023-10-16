@@ -81,6 +81,6 @@ fun SemanticInfo.getType(location: Location): ErrorOrType =
 fun TypePromise.getType(location: Location): ErrorOrType =
     this.cast<SemanticInfo>().getType(location)
 
-fun paramTypePromise() = TypeSemanticInfo(Either.Right(newParameter()))
+fun TypeSystem.paramTypePromise() = TypeSemanticInfo(Either.Right(newParameter()))
 
 fun Error.toTypePromise() = TypeSemanticInfo(Either.Left(this))

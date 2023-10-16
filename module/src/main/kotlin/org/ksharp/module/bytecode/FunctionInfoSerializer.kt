@@ -1,10 +1,12 @@
 package org.ksharp.module.bytecode
 
+import org.ksharp.common.HandlePromise
 import org.ksharp.common.io.*
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.FunctionInfoImpl
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
 import org.ksharp.typesystem.serializer.readListOfTypes
@@ -21,11 +23,11 @@ fun FunctionInfo.writeTo(buffer: BufferWriter, table: BinaryTable) {
     }
 }
 
-fun BufferView.readFunctionInfo(table: BinaryTableView): FunctionInfo {
+fun BufferView.readFunctionInfo(handle: HandlePromise<TypeSystem>, table: BinaryTableView): FunctionInfo {
     val offset = readInt(4)
     val attributes = bufferFrom(4).readAttributes(table)
     val name = table[readInt(4 + offset)]
-    val types = bufferFrom(8 + offset).readListOfTypes(table)
+    val types = bufferFrom(8 + offset).readListOfTypes(handle, table)
     return FunctionInfoImpl(attributes, name, types)
 }
 
@@ -37,19 +39,25 @@ fun Map<String, FunctionInfo>.writeTo(buffer: BufferWriter, table: BinaryTable) 
     }
 }
 
-fun BufferView.readFunctionInfoAndPosition(table: BinaryTableView): Pair<Int, FunctionInfo> {
+fun BufferView.readFunctionInfoAndPosition(
+    handle: HandlePromise<TypeSystem>,
+    table: BinaryTableView
+): Pair<Int, FunctionInfo> {
     val position = readInt(0)
-    return position to readFunctionInfo(table)
+    return position to readFunctionInfo(handle, table)
 }
 
-fun BufferView.readFunctionInfoTable(table: BinaryTableView): Map<String, FunctionInfo> {
+fun BufferView.readFunctionInfoTable(
+    handle: HandlePromise<TypeSystem>,
+    table: BinaryTableView
+): Map<String, FunctionInfo> {
     val paramsSize = readInt(0)
     val types = mapBuilder<String, FunctionInfo>()
     var position = 4
     repeat(paramsSize) {
         val typeBuffer = bufferFrom(position)
         val key = table[typeBuffer.readInt(0)]
-        val (newPosition, function) = typeBuffer.bufferFrom(4).readFunctionInfoAndPosition(table)
+        val (newPosition, function) = typeBuffer.bufferFrom(4).readFunctionInfoAndPosition(handle, table)
         types.put(
             key,
             function

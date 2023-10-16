@@ -14,7 +14,7 @@ import org.ksharp.typesystem.types.newParameter
 
 class SubstitutionTest : StringSpec({
     "Char type substitution" {
-        val context = SubstitutionContext(preludeTypeSystem.value)
+        val context = SubstitutionContext()
         context.extract(Location.NoProvided, charType, charType)
             .shouldBeRight(false)
         context.substitute(Location.NoProvided, charType, charType)
@@ -22,7 +22,7 @@ class SubstitutionTest : StringSpec({
     }
     "Numeric type substitution" {
         val intType = NumericType(Numeric.Int)
-        val context = SubstitutionContext(preludeTypeSystem.value)
+        val context = SubstitutionContext()
         context.extract(Location.NoProvided, intType, intType)
             .shouldBeRight(false)
         context.substitute(Location.NoProvided, intType, intType)
@@ -31,8 +31,8 @@ class SubstitutionTest : StringSpec({
     "Parameters and numeric types substitution" {
         val intType = NumericType(Numeric.Int)
         val longType = NumericType(Numeric.Long)
-        val parameter = newParameter()
-        val context = SubstitutionContext(preludeTypeSystem.value)
+        val parameter = preludeTypeSystem.value.newParameter()
+        val context = SubstitutionContext()
         context.extract(Location.NoProvided, parameter, intType)
             .shouldBeRight(true)
         context.extract(Location.NoProvided, parameter, longType)

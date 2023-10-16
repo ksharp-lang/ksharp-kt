@@ -1689,12 +1689,16 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             this.shouldBe(info)
             this.abstractions.first()
                 .info.getInferredType(Location.NoProvided)
-                .shouldBeRight(listOf(ts["Unit"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType())
+                .shouldBeRight(
+                    listOf(ts["Unit"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType(
+                        MockHandlePromise()
+                    )
+                )
         }
     }
     "Check inference - abstraction with arguments" {
         val errors = ErrorCollector()
-        val param = newParameter()
+        val param = ts.newParameter()
         val symbol = Symbol("a", TypeSemanticInfo(Either.Right(param)))
         val info = ModuleFunctionInfo(
             errors.build(),
@@ -1745,12 +1749,16 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             this.shouldBe(info)
             this.abstractions.first()
                 .info.getInferredType(Location.NoProvided)
-                .shouldBeRight(listOf(ts["Long"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType())
+                .shouldBeRight(
+                    listOf(ts["Long"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType(
+                        MockHandlePromise()
+                    )
+                )
         }
     }
     "Check inference - abstraction with error" {
         val errors = ErrorCollector()
-        val param = newParameter()
+        val param = ts.newParameter()
         val symbol = Symbol("a", TypeSemanticInfo(Either.Right(param)))
         val info = ModuleFunctionInfo(
             errors.build(),

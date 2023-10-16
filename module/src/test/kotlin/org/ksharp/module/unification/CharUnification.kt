@@ -16,13 +16,13 @@ import org.ksharp.typesystem.unification.unify
 class CharUnification : StringSpec({
     "chart type and parameter" {
         val type1 = charType
-        val type2 = newParameter()
-        preludeTypeSystem.value.unify(Location.NoProvided, type1, type2).shouldBeRight(type1)
+        val type2 = preludeTypeSystem.value.newParameter()
+        type1.unify(Location.NoProvided, type2).shouldBeRight(type1)
     }
     "chart type and other type" {
         val type1 = charType
         val type2 = NumericType(Numeric.Int)
-        preludeTypeSystem.value.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,

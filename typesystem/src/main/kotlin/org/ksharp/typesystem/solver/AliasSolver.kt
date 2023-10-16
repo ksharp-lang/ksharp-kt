@@ -9,7 +9,7 @@ import org.ksharp.typesystem.types.TypeAlias
 
 class AliasSolver : Solver {
     override fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType =
-        typeSystem(type).flatMap {
+        type().flatMap {
             if (it is Alias || it is TypeAlias) {
                 typeSystem.solve(it)
             } else Either.Right(it)
