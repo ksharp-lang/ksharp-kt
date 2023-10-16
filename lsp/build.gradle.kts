@@ -31,7 +31,9 @@ tasks.shadowJar {
 koverReport {
     filters {
         excludes {
-            classes("org.ksharp.lsp.KsLspMain")
+            annotatedBy(
+                "org.ksharp.common.annotation.KoverIgnore"
+            )
         }
     }
 }

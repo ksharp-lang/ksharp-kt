@@ -37,7 +37,9 @@ tasks {
 koverReport {
     filters {
         excludes {
-            classes("org.ksharp.ir.truffle.KSharpBinaryNode","org.ksharp.ir.truffle.PreludeTypeSystem")
+            annotatedBy(
+                "org.ksharp.common.annotation.KoverIgnore"
+            )
         }
     }
 }
