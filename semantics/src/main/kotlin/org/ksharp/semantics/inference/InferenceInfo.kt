@@ -24,7 +24,7 @@ internal fun FunctionInfo.substitute(
     location: Location,
     arguments: List<Type>
 ): ErrorOrValue<FunctionType> {
-    val context = SubstitutionContext(typeSystem)
+    val context = SubstitutionContext()
     val result: ErrorOrValue<FunctionType>? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
         val substitutionResult = context.extract(location, item1, item2)
         if (substitutionResult.isLeft) {
@@ -40,9 +40,9 @@ internal fun FunctionInfo.unify(
     location: Location,
     arguments: List<Type>
 ): ErrorOrType {
-    return typeSystem(types.last()).flatMap { returnType ->
+    return types.last()().flatMap { returnType ->
         types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
-            typeSystem.unify(location, item1, item2)
+            item1.unify(location, item2)
         }
             .unwrap()
             .flatMap { params ->
@@ -143,10 +143,6 @@ data class InferenceInfo(
                 )
             }
         }
-
-
-    fun unify(location: Location, left: Type, right: Type): ErrorOrType =
-        module.typeSystem.unify(location, left, right)
 
     fun getType(name: String): ErrorOrType =
         module.typeSystem[name]
