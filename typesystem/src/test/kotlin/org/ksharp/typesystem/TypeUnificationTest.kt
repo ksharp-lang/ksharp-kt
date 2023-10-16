@@ -33,40 +33,40 @@ class TypeUnificationTest : StringSpec({
     "Unify two parameters" {
         val type1 = typeSystem.newParameter()
         val type2 = typeSystem.newParameter()
-        typeSystem.unify(Location.NoProvided, type1, type2).shouldBeRight(type2)
+        type1.unify(Location.NoProvided, type2).shouldBeRight(type2)
     }
     "Compatible concrete types" {
         val type1 = typeSystem["Int"].valueOrNull!!
         val type2 = typeSystem["Int"].valueOrNull!!
-        typeSystem.unify(Location.NoProvided, type1, type2).shouldBeRight(type1)
+        type1.unify(Location.NoProvided, type2).shouldBeRight(type1)
     }
     "Compatible concrete and parameter types" {
         val type1 = typeSystem["Int"].valueOrNull!!
         val type2 = typeSystem.newParameter()
-        typeSystem.unify(Location.NoProvided, type1, type2).shouldBeRight(type1)
-        typeSystem.unify(Location.NoProvided, type2, type1).shouldBeRight(type1)
+        type1.unify(Location.NoProvided, type2).shouldBeRight(type1)
+        type1.unify(Location.NoProvided, type1).shouldBeRight(type1)
     }
     "Compatible concrete and alias types" {
         val type1 = typeSystem["Int"].valueOrNull!!
         val type2 = typeSystem["Integer"].valueOrNull!!
-        typeSystem.unify(Location.NoProvided, type1, type2).shouldBeRight(type1)
+        type1.unify(Location.NoProvided, type2).shouldBeRight(type1)
     }
     "Compatible concrete and labeled alias types" {
         val type1 = typeSystem["Int"].valueOrNull!!
         val type2 = Labeled("x", typeSystem["Integer"].valueOrNull!!)
-        typeSystem.unify(Location.NoProvided, type1, type2).shouldBeRight(type1)
-        typeSystem.unify(Location.NoProvided, type2, type1).shouldBeRight(type1)
+        type1.unify(Location.NoProvided, type2).shouldBeRight(type1)
+        type2.unify(Location.NoProvided, type1).shouldBeRight(type1)
     }
     "Compatible labeled and alias types" {
         val type1 = Labeled("x", typeSystem["Int"].valueOrNull!!)
         val type2 = typeSystem["Integer"].valueOrNull!!
-        typeSystem.unify(Location.NoProvided, type1, type2).shouldBeRight(typeSystem["Int"].valueOrNull!!)
-        typeSystem.unify(Location.NoProvided, type2, type1).shouldBeRight(typeSystem["Int"].valueOrNull!!)
+        type1.unify(Location.NoProvided, type2).shouldBeRight(typeSystem["Int"].valueOrNull!!)
+        type2.unify(Location.NoProvided, type1).shouldBeRight(typeSystem["Int"].valueOrNull!!)
     }
     "Not compatible concrete types" {
         val type1 = typeSystem["Int"].valueOrNull!!
         val type2 = typeSystem["Long"].valueOrNull!!
-        typeSystem.unify(Location.NoProvided, type1, type2).shouldBeLeft(
+        type1.unify(Location.NoProvided, type2).shouldBeLeft(
             TypeSystemErrorCode.IncompatibleTypes.new(
                 Location.NoProvided,
                 "type1" to type1.representation,
@@ -84,7 +84,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Int"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(
                 ParametricType(
                     typeSystem.handle,
@@ -99,7 +99,7 @@ class TypeUnificationTest : StringSpec({
     "Compatible parametric type 2" {
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = typeSystem.newParameter()
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(
                 ParametricType(
                     typeSystem.handle,
@@ -120,7 +120,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Int"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -139,7 +139,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Int"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(
                 type2
             )
@@ -154,7 +154,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Long"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -166,7 +166,7 @@ class TypeUnificationTest : StringSpec({
     "Incompatible parametric types 2" {
         val type1 = typeSystem["Map"].valueOrNull!!
         val type2 = Concrete(typeSystem.handle, NoAttributes, "Int")
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -185,7 +185,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Int"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -211,7 +211,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Long"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(
                 TupleType(
                     typeSystem.handle,
@@ -233,7 +233,7 @@ class TypeUnificationTest : StringSpec({
             )
         )
         val type2 = typeSystem.newParameter()
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(
                 TupleType(
                     typeSystem.handle,
@@ -261,7 +261,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Long"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -287,7 +287,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Long"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeRight(
                 FunctionType(
                     typeSystem.handle,
@@ -317,7 +317,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Long"].valueOrNull!!
             )
         )
-        typeSystem.unify(Location.NoProvided, type1, type2)
+        type1.unify(Location.NoProvided, type2)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -336,10 +336,10 @@ class TypeUnificationTest : StringSpec({
             )
         )
         val typeConstructor = TypeConstructor(typeSystem.handle, NoAttributes, "True", "Bool")
-        typeSystem.unify(Location.NoProvided, union, typeConstructor)
+        union.unify(Location.NoProvided, typeConstructor)
             .shouldBeRight(union)
-        typeSystem.unify(
-            Location.NoProvided, union, UnionType(
+        union.unify(
+            Location.NoProvided, UnionType(
                 typeSystem.handle,
                 NoAttributes,
                 mapOf(
@@ -348,7 +348,7 @@ class TypeUnificationTest : StringSpec({
                 )
             )
         ).shouldBeRight(union)
-        typeSystem.unify(Location.NoProvided, union, Concrete(typeSystem.handle, NoAttributes, "Int"))
+        union.unify(Location.NoProvided, Concrete(typeSystem.handle, NoAttributes, "Int"))
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -356,7 +356,7 @@ class TypeUnificationTest : StringSpec({
                     "type2" to "Int"
                 )
             )
-        typeSystem.unify(Location.NoProvided, union, TypeConstructor(typeSystem.handle, NoAttributes, "Other", "Bool"))
+        union.unify(Location.NoProvided, TypeConstructor(typeSystem.handle, NoAttributes, "Other", "Bool"))
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,
@@ -377,14 +377,13 @@ class TypeUnificationTest : StringSpec({
                 }
             }
         }.value
-        ts.unify(
+        ParametricType(
+            ts.handle,
+            NoAttributes, Concrete(ts.handle, NoAttributes, "Num"), listOf(
+                Parameter(ts.handle, "a")
+            )
+        ).unify(
             Location.NoProvided,
-            ParametricType(
-                ts.handle,
-                NoAttributes, Concrete(ts.handle, NoAttributes, "Num"), listOf(
-                    Parameter(ts.handle, "a")
-                )
-            ),
             Alias(ts.handle, "Int")
         ).shouldBeRight(
             ParametricType(

@@ -3,7 +3,6 @@ package org.ksharp.typesystem.unification
 import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.typesystem.ErrorOrType
-import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.ParametricType
 import org.ksharp.typesystem.types.Type
@@ -15,7 +14,6 @@ class ParametricUnification : CompoundUnification<ParametricType>() {
 
     override fun compoundUnify(
         location: Location,
-        typeSystem: TypeSystem,
         type1: ParametricType,
         type2: ParametricType
     ): ErrorOrType =
@@ -25,7 +23,7 @@ class ParametricUnification : CompoundUnification<ParametricType>() {
                 Either.Right(type1.type)
             } else incompatibleType(location, type1, type2)
             type.flatMap {
-                unifyListOfTypes(location, typeSystem, type1, type2, type1.params, type2.params).map { params ->
+                unifyListOfTypes(location, type1, type2, type1.params, type2.params).map { params ->
                     ParametricType(
                         it.typeSystem,
                         it.attributes,

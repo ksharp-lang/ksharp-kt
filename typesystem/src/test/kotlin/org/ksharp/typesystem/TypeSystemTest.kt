@@ -116,7 +116,7 @@ class TypeSystemTest : ShouldSpec({
                     value.alias(name = "Map").shouldBeType(Alias(handle, "Map"), "Map")
                 }
                 should("Resolve alias type should returns the parametric type") {
-                    value(Alias(handle, "Map")).shouldBeType(
+                    Alias(handle, "Map")().shouldBeType(
                         ParametricType(
                             handle, setOf(CommonAttribute.Public),
                             Alias(handle, "Map"),
@@ -129,18 +129,16 @@ class TypeSystemTest : ShouldSpec({
                     )
                 }
                 context("Not alias types should resolve to themself") {
-                    value(Concrete(handle, setOf(CommonAttribute.Public), "Int")).shouldBeType(
+                    Concrete(handle, setOf(CommonAttribute.Public), "Int")().shouldBeType(
                         Concrete(handle, setOf(CommonAttribute.Public), "Int"),
                         "Int"
                     )
                 }
                 context("Resolve a Labeled alias") {
-                    value(
-                        Labeled(
-                            "n",
-                            Alias(handle, "Map")
-                        )
-                    ).shouldBeType(
+                    Labeled(
+                        "n",
+                        Alias(handle, "Map")
+                    )().shouldBeType(
                         Labeled(
                             "n",
                             ParametricType(
@@ -220,7 +218,7 @@ class TypeSystemTest : ShouldSpec({
                         )
                     }
                     should("Recursive: (Either a (Either a b)) alias type") {
-                        invoke(get("EitherAlias").valueOrNull!!).shouldBeType(
+                        get("EitherAlias").valueOrNull!!().shouldBeType(
                             ParametricType(
                                 handle,
                                 setOf(CommonAttribute.Public, CommonAttribute.Pure),
@@ -434,7 +432,7 @@ class TypeSystemTest : ShouldSpec({
                             )
                     }
                     should("SumAlias (Int -> Int -> Int) type") {
-                        invoke(get("SumAlias").valueOrNull!!).shouldBeType(
+                        get("SumAlias").valueOrNull!!().shouldBeType(
                             FunctionType(
                                 handle,
                                 setOf(CommonAttribute.Public, CommonAttribute.Native),
@@ -536,7 +534,7 @@ class TypeSystemTest : ShouldSpec({
                         )
                     }
                     should("FloatPoint typealias ((Num x), (Num x)) type") {
-                        invoke(get("FloatPoint").valueOrNull!!).shouldBeType(
+                        get("FloatPoint").valueOrNull!!().shouldBeType(
                             TupleType(
                                 handle,
                                 setOf(CommonAttribute.Public, CommonAttribute.Native),
@@ -708,7 +706,7 @@ class TypeSystemTest : ShouldSpec({
                         )
                     }
                     should("Resolve type alias Boolean") {
-                        invoke(get("Boolean").valueOrNull!!).shouldBeType(
+                        get("Boolean").valueOrNull!!().shouldBeType(
                             UnionType(
                                 handle,
                                 setOf(CommonAttribute.Public, CommonAttribute.Constant),
@@ -732,7 +730,7 @@ class TypeSystemTest : ShouldSpec({
                     )
                 }
                 should("Resolve type constructor types") {
-                    value(TypeConstructor(handle, setOf(CommonAttribute.Public), "True", "Bool"))
+                    TypeConstructor(handle, setOf(CommonAttribute.Public), "True", "Bool")()
                         .shouldBeType(
                             UnionType(
                                 handle,
@@ -896,7 +894,7 @@ class TypeSystemTest : ShouldSpec({
                         )
                     }
                     should("TypeOrdNum intersection type") {
-                        invoke(get("TypeOrdNum").valueOrNull!!).shouldBeType(
+                        get("TypeOrdNum").valueOrNull!!().shouldBeType(
                             IntersectionType(
                                 handle,
                                 NoAttributes,

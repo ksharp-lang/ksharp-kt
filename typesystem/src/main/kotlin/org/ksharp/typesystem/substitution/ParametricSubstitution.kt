@@ -18,7 +18,7 @@ class ParametricSubstitution : CompoundSubstitution<ParametricType>() {
         type1: ParametricType,
         type2: ParametricType
     ): ErrorOrValue<Boolean> =
-        if (context.typeSystem(type1.type) == context.typeSystem(type2.type)) {
+        if (type1.type() == type2.type()) {
             type1.params.extract(context, location, type2.params)
         } else incompatibleType(location, type1, type2)
 

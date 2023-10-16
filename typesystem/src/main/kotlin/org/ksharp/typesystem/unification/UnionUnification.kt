@@ -3,7 +3,6 @@ package org.ksharp.typesystem.unification
 import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.typesystem.ErrorOrType
-import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.TypeConstructor
@@ -12,7 +11,6 @@ import org.ksharp.typesystem.types.UnionType
 class UnionUnification : UnificationAlgo<UnionType> {
     override fun unify(
         location: Location,
-        typeSystem: TypeSystem,
         type1: UnionType,
         type2: Type
     ): ErrorOrType =

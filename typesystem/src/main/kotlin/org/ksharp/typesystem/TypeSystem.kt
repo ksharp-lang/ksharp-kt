@@ -1,8 +1,7 @@
 package org.ksharp.typesystem
 
 import org.ksharp.common.*
-import org.ksharp.typesystem.attributes.merge
-import org.ksharp.typesystem.types.*
+import org.ksharp.typesystem.types.Type
 
 typealias PartialTypeSystem = PartialBuilderResult<TypeSystem>
 
@@ -19,24 +18,6 @@ interface TypeSystem {
      * return the type value resolved
      */
     operator fun get(name: String): ErrorOrType
-
-    operator fun invoke(type: Type): ErrorOrType =
-        when (type) {
-            is Alias -> this[type.name].flatMap {
-                this(it)
-            }
-
-            is Labeled -> this(type.type).map {
-                Labeled(type.label, it)
-            }
-
-            is TypeAlias -> this[type.name].flatMap {
-                this(it)
-            }.map { it.new(it.attributes.merge(type.attributes)) }
-
-            is TypeConstructor -> this[type.alias]
-            else -> Either.Right(type)
-        }
 }
 
 class TypeSystemImpl internal constructor(
@@ -62,11 +43,9 @@ class TypeSystemImpl internal constructor(
 }
 
 val PartialTypeSystem.size get() = value.size
-
 val PartialTypeSystem.handle get() = value.handle
-operator fun PartialTypeSystem.get(name: String) = value[name]
 
-operator fun PartialTypeSystem.invoke(type: Type) = value(type)
+operator fun PartialTypeSystem.get(name: String) = value[name]
 
 fun typeSystem(parent: PartialTypeSystem? = null, block: TypeSystemBuilder.() -> Unit): PartialTypeSystem =
     handlePromise<TypeSystem>().let { handle ->

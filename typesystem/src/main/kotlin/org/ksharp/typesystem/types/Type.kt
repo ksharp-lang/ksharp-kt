@@ -6,6 +6,7 @@ import org.ksharp.common.HandlePromise
 import org.ksharp.common.new
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.merge
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.solver.Solver
@@ -14,6 +15,24 @@ import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
+
+private fun TypeSystem.resolve(type: Type): ErrorOrType =
+    when (type) {
+        is Alias -> this[type.name].flatMap {
+            it()
+        }
+
+        is Labeled -> type.type().map {
+            Labeled(type.label, it)
+        }
+
+        is TypeAlias -> this[type.name].flatMap {
+            it()
+        }.map { it.new(it.attributes.merge(type.attributes)) }
+
+        is TypeConstructor -> this[type.alias]
+        else -> Either.Right(type)
+    }
 
 interface Type {
     val typeSystem: HandlePromise<TypeSystem>
@@ -30,6 +49,11 @@ interface Type {
     val representation: String get() = toString().let { s -> if (compound) "($s)" else s }
 
     fun new(attributes: Set<Attribute>): Type
+
+    operator fun invoke(): ErrorOrType {
+        val handle = typeSystem.handle
+        return handle?.resolve(this) ?: throw IllegalStateException("TypeSystem not initialized")
+    }
 }
 
 sealed interface TypeVariable : Type {

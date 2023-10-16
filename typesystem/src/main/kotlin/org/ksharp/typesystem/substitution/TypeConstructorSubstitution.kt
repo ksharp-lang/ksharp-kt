@@ -13,7 +13,7 @@ class TypeConstructorSubstitution : SubstitutionAlgo<TypeConstructor> {
         type1: TypeConstructor,
         type2: Type
     ): ErrorOrValue<Boolean> =
-        context.typeSystem(type1).flatMap {
+        type1().flatMap {
             context.extract(location, it, type2)
         }
 
@@ -23,7 +23,7 @@ class TypeConstructorSubstitution : SubstitutionAlgo<TypeConstructor> {
         type: TypeConstructor,
         typeContext: Type
     ): ErrorOrType =
-        context.typeSystem(type).flatMap {
+        type().flatMap {
             context.substitute(location, it, typeContext)
         }
 }
