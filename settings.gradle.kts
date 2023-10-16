@@ -3,7 +3,7 @@ rootProject.name = "ksharp-kt"
 pluginManagement {
     val kotlinVersion = "1.9.10"
     val sonarqubeVersion = "4.4.1.3373"
-    val koverVersion = "0.7.3"
+    val koverVersion = "0.7.4"
 
     plugins {
         kotlin("jvm") version kotlinVersion apply false
