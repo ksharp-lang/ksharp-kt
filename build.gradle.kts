@@ -1,5 +1,3 @@
-import kotlinx.kover.gradle.plugin.KoverGradlePlugin
-
 plugins {
     base
     id("org.sonarqube")
@@ -17,7 +15,7 @@ sonarqube {
         property("sonar.host.url", "https://sonarcloud.io")
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
-            "${project.buildDir}/reports/kover/report.xml"
+            "${project.layout.buildDirectory.get().asFile}/reports/kover/report.xml"
         )
     }
 }
@@ -58,6 +56,23 @@ subprojects {
     tasks {
         withType<Test> {
             useJUnitPlatform()
+        }
+    }
+
+    koverReport {
+        filters {
+            excludes {
+                annotatedBy(
+                    "org.ksharp.common.annotation.KoverIgnore"
+                )
+            }
+        }
+        defaults {
+            filters {
+                excludes {
+                    annotatedBy("org.ksharp.common.annotation.KoverIgnore")
+                }
+            }
         }
     }
 }
