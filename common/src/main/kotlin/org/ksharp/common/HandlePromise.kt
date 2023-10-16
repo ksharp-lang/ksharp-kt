@@ -43,6 +43,19 @@ class MockHandlePromise<T> : HandlePromise<T> {
     override fun set(value: T) {
         // Mock class
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MockHandlePromise<*>
+
+        return handle == other.handle
+    }
+
+    override fun hashCode(): Int {
+        return handle?.hashCode() ?: 0
+    }
 }
 
 fun <T> handlePromise(): HandlePromise<T> = HandlePromiseImpl<T>()

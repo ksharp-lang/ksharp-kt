@@ -70,6 +70,7 @@ class InferenceTest : StringSpec({
     "Inference type over native abstraction" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
+        val param = newParameterForTesting(0)
         AbstractionNode(
             setOf(CommonAttribute.Public, CommonAttribute.Native),
             "ten", ConstantNode(
@@ -80,7 +81,7 @@ class InferenceTest : StringSpec({
             AbstractionSemanticInfo(
                 listOf(), TypeSemanticInfo(
                     Either.Right(
-                        newParameterForTesting(0)
+                        param
                     )
                 )
             ),
@@ -89,7 +90,7 @@ class InferenceTest : StringSpec({
             shouldBeRight(
                 listOf(
                     unitTypePromise.type.valueOrNull!!,
-                    newParameterForTesting(0)
+                    param
                 ).toFunctionType(MockHandlePromise())
             )
         }

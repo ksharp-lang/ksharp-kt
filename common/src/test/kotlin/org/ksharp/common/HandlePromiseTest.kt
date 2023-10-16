@@ -27,4 +27,8 @@ class HandlePromiseTest : StringSpec({
         val handle = handlePromise<Int>()
         handle.shouldBe(MockHandlePromise<Int>())
     }
+    "mock handle should be mock handle" {
+        val handle = MockHandlePromise<Int>()
+        handle.shouldBe(MockHandlePromise<Int>())
+    }
 })

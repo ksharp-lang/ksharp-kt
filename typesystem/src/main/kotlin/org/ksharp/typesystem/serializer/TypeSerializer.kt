@@ -60,8 +60,11 @@ fun TypeSystem.writeTo(buffer: BufferWriter, table: BinaryTable) {
     asSequence().writeTo(size, buffer, table)
 }
 
-fun BufferView.readTypeSystem(table: BinaryTableView, parent: TypeSystem? = null): TypeSystem {
-    val handle = handlePromise<TypeSystem>()
+fun BufferView.readTypeSystem(
+    table: BinaryTableView,
+    parent: TypeSystem? = null,
+    handle: HandlePromise<TypeSystem> = handlePromise()
+): TypeSystem {
     return TypeSystemImpl(parent, handle, readMapOfTypes(handle, table)).also {
         handle.set(it)
     }

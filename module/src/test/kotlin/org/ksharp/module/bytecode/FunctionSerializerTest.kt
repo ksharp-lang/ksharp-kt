@@ -42,9 +42,9 @@ private fun Map<String, FunctionInfo>.shouldBeSerializable() {
     buffer.transferTo(output)
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
-    input.bufferView {
+    this.shouldBe(input.bufferView {
         it.readFunctionInfoTable(MockHandlePromise(), stringPoolView)
-    }.shouldBe(this)
+    })
 }
 
 class FunctionSerializerTest : StringSpec({
