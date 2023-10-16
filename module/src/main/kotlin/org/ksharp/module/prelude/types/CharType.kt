@@ -1,6 +1,9 @@
 package org.ksharp.module.prelude.types
 
+import org.ksharp.common.HandlePromise
+import org.ksharp.module.prelude.preludeTypeSystem
 import org.ksharp.module.prelude.serializer.TypeSerializers
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
@@ -13,6 +16,8 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 class CharType : Type {
+    override val typeSystem: HandlePromise<TypeSystem>
+        get() = preludeTypeSystem.value.handle
 
     override val attributes: Set<Attribute>
         get() = NoAttributes

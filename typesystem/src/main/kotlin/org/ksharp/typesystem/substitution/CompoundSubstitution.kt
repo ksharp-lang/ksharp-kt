@@ -56,7 +56,7 @@ abstract class CompoundSubstitution<T : Type> : SubstitutionAlgo<T> {
         type1: T,
         type2: Type
     ): ErrorOrValue<Boolean> =
-        context.typeSystem(type2).flatMap { cType2 ->
+        type2().flatMap { cType2 ->
             val innerCType2 = cType2.innerType
             when {
                 innerCType2.isSameTypeClass -> compoundExtract(context, location, type1, innerCType2.cast<T>())

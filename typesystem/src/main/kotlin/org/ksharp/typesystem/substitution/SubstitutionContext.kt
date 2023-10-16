@@ -2,20 +2,17 @@ package org.ksharp.typesystem.substitution
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.ErrorOrType
-import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.unify
 
-class SubstitutionContext(
-    val typeSystem: TypeSystem
-) {
+class SubstitutionContext {
     internal val mappings = mapBuilder<String, Type>()
     internal val errors = mapBuilder<String, Error>()
     fun addMapping(location: Location, paramName: String, type: Type): ErrorOrValue<Boolean> =
         mappings.get(paramName)?.let {
-            val typeUnification = typeSystem.unify(location, it, type)
-            if (typeUnification.isLeft) typeSystem.unify(location, type, it)
+            val typeUnification = it.unify(location, type)
+            if (typeUnification.isLeft) type.unify(location, it)
             else typeUnification
         }?.map {
             mappings.put(paramName, it)

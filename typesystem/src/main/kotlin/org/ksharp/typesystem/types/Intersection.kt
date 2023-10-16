@@ -2,6 +2,7 @@ package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.serializer.TypeSerializer
@@ -17,6 +18,7 @@ import org.ksharp.typesystem.validateTypeName
 typealias IntersectionTypeFactoryBuilder = IntersectionTypeFactory.() -> Unit
 
 data class IntersectionType internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val params: List<Type>
 ) : Type {
@@ -36,10 +38,11 @@ data class IntersectionType internal constructor(
 
     override fun toString(): String = params.joinToString(" & ") { it.representation }
 
-    override fun new(attributes: Set<Attribute>): Type = IntersectionType(attributes, params)
+    override fun new(attributes: Set<Attribute>): Type = IntersectionType(typeSystem, attributes, params)
 }
 
 class IntersectionTypeFactory(
+    val handle: HandlePromise<TypeSystem>,
     val attributes: Set<Attribute>
 ) {
     private var result: ErrorOrValue<ListBuilder<Alias>> = Either.Right(listBuilder())
@@ -47,7 +50,7 @@ class IntersectionTypeFactory(
     fun type(name: String) {
         result = result.flatMap { params ->
             validateTypeName(name).map {
-                params.add(Alias(it))
+                params.add(Alias(handle, it))
                 params
             }
         }
@@ -61,7 +64,7 @@ class IntersectionTypeFactory(
 }
 
 fun TypeItemBuilder.intersectionType(factory: IntersectionTypeFactoryBuilder) =
-    IntersectionTypeFactory(attributes).apply(factory).build().map { types ->
+    IntersectionTypeFactory(handle, attributes).apply(factory).build().map { types ->
         types.forEach { tp ->
             validation {
                 val type = it(tp.name)
@@ -72,5 +75,5 @@ fun TypeItemBuilder.intersectionType(factory: IntersectionTypeFactoryBuilder) =
                 } else null
             }
         }
-        IntersectionType(attributes, types)
+        IntersectionType(handle, attributes, types)
     }

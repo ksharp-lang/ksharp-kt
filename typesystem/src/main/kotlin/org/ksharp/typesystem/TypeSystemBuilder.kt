@@ -13,6 +13,7 @@ typealias GetType = (key: String) -> Type?
 typealias TypeValidation = (getType: GetType) -> Error?
 
 class TypeItemBuilder(
+    val handle: HandlePromise<TypeSystem>,
     val attributes: Set<Attribute>,
     val name: String,
     private val storeView: MapView<String, Type>,
@@ -48,18 +49,19 @@ class TypeItemBuilder(
             validation { error }
         }
 
-    internal fun createForSubtypes() = TypeItemBuilder(NoAttributes, name, storeView, store, builder, partialBuilder)
+    internal fun createForSubtypes() =
+        TypeItemBuilder(handle, NoAttributes, name, storeView, store, builder, partialBuilder)
 
 }
 
 class TypeSystemBuilder(
     private val parent: TypeSystem?,
+    val handle: HandlePromise<TypeSystem>,
     private val store: MapBuilder<String, Type>,
     private val builder: PartialBuilder<TypeEntry, TypeSystem>
 ) {
 
     private val mapView = object : MapView<String, Type> {
-
         private fun getFromParent(key: String): Type? =
             if (parent != null) parent[key].valueOrNull
             else null
@@ -69,7 +71,6 @@ class TypeSystemBuilder(
 
         override fun containsKey(key: String): Boolean =
             store.containsKey(key) == true || (getFromParent(key) != null)
-
     }
 
     fun item(
@@ -78,7 +79,7 @@ class TypeSystemBuilder(
         factory: TypeFactoryBuilder
     ) {
         builder.item {
-            TypeItemBuilder(attributes, name, mapView, store, this, builder).apply {
+            TypeItemBuilder(handle, attributes, name, mapView, store, this, builder).apply {
                 validateTypeName(name).flatMap {
                     if (isTypeNameTaken(it)) {
                         Either.Left(TypeSystemErrorCode.TypeAlreadyRegistered.new("type" to it))

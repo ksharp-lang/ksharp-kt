@@ -137,7 +137,7 @@ class ImplSemanticTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                val paramA = TypeSemanticInfo(type = Either.Right(newNamedParameter("a")))
+                val paramA = TypeSemanticInfo(type = Either.Right(it.typeSystem.newNamedParameter("a")))
                 it.implAbstractions
                     .shouldBe(
                         mapOf(

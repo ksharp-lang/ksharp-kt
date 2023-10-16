@@ -2,10 +2,7 @@ package org.ksharp.ir.transform
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.Line
-import org.ksharp.common.Location
-import org.ksharp.common.Offset
-import org.ksharp.common.cast
+import org.ksharp.common.*
 import org.ksharp.ir.*
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
@@ -189,7 +186,10 @@ class AbstractionToIrSymbolTest : StringSpec({
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
                 ),
-                listOf(longType, longType, longType).toFunctionType(setOf(CommonAttribute.Internal)),
+                listOf(longType, longType, longType).toFunctionType(
+                    MockHandlePromise(),
+                    setOf(CommonAttribute.Internal)
+                ),
                 Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )
         ),
@@ -321,7 +321,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                     "ten",
                     listOf(),
                     0,
-                    listOf(unitType, longType).toFunctionType(NoAttributes),
+                    listOf(unitType, longType).toFunctionType(MockHandlePromise(), NoAttributes),
                     IrInteger(
                         10,
                         Location(Line(1) to Offset(6), Line(1) to Offset(8))
@@ -368,7 +368,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                         listOf(
                             preludeModule.typeSystem.solve(internalCharType).valueOrNull!!,
                             preludeModule.typeSystem.solve(internalCharType).valueOrNull!!
-                        ).toFunctionType(NoAttributes),
+                        ).toFunctionType(MockHandlePromise(), NoAttributes),
                         IrArg(
                             setOf(CommonAttribute.Pure),
                             0,

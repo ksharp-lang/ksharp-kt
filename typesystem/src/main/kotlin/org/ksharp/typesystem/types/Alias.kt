@@ -1,5 +1,6 @@
 package org.ksharp.typesystem.types
 
+import org.ksharp.common.HandlePromise
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
@@ -14,6 +15,7 @@ import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
 data class Alias internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     val name: String,
 ) : TypeVariable {
 
@@ -38,6 +40,7 @@ data class Alias internal constructor(
 }
 
 data class TypeAlias(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val name: String
 ) : Type {
@@ -59,10 +62,10 @@ data class TypeAlias(
         return name
     }
 
-    override fun new(attributes: Set<Attribute>): Type = TypeAlias(attributes, name)
+    override fun new(attributes: Set<Attribute>): Type = TypeAlias(typeSystem, attributes, name)
 }
 
 fun TypeSystem.alias(name: String): ErrorOrType =
     this[name].map {
-        Alias(name)
+        Alias(handle, name)
     }

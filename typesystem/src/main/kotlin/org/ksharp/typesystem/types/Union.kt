@@ -2,6 +2,7 @@ package org.ksharp.typesystem.types
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.TypeItemBuilder
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
@@ -17,6 +18,7 @@ import org.ksharp.typesystem.validateTypeName
 typealias UnionTypeFactoryBuilder = UnionTypeFactory.() -> Unit
 
 data class UnionType internal constructor(
+    override val typeSystem: HandlePromise<TypeSystem>,
     override val attributes: Set<Attribute>,
     val arguments: Map<String, ClassType>,
 ) : Type {
@@ -39,9 +41,10 @@ data class UnionType internal constructor(
         arguments.asSequence().map { (_, value) -> value.representation }
             .joinToString("\n|")
 
-    override fun new(attributes: Set<Attribute>): Type = UnionType(attributes, arguments)
+    override fun new(attributes: Set<Attribute>): Type = UnionType(typeSystem, attributes, arguments)
 
     data class ClassType internal constructor(
+        override val typeSystem: HandlePromise<TypeSystem>,
         val label: String,
         val params: List<Type>
     ) : Type {
@@ -82,10 +85,11 @@ class UnionTypeFactory(
     fun clazz(label: String, parameters: ParametricTypeFactoryBuilder = {}) {
         result = result.flatMap { params ->
             validateTypeName(label).flatMap {
-                factory.add(label, TypeConstructor(attributes, label, unionType))
+                factory.add(label, TypeConstructor(factory.handle, attributes, label, unionType))
                 ParametricTypeFactory(factory.createForSubtypes()).apply(parameters).build().map { args ->
                     params.put(
                         label, UnionType.ClassType(
+                            factory.handle,
                             label,
                             args
                         )
@@ -105,5 +109,5 @@ class UnionTypeFactory(
 
 fun TypeItemBuilder.unionType(factory: UnionTypeFactoryBuilder) =
     UnionTypeFactory(name, attributes, this).apply(factory).build().map {
-        UnionType(attributes, it)
+        UnionType(handle, attributes, it)
     }

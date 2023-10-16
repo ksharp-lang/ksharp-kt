@@ -15,7 +15,7 @@ class UnionSolver : Solver {
                     it.key to t
                 }
             }.unwrap().map {
-                UnionType(type.attributes, it.toMap().cast())
+                UnionType(type.typeSystem, type.attributes, it.toMap().cast())
             }
 }
 
@@ -25,6 +25,6 @@ class ClassSolver : Solver {
             .params.map {
                 typeSystem.solve(it)
             }.unwrap().map {
-                UnionType.ClassType(type.cast<UnionType.ClassType>().label, it)
+                UnionType.ClassType(type.typeSystem, type.cast<UnionType.ClassType>().label, it)
             }
 }

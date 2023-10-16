@@ -9,7 +9,6 @@ import org.ksharp.semantics.nodes.ApplicationSemanticInfo
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
-import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.solver.solve
 import org.ksharp.typesystem.types.*
@@ -26,9 +25,6 @@ enum class InferenceErrorCode(override val description: String) : ErrorCode {
 
 private fun ApplicationName.calculateType(info: InferenceInfo): ErrorOrType =
     info.module.typeSystem[name]
-
-private fun ApplicationName.getTypeSystem(info: InferenceInfo): TypeSystem =
-    info.module.typeSystem
 
 private fun SemanticNode<SemanticInfo>.isCollectionApplication(fnName: String): Boolean =
     this is ApplicationNode
@@ -66,9 +62,9 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
             is ConditionalMatchValueNode -> {
                 val boolType = info.prelude.typeSystem["Bool"].valueOrNull!!
                 left.inferType(info).flatMap { lType ->
-                    info.unify(location, lType, boolType).flatMap {
+                    lType.unify(location, boolType).flatMap {
                         right.inferType(info).flatMap { rType ->
-                            info.unify(location, rType, boolType)
+                            rType.unify(location, boolType)
                         }
                     }
                 }
@@ -100,7 +96,7 @@ private fun SemanticNode<SemanticInfo>.bindTuple(type: Type, info: InferenceInfo
             .map { (arg, elementType) ->
                 arg.bindType(elementType, info)
             }.unwrap()
-            .map { it.toTupleType(type.attributes) }
+            .map { it.toTupleType(info.module.typeSystem, type.attributes) }
     }
 
 private fun SemanticNode<SemanticInfo>.bindParametricType(
@@ -125,7 +121,7 @@ private fun SemanticNode<SemanticInfo>.bindParametricType(
                 .cast()
         else info.getType(rootType)
             .flatMap {
-                info.unify(location, it, type).map { uType ->
+                it.unify(location, type).map { uType ->
                     bind(uType.cast())
                     uType
                 }
@@ -159,7 +155,7 @@ private fun SemanticNode<SemanticInfo>.bindType(type: Type, info: InferenceInfo)
             left.bindType(type, info).flatMap { bType ->
                 left.info.setInferredType(Either.Right(bType))
                 right.inferType(info).flatMap {
-                    info.unify(location, it, info.prelude.typeSystem["Bool"].valueOrNull!!).map {
+                    it.unify(location, info.prelude.typeSystem["Bool"].valueOrNull!!).map {
                         bType
                     }
                 }
@@ -171,9 +167,7 @@ private fun SemanticNode<SemanticInfo>.bindType(type: Type, info: InferenceInfo)
             appNode.functionName
                 .calculateType(info)
                 .flatMap { bindType ->
-                    appNode.functionName
-                        .getTypeSystem(info)
-                        .unify(location, bindType, type)
+                    bindType.unify(location, type)
                         .map { uType ->
                             val argType = Either.Right(uType)
                             appNode.arguments.forEach { arg -> arg.info.setInferredType(argType) }
@@ -183,7 +177,7 @@ private fun SemanticNode<SemanticInfo>.bindType(type: Type, info: InferenceInfo)
         }
 
         else -> inferType(info).flatMap {
-            info.unify(location, it, type)
+            it.unify(location, type)
         }
     }.also {
         this.info.setInferredType(it)
@@ -211,7 +205,7 @@ private fun MatchNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
                 var result: ErrorOrType = Either.Right(it.first())
                 for (right in it.drop(1)) {
                     result = result.flatMap { left ->
-                        info.unify(location, left, right)
+                        left.unify(location, right)
                     }
                     if (result.isLeft) break
                 }
@@ -233,7 +227,7 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
     this.info.cast<AbstractionSemanticInfo>().parameters.let { params ->
         if (params.isEmpty()) {
             info.prelude.typeSystem["Unit"].map { unitType ->
-                listOf(unitType, returnType).toFunctionType()
+                listOf(unitType, returnType).toFunctionType(info.module.typeSystem)
             }
         } else {
             params.asSequence().run {
@@ -254,7 +248,7 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
                 }
             }.unwrap()
                 .map {
-                    (it + returnType).toFunctionType()
+                    (it + returnType).toFunctionType(info.module.typeSystem)
                 }
         }
     }
@@ -284,19 +278,19 @@ private fun Sequence<ErrorOrType>.unifyArguments(
     location: Location,
     info: InferenceInfo
 ): Sequence<ErrorOrType> =
-    when (CollectionFunctionName.values().first { it.applicationName == name }) {
+    when (CollectionFunctionName.entries.first { it.applicationName == name }) {
         CollectionFunctionName.List, CollectionFunctionName.Set, CollectionFunctionName.Map -> {
             val unifiedType = reduceOrNull { acc, type ->
                 acc.flatMap { left ->
                     type.flatMap { right ->
-                        info.unify(location, left, right)
+                        left.unify(location, right)
                     }
                 }
             }
             unifiedType?.let { sequenceOf(it) } ?: emptySequence()
         }
 
-        CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType() })
+        CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType(info.module.typeSystem) })
     }
 
 private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
