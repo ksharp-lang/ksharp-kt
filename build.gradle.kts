@@ -67,5 +67,12 @@ subprojects {
                 )
             }
         }
+        defaults {
+            filters {
+                excludes {
+                    annotatedBy("org.ksharp.common.annotation.KoverIgnore")
+                }
+            }
+        }
     }
 }
