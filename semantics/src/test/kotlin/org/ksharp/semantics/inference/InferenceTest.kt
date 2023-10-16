@@ -2,10 +2,7 @@ package org.ksharp.semantics.inference
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.Either
-import org.ksharp.common.Location
-import org.ksharp.common.cast
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.functionInfo
 import org.ksharp.module.prelude.preludeModule
@@ -22,7 +19,7 @@ import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
 
 private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
-    val a = newParameter()
+    val a = typeSystem.newParameter()
     val intType = typeSystem["Int"].valueOrNull!!
     val testModule = ModuleInfo(
         listOf(),
@@ -66,7 +63,7 @@ class InferenceTest : StringSpec({
                 listOf(
                     unitTypePromise.type.valueOrNull!!,
                     longTypePromise.type.valueOrNull!!
-                ).toFunctionType()
+                ).toFunctionType(MockHandlePromise())
             )
         }
     }
@@ -93,7 +90,7 @@ class InferenceTest : StringSpec({
                 listOf(
                     unitTypePromise.type.valueOrNull!!,
                     newParameterForTesting(0)
-                ).toFunctionType()
+                ).toFunctionType(MockHandlePromise())
             )
         }
     }
@@ -161,7 +158,7 @@ class InferenceTest : StringSpec({
     "Inference type over operators and variables with substitution" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
-        val variable = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
+        val variable = Symbol("x", TypeSemanticInfo(Either.Right(ts.newParameter())))
         val abstraction = AbstractionNode(
             setOf(CommonAttribute.Public),
             "n",
@@ -198,7 +195,7 @@ class InferenceTest : StringSpec({
     "Inference type over operators and variables with substitution with function that is not parametric" {
         val module = createInferenceInfo(ts)
         val intTypePromise = ts.getTypeSemanticInfo("Int")
-        val variable = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
+        val variable = Symbol("x", TypeSemanticInfo(Either.Right(ts.newParameter())))
         val abstraction = AbstractionNode(
             setOf(CommonAttribute.Public),
             "n",
@@ -274,7 +271,7 @@ class InferenceTest : StringSpec({
     "Inference let binding" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
-        val parameter = Symbol("x", TypeSemanticInfo(Either.Right(newParameter())))
+        val parameter = Symbol("x", TypeSemanticInfo(Either.Right(ts.newParameter())))
         val abstraction = AbstractionNode(
             setOf(CommonAttribute.Public),
             "n",
@@ -347,7 +344,7 @@ class InferenceTest : StringSpec({
     "Inference let binding with binding error" {
         val module = createInferenceInfo(ts)
         val longTypePromise = ts.getTypeSemanticInfo("Long")
-        val parameter = TypeSemanticInfo(Either.Right(newParameter()))
+        val parameter = TypeSemanticInfo(Either.Right(ts.newParameter()))
         val abstraction = AbstractionNode(
             setOf(CommonAttribute.Public),
             "n",

@@ -42,7 +42,7 @@ data class Parameter internal constructor(
 }
 
 fun resetParameterCounterForTesting() = parameterIdCounter.set(-1)
-fun TypeSystem.newParameterForTesting(id: Int) = Parameter(handle, "@${id}")
+fun newParameterForTesting(id: Int) = Parameter(MockHandlePromise(), "@${id}")
 
 fun TypeSystem.newParameter() = Parameter(handle, "@${parameterIdCounter.incrementAndGet()}")
 

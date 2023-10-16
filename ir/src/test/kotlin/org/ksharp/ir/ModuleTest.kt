@@ -16,26 +16,28 @@ class ModuleTest : StringSpec({
     "IrModule " {
         "ten = 10"
             .toSemanticModuleInfo()
-            .toIrModule()
-            .first
-            .shouldBe(
-                IrModule(
-                    listOf(),
-                    listOf(
-                        IrFunction(
-                            setOf(CommonAttribute.Internal, CommonAttribute.Constant),
-                            "ten",
+            .apply {
+                toIrModule()
+                    .first
+                    .shouldBe(
+                        IrModule(
                             listOf(),
-                            0,
-                            listOf(unitType, longType).toFunctionType(NoAttributes),
-                            IrInteger(
-                                10,
-                                Location(Line(1) to Offset(6), Line(1) to Offset(8))
-                            ),
-                            Location(Line(1) to Offset(0), Line(1) to Offset(3))
+                            listOf(
+                                IrFunction(
+                                    setOf(CommonAttribute.Internal, CommonAttribute.Constant),
+                                    "ten",
+                                    listOf(),
+                                    0,
+                                    listOf(unitType, longType).toFunctionType(typeSystem, NoAttributes),
+                                    IrInteger(
+                                        10,
+                                        Location(Line(1) to Offset(6), Line(1) to Offset(8))
+                                    ),
+                                    Location(Line(1) to Offset(0), Line(1) to Offset(3))
+                                )
+                            )
                         )
                     )
-                )
-            )
+            }
     }
 })

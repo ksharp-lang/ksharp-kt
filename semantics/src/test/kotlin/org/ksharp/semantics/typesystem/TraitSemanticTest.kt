@@ -154,7 +154,7 @@ class TraitSemanticTest : StringSpec({
                 it.traits
                     .shouldNotBeEmpty()
                     .shouldDefine(mapOf("Sum::sum/3" to true))
-                val paramA = TypeSemanticInfo(type = Either.Right(newNamedParameter("a")))
+                val paramA = TypeSemanticInfo(type = Either.Right(it.typeSystem.newNamedParameter("a")))
                 it.traitsAbstractions["Sum"].shouldBe(
                     listOf(
                         AbstractionNode(

@@ -37,8 +37,8 @@ private fun FunctionNode.typePromise(typeSystem: TypeSystem): List<TypePromise> 
     (if (parameters.isEmpty()) {
         listOf(TypeSemanticInfo(typeSystem["Unit"]))
     } else parameters.map { _ ->
-        paramTypePromise()
-    }) + paramTypePromise()
+        typeSystem.paramTypePromise()
+    }) + typeSystem.paramTypePromise()
 
 private fun FunctionType.typePromise(node: FunctionNode): ErrorOrValue<List<TypePromise>> {
     val unitParams = node.parameters.isEmpty()

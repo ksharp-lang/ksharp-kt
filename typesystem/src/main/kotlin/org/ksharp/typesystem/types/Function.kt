@@ -51,3 +51,6 @@ fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
 
 fun List<Type>.toFunctionType(typeSystem: TypeSystem, attributes: Set<Attribute> = NoAttributes) =
     FunctionType(typeSystem.handle, attributes, this)
+
+fun List<Type>.toFunctionType(handle: HandlePromise<TypeSystem>, attributes: Set<Attribute> = NoAttributes) =
+    FunctionType(handle, attributes, this)

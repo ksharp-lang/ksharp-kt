@@ -100,7 +100,7 @@ private fun SemanticNode<SemanticInfo>.bindTuple(type: Type, info: InferenceInfo
             .map { (arg, elementType) ->
                 arg.bindType(elementType, info)
             }.unwrap()
-            .map { it.toTupleType(type.attributes) }
+            .map { it.toTupleType(info.module.typeSystem, type.attributes) }
     }
 
 private fun SemanticNode<SemanticInfo>.bindParametricType(
@@ -233,7 +233,7 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
     this.info.cast<AbstractionSemanticInfo>().parameters.let { params ->
         if (params.isEmpty()) {
             info.prelude.typeSystem["Unit"].map { unitType ->
-                listOf(unitType, returnType).toFunctionType()
+                listOf(unitType, returnType).toFunctionType(info.module.typeSystem)
             }
         } else {
             params.asSequence().run {
@@ -254,7 +254,7 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
                 }
             }.unwrap()
                 .map {
-                    (it + returnType).toFunctionType()
+                    (it + returnType).toFunctionType(info.module.typeSystem)
                 }
         }
     }
@@ -284,7 +284,7 @@ private fun Sequence<ErrorOrType>.unifyArguments(
     location: Location,
     info: InferenceInfo
 ): Sequence<ErrorOrType> =
-    when (CollectionFunctionName.values().first { it.applicationName == name }) {
+    when (CollectionFunctionName.entries.first { it.applicationName == name }) {
         CollectionFunctionName.List, CollectionFunctionName.Set, CollectionFunctionName.Map -> {
             val unifiedType = reduceOrNull { acc, type ->
                 acc.flatMap { left ->
@@ -296,7 +296,7 @@ private fun Sequence<ErrorOrType>.unifyArguments(
             unifiedType?.let { sequenceOf(it) } ?: emptySequence()
         }
 
-        CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType() })
+        CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType(info.module.typeSystem) })
     }
 
 private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =

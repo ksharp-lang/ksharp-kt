@@ -31,7 +31,7 @@ internal fun FunctionInfo.substitute(
             incompatibleType<List<Type>>(location, item1, item2).cast<Either.Left<Error>>()
         } else substitutionResult
     }.firstNotNullOfOrNull { if (it.isLeft) it.cast<ErrorOrValue<FunctionType>>() else null }
-    val fnType = types.toFunctionType(attributes)
+    val fnType = types.toFunctionType(typeSystem, attributes)
     return result ?: context.substitute(location, fnType, fnType).cast()
 }
 
@@ -49,7 +49,7 @@ internal fun FunctionInfo.unify(
                 if (returnType.parameters.firstOrNull() != null) {
                     substitute(typeSystem, location, params)
                 } else {
-                    Either.Right((params + returnType).toFunctionType(attributes))
+                    Either.Right((params + returnType).toFunctionType(typeSystem, attributes))
                 }
             }
     }

@@ -64,13 +64,13 @@ private fun String.toValue(type: LiteralValueType): Any =
         else -> TODO("Literal value type $type: $this")
     }
 
-private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location): SemanticInfo =
+private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location, typeSystem: TypeSystem): SemanticInfo =
     if (this is MatchSemanticInfo) {
-        table.register(name, paramTypePromise(), location)
+        table.register(name, typeSystem.paramTypePromise(), location)
         table[name]?.first ?: ExpressionSemanticsErrorCode.SymbolAlreadyUsed.new(location, "name" to name)
             .toTypePromise()
     } else cast<SymbolResolver>().getSymbol(name)
-        ?: paramTypePromise()
+        ?: typeSystem.paramTypePromise()
 
 private fun SemanticInfo.callSemanticInfo(fnName: String): SemanticInfo =
     if (this is MatchSemanticInfo) {
@@ -93,7 +93,7 @@ internal fun ExpressionParserNode.toSemanticNode(
     when (this) {
         is LiteralValueNode ->
             if (type == LiteralValueType.Binding) {
-                val varInfo = info.getVarSemanticInfo(value, location)
+                val varInfo = info.getVarSemanticInfo(value, location, typeSystem)
                 VarNode(
                     value,
                     varInfo,
@@ -245,7 +245,7 @@ private fun String.variableOrFunctionCallNode(
     info: SemanticInfo,
     location: Location
 ): SemanticNode<SemanticInfo> {
-    val varInfo = info.getVarSemanticInfo(this, location)
+    val varInfo = info.getVarSemanticInfo(this, location, typeSystem)
     return if (varInfo is Symbol) {
         VarNode(
             this,
