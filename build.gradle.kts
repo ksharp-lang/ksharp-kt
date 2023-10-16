@@ -1,5 +1,3 @@
-import kotlinx.kover.gradle.plugin.KoverGradlePlugin
-
 plugins {
     base
     id("org.sonarqube")
@@ -58,6 +56,16 @@ subprojects {
     tasks {
         withType<Test> {
             useJUnitPlatform()
+        }
+    }
+
+    koverReport {
+        filters {
+            excludes {
+                annotatedBy(
+                    "org.ksharp.common.annotation.KoverIgnore"
+                )
+            }
         }
     }
 }
