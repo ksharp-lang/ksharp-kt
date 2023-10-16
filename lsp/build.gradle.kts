@@ -27,13 +27,3 @@ tasks.jar {
 tasks.shadowJar {
     archiveFileName.set("ks-lsp-all.jar")
 }
-
-koverReport {
-    filters {
-        excludes {
-            annotatedBy(
-                "org.ksharp.common.annotation.KoverIgnore"
-            )
-        }
-    }
-}

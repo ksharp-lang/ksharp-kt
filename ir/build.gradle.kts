@@ -33,13 +33,3 @@ tasks {
         )
     }
 }
-
-koverReport {
-    filters {
-        excludes {
-            annotatedBy(
-                "org.ksharp.common.annotation.KoverIgnore"
-            )
-        }
-    }
-}
