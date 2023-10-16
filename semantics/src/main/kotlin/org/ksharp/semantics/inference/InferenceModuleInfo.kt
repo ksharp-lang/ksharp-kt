@@ -9,6 +9,7 @@ import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.types.Concrete
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
@@ -21,6 +22,8 @@ sealed interface InferenceModuleInfo {
 
     fun findFunction(name: String, numParams: Int): FunctionInfo?
 
+    fun getTraitsImplemented(type: Type): List<TraitType>
+
     fun methodName(name: String, numParams: Int) = "$name/$numParams"
 
 }
@@ -29,6 +32,18 @@ class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
     InferenceModuleInfo {
 
     override val typeSystem: TypeSystem = moduleInfo.typeSystem
+
+    override fun getTraitsImplemented(type: Type): List<TraitType> =
+        typeSystem.invoke(type).map { resolvedType ->
+            if (resolvedType is Concrete) {
+                resolvedType.name.let { typeName ->
+                    moduleInfo.impls
+                        .filter { it.type == typeName }
+                        .flatMap { it.traits }
+                }
+            } else emptyList()
+        }.valueOrNull ?: emptyList()
+
 
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         moduleInfo.functions["$name/$numParams"]
