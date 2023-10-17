@@ -19,10 +19,7 @@ fun getTraitsImplemented(type: Type, info: InferenceModuleInfo): Sequence<TraitT
                 }
 
                 is Parameter ->
-                    info.impls
-                        .map {
-                            typeSystem[it.trait].valueOrNull
-                        }.cast()
+                    info.traits
 
                 else -> emptySequence()
             }

@@ -210,7 +210,11 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     errors.collectAll(this.errors)
     val inferenceInfo = InferenceInfo(
         ConcreteModuleInfo(preludeModule),
-        abstractions.toSemanticModuleInfo(moduleTypeSystemInfo.typeSystem, moduleTypeSystemInfo.impls),
+        abstractions.toSemanticModuleInfo(
+            moduleTypeSystemInfo.typeSystem,
+            moduleTypeSystemInfo.impls,
+            moduleTypeSystemInfo.traits
+        ),
         emptyMap()
     )
     abstractions.map { it.inferType(inferenceInfo) }

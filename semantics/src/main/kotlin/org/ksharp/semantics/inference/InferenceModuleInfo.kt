@@ -22,6 +22,8 @@ sealed interface InferenceModuleInfo {
 
     val impls: Sequence<Impl>
 
+    val traits: Sequence<TraitType>
+
     fun findFunction(name: String, numParams: Int): FunctionInfo?
 
     fun getTraitsImplemented(type: Type): Sequence<TraitType> = getTraitsImplemented(type, this)
@@ -35,8 +37,11 @@ class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
 
     override val typeSystem: TypeSystem = moduleInfo.typeSystem
 
-    override val impls: Sequence<Impl>
-        get() = moduleInfo.impls.asSequence()
+    override val impls: Sequence<Impl> = moduleInfo.impls.asSequence()
+
+    override val traits: Sequence<TraitType> = moduleInfo.traits.keys.asSequence().map {
+        typeSystem[it].valueOrNull!!.cast()
+    }
 
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         moduleInfo.functions["$name/$numParams"]
@@ -45,6 +50,7 @@ class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
 class SemanticModuleInfo(
     override val typeSystem: TypeSystem,
     override val impls: Sequence<Impl>,
+    override val traits: Sequence<TraitType>,
     private val abstractions: AbstractionNodeMap
 ) : InferenceModuleInfo {
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
@@ -60,10 +66,12 @@ class TraitSemanticInfo(
 ) : InferenceModuleInfo {
 
     override val impls: Sequence<Impl>
-        get() = moduleInfo.impls.asSequence()
+        get() = moduleInfo.impls
 
     override val typeSystem: TypeSystem
         get() = moduleInfo.typeSystem
+
+    override val traits: Sequence<TraitType> = moduleInfo.traits
 
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         abstractions[methodName(name, numParams)]?.let {
@@ -79,8 +87,9 @@ class ImplSemanticInfo(
     private val abstractions: AbstractionNodeMap
 ) : InferenceModuleInfo {
 
-    override val impls: Sequence<Impl>
-        get() = moduleInfo.impls.asSequence()
+    override val impls: Sequence<Impl> = moduleInfo.impls
+
+    override val traits: Sequence<TraitType> = moduleInfo.traits
 
     override val typeSystem: TypeSystem
         get() = moduleInfo.typeSystem
@@ -115,10 +124,15 @@ private fun List<AbstractionNode<AbstractionSemanticInfo>>.toMap() =
         "${it.name}/${it.info.parameters.size + 1}"
     }
 
-fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(typeSystem: TypeSystem, impls: Set<Impl>) =
+fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(
+    typeSystem: TypeSystem,
+    impls: Set<Impl>,
+    traits: List<TraitType>
+) =
     SemanticModuleInfo(
         typeSystem,
         impls.asSequence(),
+        traits.asSequence(),
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()
     )
