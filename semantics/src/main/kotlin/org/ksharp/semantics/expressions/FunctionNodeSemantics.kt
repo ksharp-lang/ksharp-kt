@@ -1,7 +1,6 @@
 package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
-import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
@@ -187,12 +186,10 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
         }.filter {
             it.second.isNotEmpty()
         }.toMap()
-    val impls = moduleTypeSystemInfo.impls
-    val implAbstractions = this.impls.asSequence()
-        .filter { impls.contains(Impl(it.traitName, it.forName)) }
+    val implAbstractions = moduleTypeSystemInfo.impls.asSequence()
         .map {
-            val traitContext = TraitSemanticContext(typeSystem, typeSystem[it.traitName].valueOrNull!!.cast())
-            Impl(it.traitName, it.forName) to it.functions.checkFunctionSemantics(errors, traitContext)
+            val traitContext = TraitSemanticContext(typeSystem, typeSystem[it.key.trait].valueOrNull!!.cast())
+            it.key to it.value.functions.checkFunctionSemantics(errors, traitContext)
         }.toMap()
     return ModuleFunctionInfo(
         errors.build(),

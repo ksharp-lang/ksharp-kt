@@ -9,6 +9,7 @@ import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.kernelTypeSystem
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.serializer.readType
 import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
 import java.io.OutputStream
@@ -24,22 +25,23 @@ fun Set<Impl>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     buffer.add(size)
     forEach { impl ->
         buffer.add(table.add(impl.trait))
-        buffer.add(table.add(impl.type))
+        impl.type.writeTo(buffer, table)
     }
 }
 
-fun BufferView.readImpls(table: BinaryTableView): Set<Impl> {
+fun BufferView.readImpls(handle: HandlePromise<TypeSystem>, table: BinaryTableView): Set<Impl> {
     val size = readInt(0)
     val result = mutableSetOf<Impl>()
     var position = 4
     repeat(size) {
+        val typeSize = readInt(position + 4)
         result.add(
             Impl(
                 table[readInt(position)],
-                table[readInt(position + 4)]
+                bufferFrom(position + 4).readType(handle, table)
             )
         )
-        position += 8
+        position += 4 + typeSize
     }
     return result
 }
@@ -110,6 +112,6 @@ fun BufferView.readModuleInfo(handle: HandlePromise<TypeSystem> = handlePromise(
         bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize)
             .readTraitInfoTable(typeSystem.handle, stringPool)
     val impls = bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize + traitsSize)
-        .readImpls(stringPool)
+        .readImpls(typeSystem.handle, stringPool)
     return ModuleInfo(dependencies, typeSystem, functions, traits, impls)
 }

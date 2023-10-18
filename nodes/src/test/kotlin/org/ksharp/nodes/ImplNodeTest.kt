@@ -9,11 +9,10 @@ class ImplNodeTest : StringSpec({
     "Test Node Interface over ImplNode" {
         ImplNode(
             "traitName",
-            "forName",
+            UnitTypeNode(Location.NoProvided),
             emptyList(),
             Location.NoProvided,
             ImplNodeLocations(
-                Location.NoProvided,
                 Location.NoProvided,
                 Location.NoProvided,
                 Location.NoProvided,
@@ -23,12 +22,11 @@ class ImplNodeTest : StringSpec({
                 children.shouldBeEmpty()
                 cast<ImplNode>().apply {
                     traitName.shouldBe("traitName")
-                    forName.shouldBe("forName")
+                    forType.shouldBe(UnitTypeNode(Location.NoProvided))
                     functions.shouldBe(emptyList())
                     location.shouldBe(Location.NoProvided)
                     locations.shouldBe(
                         ImplNodeLocations(
-                            Location.NoProvided,
                             Location.NoProvided,
                             Location.NoProvided,
                             Location.NoProvided,
