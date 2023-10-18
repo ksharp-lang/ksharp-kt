@@ -49,7 +49,7 @@ class ImplSemanticTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
-                    TypeSemanticsErrorCode.DuplicateImpl.new(Location.NoProvided, "trait" to "Sum", "impl" to "Num")
+                    TypeSemanticsErrorCode.DuplicateImpl.new(Location.NoProvided, "trait" to "Sum", "impl" to "(Num a)")
                 )
             )
     }
@@ -99,12 +99,12 @@ class ImplSemanticTest : StringSpec({
                 (+) a b = a + b
         """.trimIndent()
             .toSemanticModuleInfo()
+            .shouldBeRight()
             .map {
-                it.impls
+                it.impls.shouldBe(
+                    setOf(Impl("Sum", it.typeSystem["Num"].valueOrNull!!))
+                )
             }
-            .shouldBeRight(
-                setOf(Impl("Sum", "Num"))
-            )
     }
     "Impl with missing method, but it has default implementation in trait" {
         """
@@ -117,12 +117,12 @@ class ImplSemanticTest : StringSpec({
                 (!=) a b = a != b
         """.trimIndent()
             .toSemanticModuleInfo()
+            .shouldBeRight()
             .map {
-                it.impls
+                it.impls.shouldBe(
+                    setOf(Impl("Eq", it.typeSystem["Num"].valueOrNull!!))
+                )
             }
-            .shouldBeRight(
-                setOf(Impl("Eq", "Num"))
-            )
     }
     "Error in method impl" {
         """
@@ -141,7 +141,7 @@ class ImplSemanticTest : StringSpec({
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
-                            Impl("Eq", "Num")
+                            Impl("Eq", it.typeSystem["Num"].valueOrNull!!)
                                     to listOf(
                                 AbstractionNode(
                                     attributes = setOf(CommonAttribute.Public),

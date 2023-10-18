@@ -549,7 +549,7 @@ class TraitParsingTest : StringSpec({
             .shouldBeRight(
                 ImplNode(
                     traitName = "Eq",
-                    forName = "Num",
+                    forType = ConcreteTypeNode("Num", Location.NoProvided),
                     functions = listOf(
                         FunctionNode(
                             native = false,
@@ -609,7 +609,6 @@ class TraitParsingTest : StringSpec({
                     location = Location.NoProvided,
                     locations = ImplNodeLocations(
                         traitName = Location.NoProvided,
-                        forName = Location.NoProvided,
                         forKeyword = Location.NoProvided,
                         assignOperator = Location.NoProvided
                     )

@@ -229,6 +229,11 @@ private fun KSharpLexerIterator.consumeTypeExpr(emitLocations: Boolean): KSharpP
         }
     }
 
+fun KSharpConsumeResult.thenTypeExpr(emitLocations: Boolean): KSharpConsumeResult =
+    consume {
+        it.consumeTypeExpr(emitLocations)
+    }
+
 private fun KSharpConsumeResult.thenTraitFunction(emitLocations: Boolean): KSharpParserResult =
     thenFunctionName()
         .then(KSharpTokenType.Operator, "::", false)

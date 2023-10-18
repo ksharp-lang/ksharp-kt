@@ -315,8 +315,35 @@ private fun TraitNode.checkTypesSemantics(
     }
 }
 
-private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: TypeSystem): Set<Impl> {
-    val impls = mutableSetOf<Impl>()
+private fun instantiateType(
+    errors: ErrorCollector,
+    typeSystem: TypeSystem,
+    handle: ReadOnlyHandlePromise<TypeSystem>,
+    expression: NodeData
+): Either<Boolean, Type> {
+    val tempTypeSystem = typeSystem(PartialTypeSystem(typeSystem, listOf()), handle) {
+        errors.collect(expression.checkParams("ImplTempType", expression.location, emptySequence())).map {
+            type(
+                emptySet(),
+                "ImplTempType",
+            ) {
+                register("ImplTempType", expression)
+            }
+        }
+    }
+    return if (tempTypeSystem.errors.isNotEmpty()) {
+        errors.collectAll(tempTypeSystem.errors)
+        Either.Left(false)
+    } else {
+        tempTypeSystem.value["ImplTempType"].flatMap {
+            it()
+        }.mapLeft { false }
+    }
+}
+
+private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: TypeSystem): Map<Impl, ImplNode> {
+    val impls = mapBuilder<Impl, ImplNode>()
+    val handle = ReadOnlyHandlePromise(typeSystem.handle)
     this.forEach { impl ->
         typeSystem[impl.traitName].flatMap { traitType ->
             val requiredMethodsToImplement = traitType.cast<TraitType>()
@@ -342,30 +369,37 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
                         TypeSemanticsErrorCode.MissingImplMethods.new(
                             impl.location,
                             "methods" to missingMethods.joinToString(", "),
-                            "impl" to impl.forName,
+                            "impl" to impl.forType.representation,
                             "trait" to impl.traitName
                         )
                     )
                 }
             }
+        }.mapLeft {
+            errors.collect(it)
+            it
         }.flatMap {
-            if (impls.add(Impl(impl.traitName, impl.forName))) {
+            instantiateType(errors, typeSystem, handle, impl.forType.cast())
+                .also { println("Impl es ${it}") }
+        }.flatMap { forType ->
+            val i = Impl(impl.traitName, forType)
+            println(impls)
+            if (impls.containsKey(i) == false) {
+                impls.put(i, impl)
                 Either.Right(true)
             } else {
-                Either.Left(
+                errors.collect(
                     TypeSemanticsErrorCode.DuplicateImpl.new(
                         impl.location,
-                        "impl" to impl.forName,
+                        "impl" to forType.representation,
                         "trait" to impl.traitName
                     )
                 )
+                Either.Left(false)
             }
-        }.mapLeft { error ->
-            errors.collect(error)
-            error
         }
     }
-    return impls
+    return impls.build()
 }
 
 private fun TypeExpression.isUnitType(): Boolean = when {

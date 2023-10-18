@@ -47,23 +47,25 @@ val PartialTypeSystem.handle get() = value.handle
 
 operator fun PartialTypeSystem.get(name: String) = value[name]
 
-fun typeSystem(parent: PartialTypeSystem? = null, block: TypeSystemBuilder.() -> Unit): PartialTypeSystem =
-    handlePromise<TypeSystem>().let { handle ->
-        TypeSystemBuilder(
-            parent?.value,
-            handle,
-            store = mapBuilder(),
-            builder = partialBuilder {
-                TypeSystemImpl(parent?.value, handle, it.toMap())
-            }
-        ).apply(block)
-            .build().let {
-                handle.set(it.value)
-                if (parent?.isPartial == true) {
-                    PartialTypeSystem(
-                        it.value,
-                        parent.errors + it.errors
-                    )
-                } else it
-            }
-    }
+fun typeSystem(
+    parent: PartialTypeSystem? = null,
+    handle: HandlePromise<TypeSystem> = handlePromise(),
+    block: TypeSystemBuilder.() -> Unit
+): PartialTypeSystem =
+    TypeSystemBuilder(
+        parent?.value,
+        handle,
+        store = mapBuilder(),
+        builder = partialBuilder {
+            TypeSystemImpl(parent?.value, handle, it.toMap())
+        }
+    ).apply(block)
+        .build().let {
+            handle.set(it.value)
+            if (parent?.isPartial == true) {
+                PartialTypeSystem(
+                    it.value,
+                    parent.errors + it.errors
+                )
+            } else it
+        }

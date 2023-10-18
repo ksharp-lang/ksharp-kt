@@ -4,6 +4,7 @@ import org.ksharp.common.cast
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ImplNode
 import org.ksharp.nodes.ImplNodeLocations
+import org.ksharp.nodes.TypeExpression
 import org.ksharp.parser.*
 
 private fun KSharpConsumeResult.thenImplFunction(): KSharpParserResult =
@@ -23,7 +24,7 @@ fun KSharpLexerIterator.consumeImpl(): KSharpParserResult =
         }
         .thenUpperCaseWord()
         .thenKeyword("for", false)
-        .thenUpperCaseWord()
+        .thenTypeExpr(state.value.emitLocations)
         .thenAssignOperator()
         .thenRepeatingIndentation(true) { l ->
             l.thenImplFunction()
@@ -33,18 +34,17 @@ fun KSharpLexerIterator.consumeImpl(): KSharpParserResult =
             val implKeywordToken = it[0].cast<Token>()
             val traitNameToken = it[1].cast<Token>()
             val forKeywordToken = it[2].cast<Token>()
-            val typeToken = it[3].cast<Token>()
+            val typeToken = it[3].cast<TypeExpression>()
             val assignOperatorToken = it[4].cast<Token>()
             val functions = it.subList(5, it.size).cast<List<FunctionNode>>()
             ImplNode(
                 traitNameToken.text,
-                typeToken.text,
+                typeToken,
                 functions,
                 implKeywordToken.location,
                 ImplNodeLocations(
                     traitNameToken.location,
                     forKeywordToken.location,
-                    typeToken.location,
                     assignOperatorToken.location
                 )
             )
