@@ -33,6 +33,28 @@ private class HandlePromiseImpl<T> : HandlePromise<T> {
         return ref.hashCode()
     }
 
+}
+
+class ReadOnlyHandlePromise<T>(private val h: HandlePromise<T>) : HandlePromise<T> {
+
+    override val handle: T?
+        get() = h.handle
+
+    override fun set(value: T) {
+        //Do nothing
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return h == other
+        other as ReadOnlyHandlePromise<*>
+
+        return h == other.h
+    }
+
+    override fun hashCode(): Int {
+        return h.hashCode()
+    }
 
 }
 

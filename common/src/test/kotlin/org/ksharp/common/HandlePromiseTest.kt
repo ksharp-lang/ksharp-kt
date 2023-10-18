@@ -31,4 +31,13 @@ class HandlePromiseTest : StringSpec({
         val handle = MockHandlePromise<Int>()
         handle.shouldBe(MockHandlePromise<Int>())
     }
+    "readonly handle test" {
+        val handle = handlePromise<Int>()
+        handle.set(100)
+        val rHandle = ReadOnlyHandlePromise(handle)
+        rHandle.set(500)
+        rHandle.handle
+            .shouldBe(100)
+        rHandle.shouldBe(handle)
+    }
 })
