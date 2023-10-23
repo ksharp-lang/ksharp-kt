@@ -1,12 +1,14 @@
 package org.ksharp.semantics.inference
 
 import org.ksharp.common.cast
-import org.ksharp.typesystem.types.*
+import org.ksharp.typesystem.types.Parameter
+import org.ksharp.typesystem.types.TraitType
+import org.ksharp.typesystem.types.Type
 
-private fun findTraits(typeName: String, info: InferenceModuleInfo) =
+private fun findTraits(type: Type, info: InferenceModuleInfo) =
     info.typeSystem.let { typeSystem ->
         info.impls
-            .filter { it.type == typeName }
+            .filter { it.type == type }
             .map {
                 typeSystem[it.trait].valueOrNull!!
             }.cast<Sequence<TraitType>>()
@@ -15,13 +17,9 @@ private fun findTraits(typeName: String, info: InferenceModuleInfo) =
 fun getTraitsImplemented(type: Type, info: InferenceModuleInfo): Sequence<TraitType> =
     type().map { resolvedType ->
         when (resolvedType) {
-            is Concrete -> findTraits(resolvedType.name, info)
-
             is Parameter ->
                 info.traits
 
-            is ParametricType -> findTraits(resolvedType.type.cast<Alias>().name, info)
-
-            else -> emptySequence()
+            else -> findTraits(resolvedType, info)
         }
     }.valueOrNull ?: emptySequence()

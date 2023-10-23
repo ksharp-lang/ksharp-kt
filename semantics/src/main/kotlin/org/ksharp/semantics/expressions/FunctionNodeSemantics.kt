@@ -209,7 +209,7 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
         ConcreteModuleInfo(preludeModule),
         abstractions.toSemanticModuleInfo(
             moduleTypeSystemInfo.typeSystem,
-            moduleTypeSystemInfo.impls,
+            moduleTypeSystemInfo.impls.keys,
             moduleTypeSystemInfo.traits
         ),
         emptyMap()
