@@ -229,27 +229,30 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
         dependencies
     )
 
+    val abstractions = abstractions.inferTypes(errors, abstractionsInferenceInfo)
+    val traitsAbstractions = traitsAbstractions.asSequence().associate { trait ->
+        val traitInferenceInfo = InferenceInfo(
+            preludeInferenceContext,
+            trait.value.toTraitInferenceContext(moduleInferenceContext),
+            dependencies
+        )
+        trait.key to trait.value.inferTypes(errors, traitInferenceInfo)
+    }
+    val implAbstractions = implAbstractions.asSequence().associate { impl ->
+        val implInferenceInfo = InferenceInfo(
+            preludeInferenceContext,
+            impl.value.toImplInferenceContext(
+                moduleInferenceContext,
+                moduleTypeSystemInfo.typeSystem[impl.key.trait].valueOrNull!!.cast()
+            ),
+            dependencies
+        )
+        impl.key to impl.value.inferTypes(errors, implInferenceInfo)
+    }
     return ModuleFunctionInfo(
         errors = errors.build(),
-        abstractions.inferTypes(errors, abstractionsInferenceInfo),
-        traitsAbstractions.asSequence().associate { trait ->
-            val traitInferenceInfo = InferenceInfo(
-                preludeInferenceContext,
-                trait.value.toTraitInferenceContext(moduleInferenceContext),
-                dependencies
-            )
-            trait.key to trait.value.inferTypes(errors, traitInferenceInfo)
-        },
-        implAbstractions.asSequence().associate { impl ->
-            val implInferenceInfo = InferenceInfo(
-                preludeInferenceContext,
-                impl.value.toImplInferenceContext(
-                    moduleInferenceContext,
-                    moduleTypeSystemInfo.typeSystem[impl.key.trait].valueOrNull!!.cast()
-                ),
-                dependencies
-            )
-            impl.key to impl.value.inferTypes(errors, implInferenceInfo)
-        }
+        abstractions,
+        traitsAbstractions,
+        implAbstractions
     )
 }
