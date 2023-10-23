@@ -65,7 +65,7 @@ private fun Sequence<Pair<String, String>>.writeTo(size: Int, buffer: BufferWrit
     }
 }
 
-private fun Map<String, String>.writeTo(buffer: BufferWriter, table: BinaryTable) {
+fun Map<String, String>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     asSequence()
         .map { entry -> entry.key to entry.value }
         .writeTo(size, buffer, table)
@@ -78,7 +78,7 @@ private fun Set<String>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     }
 }
 
-private fun BufferView.readMapOfStrings(table: BinaryTableView): Map<String, String> {
+fun BufferView.readMapOfStrings(table: BinaryTableView): Map<String, String> {
     val paramsSize = readInt(0)
     val result = mapBuilder<String, String>()
     var position = 4

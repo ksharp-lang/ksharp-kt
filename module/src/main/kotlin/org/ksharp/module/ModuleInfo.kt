@@ -9,7 +9,8 @@ data class Impl(
 )
 
 data class ModuleInfo(
-    val dependencies: List<String>,
+    // [import-key]: module-name
+    val dependencies: Map<String, String>,
     val typeSystem: TypeSystem,
     val functions: Map<String, FunctionInfo>,
     val traits: Map<String, TraitInfo>,

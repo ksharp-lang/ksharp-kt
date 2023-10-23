@@ -11,7 +11,7 @@ private fun createKernelModule(): ModuleInfo = kernelTypeSystem
     .value
     .let { ts ->
         ModuleInfo(
-            listOf(),
+            mapOf(),
             typeSystem = ts,
             functions = mapOf(),
             traits = mapOf(),

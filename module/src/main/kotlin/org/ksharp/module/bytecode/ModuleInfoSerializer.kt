@@ -1,25 +1,18 @@
 package org.ksharp.module.bytecode
 
 import org.ksharp.common.HandlePromise
-import org.ksharp.common.add
 import org.ksharp.common.handlePromise
 import org.ksharp.common.io.*
-import org.ksharp.common.listBuilder
 import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.kernelTypeSystem
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.attributes.readMapOfStrings
+import org.ksharp.typesystem.attributes.writeTo
 import org.ksharp.typesystem.serializer.readType
 import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
 import java.io.OutputStream
-
-private fun List<String>.writeTo(buffer: BufferWriter, table: BinaryTable) {
-    buffer.add(size)
-    forEach {
-        buffer.add(table.add(it))
-    }
-}
 
 fun Set<Impl>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     buffer.add(size)
@@ -44,17 +37,6 @@ fun BufferView.readImpls(handle: HandlePromise<TypeSystem>, table: BinaryTableVi
         position += 4 + typeSize
     }
     return result
-}
-
-private fun BufferView.readStringList(table: BinaryTableView): List<String> {
-    val size = readInt(0)
-    val result = listBuilder<String>()
-    var position = 4
-    repeat(size) {
-        result.add(table[readInt(position)])
-        position += 4
-    }
-    return result.build()
 }
 
 fun ModuleInfo.writeTo(output: OutputStream) {
@@ -99,7 +81,7 @@ fun BufferView.readModuleInfo(handle: HandlePromise<TypeSystem> = handlePromise(
     val offset = 20
 
     val stringPool = StringPoolView(bufferFrom(offset))
-    val dependencies = bufferFrom(offset + stringPoolSize).readStringList(stringPool)
+    val dependencies = bufferFrom(offset + stringPoolSize).readMapOfStrings(stringPool)
     val kernelTypeSystem = kernelTypeSystem.value
     val typeSystem =
         bufferFrom(offset + dependenciesSize + stringPoolSize).readTypeSystem(stringPool, kernelTypeSystem, handle)
