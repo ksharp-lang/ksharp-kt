@@ -14,7 +14,7 @@ import org.ksharp.typesystem.types.newParameter
 private fun SemanticModuleInfo.traitsImplemented(type: Type): List<TraitType> =
     getTraitsImplemented(
         type,
-        abstractions.toSemanticModuleInfo(
+        abstractions.toInferenceContext(
             typeSystem,
             impls,
             traits

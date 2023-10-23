@@ -16,6 +16,14 @@ import org.ksharp.typesystem.types.Type
 
 typealias AbstractionNodeMap = Map<String, AbstractionNode<AbstractionSemanticInfo>>
 
+private class TraitMethodTypeInfo(
+    override val name: String,
+    private val methodType: TraitType.MethodType
+) : FunctionInfo {
+    override val attributes: Set<Attribute> = methodType.attributes
+    override val types: List<Type> = methodType.arguments
+}
+
 sealed interface InferenceContext {
 
     val typeSystem: TypeSystem
@@ -83,7 +91,6 @@ class TraitInferenceContext(
 class ImplInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
-    private val traitAbstractions: AbstractionNodeMap,
     private val abstractions: AbstractionNodeMap
 ) : InferenceContext {
 
@@ -99,12 +106,9 @@ class ImplInferenceContext(
             abstractions[methodName]?.let {
                 AbstractionFunctionInfo(it)
             } ?: traitType.methods[methodName]?.let {
-                traitAbstractions[methodName]?.let {
-                    AbstractionFunctionInfo(it)
-                }
+                TraitMethodTypeInfo(methodName, it)
             } ?: parent.findFunction(name, numParams)
         }
-
 
 }
 
@@ -124,7 +128,7 @@ private fun List<AbstractionNode<AbstractionSemanticInfo>>.toMap() =
         "${it.name}/${it.info.parameters.size + 1}"
     }
 
-fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(
+fun List<AbstractionNode<SemanticInfo>>.toInferenceContext(
     typeSystem: TypeSystem,
     impls: Set<Impl>,
     traits: List<TraitType>
@@ -137,9 +141,22 @@ fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(
             .toMap()
     )
 
-fun List<AbstractionNode<SemanticInfo>>.toTraitSemanticModuleInfo(semanticInfo: InferenceContext) =
+fun List<AbstractionNode<SemanticInfo>>.toTraitInferenceContext(
+    inferenceContext: InferenceContext
+) =
     TraitInferenceContext(
-        semanticInfo,
+        inferenceContext,
+        this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
+            .toMap()
+    )
+
+fun List<AbstractionNode<SemanticInfo>>.toImplInferenceContext(
+    inferenceContext: InferenceContext,
+    traitType: TraitType
+) =
+    ImplInferenceContext(
+        inferenceContext,
+        traitType,
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()
     )

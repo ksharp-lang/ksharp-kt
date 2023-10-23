@@ -57,7 +57,7 @@ internal fun FunctionInfo.unify(
 
 data class InferenceInfo(
     val prelude: InferenceContext,
-    val module: InferenceContext,
+    val inferenceContext: InferenceContext,
     val dependencies: Map<String, ModuleInfo> = emptyMap()
 ) {
     private val cache = cacheOf<Pair<String, List<Type>>, Either<String, Type>>()
@@ -101,12 +101,12 @@ data class InferenceInfo(
             val name = appName.name
             val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
             cache.get(funName to arguments) {
-                val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else module
+                val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else inferenceContext
                 val secondSearch = if (appName.pck == null) prelude else null
 
                 firstSearch.findFunction(name, numArguments + 1)
                     ?.infer()
-                    ?.unify(module.typeSystem, location, arguments)
+                    ?.unify(inferenceContext.typeSystem, location, arguments)
                     ?.mapLeft { it.toString() }
                     ?: secondSearch?.findFunction(name, numArguments + 1)
                         ?.infer()
@@ -129,7 +129,7 @@ data class InferenceInfo(
         arguments.size.let { _ ->
             val name = appName.name
             cache.get(name to arguments) {
-                val type = module.typeSystem[name]
+                val type = inferenceContext.typeSystem[name]
                 val result = if (type.isLeft) {
                     prelude.typeSystem[name]
                 } else type
@@ -145,5 +145,5 @@ data class InferenceInfo(
         }
 
     fun getType(name: String): ErrorOrType =
-        module.typeSystem[name]
+        inferenceContext.typeSystem[name]
 }

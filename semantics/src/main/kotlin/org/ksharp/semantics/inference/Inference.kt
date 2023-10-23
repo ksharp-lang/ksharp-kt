@@ -24,7 +24,7 @@ enum class InferenceErrorCode(override val description: String) : ErrorCode {
 }
 
 private fun ApplicationName.calculateType(info: InferenceInfo): ErrorOrType =
-    info.module.typeSystem[name]
+    info.inferenceContext.typeSystem[name]
 
 private fun SemanticNode<SemanticInfo>.isCollectionApplication(fnName: String): Boolean =
     this is ApplicationNode
@@ -73,7 +73,7 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
             is ListMatchValueNode -> Either.Left(InferenceErrorCode.BindingUsedAsGuard.new(location))
         }.also {
             this.info.setInferredType(it.flatMap { t ->
-                info.module.typeSystem.solve(t)
+                info.inferenceContext.typeSystem.solve(t)
             })
         }
     }
@@ -96,7 +96,7 @@ private fun SemanticNode<SemanticInfo>.bindTuple(type: Type, info: InferenceInfo
             .map { (arg, elementType) ->
                 arg.bindType(elementType, info)
             }.unwrap()
-            .map { it.toTupleType(info.module.typeSystem, type.attributes) }
+            .map { it.toTupleType(info.inferenceContext.typeSystem, type.attributes) }
     }
 
 private fun SemanticNode<SemanticInfo>.bindParametricType(
@@ -227,7 +227,7 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
     this.info.cast<AbstractionSemanticInfo>().parameters.let { params ->
         if (params.isEmpty()) {
             info.prelude.typeSystem["Unit"].map { unitType ->
-                listOf(unitType, returnType).toFunctionType(info.module.typeSystem)
+                listOf(unitType, returnType).toFunctionType(info.inferenceContext.typeSystem)
             }
         } else {
             params.asSequence().run {
@@ -248,7 +248,7 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
                 }
             }.unwrap()
                 .map {
-                    (it + returnType).toFunctionType(info.module.typeSystem)
+                    (it + returnType).toFunctionType(info.inferenceContext.typeSystem)
                 }
         }
     }
@@ -290,7 +290,7 @@ private fun Sequence<ErrorOrType>.unifyArguments(
             unifiedType?.let { sequenceOf(it) } ?: emptySequence()
         }
 
-        CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType(info.module.typeSystem) })
+        CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType(info.inferenceContext.typeSystem) })
     }
 
 private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
