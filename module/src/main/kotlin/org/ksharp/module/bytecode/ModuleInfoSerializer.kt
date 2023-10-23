@@ -50,9 +50,6 @@ fun ModuleInfo.writeTo(output: OutputStream) {
     val functionTable = newBufferWriter().apply {
         functions.writeTo(this, stringPool)
     }
-    val traitTable = newBufferWriter().apply {
-        traits.writeTo(this, stringPool)
-    }
     val implsTable = newBufferWriter().apply {
         impls.writeTo(this, stringPool)
     }
@@ -61,14 +58,12 @@ fun ModuleInfo.writeTo(output: OutputStream) {
     header.add(dependencies.size) // 4
     header.add(typeSystem.size) // 8
     header.add(functionTable.size) // 12
-    header.add(traitTable.size) // 16
 
     header.transferTo(output)
     stringPool.writeTo(output)
     dependencies.transferTo(output)
     typeSystem.transferTo(output)
     functionTable.transferTo(output)
-    traitTable.transferTo(output)
     implsTable.transferTo(output)
 }
 
@@ -77,8 +72,7 @@ fun BufferView.readModuleInfo(handle: HandlePromise<TypeSystem> = handlePromise(
     val dependenciesSize = readInt(4)
     val typeSystemSize = readInt(8)
     val functionsSize = readInt(12)
-    val traitsSize = readInt(16)
-    val offset = 20
+    val offset = 16
 
     val stringPool = StringPoolView(bufferFrom(offset))
     val dependencies = bufferFrom(offset + stringPoolSize).readMapOfStrings(stringPool)
@@ -90,10 +84,7 @@ fun BufferView.readModuleInfo(handle: HandlePromise<TypeSystem> = handlePromise(
             typeSystem.handle,
             stringPool
         )
-    val traits =
-        bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize)
-            .readTraitInfoTable(typeSystem.handle, stringPool)
-    val impls = bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize + traitsSize)
+    val impls = bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize + functionsSize)
         .readImpls(typeSystem.handle, stringPool)
-    return ModuleInfo(dependencies, typeSystem, functions, traits, impls)
+    return ModuleInfo(dependencies, typeSystem, functions, impls)
 }
