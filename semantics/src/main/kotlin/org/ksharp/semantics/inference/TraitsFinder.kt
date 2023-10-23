@@ -18,7 +18,9 @@ fun getTraitsImplemented(type: Type, info: InferenceContext): Sequence<TraitType
     type().map { resolvedType ->
         when (resolvedType) {
             is Parameter ->
-                info.traits
+                info.typeSystem.asSequence()
+                    .map { it.second }
+                    .filterIsInstance<TraitType>()
 
             else -> findTraits(resolvedType, info)
         }

@@ -16,8 +16,7 @@ private fun SemanticModuleInfo.traitsImplemented(type: Type): List<TraitType> =
         type,
         abstractions.toInferenceContext(
             typeSystem,
-            impls,
-            traits
+            impls
         )
     ).toList()
 

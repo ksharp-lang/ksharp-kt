@@ -13,13 +13,11 @@ import org.ksharp.semantics.expressions.checkInferenceSemantics
 import org.ksharp.semantics.typesystem.checkTypesSemantics
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.TraitType
 
 data class SemanticModuleInfo(
     val name: String,
     val errors: List<Error>,
     val typeSystem: TypeSystem,
-    val traits: List<TraitType>,
     val impls: Set<Impl>,
     val traitsAbstractions: Map<String, List<AbstractionNode<SemanticInfo>>>,
     val implAbstractions: Map<Impl, List<AbstractionNode<SemanticInfo>>>,
@@ -30,10 +28,6 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
     val typeSemantics = this.checkTypesSemantics(preludeModule)
     val moduleSemantics = this.checkFunctionSemantics(typeSemantics)
         .checkInferenceSemantics(typeSemantics, preludeModule)
-    val traitsWithoutDefaultImpl = traits.asSequence()
-        .filter {
-            it.definition.functions.isEmpty()
-        }.map { it.name }.toSet()
     return SemanticModuleInfo(
         name.let {
             val ix = name.indexOf(".")
@@ -42,10 +36,6 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
         },
         errors + typeSemantics.errors + moduleSemantics.errors,
         typeSemantics.typeSystem,
-        typeSemantics.traits.filter { trait ->
-            traitsWithoutDefaultImpl.contains(trait.name) ||
-                    moduleSemantics.traitsAbstractions.containsKey(trait.name)
-        },
         typeSemantics.impls.keys,
         moduleSemantics.traitsAbstractions,
         moduleSemantics.implAbstractions,

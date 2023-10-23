@@ -19,6 +19,7 @@ import org.ksharp.semantics.scopes.TableErrorCode
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.TraitType
@@ -34,6 +35,12 @@ private fun Collection<TraitType>.shouldDefine(methods: Map<String, Boolean>): C
         .shouldBe(methods)
     return this
 }
+
+private fun TypeSystem.getTraits() =
+    asSequence()
+        .map { it.second }
+        .filterIsInstance<TraitType>()
+        .toList()
 
 class TraitSemanticTest : StringSpec({
     "Not allow duplicate functions. (Same name and arity)" {
@@ -105,7 +112,8 @@ class TraitSemanticTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .map {
-                it.traits
+                it.typeSystem
+                    .getTraits()
                     .shouldDefine(mapOf("Sum::sum/3" to true))
                     .map { t -> t.representation }
             }
@@ -126,7 +134,8 @@ class TraitSemanticTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .map {
-                it.traits
+                it.typeSystem
+                    .getTraits()
                     .shouldDefine(mapOf("Sum::sum/3" to false))
                     .map { t -> t.representation }
             }
@@ -151,7 +160,8 @@ class TraitSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 // should contains the trait with only one method sum/3 with default implementation
-                it.traits
+                it.typeSystem
+                    .getTraits()
                     .shouldNotBeEmpty()
                     .shouldDefine(mapOf("Sum::sum/3" to true))
                 val paramA = TypeSemanticInfo(type = Either.Right(it.typeSystem.newNamedParameter("a")))

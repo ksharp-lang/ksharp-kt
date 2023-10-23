@@ -220,8 +220,7 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     val preludeInferenceContext = ModuleInfoInferenceContext(preludeModule)
     val moduleInferenceContext = abstractions.toInferenceContext(
         moduleTypeSystemInfo.typeSystem,
-        moduleTypeSystemInfo.impls.keys,
-        moduleTypeSystemInfo.traits
+        moduleTypeSystemInfo.impls.keys
     )
     val dependencies = mapOf<String, ModuleInfo>()
     val abstractionsInferenceInfo = InferenceInfo(

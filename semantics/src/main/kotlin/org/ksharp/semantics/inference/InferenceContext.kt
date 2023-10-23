@@ -30,8 +30,6 @@ sealed interface InferenceContext {
 
     val impls: Sequence<Impl>
 
-    val traits: Sequence<TraitType>
-
     fun findFunction(name: String, numParams: Int): FunctionInfo?
 
     fun getTraitsImplemented(type: Type): Sequence<TraitType> = getTraitsImplemented(type, this)
@@ -47,10 +45,6 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
 
     override val impls: Sequence<Impl> = moduleInfo.impls.asSequence()
 
-    override val traits: Sequence<TraitType> = moduleInfo.traits.keys.asSequence().map {
-        typeSystem[it].valueOrNull!!.cast()
-    }
-
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         moduleInfo.functions["$name/$numParams"]
 }
@@ -58,7 +52,6 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
 class SemanticModuleInfoInferenceContext(
     override val typeSystem: TypeSystem,
     override val impls: Sequence<Impl>,
-    override val traits: Sequence<TraitType>,
     private val abstractions: AbstractionNodeMap
 ) : InferenceContext {
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
@@ -79,8 +72,6 @@ class TraitInferenceContext(
     override val typeSystem: TypeSystem
         get() = parent.typeSystem
 
-    override val traits: Sequence<TraitType> = parent.traits
-
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         abstractions[methodName(name, numParams)]?.let {
             AbstractionFunctionInfo(it)
@@ -95,8 +86,6 @@ class ImplInferenceContext(
 ) : InferenceContext {
 
     override val impls: Sequence<Impl> = parent.impls
-
-    override val traits: Sequence<TraitType> = parent.traits
 
     override val typeSystem: TypeSystem
         get() = parent.typeSystem
@@ -131,12 +120,10 @@ private fun List<AbstractionNode<AbstractionSemanticInfo>>.toMap() =
 fun List<AbstractionNode<SemanticInfo>>.toInferenceContext(
     typeSystem: TypeSystem,
     impls: Set<Impl>,
-    traits: List<TraitType>
 ) =
     SemanticModuleInfoInferenceContext(
         typeSystem,
         impls.asSequence(),
-        traits.asSequence(),
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()
     )
