@@ -10,8 +10,8 @@ import org.ksharp.semantics.context.SemanticContext
 import org.ksharp.semantics.context.TraitSemanticContext
 import org.ksharp.semantics.context.TypeSystemSemanticContext
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.ConcreteModuleInfo
 import org.ksharp.semantics.inference.InferenceInfo
+import org.ksharp.semantics.inference.ModuleInfoInferenceContext
 import org.ksharp.semantics.inference.inferType
 import org.ksharp.semantics.inference.toSemanticModuleInfo
 import org.ksharp.semantics.nodes.*
@@ -206,7 +206,7 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     val errors = ErrorCollector()
     errors.collectAll(this.errors)
     val inferenceInfo = InferenceInfo(
-        ConcreteModuleInfo(preludeModule),
+        ModuleInfoInferenceContext(preludeModule),
         abstractions.toSemanticModuleInfo(
             moduleTypeSystemInfo.typeSystem,
             moduleTypeSystemInfo.impls.keys,

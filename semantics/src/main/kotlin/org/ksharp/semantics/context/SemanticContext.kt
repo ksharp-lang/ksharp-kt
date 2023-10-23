@@ -11,6 +11,7 @@ import org.ksharp.typesystem.types.toFunctionType
 interface SemanticContext {
 
     val typeSystem: TypeSystem
+    
     fun findFunctionType(name: String): FunctionType?
 
     fun calculateVisibility(function: FunctionNode): CommonAttribute

@@ -16,7 +16,7 @@ import org.ksharp.typesystem.types.Type
 
 typealias AbstractionNodeMap = Map<String, AbstractionNode<AbstractionSemanticInfo>>
 
-sealed interface InferenceModuleInfo {
+sealed interface InferenceContext {
 
     val typeSystem: TypeSystem
 
@@ -32,8 +32,8 @@ sealed interface InferenceModuleInfo {
 
 }
 
-class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
-    InferenceModuleInfo {
+class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
+    InferenceContext {
 
     override val typeSystem: TypeSystem = moduleInfo.typeSystem
 
@@ -47,12 +47,12 @@ class ConcreteModuleInfo(private val moduleInfo: ModuleInfo) :
         moduleInfo.functions["$name/$numParams"]
 }
 
-class SemanticModuleInfo(
+class SemanticModuleInfoInferenceContext(
     override val typeSystem: TypeSystem,
     override val impls: Sequence<Impl>,
     override val traits: Sequence<TraitType>,
     private val abstractions: AbstractionNodeMap
-) : InferenceModuleInfo {
+) : InferenceContext {
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         abstractions[methodName(name, numParams)]?.let {
             AbstractionFunctionInfo(it)
@@ -60,39 +60,39 @@ class SemanticModuleInfo(
 
 }
 
-class TraitSemanticInfo(
-    private val moduleInfo: InferenceModuleInfo,
+class TraitInferenceContext(
+    private val parent: InferenceContext,
     private val abstractions: AbstractionNodeMap
-) : InferenceModuleInfo {
+) : InferenceContext {
 
     override val impls: Sequence<Impl>
-        get() = moduleInfo.impls
+        get() = parent.impls
 
     override val typeSystem: TypeSystem
-        get() = moduleInfo.typeSystem
+        get() = parent.typeSystem
 
-    override val traits: Sequence<TraitType> = moduleInfo.traits
+    override val traits: Sequence<TraitType> = parent.traits
 
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         abstractions[methodName(name, numParams)]?.let {
             AbstractionFunctionInfo(it)
-        } ?: moduleInfo.findFunction(name, numParams)
+        } ?: parent.findFunction(name, numParams)
 
 }
 
-class ImplSemanticInfo(
-    private val moduleInfo: InferenceModuleInfo,
+class ImplInferenceContext(
+    private val parent: InferenceContext,
     private val traitType: TraitType,
     private val traitAbstractions: AbstractionNodeMap,
     private val abstractions: AbstractionNodeMap
-) : InferenceModuleInfo {
+) : InferenceContext {
 
-    override val impls: Sequence<Impl> = moduleInfo.impls
+    override val impls: Sequence<Impl> = parent.impls
 
-    override val traits: Sequence<TraitType> = moduleInfo.traits
+    override val traits: Sequence<TraitType> = parent.traits
 
     override val typeSystem: TypeSystem
-        get() = moduleInfo.typeSystem
+        get() = parent.typeSystem
 
     override fun findFunction(name: String, numParams: Int): FunctionInfo? =
         methodName(name, numParams).let { methodName ->
@@ -102,7 +102,7 @@ class ImplSemanticInfo(
                 traitAbstractions[methodName]?.let {
                     AbstractionFunctionInfo(it)
                 }
-            } ?: moduleInfo.findFunction(name, numParams)
+            } ?: parent.findFunction(name, numParams)
         }
 
 
@@ -129,7 +129,7 @@ fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(
     impls: Set<Impl>,
     traits: List<TraitType>
 ) =
-    SemanticModuleInfo(
+    SemanticModuleInfoInferenceContext(
         typeSystem,
         impls.asSequence(),
         traits.asSequence(),
@@ -137,8 +137,8 @@ fun List<AbstractionNode<SemanticInfo>>.toSemanticModuleInfo(
             .toMap()
     )
 
-fun List<AbstractionNode<SemanticInfo>>.toTraitSemanticModuleInfo(semanticInfo: InferenceModuleInfo) =
-    TraitSemanticInfo(
+fun List<AbstractionNode<SemanticInfo>>.toTraitSemanticModuleInfo(semanticInfo: InferenceContext) =
+    TraitInferenceContext(
         semanticInfo,
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()

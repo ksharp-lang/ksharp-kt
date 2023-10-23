@@ -56,8 +56,8 @@ internal fun FunctionInfo.unify(
 }
 
 data class InferenceInfo(
-    val prelude: InferenceModuleInfo,
-    val module: InferenceModuleInfo,
+    val prelude: InferenceContext,
+    val module: InferenceContext,
     val dependencies: Map<String, ModuleInfo> = emptyMap()
 ) {
     private val cache = cacheOf<Pair<String, List<Type>>, Either<String, Type>>()

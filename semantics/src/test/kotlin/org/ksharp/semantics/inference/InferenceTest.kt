@@ -39,7 +39,7 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
         emptyMap(),
         emptySet()
     )
-    return InferenceInfo(ConcreteModuleInfo(preludeModule), ConcreteModuleInfo(testModule))
+    return InferenceInfo(ModuleInfoInferenceContext(preludeModule), ModuleInfoInferenceContext(testModule))
 }
 
 class InferenceTest : StringSpec({

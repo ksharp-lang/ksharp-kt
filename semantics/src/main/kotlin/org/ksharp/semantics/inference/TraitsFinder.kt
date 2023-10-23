@@ -5,7 +5,7 @@ import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
 
-private fun findTraits(type: Type, info: InferenceModuleInfo) =
+private fun findTraits(type: Type, info: InferenceContext) =
     info.typeSystem.let { typeSystem ->
         info.impls
             .filter { it.type == type }
@@ -14,7 +14,7 @@ private fun findTraits(type: Type, info: InferenceModuleInfo) =
             }.cast<Sequence<TraitType>>()
     }
 
-fun getTraitsImplemented(type: Type, info: InferenceModuleInfo): Sequence<TraitType> =
+fun getTraitsImplemented(type: Type, info: InferenceContext): Sequence<TraitType> =
     type().map { resolvedType ->
         when (resolvedType) {
             is Parameter ->
