@@ -22,7 +22,7 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
     val a = typeSystem.newParameter()
     val intType = typeSystem["Int"].valueOrNull!!
     val testModule = ModuleInfo(
-        listOf(),
+        mapOf(),
         typeSystem = typeSystem,
         functions = mapOf(
             "(test+)/3" to functionInfo(

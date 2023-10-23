@@ -33,7 +33,7 @@ class ModuleInfoSerializerTest : StringSpec({
     val ts = typeSystem { }.value
     "Serialize ModuleInfo" {
         ModuleInfo(
-            listOf("module1", "module2"),
+            mapOf("m1" to "module1", "m2" to "module2"),
             typeSystem {
                 type(setOf(CommonAttribute.Public), "Int")
                 type(setOf(CommonAttribute.Public), "String")
