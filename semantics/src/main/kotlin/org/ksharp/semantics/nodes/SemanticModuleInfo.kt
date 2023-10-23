@@ -2,7 +2,10 @@ package org.ksharp.semantics.nodes
 
 import org.ksharp.common.Error
 import org.ksharp.common.cast
-import org.ksharp.module.*
+import org.ksharp.module.FunctionInfo
+import org.ksharp.module.Impl
+import org.ksharp.module.ModuleInfo
+import org.ksharp.module.functionInfo
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.expressions.checkFunctionSemantics
@@ -68,13 +71,6 @@ fun SemanticModuleInfo.toModuleInfo(): ModuleInfo {
         dependencies = mapOf(),
         typeSystem = typeSystem,
         functions = abstractions.toFunctionInfoMap(),
-        traits = traits.associate {
-            it.name to traitInfo(
-                it.name,
-                it.methods.values.associateBy { method -> "${method.name}/${method.arguments.size}" },
-                (traitsAbstractions[it.name] ?: emptyList()).toFunctionInfoMap()
-            )
-        },
         setOf()
     )
 }
