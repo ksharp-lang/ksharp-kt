@@ -65,7 +65,7 @@ private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
 
 fun SemanticModuleInfo.toModuleInfo(): ModuleInfo {
     return ModuleInfo(
-        dependencies = listOf(),
+        dependencies = mapOf(),
         typeSystem = typeSystem,
         functions = abstractions.toFunctionInfoMap(),
         traits = traits.associate {
