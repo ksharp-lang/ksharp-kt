@@ -13,6 +13,5 @@ data class ModuleInfo(
     val dependencies: Map<String, String>,
     val typeSystem: TypeSystem,
     val functions: Map<String, FunctionInfo>,
-    val traits: Map<String, TraitInfo>,
     val impls: Set<Impl>,
 )
