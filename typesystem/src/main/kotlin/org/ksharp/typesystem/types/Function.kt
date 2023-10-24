@@ -18,11 +18,25 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
-data class FunctionType internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class FunctionType private constructor(
     override val attributes: Set<Attribute>,
     val arguments: List<Type>,
 ) : Type {
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(
+        typeSystem: HandlePromise<TypeSystem>,
+        attributes: Set<Attribute>,
+        arguments: List<Type>
+    ) : this(
+        attributes,
+        arguments
+    ) {
+        this.typeSystem = typeSystem
+    }
+
     override val solver: Solver
         get() = Solvers.Function
     override val serializer: TypeSerializer

@@ -17,11 +17,25 @@ import org.ksharp.typesystem.validateTypeName
 
 typealias UnionTypeFactoryBuilder = UnionTypeFactory.() -> Unit
 
-data class UnionType internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class UnionType private constructor(
     override val attributes: Set<Attribute>,
     val arguments: Map<String, ClassType>,
 ) : Type {
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(
+        typeSystem: HandlePromise<TypeSystem>,
+        attributes: Set<Attribute>,
+        arguments: Map<String, ClassType>
+    ) : this(
+        attributes,
+        arguments
+    ) {
+        this.typeSystem = typeSystem
+    }
+
     override val solver: Solver
         get() = Solvers.Union
     override val serializer: TypeSerializer
@@ -43,11 +57,22 @@ data class UnionType internal constructor(
 
     override fun new(attributes: Set<Attribute>): Type = UnionType(typeSystem, attributes, arguments)
 
-    data class ClassType internal constructor(
-        override val typeSystem: HandlePromise<TypeSystem>,
+    @Suppress("DataClassPrivateConstructor")
+    data class ClassType private constructor(
         val label: String,
         val params: List<Type>
     ) : Type {
+        override lateinit var typeSystem: HandlePromise<TypeSystem>
+            private set
+
+        internal constructor(
+            typeSystem: HandlePromise<TypeSystem>,
+            label: String,
+            params: List<Type>
+        ) : this(label = label, params = params) {
+            this.typeSystem = typeSystem
+        }
+
         override val attributes: Set<Attribute>
             get() = NoAttributes
 

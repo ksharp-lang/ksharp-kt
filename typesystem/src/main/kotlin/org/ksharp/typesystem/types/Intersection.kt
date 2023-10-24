@@ -17,11 +17,25 @@ import org.ksharp.typesystem.validateTypeName
 
 typealias IntersectionTypeFactoryBuilder = IntersectionTypeFactory.() -> Unit
 
-data class IntersectionType internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class IntersectionType private constructor(
     override val attributes: Set<Attribute>,
     val params: List<Type>
 ) : Type {
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(
+        typeSystem: HandlePromise<TypeSystem>,
+        attributes: Set<Attribute>,
+        params: List<Type>
+    ) : this(
+        attributes,
+        params
+    ) {
+        this.typeSystem = typeSystem
+    }
+    
     override val solver: Solver
         get() = Solvers.NoDefined
     override val serializer: TypeSerializer
