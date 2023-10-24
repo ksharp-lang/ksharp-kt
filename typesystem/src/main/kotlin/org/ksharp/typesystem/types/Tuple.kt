@@ -14,11 +14,26 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
-data class TupleType internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class TupleType private constructor(
     override val attributes: Set<Attribute>,
     val elements: List<Type>,
 ) : Type {
+
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(
+        typeSystem: HandlePromise<TypeSystem>,
+        attributes: Set<Attribute>,
+        elements: List<Type>
+    ) : this(
+        attributes,
+        elements
+    ) {
+        this.typeSystem = typeSystem
+    }
+
     override val solver: Solver
         get() = Solvers.Tuple
     override val serializer: TypeSerializer

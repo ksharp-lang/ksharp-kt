@@ -23,13 +23,10 @@ class HandlePromiseTest : StringSpec({
         }
         handle.handle.shouldBe(10)
     }
-    "handle should be mock handle" {
-        val handle = handlePromise<Int>()
-        handle.shouldBe(MockHandlePromise<Int>())
-    }
     "mock handle should be mock handle" {
         val handle = MockHandlePromise<Int>()
-        handle.shouldBe(MockHandlePromise<Int>())
+        handle.set(10)
+        handle.handle.shouldBeNull()
     }
     "readonly handle test" {
         val handle = handlePromise<Int>()
@@ -38,6 +35,5 @@ class HandlePromiseTest : StringSpec({
         rHandle.set(500)
         rHandle.handle
             .shouldBe(100)
-        rHandle.shouldBe(handle)
     }
 })

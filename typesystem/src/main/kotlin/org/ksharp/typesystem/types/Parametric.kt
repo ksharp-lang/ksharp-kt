@@ -18,10 +18,18 @@ private var parameterIdCounter = AtomicInteger(-1)
 
 typealias ParametricTypeFactoryBuilder = ParametricTypeFactory.() -> Unit
 
-data class Parameter internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class Parameter private constructor(
     val name: String,
 ) : TypeVariable {
+
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(typeSystem: HandlePromise<TypeSystem>, name: String) : this(name) {
+        this.typeSystem = typeSystem
+    }
+
     override val attributes: Set<Attribute>
         get() = NoAttributes
     override val solver: Solver
@@ -48,12 +56,28 @@ fun TypeSystem.newParameter() = Parameter(handle, "@${parameterIdCounter.increme
 
 fun TypeSystem.newNamedParameter(name: String) = Parameter(handle, name)
 
-data class ParametricType internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class ParametricType private constructor(
     override val attributes: Set<Attribute>,
     val type: Type,
     val params: List<Type>
 ) : Type {
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(
+        typeSystem: HandlePromise<TypeSystem>,
+        attributes: Set<Attribute>,
+        type: Type,
+        params: List<Type>
+    ) : this(
+        attributes,
+        type,
+        params
+    ) {
+        this.typeSystem = typeSystem
+    }
+    
     override val solver: Solver
         get() = Solvers.Parametric
     override val serializer: TypeSerializer

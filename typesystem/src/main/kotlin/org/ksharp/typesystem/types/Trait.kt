@@ -16,13 +16,32 @@ typealias TraitTypeFactoryBuilder = TraitTypeFactory.() -> Unit
 
 interface IsTrait
 
-data class TraitType internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class TraitType private constructor(
     override val attributes: Set<Attribute>,
     val name: String,
     val param: String,
     val methods: Map<String, MethodType>,
 ) : Type, IsTrait {
+
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(
+        typeSystem: HandlePromise<TypeSystem>,
+        attributes: Set<Attribute>,
+        name: String,
+        param: String,
+        methods: Map<String, MethodType>,
+    ) : this(
+        attributes,
+        name,
+        param,
+        methods
+    ) {
+        this.typeSystem = typeSystem
+    }
+
     override val solver: Solver
         get() = Solvers.NoDefined
     override val serializer: TypeSerializer
@@ -34,13 +53,30 @@ data class TraitType internal constructor(
     override val substitution: Substitution
         get() = Substitutions.NoDefined
 
-    data class MethodType internal constructor(
-        override val typeSystem: HandlePromise<TypeSystem>,
+    @Suppress("DataClassPrivateConstructor")
+    data class MethodType private constructor(
         override val attributes: Set<Attribute>,
         val name: String,
         val arguments: List<Type>,
         val withDefaultImpl: Boolean,
     ) : Type {
+        override lateinit var typeSystem: HandlePromise<TypeSystem>
+            private set
+
+        internal constructor(
+            typeSystem: HandlePromise<TypeSystem>,
+            attributes: Set<Attribute>,
+            name: String,
+            arguments: List<Type>,
+            withDefaultImpl: Boolean,
+        ) : this(
+            attributes,
+            name,
+            arguments,
+            withDefaultImpl
+        ) {
+            this.typeSystem = typeSystem
+        }
 
         override val solver: Solver
             get() = Solvers.NoDefined

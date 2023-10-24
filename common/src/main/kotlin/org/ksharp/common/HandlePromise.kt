@@ -9,7 +9,6 @@ sealed interface HandlePromise<T> {
 }
 
 private class HandlePromiseImpl<T> : HandlePromise<T> {
-
     private var ref: AtomicReference<T> = AtomicReference(null)
 
     override val handle: T?
@@ -18,44 +17,15 @@ private class HandlePromiseImpl<T> : HandlePromise<T> {
     override fun set(value: T) {
         if (!ref.compareAndSet(null, value)) throw Exception("Handle already set")
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other is MockHandlePromise<*>) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as HandlePromiseImpl<*>
-
-        return ref == other.ref
-    }
-
-    override fun hashCode(): Int {
-        return ref.hashCode()
-    }
-
 }
 
 class ReadOnlyHandlePromise<T>(private val h: HandlePromise<T>) : HandlePromise<T> {
-
     override val handle: T?
         get() = h.handle
 
     override fun set(value: T) {
         //Do nothing
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return h == other
-        other as ReadOnlyHandlePromise<*>
-
-        return h == other.h
-    }
-
-    override fun hashCode(): Int {
-        return h.hashCode()
-    }
-
 }
 
 class MockHandlePromise<T> : HandlePromise<T> {
@@ -64,19 +34,6 @@ class MockHandlePromise<T> : HandlePromise<T> {
 
     override fun set(value: T) {
         // Mock class
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as MockHandlePromise<*>
-
-        return handle == other.handle
-    }
-
-    override fun hashCode(): Int {
-        return handle?.hashCode() ?: 0
     }
 }
 
