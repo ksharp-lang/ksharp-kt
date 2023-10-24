@@ -12,12 +12,28 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
-data class TypeConstructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class TypeConstructor private constructor(
     override val attributes: Set<Attribute>,
     val name: String,
     val alias: String
 ) : Type {
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(
+        typeSystem: HandlePromise<TypeSystem>,
+        attributes: Set<Attribute>,
+        name: String,
+        alias: String
+    ) : this(
+        attributes,
+        name,
+        alias
+    ) {
+        this.typeSystem = typeSystem
+    }
+    
     override val solver: Solver
         get() = Solvers.PassThrough
     override val substitution: Substitution

@@ -14,10 +14,17 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
-data class Alias internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class Alias private constructor(
     val name: String,
 ) : TypeVariable {
+
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(typeSystem: HandlePromise<TypeSystem>, name: String) : this(name) {
+        this.typeSystem = typeSystem
+    }
 
     override val attributes: Set<Attribute> = NoAttributes
     override val solver: Solver
@@ -39,11 +46,21 @@ data class Alias internal constructor(
     override fun new(attributes: Set<Attribute>): Type = this
 }
 
-data class TypeAlias(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class TypeAlias private constructor(
     override val attributes: Set<Attribute>,
     val name: String
 ) : Type {
+
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(typeSystem: HandlePromise<TypeSystem>, attributes: Set<Attribute>, name: String) : this(
+        attributes,
+        name
+    ) {
+        this.typeSystem = typeSystem
+    }
 
     override val solver: Solver
         get() = Solvers.Alias

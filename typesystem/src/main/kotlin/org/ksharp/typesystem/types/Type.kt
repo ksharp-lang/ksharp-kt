@@ -62,11 +62,21 @@ sealed interface TypeVariable : Type {
 
 }
 
-data class Concrete internal constructor(
-    override val typeSystem: HandlePromise<TypeSystem>,
+@Suppress("DataClassPrivateConstructor")
+data class Concrete private constructor(
     override val attributes: Set<Attribute>,
     val name: String,
 ) : Type {
+    override lateinit var typeSystem: HandlePromise<TypeSystem>
+        private set
+
+    internal constructor(typeSystem: HandlePromise<TypeSystem>, attributes: Set<Attribute>, name: String) : this(
+        attributes,
+        name
+    ) {
+        this.typeSystem = typeSystem
+    }
+
     override val solver: Solver
         get() = Solvers.PassThrough
     override val serializer: TypeSerializer
