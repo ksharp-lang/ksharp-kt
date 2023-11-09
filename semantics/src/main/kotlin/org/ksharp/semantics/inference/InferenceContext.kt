@@ -34,6 +34,7 @@ sealed interface InferenceContext {
     val typeSystem: TypeSystem
 
     val impls: Sequence<Impl>
+    fun getTraitsImplemented(type: Type): Sequence<TraitType> = getTraitsImplemented(type, this)
 
     fun findFunction(caller: String, name: String, numParams: Int): FunctionInfo?
     fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType

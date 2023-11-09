@@ -327,17 +327,18 @@ class InferenceWithParsingTest : StringSpec({
 
     "Inference trait used in a function" {
         """
-            trait Op a =
-                sum :: a -> a -> a
-                
-            impl Op for Int =
-                sum a b = a + b
-            
-            fn :: Op a -> Op a -> Op a
-            fn a b = sum a b
-            
-            s = fn 10 20
+           trait Op a =
+             sum :: a -> a -> a
+           
+           impl Op for Int =
+             sum a b = a + b
+           
+           fn :: Op a -> Op a -> Op a
+           fn a b = sum a b
+           
+           s = fn 10 20
         """.trimIndent()
+            .also { println(it) }
             .toSemanticModuleInfo()
             .apply {
                 shouldInferredImplAbstractionsTypesBe(
