@@ -22,6 +22,7 @@ enum class TypeUnifications(override val algo: UnificationAlgo<out Type>) : Type
     Tuple(TupleUnification()),
     TypeConstructor(TypeConstructorUnification()),
     Union(UnionUnification()),
+    Method(MethodUnification()),
     NoDefined(UnificationAlgo { _, type1, type2 -> TODO("Not yet implemented $type1 -- $type2") })
 }
 

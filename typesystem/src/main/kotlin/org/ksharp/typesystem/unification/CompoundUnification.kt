@@ -14,7 +14,7 @@ abstract class CompoundUnification<T : Type> : UnificationAlgo<T> {
             val innerRType = rType.innerType
             when {
                 innerRType is Parameter -> Either.Right(type1)
-                innerRType.isSameTypeClass -> compoundUnify(location, type1, innerRType.cast<T>())
+                innerRType.isSameTypeClass -> compoundUnify(location, type1, innerRType.cast())
                 else -> incompatibleType(location, type1, type2)
             }
         }

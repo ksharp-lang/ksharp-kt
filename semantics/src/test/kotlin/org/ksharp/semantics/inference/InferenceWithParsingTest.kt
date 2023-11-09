@@ -34,7 +34,7 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTraitAbstracti
 ) {
     shouldBeRight().value.apply {
         traitsAbstractions.map {
-            it.value.stringRepresentation("${it.key} ::")
+            it.value.stringRepresentation("${it.key} :: ")
         }.unwrap().shouldBeRight()
             .value
             .flatten()
@@ -299,7 +299,7 @@ class InferenceWithParsingTest : StringSpec({
 
     "Inference trait abstraction" {
         """
-            ten = 10
+            ten = int 10
             
             trait Op a =
               len :: a -> Int
@@ -307,7 +307,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTraitAbstractionsTypesBe(
-                "Op :: len :: (Op a -> Int)"
+                "Op :: len :: (a -> (Num numeric<Int>))"
             )
     }
 
