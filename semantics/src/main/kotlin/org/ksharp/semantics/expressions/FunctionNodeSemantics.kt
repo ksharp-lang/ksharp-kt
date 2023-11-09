@@ -6,6 +6,7 @@ import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.semantics.context.ImplSemanticContext
 import org.ksharp.semantics.context.SemanticContext
 import org.ksharp.semantics.context.TraitSemanticContext
 import org.ksharp.semantics.context.TypeSystemSemanticContext
@@ -185,7 +186,13 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
         }.toMap()
     val implAbstractions = moduleTypeSystemInfo.impls.asSequence()
         .map {
-            val traitContext = TraitSemanticContext(typeSystem, typeSystem[it.key.trait].valueOrNull!!.cast())
+            val traitContext =
+                ImplSemanticContext(
+                    typeSystem,
+                    it.value.location,
+                    it.key.type,
+                    typeSystem[it.key.trait].valueOrNull!!.cast()
+                )
             it.key to it.value.functions.checkFunctionSemantics(errors, traitContext)
         }.toMap()
     return ModuleFunctionInfo(

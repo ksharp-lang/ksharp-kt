@@ -47,7 +47,7 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredImplAbstractio
 ) {
     shouldBeRight().value.apply {
         implAbstractions.map {
-            it.value.stringRepresentation("${it.key.trait} for ${it.key.type} ::")
+            it.value.stringRepresentation("${it.key.trait} for ${it.key.type} :: ")
         }.unwrap().shouldBeRight()
             .value
             .flatten()
@@ -313,15 +313,15 @@ class InferenceWithParsingTest : StringSpec({
 
     "Inference impl abstraction" {
         """
-            trait Op a =
-                sum :: a -> a -> a
-                
-            impl Op for Int
-                sum a b = a + b
+           trait Op a =
+             sum :: a -> a -> a
+           
+           impl Op for Int =
+             sum a b = a + b
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredImplAbstractionsTypesBe(
-                "Op for Int :: sum :: (Int -> Int -> Int)"
+                "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
             )
     }
 
@@ -330,7 +330,7 @@ class InferenceWithParsingTest : StringSpec({
             trait Op a =
                 sum :: a -> a -> a
                 
-            impl Op for Int
+            impl Op for Int =
                 sum a b = a + b
             
             fn :: Op a -> Op a -> Op a
