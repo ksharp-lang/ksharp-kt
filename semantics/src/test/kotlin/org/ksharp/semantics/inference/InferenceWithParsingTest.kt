@@ -307,7 +307,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTraitAbstractionsTypesBe(
-                "Op :: len :: ((Op a) -> (Num numeric<Int>))"
+                "Op :: len :: (a -> (Num numeric<Int>))"
             )
     }
 
