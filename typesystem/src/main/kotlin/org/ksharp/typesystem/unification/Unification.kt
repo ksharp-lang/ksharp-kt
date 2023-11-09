@@ -22,7 +22,7 @@ enum class TypeUnifications(override val algo: UnificationAlgo<out Type>) : Type
     Tuple(TupleUnification()),
     TypeConstructor(TypeConstructorUnification()),
     Union(UnionUnification()),
-    NoDefined(UnificationAlgo { _, _, _ -> TODO("Not yet implemented") })
+    NoDefined(UnificationAlgo { _, type1, type2 -> TODO("Not yet implemented $type1 -- $type2") })
 }
 
 fun Type.unify(location: Location, type2: Type): ErrorOrType =

@@ -302,9 +302,8 @@ class InferenceWithParsingTest : StringSpec({
             ten = 10
             
             trait Op a =
-                len :: a -> Int
-                 
-                len a = ten                
+              len :: a -> Int
+              len a = ten                
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTraitAbstractionsTypesBe(

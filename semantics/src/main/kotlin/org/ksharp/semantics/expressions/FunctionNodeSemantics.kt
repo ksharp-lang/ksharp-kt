@@ -200,7 +200,7 @@ private fun List<AbstractionNode<SemanticInfo>>.inferTypes(
     errors: ErrorCollector,
     info: InferenceInfo
 ): List<AbstractionNode<SemanticInfo>> {
-    map { abstraction -> abstraction.inferType(info) }
+    map { abstraction -> abstraction.inferType("", info) }
     return filter {
         val iType = it.info.getInferredType(it.location)
         if (iType.isLeft) {
@@ -233,7 +233,10 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
     val traitsAbstractions = traitsAbstractions.asSequence().associate { trait ->
         val traitInferenceInfo = InferenceInfo(
             preludeInferenceContext,
-            trait.value.toTraitInferenceContext(moduleInferenceContext),
+            trait.value.toTraitInferenceContext(
+                moduleInferenceContext,
+                moduleTypeSystemInfo.typeSystem[trait.key].valueOrNull!!.cast()
+            ),
             dependencies
         )
         trait.key to trait.value.inferTypes(errors, traitInferenceInfo)

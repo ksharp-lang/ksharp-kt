@@ -33,6 +33,9 @@ private fun SemanticNode<SemanticInfo>.isCollectionApplication(fnName: String): 
         fnName
     )
 
+private val AbstractionNode<SemanticInfo>.nameWithArity: String
+    get() = "${name}/${info.cast<AbstractionSemanticInfo>().parameters.size.coerceAtLeast(1) + 1}"
+
 private val SemanticNode<SemanticInfo>.isTuple: Boolean
     get() = isCollectionApplication("tupleOf")
 
@@ -43,27 +46,30 @@ private val SemanticNode<SemanticInfo>.isType: Boolean
     get() = this is ApplicationNode
             && this.cast<ApplicationNode<SemanticInfo>>().functionName.name.first().isUpperCase()
 
-fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
+fun SemanticNode<SemanticInfo>.inferType(caller: String, info: InferenceInfo): ErrorOrType =
     if (this.info.hasInferredType()) {
         this.info.getInferredType(location)
     } else {
         when (this) {
-            is AbstractionNode -> infer(info)
-            is ApplicationNode -> infer(info)
+            is AbstractionNode -> infer(this.nameWithArity, info).let {
+                info.inferenceContext.unify(nameWithArity, location, it)
+            }
+
+            is ApplicationNode -> infer(caller, info)
             is ConstantNode -> infer()
             is VarNode -> infer()
 
-            is LetNode -> infer(info)
-            is LetBindingNode -> infer(info)
+            is LetNode -> infer(caller, info)
+            is LetBindingNode -> infer(caller, info)
 
-            is MatchNode -> infer(info)
+            is MatchNode -> infer(caller, info)
             is MatchBranchNode -> TODO()
 
             is ConditionalMatchValueNode -> {
                 val boolType = info.prelude.typeSystem["Bool"].valueOrNull!!
-                left.inferType(info).flatMap { lType ->
+                left.inferType(caller, info).flatMap { lType ->
                     lType.unify(location, boolType).flatMap {
-                        right.inferType(info).flatMap { rType ->
+                        right.inferType(caller, info).flatMap { rType ->
                             rType.unify(location, boolType)
                         }
                     }
@@ -78,7 +84,7 @@ fun SemanticNode<SemanticInfo>.inferType(info: InferenceInfo): ErrorOrType =
         }
     }
 
-private fun SemanticNode<SemanticInfo>.bindTuple(type: Type, info: InferenceInfo): ErrorOrType =
+private fun SemanticNode<SemanticInfo>.bindTuple(caller: String, type: Type, info: InferenceInfo): ErrorOrType =
     if (type !is TupleType)
         InferenceErrorCode.NoATuple.new(location, "type" to type.representation)
             .let { Either.Left(it) }
@@ -94,7 +100,7 @@ private fun SemanticNode<SemanticInfo>.bindTuple(type: Type, info: InferenceInfo
                 .cast()
         else bindArguments.zip(tupleElements)
             .map { (arg, elementType) ->
-                arg.bindType(elementType, info)
+                arg.bindType(caller, elementType, info)
             }.unwrap()
             .map { it.toTupleType(info.inferenceContext.typeSystem, type.attributes) }
     }
@@ -145,16 +151,16 @@ private fun SemanticNode<SemanticInfo>.bindListWithTail(type: Type, info: Infere
         }
     }
 
-private fun SemanticNode<SemanticInfo>.bindType(type: Type, info: InferenceInfo): ErrorOrType =
+private fun SemanticNode<SemanticInfo>.bindType(caller: String, type: Type, info: InferenceInfo): ErrorOrType =
     when {
         this is VarNode -> Either.Right(type)
-        isTuple -> bindTuple(type, info)
+        isTuple -> bindTuple(caller, type, info)
         isList -> bindList(type, info)
         this is ListMatchValueNode -> bindListWithTail(type, info)
         this is ConditionalMatchValueNode -> {
-            left.bindType(type, info).flatMap { bType ->
+            left.bindType(caller, type, info).flatMap { bType ->
                 left.info.setInferredType(Either.Right(bType))
-                right.inferType(info).flatMap {
+                right.inferType(caller, info).flatMap {
                     it.unify(location, info.prelude.typeSystem["Bool"].valueOrNull!!).map {
                         bType
                     }
@@ -176,28 +182,28 @@ private fun SemanticNode<SemanticInfo>.bindType(type: Type, info: InferenceInfo)
                 }
         }
 
-        else -> inferType(info).flatMap {
+        else -> inferType(caller, info).flatMap {
             it.unify(location, type)
         }
     }.also {
         this.info.setInferredType(it)
     }
 
-private fun LetBindingNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
-    expression.inferType(info).flatMap {
-        match.bindType(it, info)
+private fun LetBindingNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
+    expression.inferType(caller, info).flatMap {
+        match.bindType(caller, it, info)
     }
 
-private fun LetNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
+private fun LetNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
     this.bindings.map {
-        it.inferType(info)
+        it.inferType(caller, info)
     }.firstOrNull { it.isLeft }
-        ?: expression.inferType(info)
+        ?: expression.inferType(caller, info)
 
-private fun MatchNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
-    this.expression.inferType(info).flatMap { exprType ->
+private fun MatchNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
+    this.expression.inferType(caller, info).flatMap { exprType ->
         this.branches.map { branch ->
-            branch.infer(info, exprType).also {
+            branch.infer(caller, info, exprType).also {
                 branch.info.setInferredType(it)
             }
         }.unwrap()
@@ -213,9 +219,9 @@ private fun MatchNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
             }
     }
 
-private fun MatchBranchNode<SemanticInfo>.infer(info: InferenceInfo, exprType: Type): ErrorOrType =
-    match.bindType(exprType, info).flatMap {
-        expression.inferType(info)
+private fun MatchBranchNode<SemanticInfo>.infer(caller: String, info: InferenceInfo, exprType: Type): ErrorOrType =
+    match.bindType(caller, exprType, info).flatMap {
+        expression.inferType(caller, info)
     }
 
 
@@ -254,13 +260,13 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
     }
 
 
-private fun AbstractionNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
+private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
     attributes.contains(CommonAttribute.Native).let { native ->
         run {
             if (native) {
                 this.info.cast<AbstractionSemanticInfo>().returnType?.getType(location)
                     ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
-            } else expression.inferType(info)
+            } else expression.inferType(caller, info)
         }.flatMap { returnType ->
             calculateFunctionType(native, returnType, info)
         }
@@ -293,17 +299,17 @@ private fun Sequence<ErrorOrType>.unifyArguments(
         CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType(info.inferenceContext.typeSystem) })
     }
 
-private fun ApplicationNode<SemanticInfo>.infer(info: InferenceInfo): ErrorOrType =
+private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
     functionName.pck.equals(PRELUDE_COLLECTION_FLAG).let { isPreludeCollectionFlag ->
         arguments.asSequence()
             .map {
-                it.inferType(info)
+                it.inferType(caller, info)
             }.let {
                 if (isPreludeCollectionFlag) {
                     it.unifyArguments(functionName, location, info)
                 } else it
             }.unwrap().flatMap {
-                info.findAppType(location, functionName, it).map { fn ->
+                info.findAppType(caller, location, functionName, it).map { fn ->
                     if (fn is FunctionType) {
                         this.info.cast<ApplicationSemanticInfo>().function = fn
                         val inferredFn = fn.cast<FunctionType>()

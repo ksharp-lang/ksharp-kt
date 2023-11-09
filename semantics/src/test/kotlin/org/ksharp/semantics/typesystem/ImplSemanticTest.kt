@@ -21,6 +21,7 @@ import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.newNamedParameter
+import org.ksharp.typesystem.types.toFunctionType
 
 class ImplSemanticTest : StringSpec({
     "Trait not defined" {
@@ -111,7 +112,7 @@ class ImplSemanticTest : StringSpec({
             trait Eq a =
                 (=) :: a -> a -> Bool
                 (!=) :: a -> a -> Bool
-                (=) a b = a == b
+                (=) a b = True
             
             impl Eq for Num =
                 (!=) a b = a != b
@@ -129,7 +130,7 @@ class ImplSemanticTest : StringSpec({
             trait Eq a =
                 (=) :: a -> a -> Bool
                 (!=) :: a -> a -> Bool
-                (=) a b = a == b
+                (=) a b = True
             
             impl Eq for Num =
                 (!=) a b = a != b
@@ -137,7 +138,9 @@ class ImplSemanticTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                val paramA = TypeSemanticInfo(type = Either.Right(it.typeSystem.newNamedParameter("a")))
+                val boolType = it.typeSystem["Bool"].valueOrNull!!
+                val paramAType = it.typeSystem.newNamedParameter("a")
+                val paramA = TypeSemanticInfo(type = Either.Right(paramAType))
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
@@ -150,35 +153,29 @@ class ImplSemanticTest : StringSpec({
                                         functionName = ApplicationName(pck = null, name = "(!=)"),
                                         arguments = listOf(
                                             VarNode(
-                                                name = "a",
-                                                info = Symbol(
-                                                    "a",
-                                                    paramA
-                                                ),
-                                                location = Location.NoProvided
+                                                name = "a", info = Symbol(name = "a", paramA),
+                                                Location.NoProvided
                                             ),
-                                            VarNode(
-                                                name = "b",
-                                                info = Symbol(
-                                                    "b",
-                                                    paramA
-                                                ),
-                                                location = Location.NoProvided
-                                            )
+                                            VarNode(name = "b", info = Symbol(name = "b", paramA), Location.NoProvided)
                                         ),
-                                        info = ApplicationSemanticInfo(function = null),
-                                        location = Location.NoProvided
+                                        info = ApplicationSemanticInfo(
+                                            function = listOf(
+                                                paramAType,
+                                                paramAType,
+                                                boolType
+                                            ).toFunctionType(it.typeSystem)
+                                        ), Location.NoProvided
                                     ),
                                     info = AbstractionSemanticInfo(
                                         parameters = listOf(
                                             Symbol(
                                                 name = "a",
-                                                type = paramA
-                                            ), Symbol(name = "b", type = paramA)
+                                                paramA
+                                            ), Symbol(name = "b", paramA)
                                         ),
-                                        returnType = TypeSemanticInfo(type = it.typeSystem.alias("Bool"))
+                                        returnType = TypeSemanticInfo(it.typeSystem.alias("Bool"))
                                     ),
-                                    location = Location.NoProvided
+                                    Location.NoProvided
                                 )
                             )
                         )

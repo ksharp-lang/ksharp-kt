@@ -69,16 +69,17 @@ data class InferenceInfo(
             }
         }"
 
-    private fun FunctionInfo.infer(): FunctionInfo {
+    private fun FunctionInfo.infer(caller: String): FunctionInfo {
         if (this is AbstractionFunctionInfo) {
             this.abstraction
                 .cast<SemanticNode<SemanticInfo>>()
-                .inferType(this@InferenceInfo)
+                .inferType(caller, this@InferenceInfo)
         }
         return this
     }
 
     fun findAppType(
+        caller: String,
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
@@ -86,13 +87,14 @@ data class InferenceInfo(
         appName.name.let {
             if (it.first().isUpperCase()) {
                 findConstructorType(location, appName, arguments)
-            } else findFunctionType(location, appName, arguments)
+            } else findFunctionType(caller, location, appName, arguments)
         }
 
     private val List<Type>.calculateNumArguments: Int
         get() = if (size == 1 && first().representation == "Unit") 0 else size
 
     private fun findFunctionType(
+        caller: String,
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
@@ -104,12 +106,12 @@ data class InferenceInfo(
                 val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else inferenceContext
                 val secondSearch = if (appName.pck == null) prelude else null
 
-                firstSearch.findFunction(name, numArguments + 1)
-                    ?.infer()
+                firstSearch.findFunction(caller, name, numArguments + 1)
+                    ?.infer(caller)
                     ?.unify(inferenceContext.typeSystem, location, arguments)
                     ?.mapLeft { it.toString() }
-                    ?: secondSearch?.findFunction(name, numArguments + 1)
-                        ?.infer()
+                    ?: secondSearch?.findFunction(caller, name, numArguments + 1)
+                        ?.infer(caller)
                         ?.unify(prelude.typeSystem, location, arguments)
                         ?.mapLeft { it.toString() }
                     ?: Either.Left(functionName(name, arguments))
