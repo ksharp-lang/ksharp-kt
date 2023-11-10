@@ -103,14 +103,15 @@ data class InferenceInfo(
             val name = appName.name
             val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
             cache.get(funName to arguments) {
+                val firstArgument = arguments.first()
                 val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else inferenceContext
                 val secondSearch = if (appName.pck == null) prelude else null
 
-                firstSearch.findFunction(caller, name, numArguments + 1)
+                firstSearch.findFunction(caller, name, numArguments + 1, firstArgument)
                     ?.infer(caller)
                     ?.unify(inferenceContext.typeSystem, location, arguments)
                     ?.mapLeft { it.toString() }
-                    ?: secondSearch?.findFunction(caller, name, numArguments + 1)
+                    ?: secondSearch?.findFunction(caller, name, numArguments + 1, firstArgument)
                         ?.infer(caller)
                         ?.unify(prelude.typeSystem, location, arguments)
                         ?.mapLeft { it.toString() }

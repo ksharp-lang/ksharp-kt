@@ -77,7 +77,7 @@ data class ParametricType private constructor(
     ) {
         this.typeSystem = typeSystem
     }
-    
+
     override val solver: Solver
         get() = Solvers.Parametric
     override val serializer: TypeSerializer
@@ -180,20 +180,36 @@ fun TypeItemBuilder.parametricType(
     } else
         alias(name).flatMap { pType ->
             validation {
-                if (it(name) !is ParametricType) {
-                    TypeSystemErrorCode.NoParametrizedType.new("type" to pType.representation)
-                } else null
+                it(name).let { t ->
+                    if (!(t is ParametricType || t is TraitType)) {
+                        TypeSystemErrorCode.NoParametrizedType.new("type" to pType.representation)
+                    } else null
+                }
             }
             ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { types ->
                 validation {
                     val type = it(name)
-                    if (type is ParametricType && type.params.size != types.size) {
-                        TypeSystemErrorCode.InvalidNumberOfParameters.new(
+                    when {
+                        type is ParametricType && type.params.size != types.size ->
+                            TypeSystemErrorCode.InvalidNumberOfParameters.new(
+                                "type" to type,
+                                "number" to type.params.size,
+                                "configuredType" to ParametricType(handle, attributes, type.type, types)
+                            )
+
+                        type is TraitType && 1 != types.size -> TypeSystemErrorCode.InvalidNumberOfParameters.new(
                             "type" to type,
-                            "number" to type.params.size,
-                            "configuredType" to ParametricType(handle, attributes, type.type, types)
+                            "number" to 1,
+                            "configuredType" to ParametricType(
+                                handle,
+                                attributes,
+                                Concrete(handle, NoAttributes, type.name),
+                                types
+                            )
                         )
-                    } else null
+
+                        else -> null
+                    }
                 }
                 Either.Right(ParametricType(handle, attributes, pType, types))
             }

@@ -43,7 +43,7 @@ data class TraitType private constructor(
     }
 
     override val solver: Solver
-        get() = Solvers.NoDefined
+        get() = Solvers.PassThrough
     override val serializer: TypeSerializer
         get() = TypeSerializers.TraitType
 

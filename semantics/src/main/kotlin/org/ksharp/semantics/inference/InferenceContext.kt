@@ -32,11 +32,15 @@ private class TraitMethodTypeInfo(
 sealed interface InferenceContext {
 
     val typeSystem: TypeSystem
-
     val impls: Sequence<Impl>
-    fun getTraitsImplemented(type: Type): Sequence<TraitType> = getTraitsImplemented(type, this)
+    fun findTraitFunction(methodName: String, type: Type): FunctionInfo? =
+        getTraitsImplemented(type, this).mapNotNull { trait ->
+            trait.methods[methodName]?.let { method ->
+                TraitMethodTypeInfo(methodName, method)
+            }
+        }.firstOrNull()
 
-    fun findFunction(caller: String, name: String, numParams: Int): FunctionInfo?
+    fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo?
     fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType
     fun methodName(name: String, numParams: Int) = "$name/$numParams"
 
@@ -49,8 +53,10 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
 
     override val impls: Sequence<Impl> = moduleInfo.impls.asSequence()
 
-    override fun findFunction(caller: String, name: String, numParams: Int): FunctionInfo? =
-        moduleInfo.functions["$name/$numParams"]
+    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+        methodName(name, numParams).let { methodName ->
+            moduleInfo.functions[methodName] ?: findTraitFunction(methodName, firstArgument)
+        }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
 }
@@ -60,9 +66,11 @@ class SemanticModuleInfoInferenceContext(
     override val impls: Sequence<Impl>,
     private val abstractions: AbstractionNodeMap
 ) : InferenceContext {
-    override fun findFunction(caller: String, name: String, numParams: Int): FunctionInfo? =
-        abstractions[methodName(name, numParams)]?.let {
-            AbstractionFunctionInfo(it)
+    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+        methodName(name, numParams).let { methodName ->
+            abstractions[methodName]?.let {
+                AbstractionFunctionInfo(it)
+            } ?: findTraitFunction(methodName, firstArgument)
         }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
@@ -81,10 +89,14 @@ class TraitInferenceContext(
     override val typeSystem: TypeSystem
         get() = parent.typeSystem
 
-    override fun findFunction(caller: String, name: String, numParams: Int): FunctionInfo? =
-        abstractions[methodName(name, numParams)]?.let {
-            AbstractionFunctionInfo(it)
-        } ?: parent.findFunction(caller, name, numParams)
+    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+        methodName(name, numParams).let { methodName ->
+            abstractions[methodName]?.let {
+                AbstractionFunctionInfo(it)
+            }
+                ?: findTraitFunction(methodName, firstArgument)
+                ?: parent.findFunction(caller, name, numParams, firstArgument)
+        }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
         type.flatMap { t ->
@@ -104,16 +116,19 @@ class ImplInferenceContext(
     override val typeSystem: TypeSystem
         get() = parent.typeSystem
 
-    override fun findFunction(caller: String, name: String, numParams: Int): FunctionInfo? =
+    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
         methodName(name, numParams).let { methodName ->
             val sameToCaller = methodName == caller
             run(sameToCaller) {
                 abstractions[methodName]?.let {
                     AbstractionFunctionInfo(it)
                 }
-            } ?: traitType.methods[methodName]?.let {
-                TraitMethodTypeInfo(methodName, it)
-            } ?: parent.findFunction(caller, name, numParams)
+            }
+                ?: traitType.methods[methodName]?.let {
+                    TraitMethodTypeInfo(methodName, it)
+                }
+                ?: findTraitFunction(methodName, firstArgument)
+                ?: parent.findFunction(caller, name, numParams, firstArgument)
         }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =

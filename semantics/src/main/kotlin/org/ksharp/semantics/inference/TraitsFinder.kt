@@ -17,11 +17,11 @@ private fun findTraits(type: Type, info: InferenceContext) =
 fun getTraitsImplemented(type: Type, info: InferenceContext): Sequence<TraitType> =
     type().map { resolvedType ->
         when (resolvedType) {
-            is Parameter ->
-                info.typeSystem.asSequence()
-                    .map { it.second }
-                    .filterIsInstance<TraitType>()
+            is Parameter -> info.typeSystem.asSequence()
+                .map { it.second }
+                .filterIsInstance<TraitType>()
 
+            is TraitType -> sequenceOf(resolvedType)
             else -> findTraits(resolvedType, info)
         }
     }.valueOrNull ?: emptySequence()

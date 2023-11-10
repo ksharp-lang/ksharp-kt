@@ -333,12 +333,11 @@ class InferenceWithParsingTest : StringSpec({
            impl Op for Int =
              sum a b = a + b
            
-           fn :: Op a -> Op a -> Op a
+           fn a :: (Op a) -> (Op a) -> (Op a)
            fn a b = sum a b
            
            s = fn 10 20
         """.trimIndent()
-            .also { println(it) }
             .toSemanticModuleInfo()
             .apply {
                 shouldInferredImplAbstractionsTypesBe(
