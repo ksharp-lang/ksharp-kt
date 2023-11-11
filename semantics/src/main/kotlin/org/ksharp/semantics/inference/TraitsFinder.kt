@@ -13,7 +13,7 @@ import org.ksharp.typesystem.unification.UnificationChecker
 
 private class TraitMethodTypeInfo(
     override val name: String,
-    private val methodType: TraitType.MethodType
+    methodType: TraitType.MethodType
 ) : FunctionInfo {
     override val attributes: Set<Attribute> = methodType.attributes
     override val types: List<Type> = methodType.arguments

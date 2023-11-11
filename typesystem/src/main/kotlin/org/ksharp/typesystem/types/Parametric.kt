@@ -164,6 +164,33 @@ class ParametricTypeFactory(
     internal fun build(): ErrorOrValue<List<Type>> = result.map { it.build() }
 }
 
+private fun Type?.validateParametricType(
+    handle: HandlePromise<TypeSystem>,
+    attributes: Set<Attribute>,
+    types: List<Type>
+): Error? =
+    when {
+        this is ParametricType && params.size != types.size ->
+            TypeSystemErrorCode.InvalidNumberOfParameters.new(
+                "type" to type,
+                "number" to params.size,
+                "configuredType" to ParametricType(handle, attributes, type, types)
+            )
+
+        this is TraitType && 1 != types.size -> TypeSystemErrorCode.InvalidNumberOfParameters.new(
+            "type" to this,
+            "number" to 1,
+            "configuredType" to ParametricType(
+                handle,
+                attributes,
+                Concrete(handle, NoAttributes, name),
+                types
+            )
+        )
+
+        else -> null
+    }
+
 fun TypeItemBuilder.parametricType(
     name: String,
     factory: ParametricTypeFactoryBuilder
@@ -187,30 +214,7 @@ fun TypeItemBuilder.parametricType(
                 }
             }
             ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { types ->
-                validation {
-                    val type = it(name)
-                    when {
-                        type is ParametricType && type.params.size != types.size ->
-                            TypeSystemErrorCode.InvalidNumberOfParameters.new(
-                                "type" to type,
-                                "number" to type.params.size,
-                                "configuredType" to ParametricType(handle, attributes, type.type, types)
-                            )
-
-                        type is TraitType && 1 != types.size -> TypeSystemErrorCode.InvalidNumberOfParameters.new(
-                            "type" to type,
-                            "number" to 1,
-                            "configuredType" to ParametricType(
-                                handle,
-                                attributes,
-                                Concrete(handle, NoAttributes, type.name),
-                                types
-                            )
-                        )
-
-                        else -> null
-                    }
-                }
+                validation { it(name).validateParametricType(handle, attributes, types) }
                 Either.Right(ParametricType(handle, attributes, pType, types))
             }
         }
