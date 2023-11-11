@@ -172,7 +172,7 @@ private fun Type?.validateParametricType(
     when {
         this is ParametricType && params.size != types.size ->
             TypeSystemErrorCode.InvalidNumberOfParameters.new(
-                "type" to type,
+                "type" to this,
                 "number" to params.size,
                 "configuredType" to ParametricType(handle, attributes, type, types)
             )
