@@ -17,14 +17,16 @@ import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.parameters
 import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
 internal fun FunctionInfo.substitute(
+    checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
 ): ErrorOrValue<FunctionType> {
-    val context = SubstitutionContext()
+    val context = SubstitutionContext(checker)
     val result: ErrorOrValue<FunctionType>? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
         val substitutionResult = context.extract(location, item1, item2)
         if (substitutionResult.isLeft) {
@@ -36,18 +38,19 @@ internal fun FunctionInfo.substitute(
 }
 
 internal fun FunctionInfo.unify(
+    checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
 ): ErrorOrType {
     return types.last()().flatMap { returnType ->
         types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
-            item1.unify(location, item2)
+            item1.unify(location, item2, checker)
         }
             .unwrap()
             .flatMap { params ->
                 if (returnType.parameters.firstOrNull() != null) {
-                    substitute(typeSystem, location, params)
+                    substitute(checker, typeSystem, location, params)
                 } else {
                     Either.Right((params + returnType).toFunctionType(typeSystem, attributes))
                 }
@@ -61,6 +64,8 @@ data class InferenceInfo(
     val dependencies: Map<String, ModuleInfo> = emptyMap()
 ) {
     private val cache = cacheOf<Pair<String, List<Type>>, Either<String, Type>>()
+
+    val checker: UnificationChecker get() = inferenceContext.checker
 
     private fun functionName(name: String, arguments: List<Type>) =
         "$name ${
@@ -109,11 +114,11 @@ data class InferenceInfo(
 
                 firstSearch.findFunction(caller, name, numArguments + 1, firstArgument)
                     ?.infer(caller)
-                    ?.unify(inferenceContext.typeSystem, location, arguments)
+                    ?.unify(checker, inferenceContext.typeSystem, location, arguments)
                     ?.mapLeft { it.toString() }
                     ?: secondSearch?.findFunction(caller, name, numArguments + 1, firstArgument)
                         ?.infer(caller)
-                        ?.unify(prelude.typeSystem, location, arguments)
+                        ?.unify(checker, prelude.typeSystem, location, arguments)
                         ?.mapLeft { it.toString() }
                     ?: Either.Left(functionName(name, arguments))
             }.mapLeft {

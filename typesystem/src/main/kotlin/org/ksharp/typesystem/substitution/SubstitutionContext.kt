@@ -4,15 +4,16 @@ import org.ksharp.common.*
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
-class SubstitutionContext {
+class SubstitutionContext(private val checker: UnificationChecker) {
     internal val mappings = mapBuilder<String, Type>()
     internal val errors = mapBuilder<String, Error>()
     fun addMapping(location: Location, paramName: String, type: Type): ErrorOrValue<Boolean> =
         mappings.get(paramName)?.let {
-            val typeUnification = it.unify(location, type)
-            if (typeUnification.isLeft) type.unify(location, it)
+            val typeUnification = it.unify(location, type, checker)
+            if (typeUnification.isLeft) type.unify(location, it, checker)
             else typeUnification
         }?.map {
             mappings.put(paramName, it)

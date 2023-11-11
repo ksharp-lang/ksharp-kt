@@ -12,14 +12,16 @@ import org.ksharp.typesystem.substitution.SubstitutionContext
 import org.ksharp.typesystem.substitution.extract
 import org.ksharp.typesystem.substitution.substitute
 import org.ksharp.typesystem.types.*
+import org.ksharp.typesystem.unification.UnificationChecker
 
 class SubstitutionContextTest : StringSpec({
+    val checker = UnificationChecker { _, _ -> false }
     "Substitution adding mappings" {
         val ts = typeSystem {
             type(NoAttributes, "Int")
             type(NoAttributes, "String")
         }.value
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         val intType = ts["Int"].valueOrNull!!
         context.addMapping(Location.NoProvided, "a", intType)
             .shouldBeRight(true)
@@ -31,7 +33,7 @@ class SubstitutionContextTest : StringSpec({
             type(NoAttributes, "Int")
             type(NoAttributes, "String")
         }.value
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         val intType = ts["Int"].valueOrNull!!
         val strType = ts["String"].valueOrNull!!
         context.addMapping(Location.NoProvided, "a", intType)
@@ -59,7 +61,7 @@ class SubstitutionContextTest : StringSpec({
             type(NoAttributes, "String")
         }.value
         val param = ts.newParameter()
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.getMapping(Location.NoProvided, "a", param)
             .shouldBeLeft(
                 TypeSystemErrorCode.SubstitutionNotFound.new(
@@ -72,13 +74,14 @@ class SubstitutionContextTest : StringSpec({
 })
 
 class SubstitutionTest : StringSpec({
+    val checker = UnificationChecker { _, _ -> false }
     val ts = typeSystem {
         type(NoAttributes, "Int")
         type(NoAttributes, "String")
     }.value
     val intType = ts["Int"].valueOrNull!!
     "Concrete type substitution" {
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, intType, intType)
             .shouldBeRight(false)
         context.substitute(Location.NoProvided, intType, intType)
@@ -87,7 +90,7 @@ class SubstitutionTest : StringSpec({
         context.mappings.build().shouldBeEmpty()
     }
     "Parameter type substitution" {
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         val parameter = ts.newParameter()
         context.extract(Location.NoProvided, parameter, intType)
             .shouldBeRight(true)
@@ -111,7 +114,7 @@ class SubstitutionTest : StringSpec({
         )
     }
     "No compatible parameters" {
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         val parameter = ts.newParameter()
         context.extract(Location.NoProvided, parameter, intType)
             .shouldBeRight(true)
@@ -147,7 +150,7 @@ class SubstitutionTest : StringSpec({
         )
     }
     "Alias substitution" {
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, Alias(ts.handle, "Int"), intType)
             .shouldBeRight(false)
         context.substitute(Location.NoProvided, Alias(ts.handle, "Int"), intType)
@@ -156,7 +159,7 @@ class SubstitutionTest : StringSpec({
         context.mappings.build().shouldBeEmpty()
     }
     "Labeled substitution" {
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         val parameter = ts.newParameter()
         context.extract(Location.NoProvided, Labeled("lbl", parameter), intType)
             .shouldBeRight(true)
@@ -184,7 +187,7 @@ class SubstitutionTest : StringSpec({
                 Concrete(ts.handle, NoAttributes, "Int"), Concrete(ts.handle, NoAttributes, "String")
             )
         )
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, tuple1, tuple2).shouldBeRight(true)
         context.substitute(Location.NoProvided, tuple1, Concrete(ts.handle, NoAttributes, "Int"))
             .shouldBeRight(tuple2)
@@ -211,7 +214,7 @@ class SubstitutionTest : StringSpec({
                 Concrete(ts.handle, NoAttributes, "Int"), Concrete(ts.handle, NoAttributes, "Int")
             )
         )
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, tuple1, tuple2).shouldBeRight(true)
         context.extract(Location.NoProvided, tuple1, tuple3).shouldBeLeft(
             TypeSystemErrorCode.IncompatibleTypes.new(Location.NoProvided, "type1" to "Int", "type2" to "String")
@@ -229,7 +232,7 @@ class SubstitutionTest : StringSpec({
                 Concrete(ts.handle, NoAttributes, "Int"), ts.newParameter()
             )
         )
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, tuple1, Concrete(ts.handle, NoAttributes, "Int"))
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
@@ -254,7 +257,7 @@ class SubstitutionTest : StringSpec({
                 Concrete(ts.handle, NoAttributes, "Int"), Concrete(ts.handle, NoAttributes, "String")
             )
         )
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, function1, function2).shouldBeRight(true)
         context.substitute(Location.NoProvided, function1, Concrete(ts.handle, NoAttributes, "Int"))
             .shouldBeRight(function2)
@@ -274,7 +277,7 @@ class SubstitutionTest : StringSpec({
                 Concrete(ts.handle, NoAttributes, "Int"), Concrete(ts.handle, NoAttributes, "String")
             )
         )
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
         context.substitute(Location.NoProvided, type1, Concrete(ts.handle, NoAttributes, "Int"))
             .shouldBeRight(type2)
@@ -300,7 +303,7 @@ class SubstitutionTest : StringSpec({
                 "None" to UnionType.ClassType(ts.handle, "None", emptyList()),
             )
         )
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
         context.substitute(Location.NoProvided, type1, Concrete(ts.handle, NoAttributes, "Int"))
             .shouldBeRight(type2)
@@ -328,7 +331,7 @@ class SubstitutionTest : StringSpec({
                 "None" to UnionType.ClassType(ts.handle, "None", emptyList()),
             )
         )
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, type1, type2).shouldBeLeft(
             TypeSystemErrorCode.IncompatibleTypes.new(
                 Location.NoProvided,
@@ -366,7 +369,7 @@ class SubstitutionTest : StringSpec({
                 Concrete(ts.handle, NoAttributes, "Int"), Concrete(ts.handle, NoAttributes, "String")
             )
         )
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, type1, type2).shouldBeRight(true)
         context.substitute(Location.NoProvided, type1, Concrete(ts.handle, NoAttributes, "Int"))
             .shouldBeRight(type2)
@@ -377,7 +380,7 @@ class SubstitutionTest : StringSpec({
                 parameter("a")
             }
         }.value
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         val p1 = ParametricType(
             typeSystem.handle,
             NoAttributes,
@@ -401,7 +404,7 @@ class SubstitutionTest : StringSpec({
             }
             type(NoAttributes, "Int")
         }.value
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         val p1 = ParametricType(
             typeSystem.handle,
             NoAttributes,
@@ -430,7 +433,7 @@ class SubstitutionTest : StringSpec({
                 }
             }
         }.value
-        val context = SubstitutionContext()
+        val context = SubstitutionContext(checker)
         val p1 = ParametricType(
             typeSystem.handle,
             NoAttributes,

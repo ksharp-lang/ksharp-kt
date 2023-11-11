@@ -184,6 +184,7 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
         }.filter {
             it.second.isNotEmpty()
         }.toMap()
+    val unificationChecker = unificationChecker(moduleTypeSystemInfo.traitFinderContext)
     val implAbstractions = moduleTypeSystemInfo.impls.asSequence()
         .map {
             val traitContext =
@@ -191,7 +192,8 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
                     typeSystem,
                     it.value.location,
                     it.key.type,
-                    typeSystem[it.key.trait].valueOrNull!!.cast()
+                    typeSystem[it.key.trait].valueOrNull!!.cast(),
+                    unificationChecker
                 )
             it.key to it.value.functions.checkFunctionSemantics(errors, traitContext)
         }.toMap()

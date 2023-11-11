@@ -336,7 +336,7 @@ class InferenceWithParsingTest : StringSpec({
            fn a :: (Op a) -> (Op a) -> (Op a)
            fn a b = sum a b
            
-           s = fn 10 20
+           s = fn (int 10) (int 20)
         """.trimIndent()
             .toSemanticModuleInfo()
             .apply {

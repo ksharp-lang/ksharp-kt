@@ -9,24 +9,25 @@ import org.ksharp.typesystem.types.Type
 abstract class CompoundUnification<T : Type> : UnificationAlgo<T> {
 
     abstract val Type.isSameTypeClass: Boolean
-    override fun unify(location: Location, type1: T, type2: Type): ErrorOrType =
+    override fun unify(location: Location, type1: T, type2: Type, checker: UnificationChecker): ErrorOrType =
         type2().flatMap { rType ->
             val innerRType = rType.innerType
             when {
                 innerRType is Parameter -> Either.Right(type1)
-                innerRType.isSameTypeClass -> compoundUnify(location, type1, innerRType.cast())
+                innerRType.isSameTypeClass -> compoundUnify(location, type1, innerRType.cast(), checker)
                 else -> incompatibleType(location, type1, type2)
             }
         }
 
-    abstract fun compoundUnify(location: Location, type1: T, type2: T): ErrorOrType
+    abstract fun compoundUnify(location: Location, type1: T, type2: T, checker: UnificationChecker): ErrorOrType
 
     fun unifyListOfTypes(
         location: Location,
         type1: T,
         type2: T,
         items1: List<Type>,
-        items2: List<Type>
+        items2: List<Type>,
+        checker: UnificationChecker
     ): ErrorOrValue<List<Type>> {
         var result: ErrorOrValue<List<Type>>? = null
         val type1Params = items1.iterator()
@@ -35,7 +36,7 @@ abstract class CompoundUnification<T : Type> : UnificationAlgo<T> {
         while (type1Params.hasNext() && type2Params.hasNext()) {
             val item1 = type1Params.next()
             val item2 = type2Params.next()
-            val unifyItem = item1.unify(location, item2)
+            val unifyItem = item1.unify(location, item2, checker)
             if (unifyItem.isLeft) {
                 result = incompatibleType<Type>(location, type1, type2).cast<Either.Left<Error>>()
                 break

@@ -16,10 +16,11 @@ class MethodUnification : UnificationAlgo<TraitType.MethodType> {
     override fun unify(
         location: Location,
         type1: TraitType.MethodType,
-        type2: Type
+        type2: Type,
+        checker: UnificationChecker
     ): ErrorOrType =
         if (type1 == type2) Either.Right(type1)
-        else toFunctionType(type1).unify(location, toFunctionType(type2))
+        else toFunctionType(type1).unify(location, toFunctionType(type2), checker)
 
 
 }

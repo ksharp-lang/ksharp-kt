@@ -12,7 +12,8 @@ class UnionUnification : UnificationAlgo<UnionType> {
     override fun unify(
         location: Location,
         type1: UnionType,
-        type2: Type
+        type2: Type,
+        checker: UnificationChecker
     ): ErrorOrType =
         if (type1 == type2) Either.Right(type1)
         else if (type2 is TypeConstructor) {

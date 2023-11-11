@@ -14,11 +14,12 @@ class TupleUnification : CompoundUnification<TupleType>() {
     override fun compoundUnify(
         location: Location,
         type1: TupleType,
-        type2: TupleType
+        type2: TupleType,
+        checker: UnificationChecker
     ): ErrorOrType =
         if (type1.elements.size != type2.elements.size) incompatibleType(location, type1, type2)
         else {
-            unifyListOfTypes(location, type1, type2, type1.elements, type2.elements).map { params ->
+            unifyListOfTypes(location, type1, type2, type1.elements, type2.elements, checker).map { params ->
                 TupleType(type1.typeSystem, type1.attributes, params)
             }
         }

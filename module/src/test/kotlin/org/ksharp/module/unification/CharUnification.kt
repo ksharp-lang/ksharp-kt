@@ -11,18 +11,20 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.types.newParameter
+import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
 class CharUnification : StringSpec({
+    val checker = UnificationChecker { _, _ -> false }
     "chart type and parameter" {
         val type1 = charType
         val type2 = preludeTypeSystem.value.newParameter()
-        type1.unify(Location.NoProvided, type2).shouldBeRight(type1)
+        type1.unify(Location.NoProvided, type2, checker).shouldBeRight(type1)
     }
     "chart type and other type" {
         val type1 = charType
         val type2 = NumericType(Numeric.Int)
-        type1.unify(Location.NoProvided, type2)
+        type1.unify(Location.NoProvided, type2, checker)
             .shouldBeLeft(
                 TypeSystemErrorCode.IncompatibleTypes.new(
                     Location.NoProvided,

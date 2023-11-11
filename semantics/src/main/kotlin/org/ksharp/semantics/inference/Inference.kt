@@ -68,9 +68,9 @@ fun SemanticNode<SemanticInfo>.inferType(caller: String, info: InferenceInfo): E
             is ConditionalMatchValueNode -> {
                 val boolType = info.prelude.typeSystem["Bool"].valueOrNull!!
                 left.inferType(caller, info).flatMap { lType ->
-                    lType.unify(location, boolType).flatMap {
+                    lType.unify(location, boolType, info.checker).flatMap {
                         right.inferType(caller, info).flatMap { rType ->
-                            rType.unify(location, boolType)
+                            rType.unify(location, boolType, info.checker)
                         }
                     }
                 }
@@ -127,7 +127,7 @@ private fun SemanticNode<SemanticInfo>.bindParametricType(
                 .cast()
         else info.getType(rootType)
             .flatMap {
-                it.unify(location, type).map { uType ->
+                it.unify(location, type, info.checker).map { uType ->
                     bind(uType.cast())
                     uType
                 }
@@ -161,7 +161,7 @@ private fun SemanticNode<SemanticInfo>.bindType(caller: String, type: Type, info
             left.bindType(caller, type, info).flatMap { bType ->
                 left.info.setInferredType(Either.Right(bType))
                 right.inferType(caller, info).flatMap {
-                    it.unify(location, info.prelude.typeSystem["Bool"].valueOrNull!!).map {
+                    it.unify(location, info.prelude.typeSystem["Bool"].valueOrNull!!, info.checker).map {
                         bType
                     }
                 }
@@ -173,7 +173,7 @@ private fun SemanticNode<SemanticInfo>.bindType(caller: String, type: Type, info
             appNode.functionName
                 .calculateType(info)
                 .flatMap { bindType ->
-                    bindType.unify(location, type)
+                    bindType.unify(location, type, info.checker)
                         .map { uType ->
                             val argType = Either.Right(uType)
                             appNode.arguments.forEach { arg -> arg.info.setInferredType(argType) }
@@ -183,7 +183,7 @@ private fun SemanticNode<SemanticInfo>.bindType(caller: String, type: Type, info
         }
 
         else -> inferType(caller, info).flatMap {
-            it.unify(location, type)
+            it.unify(location, type, info.checker)
         }
     }.also {
         this.info.setInferredType(it)
@@ -211,7 +211,7 @@ private fun MatchNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): 
                 var result: ErrorOrType = Either.Right(it.first())
                 for (right in it.drop(1)) {
                     result = result.flatMap { left ->
-                        left.unify(location, right)
+                        left.unify(location, right, info.checker)
                     }
                     if (result.isLeft) break
                 }
@@ -289,7 +289,7 @@ private fun Sequence<ErrorOrType>.unifyArguments(
             val unifiedType = reduceOrNull { acc, type ->
                 acc.flatMap { left ->
                     type.flatMap { right ->
-                        left.unify(location, right)
+                        left.unify(location, right, info.checker)
                     }
                 }
             }

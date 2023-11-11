@@ -14,6 +14,7 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
 typealias AbstractionNodeMap = Map<String, AbstractionNode<AbstractionSemanticInfo>>
@@ -21,33 +22,15 @@ typealias AbstractionNodeMap = Map<String, AbstractionNode<AbstractionSemanticIn
 private inline fun run(sameToCaller: Boolean, action: () -> FunctionInfo?): FunctionInfo? =
     if (sameToCaller) null else action()
 
-private class TraitMethodTypeInfo(
-    override val name: String,
-    private val methodType: TraitType.MethodType
-) : FunctionInfo {
-    override val attributes: Set<Attribute> = methodType.attributes
-    override val types: List<Type> = methodType.arguments
-}
-
-sealed interface InferenceContext {
-
-    val typeSystem: TypeSystem
-    val impls: Sequence<Impl>
-    fun findTraitFunction(methodName: String, type: Type): FunctionInfo? =
-        getTraitsImplemented(type, this).mapNotNull { trait ->
-            trait.methods[methodName]?.let { method ->
-                TraitMethodTypeInfo(methodName, method)
-            }
-        }.firstOrNull()
-
-    fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo?
-    fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType
+sealed class InferenceContext : TraitFinderContext {
+    val checker: UnificationChecker by lazy { unificationChecker(this) }
+    abstract fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo?
+    abstract fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType
     fun methodName(name: String, numParams: Int) = "$name/$numParams"
-
 }
 
 class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
-    InferenceContext {
+    InferenceContext() {
 
     override val typeSystem: TypeSystem = moduleInfo.typeSystem
 
@@ -65,7 +48,7 @@ class SemanticModuleInfoInferenceContext(
     override val typeSystem: TypeSystem,
     override val impls: Sequence<Impl>,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext {
+) : InferenceContext() {
     override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
         methodName(name, numParams).let { methodName ->
             abstractions[methodName]?.let {
@@ -81,7 +64,7 @@ class TraitInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext {
+) : InferenceContext() {
 
     override val impls: Sequence<Impl>
         get() = parent.impls
@@ -100,7 +83,7 @@ class TraitInferenceContext(
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
         type.flatMap { t ->
-            traitType.methods[name]?.unify(location, t) ?: type
+            traitType.methods[name]?.unify(location, t, checker) ?: type
         }
 
 }
@@ -109,7 +92,7 @@ class ImplInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext {
+) : InferenceContext() {
 
     override val impls: Sequence<Impl> = parent.impls
 
@@ -124,16 +107,14 @@ class ImplInferenceContext(
                     AbstractionFunctionInfo(it)
                 }
             }
-                ?: traitType.methods[methodName]?.let {
-                    TraitMethodTypeInfo(methodName, it)
-                }
+                ?: traitType.methods[methodName]?.let(::methodTypeToFunctionInfo)
                 ?: findTraitFunction(methodName, firstArgument)
                 ?: parent.findFunction(caller, name, numParams, firstArgument)
         }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
         type.flatMap { t ->
-            traitType.methods[name]?.unify(location, t) ?: type
+            traitType.methods[name]?.unify(location, t, checker) ?: type
         }
 }
 

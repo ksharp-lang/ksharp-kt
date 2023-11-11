@@ -5,9 +5,9 @@ import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.types.Type
 
 class AliasUnification : UnificationAlgo<Type> {
-    override fun unify(location: Location, type1: Type, type2: Type): ErrorOrType =
+    override fun unify(location: Location, type1: Type, type2: Type, checker: UnificationChecker): ErrorOrType =
         type1().flatMap {
-            it.unify(location, type2)
+            it.unify(location, type2, checker)
         }
 
 }

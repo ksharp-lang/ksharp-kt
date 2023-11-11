@@ -13,6 +13,7 @@ import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.unification.UnificationChecker
 
 interface SemanticContext {
 
@@ -51,12 +52,13 @@ class ImplSemanticContext(
     override val typeSystem: TypeSystem,
     private val location: Location,
     private val forType: Type,
-    private val trait: TraitType
+    private val trait: TraitType,
+    private val checker: UnificationChecker
 ) : SemanticContext {
     override fun findFunctionType(name: String): FunctionType? =
         trait.methods[name]?.let {
-            val substitutionContext = SubstitutionContext()
             val fnType = it.arguments.toFunctionType(it.typeSystem.handle!!, it.attributes)
+            val substitutionContext = SubstitutionContext(checker)
             substitutionContext.extract(location, fnType, fnType)
             substitutionContext.addMapping(location, trait.param, forType)
             substitutionContext.substitute(location, fnType, fnType).valueOrNull!!.cast()
