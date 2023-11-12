@@ -70,9 +70,9 @@ class InferenceTraitsImplementedTest : StringSpec({
     }
     "Find traits implemented by a parametric type, module with implementations" {
         """
-            type Lista = Lista
+            type Lista a = Lista a
             
-            sumLista :: Lista -> Lista -> Lista
+            sumLista a :: (Lista a) -> (Lista a) -> (Lista a)
             native pub sumLista a b
             
             trait Sum a =

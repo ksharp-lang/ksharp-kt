@@ -62,7 +62,7 @@ fun getTraitsImplemented(type: Type, context: TraitFinderContext): Sequence<Trai
                     .valueOrNull!!
                 if (rType is TraitType) {
                     sequenceOf(rType)
-                } else emptySequence<TraitType>()
+                } else findTraits(resolvedType, context)
             }
 
             resolvedType is TraitType -> sequenceOf(resolvedType)
