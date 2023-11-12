@@ -19,8 +19,6 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
-import org.ksharp.typesystem.types.alias
-import org.ksharp.typesystem.types.newNamedParameter
 import org.ksharp.typesystem.types.toFunctionType
 
 class ImplSemanticTest : StringSpec({
@@ -139,12 +137,11 @@ class ImplSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 val boolType = it.typeSystem["Bool"].valueOrNull!!
-                val paramAType = it.typeSystem.newNamedParameter("a")
-                val paramA = TypeSemanticInfo(type = Either.Right(paramAType))
+                val forType = it.typeSystem["Num"]
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
-                            Impl("Eq", it.typeSystem["Num"].valueOrNull!!)
+                            Impl("Eq", forType.valueOrNull!!)
                                     to listOf(
                                 AbstractionNode(
                                     attributes = setOf(CommonAttribute.Public),
@@ -153,27 +150,25 @@ class ImplSemanticTest : StringSpec({
                                         functionName = ApplicationName(pck = null, name = "(!=)"),
                                         arguments = listOf(
                                             VarNode(
-                                                name = "a", info = Symbol(name = "a", paramA),
+                                                "a", Symbol(name = "a", TypeSemanticInfo(forType)),
                                                 Location.NoProvided
                                             ),
-                                            VarNode(name = "b", info = Symbol(name = "b", paramA), Location.NoProvided)
+                                            VarNode("b", Symbol("b", TypeSemanticInfo(forType)), Location.NoProvided)
                                         ),
                                         info = ApplicationSemanticInfo(
                                             function = listOf(
-                                                paramAType,
-                                                paramAType,
+                                                forType.valueOrNull!!,
+                                                forType.valueOrNull!!,
                                                 boolType
                                             ).toFunctionType(it.typeSystem)
                                         ), Location.NoProvided
                                     ),
                                     info = AbstractionSemanticInfo(
                                         parameters = listOf(
-                                            Symbol(
-                                                name = "a",
-                                                paramA
-                                            ), Symbol(name = "b", paramA)
+                                            Symbol("a", TypeSemanticInfo(forType)),
+                                            Symbol("b", TypeSemanticInfo(forType))
                                         ),
-                                        returnType = TypeSemanticInfo(it.typeSystem.alias("Bool"))
+                                        returnType = TypeSemanticInfo(Either.Right(boolType))
                                     ),
                                     Location.NoProvided
                                 )

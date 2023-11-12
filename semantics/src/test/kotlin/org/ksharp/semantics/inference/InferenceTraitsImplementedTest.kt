@@ -70,13 +70,16 @@ class InferenceTraitsImplementedTest : StringSpec({
     }
     "Find traits implemented by a parametric type, module with implementations" {
         """
-            type Lista a = Lista a
+            type Lista = Lista
+            
+            sumLista :: Lista -> Lista -> Lista
+            native pub sumLista a b
             
             trait Sum a =
               sum :: a -> a -> a
             
             impl Sum for Lista =
-              sum a b = a + b
+              sum a b = sumLista a b
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeRight()
