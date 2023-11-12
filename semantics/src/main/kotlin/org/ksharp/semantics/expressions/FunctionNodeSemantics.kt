@@ -6,14 +6,12 @@ import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.semantics.context.ImplSemanticContext
 import org.ksharp.semantics.context.SemanticContext
 import org.ksharp.semantics.context.TraitSemanticContext
 import org.ksharp.semantics.context.TypeSystemSemanticContext
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.inference.ConcreteModuleInfo
-import org.ksharp.semantics.inference.InferenceInfo
-import org.ksharp.semantics.inference.inferType
-import org.ksharp.semantics.inference.toSemanticModuleInfo
+import org.ksharp.semantics.inference.*
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
@@ -186,9 +184,17 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
         }.filter {
             it.second.isNotEmpty()
         }.toMap()
+    val unificationChecker = unificationChecker(moduleTypeSystemInfo.traitFinderContext)
     val implAbstractions = moduleTypeSystemInfo.impls.asSequence()
         .map {
-            val traitContext = TraitSemanticContext(typeSystem, typeSystem[it.key.trait].valueOrNull!!.cast())
+            val traitContext =
+                ImplSemanticContext(
+                    typeSystem,
+                    it.value.location,
+                    it.key.type,
+                    typeSystem[it.key.trait].valueOrNull!!.cast(),
+                    unificationChecker
+                )
             it.key to it.value.functions.checkFunctionSemantics(errors, traitContext)
         }.toMap()
     return ModuleFunctionInfo(
@@ -199,29 +205,66 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
     )
 }
 
-fun ModuleFunctionInfo.checkInferenceSemantics(
-    moduleTypeSystemInfo: ModuleTypeSystemInfo,
-    preludeModule: ModuleInfo
-): ModuleFunctionInfo {
-    val errors = ErrorCollector()
-    errors.collectAll(this.errors)
-    val inferenceInfo = InferenceInfo(
-        ConcreteModuleInfo(preludeModule),
-        abstractions.toSemanticModuleInfo(moduleTypeSystemInfo.typeSystem),
-        emptyMap()
-    )
-    abstractions.map { it.inferType(inferenceInfo) }
-    val abstractions = abstractions.filter {
+private fun List<AbstractionNode<SemanticInfo>>.inferTypes(
+    errors: ErrorCollector,
+    info: InferenceInfo
+): List<AbstractionNode<SemanticInfo>> {
+    map { abstraction -> abstraction.inferType("", info) }
+    return filter {
         val iType = it.info.getInferredType(it.location)
         if (iType.isLeft) {
             errors.collect(iType.cast<Either.Left<Error>>().value)
             false
         } else true
     }
+}
+
+fun ModuleFunctionInfo.checkInferenceSemantics(
+    moduleTypeSystemInfo: ModuleTypeSystemInfo,
+    preludeModule: ModuleInfo
+): ModuleFunctionInfo {
+    val errors = ErrorCollector()
+    errors.collectAll(this.errors)
+
+    val preludeInferenceContext = ModuleInfoInferenceContext(preludeModule)
+    val moduleInferenceContext = abstractions.toInferenceContext(
+        moduleTypeSystemInfo.typeSystem,
+        moduleTypeSystemInfo.impls.keys
+    )
+    val dependencies = mapOf<String, ModuleInfo>()
+    val abstractionsInferenceInfo = InferenceInfo(
+        preludeInferenceContext,
+        moduleInferenceContext,
+        dependencies
+    )
+
+    val abstractions = abstractions.inferTypes(errors, abstractionsInferenceInfo)
+    val traitsAbstractions = traitsAbstractions.asSequence().associate { trait ->
+        val traitInferenceInfo = InferenceInfo(
+            preludeInferenceContext,
+            trait.value.toTraitInferenceContext(
+                moduleInferenceContext,
+                moduleTypeSystemInfo.typeSystem[trait.key].valueOrNull!!.cast()
+            ),
+            dependencies
+        )
+        trait.key to trait.value.inferTypes(errors, traitInferenceInfo)
+    }
+    val implAbstractions = implAbstractions.asSequence().associate { impl ->
+        val implInferenceInfo = InferenceInfo(
+            preludeInferenceContext,
+            impl.value.toImplInferenceContext(
+                moduleInferenceContext,
+                moduleTypeSystemInfo.typeSystem[impl.key.trait].valueOrNull!!.cast()
+            ),
+            dependencies
+        )
+        impl.key to impl.value.inferTypes(errors, implInferenceInfo)
+    }
     return ModuleFunctionInfo(
         errors = errors.build(),
         abstractions,
-        traitsAbstractions, //TODO: build the traits for the module
-        implAbstractions, //TODO: build the impls for the module
+        traitsAbstractions,
+        implAbstractions
     )
 }

@@ -3,6 +3,7 @@ package org.ksharp.semantics.nodes
 import org.ksharp.common.Error
 import org.ksharp.module.Impl
 import org.ksharp.nodes.ImplNode
+import org.ksharp.semantics.inference.TraitFinderContext
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.TraitType
 
@@ -11,4 +12,13 @@ data class ModuleTypeSystemInfo(
     val typeSystem: TypeSystem,
     val traits: List<TraitType>,
     val impls: Map<Impl, ImplNode>
-)
+) {
+
+    val traitFinderContext: TraitFinderContext by lazy {
+        object : TraitFinderContext {
+            override val typeSystem: TypeSystem = this@ModuleTypeSystemInfo.typeSystem
+            override val impls: Sequence<Impl> = this@ModuleTypeSystemInfo.impls.keys.asSequence()
+        }
+    }
+    
+}

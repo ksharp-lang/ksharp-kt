@@ -8,10 +8,11 @@ import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.UnificationAlgo
+import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.innerType
 
 class NumericUnification : UnificationAlgo<NumericType> {
-    override fun unify(location: Location, type1: NumericType, type2: Type): ErrorOrType =
+    override fun unify(location: Location, type1: NumericType, type2: Type, checker: UnificationChecker): ErrorOrType =
         type2().flatMap { rType ->
             when (val innerRType = rType.innerType) {
                 is Parameter -> Either.Right(type1)

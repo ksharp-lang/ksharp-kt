@@ -6,7 +6,7 @@ import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.Type
 
 class ParameterUnification : UnificationAlgo<Parameter> {
-    override fun unify(location: Location, type1: Parameter, type2: Type): ErrorOrType =
+    override fun unify(location: Location, type1: Parameter, type2: Type, checker: UnificationChecker): ErrorOrType =
         type2()
 
 }

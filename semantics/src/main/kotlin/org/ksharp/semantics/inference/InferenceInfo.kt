@@ -17,14 +17,16 @@ import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.parameters
 import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
 internal fun FunctionInfo.substitute(
+    checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
 ): ErrorOrValue<FunctionType> {
-    val context = SubstitutionContext()
+    val context = SubstitutionContext(checker)
     val result: ErrorOrValue<FunctionType>? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
         val substitutionResult = context.extract(location, item1, item2)
         if (substitutionResult.isLeft) {
@@ -36,18 +38,19 @@ internal fun FunctionInfo.substitute(
 }
 
 internal fun FunctionInfo.unify(
+    checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
 ): ErrorOrType {
     return types.last()().flatMap { returnType ->
         types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
-            item1.unify(location, item2)
+            item1.unify(location, item2, checker)
         }
             .unwrap()
             .flatMap { params ->
                 if (returnType.parameters.firstOrNull() != null) {
-                    substitute(typeSystem, location, params)
+                    substitute(checker, typeSystem, location, params)
                 } else {
                     Either.Right((params + returnType).toFunctionType(typeSystem, attributes))
                 }
@@ -56,11 +59,13 @@ internal fun FunctionInfo.unify(
 }
 
 data class InferenceInfo(
-    val prelude: InferenceModuleInfo,
-    val module: InferenceModuleInfo,
+    val prelude: InferenceContext,
+    val inferenceContext: InferenceContext,
     val dependencies: Map<String, ModuleInfo> = emptyMap()
 ) {
     private val cache = cacheOf<Pair<String, List<Type>>, Either<String, Type>>()
+
+    val checker: UnificationChecker get() = inferenceContext.checker
 
     private fun functionName(name: String, arguments: List<Type>) =
         "$name ${
@@ -69,16 +74,17 @@ data class InferenceInfo(
             }
         }"
 
-    private fun FunctionInfo.infer(): FunctionInfo {
+    private fun FunctionInfo.infer(caller: String): FunctionInfo {
         if (this is AbstractionFunctionInfo) {
             this.abstraction
                 .cast<SemanticNode<SemanticInfo>>()
-                .inferType(this@InferenceInfo)
+                .inferType(caller, this@InferenceInfo)
         }
         return this
     }
 
     fun findAppType(
+        caller: String,
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
@@ -86,13 +92,14 @@ data class InferenceInfo(
         appName.name.let {
             if (it.first().isUpperCase()) {
                 findConstructorType(location, appName, arguments)
-            } else findFunctionType(location, appName, arguments)
+            } else findFunctionType(caller, location, appName, arguments)
         }
 
     private val List<Type>.calculateNumArguments: Int
         get() = if (size == 1 && first().representation == "Unit") 0 else size
 
     private fun findFunctionType(
+        caller: String,
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
@@ -101,16 +108,17 @@ data class InferenceInfo(
             val name = appName.name
             val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
             cache.get(funName to arguments) {
-                val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else module
+                val firstArgument = arguments.first()
+                val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else inferenceContext
                 val secondSearch = if (appName.pck == null) prelude else null
 
-                firstSearch.findFunction(name, numArguments + 1)
-                    ?.infer()
-                    ?.unify(module.typeSystem, location, arguments)
+                firstSearch.findFunction(caller, name, numArguments + 1, firstArgument)
+                    ?.infer(caller)
+                    ?.unify(checker, inferenceContext.typeSystem, location, arguments)
                     ?.mapLeft { it.toString() }
-                    ?: secondSearch?.findFunction(name, numArguments + 1)
-                        ?.infer()
-                        ?.unify(prelude.typeSystem, location, arguments)
+                    ?: secondSearch?.findFunction(caller, name, numArguments + 1, firstArgument)
+                        ?.infer(caller)
+                        ?.unify(checker, prelude.typeSystem, location, arguments)
                         ?.mapLeft { it.toString() }
                     ?: Either.Left(functionName(name, arguments))
             }.mapLeft {
@@ -129,7 +137,7 @@ data class InferenceInfo(
         arguments.size.let { _ ->
             val name = appName.name
             cache.get(name to arguments) {
-                val type = module.typeSystem[name]
+                val type = inferenceContext.typeSystem[name]
                 val result = if (type.isLeft) {
                     prelude.typeSystem[name]
                 } else type
@@ -145,5 +153,5 @@ data class InferenceInfo(
         }
 
     fun getType(name: String): ErrorOrType =
-        module.typeSystem[name]
+        inferenceContext.typeSystem[name]
 }

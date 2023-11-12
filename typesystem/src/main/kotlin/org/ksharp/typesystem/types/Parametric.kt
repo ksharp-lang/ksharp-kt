@@ -77,7 +77,7 @@ data class ParametricType private constructor(
     ) {
         this.typeSystem = typeSystem
     }
-    
+
     override val solver: Solver
         get() = Solvers.Parametric
     override val serializer: TypeSerializer
@@ -164,6 +164,33 @@ class ParametricTypeFactory(
     internal fun build(): ErrorOrValue<List<Type>> = result.map { it.build() }
 }
 
+private fun Type?.validateParametricType(
+    handle: HandlePromise<TypeSystem>,
+    attributes: Set<Attribute>,
+    types: List<Type>
+): Error? =
+    when {
+        this is ParametricType && params.size != types.size ->
+            TypeSystemErrorCode.InvalidNumberOfParameters.new(
+                "type" to this,
+                "number" to params.size,
+                "configuredType" to ParametricType(handle, attributes, type, types)
+            )
+
+        this is TraitType && 1 != types.size -> TypeSystemErrorCode.InvalidNumberOfParameters.new(
+            "type" to this,
+            "number" to 1,
+            "configuredType" to ParametricType(
+                handle,
+                attributes,
+                Concrete(handle, NoAttributes, name),
+                types
+            )
+        )
+
+        else -> null
+    }
+
 fun TypeItemBuilder.parametricType(
     name: String,
     factory: ParametricTypeFactoryBuilder
@@ -180,21 +207,14 @@ fun TypeItemBuilder.parametricType(
     } else
         alias(name).flatMap { pType ->
             validation {
-                if (it(name) !is ParametricType) {
-                    TypeSystemErrorCode.NoParametrizedType.new("type" to pType.representation)
-                } else null
-            }
-            ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { types ->
-                validation {
-                    val type = it(name)
-                    if (type is ParametricType && type.params.size != types.size) {
-                        TypeSystemErrorCode.InvalidNumberOfParameters.new(
-                            "type" to type,
-                            "number" to type.params.size,
-                            "configuredType" to ParametricType(handle, attributes, type.type, types)
-                        )
+                it(name).let { t ->
+                    if (!(t is ParametricType || t is TraitType)) {
+                        TypeSystemErrorCode.NoParametrizedType.new("type" to pType.representation)
                     } else null
                 }
+            }
+            ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { types ->
+                validation { it(name).validateParametricType(handle, attributes, types) }
                 Either.Right(ParametricType(handle, attributes, pType, types))
             }
         }

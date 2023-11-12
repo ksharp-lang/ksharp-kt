@@ -15,7 +15,7 @@ class ParametricSolver : Solver {
             if (it is ParametricType) {
                 if (it.type == type) Either.Right(it.type)
                 else resolveParametricType(typeSystem, it.type)
-            } else resolveParametricType(typeSystem, it)
+            } else Either.Right(it)
         }
 
     override fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType {

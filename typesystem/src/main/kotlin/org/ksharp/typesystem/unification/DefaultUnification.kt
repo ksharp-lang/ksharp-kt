@@ -17,7 +17,7 @@ val Type.innerType: Type
         }
 
 class DefaultUnification : UnificationAlgo<Type> {
-    override fun unify(location: Location, type1: Type, type2: Type): ErrorOrType =
+    override fun unify(location: Location, type1: Type, type2: Type, checker: UnificationChecker): ErrorOrType =
         type1().flatMap { lType ->
             val innerLType = lType.innerType
             type2().flatMap { rType ->

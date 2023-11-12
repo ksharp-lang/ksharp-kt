@@ -27,7 +27,7 @@ private class FunctionLookupImpl : FunctionLookup {
             functions.asSequence()
                 .filter { it.name == name && it.type.arguments.size == arity }
                 .map { fn ->
-                    functionType.unify(Location.NoProvided, type).map { fn }
+                    functionType.unify(Location.NoProvided, type) { _, _ -> false }.map { fn }
                 }
                 .firstOrNull { it is Either.Right }
                 ?.valueOrNull!!

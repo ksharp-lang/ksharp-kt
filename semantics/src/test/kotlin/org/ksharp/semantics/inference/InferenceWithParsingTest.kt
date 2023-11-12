@@ -4,22 +4,54 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
+import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 
-fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg types: String) {
+private fun List<AbstractionNode<SemanticInfo>>.stringRepresentation(prefix: String) =
+    map {
+        it.info.getInferredType(Location.NoProvided)
+            .map { type ->
+                "${prefix}${it.name} :: ${type.representation}"
+            }
+    }.unwrap()
+
+private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg types: String) {
     shouldBeRight().value.apply {
         abstractions.size.shouldBe(types.size)
-        abstractions.map {
-            it.info.getInferredType(Location.NoProvided)
-                .map { type ->
-                    "${it.name} :: ${type.representation}"
-                }
-        }.unwrap().shouldBeRight()
+        abstractions.stringRepresentation("")
+            .shouldBeRight()
             .value.shouldContainExactlyInAnyOrder(types.toList())
+    }
+}
+
+private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTraitAbstractionsTypesBe(
+    vararg types: String
+) {
+    shouldBeRight().value.apply {
+        traitsAbstractions.map {
+            it.value.stringRepresentation("${it.key} :: ")
+        }.unwrap().shouldBeRight()
+            .value
+            .flatten()
+            .shouldContainExactlyInAnyOrder(types.toList())
+    }
+}
+
+private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredImplAbstractionsTypesBe(
+    vararg types: String
+) {
+    shouldBeRight().value.apply {
+        implAbstractions.map {
+            it.value.stringRepresentation("${it.key.trait} for ${it.key.type} :: ")
+        }.unwrap().shouldBeRight()
+            .value
+            .flatten()
+            .shouldContainExactlyInAnyOrder(types.toList())
     }
 }
 
@@ -263,5 +295,64 @@ class InferenceWithParsingTest : StringSpec({
                     )
                 )
             )
+    }
+
+    "Inference trait abstraction" {
+        """
+            ten = int 10
+            
+            trait Op a =
+              len :: a -> Int
+              len a = ten
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTraitAbstractionsTypesBe(
+                "Op :: len :: (a -> (Num numeric<Int>))"
+            )
+    }
+
+    "Inference impl abstraction" {
+        """
+           trait Op a =
+             sum :: a -> a -> a
+           
+           impl Op for Int =
+             sum a b = a + b
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredImplAbstractionsTypesBe(
+                "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
+            )
+    }
+
+    "Inference trait used in a function" {
+        """
+           trait Op a =
+             sum :: a -> a -> a
+           
+           impl Op for Int =
+             sum a b = a + b
+           
+           fn a :: (Op a) -> (Op a) -> (Op a)
+           fn a b = sum a b
+           
+           s = fn (int 10) (int 20)
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .apply {
+                shouldBeRight()
+                val traitOp = valueOrNull!!.typeSystem["Op"].valueOrNull!!().valueOrNull!!.representation
+                shouldInferredImplAbstractionsTypesBe(
+                    "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
+                )
+                shouldInferredTypesBe(
+                    "fn :: (($traitOp a) -> ($traitOp a) -> ($traitOp a))",
+                    "s :: (Unit -> ($traitOp a))"
+                )
+            }
+    }
+
+    "Inference impl using a default trait method" {
+
     }
 })
