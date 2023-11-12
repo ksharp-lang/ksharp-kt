@@ -151,7 +151,7 @@ class ImplSemanticTest : StringSpec({
                                         functionName = ApplicationName(pck = null, name = "True"),
                                         arguments = listOf(
                                             ConstantNode(
-                                                value = kotlin.Unit,
+                                                value = Unit,
                                                 info = TypeSemanticInfo(type = unitType), Location.NoProvided
                                             )
                                         ),
