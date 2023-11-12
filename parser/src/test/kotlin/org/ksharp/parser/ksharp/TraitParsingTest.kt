@@ -1,14 +1,18 @@
 package org.ksharp.parser.ksharp
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 import org.ksharp.nodes.*
 import org.ksharp.parser.TokenLexerIterator
+import org.ksharp.parser.collapseNewLines
 import org.ksharp.parser.enableLookAhead
+import org.ksharp.parser.excludeIgnoreNewLineTokens
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
     filterAndCollapseTokens()
+        .excludeIgnoreNewLineTokens()
         .collapseNewLines()
         .enableLookAhead()
         .enableIndentationOffset()
@@ -611,6 +615,137 @@ class TraitParsingTest : StringSpec({
                         traitName = Location.NoProvided,
                         forKeyword = Location.NoProvided,
                         assignOperator = Location.NoProvided
+                    )
+                )
+            )
+    }
+    "Parsing many traits" {
+        """
+            trait Num a =
+                sum :: a -> a -> a
+                prod :: a -> a -> a
+                
+            trait Eq a =
+                (=) :: a -> a -> Bool
+                (!=) :: a -> a -> Bool
+        """.trimIndent()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeModuleNodes()
+            .shouldBe(
+                listOf(
+                    TraitNode(
+                        internal = false,
+                        annotations = null,
+                        name = "Num", params = listOf("a"),
+                        definition = TraitFunctionsNode(
+                            definitions = listOf(
+                                TraitFunctionNode(
+                                    name = "sum",
+                                    type = FunctionTypeNode(
+                                        params = listOf(
+                                            ParameterTypeNode(
+                                                name = "a",
+                                                Location.NoProvided
+                                            ),
+                                            ParameterTypeNode(name = "a", Location.NoProvided),
+                                            ParameterTypeNode(name = "a", Location.NoProvided)
+                                        ),
+                                        Location.NoProvided,
+                                        locations = FunctionTypeNodeLocations(separators = listOf())
+                                    ),
+                                    Location.NoProvided,
+                                    locations = TraitFunctionNodeLocation(
+                                        name = Location.NoProvided,
+                                        operator = Location.NoProvided
+                                    )
+                                ),
+                                TraitFunctionNode(
+                                    name = "prod",
+                                    type = FunctionTypeNode(
+                                        params = listOf(
+                                            ParameterTypeNode(
+                                                name = "a",
+                                                Location.NoProvided
+                                            ),
+                                            ParameterTypeNode(name = "a", Location.NoProvided),
+                                            ParameterTypeNode(name = "a", Location.NoProvided)
+                                        ),
+                                        Location.NoProvided,
+                                        locations = FunctionTypeNodeLocations(separators = listOf())
+                                    ),
+                                    Location.NoProvided,
+                                    locations = TraitFunctionNodeLocation(
+                                        name = Location.NoProvided,
+                                        operator = Location.NoProvided
+                                    )
+                                )
+                            ),
+                            functions = listOf()
+                        ),
+                        Location.NoProvided,
+                        locations = TraitNodeLocations(
+                            internalLocation = Location.NoProvided,
+                            traitLocation = Location.NoProvided,
+                            name = Location.NoProvided,
+                            params = listOf(),
+                            assignOperatorLocation = Location.NoProvided
+                        )
+                    ),
+                    TraitNode(
+                        internal = false,
+                        annotations = null,
+                        name = "Eq",
+                        params = listOf("a"),
+                        definition = TraitFunctionsNode(
+                            definitions = listOf(
+                                TraitFunctionNode(
+                                    name = "(=)",
+                                    type = FunctionTypeNode(
+                                        params = listOf(
+                                            ParameterTypeNode(
+                                                name = "a",
+                                                Location.NoProvided
+                                            ),
+                                            ParameterTypeNode(name = "a", Location.NoProvided),
+                                            ConcreteTypeNode(name = "Bool", Location.NoProvided)
+                                        ),
+                                        Location.NoProvided,
+                                        locations = FunctionTypeNodeLocations(separators = listOf())
+                                    ),
+                                    Location.NoProvided,
+                                    locations = TraitFunctionNodeLocation(
+                                        name = Location.NoProvided,
+                                        operator = Location.NoProvided
+                                    )
+                                ),
+                                TraitFunctionNode(
+                                    name = "(!=)",
+                                    type = FunctionTypeNode(
+                                        params = listOf(
+                                            ParameterTypeNode(name = "a", Location.NoProvided),
+                                            ParameterTypeNode(name = "a", Location.NoProvided),
+                                            ConcreteTypeNode(name = "Bool", Location.NoProvided)
+                                        ),
+                                        Location.NoProvided,
+                                        locations = FunctionTypeNodeLocations(separators = listOf())
+                                    ),
+                                    Location.NoProvided,
+                                    locations = TraitFunctionNodeLocation(
+                                        name = Location.NoProvided,
+                                        operator = Location.NoProvided
+                                    )
+                                )
+                            ), functions = listOf()
+                        ),
+                        Location.NoProvided,
+                        locations = TraitNodeLocations(
+                            internalLocation = Location.NoProvided,
+                            traitLocation = Location.NoProvided,
+                            name = Location.NoProvided,
+                            params = listOf(),
+                            assignOperatorLocation = Location.NoProvided
+                        )
                     )
                 )
             )

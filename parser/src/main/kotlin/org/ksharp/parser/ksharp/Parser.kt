@@ -77,7 +77,8 @@ fun Reader.lexerModule(withLocations: Boolean) =
         .let {
             if (withLocations) it.toLogicalLexerToken()
             else it
-        }.collapseNewLines()
+        }.excludeIgnoreNewLineTokens()
+        .collapseNewLines()
         .enableLookAhead()
         .enableIndentationOffset()
 
