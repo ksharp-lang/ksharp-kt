@@ -340,12 +340,14 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .apply {
+                shouldBeRight()
+                val traitOp = valueOrNull!!.typeSystem["Op"].valueOrNull!!().valueOrNull!!.representation
                 shouldInferredImplAbstractionsTypesBe(
-                    "Op for Int :: sum :: (Int -> Int -> Int)"
+                    "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
                 )
                 shouldInferredTypesBe(
-                    "fn :: ((Op a) -> (Op a) -> (Op a))",
-                    "s :: Long"
+                    "fn :: (($traitOp a) -> ($traitOp a) -> ($traitOp a))",
+                    "s :: (Unit -> ($traitOp a))"
                 )
             }
     }
