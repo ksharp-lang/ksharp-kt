@@ -124,7 +124,11 @@ class TraitTypeFactory(
 ) {
     private var result: ErrorOrValue<MapBuilder<String, TraitType.MethodType>> = Either.Right(mapBuilder())
 
-    fun method(name: String, withDefaultImpl: Boolean = false, arguments: ParametricTypeFactoryBuilder = {}) {
+    fun method(
+        name: String,
+        withDefaultImpl: Boolean = false,
+        arguments: ParametricTypeFactoryBuilder = {}
+    ) {
         result = result.flatMap { params ->
             validateFunctionName(name).flatMap {
                 ParametricTypeFactory(factory).apply(arguments).build().flatMap traitMethod@{ args ->

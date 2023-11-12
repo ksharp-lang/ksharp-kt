@@ -33,7 +33,17 @@ class PreludeTypeSystemTest : StringSpec({
             repr("Double").shouldBeRight("Num numeric<Double>")
             repr("BigDecimal").shouldBeRight("Num numeric<BigDecimal>")
             repr("String").shouldBeRight("String")
-            repr("Num").shouldBeRight("Num a")
+            repr("Num").shouldBeRight(
+                """
+                trait Num a =
+                    (+) :: a -> a -> a
+                    (-) :: a -> a -> a
+                    (*) :: a -> a -> a
+                    ( :: a -> a -> a
+                    (%) :: a -> a -> a
+                    (**) :: a -> a -> a
+            """.trimIndent()
+            )
             repr("List").shouldBeRight("List v")
             repr("Set").shouldBeRight("Set v")
             repr("Map").shouldBeRight("Map k v")

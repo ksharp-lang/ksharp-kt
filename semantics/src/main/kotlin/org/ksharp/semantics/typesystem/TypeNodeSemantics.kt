@@ -381,7 +381,7 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
         }.flatMap {
             instantiateType(errors, typeSystem, handle, impl.forType.cast())
         }.flatMap { forType ->
-            val i = Impl(impl.traitName, forType)
+            val i = Impl(NoAttributes, impl.traitName, forType)
             if (impls.containsKey(i) == false) {
                 impls.put(i, impl)
                 Either.Right(true)

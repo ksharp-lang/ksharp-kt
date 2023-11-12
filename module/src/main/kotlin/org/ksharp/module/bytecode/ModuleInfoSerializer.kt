@@ -3,41 +3,14 @@ package org.ksharp.module.bytecode
 import org.ksharp.common.HandlePromise
 import org.ksharp.common.handlePromise
 import org.ksharp.common.io.*
-import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.kernelTypeSystem
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.readMapOfStrings
 import org.ksharp.typesystem.attributes.writeTo
-import org.ksharp.typesystem.serializer.readType
 import org.ksharp.typesystem.serializer.readTypeSystem
 import org.ksharp.typesystem.serializer.writeTo
 import java.io.OutputStream
-
-fun Set<Impl>.writeTo(buffer: BufferWriter, table: BinaryTable) {
-    buffer.add(size)
-    forEach { impl ->
-        buffer.add(table.add(impl.trait))
-        impl.type.writeTo(buffer, table)
-    }
-}
-
-fun BufferView.readImpls(handle: HandlePromise<TypeSystem>, table: BinaryTableView): Set<Impl> {
-    val size = readInt(0)
-    val result = mutableSetOf<Impl>()
-    var position = 4
-    repeat(size) {
-        val typeSize = readInt(position + 4)
-        result.add(
-            Impl(
-                table[readInt(position)],
-                bufferFrom(position + 4).readType(handle, table)
-            )
-        )
-        position += 4 + typeSize
-    }
-    return result
-}
 
 fun ModuleInfo.writeTo(output: OutputStream) {
     val stringPool = StringPoolBuilder()
