@@ -4,12 +4,10 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
-import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.toSemanticModuleInfo
-import org.ksharp.semantics.type
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
@@ -58,9 +56,6 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredImplAbstractio
 }
 
 class InferenceWithParsingTest : StringSpec({
-    val numRepr = preludeModule.typeSystem.type("Num")
-    val longRepr = preludeModule.typeSystem.type("Long").representation
-    val intRepr = preludeModule.typeSystem.type("Int").representation
     "Inference module" {
         """
             fn = sum 10 20
@@ -68,8 +63,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: (($numRepr a) -> ($numRepr a) -> ($numRepr a))",
-                "fn :: (Unit -> $longRepr)"
+                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference module 2" {
@@ -79,8 +74,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: (($numRepr a) -> ($numRepr a) -> ($numRepr a))",
-                "fn :: (Unit -> $longRepr)"
+                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference module - function not found" {
@@ -119,7 +114,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> $longRepr)"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference let expression - tuple variable binding" {
@@ -129,7 +124,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> $longRepr)"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference let expression - tuple variable binding 2" {
@@ -139,7 +134,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> $longRepr)"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference let expression - not a tuple binding" {
@@ -179,7 +174,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> $longRepr)"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference let expression - no a list" {
@@ -221,7 +216,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> $longRepr)"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference let expression - binding with guards" {
@@ -235,7 +230,7 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "isEven :: ((Num numeric<Long>) -> True)",
-                "fn :: (Unit -> $longRepr)"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference let expression - list binding used as guard" {
@@ -281,7 +276,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> $longRepr)"
+                "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
     "Inference match expression with error" {
@@ -324,7 +319,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredImplAbstractionsTypesBe(
-                "Op for Num numeric<Int> :: sum :: ($intRepr -> $intRepr -> $intRepr)"
+                "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
             )
     }
     "Inference trait used in a function" {

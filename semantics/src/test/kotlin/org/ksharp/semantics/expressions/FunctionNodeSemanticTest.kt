@@ -19,7 +19,6 @@ import org.ksharp.semantics.inference.InferenceErrorCode
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
-import org.ksharp.semantics.type
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.PartialTypeSystem
@@ -1691,7 +1690,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             this.abstractions.first()
                 .info.getInferredType(Location.NoProvided)
                 .shouldBeRight(
-                    listOf(ts["Unit"].valueOrNull!!, ts.type("Long")).toFunctionType(
+                    listOf(ts["Unit"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType(
                         MockHandlePromise()
                     )
                 )
@@ -1751,7 +1750,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             this.abstractions.first()
                 .info.getInferredType(Location.NoProvided)
                 .shouldBeRight(
-                    listOf(ts.type("Long"), ts.type("Long")).toFunctionType(
+                    listOf(ts["Long"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType(
                         MockHandlePromise()
                     )
                 )
@@ -1810,7 +1809,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "no-function True ${ts.type("Long").representation} @0"
+                        "function" to "no-function True ${ts["Long"].valueOrNull!!.representation} @0"
                     )
                 )
             )
