@@ -5,11 +5,14 @@ import org.ksharp.common.Location
 import org.ksharp.nodes.AnnotationNode
 import org.ksharp.nodes.AnnotationNodeLocations
 import org.ksharp.parser.TokenLexerIterator
+import org.ksharp.parser.collapseNewLines
 import org.ksharp.parser.enableLookAhead
+import org.ksharp.parser.excludeIgnoreNewLineTokens
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForAnnotationParsing() =
     filterAndCollapseTokens()
+        .excludeIgnoreNewLineTokens()
         .collapseNewLines()
         .enableLookAhead()
         .enableIndentationOffset()

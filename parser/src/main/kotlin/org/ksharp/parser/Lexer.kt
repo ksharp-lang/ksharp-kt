@@ -77,7 +77,7 @@ fun <V> TokenLexerIterator<V>.toLogicalLexerToken(): BaseLexerIterator<V> =
         private var lineOffset: Int = 0
 
         override val lastEndOffset: Int get() = this@toLogicalLexerToken.lastEndOffset
-        
+
         override val lastStartOffset: Int get() = this@toLogicalLexerToken.lastStartOffset
 
         override val state: LexerState<V> = this@toLogicalLexerToken.state
@@ -85,7 +85,7 @@ fun <V> TokenLexerIterator<V>.toLogicalLexerToken(): BaseLexerIterator<V> =
         override fun hasNext(): Boolean = this@toLogicalLexerToken.hasNext()
 
         override fun next(): LogicalLexerToken = with(this@toLogicalLexerToken.next()) {
-            if (type == BaseTokenType.NewLine) {
+            if (type == BaseTokenType.NewLine || type == BaseTokenType.IgnoreNewLine) {
                 startPosition = Line(startPosition.first.value.inc()) to Offset(0)
                 lineOffset = startOffset + (if (text.startsWith("\r\n")) 2 else 1)
             } else {
@@ -98,3 +98,29 @@ fun <V> TokenLexerIterator<V>.toLogicalLexerToken(): BaseLexerIterator<V> =
             )
         }
     }
+
+
+internal fun String.indentLength() =
+    replace("\n", "").replace("\r", "") //normalize newline to zero spaces
+        .replace("\t", "  ") //normalize tab to two spaces
+        .length
+
+fun <V> BaseLexerIterator<V>.excludeIgnoreNewLineTokens(): BaseLexerIterator<V> = filter {
+    it.type != BaseTokenType.IgnoreNewLine
+}
+
+fun <V> BaseLexerIterator<V>.collapseNewLines(): BaseLexerIterator<V> {
+    var lastIndent = 0
+    return generateLexerIterator(state) {
+        while (hasNext()) {
+            val token = next()
+            lastIndent = if (token.type == BaseTokenType.NewLine) {
+                val length = token.text.indentLength()
+                if (length == lastIndent) continue
+                else length
+            } else -1
+            return@generateLexerIterator token
+        }
+        null
+    }
+}

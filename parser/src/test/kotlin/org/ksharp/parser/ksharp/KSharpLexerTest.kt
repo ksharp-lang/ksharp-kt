@@ -589,6 +589,7 @@ private fun <T> List<T>.printTokens() = onEach { println("\"$it\",") }
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForMarkBlockTests(): KSharpLexerIterator {
     return filterAndCollapseTokens()
+        .excludeIgnoreNewLineTokens()
         .collapseNewLines()
         .enableLookAhead()
 }

@@ -310,7 +310,14 @@ fun KSharpLexer.newLine(requestForNewLineChar: Boolean): LexerToken {
             return token(BaseTokenType.NewLine, 1)
         }
     }
-    return loopChar({ isSpace() }, BaseTokenType.NewLine)
+    while (true) {
+        val c = this.nextChar() ?: return token(BaseTokenType.NewLine, 1)
+        if (c.isNewLine()) {
+            return token(BaseTokenType.IgnoreNewLine, 1)
+        }
+        if (!c.isSpace())
+            return token(BaseTokenType.NewLine, 1)
+    }
 }
 
 fun KSharpLexer.whiteSpace(): LexerToken = loopChar({ isSpace() }, BaseTokenType.WhiteSpace)
@@ -424,27 +431,6 @@ private fun Token.mapOperatorToken(): Token = when (type) {
     }
 
     else -> this
-}
-
-internal fun String.indentLength() =
-    replace("\n", "").replace("\r", "") //normalize newline to zero spaces
-        .replace("\t", "  ") //normalize tab to two spaces
-        .length
-
-fun KSharpLexerIterator.collapseNewLines(): KSharpLexerIterator {
-    var lastIndent = 0
-    return generateLexerIterator(state) {
-        while (hasNext()) {
-            val token = next()
-            lastIndent = if (token.type == BaseTokenType.NewLine) {
-                val length = token.text.indentLength()
-                if (length == lastIndent) continue
-                else length
-            } else -1
-            return@generateLexerIterator token
-        }
-        null
-    }
 }
 
 fun KSharpLexerIterator.ensureNewLineAtEnd(): KSharpLexerIterator {

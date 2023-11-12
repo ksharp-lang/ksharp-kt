@@ -4,11 +4,14 @@ import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.*
 import org.ksharp.parser.TokenLexerIterator
+import org.ksharp.parser.collapseNewLines
 import org.ksharp.parser.enableLookAhead
+import org.ksharp.parser.excludeIgnoreNewLineTokens
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForFunctionParsing() =
     filterAndCollapseTokens()
+        .excludeIgnoreNewLineTokens()
         .collapseNewLines()
         .enableLookAhead()
         .enableIndentationOffset()

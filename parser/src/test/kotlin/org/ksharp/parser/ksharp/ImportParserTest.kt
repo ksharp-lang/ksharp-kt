@@ -4,7 +4,9 @@ import io.kotest.core.spec.style.StringSpec
 import org.ksharp.common.Location
 import org.ksharp.nodes.ImportNode
 import org.ksharp.nodes.ImportNodeLocations
+import org.ksharp.parser.collapseNewLines
 import org.ksharp.parser.enableLookAhead
+import org.ksharp.parser.excludeIgnoreNewLineTokens
 import org.ksharp.test.shouldBeRight
 
 class ImportParserTest : StringSpec({
@@ -12,6 +14,7 @@ class ImportParserTest : StringSpec({
         "import ksharp.math as math"
             .kSharpLexer()
             .filterAndCollapseTokens()
+            .excludeIgnoreNewLineTokens()
             .collapseNewLines()
             .enableLookAhead()
             .consumeImport()
@@ -35,6 +38,7 @@ class ImportParserTest : StringSpec({
         "import ksharp as math"
             .kSharpLexer()
             .filterAndCollapseTokens()
+            .excludeIgnoreNewLineTokens()
             .collapseNewLines()
             .enableLookAhead()
             .consumeImport()
@@ -59,6 +63,7 @@ class ImportParserTest : StringSpec({
            |    ksharp as math""".trimMargin()
             .kSharpLexer()
             .filterAndCollapseTokens()
+            .excludeIgnoreNewLineTokens()
             .collapseNewLines()
             .enableLookAhead()
             .enableIndentationOffset()
