@@ -92,7 +92,9 @@ data class ParametricType private constructor(
     override val terms: Sequence<Type>
         get() = sequenceOf(sequenceOf(type), params.asSequence()).flatten()
 
-    override fun toString(): String = "$type ${params.asSequence().map { it.representation }.joinToString(" ")}"
+    override fun toString(): String = "${if (type is TraitType) type.name else type.toString()} ${
+        params.asSequence().map { it.representation }.joinToString(" ")
+    }"
 
     override fun new(attributes: Set<Attribute>): Type = ParametricType(typeSystem, attributes, type, params)
 }
@@ -230,5 +232,11 @@ fun TypeSystemBuilder.parametricType(
     }
 
 val Type.parameters: Sequence<Parameter>
-    get() = if (this is Parameter) sequenceOf(this)
-    else this.terms.map { it.parameters }.flatten()
+    get() = when (this) {
+        is ParametricType -> this.params.asSequence().map {
+            it.parameters
+        }.flatten()
+
+        is Parameter -> sequenceOf(this)
+        else -> this.terms.map { it.parameters }.flatten()
+    }

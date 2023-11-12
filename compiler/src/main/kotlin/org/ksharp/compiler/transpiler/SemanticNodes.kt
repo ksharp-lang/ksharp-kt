@@ -15,6 +15,7 @@ val SemanticNode<SemanticInfo>.type: ErrorOrType
 
 val AbstractionNode<SemanticInfo>.parametric: ErrorOrValue<Boolean>
     get() = type.map {
+        println(it)
+        println(it.parameters.toList())
         it.parameters.firstOrNull() != null
     }
-
