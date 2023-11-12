@@ -159,7 +159,7 @@ class ImplSemanticTest : StringSpec({
                                     ),
                                     info = AbstractionSemanticInfo(
                                         parameters = listOf(),
-                                        returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
+                                        returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(2)))
                                     ), Location.NoProvided
                                 ),
                                 AbstractionNode(
