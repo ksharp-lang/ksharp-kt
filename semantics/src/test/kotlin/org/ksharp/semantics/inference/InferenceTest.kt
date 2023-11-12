@@ -265,7 +265,7 @@ class InferenceTest : StringSpec({
         )
         abstraction.inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("(Unit -> (Num numeric<int>))")
+                .shouldBeRight("(Unit -> (Num numeric<Int>))")
         }
     }
     "Inference let binding" {
