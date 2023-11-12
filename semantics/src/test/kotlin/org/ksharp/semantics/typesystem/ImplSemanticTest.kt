@@ -6,10 +6,7 @@ import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.new
 import org.ksharp.module.Impl
-import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.nodes.semantic.ApplicationName
-import org.ksharp.nodes.semantic.ApplicationNode
-import org.ksharp.nodes.semantic.VarNode
+import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.ApplicationSemanticInfo
 import org.ksharp.semantics.nodes.Symbol
@@ -19,6 +16,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
 
 class ImplSemanticTest : StringSpec({
@@ -123,7 +121,7 @@ class ImplSemanticTest : StringSpec({
                 )
             }
     }
-    "Error in method impl" {
+    "Impl semantics nodes" {
         """
             trait Eq a =
                 (=) :: a -> a -> Bool
@@ -131,6 +129,8 @@ class ImplSemanticTest : StringSpec({
                 (=) a b = True
             
             impl Eq for Num =
+                support = True
+                 
                 (!=) a b = a != b
         """.trimIndent()
             .toSemanticModuleInfo()
@@ -138,11 +138,30 @@ class ImplSemanticTest : StringSpec({
             .map {
                 val boolType = it.typeSystem["Bool"].valueOrNull!!
                 val forType = it.typeSystem["Num"]
+                val unitType = it.typeSystem["Unit"]
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
                             Impl("Eq", forType.valueOrNull!!)
                                     to listOf(
+                                AbstractionNode(
+                                    attributes = setOf(CommonAttribute.Internal),
+                                    name = "support",
+                                    expression = ApplicationNode(
+                                        functionName = ApplicationName(pck = null, name = "True"),
+                                        arguments = listOf(
+                                            ConstantNode(
+                                                value = kotlin.Unit,
+                                                info = TypeSemanticInfo(type = unitType), Location.NoProvided
+                                            )
+                                        ),
+                                        info = ApplicationSemanticInfo(function = null), Location.NoProvided
+                                    ),
+                                    info = AbstractionSemanticInfo(
+                                        parameters = listOf(),
+                                        returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
+                                    ), Location.NoProvided
+                                ),
                                 AbstractionNode(
                                     attributes = setOf(CommonAttribute.Public),
                                     name = "(!=)",
