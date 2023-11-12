@@ -75,27 +75,3 @@ native pub mapOf p
 @name("prelude::mapOf" for="ir")
 emptyMap k v :: () -> (Map k v)
 native pub emptyMap
-
-@name("prelude::sum" for="ir")
-(+) a :: (Num a) -> (Num a) -> (Num a)
-native pub (+) a b
-
-@name("prelude::sub" for="ir")
-(-) a :: (Num a) -> (Num a) -> (Num a)
-native pub (-) a b
-
-@name("prelude::mul" for="ir")
-(*) a :: (Num a) -> (Num a) -> (Num a)
-native pub (*) a b
-
-@name("prelude::div" for="ir")
-(/) a :: (Num a) -> (Num a) -> (Num a)
-native pub (/) a b
-
-@name("prelude::pow" for="ir")
-(**) a :: (Num a) -> (Num a) -> (Num a)
-native pub (**) a b
-
-@name("prelude::mod" for="ir")
-(%) a :: (Num a) -> (Num a) -> (Num a)
-native pub (%) a b
