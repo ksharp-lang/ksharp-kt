@@ -9,6 +9,7 @@ import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
 import org.ksharp.semantics.nodes.*
+import org.ksharp.semantics.type
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
@@ -121,7 +122,7 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         ).inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("(Unit -> (Num numeric<Long>))")
+                .shouldBeRight("(Unit -> ${ts.type("Long").representation})")
         }
     }
     "Inference type over operators with substitution" {
@@ -265,7 +266,7 @@ class InferenceTest : StringSpec({
         )
         abstraction.inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("(Unit -> (Num numeric<Int>))")
+                .shouldBeRight("(Unit -> ${ts.type("Int").representation})")
         }
     }
     "Inference let binding" {
@@ -309,7 +310,7 @@ class InferenceTest : StringSpec({
         )
         abstraction.inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("(Unit -> (Num numeric<Long>))")
+                .shouldBeRight("(Unit -> ${ts.type("Long").representation})")
         }
     }
     "Inference test function doesn't exists" {

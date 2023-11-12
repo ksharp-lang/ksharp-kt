@@ -23,9 +23,12 @@ import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
+import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.newNamedParameter
+import org.ksharp.typesystem.types.parametricType
 import org.ksharp.typesystem.types.toFunctionType
 
 private fun Collection<TraitType>.shouldDefine(methods: Map<String, Boolean>): Collection<TraitType> {
@@ -162,7 +165,12 @@ class TraitSemanticTest : StringSpec({
             .getSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                val num = it.typeSystem["Num"].valueOrNull!!
+                val num = typeSystem {
+                    parametricType(NoAttributes, "Num") {
+                        parameter("a")
+                    }
+                }.value["Num"].valueOrNull!!
+
                 // should contains the trait with only one method sum/3 with default implementation
                 it.typeSystem
                     .getTraits()

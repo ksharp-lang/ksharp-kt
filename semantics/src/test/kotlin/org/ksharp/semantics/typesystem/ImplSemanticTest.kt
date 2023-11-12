@@ -16,6 +16,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
 
@@ -35,13 +36,13 @@ class ImplSemanticTest : StringSpec({
     "Not allow duplicate Impls" {
         """
             trait Sum a =
-                (+) :: a -> a -> a
+                (&) :: a -> a -> a
             
             impl Sum for Num =
-                (+) a b = a + b
+                (&) a b = a + b
             
             impl Sum for Num =
-                (+) a b = a + b
+                (&) a b = a + b
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeLeft(
@@ -99,7 +100,7 @@ class ImplSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.impls.shouldBe(
-                    setOf(Impl("Sum", it.typeSystem["Num"].valueOrNull!!))
+                    setOf(Impl(NoAttributes, "Sum", it.typeSystem["Num"].valueOrNull!!))
                 )
             }
     }
@@ -117,7 +118,7 @@ class ImplSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.impls.shouldBe(
-                    setOf(Impl("Eq", it.typeSystem["Num"].valueOrNull!!))
+                    setOf(Impl(NoAttributes, "Eq", it.typeSystem["Num"].valueOrNull!!))
                 )
             }
     }
@@ -142,7 +143,7 @@ class ImplSemanticTest : StringSpec({
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
-                            Impl("Eq", forType.valueOrNull!!)
+                            Impl(NoAttributes, "Eq", forType.valueOrNull!!)
                                     to listOf(
                                 AbstractionNode(
                                     attributes = setOf(CommonAttribute.Internal),
