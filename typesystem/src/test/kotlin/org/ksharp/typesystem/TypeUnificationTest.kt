@@ -3,6 +3,7 @@ package org.ksharp.typesystem
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import org.ksharp.common.Location
+import org.ksharp.common.cast
 import org.ksharp.common.new
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -13,6 +14,7 @@ import org.ksharp.typesystem.unification.unify
 
 class TypeUnificationTest : StringSpec({
     val typeSystem = typeSystem {
+        type(NoAttributes, "List")
         type(NoAttributes, "Int")
         type(NoAttributes, "Long")
         type(NoAttributes, "Integer") {
@@ -26,6 +28,11 @@ class TypeUnificationTest : StringSpec({
             parametricType("Map") {
                 type("Long")
                 parameter("b")
+            }
+        }
+        trait(NoAttributes, "Num", "a") {
+            method("add", false) {
+                parameter("a")
             }
         }
     }.apply {
@@ -145,6 +152,47 @@ class TypeUnificationTest : StringSpec({
             .shouldBeRight(
                 type2
             )
+    }
+    "Compatible parametric and tait type" {
+        val type1 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            Alias(typeSystem.handle, "Num"), listOf(
+                Parameter(typeSystem.handle, "a")
+            )
+        )
+        val type2 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            typeSystem["Num"].valueOrNull!!, listOf(
+                Parameter(typeSystem.handle, "a")
+            )
+        )
+        type1.unify(Location.NoProvided, type2, checker)
+            .shouldBeRight(
+                type2
+            )
+    }
+    "Compatible trait and parametric type" {
+        val type1 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            Alias(typeSystem.handle, "Num"), listOf(
+                Parameter(typeSystem.handle, "a")
+            )
+        )
+        val type2 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            typeSystem["Num"].valueOrNull!!, listOf(
+                Parameter(typeSystem.handle, "a")
+            )
+        )
+        type2.unify(Location.NoProvided, type1) { trait, type ->
+            type.cast<ParametricType>().type.representation == trait.name
+        }.shouldBeRight(
+            type2
+        )
     }
     "Incompatible parametric types by types" {
         val type1 = typeSystem["LongMap"].valueOrNull!!
