@@ -11,7 +11,7 @@ class AliasSolver : Solver {
     override fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType =
         type().flatMap {
             if (it is Alias || it is TypeAlias) {
-                typeSystem.solve(it)
+                it.solve()
             } else Either.Right(it)
         }
 

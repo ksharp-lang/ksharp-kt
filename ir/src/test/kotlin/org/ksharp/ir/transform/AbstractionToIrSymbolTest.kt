@@ -366,8 +366,8 @@ class AbstractionToIrSymbolTest : StringSpec({
                         listOf("a"),
                         0,
                         listOf(
-                            preludeModule.typeSystem.solve(internalCharType).valueOrNull!!,
-                            preludeModule.typeSystem.solve(internalCharType).valueOrNull!!
+                            internalCharType.solve().valueOrNull!!,
+                            internalCharType.solve().valueOrNull!!
                         ).toFunctionType(MockHandlePromise(), NoAttributes),
                         IrArg(
                             setOf(CommonAttribute.Pure),

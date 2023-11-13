@@ -79,7 +79,7 @@ fun SemanticNode<SemanticInfo>.inferType(caller: String, info: InferenceInfo): E
             is ListMatchValueNode -> Either.Left(InferenceErrorCode.BindingUsedAsGuard.new(location))
         }.also {
             this.info.setInferredType(it.flatMap { t ->
-                info.inferenceContext.typeSystem.solve(t)
+                t.solve()
             })
         }
     }

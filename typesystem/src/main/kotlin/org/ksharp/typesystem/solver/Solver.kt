@@ -22,4 +22,7 @@ enum class Solvers(reducer: Solver) : Solver by reducer {
     UnionClass(ClassSolver()),
 }
 
-fun TypeSystem.solve(type: Type): ErrorOrType = type.solver.solve(this, type)
+/**
+ * Return the type with the aliases solved
+ */
+fun Type.solve(): ErrorOrType = solver.solve(this.typeSystem.handle!!, this)

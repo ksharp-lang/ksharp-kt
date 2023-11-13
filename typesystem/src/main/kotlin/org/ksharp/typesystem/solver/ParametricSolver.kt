@@ -11,7 +11,7 @@ import org.ksharp.typesystem.types.Type
 class ParametricSolver : Solver {
 
     private fun resolveParametricType(typeSystem: TypeSystem, type: Type): ErrorOrType =
-        typeSystem.solve(type).flatMap {
+        type.solve().flatMap {
             if (it is ParametricType) {
                 if (it.type == type) Either.Right(it.type)
                 else resolveParametricType(typeSystem, it.type)
@@ -22,7 +22,7 @@ class ParametricSolver : Solver {
         val parametricType = type.cast<ParametricType>()
         return resolveParametricType(typeSystem, parametricType.type).flatMap { t ->
             parametricType.params.map { p ->
-                typeSystem.solve(p)
+                p.solve()
             }.unwrap()
                 .map { params ->
                     ParametricType(t.typeSystem, t.attributes + type.attributes, t, params)

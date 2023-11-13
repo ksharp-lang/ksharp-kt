@@ -11,7 +11,7 @@ class UnionSolver : Solver {
     override fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType =
         type.cast<UnionType>()
             .arguments.map {
-                typeSystem.solve(it.value).map { t ->
+                it.value.solve().map { t ->
                     it.key to t
                 }
             }.unwrap().map {
@@ -23,7 +23,7 @@ class ClassSolver : Solver {
     override fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType =
         type.cast<UnionType.ClassType>()
             .params.map {
-                typeSystem.solve(it)
+                it.solve()
             }.unwrap().map {
                 UnionType.ClassType(type.typeSystem, type.cast<UnionType.ClassType>().label, it)
             }

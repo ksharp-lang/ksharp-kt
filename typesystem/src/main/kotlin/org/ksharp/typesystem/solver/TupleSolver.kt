@@ -12,7 +12,7 @@ class TupleSolver : Solver {
     override fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType =
         type.cast<TupleType>()
             .elements.map { p ->
-                typeSystem.solve(p)
+                p.solve()
             }.unwrap()
             .map { elements ->
                 elements.toTupleType(typeSystem, type.attributes)

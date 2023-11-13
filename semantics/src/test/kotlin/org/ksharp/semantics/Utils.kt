@@ -30,4 +30,4 @@ fun String.getSemanticModuleInfo(): ErrorOrValue<SemanticModuleInfo> =
 
 
 fun TypeSystem.solve(name: String) =
-    this.solve(this[name].valueOrNull!!).valueOrNull!!
+    this[name].valueOrNull!!.solve().valueOrNull!!

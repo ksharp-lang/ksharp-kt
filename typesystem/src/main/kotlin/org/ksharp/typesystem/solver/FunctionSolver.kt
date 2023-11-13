@@ -12,7 +12,7 @@ class FunctionSolver : Solver {
     override fun solve(typeSystem: TypeSystem, type: Type): ErrorOrType =
         type.cast<FunctionType>()
             .arguments.map { p ->
-                typeSystem.solve(p)
+                p.solve()
             }.unwrap()
             .map { arguments ->
                 arguments.toFunctionType(typeSystem, type.attributes)

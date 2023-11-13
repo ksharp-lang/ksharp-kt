@@ -48,6 +48,13 @@ private fun findTraits(type: Type, context: TraitFinderContext) =
             }.cast<Sequence<TraitType>>()
     }
 
+private val ParametricType.traitOrNull: TraitType?
+    get() =
+        if (type is TraitType) type.cast()
+        else typeSystem
+            .handle!![type.representation]
+            .valueOrNull as? TraitType
+
 fun getTraitsImplemented(type: Type, context: TraitFinderContext): Sequence<TraitType> =
     type().map { resolvedType ->
         when {
@@ -57,12 +64,9 @@ fun getTraitsImplemented(type: Type, context: TraitFinderContext): Sequence<Trai
                     .filterIsInstance<TraitType>()
 
             resolvedType is ParametricType && resolvedType.params.size == 1 -> {
-                val rType = resolvedType.typeSystem
-                    .handle!![resolvedType.type.representation]
-                    .valueOrNull!!
-                if (rType is TraitType) {
-                    sequenceOf(rType)
-                } else findTraits(resolvedType, context)
+                resolvedType.traitOrNull?.let {
+                    sequenceOf(it)
+                } ?: findTraits(resolvedType, context)
             }
 
             resolvedType is TraitType -> sequenceOf(resolvedType)
