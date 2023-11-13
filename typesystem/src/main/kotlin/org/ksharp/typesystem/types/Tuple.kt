@@ -59,6 +59,8 @@ fun TypeItemBuilder.tupleType(factory: ParametricTypeFactoryBuilder) =
         TupleType(handle, attributes, it)
     }
 
+fun List<Type>.toTupleType(typeSystem: HandlePromise<TypeSystem>, attributes: Set<Attribute> = NoAttributes) =
+    TupleType(typeSystem, attributes, this)
 
 fun List<Type>.toTupleType(typeSystem: TypeSystem, attributes: Set<Attribute> = NoAttributes) =
     TupleType(typeSystem.handle, attributes, this)
