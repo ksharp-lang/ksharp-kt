@@ -87,6 +87,30 @@ class ImplSemanticTest : StringSpec({
                 )
             )
     }
+    "Trait implementing another trait" {
+        """
+            trait Eq2 a =
+                eq :: a -> a -> Bool
+                
+            trait Eq a =
+                (=) :: a -> a -> Bool
+                (!=) :: a -> a -> Bool
+            
+            impl Eq for Eq2 =
+                (=) a b = True
+                (!=) a b = False
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeLeft(
+                listOf(
+                    TypeSemanticsErrorCode.TraitImplementingAnotherTrait.new(
+                        Location.NoProvided,
+                        "trait" to "Eq",
+                        "impl" to "Eq2"
+                    )
+                )
+            )
+    }
     "Valid Impl" {
         """
             trait Sum a =

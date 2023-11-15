@@ -34,6 +34,7 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     DuplicateTraitMethod("Duplicate trait method '{name}'"),
     DuplicateImplMethod("Duplicate impl method '{name}'"),
     MissingImplMethods("Missing methods '{methods}' in impl '{trait}' for '{impl}'"),
+    TraitImplementingAnotherTrait("Trait '{impl}' cannot implement another trait '{trait}'"),
     DuplicateImpl("Duplicate impl '{trait}' for '{impl}'"),
 }
 
@@ -341,46 +342,60 @@ private fun instantiateType(
     }
 }
 
+private fun ImplNode.checkFunctionSemantics(type: TraitType, collector: MutableSet<String>): ErrorOrValue<Boolean> {
+    val requiredMethodsToImplement = type
+        .methods
+        .values
+        .filter { !it.withDefaultImpl }
+        .map { "${it.name}/${it.arguments.size}" }.toSet()
+
+    return functions.map {
+        val methodArity = it.nameWithArity
+        if (collector.add(methodArity)) {
+            Either.Right(methodArity)
+        } else Either.Left(
+            TypeSemanticsErrorCode.DuplicateImplMethod.new(location, "name" to methodArity)
+        )
+    }.unwrap().flatMap {
+        val missingMethods = requiredMethodsToImplement.minus(it.toSet())
+        if (missingMethods.isEmpty()) {
+            Either.Right(true)
+        } else {
+            Either.Left(
+                TypeSemanticsErrorCode.MissingImplMethods.new(
+                    location,
+                    "methods" to missingMethods.joinToString(", "),
+                    "impl" to forType.representation,
+                    "trait" to traitName
+                )
+            )
+        }
+    }
+}
+
 private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: TypeSystem): Map<Impl, ImplNode> {
     val impls = mapBuilder<Impl, ImplNode>()
     val handle = ReadOnlyHandlePromise(typeSystem.handle)
     this.forEach { impl ->
         typeSystem[impl.traitName].flatMap { traitType ->
-            val requiredMethodsToImplement = traitType.cast<TraitType>()
-                .methods
-                .values
-                .filter { !it.withDefaultImpl }
-                .map { "${it.name}/${it.arguments.size}" }.toSet()
-
             val implMethods = mutableSetOf<String>()
-            impl.functions.map {
-                val methodArity = it.nameWithArity
-                if (implMethods.add(methodArity)) {
-                    Either.Right(methodArity)
-                } else Either.Left(
-                    TypeSemanticsErrorCode.DuplicateImplMethod.new(impl.location, "name" to methodArity)
-                )
-            }.unwrap().flatMap {
-                val missingMethods = requiredMethodsToImplement.minus(it.toSet())
-                if (missingMethods.isEmpty()) {
-                    Either.Right(true)
-                } else {
-                    Either.Left(
-                        TypeSemanticsErrorCode.MissingImplMethods.new(
-                            impl.location,
-                            "methods" to missingMethods.joinToString(", "),
-                            "impl" to impl.forType.representation,
-                            "trait" to impl.traitName
-                        )
-                    )
-                }
-            }
+            impl.checkFunctionSemantics(traitType.cast(), implMethods)
         }.mapLeft {
             errors.collect(it)
             it
         }.flatMap {
             instantiateType(errors, typeSystem, handle, impl.forType.cast())
         }.flatMap { forType ->
+            if (forType is TraitType) {
+                errors.collect(
+                    TypeSemanticsErrorCode.TraitImplementingAnotherTrait.new(
+                        impl.location,
+                        "impl" to forType.name,
+                        "trait" to impl.traitName
+                    )
+                )
+                return@flatMap Either.Left(false)
+            }
             val i = Impl(impl.traitName, forType)
             if (impls.containsKey(i) == false) {
                 impls.put(i, impl)
