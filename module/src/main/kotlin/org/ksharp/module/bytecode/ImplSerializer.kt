@@ -45,7 +45,7 @@ fun BufferView.readImpls(handle: HandlePromise<TypeSystem>, table: BinaryTableVi
         val implBuffer = bufferFrom(position)
         val impl = implBuffer.readImpl(handle, table)
         result.add(impl)
-        position += implBuffer.readInt(0) + 4
+        position += implBuffer.readInt(0)
     }
     return result
 }

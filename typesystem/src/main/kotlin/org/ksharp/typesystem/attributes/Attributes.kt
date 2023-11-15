@@ -62,7 +62,9 @@ internal fun Attribute.writeTo(buffer: BufferWriter, table: BinaryTable) {
 fun Set<Attribute>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
         if (isEmpty()) {
-            buffer.add(4)
+            add(0)
+            set(0, size)
+            transferTo(buffer)
         } else {
             add(0)
             add(this@writeTo.size)

@@ -61,6 +61,6 @@ fun SemanticModuleInfo.toModuleInfo(): ModuleInfo {
         dependencies = mapOf(),
         typeSystem = typeSystem,
         functions = abstractions.toFunctionInfoMap(),
-        setOf()
+        impls = impls,
     )
 }
