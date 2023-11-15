@@ -8,9 +8,7 @@ import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.typeSystem
-import org.ksharp.typesystem.types.TraitTypeFactory
 import org.ksharp.typesystem.types.parametricType
-import org.ksharp.typesystem.types.trait
 import org.ksharp.typesystem.types.type
 
 private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
@@ -20,23 +18,11 @@ private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
         }
     }
 
-private fun TraitTypeFactory.mathOperator(operator: String) =
-    method("($operator)", false) {
-        parameter("a")
-        parameter("a")
-        parameter("a")
-    }
-
 private fun createKernelTypeSystem() = typeSystem {
     type(NoAttributes, "Unit")
     type(NoAttributes, "Char") { Either.Right(charType) }
-    trait(NoAttributes, "Num", "a") {
-        mathOperator("+")
-        mathOperator("-")
-        mathOperator("*")
-        mathOperator("/")
-        mathOperator("%")
-        mathOperator("**")
+    parametricType(NoAttributes, "Num") {
+        parameter("a")
     }
     number("Byte", Numeric.Byte)
     number("Short", Numeric.Short)

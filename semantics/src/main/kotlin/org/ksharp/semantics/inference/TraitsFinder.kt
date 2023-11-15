@@ -33,7 +33,9 @@ interface TraitFinderContext {
 }
 
 fun unificationChecker(context: TraitFinderContext) = UnificationChecker { trait, type ->
-    getTraitsImplemented(type, context)
+    getTraitsImplemented(type, context).also {
+        println(it.toList())
+    }
         .any { t ->
             trait == t
         }

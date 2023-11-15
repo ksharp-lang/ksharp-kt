@@ -75,3 +75,45 @@ native pub mapOf p
 @name("prelude::mapOf" for="ir")
 emptyMap k v :: () -> (Map k v)
 native pub emptyMap
+
+trait Add a =
+    (+) :: a -> a -> a
+
+trait Sub a =
+    (-) :: a -> a -> a
+
+trait Mul a =
+    (*) :: a -> a -> a
+
+trait Div a =
+    (/) :: a -> a -> a
+
+trait Mod a =
+    (%) :: a -> a -> a
+
+trait Pow a =
+    (**) :: a -> a -> a
+
+@name("prelude::add" for="ir")
+impl Add for Num =
+    native (+) a b
+
+@name("prelude::sub" for="ir")
+impl Sub for Num =
+    native (-) a b
+
+@name("prelude::mul" for="ir")
+impl Mul for Num =
+    native (*) a b
+
+@name("prelude::div" for="ir")
+impl Div for Num =
+    native (/) a b
+
+@name("prelude::mod" for="ir")
+impl Mod for Num =
+    native (%) a b
+
+@name("prelude::pow" for="ir")
+impl Pow for Num =
+    native (**) a b

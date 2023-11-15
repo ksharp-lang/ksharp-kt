@@ -334,6 +334,8 @@ class InferenceWithParsingTest : StringSpec({
            fn a b = sum a b
            
            s = fn (int 10) (int 20)
+           
+           s2 = s
         """.trimIndent()
             .toSemanticModuleInfo()
             .apply {
@@ -344,7 +346,8 @@ class InferenceWithParsingTest : StringSpec({
                 )
                 shouldInferredTypesBe(
                     "fn :: (($traitOp a) -> ($traitOp a) -> ($traitOp a))",
-                    "s :: (Unit -> ($traitOp a))"
+                    "s :: (Unit -> ($traitOp a))",
+                    "s2 :: (Unit -> ($traitOp a))"
                 )
             }
     }

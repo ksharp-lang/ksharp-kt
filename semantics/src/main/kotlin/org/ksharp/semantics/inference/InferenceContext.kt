@@ -131,7 +131,7 @@ class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemant
 
 private fun List<AbstractionNode<AbstractionSemanticInfo>>.toMap() =
     associateBy {
-        "${it.name}/${it.info.parameters.size + 1}"
+        "${it.name}/${if (it.info.parameters.isEmpty()) 2 else it.info.parameters.size + 1}"
     }
 
 fun List<AbstractionNode<SemanticInfo>>.toInferenceContext(
