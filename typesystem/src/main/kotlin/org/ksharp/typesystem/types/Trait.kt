@@ -48,7 +48,7 @@ data class TraitType private constructor(
         get() = TypeSerializers.TraitType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Trait
 
     override val substitution: Substitution
         get() = Substitutions.NoDefined
