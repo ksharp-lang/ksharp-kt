@@ -34,6 +34,7 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     DuplicateTraitMethod("Duplicate trait method '{name}'"),
     DuplicateImplMethod("Duplicate impl method '{name}'"),
     MissingImplMethods("Missing methods '{methods}' in impl '{trait}' for '{impl}'"),
+    TraitImplementingAnotherTrait("Trait '{impl}' cannot implement another trait '{trait}'"),
     DuplicateImpl("Duplicate impl '{trait}' for '{impl}'"),
 }
 
@@ -381,6 +382,16 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
         }.flatMap {
             instantiateType(errors, typeSystem, handle, impl.forType.cast())
         }.flatMap { forType ->
+            if (forType is TraitType) {
+                errors.collect(
+                    TypeSemanticsErrorCode.TraitImplementingAnotherTrait.new(
+                        impl.location,
+                        "impl" to forType.name,
+                        "trait" to impl.traitName
+                    )
+                )
+                return@flatMap Either.Left(false)
+            }
             val i = Impl(impl.traitName, forType)
             if (impls.containsKey(i) == false) {
                 impls.put(i, impl)
