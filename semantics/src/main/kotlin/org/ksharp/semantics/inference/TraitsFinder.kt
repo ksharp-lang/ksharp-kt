@@ -1,6 +1,8 @@
 package org.ksharp.semantics.inference
 
+import org.ksharp.common.Location
 import org.ksharp.common.cast
+import org.ksharp.common.isRight
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.Impl
 import org.ksharp.module.prelude.preludeModule
@@ -11,6 +13,7 @@ import org.ksharp.typesystem.types.ParametricType
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.UnificationChecker
+import org.ksharp.typesystem.unification.unify
 
 private class TraitMethodTypeInfo(
     override val name: String,
@@ -42,13 +45,25 @@ fun unificationChecker(context: TraitFinderContext) = UnificationChecker { trait
         }
 }
 
-private fun findTraits(type: Type, context: TraitFinderContext) =
-    context.typeSystem.let { typeSystem ->
-        context.impls
-            .filter { it.type == type }
-            .map {
-                typeSystem[it.trait].valueOrNull!!
-            }.cast<Sequence<TraitType>>()
+private fun Sequence<Impl>.filterTraits(
+    location: Location,
+    type: Type,
+    typeSystem: TypeSystem,
+    checker: UnificationChecker
+): Sequence<TraitType> =
+    filter { it.type.unify(location, type, checker).isRight }
+        .map {
+            typeSystem[it.trait].valueOrNull!!
+        }.cast()
+
+private fun findTraits(type: Type, context: TraitFinderContext): Sequence<TraitType> =
+    unificationChecker(context).let { checker ->
+        sequenceOf(
+            context.impls
+                .filterTraits(Location.NoProvided, type, context.typeSystem, checker),
+            preludeModule.impls.asSequence()
+                .filterTraits(Location.NoProvided, type, preludeModule.typeSystem, checker)
+        ).flatten()
     }
 
 private val ParametricType.traitOrNull: TraitType?
