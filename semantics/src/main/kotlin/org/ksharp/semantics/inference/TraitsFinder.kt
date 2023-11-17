@@ -3,6 +3,7 @@ package org.ksharp.semantics.inference
 import org.ksharp.common.cast
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.Impl
+import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.Parameter
@@ -61,7 +62,10 @@ fun getTraitsImplemented(type: Type, context: TraitFinderContext): Sequence<Trai
     type().map { resolvedType ->
         when {
             resolvedType is Parameter ->
-                context.typeSystem.asSequence()
+                sequenceOf(
+                    context.typeSystem.asSequence(),
+                    preludeModule.typeSystem.asSequence()
+                ).flatten()
                     .map { it.second }
                     .filterIsInstance<TraitType>()
 
