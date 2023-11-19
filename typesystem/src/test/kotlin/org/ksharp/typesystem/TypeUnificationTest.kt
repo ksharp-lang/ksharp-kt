@@ -470,7 +470,7 @@ class TypeUnificationTest : StringSpec({
         val type2 = typeSystem["LongMap"].valueOrNull!!
         type1.unify(Location.NoProvided, type2) { _, _ -> true }
             .shouldBeRight(
-                ImplType(type1.trait, typeSystem.solve(type2).valueOrNull!!)
+                ImplType(type1.trait, type2.solve().valueOrNull!!)
             )
     }
     "Unification test impl and other type that impl the trait" {

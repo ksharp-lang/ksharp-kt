@@ -6,10 +6,7 @@ import org.ksharp.common.cast
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.solver.solve
-import org.ksharp.typesystem.types.ImplType
-import org.ksharp.typesystem.types.ParametricType
-import org.ksharp.typesystem.types.TraitType
-import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.*
 
 class ParametricUnification : CompoundUnification<ParametricType>() {
 
