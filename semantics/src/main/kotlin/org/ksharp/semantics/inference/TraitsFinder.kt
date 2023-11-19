@@ -8,20 +8,21 @@ import org.ksharp.module.Impl
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.types.Parameter
-import org.ksharp.typesystem.types.ParametricType
-import org.ksharp.typesystem.types.TraitType
-import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.substitution.SubstitutionContext
+import org.ksharp.typesystem.substitution.extract
+import org.ksharp.typesystem.substitution.substitute
+import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
-private class TraitMethodTypeInfo(
+private class FunctionTypeInfo(
     override val name: String,
-    methodType: TraitType.MethodType
+    function: FunctionType
 ) : FunctionInfo {
-    override val attributes: Set<Attribute> = methodType.attributes
-    override val types: List<Type> = methodType.arguments
+    override val attributes: Set<Attribute> = function.attributes
+    override val types: List<Type> = function.arguments
 }
+
 
 interface TraitFinderContext {
     val typeSystem: TypeSystem
@@ -29,17 +30,33 @@ interface TraitFinderContext {
 
     fun findTraitFunction(methodName: String, type: Type): FunctionInfo? =
         getTraitsImplemented(type, this).mapNotNull { trait ->
-            trait.methods[methodName]?.let(::methodTypeToFunctionInfo)
+            trait.methods[methodName]?.let {
+                methodTypeToFunctionInfo(trait, it, unificationChecker(this))
+            }
         }.firstOrNull()
 
-    fun methodTypeToFunctionInfo(method: TraitType.MethodType): FunctionInfo =
-        TraitMethodTypeInfo(method.name, method)
+    fun methodTypeToFunctionInfo(
+        trait: TraitType,
+        method: TraitType.MethodType,
+        checker: UnificationChecker
+    ): FunctionInfo {
+        val fnType = method.arguments.toFunctionType(trait.typeSystem.handle!!, method.attributes)
+        val substitutionContext = SubstitutionContext(checker)
+        substitutionContext.extract(Location.NoProvided, fnType, fnType)
+        substitutionContext.addMapping(Location.NoProvided, trait.param, trait.toParametricType())
+        val type =
+            substitutionContext.substitute(Location.NoProvided, fnType, fnType).valueOrNull!!.cast<FunctionType>()
+        return FunctionTypeInfo(method.name, type)
+    }
 }
 
+
 fun unificationChecker(context: TraitFinderContext) = UnificationChecker { trait, type ->
-    getTraitsImplemented(type, context).also {
-        println(it.toList())
-    }
+    sequenceOf(
+        getTraitsImplemented(type, context),
+        getTraitsImplemented(trait, ModuleInfoInferenceContext(preludeModule))
+    )
+        .flatten()
         .any { t ->
             trait == t
         }
@@ -58,12 +75,8 @@ private fun Sequence<Impl>.filterTraits(
 
 private fun findTraits(type: Type, context: TraitFinderContext): Sequence<TraitType> =
     unificationChecker(context).let { checker ->
-        sequenceOf(
-            context.impls
-                .filterTraits(Location.NoProvided, type, context.typeSystem, checker),
-            preludeModule.impls.asSequence()
-                .filterTraits(Location.NoProvided, type, preludeModule.typeSystem, checker)
-        ).flatten()
+        context.impls
+            .filterTraits(Location.NoProvided, type, context.typeSystem, checker)
     }
 
 private val ParametricType.traitOrNull: TraitType?
@@ -77,10 +90,7 @@ fun getTraitsImplemented(type: Type, context: TraitFinderContext): Sequence<Trai
     type().map { resolvedType ->
         when {
             resolvedType is Parameter ->
-                sequenceOf(
-                    context.typeSystem.asSequence(),
-                    preludeModule.typeSystem.asSequence()
-                ).flatten()
+                context.typeSystem.asSequence()
                     .map { it.second }
                     .filterIsInstance<TraitType>()
 

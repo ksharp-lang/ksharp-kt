@@ -176,3 +176,6 @@ fun TypeSystemBuilder.trait(
             }
         }
     }
+
+fun TraitType.toParametricType() =
+    ParametricType(typeSystem, attributes, this, listOf(Parameter(typeSystem, param)))

@@ -64,8 +64,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Num a) -> (Num a) -> (Num a))",
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "fn :: (Unit -> (Add a))"
             )
     }
     "Inference module 2" {
@@ -75,8 +75,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Num a) -> (Num a) -> (Num a))",
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "fn :: (Unit -> (Add a))"
             )
     }
     "Inference module - function not found" {

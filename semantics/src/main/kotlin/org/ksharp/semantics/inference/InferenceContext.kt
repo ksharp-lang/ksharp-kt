@@ -107,7 +107,9 @@ class ImplInferenceContext(
                     AbstractionFunctionInfo(it)
                 }
             }
-                ?: traitType.methods[methodName]?.let(::methodTypeToFunctionInfo)
+                ?: traitType.methods[methodName]?.let {
+                    methodTypeToFunctionInfo(traitType, it, checker)
+                }
                 ?: findTraitFunction(methodName, firstArgument)
                 ?: parent.findFunction(caller, name, numParams, firstArgument)
         }
