@@ -402,22 +402,18 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 typeSystem, emptyList(), emptyMap()
             )
         ).apply {
-            errors.shouldBeEmpty()
-            functionTable["sum/2"]
-                .shouldNotBeNull()
-                .apply {
-                    first.shouldBe(
-                        Function(
-                            setOf(CommonAttribute.Public),
-                            "sum",
-                            listOf(
-                                TypeSemanticInfo(typeSystem["Unit"]),
-                                TypeSemanticInfo(Either.Right(newParameterForTesting(0))),
-                            )
-                        )
+            errors.shouldBe(
+                listOf(
+                    FunctionSemanticsErrorCode.ParamMismatch.new(
+                        Location.NoProvided,
+                        "name" to "sum",
+                        "fnParam" to "()",
+                        "declParam" to "Int"
                     )
-                    second.shouldBe(Location.NoProvided)
-                }
+                )
+            )
+            functionTable["sum/2"]
+                .shouldBeNull()
         }
     }
 }) {
@@ -625,7 +621,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: operator with function declaration") {
         var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
-            type(setOf(CommonAttribute.Public), "Decl__n/1") {
+            type(setOf(CommonAttribute.Public), "Decl__n/2") {
                 functionType {
                     type("Unit")
                     type("Long")
@@ -701,7 +697,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: function with module name") {
         var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
-            type(setOf(CommonAttribute.Public), "Decl__n/1") {
+            type(setOf(CommonAttribute.Public), "Decl__n/2") {
                 functionType {
                     type("Unit")
                     type("Long")
