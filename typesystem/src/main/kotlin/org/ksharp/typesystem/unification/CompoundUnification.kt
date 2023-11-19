@@ -15,9 +15,12 @@ abstract class CompoundUnification<T : Type> : UnificationAlgo<T> {
             when {
                 innerRType is Parameter -> Either.Right(type1)
                 innerRType.isSameTypeClass -> compoundUnify(location, type1, innerRType.cast(), checker)
-                else -> incompatibleType(location, type1, type2)
+                else -> elseUnify(location, type1, innerRType, checker)
             }
         }
+
+    open fun elseUnify(location: Location, type1: T, type2: Type, checker: UnificationChecker): ErrorOrType =
+        incompatibleType(location, type1, type2)
 
     abstract fun compoundUnify(location: Location, type1: T, type2: T, checker: UnificationChecker): ErrorOrType
 

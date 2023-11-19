@@ -473,6 +473,17 @@ class TypeUnificationTest : StringSpec({
                 ImplType(type1.trait, type2.solve().valueOrNull!!)
             )
     }
+    "Unification test parametric and impl type" {
+        val type1 = ImplType(
+            TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()),
+            typeSystem["LongMap"].valueOrNull!!
+        )
+        val type2 = typeSystem["LongMap"].valueOrNull!!
+        type2.unify(Location.NoProvided, type1) { _, _ -> true }
+            .shouldBeRight(
+                ImplType(type1.trait, type2.solve().valueOrNull!!)
+            )
+    }
     "Unification test impl and other type that impl the trait" {
         val type1 = ImplType(
             TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()),
@@ -525,10 +536,18 @@ class TypeUnificationTest : StringSpec({
                 type1
             )
     }
-    "Unification test fixed trait and type" {
+    "Unification test fixed trait and parametric type" {
         val type1 = FixedTraitType(TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()))
         val type2 = typeSystem["LongMap"].valueOrNull!!
         type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                type1
+            )
+    }
+    "Unification test parametric type and fixed trait" {
+        val type1 = FixedTraitType(TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()))
+        val type2 = typeSystem["LongMap"].valueOrNull!!
+        type2.unify(Location.NoProvided, type1) { _, _ -> true }
             .shouldBeRight(
                 type1
             )

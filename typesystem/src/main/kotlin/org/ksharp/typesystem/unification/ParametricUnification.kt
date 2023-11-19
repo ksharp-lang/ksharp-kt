@@ -32,6 +32,19 @@ class ParametricUnification : CompoundUnification<ParametricType>() {
             }
         }
 
+    override fun elseUnify(
+        location: Location,
+        type1: ParametricType,
+        type2: Type,
+        checker: UnificationChecker
+    ): ErrorOrType =
+        when (type2) {
+            is ImplType -> type2.unify(location, type1, checker)
+            is FixedTraitType -> type2.unify(location, type1, checker)
+            else -> incompatibleType(location, type1, type2)
+        }
+
+
     override fun compoundUnify(
         location: Location,
         type1: ParametricType,

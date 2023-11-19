@@ -39,6 +39,8 @@ data class ImplType internal constructor(
         return ImplType(trait, impl.new(attributes))
     }
 
+    override fun toString(): String = impl.toString()
+
 }
 
 data class FixedTraitType internal constructor(
@@ -64,5 +66,7 @@ data class FixedTraitType internal constructor(
 
     override fun new(attributes: Set<Attribute>): Type =
         FixedTraitType(trait.new(attributes).cast())
+
+    override fun toString(): String = trait.toString()
 
 }
