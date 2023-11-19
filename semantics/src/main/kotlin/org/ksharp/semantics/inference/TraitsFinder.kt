@@ -54,7 +54,7 @@ interface TraitFinderContext {
 fun unificationChecker(context: TraitFinderContext) = UnificationChecker { trait, type ->
     sequenceOf(
         getTraitsImplemented(type, context),
-        getTraitsImplemented(trait, ModuleInfoInferenceContext(preludeModule))
+        getTraitsImplemented(type, ModuleInfoInferenceContext(preludeModule))
     )
         .flatten()
         .any { t ->
