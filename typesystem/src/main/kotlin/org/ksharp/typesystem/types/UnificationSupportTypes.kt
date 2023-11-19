@@ -24,7 +24,7 @@ data class ImplType internal constructor(
     override val unification: TypeUnification
         get() = TypeUnifications.Impl
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.Impl
     override val solver: Solver
         get() = Solvers.PassThrough
     override val terms: Sequence<Type>
@@ -53,7 +53,7 @@ data class FixedTraitType internal constructor(
     override val unification: TypeUnification
         get() = TypeUnifications.FixedTrait
     override val substitution: Substitution
-        get() = Substitutions.NoDefined
+        get() = Substitutions.FixedTrait
     override val solver: Solver
         get() = Solvers.PassThrough
     override val terms: Sequence<Type>
@@ -62,7 +62,7 @@ data class FixedTraitType internal constructor(
         get() = trait.attributes
 
     override val representation: String
-        get() = trait.representation
+        get() = "(${trait.name} ${trait.param})"
 
     override fun new(attributes: Set<Attribute>): Type =
         FixedTraitType(trait.new(attributes).cast())

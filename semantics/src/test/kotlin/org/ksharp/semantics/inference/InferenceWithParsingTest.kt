@@ -26,7 +26,9 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg
         abstractions.size.shouldBe(types.size)
         abstractions.stringRepresentation("")
             .shouldBeRight()
-            .value.shouldContainExactlyInAnyOrder(types.toList())
+            .value
+            .onEach(::println)
+            .shouldContainExactlyInAnyOrder(types.toList())
     }
 }
 
@@ -341,14 +343,13 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .apply {
                 shouldBeRight()
-                val traitOp = valueOrNull!!.typeSystem["Op"].valueOrNull!!().valueOrNull!!.representation
                 shouldInferredImplAbstractionsTypesBe(
                     "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
                 )
                 shouldInferredTypesBe(
-                    "fn :: (($traitOp a) -> ($traitOp a) -> ($traitOp a))",
-                    "s :: (Unit -> ($traitOp a))",
-                    "s2 :: (Unit -> ($traitOp a))"
+                    "fn :: ((Op a) -> (Op a) -> (Op a))",
+                    "s :: (Unit -> (Op a))",
+                    "s2 :: (Unit -> (Op a))"
                 )
             }
     }

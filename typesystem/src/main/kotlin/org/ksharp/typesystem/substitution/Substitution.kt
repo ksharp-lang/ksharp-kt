@@ -27,6 +27,8 @@ enum class Substitutions(override val algo: SubstitutionAlgo<out Type>) : Substi
     Parametric(ParametricSubstitution()),
     Tuple(TupleSubstitution()),
     Union(UnionSubstitution()),
+    Impl(ImplSubstitution()),
+    FixedTrait(FixedTraitSubstitution()),
     TypeConstructor(TypeConstructorSubstitution()),
     NoDefined(object : SubstitutionAlgo<Type> {
         override fun extract(
@@ -35,7 +37,7 @@ enum class Substitutions(override val algo: SubstitutionAlgo<out Type>) : Substi
             type1: Type,
             type2: Type
         ): ErrorOrValue<Boolean> {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented for ${type1.javaClass}")
         }
 
         override fun substitute(
@@ -44,7 +46,7 @@ enum class Substitutions(override val algo: SubstitutionAlgo<out Type>) : Substi
             type: Type,
             typeContext: Type
         ): ErrorOrType {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented for ${type.javaClass}")
         }
     })
 }

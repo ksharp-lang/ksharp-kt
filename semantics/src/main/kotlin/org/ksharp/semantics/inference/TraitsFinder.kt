@@ -52,9 +52,16 @@ interface TraitFinderContext {
 
 
 fun unificationChecker(context: TraitFinderContext) = UnificationChecker { trait, type ->
-    sequenceOf(
-        getTraitsImplemented(type, context),
-        getTraitsImplemented(type, ModuleInfoInferenceContext(preludeModule))
+    val checkType = when (type) {
+        is FixedTraitType -> type.trait
+        is ImplType -> type.impl
+        else -> type
+    }
+    if (trait == checkType) {
+        true
+    } else sequenceOf(
+        getTraitsImplemented(checkType, context),
+        getTraitsImplemented(checkType, ModuleInfoInferenceContext(preludeModule))
     )
         .flatten()
         .any { t ->

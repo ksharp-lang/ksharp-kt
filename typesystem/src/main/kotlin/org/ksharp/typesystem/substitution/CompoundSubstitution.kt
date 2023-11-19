@@ -2,7 +2,6 @@ package org.ksharp.typesystem.substitution
 
 import org.ksharp.common.*
 import org.ksharp.typesystem.incompatibleType
-import org.ksharp.typesystem.types.ImplType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.innerType
 
@@ -61,15 +60,16 @@ abstract class CompoundSubstitution<T : Type> : SubstitutionAlgo<T> {
             val innerCType2 = cType2.innerType
             when {
                 innerCType2.isSameTypeClass -> compoundExtract(context, location, type1, innerCType2.cast<T>())
-                cType2 is ImplType -> {
-                    if (context.checker.isImplemented(cType2.trait, type1)) {
-                        context.addMapping(location, type1.representation, cType2)
-                        Either.Right(true)
-                    } else incompatibleType(location, type1, type2)
-                }
-
-                else -> incompatibleType(location, type1, type2)
+                else -> elseExtract(context, location, type1, innerCType2)
             }
         }
+
+    open fun elseExtract(
+        context: SubstitutionContext,
+        location: Location,
+        type1: T,
+        type2: Type
+    ): ErrorOrValue<Boolean> =
+        incompatibleType(location, type1, type2)
 
 }

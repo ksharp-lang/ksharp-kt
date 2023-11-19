@@ -1,9 +1,11 @@
 package org.ksharp.typesystem.substitution
 
+import org.ksharp.common.Either
 import org.ksharp.common.ErrorOrValue
 import org.ksharp.common.Location
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.incompatibleType
+import org.ksharp.typesystem.types.ImplType
 import org.ksharp.typesystem.types.ParametricType
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
@@ -22,6 +24,23 @@ class ParametricSubstitution : CompoundSubstitution<ParametricType>() {
         if (type1.type() == type2.type()) {
             type1.params.extract(context, location, type2.params)
         } else incompatibleType(location, type1, type2)
+
+    override fun elseExtract(
+        context: SubstitutionContext,
+        location: Location,
+        type1: ParametricType,
+        type2: Type
+    ): ErrorOrValue<Boolean> =
+        when (type2) {
+            is ImplType -> {
+                if (context.checker.isImplemented(type2.trait, type1)) {
+                    context.addMapping(location, type1.representation, type2)
+                    Either.Right(true)
+                } else incompatibleType(location, type1, type2)
+            }
+
+            else -> super.elseExtract(context, location, type1, type2)
+        }
 
     private fun substituteParams(
         context: SubstitutionContext,
