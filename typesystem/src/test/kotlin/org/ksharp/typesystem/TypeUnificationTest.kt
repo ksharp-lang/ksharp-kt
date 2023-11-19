@@ -192,7 +192,7 @@ class TypeUnificationTest : StringSpec({
         type2.unify(Location.NoProvided, type1) { trait, type ->
             type.cast<ParametricType>().type.representation == trait.name
         }.shouldBeRight(
-            type2
+            ImplType(typeSystem["Num"].valueOrNull!!.cast(), type1)
         )
     }
     "Compatible trait type and parametric type" {
