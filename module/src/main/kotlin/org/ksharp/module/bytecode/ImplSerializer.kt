@@ -4,8 +4,6 @@ import org.ksharp.common.HandlePromise
 import org.ksharp.common.io.*
 import org.ksharp.module.Impl
 import org.ksharp.typesystem.TypeSystem
-import org.ksharp.typesystem.attributes.readAttributes
-import org.ksharp.typesystem.attributes.writeTo
 import org.ksharp.typesystem.serializer.readType
 import org.ksharp.typesystem.serializer.writeTo
 import org.ksharp.typesystem.types.Type
@@ -14,20 +12,17 @@ import org.ksharp.typesystem.types.Type
 fun Impl.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
         add(0) // 0
-        attributes.writeTo(this, table) // 4
-        add(table.add(trait)) // 8
-        type.writeTo(this, table) //12
+        add(table.add(trait)) // 4
+        type.writeTo(this, table) //8
         set(0, size)
         transferTo(buffer)
     }
 }
 
 fun BufferView.readImpl(handle: HandlePromise<TypeSystem>, table: BinaryTableView): Impl {
-    val offset = readInt(4)
-    val attributes = bufferFrom(4).readAttributes(table)
-    val name = table[readInt(4 + offset)]
-    val type = bufferFrom(8 + offset).readType<Type>(handle, table)
-    return Impl(attributes, name, type)
+    val name = table[readInt(4)]
+    val type = bufferFrom(8).readType<Type>(handle, table)
+    return Impl(name, type)
 }
 
 fun Set<Impl>.writeTo(buffer: BufferWriter, table: BinaryTable) {

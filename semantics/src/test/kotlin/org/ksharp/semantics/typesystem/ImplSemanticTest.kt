@@ -18,7 +18,6 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
-import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
 
@@ -130,7 +129,7 @@ class ImplSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.impls.shouldBe(
-                    setOf(Impl(NoAttributes, "Sum", it.typeSystem["Num"].valueOrNull!!))
+                    setOf(Impl("Sum", it.typeSystem["Num"].valueOrNull!!))
                 )
             }
     }
@@ -148,7 +147,7 @@ class ImplSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.impls.shouldBe(
-                    setOf(Impl(NoAttributes, "Eq", it.typeSystem["Num"].valueOrNull!!))
+                    setOf(Impl("Eq", it.typeSystem["Num"].valueOrNull!!))
                 )
             }
     }
@@ -173,7 +172,7 @@ class ImplSemanticTest : StringSpec({
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
-                            Impl(NoAttributes, "Eq", forType.valueOrNull!!)
+                            Impl("Eq", forType.valueOrNull!!)
                                     to listOf(
                                 AbstractionNode(
                                     attributes = setOf(CommonAttribute.Internal),

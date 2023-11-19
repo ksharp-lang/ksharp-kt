@@ -94,26 +94,20 @@ trait Mod a =
 trait Pow a =
     (**) :: a -> a -> a
 
-@name("prelude::add" for="ir")
 impl Add for Num =
     native (+) a b
 
-@name("prelude::sub" for="ir")
 impl Sub for Num =
     native (-) a b
 
-@name("prelude::mul" for="ir")
 impl Mul for Num =
     native (*) a b
 
-@name("prelude::div" for="ir")
 impl Div for Num =
     native (/) a b
 
-@name("prelude::mod" for="ir")
 impl Mod for Num =
     native (%) a b
 
-@name("prelude::pow" for="ir")
 impl Pow for Num =
     native (**) a b

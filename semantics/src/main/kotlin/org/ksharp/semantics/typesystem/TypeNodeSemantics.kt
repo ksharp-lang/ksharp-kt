@@ -396,7 +396,7 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
                 )
                 return@flatMap Either.Left(false)
             }
-            val i = Impl(NoAttributes, impl.traitName, forType)
+            val i = Impl(impl.traitName, forType)
             if (impls.containsKey(i) == false) {
                 impls.put(i, impl)
                 Either.Right(true)
