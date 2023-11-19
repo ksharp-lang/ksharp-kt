@@ -292,7 +292,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["ten/1"]
+            functionTable["ten/2"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -403,7 +403,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["sum/1"]
+            functionTable["sum/2"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
