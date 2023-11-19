@@ -7,6 +7,7 @@ import org.ksharp.common.*
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.SemanticModuleInfo
+import org.ksharp.semantics.nodes.toModuleInfo
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -354,5 +355,23 @@ class InferenceWithParsingTest : StringSpec({
 
     "Inference impl using a default trait method" {
 
+    }
+    "Inference parametric function" {
+        """
+            emptyHashMap k v :: () -> (Map k v)
+            native pub emptyHashMap
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .apply {
+                shouldBeRight()
+                valueOrNull!!.toModuleInfo().functions.keys.shouldBe(
+                    listOf(
+                        "emptyHashMap/2"
+                    )
+                )
+            }
+            .shouldInferredTypesBe(
+                "emptyHashMap :: (Unit -> (Map k v))"
+            )
     }
 })
