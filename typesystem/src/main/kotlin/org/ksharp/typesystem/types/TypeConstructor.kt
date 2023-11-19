@@ -33,14 +33,14 @@ data class TypeConstructor private constructor(
     ) {
         this.typeSystem = typeSystem
     }
-    
+
     override val solver: Solver
         get() = Solvers.PassThrough
     override val substitution: Substitution
         get() = Substitutions.TypeConstructor
 
     override val serializer: TypeSerializer
-        get() = TypeSerializers.NoType
+        get() = TypeSerializers.ConstructorType
 
     override val terms: Sequence<Type>
         get() = emptySequence()
