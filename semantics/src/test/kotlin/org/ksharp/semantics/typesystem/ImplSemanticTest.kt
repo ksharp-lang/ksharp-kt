@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Either
 import org.ksharp.common.Location
+import org.ksharp.common.cast
 import org.ksharp.common.new
 import org.ksharp.module.Impl
 import org.ksharp.module.prelude.preludeModule
@@ -18,6 +19,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.ImplType
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
 
@@ -169,6 +171,10 @@ class ImplSemanticTest : StringSpec({
                 val boolType = it.typeSystem["Bool"].valueOrNull!!
                 val forType = it.typeSystem["Num"]
                 val unitType = it.typeSystem["Unit"]
+                val implType = ImplType(it.typeSystem["Eq"].valueOrNull!!.cast(), forType.valueOrNull!!)
+                it.implAbstractions.values.also {
+                    it.forEach(::println)
+                }
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
@@ -189,7 +195,7 @@ class ImplSemanticTest : StringSpec({
                                     ),
                                     info = AbstractionSemanticInfo(
                                         parameters = listOf(),
-                                        returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(2)))
+                                        returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
                                     ), Location.NoProvided
                                 ),
                                 AbstractionNode(
@@ -206,8 +212,8 @@ class ImplSemanticTest : StringSpec({
                                         ),
                                         info = ApplicationSemanticInfo(
                                             function = listOf(
-                                                forType.valueOrNull!!,
-                                                forType.valueOrNull!!,
+                                                implType,
+                                                implType,
                                                 boolType
                                             ).toFunctionType(it.typeSystem)
                                         ), Location.NoProvided

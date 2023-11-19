@@ -13,7 +13,7 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
-data class ImplType internal constructor(
+data class ImplType(
     val trait: TraitType,
     val impl: Type
 ) : Type {
@@ -43,7 +43,7 @@ data class ImplType internal constructor(
 
 }
 
-data class FixedTraitType internal constructor(
+data class FixedTraitType(
     val trait: TraitType
 ) : Type {
     override val typeSystem: HandlePromise<TypeSystem>

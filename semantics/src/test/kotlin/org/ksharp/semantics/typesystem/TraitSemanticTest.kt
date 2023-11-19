@@ -3,10 +3,7 @@ package org.ksharp.semantics.typesystem
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.Either
-import org.ksharp.common.Location
-import org.ksharp.common.MockHandlePromise
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.nodes.semantic.ApplicationNode
@@ -27,6 +24,7 @@ import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.newNamedParameter
 import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.types.toParametricType
 
 private fun Collection<TraitType>.shouldDefine(methods: Map<String, Boolean>): Collection<TraitType> {
     asSequence().map { t ->
@@ -163,7 +161,8 @@ class TraitSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 val paramA = it.typeSystem.newNamedParameter("a")
-                // should contains the trait with only one method sum/3 with default implementation
+                val addA = it.typeSystem["Add"].valueOrNull!!.cast<TraitType>().toParametricType()
+
                 it.typeSystem
                     .getTraits()
                     .shouldNotBeEmpty()
@@ -198,7 +197,7 @@ class TraitSemanticTest : StringSpec({
                                             location = Location.NoProvided
                                         )
                                     ), info = ApplicationSemanticInfo(
-                                        function = listOf(paramA, paramA, paramA).toFunctionType(
+                                        function = listOf(addA, addA, addA).toFunctionType(
                                             MockHandlePromise(),
                                             NoAttributes
                                         )
