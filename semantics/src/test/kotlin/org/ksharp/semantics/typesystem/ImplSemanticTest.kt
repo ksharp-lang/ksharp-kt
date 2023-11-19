@@ -172,9 +172,6 @@ class ImplSemanticTest : StringSpec({
                 val forType = it.typeSystem["Num"]
                 val unitType = it.typeSystem["Unit"]
                 val implType = ImplType(it.typeSystem["Eq"].valueOrNull!!.cast(), forType.valueOrNull!!)
-                it.implAbstractions.values.also {
-                    it.forEach(::println)
-                }
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
