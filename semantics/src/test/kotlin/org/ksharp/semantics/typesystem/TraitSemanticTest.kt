@@ -169,14 +169,10 @@ class TraitSemanticTest : StringSpec({
                     .shouldDefine(mapOf("Sum::sum/3" to true))
                 val paramAType = TypeSemanticInfo(type = Either.Right(paramA))
                 it.traitsAbstractions["Sum"]
-                    .also {
-                        val abs = it!!.first()
-                        println(abs)
-                    }
                     .shouldBe(
                         listOf(
                             AbstractionNode(
-                                attributes = setOf(CommonAttribute.Public),
+                                attributes = setOf(CommonAttribute.TraitMethod, CommonAttribute.Public),
                                 name = "sum",
                                 expression = ApplicationNode(
                                     functionName = ApplicationName(pck = null, name = "(+)"),
