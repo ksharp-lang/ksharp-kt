@@ -3,7 +3,7 @@ package org.ksharp.typesystem.types
 import org.ksharp.common.*
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.solver.Solver
@@ -145,7 +145,7 @@ class TraitTypeFactory(
                     params.put(
                         traitMethodName, TraitType.MethodType(
                             factory.handle,
-                            NoAttributes,
+                            setOf(CommonAttribute.TraitMethod),
                             name,
                             args,
                             withDefaultImpl

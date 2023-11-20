@@ -10,6 +10,7 @@ import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
 import org.ksharp.typesystem.solver.solve
+import org.ksharp.typesystem.types.ImplType
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.toFunctionType
 
@@ -41,7 +42,9 @@ private fun arithmeticExpected(factory: BinaryOperationFactory) =
 class AbstractionToIrSymbolTest : StringSpec({
     val functionLookup = FunctionLookup { _, _, _ -> null }
     val ts = preludeModule.typeSystem
+    val addType = ts["Add"].valueOrNull!!
     val longType = ts["Long"].valueOrNull!!
+    val longImplType = ImplType(addType.cast(), longType)
     val unitType = ts["Unit"].valueOrNull!!
     listOf(
         createSpec(
@@ -189,7 +192,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
                 ),
-                listOf(longType, longType, longType).toFunctionType(
+                listOf(longImplType, longImplType, longImplType).toFunctionType(
                     MockHandlePromise(),
                     setOf(CommonAttribute.Internal)
                 ),
@@ -388,7 +391,9 @@ class AbstractionToIrSymbolTest : StringSpec({
 class CustomAbstractionToIrSymbolTest : StringSpec({
     val functionLookup = FunctionLookup { _, _, _ -> null }
     val ts = preludeModule.typeSystem
+    val addType = ts["Add"].valueOrNull!!
     val longType = ts["Long"].valueOrNull!!
+    val longImplType = ImplType(addType.cast(), longType)
     "Check a custom spec" {
         createSpec(
             "Constant IrCall expression",
@@ -410,7 +415,7 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
                 ),
-                listOf(longType, longType, longType).toFunctionType(
+                listOf(longImplType, longImplType, longImplType).toFunctionType(
                     MockHandlePromise(),
                     setOf(CommonAttribute.Internal)
                 ),
@@ -420,6 +425,9 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
             code.getFirstAbstraction()
                 .toIrSymbol(functionLookup)
                 .expr
+                .also {
+                    println(it)
+                }
                 .shouldBe(expected)
         }
     }

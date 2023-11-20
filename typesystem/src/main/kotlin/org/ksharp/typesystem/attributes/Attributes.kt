@@ -20,7 +20,8 @@ enum class CommonAttribute(val description: String, override val writer: Seriali
     Internal("Symbol accessible only in the module where they are defined", EnumAttributeSerializerWriter),
     Impure("Symbol has side effects", EnumAttributeSerializerWriter),
     Pure("Symbol has not side effects", EnumAttributeSerializerWriter),
-    Constant("Symbol represent a compile constant value", EnumAttributeSerializerWriter)
+    Constant("Symbol represent a compile constant value", EnumAttributeSerializerWriter),
+    TraitMethod("Symbol is a trait function", EnumAttributeSerializerWriter)
 }
 
 interface NameAttribute : AttributeWithValue<Map<String, String>>

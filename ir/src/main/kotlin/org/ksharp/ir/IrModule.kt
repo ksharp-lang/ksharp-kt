@@ -1,9 +1,9 @@
 package org.ksharp.ir
 
-import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.cacheOf
 import org.ksharp.common.cast
+import org.ksharp.common.isRight
 import org.ksharp.ir.transform.toIrSymbol
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.typesystem.types.FunctionType
@@ -29,7 +29,7 @@ private class FunctionLookupImpl : FunctionLookup {
                 .map { fn ->
                     functionType.unify(Location.NoProvided, type) { _, _ -> false }.map { fn }
                 }
-                .firstOrNull { it is Either.Right }
+                .firstOrNull { it.isRight }
                 ?.valueOrNull!!
         }
 

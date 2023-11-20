@@ -115,8 +115,8 @@ private fun ApplicationSemanticInfo.isUnionOrConstructor(inferredType: Type): Bo
     (function == null)
             && ((inferredType is UnionType) || (inferredType is TypeConstructor))
 
-private fun ApplicationSemanticInfo.couldBeATraitFunction(): Boolean =
-    function != null && function!!.arguments.isNotEmpty()
+private fun ApplicationSemanticInfo.isATraitFunction(): Boolean =
+    function != null && function!!.attributes.contains(CommonAttribute.TraitMethod)
 
 private fun ApplicationSemanticInfo.traitType(): TraitType? =
     function!!.arguments.first().asTraitType
@@ -127,7 +127,7 @@ val ApplicationNode<SemanticInfo>.customIrNode: String?
             info.function.irCustomNode ?: with(inferredType) {
                 when {
                     info.isUnionOrConstructor(inferredType) -> irCustomNode
-                    info.couldBeATraitFunction() -> {
+                    info.isATraitFunction() -> {
                         info.traitType()?.let { traitType ->
                             val traitCustomNode = traitType.irCustomNode
                             val implCustomNode = arguments.first().inferredType.irCustomNode
