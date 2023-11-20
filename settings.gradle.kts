@@ -1,7 +1,7 @@
 rootProject.name = "ksharp-kt"
 
 pluginManagement {
-    val kotlinVersion = "1.9.10"
+    val kotlinVersion = "1.9.20"
     val sonarqubeVersion = "4.4.1.3373"
     val koverVersion = "0.7.4"
 
@@ -15,10 +15,10 @@ pluginManagement {
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("kotest", "5.7.2")
+            version("kotest", "5.8.0")
             version("eclipse.lsp4j", "0.21.1")
-            version("graalvm", "22.3.0")
-            version("netty", "4.1.99.Final")
+            version("graalvm", "22.3.4")
+            version("netty", "4.1.101.Final")
 
             // Tooling
             version("plugin.com.github.johnrengelman.shadow", "8.1.1")
