@@ -259,6 +259,15 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
         }
     }
 
+private fun Type.toFixedTraitOrType(): Type =
+    when (this) {
+        is ImplType -> {
+            this.solve().valueOrNull!!
+        }
+
+        is TraitType -> FixedTraitType(this)
+        else -> this
+    }
 
 private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
     attributes.contains(CommonAttribute.Native).let { native ->
@@ -268,7 +277,7 @@ private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceI
                     ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
             } else expression.inferType(caller, info)
         }.flatMap { returnType ->
-            calculateFunctionType(native, returnType, info)
+            calculateFunctionType(native, returnType.toFixedTraitOrType(), info)
         }
     }
 
