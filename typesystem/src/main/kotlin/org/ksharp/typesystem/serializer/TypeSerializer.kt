@@ -30,8 +30,10 @@ enum class TypeSerializers(
     ClassType(ClassTypeSerializer()),
     UnionType(UnionTypeSerializer()),
     MethodType(MethodTypeSerializer()),
-    NoType(TypeConstructorSerializer()),
-    TraitType(TraitSerializer())
+    ConstructorType(TypeConstructorSerializer()),
+    TraitType(TraitSerializer()),
+    FixedTraitType(FixedTraitTypeSerializer()),
+    ImplType(ImplTypeSerializer()),
 }
 
 @Suppress("UNCHECKED_CAST")

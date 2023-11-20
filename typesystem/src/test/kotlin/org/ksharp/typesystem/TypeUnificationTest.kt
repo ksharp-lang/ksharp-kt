@@ -3,16 +3,19 @@ package org.ksharp.typesystem
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import org.ksharp.common.Location
+import org.ksharp.common.cast
 import org.ksharp.common.new
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.solver.solve
 import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
 class TypeUnificationTest : StringSpec({
     val typeSystem = typeSystem {
+        type(NoAttributes, "List")
         type(NoAttributes, "Int")
         type(NoAttributes, "Long")
         type(NoAttributes, "Integer") {
@@ -26,6 +29,11 @@ class TypeUnificationTest : StringSpec({
             parametricType("Map") {
                 type("Long")
                 parameter("b")
+            }
+        }
+        trait(NoAttributes, "Num", "a") {
+            method("add", false) {
+                parameter("a")
             }
         }
     }.apply {
@@ -144,6 +152,62 @@ class TypeUnificationTest : StringSpec({
         type1.unify(Location.NoProvided, type2, checker)
             .shouldBeRight(
                 type2
+            )
+    }
+    "Compatible parametric and tait type" {
+        val type1 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            Alias(typeSystem.handle, "Num"), listOf(
+                Parameter(typeSystem.handle, "a")
+            )
+        )
+        val type2 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            typeSystem["Num"].valueOrNull!!, listOf(
+                Parameter(typeSystem.handle, "a")
+            )
+        )
+        type1.unify(Location.NoProvided, type2, checker)
+            .shouldBeRight(
+                type2
+            )
+    }
+    "Compatible trait and parametric type" {
+        val type1 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            Alias(typeSystem.handle, "Num"), listOf(
+                Parameter(typeSystem.handle, "a")
+            )
+        )
+        val type2 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            typeSystem["Num"].valueOrNull!!, listOf(
+                Parameter(typeSystem.handle, "a")
+            )
+        )
+        type2.unify(Location.NoProvided, type1) { trait, type ->
+            type.cast<ParametricType>().type.representation == trait.name
+        }.shouldBeRight(
+            ImplType(typeSystem["Num"].valueOrNull!!.cast(), type1)
+        )
+    }
+    "Compatible trait type and parametric type" {
+        val type1 = ParametricType(
+            typeSystem.handle,
+            NoAttributes,
+            TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()),
+            listOf(
+                typeSystem["Long"].valueOrNull!!
+            )
+        )
+        val type2 = typeSystem["LongMap"].valueOrNull!!
+        type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                ImplType(type1.type.cast(), type2)
             )
     }
     "Incompatible parametric types by types" {
@@ -397,5 +461,95 @@ class TypeUnificationTest : StringSpec({
                 )
             )
         )
+    }
+    "Unification test impl and parametric type" {
+        val type1 = ImplType(
+            TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()),
+            typeSystem["LongMap"].valueOrNull!!
+        )
+        val type2 = typeSystem["LongMap"].valueOrNull!!
+        type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                ImplType(type1.trait, type2.solve().valueOrNull!!)
+            )
+    }
+    "Unification test parametric and impl type" {
+        val type1 = ImplType(
+            TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()),
+            typeSystem["LongMap"].valueOrNull!!
+        )
+        val type2 = typeSystem["LongMap"].valueOrNull!!
+        type2.unify(Location.NoProvided, type1) { _, _ -> true }
+            .shouldBeRight(
+                ImplType(type1.trait, type2.solve().valueOrNull!!)
+            )
+    }
+    "Unification test impl and other type that impl the trait" {
+        val type1 = ImplType(
+            TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()),
+            typeSystem["LongMap"].valueOrNull!!
+        )
+        val type2 = typeSystem["Int"].valueOrNull!!
+        type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                FixedTraitType(type1.trait)
+            )
+    }
+    "Unification test impl and fixed Trait" {
+        val type1 = ImplType(
+            TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()),
+            typeSystem["LongMap"].valueOrNull!!
+        )
+        val type2 = FixedTraitType(type1.trait)
+        type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                type2
+            )
+    }
+    "Unification test impl and trait" {
+        val type1 = ImplType(
+            TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()),
+            typeSystem["LongMap"].valueOrNull!!
+        )
+        val type2 = type1.trait
+        type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                FixedTraitType(type2)
+            )
+    }
+    "Unification test fixed trait and impl type" {
+        val type1 = FixedTraitType(TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()))
+        val type2 = ImplType(
+            type1.trait,
+            typeSystem["LongMap"].valueOrNull!!
+        )
+        type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                type1
+            )
+    }
+    "Unification test fixed trait and trait" {
+        val type1 = FixedTraitType(TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()))
+        val type2 = type1.trait
+        type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                type1
+            )
+    }
+    "Unification test fixed trait and parametric type" {
+        val type1 = FixedTraitType(TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()))
+        val type2 = typeSystem["LongMap"].valueOrNull!!
+        type1.unify(Location.NoProvided, type2) { _, _ -> true }
+            .shouldBeRight(
+                type1
+            )
+    }
+    "Unification test parametric type and fixed trait" {
+        val type1 = FixedTraitType(TraitType(typeSystem.handle, NoAttributes, "Add", "a", emptyMap()))
+        val type2 = typeSystem["LongMap"].valueOrNull!!
+        type2.unify(Location.NoProvided, type1) { _, _ -> true }
+            .shouldBeRight(
+                type1
+            )
     }
 })

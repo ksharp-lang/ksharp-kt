@@ -6,6 +6,7 @@ import org.ksharp.module.bytecode.writeTo
 import org.ksharp.module.prelude.kernelModule
 import org.ksharp.semantics.nodes.toModuleInfo
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.types.TraitType
 import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
 
@@ -21,6 +22,14 @@ class CompilePreludeModule : StringSpec({
                 it.toModuleInfo()
                     .also { m ->
                         m.functions.keys.onEach(::println)
+                        println("=== Traits ===")
+                        m.typeSystem.asSequence().forEach { (_, type) ->
+                            if (type is TraitType) {
+                                println(type.name)
+                            }
+                        }
+                        println("=== Impls ===")
+                        m.impls.onEach(::println)
                     }
                     .writeTo(FileOutputStream("prelude.ksm"))
             }

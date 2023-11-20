@@ -5,9 +5,7 @@ import org.ksharp.common.io.*
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
-import org.ksharp.typesystem.types.Parameter
-import org.ksharp.typesystem.types.ParametricType
-import org.ksharp.typesystem.types.TypeVariable
+import org.ksharp.typesystem.types.*
 
 class ParameterSerializer : SerializerWriter<Parameter>, TypeSerializerReader<Parameter> {
     override fun write(input: Parameter, buffer: BufferWriter, table: BinaryTable) {
@@ -22,7 +20,10 @@ class ParameterSerializer : SerializerWriter<Parameter>, TypeSerializerReader<Pa
 class ParametricTypeSerializer : SerializerWriter<ParametricType>, TypeSerializerReader<ParametricType> {
     override fun write(input: ParametricType, buffer: BufferWriter, table: BinaryTable) {
         input.attributes.writeTo(buffer, table)
-        input.type.writeTo(buffer, table)
+        val type = input.type
+        if (type is TraitType) {
+            Alias(type.typeSystem, type.name).writeTo(buffer, table)
+        } else input.type.writeTo(buffer, table)
         input.params.writeTo(buffer, table)
     }
 

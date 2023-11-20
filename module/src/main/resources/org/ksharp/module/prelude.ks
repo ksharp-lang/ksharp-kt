@@ -77,25 +77,43 @@ emptyMap k v :: () -> (Map k v)
 native pub emptyMap
 
 @name("prelude::sum" for="ir")
-(+) a :: (Num a) -> (Num a) -> (Num a)
-native pub (+) a b
+trait Add a =
+    (+) :: a -> a -> a
 
 @name("prelude::sub" for="ir")
-(-) a :: (Num a) -> (Num a) -> (Num a)
-native pub (-) a b
+trait Sub a =
+    (-) :: a -> a -> a
 
 @name("prelude::mul" for="ir")
-(*) a :: (Num a) -> (Num a) -> (Num a)
-native pub (*) a b
+trait Mul a =
+    (*) :: a -> a -> a
 
 @name("prelude::div" for="ir")
-(/) a :: (Num a) -> (Num a) -> (Num a)
-native pub (/) a b
-
-@name("prelude::pow" for="ir")
-(**) a :: (Num a) -> (Num a) -> (Num a)
-native pub (**) a b
+trait Div a =
+    (/) :: a -> a -> a
 
 @name("prelude::mod" for="ir")
-(%) a :: (Num a) -> (Num a) -> (Num a)
-native pub (%) a b
+trait Mod a =
+    (%) :: a -> a -> a
+
+@name("prelude::pow" for="ir")
+trait Pow a =
+    (**) :: a -> a -> a
+
+impl Add for Num =
+    native (+) a b
+
+impl Sub for Num =
+    native (-) a b
+
+impl Mul for Num =
+    native (*) a b
+
+impl Div for Num =
+    native (/) a b
+
+impl Mod for Num =
+    native (%) a b
+
+impl Pow for Num =
+    native (**) a b

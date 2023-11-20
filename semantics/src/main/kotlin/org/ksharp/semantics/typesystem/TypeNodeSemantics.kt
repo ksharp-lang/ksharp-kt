@@ -424,9 +424,7 @@ private fun TypeExpression.isUnitType(): Boolean = when {
 
 private val FunctionTypeNode.arity: Int
     get() =
-        params.size - params.first().isUnitType().let {
-            if (it) 1 else 0
-        }
+        params.size.coerceAtLeast(2)
 
 private fun TypeDeclarationNode.checkTypesSemantics(
     errors: ErrorCollector,

@@ -55,23 +55,23 @@ class SolverTest : StringSpec({
     }
     "solve param" {
         val param = ts.newParameter()
-        ts.solve(param).shouldBeRight(param)
+        param.solve().shouldBeRight(param)
     }
     "solve concrete type" {
         val type = Concrete(ts.handle, NoAttributes, "Int")
-        ts.solve(type).shouldBeRight(type)
+        type.solve().shouldBeRight(type)
     }
     "solve type alias" {
         val type = TypeAlias(ts.handle, NoAttributes, "String")
-        ts.solve(type).shouldBeRight(Concrete(ts.handle, NoAttributes, "String"))
+        type.solve().shouldBeRight(Concrete(ts.handle, NoAttributes, "String"))
     }
     "solve alias" {
         val type = Alias(ts.handle, "Str")
-        ts.solve(type).shouldBeRight(Concrete(ts.handle, NoAttributes, "String"))
+        type.solve().shouldBeRight(Concrete(ts.handle, NoAttributes, "String"))
     }
     "solve parametric type" {
         val type = ts["StringList"].valueOrNull.shouldNotBeNull()
-        ts.solve(type).also { println(it) }
+        type.solve().also { println(it) }
             .shouldBeRight(
                 ParametricType(
                     ts.handle,
@@ -83,7 +83,7 @@ class SolverTest : StringSpec({
     }
     "solve function type" {
         val type = ts["Sum"].valueOrNull.shouldNotBeNull()
-        ts.solve(type).also { println(it) }
+        type.solve().also { println(it) }
             .shouldBeRight(
                 FunctionType(
                     ts.handle,
@@ -101,7 +101,7 @@ class SolverTest : StringSpec({
     }
     "solve tuple type" {
         val type = ts["Tuple"].valueOrNull.shouldNotBeNull()
-        ts.solve(type).also { println(it) }
+        type.solve().also { println(it) }
             .shouldBeRight(
                 TupleType(
                     ts.handle,
@@ -114,7 +114,7 @@ class SolverTest : StringSpec({
     }
     "solve union type" {
         val type = ts["Either"].valueOrNull.shouldNotBeNull()
-        ts.solve(type).also { println(it) }
+        type.solve().also { println(it) }
             .shouldBeRight(
                 UnionType(
                     ts.handle,

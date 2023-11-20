@@ -54,7 +54,10 @@ class ModuleInfoSerializerTest : StringSpec({
                     listOf(ts.newParameter(), ts.newParameter())
                 )
             ),
-            setOf(Impl("Eq", ts.newParameter()))
+            setOf(
+                Impl("Eq", ts.newParameter()),
+                Impl("Eq2", ts.newParameter())
+            )
         ).shouldBeSerializable()
     }
 })

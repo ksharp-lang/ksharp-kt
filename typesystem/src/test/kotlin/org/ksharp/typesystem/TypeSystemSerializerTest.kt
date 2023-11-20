@@ -198,4 +198,63 @@ class TypeSystemSerializerTest : StringSpec({
             "Bool"
         ).shouldBeSerializable()
     }
+    "Serialize FixedTrait Types" {
+        FixedTraitType(
+            TraitType(
+                mockHandle, setOf(CommonAttribute.Internal),
+                "Num",
+                "a",
+                mapOf(
+                    "sum" to TraitType.MethodType(
+                        mockHandle, setOf(CommonAttribute.Public),
+                        "sum",
+                        listOf(
+                            Parameter(mockHandle, "a"),
+                            Parameter(mockHandle, "a"),
+                            Parameter(mockHandle, "a")
+                        ), true
+                    ),
+                    "sub" to TraitType.MethodType(
+                        mockHandle, setOf(CommonAttribute.Public),
+                        "sub",
+                        listOf(
+                            Parameter(mockHandle, "a"),
+                            Parameter(mockHandle, "a"),
+                            Parameter(mockHandle, "a")
+                        ), false
+                    )
+                )
+            )
+        ).shouldBeSerializable()
+    }
+    "Serialize Impl type" {
+        ImplType(
+            TraitType(
+                mockHandle, setOf(CommonAttribute.Internal),
+                "Num",
+                "a",
+                mapOf(
+                    "sum" to TraitType.MethodType(
+                        mockHandle, setOf(CommonAttribute.Public),
+                        "sum",
+                        listOf(
+                            Parameter(mockHandle, "a"),
+                            Parameter(mockHandle, "a"),
+                            Parameter(mockHandle, "a")
+                        ), true
+                    ),
+                    "sub" to TraitType.MethodType(
+                        mockHandle, setOf(CommonAttribute.Public),
+                        "sub",
+                        listOf(
+                            Parameter(mockHandle, "a"),
+                            Parameter(mockHandle, "a"),
+                            Parameter(mockHandle, "a")
+                        ), false
+                    )
+                )
+            ),
+            Parameter(mockHandle, "A")
+        ).shouldBeSerializable()
+    }
 })

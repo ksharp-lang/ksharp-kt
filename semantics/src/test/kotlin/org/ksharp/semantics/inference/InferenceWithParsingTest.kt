@@ -7,6 +7,7 @@ import org.ksharp.common.*
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.SemanticModuleInfo
+import org.ksharp.semantics.nodes.toModuleInfo
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -25,7 +26,9 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg
         abstractions.size.shouldBe(types.size)
         abstractions.stringRepresentation("")
             .shouldBeRight()
-            .value.shouldContainExactlyInAnyOrder(types.toList())
+            .value
+            .onEach(::println)
+            .shouldContainExactlyInAnyOrder(types.toList())
     }
 }
 
@@ -63,7 +66,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
                 "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
@@ -74,7 +77,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
                 "fn :: (Unit -> (Num numeric<Long>))"
             )
     }
@@ -296,7 +299,6 @@ class InferenceWithParsingTest : StringSpec({
                 )
             )
     }
-
     "Inference trait abstraction" {
         """
             ten = int 10
@@ -310,7 +312,6 @@ class InferenceWithParsingTest : StringSpec({
                 "Op :: len :: (a -> (Num numeric<Int>))"
             )
     }
-
     "Inference impl abstraction" {
         """
            trait Op a =
@@ -324,7 +325,6 @@ class InferenceWithParsingTest : StringSpec({
                 "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
             )
     }
-
     "Inference trait used in a function" {
         """
            trait Op a =
@@ -337,22 +337,42 @@ class InferenceWithParsingTest : StringSpec({
            fn a b = sum a b
            
            s = fn (int 10) (int 20)
+           
+           s2 = s
         """.trimIndent()
             .toSemanticModuleInfo()
             .apply {
                 shouldBeRight()
-                val traitOp = valueOrNull!!.typeSystem["Op"].valueOrNull!!().valueOrNull!!.representation
                 shouldInferredImplAbstractionsTypesBe(
                     "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
                 )
                 shouldInferredTypesBe(
-                    "fn :: (($traitOp a) -> ($traitOp a) -> ($traitOp a))",
-                    "s :: (Unit -> ($traitOp a))"
+                    "fn :: ((Op a) -> (Op a) -> (Op a))",
+                    "s :: (Unit -> (Op a))",
+                    "s2 :: (Unit -> (Op a))"
                 )
             }
     }
 
     "Inference impl using a default trait method" {
 
+    }
+    "Inference parametric function" {
+        """
+            emptyHashMap k v :: () -> (Map k v)
+            native pub emptyHashMap
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .apply {
+                shouldBeRight()
+                valueOrNull!!.toModuleInfo().functions.keys.shouldBe(
+                    listOf(
+                        "emptyHashMap/2"
+                    )
+                )
+            }
+            .shouldInferredTypesBe(
+                "emptyHashMap :: (Unit -> (Map k v))"
+            )
     }
 })

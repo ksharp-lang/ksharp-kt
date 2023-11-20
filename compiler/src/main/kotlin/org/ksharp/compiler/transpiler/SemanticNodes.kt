@@ -17,4 +17,3 @@ val AbstractionNode<SemanticInfo>.parametric: ErrorOrValue<Boolean>
     get() = type.map {
         it.parameters.firstOrNull() != null
     }
-

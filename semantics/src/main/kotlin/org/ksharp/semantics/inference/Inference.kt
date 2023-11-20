@@ -79,7 +79,7 @@ fun SemanticNode<SemanticInfo>.inferType(caller: String, info: InferenceInfo): E
             is ListMatchValueNode -> Either.Left(InferenceErrorCode.BindingUsedAsGuard.new(location))
         }.also {
             this.info.setInferredType(it.flatMap { t ->
-                info.inferenceContext.typeSystem.solve(t)
+                t.solve()
             })
         }
     }
@@ -259,6 +259,15 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
         }
     }
 
+private fun Type.toFixedTraitOrType(): Type =
+    when (this) {
+        is ImplType -> {
+            this.solve().valueOrNull!!
+        }
+
+        is TraitType -> FixedTraitType(this)
+        else -> this
+    }
 
 private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
     attributes.contains(CommonAttribute.Native).let { native ->
@@ -268,7 +277,7 @@ private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceI
                     ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
             } else expression.inferType(caller, info)
         }.flatMap { returnType ->
-            calculateFunctionType(native, returnType, info)
+            calculateFunctionType(native, returnType.toFixedTraitOrType(), info)
         }
     }
 
@@ -316,7 +325,7 @@ private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceI
                         if (!isPreludeCollectionFlag) {
                             inferredFn.arguments.asSequence()
                                 .zip(arguments.asSequence()) { fnArg, arg ->
-                                    arg.info.setInferredType(Either.Right(fnArg))
+                                    arg.info.setInferredType(fnArg.solve())
                                 }.last()
                         }
                         inferredFn.arguments.last()

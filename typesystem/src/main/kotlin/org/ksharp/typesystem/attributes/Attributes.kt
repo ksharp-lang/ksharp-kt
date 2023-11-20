@@ -20,7 +20,8 @@ enum class CommonAttribute(val description: String, override val writer: Seriali
     Internal("Symbol accessible only in the module where they are defined", EnumAttributeSerializerWriter),
     Impure("Symbol has side effects", EnumAttributeSerializerWriter),
     Pure("Symbol has not side effects", EnumAttributeSerializerWriter),
-    Constant("Symbol represent a compile constant value", EnumAttributeSerializerWriter)
+    Constant("Symbol represent a compile constant value", EnumAttributeSerializerWriter),
+    TraitMethod("Symbol is a trait function", EnumAttributeSerializerWriter)
 }
 
 interface NameAttribute : AttributeWithValue<Map<String, String>>
@@ -62,7 +63,9 @@ internal fun Attribute.writeTo(buffer: BufferWriter, table: BinaryTable) {
 fun Set<Attribute>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
         if (isEmpty()) {
-            buffer.add(4)
+            add(0)
+            set(0, size)
+            transferTo(buffer)
         } else {
             add(0)
             add(this@writeTo.size)

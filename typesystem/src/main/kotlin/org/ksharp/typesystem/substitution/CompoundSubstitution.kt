@@ -60,8 +60,16 @@ abstract class CompoundSubstitution<T : Type> : SubstitutionAlgo<T> {
             val innerCType2 = cType2.innerType
             when {
                 innerCType2.isSameTypeClass -> compoundExtract(context, location, type1, innerCType2.cast<T>())
-                else -> incompatibleType(location, type1, type2)
+                else -> elseExtract(context, location, type1, innerCType2)
             }
         }
+
+    open fun elseExtract(
+        context: SubstitutionContext,
+        location: Location,
+        type1: T,
+        type2: Type
+    ): ErrorOrValue<Boolean> =
+        incompatibleType(location, type1, type2)
 
 }

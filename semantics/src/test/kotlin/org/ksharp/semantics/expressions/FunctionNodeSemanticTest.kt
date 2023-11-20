@@ -19,6 +19,7 @@ import org.ksharp.semantics.inference.InferenceErrorCode
 import org.ksharp.semantics.nodes.*
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
+import org.ksharp.semantics.solve
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.PartialTypeSystem
@@ -291,7 +292,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["ten/1"]
+            functionTable["ten/2"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -401,22 +402,18 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                 typeSystem, emptyList(), emptyMap()
             )
         ).apply {
-            errors.shouldBeEmpty()
-            functionTable["sum/1"]
-                .shouldNotBeNull()
-                .apply {
-                    first.shouldBe(
-                        Function(
-                            setOf(CommonAttribute.Public),
-                            "sum",
-                            listOf(
-                                TypeSemanticInfo(typeSystem["Unit"]),
-                                TypeSemanticInfo(Either.Right(newParameterForTesting(0))),
-                            )
-                        )
+            errors.shouldBe(
+                listOf(
+                    FunctionSemanticsErrorCode.ParamMismatch.new(
+                        Location.NoProvided,
+                        "name" to "sum",
+                        "fnParam" to "()",
+                        "declParam" to "Int"
                     )
-                    second.shouldBe(Location.NoProvided)
-                }
+                )
+            )
+            functionTable["sum/2"]
+                .shouldBeNull()
         }
     }
 }) {
@@ -624,7 +621,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: operator with function declaration") {
         var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
-            type(setOf(CommonAttribute.Public), "Decl__n/1") {
+            type(setOf(CommonAttribute.Public), "Decl__n/2") {
                 functionType {
                     type("Unit")
                     type("Long")
@@ -700,7 +697,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: function with module name") {
         var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
-            type(setOf(CommonAttribute.Public), "Decl__n/1") {
+            type(setOf(CommonAttribute.Public), "Decl__n/2") {
                 functionType {
                     type("Unit")
                     type("Long")
@@ -1690,7 +1687,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             this.abstractions.first()
                 .info.getInferredType(Location.NoProvided)
                 .shouldBeRight(
-                    listOf(ts["Unit"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType(
+                    listOf(ts["Unit"].valueOrNull!!, ts.solve("Long")).toFunctionType(
                         MockHandlePromise()
                     )
                 )
@@ -1750,7 +1747,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
             this.abstractions.first()
                 .info.getInferredType(Location.NoProvided)
                 .shouldBeRight(
-                    listOf(ts["Long"].valueOrNull!!, ts["Long"].valueOrNull!!).toFunctionType(
+                    listOf(ts.solve("Long"), ts.solve("Long")).toFunctionType(
                         MockHandlePromise()
                     )
                 )
@@ -1809,7 +1806,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "no-function True (Num numeric<Long>) @0"
+                        "function" to "no-function True ${ts["Long"].valueOrNull!!.representation} @0"
                     )
                 )
             )

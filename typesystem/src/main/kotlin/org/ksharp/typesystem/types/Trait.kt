@@ -3,6 +3,7 @@ package org.ksharp.typesystem.types
 import org.ksharp.common.*
 import org.ksharp.typesystem.*
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.solver.Solver
@@ -48,7 +49,7 @@ data class TraitType private constructor(
         get() = TypeSerializers.TraitType
 
     override val unification: TypeUnification
-        get() = TypeUnifications.NoDefined
+        get() = TypeUnifications.Trait
 
     override val substitution: Substitution
         get() = Substitutions.NoDefined
@@ -124,7 +125,11 @@ class TraitTypeFactory(
 ) {
     private var result: ErrorOrValue<MapBuilder<String, TraitType.MethodType>> = Either.Right(mapBuilder())
 
-    fun method(name: String, withDefaultImpl: Boolean = false, arguments: ParametricTypeFactoryBuilder = {}) {
+    fun method(
+        name: String,
+        withDefaultImpl: Boolean = false,
+        arguments: ParametricTypeFactoryBuilder = {}
+    ) {
         result = result.flatMap { params ->
             validateFunctionName(name).flatMap {
                 ParametricTypeFactory(factory).apply(arguments).build().flatMap traitMethod@{ args ->
@@ -140,7 +145,7 @@ class TraitTypeFactory(
                     params.put(
                         traitMethodName, TraitType.MethodType(
                             factory.handle,
-                            factory.attributes,
+                            setOf(CommonAttribute.TraitMethod),
                             name,
                             args,
                             withDefaultImpl
@@ -172,3 +177,6 @@ fun TypeSystemBuilder.trait(
             }
         }
     }
+
+fun TraitType.toParametricType() =
+    ParametricType(typeSystem, attributes, this, listOf(Parameter(typeSystem, param)))

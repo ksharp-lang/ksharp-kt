@@ -95,16 +95,13 @@ data class InferenceInfo(
             } else findFunctionType(caller, location, appName, arguments)
         }
 
-    private val List<Type>.calculateNumArguments: Int
-        get() = if (size == 1 && first().representation == "Unit") 0 else size
-
     private fun findFunctionType(
         caller: String,
         location: Location,
         appName: ApplicationName,
         arguments: List<Type>
     ): ErrorOrType =
-        arguments.calculateNumArguments.let { numArguments ->
+        arguments.size.let { numArguments ->
             val name = appName.name
             val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
             cache.get(funName to arguments) {

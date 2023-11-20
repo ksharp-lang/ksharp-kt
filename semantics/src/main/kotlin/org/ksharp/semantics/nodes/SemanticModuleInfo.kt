@@ -44,9 +44,7 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
 }
 
 private val FunctionInfo.nameWithArity: String
-    get() = if (types.first().representation == "Unit") {
-        "$name/${types.size - 1}"
-    } else "$name/${types.size}"
+    get() = "$name/${types.size.coerceAtLeast(2)}"
 
 private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
     this.asSequence().map {
@@ -61,6 +59,6 @@ fun SemanticModuleInfo.toModuleInfo(): ModuleInfo {
         dependencies = mapOf(),
         typeSystem = typeSystem,
         functions = abstractions.toFunctionInfoMap(),
-        setOf()
+        impls = impls,
     )
 }

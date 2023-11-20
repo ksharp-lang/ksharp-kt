@@ -1,22 +1,28 @@
 package org.ksharp.semantics.typesystem
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.test.TestCase
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Either
 import org.ksharp.common.Location
+import org.ksharp.common.cast
 import org.ksharp.common.new
 import org.ksharp.module.Impl
+import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.nodes.AbstractionSemanticInfo
 import org.ksharp.semantics.nodes.ApplicationSemanticInfo
 import org.ksharp.semantics.nodes.Symbol
 import org.ksharp.semantics.nodes.TypeSemanticInfo
+import org.ksharp.semantics.solve
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.ImplType
 import org.ksharp.typesystem.types.newParameterForTesting
+import org.ksharp.typesystem.types.resetParameterCounterForTesting
 import org.ksharp.typesystem.types.toFunctionType
 
 class ImplSemanticTest : StringSpec({
@@ -35,18 +41,22 @@ class ImplSemanticTest : StringSpec({
     "Not allow duplicate Impls" {
         """
             trait Sum a =
-                (+) :: a -> a -> a
+                (&) :: a -> a -> a
             
             impl Sum for Num =
-                (+) a b = a + b
+                (&) a b = a + b
             
             impl Sum for Num =
-                (+) a b = a + b
+                (&) a b = a + b
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
-                    TypeSemanticsErrorCode.DuplicateImpl.new(Location.NoProvided, "trait" to "Sum", "impl" to "(Num a)")
+                    TypeSemanticsErrorCode.DuplicateImpl.new(
+                        Location.NoProvided,
+                        "trait" to "Sum",
+                        "impl" to preludeModule.typeSystem.solve("Num").representation
+                    )
                 )
             )
     }
@@ -163,61 +173,67 @@ class ImplSemanticTest : StringSpec({
                 val boolType = it.typeSystem["Bool"].valueOrNull!!
                 val forType = it.typeSystem["Num"]
                 val unitType = it.typeSystem["Unit"]
+                val implType = ImplType(it.typeSystem["Eq"].valueOrNull!!.cast(), forType.valueOrNull!!)
+                val expectedAbstractions = listOf(
+                    AbstractionNode(
+                        attributes = setOf(CommonAttribute.Internal),
+                        name = "support",
+                        expression = ApplicationNode(
+                            functionName = ApplicationName(pck = null, name = "True"),
+                            arguments = listOf(
+                                ConstantNode(
+                                    value = Unit,
+                                    info = TypeSemanticInfo(type = unitType), Location.NoProvided
+                                )
+                            ),
+                            info = ApplicationSemanticInfo(function = null), Location.NoProvided
+                        ),
+                        info = AbstractionSemanticInfo(
+                            parameters = listOf(),
+                            returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
+                        ), Location.NoProvided
+                    ),
+                    AbstractionNode(
+                        attributes = setOf(CommonAttribute.TraitMethod, CommonAttribute.Public),
+                        name = "(!=)",
+                        expression = ApplicationNode(
+                            functionName = ApplicationName(pck = null, name = "(!=)"),
+                            arguments = listOf(
+                                VarNode(
+                                    "a", Symbol(name = "a", TypeSemanticInfo(forType)),
+                                    Location.NoProvided
+                                ),
+                                VarNode("b", Symbol("b", TypeSemanticInfo(forType)), Location.NoProvided)
+                            ),
+                            info = ApplicationSemanticInfo(
+                                function = listOf(
+                                    implType,
+                                    implType,
+                                    boolType
+                                ).toFunctionType(it.typeSystem, setOf(CommonAttribute.TraitMethod))
+                            ), Location.NoProvided
+                        ),
+                        info = AbstractionSemanticInfo(
+                            parameters = listOf(
+                                Symbol("a", TypeSemanticInfo(forType)),
+                                Symbol("b", TypeSemanticInfo(forType))
+                            ),
+                            returnType = TypeSemanticInfo(Either.Right(boolType))
+                        ),
+                        Location.NoProvided
+                    )
+                )
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
                             Impl("Eq", forType.valueOrNull!!)
-                                    to listOf(
-                                AbstractionNode(
-                                    attributes = setOf(CommonAttribute.Internal),
-                                    name = "support",
-                                    expression = ApplicationNode(
-                                        functionName = ApplicationName(pck = null, name = "True"),
-                                        arguments = listOf(
-                                            ConstantNode(
-                                                value = Unit,
-                                                info = TypeSemanticInfo(type = unitType), Location.NoProvided
-                                            )
-                                        ),
-                                        info = ApplicationSemanticInfo(function = null), Location.NoProvided
-                                    ),
-                                    info = AbstractionSemanticInfo(
-                                        parameters = listOf(),
-                                        returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(2)))
-                                    ), Location.NoProvided
-                                ),
-                                AbstractionNode(
-                                    attributes = setOf(CommonAttribute.Public),
-                                    name = "(!=)",
-                                    expression = ApplicationNode(
-                                        functionName = ApplicationName(pck = null, name = "(!=)"),
-                                        arguments = listOf(
-                                            VarNode(
-                                                "a", Symbol(name = "a", TypeSemanticInfo(forType)),
-                                                Location.NoProvided
-                                            ),
-                                            VarNode("b", Symbol("b", TypeSemanticInfo(forType)), Location.NoProvided)
-                                        ),
-                                        info = ApplicationSemanticInfo(
-                                            function = listOf(
-                                                forType.valueOrNull!!,
-                                                forType.valueOrNull!!,
-                                                boolType
-                                            ).toFunctionType(it.typeSystem)
-                                        ), Location.NoProvided
-                                    ),
-                                    info = AbstractionSemanticInfo(
-                                        parameters = listOf(
-                                            Symbol("a", TypeSemanticInfo(forType)),
-                                            Symbol("b", TypeSemanticInfo(forType))
-                                        ),
-                                        returnType = TypeSemanticInfo(Either.Right(boolType))
-                                    ),
-                                    Location.NoProvided
-                                )
-                            )
+                                    to expectedAbstractions
                         )
                     )
             }
     }
-})
+}) {
+    override suspend fun beforeAny(testCase: TestCase) {
+        resetParameterCounterForTesting()
+    }
+}

@@ -7,12 +7,13 @@ import org.ksharp.module.prelude.types.numeric
 import org.ksharp.typesystem.PartialTypeSystem
 import org.ksharp.typesystem.TypeSystemBuilder
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.attributes.nameAttribute
 import org.ksharp.typesystem.typeSystem
 import org.ksharp.typesystem.types.parametricType
 import org.ksharp.typesystem.types.type
 
 private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
-    type(NoAttributes, alias) {
+    type(setOf(nameAttribute(mapOf("ir" to "num"))), alias) {
         parametricType("Num") {
             numeric(type)
         }
@@ -21,7 +22,7 @@ private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
 private fun createKernelTypeSystem() = typeSystem {
     type(NoAttributes, "Unit")
     type(NoAttributes, "Char") { Either.Right(charType) }
-    parametricType(NoAttributes, "Num") {
+    parametricType(setOf(nameAttribute(mapOf("ir" to "num"))), "Num") {
         parameter("a")
     }
     number("Byte", Numeric.Byte)

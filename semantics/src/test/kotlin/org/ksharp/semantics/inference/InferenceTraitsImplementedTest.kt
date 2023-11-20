@@ -45,7 +45,7 @@ class InferenceTraitsImplementedTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                it.traitsImplemented(preludeModule.typeSystem["Int"].valueOrNull!!)
+                it.traitsImplemented(preludeModule.typeSystem["Bool"].valueOrNull!!)
                     .shouldBeEmpty()
             }
     }

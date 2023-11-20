@@ -1,12 +1,10 @@
 package org.ksharp.semantics.typesystem
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.test.TestCase
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.Either
-import org.ksharp.common.Location
-import org.ksharp.common.MockHandlePromise
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.nodes.semantic.ApplicationNode
@@ -23,10 +21,7 @@ import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
-import org.ksharp.typesystem.attributes.nameAttribute
-import org.ksharp.typesystem.types.TraitType
-import org.ksharp.typesystem.types.newNamedParameter
-import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.types.*
 
 private fun Collection<TraitType>.shouldDefine(methods: Map<String, Boolean>): Collection<TraitType> {
     asSequence().map { t ->
@@ -162,60 +157,59 @@ class TraitSemanticTest : StringSpec({
             .getSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                val num = it.typeSystem["Num"].valueOrNull!!
-                // should contains the trait with only one method sum/3 with default implementation
+                val paramA = it.typeSystem.newNamedParameter("a")
+                val addA = it.typeSystem["Add"].valueOrNull!!.cast<TraitType>().toParametricType()
+
                 it.typeSystem
                     .getTraits()
                     .shouldNotBeEmpty()
                     .shouldDefine(mapOf("Sum::sum/3" to true))
-                val paramA = TypeSemanticInfo(type = Either.Right(it.typeSystem.newNamedParameter("a")))
-                it.traitsAbstractions["Sum"].shouldBe(
-                    listOf(
-                        AbstractionNode(
-                            attributes = setOf(CommonAttribute.Public),
-                            name = "sum",
-                            expression = ApplicationNode(
-                                functionName = ApplicationName(pck = null, name = "(+)"),
-                                arguments = listOf(
-                                    VarNode(
+                val paramAType = TypeSemanticInfo(type = Either.Right(paramA))
+                val expectedAbstractions = listOf(
+                    AbstractionNode(
+                        attributes = setOf(CommonAttribute.TraitMethod, CommonAttribute.Public),
+                        name = "sum",
+                        expression = ApplicationNode(
+                            functionName = ApplicationName(pck = null, name = "(+)"),
+                            arguments = listOf(
+                                VarNode(
+                                    name = "a",
+                                    info = Symbol(
                                         name = "a",
-                                        info = Symbol(
-                                            name = "a",
-                                            type = paramA
-                                        ),
-                                        location = Location.NoProvided
-                                    ), VarNode(
+                                        type = paramAType
+                                    ),
+                                    location = Location.NoProvided
+                                ), VarNode(
+                                    name = "b",
+                                    info = Symbol(
                                         name = "b",
-                                        info = Symbol(
-                                            name = "b",
-                                            type = paramA
-                                        ),
-                                        location = Location.NoProvided
-                                    )
-                                ), info = ApplicationSemanticInfo(
-                                    function = listOf(num, num, num).toFunctionType(
-                                        MockHandlePromise(),
-                                        setOf(
-                                            CommonAttribute.Public,
-                                            CommonAttribute.Native,
-                                            nameAttribute(mapOf("ir" to "prelude::sum"))
-                                        )
-                                    )
-                                ), location = Location.NoProvided
+                                        type = paramAType
+                                    ),
+                                    location = Location.NoProvided
+                                )
+                            ), info = ApplicationSemanticInfo(
+                                function = listOf(addA, addA, addA).toFunctionType(
+                                    MockHandlePromise(),
+                                    setOf(CommonAttribute.TraitMethod)
+                                )
+                            ), location = Location.NoProvided
+                        ),
+                        info = AbstractionSemanticInfo(
+                            parameters = listOf(
+                                Symbol(
+                                    name = "a",
+                                    type = paramAType
+                                ), Symbol(name = "b", type = paramAType)
                             ),
-                            info = AbstractionSemanticInfo(
-                                parameters = listOf(
-                                    Symbol(
-                                        name = "a",
-                                        type = paramA
-                                    ), Symbol(name = "b", type = paramA)
-                                ),
-                                returnType = paramA
-                            ),
-                            location = Location.NoProvided
-                        )
+                            returnType = paramAType
+                        ),
+                        location = Location.NoProvided
                     )
                 )
+                it.traitsAbstractions["Sum"]
+                    .shouldBe(
+                        expectedAbstractions
+                    )
                 it.errors.shouldBe(
                     listOf(
                         TableErrorCode.AlreadyDefined.new(
@@ -227,4 +221,8 @@ class TraitSemanticTest : StringSpec({
                 )
             }
     }
-})
+}) {
+    override suspend fun beforeAny(testCase: TestCase) {
+        resetParameterCounterForTesting()
+    }
+}

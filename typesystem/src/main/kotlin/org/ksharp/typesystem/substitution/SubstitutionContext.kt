@@ -7,9 +7,10 @@ import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
-class SubstitutionContext(private val checker: UnificationChecker) {
+class SubstitutionContext(val checker: UnificationChecker) {
     internal val mappings = mapBuilder<String, Type>()
     internal val errors = mapBuilder<String, Error>()
+
     fun addMapping(location: Location, paramName: String, type: Type): ErrorOrValue<Boolean> =
         mappings.get(paramName)?.let {
             val typeUnification = it.unify(location, type, checker)
