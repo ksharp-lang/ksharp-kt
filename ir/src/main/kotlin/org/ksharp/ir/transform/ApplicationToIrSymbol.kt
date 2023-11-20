@@ -10,9 +10,7 @@ import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
-import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.TypeConstructor
-import org.ksharp.typesystem.types.UnionType
+import org.ksharp.typesystem.types.*
 import java.util.concurrent.atomic.AtomicInteger
 
 typealias CustomApplicationIrNode = ApplicationNode<SemanticInfo>.(state: IrState) -> IrExpression
@@ -53,12 +51,12 @@ private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::mapOf" to IrMapFactory,
     "prelude::bool" to IrBoolFactory,
     "prelude::pair" to binaryOperationFactory(::IrPair),
-    "prelude::sum" to binaryOperationFactory(::IrSum),
-    "prelude::sub" to binaryOperationFactory(::IrSub),
-    "prelude::mul" to binaryOperationFactory(::IrMul),
-    "prelude::div" to binaryOperationFactory(::IrDiv),
-    "prelude::pow" to binaryOperationFactory(::IrPow),
-    "prelude::mod" to binaryOperationFactory(::IrMod),
+    "prelude::sum::num" to binaryOperationFactory(::IrSum),
+    "prelude::sub::num" to binaryOperationFactory(::IrSub),
+    "prelude::mul::num" to binaryOperationFactory(::IrMul),
+    "prelude::div::num" to binaryOperationFactory(::IrDiv),
+    "prelude::pow::num" to binaryOperationFactory(::IrPow),
+    "prelude::mod::num" to binaryOperationFactory(::IrMod),
     "prelude::num-cast" to IrNumCastFactory,
     "prelude::if" to IrIfFactory
 )
@@ -103,11 +101,46 @@ private val Type?.irCustomNode: String?
             ?.let { a -> a.cast<NameAttribute>().value["ir"] }
         else null
 
+private val Type.asTraitType: TraitType?
+    get() =
+        when (this) {
+            is TraitType -> this
+            is ImplType -> this.trait
+            is FixedTraitType -> this.trait
+            else -> null
+        }
+
+
+private fun ApplicationSemanticInfo.isUnionOrConstructor(inferredType: Type): Boolean =
+    (function == null)
+            && ((inferredType is UnionType) || (inferredType is TypeConstructor))
+
+private fun ApplicationSemanticInfo.couldBeATraitFunction(): Boolean =
+    function != null && function!!.arguments.isNotEmpty()
+
+private fun ApplicationSemanticInfo.traitType(): TraitType? =
+    function!!.arguments.first().asTraitType
+
 val ApplicationNode<SemanticInfo>.customIrNode: String?
     get() =
         info.cast<ApplicationSemanticInfo>().let { info ->
             info.function.irCustomNode ?: with(inferredType) {
-                if (info.function == null && (this is UnionType || this is TypeConstructor)) irCustomNode else null
+                when {
+                    info.isUnionOrConstructor(inferredType) -> irCustomNode
+                    info.couldBeATraitFunction() -> {
+                        info.traitType()?.let { traitType ->
+                            val traitCustomNode = traitType.irCustomNode
+                            val implCustomNode = arguments.first().inferredType.irCustomNode
+                            if (traitCustomNode != null
+                                && implCustomNode != null
+                                && traitCustomNode != implCustomNode
+                            ) "$traitCustomNode::$implCustomNode"
+                            else null
+                        }
+                    }
+
+                    else -> null
+                }
             }
         }
 

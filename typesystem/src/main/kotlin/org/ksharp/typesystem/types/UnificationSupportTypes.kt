@@ -26,7 +26,7 @@ data class ImplType(
     override val substitution: Substitution
         get() = Substitutions.Impl
     override val solver: Solver
-        get() = Solvers.PassThrough
+        get() = Solvers.ImplType
     override val terms: Sequence<Type>
         get() = impl.terms
     override val attributes: Set<Attribute>

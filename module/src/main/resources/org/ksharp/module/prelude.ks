@@ -76,21 +76,27 @@ native pub mapOf p
 emptyMap k v :: () -> (Map k v)
 native pub emptyMap
 
+@name("prelude::sum" for="ir")
 trait Add a =
     (+) :: a -> a -> a
 
+@name("prelude::sub" for="ir")
 trait Sub a =
     (-) :: a -> a -> a
 
+@name("prelude::mul" for="ir")
 trait Mul a =
     (*) :: a -> a -> a
 
+@name("prelude::div" for="ir")
 trait Div a =
     (/) :: a -> a -> a
 
+@name("prelude::mod" for="ir")
 trait Mod a =
     (%) :: a -> a -> a
 
+@name("prelude::pow" for="ir")
 trait Pow a =
     (**) :: a -> a -> a
 

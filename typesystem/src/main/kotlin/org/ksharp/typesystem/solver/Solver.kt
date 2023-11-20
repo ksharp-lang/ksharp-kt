@@ -19,6 +19,7 @@ enum class Solvers(reducer: Solver) : Solver by reducer {
     Tuple(TupleSolver()),
     Union(UnionSolver()),
     UnionClass(ClassSolver()),
+    ImplType(ImplTypeSolver())
 }
 
 /**

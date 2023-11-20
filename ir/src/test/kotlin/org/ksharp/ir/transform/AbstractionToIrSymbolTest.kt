@@ -16,6 +16,9 @@ import org.ksharp.typesystem.types.toFunctionType
 private fun String.getFirstAbstraction() =
     toSemanticModuleInfo()
         .abstractions
+        .also {
+            println(it.first())
+        }
         .first()
 
 private fun createSpec(description: String, code: String, expected: IrNode) =
@@ -378,5 +381,46 @@ class AbstractionToIrSymbolTest : StringSpec({
                     )
                 )
             }
+    }
+})
+
+
+class CustomAbstractionToIrSymbolTest : StringSpec({
+    val functionLookup = FunctionLookup { _, _, _ -> null }
+    val ts = preludeModule.typeSystem
+    val longType = ts["Long"].valueOrNull!!
+    "Check a custom spec" {
+        createSpec(
+            "Constant IrCall expression",
+            """
+                    fn = sum 1 2
+                    
+                    sum a b = a + b
+                """.trimIndent(), IrCall(
+                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                null,
+                "sum",
+                listOf(
+                    IrInteger(
+                        1,
+                        Location(Line(1) to Offset(9), Line(1) to Offset(10))
+                    ),
+                    IrInteger(
+                        2,
+                        Location(Line(1) to Offset(11), Line(1) to Offset(12))
+                    )
+                ),
+                listOf(longType, longType, longType).toFunctionType(
+                    MockHandlePromise(),
+                    setOf(CommonAttribute.Internal)
+                ),
+                Location(Line(1) to Offset(5), Line(1) to Offset(8))
+            )
+        ).let { (_, code, expected) ->
+            code.getFirstAbstraction()
+                .toIrSymbol(functionLookup)
+                .expr
+                .shouldBe(expected)
+        }
     }
 })

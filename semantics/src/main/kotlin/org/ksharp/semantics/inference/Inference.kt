@@ -316,7 +316,7 @@ private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceI
                         if (!isPreludeCollectionFlag) {
                             inferredFn.arguments.asSequence()
                                 .zip(arguments.asSequence()) { fnArg, arg ->
-                                    arg.info.setInferredType(Either.Right(fnArg))
+                                    arg.info.setInferredType(fnArg.solve())
                                 }.last()
                         }
                         inferredFn.arguments.last()
