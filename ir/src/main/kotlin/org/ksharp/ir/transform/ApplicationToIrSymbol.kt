@@ -95,20 +95,20 @@ fun List<SemanticNode<SemanticInfo>>.toIrSymbols(
     return computeAttributes(symbols.size, constantCounter.get(), pureCounter.get()) to symbols
 }
 
-private val Type?.irCustomNode: String?
+val Type?.irCustomNode: String?
     get() =
         if (this != null) attributes.firstOrNull { a -> a is NameAttribute }
             ?.let { a -> a.cast<NameAttribute>().value["ir"] }
         else null
 
-private val Type.asTraitType: TraitType?
-    get() =
-        when (this) {
-            is TraitType -> this
-            is ImplType -> this.trait
-            is FixedTraitType -> this.trait
-            else -> null
-        }
+fun Type.asTraitType(): TraitType? =
+    when (this) {
+        is TraitType -> this
+        is ImplType -> this.trait
+        is FixedTraitType -> this.trait
+        is ParametricType -> this.type.asTraitType()
+        else -> null
+    }
 
 
 private fun ApplicationSemanticInfo.isUnionOrConstructor(inferredType: Type): Boolean =
@@ -119,7 +119,7 @@ private fun ApplicationSemanticInfo.isATraitFunction(): Boolean =
     function != null && function!!.attributes.contains(CommonAttribute.TraitMethod)
 
 private fun ApplicationSemanticInfo.traitType(): TraitType? =
-    function!!.arguments.first().asTraitType
+    function!!.arguments.first().asTraitType()
 
 val ApplicationNode<SemanticInfo>.customIrNode: String?
     get() =
