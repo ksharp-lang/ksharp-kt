@@ -4,6 +4,16 @@ import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 
+interface ModuleInterface {
+
+    val impls: Set<Impl>
+
+    fun type(name: String): ErrorOrType
+
+    fun function(name: String): FunctionInfo?
+
+}
+
 data class Impl(
     val trait: String,
     val type: Type

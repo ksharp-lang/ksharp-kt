@@ -7,6 +7,7 @@ import org.ksharp.module.prelude.preludeModule
 import org.ksharp.parser.ksharp.parseModule
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.nodes.toSemanticModuleInfo
+import org.ksharp.semantics.nodes.toSemanticModuleInterface
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.solver.solve
 
@@ -16,7 +17,7 @@ fun String.toSemanticModuleInfo(): Either<List<Error>, SemanticModuleInfo> =
             if (it.errors.isNotEmpty()) {
                 return@flatMap Either.Left(it.errors)
             }
-            val moduleInfo = it.toSemanticModuleInfo(preludeModule)
+            val moduleInfo = it.toSemanticModuleInterface(preludeModule).toSemanticModuleInfo()
             if (moduleInfo.errors.isNotEmpty()) {
                 Either.Left(moduleInfo.errors)
             } else Either.Right(moduleInfo)
@@ -25,7 +26,7 @@ fun String.toSemanticModuleInfo(): Either<List<Error>, SemanticModuleInfo> =
 fun String.getSemanticModuleInfo(): ErrorOrValue<SemanticModuleInfo> =
     this.parseModule("irTest.ks", false)
         .flatMap {
-            Either.Right(it.toSemanticModuleInfo(preludeModule))
+            Either.Right(it.toSemanticModuleInterface(preludeModule).toSemanticModuleInfo())
         }
 
 

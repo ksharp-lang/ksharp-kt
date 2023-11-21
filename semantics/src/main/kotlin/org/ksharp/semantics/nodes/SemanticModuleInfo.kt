@@ -25,22 +25,44 @@ data class SemanticModuleInfo(
     val abstractions: List<AbstractionNode<SemanticInfo>>
 )
 
-fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleInfo {
+data class SemanticModuleInterface(
+    val name: String,
+    val errors: List<Error>,
+    val preludeModule: ModuleInfo,
+    val typeSystemInfo: ModuleTypeSystemInfo,
+    val functionInfo: ModuleFunctionInfo
+)
+
+fun ModuleNode.toSemanticModuleInterface(preludeModule: ModuleInfo): SemanticModuleInterface {
     val typeSemantics = this.checkTypesSemantics(preludeModule)
     val moduleSemantics = this.checkFunctionSemantics(typeSemantics)
-        .checkInferenceSemantics(typeSemantics, preludeModule)
-    return SemanticModuleInfo(
+    return SemanticModuleInterface(
         name.let {
             val ix = name.indexOf(".")
             if (ix != -1) name.substring(0, ix)
             else name
         },
         errors + typeSemantics.errors + moduleSemantics.errors,
-        typeSemantics.typeSystem,
-        typeSemantics.impls.keys,
-        moduleSemantics.traitsAbstractions,
-        moduleSemantics.implAbstractions,
-        moduleSemantics.abstractions,
+        preludeModule,
+        typeSemantics,
+        moduleSemantics
+    )
+}
+
+fun SemanticModuleInterface.toSemanticModuleInfo(): SemanticModuleInfo {
+    val functionInfo = checkInferenceSemantics()
+    return SemanticModuleInfo(
+        name.let {
+            val ix = name.indexOf(".")
+            if (ix != -1) name.substring(0, ix)
+            else name
+        },
+        errors + functionInfo.errors,
+        typeSystemInfo.typeSystem,
+        typeSystemInfo.impls.keys,
+        functionInfo.traitsAbstractions,
+        functionInfo.implAbstractions,
+        functionInfo.abstractions,
     )
 }
 

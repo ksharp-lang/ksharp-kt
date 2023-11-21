@@ -5,12 +5,10 @@ import org.ksharp.module.Impl
 import org.ksharp.nodes.ImplNode
 import org.ksharp.semantics.inference.TraitFinderContext
 import org.ksharp.typesystem.TypeSystem
-import org.ksharp.typesystem.types.TraitType
 
 data class ModuleTypeSystemInfo(
     val errors: List<Error>,
     val typeSystem: TypeSystem,
-    val traits: List<TraitType>,
     val impls: Map<Impl, ImplNode>
 ) {
 
@@ -20,5 +18,5 @@ data class ModuleTypeSystemInfo(
             override val impls: Sequence<Impl> = this@ModuleTypeSystemInfo.impls.keys.asSequence()
         }
     }
-    
+
 }
