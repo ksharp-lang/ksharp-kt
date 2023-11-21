@@ -423,13 +423,6 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
     return impls.build()
 }
 
-private fun TypeExpression.isUnitType(): Boolean = when {
-    this is UnitTypeNode -> true
-    this is ConcreteTypeNode && this.name == "Unit" -> true
-    this is LabelTypeNode -> this.expr.isUnitType()
-    else -> false
-}
-
 internal val FunctionTypeNode.arity: Int
     get() = params.size.let { sizeArgs ->
         when (sizeArgs) {
