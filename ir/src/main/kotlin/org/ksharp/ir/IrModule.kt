@@ -13,6 +13,7 @@ import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.arity
 import org.ksharp.typesystem.unification.unify
 
 fun interface FunctionLookup {
@@ -64,9 +65,11 @@ private class FunctionLookupImpl : FunctionLookup {
     override fun find(module: String?, name: String, type: Type): IrTopLevelSymbol =
         cache.get(name to type) {
             val functionType = type.cast<FunctionType>()
-            val arity = functionType.arguments.size - 1
+            val arity = functionType.arguments.arity
             functions.asSequence()
-                .filter { it.name == name && it.type.arguments.size == arity }
+                .filter {
+                    it.name == name && it.type.arguments.arity == arity
+                }
                 .map { fn ->
                     functionType.unify(Location.NoProvided, type) { _, _ -> false }.map { fn }
                 }
