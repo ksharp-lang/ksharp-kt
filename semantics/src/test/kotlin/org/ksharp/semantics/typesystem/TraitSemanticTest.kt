@@ -50,7 +50,7 @@ class TraitSemanticTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
-                    TypeSemanticsErrorCode.DuplicateTraitMethod.new(Location.NoProvided, "name" to "sum/3")
+                    TypeSemanticsErrorCode.DuplicateTraitMethod.new(Location.NoProvided, "name" to "sum/2")
                 )
             )
     }
@@ -79,7 +79,7 @@ class TraitSemanticTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
-                    TypeSemanticsErrorCode.DuplicateTraitMethod.new(Location.NoProvided, "name" to "sum/3")
+                    TypeSemanticsErrorCode.DuplicateTraitMethod.new(Location.NoProvided, "name" to "sum/2")
                 )
             )
     }
@@ -112,7 +112,7 @@ class TraitSemanticTest : StringSpec({
             .map {
                 it.typeSystem
                     .getTraits()
-                    .shouldDefine(mapOf("Sum::sum/3" to true))
+                    .shouldDefine(mapOf("Sum::sum/2" to true))
                     .map { t -> t.representation }
             }
             .shouldBeRight(
@@ -134,7 +134,7 @@ class TraitSemanticTest : StringSpec({
             .map {
                 it.typeSystem
                     .getTraits()
-                    .shouldDefine(mapOf("Sum::sum/3" to false))
+                    .shouldDefine(mapOf("Sum::sum/2" to false))
                     .map { t -> t.representation }
             }
             .shouldBeRight(
@@ -163,7 +163,7 @@ class TraitSemanticTest : StringSpec({
                 it.typeSystem
                     .getTraits()
                     .shouldNotBeEmpty()
-                    .shouldDefine(mapOf("Sum::sum/3" to true))
+                    .shouldDefine(mapOf("Sum::sum/2" to true))
                 val paramAType = TypeSemanticInfo(type = Either.Right(paramA))
                 val expectedAbstractions = listOf(
                     AbstractionNode(

@@ -13,6 +13,7 @@ import org.ksharp.semantics.expressions.checkInferenceSemantics
 import org.ksharp.semantics.typesystem.checkTypesSemantics
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.isUnitType
 
 data class SemanticModuleInfo(
     val name: String,
@@ -43,8 +44,11 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
     )
 }
 
-private val FunctionInfo.nameWithArity: String
-    get() = "$name/${types.size.coerceAtLeast(2)}"
+val FunctionInfo.nameWithArity: String
+    get() = when (val size = types.size) {
+        2 -> if (types.first().isUnitType) 0 else 1
+        else -> size - 1
+    }.let { "$name/$it" }
 
 private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
     this.asSequence().map {

@@ -135,7 +135,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["sum/3"]
+            functionTable["sum/2"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -155,7 +155,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            type(setOf(CommonAttribute.Internal), "Decl__sum/3") {
+            type(setOf(CommonAttribute.Internal), "Decl__sum/2") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -192,7 +192,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["sum/3"]
+            functionTable["sum/2"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -212,7 +212,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration 2" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            type(setOf(CommonAttribute.Internal), "Decl__sum/3") {
+            type(setOf(CommonAttribute.Internal), "Decl__sum/2") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -249,7 +249,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["sum/3"]
+            functionTable["sum/2"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -292,7 +292,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["ten/2"]
+            functionTable["ten/0"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -311,7 +311,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration mismatch" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            type(setOf(CommonAttribute.Internal), "Decl__sum/2") {
+            type(setOf(CommonAttribute.Internal), "Decl__sum/1") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -347,7 +347,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
             )
         ).apply {
             errors.shouldBeEmpty()
-            functionTable["sum/3"]
+            functionTable["sum/2"]
                 .shouldNotBeNull()
                 .apply {
                     first.shouldBe(
@@ -367,7 +367,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
     }
     "table: function with declaration mismatch 2" {
         val typeSystem = typeSystem(PartialTypeSystem(preludeModule.typeSystem, listOf())) {
-            type(setOf(CommonAttribute.Internal), "Decl__sum/2") {
+            type(setOf(CommonAttribute.Internal), "Decl__sum/0") {
                 functionType {
                     type("Int")
                     type("Int")
@@ -412,7 +412,7 @@ class FunctionNodeSemanticFunctionTableTest : StringSpec({
                     )
                 )
             )
-            functionTable["sum/2"]
+            functionTable["sum/0"]
                 .shouldBeNull()
         }
     }
@@ -621,7 +621,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: operator with function declaration") {
         var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
-            type(setOf(CommonAttribute.Public), "Decl__n/2") {
+            type(setOf(CommonAttribute.Public), "Decl__n/0") {
                 functionType {
                     type("Unit")
                     type("Long")
@@ -697,7 +697,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: function with module name") {
         var fnType: ErrorOrType? = null
         val nTs = typeSystem(PartialTypeSystem(ts, emptyList())) {
-            type(setOf(CommonAttribute.Public), "Decl__n/2") {
+            type(setOf(CommonAttribute.Public), "Decl__n/0") {
                 functionType {
                     type("Unit")
                     type("Long")

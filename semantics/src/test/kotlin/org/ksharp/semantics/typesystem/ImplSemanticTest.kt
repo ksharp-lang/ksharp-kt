@@ -72,7 +72,7 @@ class ImplSemanticTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
-                    TypeSemanticsErrorCode.DuplicateImplMethod.new(Location.NoProvided, "name" to "(+)/3")
+                    TypeSemanticsErrorCode.DuplicateImplMethod.new(Location.NoProvided, "name" to "(+)/2")
                 )
             )
     }
@@ -90,7 +90,7 @@ class ImplSemanticTest : StringSpec({
                 listOf(
                     TypeSemanticsErrorCode.MissingImplMethods.new(
                         Location.NoProvided,
-                        "methods" to "(!=)/3",
+                        "methods" to "(!=)/2",
                         "impl" to "Num",
                         "trait" to "Eq"
                     )

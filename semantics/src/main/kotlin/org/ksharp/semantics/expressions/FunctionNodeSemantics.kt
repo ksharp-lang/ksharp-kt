@@ -73,7 +73,7 @@ internal fun String.checkFunctionName(location: Location): ErrorOrValue<Unit> {
 }
 
 val FunctionNode.nameWithArity: String
-    get() = "$name/${if (parameters.isEmpty()) 2 else (parameters.size + 1)}"
+    get() = "$name/${parameters.size}"
 
 internal fun List<FunctionNode>.buildFunctionTable(
     errors: ErrorCollector,

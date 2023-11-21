@@ -367,7 +367,7 @@ class InferenceWithParsingTest : StringSpec({
                 shouldBeRight()
                 valueOrNull!!.toModuleInfo().functions.keys.shouldBe(
                     listOf(
-                        "emptyHashMap/2"
+                        "emptyHashMap/0"
                     )
                 )
             }

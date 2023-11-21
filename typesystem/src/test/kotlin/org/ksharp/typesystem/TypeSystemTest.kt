@@ -804,7 +804,7 @@ class TypeSystemTest : ShouldSpec({
                                 handle,
                                 setOf(CommonAttribute.Public),
                                 "Num", "a", mapOf(
-                                    "(+)/3" to TraitType.MethodType(
+                                    "(+)/2" to TraitType.MethodType(
                                         handle,
                                         setOf(CommonAttribute.TraitMethod),
                                         "(+)",
@@ -814,7 +814,7 @@ class TypeSystemTest : ShouldSpec({
                                             Parameter(handle, "a")
                                         ), true
                                     ),
-                                    "(-)/3" to TraitType.MethodType(
+                                    "(-)/2" to TraitType.MethodType(
                                         handle,
                                         setOf(CommonAttribute.TraitMethod),
                                         "(-)",
@@ -837,7 +837,7 @@ class TypeSystemTest : ShouldSpec({
                 should("Shouldn't have errors") {
                     errors.shouldBe(
                         listOf(
-                            TypeSystemErrorCode.DuplicateTraitMethod.new("name" to "(+)/3", "trait" to "Num2"),
+                            TypeSystemErrorCode.DuplicateTraitMethod.new("name" to "(+)/2", "trait" to "Num2"),
                             TypeSystemErrorCode.TypeNameShouldStartWithUpperCase.new("name" to "num"),
                             TypeSystemErrorCode.TypeParamNameShouldStartWithLowerCase.new("name" to "F"),
                             TypeSystemErrorCode.FunctionNameShouldntHaveSpaces.new("name" to "map ing"),
