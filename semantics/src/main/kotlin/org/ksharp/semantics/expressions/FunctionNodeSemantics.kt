@@ -219,17 +219,13 @@ private fun List<AbstractionNode<SemanticInfo>>.inferTypes(
     }
 }
 
-fun ModuleFunctionInfo.checkInferenceSemantics(
-    moduleTypeSystemInfo: ModuleTypeSystemInfo,
-    preludeModule: ModuleInfo
-): ModuleFunctionInfo {
+fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     val errors = ErrorCollector()
-    errors.collectAll(this.errors)
 
     val preludeInferenceContext = ModuleInfoInferenceContext(preludeModule)
-    val moduleInferenceContext = abstractions.toInferenceContext(
-        moduleTypeSystemInfo.typeSystem,
-        moduleTypeSystemInfo.impls.keys
+    val moduleInferenceContext = functionInfo.abstractions.toInferenceContext(
+        typeSystemInfo.typeSystem,
+        typeSystemInfo.impls.keys
     )
     val dependencies = mapOf<String, ModuleInfo>()
     val abstractionsInferenceInfo = InferenceInfo(
@@ -238,24 +234,24 @@ fun ModuleFunctionInfo.checkInferenceSemantics(
         dependencies
     )
 
-    val abstractions = abstractions.inferTypes(errors, abstractionsInferenceInfo)
-    val traitsAbstractions = traitsAbstractions.asSequence().associate { trait ->
+    val abstractions = functionInfo.abstractions.inferTypes(errors, abstractionsInferenceInfo)
+    val traitsAbstractions = functionInfo.traitsAbstractions.asSequence().associate { trait ->
         val traitInferenceInfo = InferenceInfo(
             preludeInferenceContext,
             trait.value.toTraitInferenceContext(
                 moduleInferenceContext,
-                moduleTypeSystemInfo.typeSystem[trait.key].valueOrNull!!.cast()
+                typeSystemInfo.typeSystem[trait.key].valueOrNull!!.cast()
             ),
             dependencies
         )
         trait.key to trait.value.inferTypes(errors, traitInferenceInfo)
     }
-    val implAbstractions = implAbstractions.asSequence().associate { impl ->
+    val implAbstractions = functionInfo.implAbstractions.asSequence().associate { impl ->
         val implInferenceInfo = InferenceInfo(
             preludeInferenceContext,
             impl.value.toImplInferenceContext(
                 moduleInferenceContext,
-                moduleTypeSystemInfo.typeSystem[impl.key.trait].valueOrNull!!.cast()
+                typeSystemInfo.typeSystem[impl.key.trait].valueOrNull!!.cast()
             ),
             dependencies
         )

@@ -6,6 +6,7 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.parser.ksharp.parseModule
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.nodes.toSemanticModuleInfo
+import org.ksharp.semantics.nodes.toSemanticModuleInterface
 import java.io.File
 import java.io.Reader
 import java.nio.charset.StandardCharsets
@@ -17,7 +18,7 @@ fun Reader.moduleInfo(context: String, preludeModule: ModuleInfo): Either<List<E
         .mapLeft {
             listOf(it.error)
         }.flatMap {
-            val moduleInfo = it.toSemanticModuleInfo(preludeModule)
+            val moduleInfo = it.toSemanticModuleInterface(preludeModule).toSemanticModuleInfo()
             if (moduleInfo.errors.isNotEmpty()) {
                 Either.Left(moduleInfo.errors)
             } else Either.Right(moduleInfo)

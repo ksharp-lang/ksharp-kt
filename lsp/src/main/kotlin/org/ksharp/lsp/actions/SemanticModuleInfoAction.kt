@@ -5,6 +5,7 @@ import org.ksharp.nodes.NodeData
 import org.ksharp.parser.ksharp.toModuleNode
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.nodes.toSemanticModuleInfo
+import org.ksharp.semantics.nodes.toSemanticModuleInterface
 
 const val SemanticModuleInfoAction = "SemanticModuleInfoAction"
 fun semanticModuleInfoAction(moduleName: String, builder: ActionsGraphBuilder<SemanticModuleInfo>) =
@@ -22,7 +23,8 @@ fun semanticModuleInfoAction(moduleName: String, builder: ActionsGraphBuilder<Se
     ) {
         execution { _, nodes ->
             nodes.asSequence().toModuleNode(moduleName)
-                .toSemanticModuleInfo(preludeModule)
+                .toSemanticModuleInterface(preludeModule)
+                .toSemanticModuleInfo()
         }
         graphBuilder(builder)
     }
