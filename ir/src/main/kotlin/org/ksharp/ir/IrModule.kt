@@ -64,7 +64,7 @@ private class FunctionLookupImpl : FunctionLookup {
     override fun find(module: String?, name: String, type: Type): IrTopLevelSymbol =
         cache.get(name to type) {
             val functionType = type.cast<FunctionType>()
-            val arity = functionType.arguments.size
+            val arity = functionType.arguments.size - 1
             functions.asSequence()
                 .filter { it.name == name && it.type.arguments.size == arity }
                 .map { fn ->

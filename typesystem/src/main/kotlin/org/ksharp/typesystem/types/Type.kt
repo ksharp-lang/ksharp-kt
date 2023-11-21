@@ -125,3 +125,10 @@ fun TypeSystemBuilder.type(
             } else it
         }
     }
+
+val List<Type>.arity: Int
+    get() =
+        when (val s = this.size) {
+            2 -> if (first().representation == "Unit") 0 else 1
+            else -> s - 1
+        }

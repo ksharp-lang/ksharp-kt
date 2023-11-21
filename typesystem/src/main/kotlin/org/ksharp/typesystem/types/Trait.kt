@@ -133,7 +133,7 @@ class TraitTypeFactory(
         result = result.flatMap { params ->
             validateFunctionName(name).flatMap {
                 ParametricTypeFactory(factory).apply(arguments).build().flatMap traitMethod@{ args ->
-                    val traitMethodName = "${name}/${args.size}"
+                    val traitMethodName = "${name}/${args.arity}"
                     if (params.containsKey(traitMethodName) == true) {
                         return@traitMethod Either.Left(
                             TypeSystemErrorCode.DuplicateTraitMethod.new(

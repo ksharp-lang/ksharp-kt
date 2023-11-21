@@ -249,8 +249,7 @@ private fun TraitFunctionsNode.checkTraitFunctions(): ErrorOrValue<Boolean> {
                     TypeSemanticsErrorCode.TraitMethodShouldBeAFunctionType.new(location, "name" to it.name)
                 )
             }
-            val funcType = it.type.cast<FunctionTypeNode>()
-            val methodArity = "${it.name}/${funcType.arity}"
+            val methodArity = it.nameWithArity
             if (traitMethods.add(methodArity)) {
                 Either.Right(methodArity)
             } else Either.Left(
@@ -270,7 +269,7 @@ private fun TraitFunctionsNode.checkTraitFunctions(): ErrorOrValue<Boolean> {
         .map { true }
 }
 
-private val TraitFunctionNode.nameWithArity: String
+internal val TraitFunctionNode.nameWithArity: String
     get() = "${name}/${type.cast<FunctionTypeNode>().arity}"
 
 
@@ -342,12 +341,21 @@ private fun instantiateType(
     }
 }
 
+internal val TraitType.MethodType.nameWithArity: String
+    get() =
+        when (val size = arguments.size) {
+            2 -> if (arguments.first().representation == "Unit") 0 else 1
+            else -> size - 1
+        }.let {
+            "$name/$it"
+        }
+
 private fun ImplNode.checkFunctionSemantics(type: TraitType, collector: MutableSet<String>): ErrorOrValue<Boolean> {
     val requiredMethodsToImplement = type
         .methods
         .values
         .filter { !it.withDefaultImpl }
-        .map { "${it.name}/${it.arguments.size}" }.toSet()
+        .map(TraitType.MethodType::nameWithArity).toSet()
 
     return functions.map {
         val methodArity = it.nameWithArity
@@ -422,9 +430,14 @@ private fun TypeExpression.isUnitType(): Boolean = when {
     else -> false
 }
 
-private val FunctionTypeNode.arity: Int
-    get() =
-        params.size.coerceAtLeast(2)
+internal val FunctionTypeNode.arity: Int
+    get() = params.size.let { sizeArgs ->
+        when (sizeArgs) {
+            2 -> if (params.first() is UnitTypeNode) 0 else 1
+
+            else -> sizeArgs - 1
+        }
+    }
 
 private fun TypeDeclarationNode.checkTypesSemantics(
     errors: ErrorCollector,

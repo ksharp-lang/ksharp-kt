@@ -101,7 +101,10 @@ data class InferenceInfo(
         appName: ApplicationName,
         arguments: List<Type>
     ): ErrorOrType =
-        arguments.size.let { numArguments ->
+        when (val size = arguments.size) {
+            1 -> if (arguments.first().representation == "Unit") 0 else 1
+            else -> size
+        }.let { numArguments ->
             val name = appName.name
             val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
             cache.get(funName to arguments) {
@@ -109,11 +112,11 @@ data class InferenceInfo(
                 val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else inferenceContext
                 val secondSearch = if (appName.pck == null) prelude else null
 
-                firstSearch.findFunction(caller, name, numArguments + 1, firstArgument)
+                firstSearch.findFunction(caller, name, numArguments, firstArgument)
                     ?.infer(caller)
                     ?.unify(checker, inferenceContext.typeSystem, location, arguments)
                     ?.mapLeft { it.toString() }
-                    ?: secondSearch?.findFunction(caller, name, numArguments + 1, firstArgument)
+                    ?: secondSearch?.findFunction(caller, name, numArguments, firstArgument)
                         ?.infer(caller)
                         ?.unify(checker, prelude.typeSystem, location, arguments)
                         ?.mapLeft { it.toString() }

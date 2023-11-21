@@ -1517,7 +1517,7 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
-            typeSystem["Decl__ten/2"].map { it.representation }
+            typeSystem["Decl__ten/0"].map { it.representation }
                 .shouldBeRight("(Unit -> Int)")
         }
     }
@@ -1537,7 +1537,7 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
-            typeSystem["Decl__ten/2"].map { it.representation }
+            typeSystem["Decl__ten/0"].map { it.representation }
                 .shouldBeRight("(Unit -> Int)")
         }
     }
@@ -1595,7 +1595,7 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
-            typeSystem["Decl__sum/3"].map { it.representation }
+            typeSystem["Decl__sum/2"].map { it.representation }
                 .shouldBeRight("((Num a) -> (Num a) -> Int)")
         }
     }

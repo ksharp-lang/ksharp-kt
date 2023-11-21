@@ -33,8 +33,8 @@ private fun SemanticNode<SemanticInfo>.isCollectionApplication(fnName: String): 
         fnName
     )
 
-private val AbstractionNode<SemanticInfo>.nameWithArity: String
-    get() = "${name}/${info.cast<AbstractionSemanticInfo>().parameters.size.coerceAtLeast(1) + 1}"
+internal val <T : SemanticInfo> AbstractionNode<T>.nameWithArity: String
+    get() = info.cast<AbstractionSemanticInfo>().parameters.size.let { "$name/$it" }
 
 private val SemanticNode<SemanticInfo>.isTuple: Boolean
     get() = isCollectionApplication("tupleOf")
