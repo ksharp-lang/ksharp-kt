@@ -13,10 +13,7 @@ import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.substitution.SubstitutionContext
 import org.ksharp.typesystem.substitution.extract
 import org.ksharp.typesystem.substitution.substitute
-import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.parameters
-import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
@@ -102,7 +99,7 @@ data class InferenceInfo(
         arguments: List<Type>
     ): ErrorOrType =
         when (val size = arguments.size) {
-            1 -> if (arguments.first().representation == "Unit") 0 else 1
+            1 -> if (arguments.first().isUnitType) 0 else 1
             else -> size
         }.let { numArguments ->
             val name = appName.name

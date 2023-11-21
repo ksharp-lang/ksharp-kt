@@ -13,6 +13,7 @@ import org.ksharp.semantics.expressions.checkInferenceSemantics
 import org.ksharp.semantics.typesystem.checkTypesSemantics
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.isUnitType
 
 data class SemanticModuleInfo(
     val name: String,
@@ -45,7 +46,7 @@ fun ModuleNode.toSemanticModuleInfo(preludeModule: ModuleInfo): SemanticModuleIn
 
 val FunctionInfo.nameWithArity: String
     get() = when (val size = types.size) {
-        2 -> if (types.first().representation == "Unit") 0 else 1
+        2 -> if (types.first().isUnitType) 0 else 1
         else -> size - 1
     }.let { "$name/$it" }
 

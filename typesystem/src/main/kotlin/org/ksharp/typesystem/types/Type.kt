@@ -11,6 +11,7 @@ import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.solver.Solver
 import org.ksharp.typesystem.solver.Solvers
+import org.ksharp.typesystem.solver.solve
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
@@ -132,3 +133,9 @@ val List<Type>.arity: Int
             2 -> if (first().representation == "Unit") 0 else 1
             else -> s - 1
         }
+
+val Type.isUnitType: Boolean
+    get() = when (this) {
+        is Concrete, is Alias, is TypeAlias, is Labeled -> this.solve().valueOrNull!!.representation == "Unit"
+        else -> false
+    }

@@ -344,7 +344,7 @@ private fun instantiateType(
 internal val TraitType.MethodType.nameWithArity: String
     get() =
         when (val size = arguments.size) {
-            2 -> if (arguments.first().representation == "Unit") 0 else 1
+            2 -> if (arguments.first().isUnitType) 0 else 1
             else -> size - 1
         }.let {
             "$name/$it"
