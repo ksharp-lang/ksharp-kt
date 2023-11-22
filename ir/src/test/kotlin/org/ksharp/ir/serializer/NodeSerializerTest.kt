@@ -7,8 +7,8 @@ import org.ksharp.common.io.BinaryTable
 import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
-import org.ksharp.ir.IrInteger
-import org.ksharp.ir.IrNode
+import org.ksharp.ir.*
+import org.ksharp.typesystem.attributes.CommonAttribute
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicInteger
@@ -42,8 +42,43 @@ private inline fun <reified T : IrNode> T.shouldBeSerializable() {
 
 class NodeSerializerTest : StringSpec({
     val location = Location(Line(1) to Offset(1), Line(1) to Offset(5))
+    val attributes = setOf(CommonAttribute.Native, CommonAttribute.Public)
     "IrInteger test" {
         IrInteger(1, location)
+            .shouldBeSerializable()
+    }
+    "IrDecimal test" {
+        IrDecimal(1.5, location)
+            .shouldBeSerializable()
+    }
+    "IrCharacter test" {
+        IrCharacter('a', location)
+            .shouldBeSerializable()
+    }
+    "IrString test" {
+        IrString("abc", location)
+            .shouldBeSerializable()
+    }
+    "IrBool test" {
+        IrBool(true, location)
+            .shouldBeSerializable()
+        IrBool(false, location)
+            .shouldBeSerializable()
+    }
+    "IrNumCast test" {
+        IrNumCast(IrInteger(1, location), CastType.Int, location)
+            .shouldBeSerializable()
+    }
+    "IrPair test" {
+        IrPair(attributes, IrInteger(1, location), IrInteger(2, location), location)
+            .shouldBeSerializable()
+    }
+    "IrList test" {
+        IrList(attributes, listOf(IrInteger(1, location), IrInteger(2, location)), location)
+            .shouldBeSerializable()
+    }
+    "IrSet test" {
+        IrSet(attributes, listOf(IrInteger(1, location), IrInteger(2, location)), location)
             .shouldBeSerializable()
     }
 })
