@@ -16,7 +16,6 @@ sealed interface TypePromise {
 
 sealed class SemanticInfo {
     private var inferredType: ErrorOrType? = null
-
     fun hasInferredType(): Boolean = inferredType != null
 
     fun setInferredType(type: ErrorOrType) {
