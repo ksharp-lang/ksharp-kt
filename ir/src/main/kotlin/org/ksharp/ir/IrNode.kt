@@ -1,3 +1,7 @@
 package org.ksharp.ir
 
-interface IrNode
+import org.ksharp.ir.serializer.IrNodeSerializers
+
+interface IrNode {
+    val serializer: IrNodeSerializers
+}

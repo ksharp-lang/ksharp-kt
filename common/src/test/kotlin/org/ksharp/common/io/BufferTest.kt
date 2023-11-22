@@ -14,18 +14,22 @@ class BufferTest : StringSpec({
             add(5)
             add("Hello")
             add(6)
+            add(150L)
+            add(15.0)
             set(0, 78)
-            size.shouldBe(17)
+            size.shouldBe(33)
             transferTo(output)
         }
         val bytes = output.toByteArray()
-        bytes.size.shouldBe(17)
+        bytes.size.shouldBe(33)
         ByteArrayInputStream(bytes).bufferView {
             it.offset.shouldBe(0)
             it.readInt(0).shouldBe(78)
             it.readInt(4).shouldBe(5)
             it.readString(8, 5).shouldBe("Hello")
             it.readInt(13).shouldBe(6)
+            it.readLong(17).shouldBe(150L)
+            it.readDouble(25).shouldBe(15.0)
         }.shouldNotBeNull()
     }
     "Test buffer view with offset" {
