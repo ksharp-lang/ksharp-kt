@@ -92,4 +92,28 @@ class NodeSerializerTest : StringSpec({
         )
             .shouldBeSerializable()
     }
+    "IrSum test" {
+        IrSum(attributes, IrInteger(1, location), IrInteger(2, location), location)
+            .shouldBeSerializable()
+    }
+    "IrSub test" {
+        IrSub(attributes, IrInteger(1, location), IrInteger(2, location), location)
+            .shouldBeSerializable()
+    }
+    "IrMul test" {
+        IrMul(attributes, IrInteger(1, location), IrInteger(2, location), location)
+            .shouldBeSerializable()
+    }
+    "IrDiv test" {
+        IrDiv(attributes, IrInteger(1, location), IrInteger(2, location), location)
+            .shouldBeSerializable()
+    }
+    "IrMod test" {
+        IrMod(attributes, IrInteger(1, location), IrInteger(2, location), location)
+            .shouldBeSerializable()
+    }
+    "IrPow test" {
+        IrPow(attributes, IrInteger(1, location), IrInteger(2, location), location)
+            .shouldBeSerializable()
+    }
 })
