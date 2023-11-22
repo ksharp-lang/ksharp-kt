@@ -73,7 +73,7 @@ data class IrMod(
 ) : ModNode(left.cast(), right.cast()), IrBinaryOperation {
     override val serializer: IrNodeSerializers
         get() = IrNodeSerializers.Mod
-    
+
 }
 
 class IrArithmeticCall(
@@ -84,5 +84,7 @@ class IrArithmeticCall(
 
     override val attributes: Set<Attribute> = expr.attributes
     override val location: Location = expr.location
+
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
 
 }

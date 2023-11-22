@@ -2,6 +2,7 @@ package org.ksharp.ir
 
 import org.ksharp.common.Location
 import org.ksharp.common.cast
+import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.truffle.FunctionNode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.FunctionType
@@ -27,4 +28,6 @@ data class IrFunction(
     override val location: Location
 ) : FunctionNode(frameSlots, expr.cast()), IrTopLevelSymbol, IrExpression {
     fun call(vararg arguments: Any): Any = callTarget.call(*arguments)
+
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
 }

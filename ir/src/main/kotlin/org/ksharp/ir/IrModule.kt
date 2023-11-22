@@ -4,6 +4,7 @@ import org.ksharp.common.Location
 import org.ksharp.common.cacheOf
 import org.ksharp.common.cast
 import org.ksharp.common.isRight
+import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.asTraitType
 import org.ksharp.ir.transform.irCustomNode
@@ -84,7 +85,9 @@ private class FunctionLookupImpl : FunctionLookup {
 data class IrModule(
     val dependencies: List<String>,
     val symbols: List<IrTopLevelSymbol>
-) : IrNode
+) : IrNode {
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+}
 
 fun List<AbstractionNode<SemanticInfo>>.toIrModule(): Pair<IrModule, FunctionLookup> {
     val lookup = FunctionLookupImpl()

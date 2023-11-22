@@ -4,12 +4,13 @@ import com.oracle.truffle.api.CallTarget
 import com.oracle.truffle.api.nodes.RootNode
 import org.ksharp.common.Location
 import org.ksharp.common.cast
+import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.truffle.ArgAccessNode
 import org.ksharp.ir.truffle.IfNode
 import org.ksharp.ir.truffle.KSharpNode
-import org.ksharp.ir.truffle.variable.VarAccessNode
 import org.ksharp.ir.truffle.call.CallNode
 import org.ksharp.ir.truffle.cast.NumCastNode
+import org.ksharp.ir.truffle.variable.VarAccessNode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.Type
@@ -39,6 +40,8 @@ data class IrNumCast(
 ) : NumCastNode(type, expr.cast()), IrExpression {
     override val attributes: Set<Attribute>
         get() = NoAttributes
+
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
 }
 
 data class IrPair(
@@ -46,19 +49,25 @@ data class IrPair(
     val first: IrExpression,
     val second: IrExpression,
     override val location: Location
-) : IrExpression
+) : IrExpression {
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+}
 
 data class IrArg(
     override val attributes: Set<Attribute>,
     val index: Int,
     override val location: Location
-) : ArgAccessNode(index), IrExpression
+) : ArgAccessNode(index), IrExpression {
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+}
 
 data class IrVar(
     override val attributes: Set<Attribute>,
     val index: Int,
     override val location: Location
-) : VarAccessNode(index), IrExpression
+) : VarAccessNode(index), IrExpression {
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+}
 
 
 data class IrIf(
@@ -67,7 +76,9 @@ data class IrIf(
     val thenExpr: IrExpression,
     val elseExpr: IrExpression,
     override val location: Location
-) : IfNode(condition.cast(), thenExpr.cast(), elseExpr.cast()), IrExpression
+) : IfNode(condition.cast(), thenExpr.cast(), elseExpr.cast()), IrExpression {
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+}
 
 data class IrCall(
     override val attributes: Set<Attribute>,
@@ -82,5 +93,7 @@ data class IrCall(
 
     override fun getCallTarget(): CallTarget? =
         functionLookup.find(module, function, type)?.cast<RootNode>()?.callTarget
+
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
 
 }
