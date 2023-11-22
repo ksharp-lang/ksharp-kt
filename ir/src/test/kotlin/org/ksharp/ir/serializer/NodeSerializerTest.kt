@@ -81,4 +81,15 @@ class NodeSerializerTest : StringSpec({
         IrSet(attributes, listOf(IrInteger(1, location), IrInteger(2, location)), location)
             .shouldBeSerializable()
     }
+    "IrMap test" {
+        IrMap(
+            attributes,
+            listOf(
+                IrPair(attributes, IrInteger(1, location), IrInteger(2, location), location),
+                IrPair(attributes, IrInteger(3, location), IrInteger(4, location), location)
+            ),
+            location
+        )
+            .shouldBeSerializable()
+    }
 })

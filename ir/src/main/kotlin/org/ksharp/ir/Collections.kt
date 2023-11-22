@@ -33,5 +33,5 @@ data class IrMap(
     val entries: List<IrPair>,
     override val location: Location
 ) : MapNode(entries), IrExpression {
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val serializer: IrNodeSerializers = IrNodeSerializers.Map
 }

@@ -29,6 +29,7 @@ enum class IrNodeSerializers(
     Pair(IrPairSerializer()),
     List(IrCollectionsSerializer(::IrList)),
     Set(IrCollectionsSerializer(::IrSet)),
+    Map(IrMapSerializer()),
     Sum(IrBinaryOperationSerializer(::IrSum)),
     Sub(IrBinaryOperationSerializer(::IrSub)),
     Mul(IrBinaryOperationSerializer(::IrMul)),
