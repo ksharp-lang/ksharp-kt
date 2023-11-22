@@ -3,7 +3,6 @@ package org.ksharp.ir
 import org.ksharp.common.Location
 import org.ksharp.common.cacheOf
 import org.ksharp.common.cast
-import org.ksharp.common.isRight
 import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.asTraitType
@@ -16,7 +15,6 @@ import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.arity
-import org.ksharp.typesystem.unification.unify
 
 fun interface FunctionLookup {
     fun find(module: String?, name: String, type: Type): IrTopLevelSymbol?
@@ -34,7 +32,6 @@ private fun binaryExpressionFunction(
             IrArg(NoAttributes, 1, Location.NoProvided),
             Location.NoProvided
         ).cast(),
-        it
     )
 }
 
@@ -70,13 +67,9 @@ private class FunctionLookupImpl : FunctionLookup {
             val arity = functionType.arguments.arity
             functions.asSequence()
                 .filter {
-                    it.name == name && it.type.arguments.arity == arity
+                    it.name == name && it.arity == arity
                 }
-                .map { fn ->
-                    functionType.unify(Location.NoProvided, type) { _, _ -> false }.map { fn }
-                }
-                .firstOrNull { it.isRight }
-                ?.valueOrNull
+                .firstOrNull()
                 ?: findCustomFunction(name, functionType)!!
         }
 

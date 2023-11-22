@@ -116,4 +116,8 @@ class NodeSerializerTest : StringSpec({
         IrPow(attributes, IrInteger(1, location), IrInteger(2, location), location)
             .shouldBeSerializable()
     }
+    "IrArithmeticCall Test" {
+        IrArithmeticCall("+", IrSum(attributes, IrInteger(1, location), IrInteger(2, location), location))
+            .shouldBeSerializable()
+    }
 })

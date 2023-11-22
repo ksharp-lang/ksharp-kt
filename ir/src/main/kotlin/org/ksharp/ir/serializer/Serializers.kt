@@ -3,6 +3,9 @@ package org.ksharp.ir.serializer
 import org.ksharp.common.*
 import org.ksharp.common.io.*
 import org.ksharp.ir.*
+import org.ksharp.typesystem.TypeSystem
+
+typealias TypeSystemHandle = HandlePromise<TypeSystem>
 
 interface IrNodeSerializer<S : IrNode> : SerializerWriter<S>, SerializerReader<S>
 
@@ -36,6 +39,7 @@ enum class IrNodeSerializers(
     Div(IrBinaryOperationSerializer(::IrDiv)),
     Pow(IrBinaryOperationSerializer(::IrPow)),
     Mod(IrBinaryOperationSerializer(::IrMod)),
+    ArithmeticCall(IrArithmeticCallSerializer()),
 
 }
 
@@ -69,7 +73,9 @@ fun IrNode.serialize(buffer: BufferWriter, table: BinaryTable) {
 fun BufferView.readIrNode(table: BinaryTableView): IrNode {
     val serializerIndex = readInt(4)
     return IrNodeSerializers.entries[serializerIndex]
-        .serializer.read(bufferFrom(8), table)
+        .serializer.read(
+            bufferFrom(8), table
+        )
 }
 
 fun List<IrNode>.writeTo(buffer: BufferWriter, table: BinaryTable) {

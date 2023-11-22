@@ -7,9 +7,7 @@ import org.ksharp.ir.*
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
-import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
-import org.ksharp.typesystem.solver.solve
 import org.ksharp.typesystem.types.ImplType
 import org.ksharp.typesystem.types.alias
 import org.ksharp.typesystem.types.toFunctionType
@@ -325,9 +323,9 @@ class AbstractionToIrSymbolTest : StringSpec({
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
                     "ten",
+                    0,
                     listOf(),
                     0,
-                    listOf(unitType, longType).toFunctionType(MockHandlePromise(), NoAttributes),
                     IrInteger(
                         10,
                         Location(Line(1) to Offset(6), Line(1) to Offset(8))
@@ -369,12 +367,9 @@ class AbstractionToIrSymbolTest : StringSpec({
                     IrFunction(
                         setOf(CommonAttribute.Internal),
                         "c",
+                        1,
                         listOf("a"),
                         0,
-                        listOf(
-                            internalCharType.solve().valueOrNull!!,
-                            internalCharType.solve().valueOrNull!!
-                        ).toFunctionType(MockHandlePromise(), NoAttributes),
                         IrArg(
                             setOf(CommonAttribute.Pure),
                             0,

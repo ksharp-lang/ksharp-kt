@@ -6,7 +6,6 @@ import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.truffle.FunctionNode
 import org.ksharp.ir.truffle.arithmetic.*
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.types.FunctionType
 
 data class IrSum(
     override val attributes: Set<Attribute>,
@@ -76,15 +75,14 @@ data class IrMod(
 
 }
 
-class IrArithmeticCall(
+data class IrArithmeticCall(
     @get:JvmName("getSymbolName") override val name: String,
     override val expr: IrBinaryOperation,
-    override val type: FunctionType,
 ) : FunctionNode(2, expr.cast()), IrTopLevelSymbol {
 
     override val attributes: Set<Attribute> = expr.attributes
     override val location: Location = expr.location
-
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val arity: Int = 2
+    override val serializer: IrNodeSerializers = IrNodeSerializers.ArithmeticCall
 
 }

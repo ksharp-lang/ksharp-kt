@@ -20,7 +20,8 @@ typealias IrBinaryNodeFactory = (
 ) -> IrExpression
 
 internal fun BufferView.readIrBinaryNode(
-    table: BinaryTableView, factory: IrBinaryNodeFactory
+    table: BinaryTableView,
+    factory: IrBinaryNodeFactory
 ): IrExpression {
     var offset = this.readInt(0)
     val attributes = this.readAttributes(table)
@@ -35,7 +36,7 @@ internal fun BufferView.readIrBinaryNode(
     return factory(attributes, left.cast(), right.cast(), location)
 }
 
-class IrBinaryOperationSerializer(val factory: IrBinaryNodeFactory) : IrNodeSerializer<IrBinaryOperation> {
+class IrBinaryOperationSerializer(private val factory: IrBinaryNodeFactory) : IrNodeSerializer<IrBinaryOperation> {
 
     override fun write(input: IrBinaryOperation, buffer: BufferWriter, table: BinaryTable) {
         input.attributes.writeTo(buffer, table)
