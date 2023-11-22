@@ -13,12 +13,6 @@ enum class IrNodeSerializers(
     val serializer: IrNodeSerializer<out IrNode>,
 ) {
     //ADD new Serializers at the end of the list
-    Sum(IrBinaryOperationSerializer(::IrSum)),
-    Sub(IrBinaryOperationSerializer(::IrSub)),
-    Mul(IrBinaryOperationSerializer(::IrMul)),
-    Div(IrBinaryOperationSerializer(::IrDiv)),
-    Pow(IrBinaryOperationSerializer(::IrPow)),
-    Mod(IrBinaryOperationSerializer(::IrMod)),
     NoDefined(object : IrNodeSerializer<IrNode> {
         override fun write(input: IrNode, buffer: BufferWriter, table: BinaryTable) {
             error("No serializer for $input")
@@ -27,7 +21,15 @@ enum class IrNodeSerializers(
         override fun read(buffer: BufferView, table: BinaryTableView): IrNode {
             error("No serializer for IrNode")
         }
-    })
+    }),
+
+    Sum(IrBinaryOperationSerializer(::IrSum)),
+    Sub(IrBinaryOperationSerializer(::IrSub)),
+    Mul(IrBinaryOperationSerializer(::IrMul)),
+    Div(IrBinaryOperationSerializer(::IrDiv)),
+    Pow(IrBinaryOperationSerializer(::IrPow)),
+    Mod(IrBinaryOperationSerializer(::IrMod)),
+
 }
 
 fun Location.writeTo(buffer: BufferWriter) {
