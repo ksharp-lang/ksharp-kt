@@ -8,7 +8,8 @@ import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.asTraitType
 import org.ksharp.ir.transform.irCustomNode
 import org.ksharp.ir.transform.toIrSymbol
-import org.ksharp.semantics.nodes.SemanticModuleInfo
+import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.FunctionType
@@ -85,11 +86,11 @@ data class IrModule(
     val symbols: List<IrTopLevelSymbol>
 ) : IrNode
 
-fun SemanticModuleInfo.toIrModule(): Pair<IrModule, FunctionLookup> {
+fun List<AbstractionNode<SemanticInfo>>.toIrModule(): Pair<IrModule, FunctionLookup> {
     val lookup = FunctionLookupImpl()
     val module = IrModule(
         listOf(),
-        abstractions.map { it.toIrSymbol(lookup) }
+        map { it.toIrSymbol(lookup) }
     )
     lookup.functions = module.symbols.cast()
     return module to lookup

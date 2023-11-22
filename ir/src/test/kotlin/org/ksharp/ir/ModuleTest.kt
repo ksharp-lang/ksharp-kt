@@ -17,7 +17,8 @@ class ModuleTest : StringSpec({
         "ten = 10"
             .toSemanticModuleInfo()
             .apply {
-                toIrModule()
+                abstractions
+                    .toIrModule()
                     .first
                     .shouldBe(
                         IrModule(

@@ -1,9 +1,6 @@
 package org.ksharp.nodes.semantic
 
-import org.ksharp.common.Either
-import org.ksharp.common.ErrorCode
-import org.ksharp.common.Location
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.nodes.NoLocationsDefined
 import org.ksharp.nodes.NodeData
 import org.ksharp.nodes.NodeLocations
@@ -19,7 +16,6 @@ sealed interface TypePromise {
 
 sealed class SemanticInfo {
     private var inferredType: ErrorOrType? = null
-
     fun hasInferredType(): Boolean = inferredType != null
 
     fun setInferredType(type: ErrorOrType) {
@@ -41,3 +37,13 @@ sealed class SemanticNode<SemanticInfo> : NodeData() {
     override val locations: NodeLocations
         get() = NoLocationsDefined
 }
+
+fun SemanticInfo.getType(location: Location): ErrorOrType =
+    when (this) {
+        is TypeSemanticInfo -> if (hasInferredType()) getInferredType(location) else type
+        is Symbol -> if (hasInferredType()) getInferredType(location) else type.getType(location)
+        else -> getInferredType(location)
+    }
+
+fun TypePromise.getType(location: Location): ErrorOrType =
+    this.cast<SemanticInfo>().getType(location)

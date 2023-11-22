@@ -14,9 +14,7 @@ private data class Call(
 
 private fun String.evaluateFirstFunction(arguments: List<Any>) =
     toSemanticModuleInfo()
-        .also {
-            println(it.abstractions)
-        }
+        .abstractions
         .toIrModule()
         .first
         .symbols
