@@ -4,9 +4,6 @@ import org.ksharp.common.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.expressions.CollectionFunctionName
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
-import org.ksharp.semantics.nodes.AbstractionSemanticInfo
-import org.ksharp.semantics.nodes.ApplicationSemanticInfo
-import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.attributes.CommonAttribute
@@ -15,7 +12,6 @@ import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.unify
 
 enum class InferenceErrorCode(override val description: String) : ErrorCode {
-    TypeNotInferred("Type not inferred"),
     FunctionNotFound("Function '{function}' not found"),
     NoATuple("Type '{type}' is not a tuple"),
     NoAList("Type '{type}' is not a list"),
@@ -274,7 +270,7 @@ private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceI
         run {
             if (native) {
                 this.info.cast<AbstractionSemanticInfo>().returnType?.getType(location)
-                    ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
+                    ?: Either.Left(SemanticInfoErrorCode.TypeNotInferred.new(location))
             } else expression.inferType(caller, info)
         }.flatMap { returnType ->
             calculateFunctionType(native, returnType.toFixedTraitOrType(), info)

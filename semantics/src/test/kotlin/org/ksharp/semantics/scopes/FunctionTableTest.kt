@@ -8,8 +8,8 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.new
+import org.ksharp.nodes.semantic.TypeSemanticInfo
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.attributes.CommonAttribute
@@ -24,6 +24,15 @@ class FunctionTableTest : StringSpec({
                 Function(setOf(CommonAttribute.Public), "sum", listOf(mockType)),
                 Location.NoProvided
             ).shouldBeRight()
+            this["sum"]!!.apply {
+                first.shouldBe(
+                    Function(setOf(CommonAttribute.Public), "sum", listOf(mockType))
+                )
+                second.shouldBe(Location.NoProvided)
+                isPublic.shouldBeTrue()
+                isInternal.shouldBeFalse()
+            }
+            this["sub"].shouldBeNull()
         }.build().apply {
             this["sum"]!!.apply {
                 first.shouldBe(

@@ -7,21 +7,16 @@ enum class TableErrorCode(override val description: String) : ErrorCode {
     AlreadyDefined("{classifier} already defined: {name}"),
 }
 
-typealias TableValue<V> = Pair<V, Location>
-
-fun interface Table<Value> {
-    operator fun get(name: String): TableValue<Value>?
-}
-
-open class TableBuilder<Value>(
+open class TableBuilderImpl<Value>(
     private val parent: Table<Value>?,
     private val collector: ErrorCollector,
     private val classifier: String
-) {
+) : TableBuilder<Value> {
 
-    protected val table = mapBuilder<String, TableValue<Value>>()
+    internal val table = mapBuilder<String, TableValue<Value>>()
 
-    fun register(
+    override fun get(name: String): TableValue<Value>? = table.get(name)
+    override fun register(
         name: String,
         value: Value,
         location: Location
@@ -33,7 +28,7 @@ open class TableBuilder<Value>(
             Either.Left(TableErrorCode.AlreadyDefined.new(location, "classifier" to classifier, "name" to name))
         )
 
-    open fun build() = TableImpl(parent, table.build())
+    override fun build(): Table<Value> = TableImpl(parent, table.build())
 
 }
 

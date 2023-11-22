@@ -8,6 +8,7 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.module.functionInfo
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.semantics.expressions.checkFunctionSemantics
 import org.ksharp.semantics.expressions.checkInferenceSemantics
 import org.ksharp.semantics.typesystem.checkTypesSemantics
@@ -74,7 +75,7 @@ val FunctionInfo.nameWithArity: String
 
 private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
     this.asSequence().map {
-        val semanticInfo = it.info.cast<AbstractionSemanticInfo>()
+        val semanticInfo = it.info
         val type = semanticInfo.getInferredType(it.location).valueOrNull!!.cast<FunctionType>()
         functionInfo(it.attributes, it.name, type.arguments)
     }.associateBy { it.nameWithArity }

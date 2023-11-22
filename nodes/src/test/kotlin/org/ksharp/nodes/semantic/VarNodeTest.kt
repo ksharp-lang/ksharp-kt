@@ -11,12 +11,12 @@ class VarNodeTest : StringSpec({
     "Test Node Interface over VarNode" {
         VarNode(
             "a",
-            "Info",
+            ("Info"),
             Location.NoProvided
         ).node.apply {
             cast<VarNode<String>>().apply {
                 name.shouldBe("a")
-                info.shouldBe("Info")
+                info.shouldBe(("Info"))
                 location.shouldBe(Location.NoProvided)
                 locations.shouldBe(NoLocationsDefined)
             }

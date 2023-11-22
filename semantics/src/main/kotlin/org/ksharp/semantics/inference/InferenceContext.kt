@@ -6,8 +6,8 @@ import org.ksharp.module.FunctionInfo
 import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.semantics.nodes.AbstractionSemanticInfo
-import org.ksharp.semantics.nodes.SemanticInfo
+import org.ksharp.nodes.semantic.AbstractionSemanticInfo
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute

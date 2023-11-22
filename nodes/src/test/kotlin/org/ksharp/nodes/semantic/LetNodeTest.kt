@@ -12,30 +12,30 @@ class LetNodeTest : StringSpec({
         LetBindingNode(
             VarNode(
                 "b",
-                "VarInfo",
+                ("VarInfo"),
                 Location.NoProvided
             ),
             VarNode(
                 "a",
-                "VarInfo",
+                ("VarInfo"),
                 Location.NoProvided
             ),
-            "BindingInfo",
+            ("BindingInfo"),
             Location.NoProvided
         ).node.apply {
             cast<LetBindingNode<String>>().apply {
                 match.shouldBe(
                     VarNode(
                         "b",
-                        "VarInfo",
+                        ("VarInfo"),
                         Location.NoProvided
                     )
                 )
-                info.shouldBe("BindingInfo")
+                info.shouldBe(("BindingInfo"))
                 expression.shouldBe(
                     VarNode(
                         "a",
-                        "VarInfo",
+                        ("VarInfo"),
                         Location.NoProvided
                     )
                 )
@@ -50,7 +50,7 @@ class LetNodeTest : StringSpec({
                         Location.NoProvided,
                         VarNode(
                             "a",
-                            "VarInfo",
+                            ("VarInfo"),
                             Location.NoProvided
                         )
                     )
@@ -64,42 +64,42 @@ class LetNodeTest : StringSpec({
                 LetBindingNode(
                     VarNode(
                         "b",
-                        "VarInfo",
+                        ("VarInfo"),
                         Location.NoProvided
                     ),
                     VarNode(
                         "a",
-                        "VarInfo",
+                        ("VarInfo"),
                         Location.NoProvided
                     ),
-                    "BindingInfo",
+                    ("BindingInfo"),
                     Location.NoProvided
                 )
             ),
             VarNode(
                 "a",
-                "VarInfo2",
+                ("VarInfo2"),
                 Location.NoProvided
             ),
-            "LetInfo",
+            ("LetInfo"),
             Location.NoProvided
         ).node.apply {
             cast<LetNode<String>>().apply {
-                info.shouldBe("LetInfo")
+                info.shouldBe(("LetInfo"))
                 bindings.shouldBe(
                     listOf(
                         LetBindingNode(
                             VarNode(
                                 "b",
-                                "VarInfo",
+                                ("VarInfo"),
                                 Location.NoProvided
                             ),
                             VarNode(
                                 "a",
-                                "VarInfo",
+                                ("VarInfo"),
                                 Location.NoProvided
                             ),
-                            "BindingInfo",
+                            ("BindingInfo"),
                             Location.NoProvided
                         )
                     )
@@ -107,7 +107,7 @@ class LetNodeTest : StringSpec({
                 expression.shouldBe(
                     VarNode(
                         "a",
-                        "VarInfo2",
+                        ("VarInfo2"),
                         Location.NoProvided
                     ),
                 )
@@ -122,15 +122,15 @@ class LetNodeTest : StringSpec({
                         LetBindingNode(
                             VarNode(
                                 "b",
-                                "VarInfo",
+                                ("VarInfo"),
                                 Location.NoProvided
                             ),
                             VarNode(
                                 "a",
-                                "VarInfo",
+                                ("VarInfo"),
                                 Location.NoProvided
                             ),
-                            "BindingInfo",
+                            ("BindingInfo"),
                             Location.NoProvided
                         )
                     ),
@@ -139,7 +139,7 @@ class LetNodeTest : StringSpec({
                         Location.NoProvided,
                         VarNode(
                             "a",
-                            "VarInfo2",
+                            ("VarInfo2"),
                             Location.NoProvided
                         )
                     )

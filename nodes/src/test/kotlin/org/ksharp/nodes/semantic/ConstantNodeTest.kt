@@ -11,12 +11,12 @@ class ConstantNodeTest : StringSpec({
     "Test Node Interface over ConstantNode" {
         ConstantNode(
             "10",
-            "Info",
+            ("Info"),
             Location.NoProvided
         ).node.apply {
             cast<ConstantNode<String>>().apply {
                 value.shouldBe("10")
-                info.shouldBe("Info")
+                info.shouldBe(("Info"))
                 location.shouldBe(Location.NoProvided)
                 locations.shouldBe(NoLocationsDefined)
             }

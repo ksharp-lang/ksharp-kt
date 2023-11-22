@@ -8,6 +8,7 @@ import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.FunctionTypeNode
 import org.ksharp.nodes.TraitFunctionNode
 import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.parser.ksharp.parseModule
 import org.ksharp.semantics.expressions.nameWithArity
 import org.ksharp.semantics.inference.nameWithArity

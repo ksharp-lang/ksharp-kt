@@ -1,72 +1,16 @@
 package org.ksharp.semantics.nodes
 
-import org.ksharp.common.*
-import org.ksharp.semantics.inference.InferenceErrorCode
-import org.ksharp.semantics.scopes.SymbolTable
-import org.ksharp.semantics.scopes.SymbolTableBuilder
-import org.ksharp.semantics.scopes.Table
-import org.ksharp.semantics.scopes.TableValue
+import org.ksharp.common.Either
+import org.ksharp.common.Error
+import org.ksharp.common.Location
+import org.ksharp.common.cast
+import org.ksharp.nodes.semantic.SemanticInfo
+import org.ksharp.nodes.semantic.Symbol
+import org.ksharp.nodes.semantic.TypePromise
+import org.ksharp.nodes.semantic.TypeSemanticInfo
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
-import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.newParameter
-
-sealed interface TypePromise {
-    val type: ErrorOrType
-}
-
-sealed class SemanticInfo {
-    private var inferredType: ErrorOrType? = null
-
-    fun hasInferredType(): Boolean = inferredType != null
-
-    internal fun setInferredType(type: ErrorOrType) {
-        inferredType = type
-    }
-
-    fun getInferredType(location: Location): ErrorOrType =
-        inferredType ?: Either.Left(InferenceErrorCode.TypeNotInferred.new(location))
-}
-
-data class AbstractionSemanticInfo(
-    val parameters: List<SemanticInfo>,
-    val returnType: TypePromise? = null
-) : SemanticInfo()
-
-data class ApplicationSemanticInfo(var function: FunctionType? = null) : SemanticInfo()
-
-
-data class EmptySemanticInfo(private val nothing: Unit = Unit) : SemanticInfo()
-
-fun interface SymbolResolver {
-    fun getSymbol(name: String): Symbol?
-}
-
-data class SymbolTableSemanticInfo(
-    private val table: SymbolTable,
-) : SemanticInfo(), SymbolResolver, Table<Symbol> {
-    override fun getSymbol(name: String): Symbol? =
-        table[name]?.first?.also { it.used.activate() }
-
-    override fun get(name: String): TableValue<Symbol>? = table[name]
-}
-
-data class LetSemanticInfo(
-    val table: SymbolTableBuilder,
-) : SemanticInfo(), SymbolResolver, Table<Symbol> {
-    override fun getSymbol(name: String): Symbol? =
-        table[name]?.first?.also { it.used.activate() }
-
-    override fun get(name: String): TableValue<Symbol>? = table[name]
-}
-
-data class MatchSemanticInfo(
-    val table: SymbolTableBuilder,
-) : SemanticInfo()
-
-data class TypeSemanticInfo(
-    override val type: ErrorOrType
-) : SemanticInfo(), TypePromise
 
 fun TypeSystem.getTypeSemanticInfo(name: String) =
     TypeSemanticInfo(get(name))

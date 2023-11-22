@@ -2,11 +2,7 @@ package org.ksharp.ir.transform
 
 import org.ksharp.common.cast
 import org.ksharp.ir.*
-import org.ksharp.nodes.semantic.ApplicationNode
-import org.ksharp.nodes.semantic.ConstantNode
-import org.ksharp.nodes.semantic.SemanticNode
-import org.ksharp.semantics.nodes.ApplicationSemanticInfo
-import org.ksharp.semantics.nodes.SemanticInfo
+import org.ksharp.nodes.semantic.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute

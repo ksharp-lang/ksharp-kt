@@ -7,10 +7,10 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.AbstractionSemanticInfo
 import org.ksharp.nodes.semantic.ConstantNode
+import org.ksharp.nodes.semantic.TypeSemanticInfo
 import org.ksharp.semantics.inference.InferenceErrorCode
-import org.ksharp.semantics.nodes.AbstractionSemanticInfo
-import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.attributes.CommonAttribute
