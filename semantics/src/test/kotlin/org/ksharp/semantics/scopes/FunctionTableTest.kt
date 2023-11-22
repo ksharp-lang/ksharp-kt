@@ -24,6 +24,15 @@ class FunctionTableTest : StringSpec({
                 Function(setOf(CommonAttribute.Public), "sum", listOf(mockType)),
                 Location.NoProvided
             ).shouldBeRight()
+            this["sum"]!!.apply {
+                first.shouldBe(
+                    Function(setOf(CommonAttribute.Public), "sum", listOf(mockType))
+                )
+                second.shouldBe(Location.NoProvided)
+                isPublic.shouldBeTrue()
+                isInternal.shouldBeFalse()
+            }
+            this["sub"].shouldBeNull()
         }.build().apply {
             this["sum"]!!.apply {
                 first.shouldBe(
