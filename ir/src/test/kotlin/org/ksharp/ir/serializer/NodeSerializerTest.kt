@@ -43,7 +43,7 @@ private inline fun <reified T : IrNode> T.shouldBeSerializable() {
 class NodeSerializerTest : StringSpec({
     val location = Location(Line(1) to Offset(1), Line(1) to Offset(5))
     "IrInteger test" {
-        val irInteger = IrInteger(1, location)
+        IrInteger(1, location)
             .shouldBeSerializable()
     }
 })
