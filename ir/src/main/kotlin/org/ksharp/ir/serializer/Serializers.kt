@@ -1,9 +1,6 @@
 package org.ksharp.ir.serializer
 
-import org.ksharp.common.Line
-import org.ksharp.common.Location
-import org.ksharp.common.Offset
-import org.ksharp.common.cast
+import org.ksharp.common.*
 import org.ksharp.common.io.*
 import org.ksharp.ir.*
 
@@ -23,6 +20,13 @@ enum class IrNodeSerializers(
         }
     }),
 
+    Integer(IrIntegerSerializer()),
+    Decimal(IrDecimalSerializer()),
+    Character(IrCharacterSerializer()),
+    String(IrStringSerializer()),
+    Bool(IrBoolSerializer()),
+    NumCast(IrNumCastSerializer()),
+    Pair(IrPairSerializer()),
     Sum(IrBinaryOperationSerializer(::IrSum)),
     Sub(IrBinaryOperationSerializer(::IrSub)),
     Mul(IrBinaryOperationSerializer(::IrMul)),
@@ -63,4 +67,23 @@ fun BufferView.readIrNode(table: BinaryTableView): IrNode {
     val serializerIndex = readInt(4)
     return IrNodeSerializers.entries[serializerIndex]
         .serializer.read(bufferFrom(8), table)
+}
+
+fun List<IrNode>.writeTo(buffer: BufferWriter, table: BinaryTable) {
+    buffer.add(size)
+    forEach {
+        it.serialize(buffer, table)
+    }
+}
+
+fun BufferView.readListOfNodes(tableView: BinaryTableView): List<IrNode> {
+    val paramsSize = readInt(0)
+    val result = listBuilder<IrNode>()
+    var position = 4
+    repeat(paramsSize) {
+        val typeBuffer = bufferFrom(position)
+        position += typeBuffer.readInt(0)
+        result.add(typeBuffer.readIrNode(tableView))
+    }
+    return result.build()
 }

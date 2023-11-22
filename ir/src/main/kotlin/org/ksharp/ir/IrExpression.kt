@@ -41,7 +41,7 @@ data class IrNumCast(
     override val attributes: Set<Attribute>
         get() = NoAttributes
 
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NumCast
 }
 
 data class IrPair(
@@ -50,7 +50,7 @@ data class IrPair(
     val second: IrExpression,
     override val location: Location
 ) : IrExpression {
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val serializer: IrNodeSerializers = IrNodeSerializers.Pair
 }
 
 data class IrArg(
