@@ -7,7 +7,9 @@ import org.ksharp.common.new
 import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.nodes.*
+import org.ksharp.semantics.nodes.getTypeSemanticInfo
+import org.ksharp.semantics.nodes.paramTypePromise
+import org.ksharp.semantics.nodes.toTypePromise
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.typesystem.TypeSystem
@@ -66,7 +68,7 @@ private fun String.toValue(type: LiteralValueType): Any =
 
 private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location, typeSystem: TypeSystem): SemanticInfo =
     if (this is MatchSemanticInfo) {
-        table.register(name, typeSystem.paramTypePromise(), location)
+        table.cast<SymbolTableBuilder>().register(name, typeSystem.paramTypePromise(), location)
         table[name]?.first ?: ExpressionSemanticsErrorCode.SymbolAlreadyUsed.new(location, "name" to name)
             .toTypePromise()
     } else cast<SymbolResolver>().getSymbol(name)

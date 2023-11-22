@@ -5,7 +5,7 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
 import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.semantics.nodes.SemanticInfo
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.semantics.nodes.SemanticModuleInfo
 import org.ksharp.semantics.nodes.toModuleInfo
 import org.ksharp.semantics.toSemanticModuleInfo

@@ -14,21 +14,21 @@ class ApplicationNodeTest : StringSpec({
             listOf(
                 VarNode(
                     "a",
-                    "VarInfo",
+                    ("VarInfo"),
                     Location.NoProvided
                 )
             ),
-            "AppInfo",
+            ("AppInfo"),
             Location.NoProvided
         ).node.apply {
             cast<ApplicationNode<String>>().apply {
                 functionName.shouldBe(ApplicationName(name = "sum5"))
-                info.shouldBe("AppInfo")
+                info.shouldBe(("AppInfo"))
                 arguments.shouldBe(
                     listOf(
                         VarNode(
                             "a",
-                            "VarInfo",
+                            ("VarInfo"),
                             Location.NoProvided
                         )
                     )
@@ -44,7 +44,7 @@ class ApplicationNodeTest : StringSpec({
                         Location.NoProvided,
                         VarNode(
                             "a",
-                            "VarInfo",
+                            ("VarInfo"),
                             Location.NoProvided
                         )
                     )

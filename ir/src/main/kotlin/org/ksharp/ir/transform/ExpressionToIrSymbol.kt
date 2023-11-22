@@ -3,7 +3,6 @@ package org.ksharp.ir.transform
 import org.ksharp.common.cast
 import org.ksharp.ir.*
 import org.ksharp.nodes.semantic.*
-import org.ksharp.semantics.nodes.SemanticInfo
 
 fun ConstantNode<SemanticInfo>.toIrSymbol(): IrExpression =
     when (value) {

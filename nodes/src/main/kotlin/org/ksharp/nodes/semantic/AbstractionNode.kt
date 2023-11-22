@@ -4,6 +4,11 @@ import org.ksharp.common.Location
 import org.ksharp.nodes.NodeData
 import org.ksharp.typesystem.attributes.Attribute
 
+data class AbstractionSemanticInfo(
+    val parameters: List<SemanticInfo>,
+    val returnType: TypePromise? = null
+) : SemanticInfo()
+
 data class AbstractionNode<SemanticInfo>(
     val attributes: Set<Attribute>,
     val name: String,

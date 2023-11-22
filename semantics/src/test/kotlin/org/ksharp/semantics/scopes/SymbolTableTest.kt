@@ -7,9 +7,9 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.common.new
+import org.ksharp.nodes.semantic.Symbol
+import org.ksharp.nodes.semantic.TypeSemanticInfo
 import org.ksharp.semantics.errors.ErrorCollector
-import org.ksharp.semantics.nodes.Symbol
-import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.types.newParameterForTesting

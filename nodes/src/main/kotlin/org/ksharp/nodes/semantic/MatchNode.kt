@@ -1,8 +1,14 @@
 package org.ksharp.nodes.semantic
 
 import org.ksharp.common.Location
+import org.ksharp.common.TableBuilder
 import org.ksharp.nodes.MatchConditionalType
 import org.ksharp.nodes.NodeData
+
+data class MatchSemanticInfo(
+    val table: TableBuilder<Symbol>,
+) : SemanticInfo()
+
 
 data class ConditionalMatchValueNode<SemanticInfo>(
     val type: MatchConditionalType,

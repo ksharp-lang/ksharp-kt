@@ -6,8 +6,8 @@ import org.ksharp.ir.IrSetVar
 import org.ksharp.ir.IrState
 import org.ksharp.nodes.semantic.LetBindingNode
 import org.ksharp.nodes.semantic.LetNode
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.nodes.semantic.VarNode
-import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
 import java.util.concurrent.atomic.AtomicInteger
 

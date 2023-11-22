@@ -9,6 +9,7 @@ import org.ksharp.nodes.NoLocationsDefined
 import org.ksharp.nodes.Node
 import org.ksharp.typesystem.attributes.NoAttributes
 
+
 class AbstractionNodeTest : StringSpec({
     "Test Node Interface over AbstractionNode" {
         AbstractionNode(
@@ -16,20 +17,20 @@ class AbstractionNodeTest : StringSpec({
             "id",
             VarNode(
                 "a",
-                "VarInfo",
+                ("VarInfo"),
                 Location.NoProvided
             ),
-            "AbstractionNode",
+            ("AbstractionNode"),
             Location.NoProvided
         ).node.apply {
             cast<AbstractionNode<String>>().apply {
                 attributes.shouldBeEmpty()
                 name.shouldBe("id")
-                info.shouldBe("AbstractionNode")
+                info.shouldBe(("AbstractionNode"))
                 expression.shouldBe(
                     VarNode(
                         "a",
-                        "VarInfo",
+                        ("VarInfo"),
                         Location.NoProvided
                     )
                 )
@@ -44,7 +45,7 @@ class AbstractionNodeTest : StringSpec({
                         Location.NoProvided,
                         VarNode(
                             "a",
-                            "VarInfo",
+                            ("VarInfo"),
                             Location.NoProvided
                         )
                     )

@@ -10,10 +10,6 @@ import org.ksharp.common.new
 import org.ksharp.module.Impl
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
-import org.ksharp.semantics.nodes.AbstractionSemanticInfo
-import org.ksharp.semantics.nodes.ApplicationSemanticInfo
-import org.ksharp.semantics.nodes.Symbol
-import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.semantics.solve
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft

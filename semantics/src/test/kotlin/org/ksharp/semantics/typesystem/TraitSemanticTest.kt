@@ -5,15 +5,8 @@ import io.kotest.core.test.TestCase
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
-import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.nodes.semantic.ApplicationName
-import org.ksharp.nodes.semantic.ApplicationNode
-import org.ksharp.nodes.semantic.VarNode
+import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.getSemanticModuleInfo
-import org.ksharp.semantics.nodes.AbstractionSemanticInfo
-import org.ksharp.semantics.nodes.ApplicationSemanticInfo
-import org.ksharp.semantics.nodes.Symbol
-import org.ksharp.semantics.nodes.TypeSemanticInfo
 import org.ksharp.semantics.scopes.TableErrorCode
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft

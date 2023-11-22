@@ -4,9 +4,9 @@ import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.ApplicationName
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.nodes.semantic.SemanticNode
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
-import org.ksharp.semantics.nodes.SemanticInfo
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.incompatibleType
