@@ -3,11 +3,7 @@ package org.ksharp.ir.transform
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.ir.*
-import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.nodes.semantic.AbstractionSemanticInfo
-import org.ksharp.nodes.semantic.SemanticInfo
-import org.ksharp.nodes.semantic.Symbol
-import org.ksharp.semantics.nodes.getType
+import org.ksharp.nodes.semantic.*
 import org.ksharp.typesystem.attributes.CommonAttribute
 
 val pureArgument = setOf(CommonAttribute.Pure)

@@ -4,7 +4,6 @@ import org.ksharp.common.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.expressions.CollectionFunctionName
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
-import org.ksharp.semantics.nodes.getType
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.solver.solve
