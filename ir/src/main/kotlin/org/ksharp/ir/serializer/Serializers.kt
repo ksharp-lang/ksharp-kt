@@ -3,9 +3,6 @@ package org.ksharp.ir.serializer
 import org.ksharp.common.*
 import org.ksharp.common.io.*
 import org.ksharp.ir.*
-import org.ksharp.typesystem.TypeSystem
-
-typealias TypeSystemHandle = HandlePromise<TypeSystem>
 
 interface IrNodeSerializer<S : IrNode> : SerializerWriter<S>, SerializerReader<S>
 
