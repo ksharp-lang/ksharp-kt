@@ -150,12 +150,18 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
     else {
         val info = this.info.cast<ApplicationSemanticInfo>()
         val (attributes, arguments) = arguments.toIrSymbols(state)
+        val functionType = info.function!!
+        val callName = "${functionName.name}/${functionType.arguments.arity}"
+        val trait = functionType.arguments.first().asTraitType()
+        val isTrait = trait != null
+        val scopeName = if (isTrait) {
+            trait?.irCustomNode
+        } else null
         IrCall(
             attributes,
             null,
-            functionName.name,
+            CallScope(callName, scopeName, isTrait),
             arguments,
-            info.function!!,
             location,
         ).apply {
             this.functionLookup = state.functionLookup

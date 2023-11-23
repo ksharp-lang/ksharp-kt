@@ -13,13 +13,16 @@ import org.ksharp.ir.truffle.cast.NumCastNode
 import org.ksharp.ir.truffle.variable.VarAccessNode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
-import org.ksharp.typesystem.types.Type
 
 sealed interface IrExpression : IrSymbol
 
 sealed interface IrBinaryOperation : IrExpression {
     val left: IrExpression
     val right: IrExpression
+}
+
+sealed interface IrValueAccess : IrExpression {
+    val index: Int
 }
 
 enum class CastType {
@@ -32,6 +35,12 @@ enum class CastType {
     BigInt,
     BigDecimal,
 }
+
+data class CallScope(
+    val callName: String,
+    val scopeName: String?,
+    val isTrait: Boolean
+)
 
 data class IrNumCast(
     val expr: IrExpression,
@@ -55,18 +64,18 @@ data class IrPair(
 
 data class IrArg(
     override val attributes: Set<Attribute>,
-    val index: Int,
+    override val index: Int,
     override val location: Location
-) : ArgAccessNode(index), IrExpression {
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+) : ArgAccessNode(index), IrValueAccess {
+    override val serializer: IrNodeSerializers = IrNodeSerializers.Arg
 }
 
 data class IrVar(
     override val attributes: Set<Attribute>,
-    val index: Int,
+    override val index: Int,
     override val location: Location
-) : VarAccessNode(index), IrExpression {
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+) : VarAccessNode(index), IrValueAccess {
+    override val serializer: IrNodeSerializers = IrNodeSerializers.Var
 }
 
 
@@ -83,16 +92,15 @@ data class IrIf(
 data class IrCall(
     override val attributes: Set<Attribute>,
     val module: String?,
-    val function: String,
+    val scope: CallScope,
     val arguments: List<IrExpression>,
-    val type: Type,
     override val location: Location
 ) : CallNode(arguments.cast<List<KSharpNode>>().toTypedArray()), IrExpression {
 
     lateinit var functionLookup: FunctionLookup
 
     override fun getCallTarget(): CallTarget? =
-        functionLookup.find(module, function, type)?.cast<RootNode>()?.callTarget
+        functionLookup.find(module, scope)?.cast<RootNode>()?.callTarget
 
     override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
 

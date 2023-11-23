@@ -19,7 +19,7 @@ typealias IrCollectionFactory = (
     location: Location
 ) -> IrCollections
 
-class IrCollectionsSerializer(val factory: IrCollectionFactory) : IrNodeSerializer<IrCollections> {
+class IrCollectionsSerializer(private val factory: IrCollectionFactory) : IrNodeSerializer<IrCollections> {
     override fun write(input: IrCollections, buffer: BufferWriter, table: BinaryTable) {
         input.attributes.writeTo(buffer, table)
         input.location.writeTo(buffer)

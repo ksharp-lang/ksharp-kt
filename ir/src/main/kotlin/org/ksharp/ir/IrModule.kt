@@ -5,25 +5,19 @@ import org.ksharp.common.cacheOf
 import org.ksharp.common.cast
 import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
-import org.ksharp.ir.transform.asTraitType
-import org.ksharp.ir.transform.irCustomNode
 import org.ksharp.ir.transform.toIrSymbol
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.SemanticInfo
-import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
-import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.arity
 
 fun interface FunctionLookup {
-    fun find(module: String?, name: String, type: Type): IrTopLevelSymbol?
+    fun find(module: String?, call: CallScope): IrTopLevelSymbol?
 }
 
 private fun binaryExpressionFunction(
     name: String,
     factory: BinaryOperationFactory
-): (type: FunctionType) -> IrTopLevelSymbol = {
+): () -> IrTopLevelSymbol = {
     IrArithmeticCall(
         name,
         factory(
@@ -39,38 +33,32 @@ private class FunctionLookupImpl : FunctionLookup {
 
     lateinit var functions: List<IrTopLevelSymbol>
 
-    private val cache = cacheOf<Pair<String, Type>, IrTopLevelSymbol>()
+    private val cache = cacheOf<CallScope, IrTopLevelSymbol>()
 
     private var irNodeFactory = mapOf(
-        "prelude::sum::(+)" to binaryExpressionFunction("(+)", ::IrSum),
-        "prelude::sub::(-)" to binaryExpressionFunction("(-)", ::IrSub),
-        "prelude::mul::(*)" to binaryExpressionFunction("(-)", ::IrMul),
-        "prelude::div::(/)" to binaryExpressionFunction("(-)", ::IrDiv),
-        "prelude::pow::(**)" to binaryExpressionFunction("(-)", ::IrPow),
-        "prelude::mod::(%)" to binaryExpressionFunction("(-)", ::IrMod),
+        "prelude::sum::(+)/2" to binaryExpressionFunction("(+)", ::IrSum),
+        "prelude::sub::(-)/2" to binaryExpressionFunction("(-)", ::IrSub),
+        "prelude::mul::(*)/2" to binaryExpressionFunction("(-)", ::IrMul),
+        "prelude::div::(/)/2" to binaryExpressionFunction("(-)", ::IrDiv),
+        "prelude::pow::(**)/2" to binaryExpressionFunction("(-)", ::IrPow),
+        "prelude::mod::(%)/2" to binaryExpressionFunction("(-)", ::IrMod),
     )
 
-    private fun findCustomFunction(name: String, type: FunctionType): IrTopLevelSymbol? {
-        if (type.attributes.contains(CommonAttribute.TraitMethod)) {
-            val trait = type.arguments.first().asTraitType()
-            if (trait != null) {
-                val node = trait.irCustomNode
-                return irNodeFactory["$node::$name"]?.invoke(type)
-            }
+    private fun findCustomFunction(call: CallScope): IrTopLevelSymbol? {
+        if (call.isTrait) {
+            return irNodeFactory["${call.scopeName}::${call.callName}"]?.invoke()
         }
         return null
     }
 
-    override fun find(module: String?, name: String, type: Type): IrTopLevelSymbol =
-        cache.get(name to type) {
-            val functionType = type.cast<FunctionType>()
-            val arity = functionType.arguments.arity
+    override fun find(module: String?, call: CallScope): IrTopLevelSymbol =
+        cache.get(call) {
             functions.asSequence()
                 .filter {
-                    it.name == name && it.arity == arity
+                    it.name == call.callName
                 }
                 .firstOrNull()
-                ?: findCustomFunction(name, functionType)!!
+                ?: findCustomFunction(call)!!
         }
 
 }

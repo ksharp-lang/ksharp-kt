@@ -21,8 +21,7 @@ class ModuleTest : StringSpec({
                             listOf(
                                 IrFunction(
                                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
-                                    "ten",
-                                    0,
+                                    "ten/0",
                                     listOf(),
                                     0,
                                     IrInteger(

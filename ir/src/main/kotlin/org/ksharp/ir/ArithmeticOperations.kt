@@ -82,7 +82,6 @@ data class IrArithmeticCall(
 
     override val attributes: Set<Attribute> = expr.attributes
     override val location: Location = expr.location
-    override val arity: Int = 2
     override val serializer: IrNodeSerializers = IrNodeSerializers.ArithmeticCall
 
 }

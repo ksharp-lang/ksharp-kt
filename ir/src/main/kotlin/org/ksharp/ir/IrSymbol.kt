@@ -13,14 +13,12 @@ interface IrSymbol : IrNode {
 
 interface IrTopLevelSymbol : IrSymbol {
     val name: String
-    val arity: Int
     val expr: IrExpression
 }
 
 data class IrFunction(
     override val attributes: Set<Attribute>,
     @get:JvmName("getSymbolName") override val name: String,
-    override val arity: Int,
     val arguments: List<String>,
     val frameSlots: Int,
     override val expr: IrExpression,

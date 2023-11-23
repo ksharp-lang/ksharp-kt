@@ -35,8 +35,7 @@ fun AbstractionNode<SemanticInfo>.toIrSymbol(
     return IrFunction(
         //all functions are pure, except if it is marked impure
         expression.addExpressionAttributes(attributes, CommonAttribute.Constant, CommonAttribute.Impure),
-        name,
-        inferredType.cast<FunctionType>().arguments.arity,
+        "$name/${inferredType.cast<FunctionType>().arguments.arity}",
         arguments,
         irState.variableIndex.size,
         expression,

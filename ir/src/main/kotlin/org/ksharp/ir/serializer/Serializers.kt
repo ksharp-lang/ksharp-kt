@@ -40,6 +40,8 @@ enum class IrNodeSerializers(
     Pow(IrBinaryOperationSerializer(::IrPow)),
     Mod(IrBinaryOperationSerializer(::IrMod)),
     ArithmeticCall(IrArithmeticCallSerializer()),
+    Arg(IrVarValueSerializer(::IrArg)),
+    Var(IrVarValueSerializer(::IrVar)),
 
 }
 
