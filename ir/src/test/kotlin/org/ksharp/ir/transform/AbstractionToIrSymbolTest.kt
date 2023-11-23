@@ -173,7 +173,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                 """.trimIndent(), IrCall(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 null,
-                CallScope("sum/2", null, false),
+                CallScope("sum/2", traitScopeName = "prelude::sum", true),
                 listOf(
                     IrInteger(
                         1,
@@ -381,7 +381,7 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
                 """.trimIndent(), IrCall(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 null,
-                CallScope("sum/2", null, false),
+                CallScope("sum/2", "prelude::sum", true),
                 listOf(
                     IrInteger(
                         1,

@@ -45,8 +45,8 @@ private class FunctionLookupImpl : FunctionLookup {
     )
 
     private fun findCustomFunction(call: CallScope): IrTopLevelSymbol? {
-        if (call.isTrait) {
-            return irNodeFactory["${call.scopeName}::${call.callName}"]?.invoke()
+        if (call.isFirstArgTrait) {
+            return irNodeFactory["${call.traitScopeName}::${call.callName}"]?.invoke()
         }
         return null
     }
