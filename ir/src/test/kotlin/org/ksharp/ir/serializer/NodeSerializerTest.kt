@@ -128,4 +128,25 @@ class NodeSerializerTest : StringSpec({
         IrVar(attributes, 1, location)
             .shouldBeSerializable()
     }
+    "IrIf test" {
+        IrIf(
+            attributes,
+            IrBool(true, location),
+            IrInteger(1, location),
+            IrInteger(2, location),
+            location
+        )
+            .shouldBeSerializable()
+    }
+    "IrFunction test" {
+        IrFunction(
+            attributes,
+            "test",
+            listOf("a", "b"),
+            1,
+            IrInteger(1, location),
+            location
+        )
+            .shouldBeSerializable()
+    }
 })

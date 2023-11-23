@@ -86,7 +86,7 @@ data class IrIf(
     val elseExpr: IrExpression,
     override val location: Location
 ) : IfNode(condition.cast(), thenExpr.cast(), elseExpr.cast()), IrExpression {
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val serializer: IrNodeSerializers = IrNodeSerializers.If
 }
 
 data class IrCall(

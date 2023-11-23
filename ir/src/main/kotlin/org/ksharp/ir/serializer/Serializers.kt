@@ -39,6 +39,8 @@ enum class IrNodeSerializers(
     ArithmeticCall(IrArithmeticCallSerializer()),
     Arg(IrVarValueSerializer(::IrArg)),
     Var(IrVarValueSerializer(::IrVar)),
+    If(IrIfSerializer()),
+    Function(IrFunctionSerializer()),
 
 }
 

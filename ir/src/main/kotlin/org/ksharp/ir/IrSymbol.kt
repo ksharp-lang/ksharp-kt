@@ -26,5 +26,5 @@ data class IrFunction(
 ) : FunctionNode(frameSlots, expr.cast()), IrTopLevelSymbol, IrExpression {
     fun call(vararg arguments: Any): Any = callTarget.call(*arguments)
 
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val serializer: IrNodeSerializers = IrNodeSerializers.Function
 }
