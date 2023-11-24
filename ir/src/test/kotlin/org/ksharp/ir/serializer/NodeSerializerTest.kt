@@ -174,4 +174,24 @@ class NodeSerializerTest : StringSpec({
         )
             .shouldBeSerializable()
     }
+    "IrLet test" {
+        IrLet(
+            attributes,
+            listOf(
+                IrInteger(1, location),
+                IrInteger(2, location),
+            ),
+            location
+        )
+            .shouldBeSerializable()
+    }
+    "IrLetSetVar test" {
+        IrSetVar(
+            attributes,
+            0,
+            IrInteger(2, location),
+            location
+        )
+            .shouldBeSerializable()
+    }
 })
