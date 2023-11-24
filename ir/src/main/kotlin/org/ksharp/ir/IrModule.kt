@@ -64,16 +64,14 @@ private class FunctionLookupImpl : FunctionLookup {
 }
 
 data class IrModule(
-    val dependencies: List<String>,
     val symbols: List<IrTopLevelSymbol>
 ) : IrNode {
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val serializer: IrNodeSerializers = IrNodeSerializers.Module
 }
 
 fun List<AbstractionNode<SemanticInfo>>.toIrModule(): Pair<IrModule, FunctionLookup> {
     val lookup = FunctionLookupImpl()
     val module = IrModule(
-        listOf(),
         map { it.toIrSymbol(lookup) }
     )
     lookup.functions = module.symbols.cast()

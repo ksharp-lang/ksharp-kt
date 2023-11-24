@@ -17,7 +17,6 @@ class ModuleTest : StringSpec({
                     .first
                     .shouldBe(
                         IrModule(
-                            listOf(),
                             listOf(
                                 IrFunction(
                                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),

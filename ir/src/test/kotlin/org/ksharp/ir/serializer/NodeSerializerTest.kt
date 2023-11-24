@@ -149,4 +149,29 @@ class NodeSerializerTest : StringSpec({
         )
             .shouldBeSerializable()
     }
+    "IrModule test" {
+        IrModule(
+            listOf(
+                IrFunction(
+                    attributes,
+                    "test",
+                    listOf("a", "b"),
+                    1,
+                    IrInteger(1, location),
+                    location
+                )
+            )
+        )
+            .shouldBeSerializable()
+    }
+    "IrCall test" {
+        IrCall(
+            attributes,
+            "test",
+            CallScope("test", null, false),
+            listOf(IrInteger(1, location), IrInteger(2, location)),
+            location
+        )
+            .shouldBeSerializable()
+    }
 })

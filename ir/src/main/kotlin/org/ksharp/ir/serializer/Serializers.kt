@@ -20,6 +20,8 @@ enum class IrNodeSerializers(
         }
     }),
 
+    Module(IrModuleSerializer()),
+    Function(IrFunctionSerializer()),
     Integer(IrIntegerSerializer()),
     Decimal(IrDecimalSerializer()),
     Character(IrCharacterSerializer()),
@@ -40,7 +42,7 @@ enum class IrNodeSerializers(
     Arg(IrVarValueSerializer(::IrArg)),
     Var(IrVarValueSerializer(::IrVar)),
     If(IrIfSerializer()),
-    Function(IrFunctionSerializer()),
+    Call(IrCallSerializer()),
 
 }
 
