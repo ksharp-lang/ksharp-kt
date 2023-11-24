@@ -13,7 +13,7 @@ data class IrLet(
     val expressions: List<IrExpression>,
     override val location: Location
 ) : LetNode(expressions.cast<List<KSharpNode>>().toTypedArray()), IrExpression {
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val serializer: IrNodeSerializers = IrNodeSerializers.Let
 }
 
 data class IrSetVar(
@@ -22,5 +22,5 @@ data class IrSetVar(
     val value: IrExpression,
     override val location: Location
 ) : SetVarNode(index, value.cast()), IrExpression {
-    override val serializer: IrNodeSerializers = IrNodeSerializers.NoDefined
+    override val serializer: IrNodeSerializers = IrNodeSerializers.LetSetVar
 }

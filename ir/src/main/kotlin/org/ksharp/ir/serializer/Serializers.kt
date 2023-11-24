@@ -10,16 +10,6 @@ enum class IrNodeSerializers(
     val serializer: IrNodeSerializer<out IrNode>,
 ) {
     //ADD new Serializers at the end of the list
-    NoDefined(object : IrNodeSerializer<IrNode> {
-        override fun write(input: IrNode, buffer: BufferWriter, table: BinaryTable) {
-            error("No serializer for $input")
-        }
-
-        override fun read(buffer: BufferView, table: BinaryTableView): IrNode {
-            error("No serializer for IrNode")
-        }
-    }),
-
     Module(IrModuleSerializer()),
     Function(IrFunctionSerializer()),
     Integer(IrIntegerSerializer()),
@@ -43,6 +33,8 @@ enum class IrNodeSerializers(
     Var(IrVarValueSerializer(::IrVar)),
     If(IrIfSerializer()),
     Call(IrCallSerializer()),
+    Let(IrLetSerializer()),
+    LetSetVar(IrSetVarSerializer()),
 
 }
 
