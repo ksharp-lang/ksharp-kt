@@ -5,14 +5,9 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
 import org.ksharp.common.Location
 import org.ksharp.common.Offset
-import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
-import org.ksharp.typesystem.attributes.NoAttributes
-import org.ksharp.typesystem.types.toFunctionType
 
 class ModuleTest : StringSpec({
-    val longType = preludeModule.typeSystem["Long"].valueOrNull!!
-    val unitType = preludeModule.typeSystem["Unit"].valueOrNull!!
     "IrModule " {
         "ten = 10"
             .toSemanticModuleInfo()
@@ -22,14 +17,12 @@ class ModuleTest : StringSpec({
                     .first
                     .shouldBe(
                         IrModule(
-                            listOf(),
                             listOf(
                                 IrFunction(
                                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
-                                    "ten",
+                                    "ten/0",
                                     listOf(),
                                     0,
-                                    listOf(unitType, longType).toFunctionType(typeSystem, NoAttributes),
                                     IrInteger(
                                         10,
                                         Location(Line(1) to Offset(6), Line(1) to Offset(8))

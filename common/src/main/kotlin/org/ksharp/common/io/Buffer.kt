@@ -8,12 +8,17 @@ import java.io.OutputStream
 
 private val allocator = PooledByteBufAllocator.DEFAULT
 
+/**
+ * Endianess is BIG_ENDIAN
+ */
 interface BufferWriter {
 
     val size: Int
     fun add(value: String): Int
     fun set(index: Int, value: Int)
     fun add(value: Int)
+    fun add(value: Long)
+    fun add(double: Double)
 
     /**
      * Once the buffer is transferred it is destroyed
@@ -26,10 +31,17 @@ interface BufferWriter {
     fun transferTo(buffer: BufferWriter)
 }
 
+/**
+ * Endianess is BIG_ENDIAN
+ */
 interface BufferView {
     val offset: Int get() = 0
 
     fun readInt(index: Int): Int
+
+    fun readLong(index: Int): Long
+
+    fun readDouble(index: Int): Double
 
     fun readString(index: Int, size: Int): String
 
@@ -38,7 +50,8 @@ interface BufferView {
 }
 
 class OffsetBufferView(override val offset: Int, private val bufferView: BufferView) : BufferView {
-
+    override fun readLong(index: Int): Long = bufferView.readLong(offset + index)
+    override fun readDouble(index: Int): Double = bufferView.readDouble(offset + index)
     override fun readInt(index: Int): Int = bufferView.readInt(offset + index)
     override fun readString(index: Int, size: Int): String = bufferView.readString(offset + index, size)
     override fun bufferFrom(offset: Int) = OffsetBufferView(offset + this.offset, bufferView)
@@ -49,7 +62,7 @@ class OffsetBufferView(override val offset: Int, private val bufferView: BufferV
  * Calling methods after the buffer is written produce an exception
  */
 private class BufferWriterImpl : BufferWriter {
-    private val buffer: ByteBuf = allocator.heapBuffer()
+    private val buffer: ByteBuf = allocator.directBuffer()
 
     override val size: Int get() = buffer.readableBytes()
     override fun add(value: String): Int = buffer.writeCharSequence(value, Charsets.UTF_8)
@@ -60,6 +73,14 @@ private class BufferWriterImpl : BufferWriter {
 
     override fun add(value: Int) {
         buffer.writeInt(value)
+    }
+
+    override fun add(value: Long) {
+        buffer.writeLong(value)
+    }
+
+    override fun add(double: Double) {
+        buffer.writeDouble(double)
     }
 
     override fun transferTo(output: OutputStream) {
@@ -78,7 +99,8 @@ private class BufferWriterImpl : BufferWriter {
 
 private class BufferViewImpl(private val byteBuf: ByteBuf) : BufferView {
     override fun readInt(index: Int) = byteBuf.getInt(index)
-
+    override fun readLong(index: Int): Long = byteBuf.getLong(index)
+    override fun readDouble(index: Int): Double = byteBuf.getDouble(index)
     override fun readString(index: Int, size: Int): String = byteBuf.toString(index, size, Charsets.UTF_8)
 }
 

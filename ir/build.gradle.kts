@@ -8,12 +8,11 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":nodes"))
     implementation(project(":typesystem"))
-
+    implementation(project(":module"))
 
     implementation(libs.graalvm.truffle.api)
     annotationProcessor(libs.graalvm.truffle.dsl.processor)
 
-    testImplementation(project(":module"))
     testImplementation(project(":semantics"))
     testImplementation(project(":parser"))
     testImplementation(project(":test"))

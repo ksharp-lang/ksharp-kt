@@ -2,17 +2,14 @@ package org.ksharp.ir.transform
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import org.ksharp.common.*
+import org.ksharp.common.Line
+import org.ksharp.common.Location
+import org.ksharp.common.Offset
+import org.ksharp.common.cast
 import org.ksharp.ir.*
-import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
-import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
-import org.ksharp.typesystem.solver.solve
-import org.ksharp.typesystem.types.ImplType
-import org.ksharp.typesystem.types.alias
-import org.ksharp.typesystem.types.toFunctionType
 
 private fun String.getFirstAbstraction() =
     toSemanticModuleInfo()
@@ -40,12 +37,7 @@ private fun arithmeticExpected(factory: BinaryOperationFactory) =
     )
 
 class AbstractionToIrSymbolTest : StringSpec({
-    val functionLookup = FunctionLookup { _, _, _ -> null }
-    val ts = preludeModule.typeSystem
-    val addType = ts["Add"].valueOrNull!!
-    val longType = ts["Long"].valueOrNull!!
-    val longImplType = ImplType(addType.cast(), longType)
-    val unitType = ts["Unit"].valueOrNull!!
+    val functionLookup = FunctionLookup { _, _ -> null }
     listOf(
         createSpec(
             "IrInteger expression", "fn = 10", IrInteger(
@@ -181,7 +173,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                 """.trimIndent(), IrCall(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 null,
-                "sum",
+                CallScope("sum/2", traitScopeName = "prelude::sum", true),
                 listOf(
                     IrInteger(
                         1,
@@ -191,10 +183,6 @@ class AbstractionToIrSymbolTest : StringSpec({
                         2,
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
-                ),
-                listOf(longImplType, longImplType, longImplType).toFunctionType(
-                    MockHandlePromise(),
-                    setOf(CommonAttribute.Internal)
                 ),
                 Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )
@@ -320,14 +308,13 @@ class AbstractionToIrSymbolTest : StringSpec({
     "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
-            .toIrSymbol(IrState({ _, _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(IrState({ _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
             .shouldBe(
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
-                    "ten",
+                    "ten/0",
                     listOf(),
                     0,
-                    listOf(unitType, longType).toFunctionType(MockHandlePromise(), NoAttributes),
                     IrInteger(
                         10,
                         Location(Line(1) to Offset(6), Line(1) to Offset(8))
@@ -356,8 +343,6 @@ class AbstractionToIrSymbolTest : StringSpec({
             }
     }
     "Function with arguments" {
-        val internalCharType =
-            preludeModule.typeSystem.alias("Char").valueOrNull!!
         """
             c :: Char -> Char
             c a = a
@@ -368,13 +353,9 @@ class AbstractionToIrSymbolTest : StringSpec({
                 shouldBe(
                     IrFunction(
                         setOf(CommonAttribute.Internal),
-                        "c",
+                        "c/1",
                         listOf("a"),
                         0,
-                        listOf(
-                            internalCharType.solve().valueOrNull!!,
-                            internalCharType.solve().valueOrNull!!
-                        ).toFunctionType(MockHandlePromise(), NoAttributes),
                         IrArg(
                             setOf(CommonAttribute.Pure),
                             0,
@@ -389,11 +370,7 @@ class AbstractionToIrSymbolTest : StringSpec({
 
 
 class CustomAbstractionToIrSymbolTest : StringSpec({
-    val functionLookup = FunctionLookup { _, _, _ -> null }
-    val ts = preludeModule.typeSystem
-    val addType = ts["Add"].valueOrNull!!
-    val longType = ts["Long"].valueOrNull!!
-    val longImplType = ImplType(addType.cast(), longType)
+    val functionLookup = FunctionLookup { _, _ -> null }
     "Check a custom spec" {
         createSpec(
             "Constant IrCall expression",
@@ -404,7 +381,7 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
                 """.trimIndent(), IrCall(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 null,
-                "sum",
+                CallScope("sum/2", "prelude::sum", true),
                 listOf(
                     IrInteger(
                         1,
@@ -414,10 +391,6 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
                         2,
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
-                ),
-                listOf(longImplType, longImplType, longImplType).toFunctionType(
-                    MockHandlePromise(),
-                    setOf(CommonAttribute.Internal)
                 ),
                 Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )

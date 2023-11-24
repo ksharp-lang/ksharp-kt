@@ -5,6 +5,8 @@ import org.ksharp.common.cast
 import org.ksharp.ir.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.arity
 
 val pureArgument = setOf(CommonAttribute.Pure)
 
@@ -33,10 +35,9 @@ fun AbstractionNode<SemanticInfo>.toIrSymbol(
     return IrFunction(
         //all functions are pure, except if it is marked impure
         expression.addExpressionAttributes(attributes, CommonAttribute.Constant, CommonAttribute.Impure),
-        name,
+        "$name/${inferredType.cast<FunctionType>().arguments.arity}",
         arguments,
         irState.variableIndex.size,
-        inferredType.cast(),
         expression,
         location
     )
