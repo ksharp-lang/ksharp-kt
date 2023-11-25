@@ -6,8 +6,7 @@ import org.ksharp.common.cast
 import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.toIrSymbol
-import org.ksharp.nodes.semantic.AbstractionNode
-import org.ksharp.nodes.semantic.SemanticInfo
+import org.ksharp.module.CodeModule
 import org.ksharp.typesystem.attributes.NoAttributes
 
 fun interface FunctionLookup {
@@ -69,10 +68,10 @@ data class IrModule(
     override val serializer: IrNodeSerializers = IrNodeSerializers.Module
 }
 
-fun List<AbstractionNode<SemanticInfo>>.toIrModule(): Pair<IrModule, FunctionLookup> {
+fun CodeModule.toIrModule(): Pair<IrModule, FunctionLookup> {
     val lookup = FunctionLookupImpl()
     val module = IrModule(
-        map { it.toIrSymbol(lookup) }
+        artifact.abstractions.map { it.toIrSymbol(lookup) }
     )
     lookup.functions = module.symbols.cast()
     return module to lookup

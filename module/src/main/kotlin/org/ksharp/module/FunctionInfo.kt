@@ -2,11 +2,19 @@ package org.ksharp.module
 
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.isUnitType
 
 interface FunctionInfo {
     val attributes: Set<Attribute>
     val name: String
     val types: List<Type>
+
+    val nameWithArity: String
+        get() = when (val size = types.size) {
+            2 -> if (types.first().isUnitType) 0 else 1
+            else -> size - 1
+        }.let { "$name/$it" }
+
 }
 
 internal data class FunctionInfoImpl(

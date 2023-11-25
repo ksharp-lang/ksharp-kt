@@ -7,7 +7,7 @@ import org.ksharp.common.*
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.semantics.nodes.SemanticModuleInfo
-import org.ksharp.semantics.nodes.toModuleInfo
+import org.ksharp.semantics.nodes.toCodeModule
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -365,11 +365,16 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .apply {
                 shouldBeRight()
-                valueOrNull!!.toModuleInfo().functions.keys.shouldBe(
-                    listOf(
-                        "emptyHashMap/0"
+                valueOrNull!!
+                    .toCodeModule()
+                    .module
+                    .functions
+                    .keys
+                    .shouldBe(
+                        listOf(
+                            "emptyHashMap/0"
+                        )
                     )
-                )
             }
             .shouldInferredTypesBe(
                 "emptyHashMap :: (Unit -> (Map k v))"

@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import org.ksharp.compiler.moduleInfo
 import org.ksharp.module.bytecode.writeTo
 import org.ksharp.module.prelude.kernelModule
-import org.ksharp.semantics.nodes.toModuleInfo
+import org.ksharp.semantics.nodes.toCodeModule
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.types.TraitType
 import java.io.FileOutputStream
@@ -19,7 +19,8 @@ class CompilePreludeModule : StringSpec({
         moduleInfo
             .shouldBeRight()
             .map {
-                it.toModuleInfo()
+                it.toCodeModule()
+                    .module
                     .also { m ->
                         m.functions.keys.onEach(::println)
                         println("=== Traits ===")

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Line
 import org.ksharp.common.Location
 import org.ksharp.common.Offset
+import org.ksharp.semantics.nodes.toCodeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
 
 class ModuleTest : StringSpec({
@@ -12,7 +13,7 @@ class ModuleTest : StringSpec({
         "ten = 10"
             .toSemanticModuleInfo()
             .apply {
-                abstractions
+                toCodeModule()
                     .toIrModule()
                     .first
                     .shouldBe(
