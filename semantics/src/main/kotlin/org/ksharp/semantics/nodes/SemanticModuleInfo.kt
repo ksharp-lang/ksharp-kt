@@ -2,10 +2,7 @@ package org.ksharp.semantics.nodes
 
 import org.ksharp.common.Error
 import org.ksharp.common.cast
-import org.ksharp.module.FunctionInfo
-import org.ksharp.module.Impl
-import org.ksharp.module.ModuleInfo
-import org.ksharp.module.functionInfo
+import org.ksharp.module.*
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.SemanticInfo
@@ -14,7 +11,6 @@ import org.ksharp.semantics.expressions.checkInferenceSemantics
 import org.ksharp.semantics.typesystem.checkTypesSemantics
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.isUnitType
 
 data class SemanticModuleInfo(
     val name: String,
@@ -67,12 +63,6 @@ fun SemanticModuleInterface.toSemanticModuleInfo(): SemanticModuleInfo {
     )
 }
 
-val FunctionInfo.nameWithArity: String
-    get() = when (val size = types.size) {
-        2 -> if (types.first().isUnitType) 0 else 1
-        else -> size - 1
-    }.let { "$name/$it" }
-
 private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
     this.asSequence().map {
         val semanticInfo = it.info
@@ -81,11 +71,15 @@ private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
     }.associateBy { it.nameWithArity }
 
 
-fun SemanticModuleInfo.toModuleInfo(): ModuleInfo {
-    return ModuleInfo(
-        dependencies = mapOf(),
-        typeSystem = typeSystem,
-        functions = abstractions.toFunctionInfoMap(),
-        impls = impls,
+fun SemanticModuleInfo.toCodeModule(): CodeModule =
+    CodeModule(
+        ModuleInfo(
+            dependencies = mapOf(),
+            typeSystem = typeSystem,
+            functions = abstractions.toFunctionInfoMap(),
+            impls = impls,
+        ),
+        CodeArtifact(abstractions),
+        traitsAbstractions.mapValues { CodeArtifact(it.value) },
+        implAbstractions.mapValues { CodeArtifact(it.value) }
     )
-}
