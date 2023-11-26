@@ -3,6 +3,9 @@ package org.ksharp.ir.serializer
 import org.ksharp.common.*
 import org.ksharp.common.io.*
 import org.ksharp.ir.*
+import org.ksharp.module.bytecode.StringPoolBuilder
+import org.ksharp.module.bytecode.StringPoolView
+import java.io.OutputStream
 
 interface IrNodeSerializer<S : IrNode> : SerializerWriter<S>, SerializerReader<S>
 
@@ -90,4 +93,24 @@ fun BufferView.readListOfNodes(tableView: BinaryTableView): List<IrNode> {
         result.add(typeBuffer.readIrNode(tableView))
     }
     return result.build()
+}
+
+fun IrModule.writeTo(output: OutputStream) {
+    val stringPool = StringPoolBuilder()
+    val code = newBufferWriter().apply {
+        serialize(this, stringPool)
+    }
+    val header = newBufferWriter()
+    header.add(stringPool.size) // 0
+    header.transferTo(output)
+    stringPool.writeTo(output)
+    code.transferTo(output)
+}
+
+
+fun BufferView.readIrModule(): IrModule {
+    val stringPoolSize = readInt(0)
+    val offset = 4
+    val stringPool = StringPoolView(bufferFrom(offset))
+    return bufferFrom(offset + stringPoolSize).readIrNode(stringPool).cast()
 }

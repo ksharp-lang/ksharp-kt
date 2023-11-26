@@ -13,7 +13,6 @@ class ModuleTest : StringSpec({
             .toCodeModule()
             .apply {
                 toIrModule()
-                    .first
                     .shouldBe(
                         IrModule(
                             listOf(

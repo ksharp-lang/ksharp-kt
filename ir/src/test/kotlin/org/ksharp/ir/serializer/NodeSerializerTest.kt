@@ -40,6 +40,15 @@ private inline fun <reified T : IrNode> T.shouldBeSerializable() {
     })
 }
 
+private fun IrModule.shouldBeSerializableModule() {
+    val output = ByteArrayOutputStream()
+    writeTo(output)
+    val input = ByteArrayInputStream(output.toByteArray())
+    this.shouldBe(input.bufferView {
+        it.readIrModule().also(::println)
+    })
+}
+
 class NodeSerializerTest : StringSpec({
     val location = Location(Line(1) to Offset(1), Line(1) to Offset(5))
     val attributes = setOf(CommonAttribute.Native, CommonAttribute.Public)
@@ -161,8 +170,11 @@ class NodeSerializerTest : StringSpec({
                     location
                 )
             )
-        )
-            .shouldBeSerializable()
+        ).apply {
+            shouldBeSerializable()
+            shouldBeSerializableModule()
+        }
+
     }
     "IrCall test" {
         IrCall(

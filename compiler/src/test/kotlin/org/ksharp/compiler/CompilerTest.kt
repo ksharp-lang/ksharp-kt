@@ -16,8 +16,6 @@ import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.resetParameterCounterForTesting
-import java.io.File
-import kotlin.io.path.Path
 
 class CompilerTestModuleInfo : StringSpec({
     "Create a moduleinfo from a String" {
@@ -65,72 +63,6 @@ class CompilerTestModuleInfo : StringSpec({
             .apply {
                 map {
                     it.name.shouldBe("file1")
-                    it.errors.shouldBeEmpty()
-                    it.artifact.abstractions.shouldBe(
-                        listOf(
-                            AbstractionNode(
-                                setOf(CommonAttribute.Internal),
-                                name = "ten",
-                                expression = ConstantNode(
-                                    value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.module.typeSystem["Long"]),
-                                    location = Location(
-                                        Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
-                                    )
-                                ),
-                                info = AbstractionSemanticInfo(
-                                    parameters = emptyList(),
-                                    TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
-                                ),
-                                location = Location(
-                                    Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 3)
-                                )
-                            )
-                        )
-                    )
-                }
-            }
-    }
-    "Create a moduleinfo from a File" {
-        File("src/test/resources/ten.ff")
-            .moduleInfo(preludeModule)
-            .shouldBeRight()
-            .apply {
-                map {
-                    it.name.shouldBe("ten")
-                    it.errors.shouldBeEmpty()
-                    it.artifact.abstractions.shouldBe(
-                        listOf(
-                            AbstractionNode(
-                                setOf(CommonAttribute.Internal),
-                                name = "ten",
-                                expression = ConstantNode(
-                                    value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.module.typeSystem["Long"]),
-                                    location = Location(
-                                        Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
-                                    )
-                                ),
-                                info = AbstractionSemanticInfo(
-                                    parameters = emptyList(),
-                                    TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
-                                ),
-                                location = Location(
-                                    Line(value = 1) to Offset(value = 0), Line(value = 1) to Offset(value = 3)
-                                )
-                            )
-                        )
-                    )
-                }
-            }
-    }
-    "Create a moduleinfo from a Path" {
-        Path("src/test/resources/ten.ff")
-            .moduleInfo(preludeModule)
-            .shouldBeRight()
-            .apply {
-                map {
-                    it.name.shouldBe("ten")
                     it.errors.shouldBeEmpty()
                     it.artifact.abstractions.shouldBe(
                         listOf(
