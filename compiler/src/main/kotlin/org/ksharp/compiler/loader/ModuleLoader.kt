@@ -61,7 +61,9 @@ class ModuleLoader(
             }.flatMap {
                 it.toCodeModule(preludeModule).let { codeModule ->
                     if (codeModule.errors.isEmpty())
-                        Either.Right(CodeModuleInterface(codeModule, sources))
+                        Either.Right(CodeModuleInterface(codeModule, sources).apply {
+                            compile()
+                        })
                     else Either.Left(codeModule.errors)
                 }
             }

@@ -21,10 +21,10 @@ class CodeModuleInterface(
     override val impls: Set<Impl> = module.module.impls
 
     fun compile() {
-        sources.outputStream(name.toModulePath(".ksm")).let {
+        sources.outputStream(name.toModulePath("ksm")).let {
             module.module.writeTo(it)
         }
-        sources.outputStream(name.toModulePath(".ksc")).let {
+        sources.outputStream(name.toModulePath("ksc")).let {
             module.toIrModule().writeTo(it)
         }
     }
