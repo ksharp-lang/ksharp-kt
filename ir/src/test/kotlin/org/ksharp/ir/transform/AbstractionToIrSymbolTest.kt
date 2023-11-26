@@ -12,7 +12,8 @@ import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.nameAttribute
 
 private fun String.getFirstAbstraction() =
-    toSemanticModuleInfo()
+    toCodeModule()
+        .artifact
         .abstractions
         .also {
             println(it.first())

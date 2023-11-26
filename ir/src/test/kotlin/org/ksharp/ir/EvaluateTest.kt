@@ -4,7 +4,6 @@ import com.oracle.truffle.api.strings.TruffleString
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.cast
-import org.ksharp.semantics.nodes.toCodeModule
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -14,8 +13,7 @@ private data class Call(
 )
 
 private fun String.evaluateFirstFunction(arguments: List<Any>) =
-    toSemanticModuleInfo()
-        .toCodeModule()
+    toCodeModule()
         .toIrModule()
         .first
         .symbols
