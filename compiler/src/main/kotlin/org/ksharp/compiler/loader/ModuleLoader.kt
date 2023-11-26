@@ -67,8 +67,8 @@ class ModuleLoader(
             }
 
     fun load(name: String, from: String): ErrorsOrModuleInterface =
-        sources.binaryLoad(name.toModulePath(".ksm"))?.readModuleInfo(name)
-            ?: name.toModulePath(".ks").let {
+        sources.binaryLoad(name.toModulePath("ksm"))?.readModuleInfo(name)
+            ?: name.toModulePath("ks").let {
                 sources.sourceLoad(it)?.codeModule(it, preludeModule)
             } ?: Either.Left(listOf(ModuleLoaderErrorCode.ModuleNotFound.new("name" to name)))
 
