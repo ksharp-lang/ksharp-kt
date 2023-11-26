@@ -9,7 +9,7 @@ data class DocumentActions(
 
 fun documentActions(uri: String): DocumentActions {
     val semanticTokensActions = semanticTokenAction()
-    val semanticModuleInfoAction = semanticModuleInfoAction(uri) {
+    val codeModuleErrors = codeModuleErrorsAction(uri) {
         trigger {
             +publishSemanticErrorsAction(uri)
         }
@@ -17,7 +17,7 @@ fun documentActions(uri: String): DocumentActions {
     val parseAction = parseAction {
         trigger {
             +semanticTokensActions
-            +semanticModuleInfoAction
+            +codeModuleErrors
         }
     }
     return DocumentActions(

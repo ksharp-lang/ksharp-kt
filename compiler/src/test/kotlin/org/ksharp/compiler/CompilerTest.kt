@@ -31,14 +31,14 @@ class CompilerTestModuleInfo : StringSpec({
                 map {
                     it.name.shouldBe("file1")
                     it.errors.shouldBeEmpty()
-                    it.abstractions.shouldBe(
+                    it.artifact.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
                                 setOf(CommonAttribute.Internal),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.typeSystem["Long"]),
+                                    info = TypeSemanticInfo(type = it.module.typeSystem["Long"]),
                                     location = Location(
                                         Line(value = 2) to Offset(value = 6), Line(value = 2) to Offset(value = 8)
                                     )
@@ -66,14 +66,14 @@ class CompilerTestModuleInfo : StringSpec({
                 map {
                     it.name.shouldBe("file1")
                     it.errors.shouldBeEmpty()
-                    it.abstractions.shouldBe(
+                    it.artifact.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
                                 setOf(CommonAttribute.Internal),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.typeSystem["Long"]),
+                                    info = TypeSemanticInfo(type = it.module.typeSystem["Long"]),
                                     location = Location(
                                         Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )
@@ -99,14 +99,14 @@ class CompilerTestModuleInfo : StringSpec({
                 map {
                     it.name.shouldBe("ten")
                     it.errors.shouldBeEmpty()
-                    it.abstractions.shouldBe(
+                    it.artifact.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
                                 setOf(CommonAttribute.Internal),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.typeSystem["Long"]),
+                                    info = TypeSemanticInfo(type = it.module.typeSystem["Long"]),
                                     location = Location(
                                         Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )
@@ -132,14 +132,14 @@ class CompilerTestModuleInfo : StringSpec({
                 map {
                     it.name.shouldBe("ten")
                     it.errors.shouldBeEmpty()
-                    it.abstractions.shouldBe(
+                    it.artifact.abstractions.shouldBe(
                         listOf(
                             AbstractionNode(
                                 setOf(CommonAttribute.Internal),
                                 name = "ten",
                                 expression = ConstantNode(
                                     value = 10.toLong(),
-                                    info = TypeSemanticInfo(type = it.typeSystem["Long"]),
+                                    info = TypeSemanticInfo(type = it.module.typeSystem["Long"]),
                                     location = Location(
                                         Line(value = 1) to Offset(value = 6), Line(value = 1) to Offset(value = 8)
                                     )

@@ -1,30 +1,21 @@
 package org.ksharp.lsp.actions
 
+import org.ksharp.common.Error
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.NodeData
 import org.ksharp.parser.ksharp.toModuleNode
-import org.ksharp.semantics.nodes.SemanticModuleInfo
-import org.ksharp.semantics.nodes.toSemanticModuleInfo
-import org.ksharp.semantics.nodes.toSemanticModuleInterface
+import org.ksharp.semantics.nodes.toCodeModule
 
 const val SemanticModuleInfoAction = "SemanticModuleInfoAction"
-fun semanticModuleInfoAction(moduleName: String, builder: ActionsGraphBuilder<SemanticModuleInfo>) =
-    action<List<NodeData>, SemanticModuleInfo>(
+fun codeModuleErrorsAction(moduleName: String, builder: ActionsGraphBuilder<List<Error>>) =
+    action<List<NodeData>, List<Error>>(
         SemanticModuleInfoAction,
-        SemanticModuleInfo(
-            moduleName,
-            listOf(),
-            preludeModule.typeSystem,
-            setOf(),
-            emptyMap(),
-            emptyMap(),
-            listOf(),
-        )
+        emptyList<Error>()
     ) {
         execution { _, nodes ->
             nodes.asSequence().toModuleNode(moduleName)
-                .toSemanticModuleInterface(preludeModule)
-                .toSemanticModuleInfo()
+                .toCodeModule(preludeModule)
+                .errors
         }
         graphBuilder(builder)
     }

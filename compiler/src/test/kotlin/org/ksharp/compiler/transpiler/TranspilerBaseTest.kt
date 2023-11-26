@@ -13,7 +13,7 @@ class TranspilerBaseTest : StringSpec({
         """.trimIndent()
             .moduleInfo("tst.ks", preludeModule)
             .flatMap {
-                it.abstractions.first().type
+                it.artifact.abstractions.first().type
             }.map { it.representation }.shouldBeRight("((Num a) -> (Num a) -> (Num a))")
     }
     "Detect if a abstraction is parametric" {
@@ -26,7 +26,7 @@ class TranspilerBaseTest : StringSpec({
         """.trimIndent()
             .moduleInfo("tst.ks", preludeModule)
             .map {
-                it.abstractions.associate { a ->
+                it.artifact.abstractions.associate { a ->
                     a.name to a.parametric.valueOrNull!!
                 }
             }.shouldBeRight(
