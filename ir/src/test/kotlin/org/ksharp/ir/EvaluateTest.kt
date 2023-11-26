@@ -15,7 +15,6 @@ private data class Call(
 private fun String.evaluateFirstFunction(arguments: List<Any>) =
     toCodeModule()
         .toIrModule()
-        .first
         .symbols
         .first { it is IrFunction }
         .cast<IrFunction>()

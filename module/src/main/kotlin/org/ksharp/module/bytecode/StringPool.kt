@@ -46,7 +46,7 @@ class StringPoolBuilder : BinaryTable {
     }
 }
 
-class StringPoolView internal constructor(
+class StringPoolView(
     private val buffer: BufferView
 ) : BinaryTableView {
 

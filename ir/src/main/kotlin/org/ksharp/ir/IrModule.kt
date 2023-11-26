@@ -68,11 +68,11 @@ data class IrModule(
     override val serializer: IrNodeSerializers = IrNodeSerializers.Module
 }
 
-fun CodeModule.toIrModule(): Pair<IrModule, FunctionLookup> {
+fun CodeModule.toIrModule(): IrModule {
     val lookup = FunctionLookupImpl()
     val module = IrModule(
         artifact.abstractions.map { it.toIrSymbol(lookup) }
     )
     lookup.functions = module.symbols.cast()
-    return module to lookup
+    return module
 }

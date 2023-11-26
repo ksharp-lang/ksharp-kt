@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":nodes"))
     implementation(project(":module"))
     implementation(project(":semantics"))
+    implementation(project(":ir"))
     implementation(project(":typesystem"))
     testImplementation(project(":test"))
     testImplementation(libs.kotest)
