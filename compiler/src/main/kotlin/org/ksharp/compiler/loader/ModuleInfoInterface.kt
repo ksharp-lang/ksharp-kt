@@ -9,7 +9,7 @@ import org.ksharp.typesystem.TypeSystem
 
 class ModuleInfoInterface(
     override val name: String,
-    private val info: ModuleInfo,
+    info: ModuleInfo,
     private val sources: SourceLoader
 ) : ModuleInterface {
 
