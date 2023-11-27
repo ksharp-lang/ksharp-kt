@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":semantics"))
     implementation(project(":ir"))
     implementation(project(":typesystem"))
+    implementation(libs.graalvm.truffle.api)
     testImplementation(project(":test"))
     testImplementation(libs.kotest)
 }
