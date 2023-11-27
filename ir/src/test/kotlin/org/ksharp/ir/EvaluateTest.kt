@@ -122,6 +122,24 @@ class EvaluateTest : StringSpec({
             "fn = (bigdec 2.0) % (bigdec 2.0)",
             BigDecimal.valueOf(0.0)
         ),
+
+        createSpec("Pow byte expression", "fn = (byte 2) ** (byte 3)", 8.toByte()),
+        createSpec("Pow short expression", "fn = (short 2) ** (short 3)", 8.toShort()),
+        createSpec("Pow int expression", "fn = (int 2) ** (int 3)", 8),
+        createSpec("Pow long expression", "fn = (long 2) ** (long 3)", 8.toLong()),
+        createSpec("Pow bigint expression", "fn = (bigint 2) ** (bigint 3)", BigInteger.valueOf(8)),
+        createSpec("Pow float expression", "fn = (float 2.0) ** (float 3.0)", (8.0).toFloat()),
+        createSpec("Pow double expression", "fn = (double 2.0) ** (double 3.0)", (8.0).toDouble()),
+        createSpec(
+            "Pow BigDecimal expression",
+            "fn = (bigdec 2.0) ** (bigdec 3.0)",
+            BigDecimal.valueOf(2.0).pow(3)
+        ),
+
+        createSpec("Cast bigint", "fn = bigint (bigint 3)", BigInteger.valueOf(3)),
+        createSpec("Cast bigint from bigdec", "fn = bigint (bigdec 3)", BigInteger.valueOf(3)),
+        createSpec("Cast bigdec", "fn = bigdec (bigdec 3)", BigDecimal.valueOf(3.0)),
+
         createSpec(
             "Let expressions with var binding",
             """|fn = let x = 10
