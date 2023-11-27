@@ -19,16 +19,19 @@ class CodeModuleInterface(
     override val typeSystem: TypeSystem = module.module.typeSystem
     override val functions: Map<String, FunctionInfo> = module.module.functions
     override val impls: Set<Impl> = module.module.impls
+    private lateinit var executableCache: ModuleExecutable
 
     fun compile() {
         sources.outputStream(name.toModulePath("ksm")).let {
             module.module.writeTo(it)
         }
         sources.outputStream(name.toModulePath("ksc")).let {
-            module.toIrModule().writeTo(it)
+            executableCache = IrModuleExecutable(module.toIrModule().apply {
+                writeTo(it)
+            })
         }
     }
 
     override val executable: ModuleExecutable
-        get() = TODO("Not yet implemented")
+        get() = executableCache
 }
