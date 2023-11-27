@@ -357,6 +357,7 @@ class InferenceWithParsingTest : StringSpec({
     "Inference impl using a default trait method" {
 
     }
+
     "Inference parametric function" {
         """
             emptyHashMap k v :: () -> (Map k v)
@@ -378,6 +379,44 @@ class InferenceWithParsingTest : StringSpec({
             }
             .shouldInferredTypesBe(
                 "emptyHashMap :: (Unit -> (Map k v))"
+            )
+    }
+
+    "Inference partial application" {
+        """
+            sum a b = a + b
+            sum2 = sum 2
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial application used in a function" {
+        """
+            sum a b = a + b
+            sum2 = sum 2           
+            fn a = sum2 a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))",
+                "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial application used in a function, partial declared after used" {
+        """
+            sum a b = a + b
+            fn a = sum2 a
+            sum2 = sum 2
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))",
+                "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
             )
     }
 })
