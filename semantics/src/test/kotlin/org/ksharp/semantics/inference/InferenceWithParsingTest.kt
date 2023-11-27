@@ -355,7 +355,25 @@ class InferenceWithParsingTest : StringSpec({
     }
 
     "Inference impl using a default trait method" {
-
+        """
+            trait Op a =
+              sum :: a -> a -> a
+              sum10 :: a -> a
+              
+              sum a b = a + b
+            
+            impl Op for Int =
+              sum10 a = sum (int 10) a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .apply {
+                shouldInferredImplAbstractionsTypesBe(
+                    "Op for Num numeric<Int> :: sum10 :: ((Num numeric<Int>) -> (Num numeric<Int>))"
+                )
+                shouldInferredTraitAbstractionsTypesBe(
+                    "Op :: sum :: ((Add a) -> (Add a) -> (Add a))"
+                )
+            }
     }
 
     "Inference parametric function" {
