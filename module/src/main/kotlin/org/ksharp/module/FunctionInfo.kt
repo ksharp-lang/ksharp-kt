@@ -9,11 +9,14 @@ interface FunctionInfo {
     val name: String
     val types: List<Type>
 
-    val nameWithArity: String
+    val arity: Int
         get() = when (val size = types.size) {
             2 -> if (types.first().isUnitType) 0 else 1
             else -> size - 1
-        }.let { "$name/$it" }
+        }
+
+    val nameWithArity: String
+        get() = "$name/$arity"
 
 }
 

@@ -399,7 +399,6 @@ class InferenceWithParsingTest : StringSpec({
                 "emptyHashMap :: (Unit -> (Map k v))"
             )
     }
-
     "Inference partial application" {
         """
             sum a b = a + b
@@ -408,6 +407,15 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial application over prelude function" {
+        """
+            sum2 = (+) 2
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
                 "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))"
             )
     }

@@ -313,7 +313,7 @@ private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceI
                     it.unifyArguments(functionName, location, info)
                 } else it
             }.unwrap().flatMap {
-                info.findAppType(caller, location, functionName, it).map { fn ->
+                info.findAppType(caller, location, functionName, it, FindFunctionMode.Complete).map { fn ->
                     if (fn is FunctionType) {
                         this.info.cast<ApplicationSemanticInfo>().function = fn
                         val inferredFn = fn.cast<FunctionType>()
@@ -325,6 +325,11 @@ private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceI
                         }
                         inferredFn.arguments.last()
                     } else fn
+                }.flatMapLeft { e ->
+                    info.findAppType(caller, location, functionName, it, FindFunctionMode.Partial).map { fn ->
+                        println(fn)
+                        fn
+                    }.mapLeft { e }
                 }
             }
     }

@@ -19,12 +19,25 @@ import org.ksharp.typesystem.unification.unify
 
 typealias AbstractionNodeMap = Map<String, AbstractionNode<AbstractionSemanticInfo>>
 
+enum class FindFunctionMode {
+    Partial,
+    Complete
+}
+
 private inline fun run(sameToCaller: Boolean, action: () -> FunctionInfo?): FunctionInfo? =
     if (sameToCaller) null else action()
 
 sealed class InferenceContext : TraitFinderContext {
     val checker: UnificationChecker by lazy { unificationChecker(this) }
-    abstract fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo?
+    abstract fun findPartialFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo?
+    abstract fun findFullFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo?
+
+    fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type, mode: FindFunctionMode) =
+        when (mode) {
+            FindFunctionMode.Partial -> findPartialFunction(caller, name, numParams, firstArgument)
+            FindFunctionMode.Complete -> findFullFunction(caller, name, numParams, firstArgument)
+        }
+
     abstract fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType
     fun methodName(name: String, numParams: Int) = "$name/$numParams"
 }
@@ -36,10 +49,23 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
 
     override val impls: Sequence<Impl> = moduleInfo.impls.asSequence()
 
-    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+    override fun findFullFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
         methodName(name, numParams).let { methodName ->
             moduleInfo.functions[methodName] ?: findTraitFunction(methodName, firstArgument)
         }
+
+    override fun findPartialFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? {
+        "$name/".let { prefixName ->
+            moduleInfo.functions
+                .asSequence()
+                .filter { (key, value) ->
+                    key.startsWith(prefixName) && value.arity > numParams
+                }.also {
+                    println("findPartialFunction: ${it.toList()}")
+                }
+        }
+        return null
+    }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
 }
@@ -49,7 +75,7 @@ class SemanticModuleInfoInferenceContext(
     override val impls: Sequence<Impl>,
     private val abstractions: AbstractionNodeMap
 ) : InferenceContext() {
-    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+    override fun findFullFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
         methodName(name, numParams).let { methodName ->
             abstractions[methodName]?.let {
                 AbstractionFunctionInfo(it)
@@ -58,6 +84,18 @@ class SemanticModuleInfoInferenceContext(
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
 
+    override fun findPartialFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? {
+        "$name/".let { prefixName ->
+            abstractions
+                .asSequence()
+                .filter { (key, value) ->
+                    key.startsWith(prefixName) && value.info.parameters.size > numParams
+                }.also {
+                    println("findPartialFunction: ${it.toList()}")
+                }
+        }
+        TODO()
+    }
 }
 
 class TraitInferenceContext(
@@ -72,13 +110,13 @@ class TraitInferenceContext(
     override val typeSystem: TypeSystem
         get() = parent.typeSystem
 
-    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+    override fun findFullFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
         methodName(name, numParams).let { methodName ->
             abstractions[methodName]?.let {
                 AbstractionFunctionInfo(it)
             }
                 ?: findTraitFunction(methodName, firstArgument)
-                ?: parent.findFunction(caller, name, numParams, firstArgument)
+                ?: parent.findFullFunction(caller, name, numParams, firstArgument)
         }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
@@ -86,6 +124,9 @@ class TraitInferenceContext(
             traitType.methods[name]?.unify(location, t, checker) ?: type
         }
 
+    override fun findPartialFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? {
+        TODO("Not yet implemented")
+    }
 }
 
 class ImplInferenceContext(
@@ -99,7 +140,7 @@ class ImplInferenceContext(
     override val typeSystem: TypeSystem
         get() = parent.typeSystem
 
-    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+    override fun findFullFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
         methodName(name, numParams).let { methodName ->
             val sameToCaller = methodName == caller
             run(sameToCaller) {
@@ -111,13 +152,17 @@ class ImplInferenceContext(
                     methodTypeToFunctionInfo(traitType, it, checker)
                 }
                 ?: findTraitFunction(methodName, firstArgument)
-                ?: parent.findFunction(caller, name, numParams, firstArgument)
+                ?: parent.findFullFunction(caller, name, numParams, firstArgument)
         }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
         type.flatMap { t ->
             traitType.methods[name]?.unify(location, t, checker) ?: type
         }
+
+    override fun findPartialFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? {
+        TODO("Not yet implemented")
+    }
 }
 
 class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemanticInfo>) : FunctionInfo {

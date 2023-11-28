@@ -17,6 +17,12 @@ import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
+private data class FindFunctionKey(
+    val name: String,
+    val arguments: List<Type>,
+    val mode: FindFunctionMode
+)
+
 internal fun FunctionInfo.substitute(
     checker: UnificationChecker,
     typeSystem: TypeSystem,
@@ -60,7 +66,7 @@ data class InferenceInfo(
     val inferenceContext: InferenceContext,
     val dependencies: Map<String, ModuleInfo> = emptyMap()
 ) {
-    private val cache = cacheOf<Pair<String, List<Type>>, Either<String, Type>>()
+    private val cache = cacheOf<FindFunctionKey, Either<String, Type>>()
 
     val checker: UnificationChecker get() = inferenceContext.checker
 
@@ -84,19 +90,21 @@ data class InferenceInfo(
         caller: String,
         location: Location,
         appName: ApplicationName,
-        arguments: List<Type>
+        arguments: List<Type>,
+        mode: FindFunctionMode
     ): ErrorOrType =
         appName.name.let {
             if (it.first().isUpperCase()) {
                 findConstructorType(location, appName, arguments)
-            } else findFunctionType(caller, location, appName, arguments)
+            } else findFunctionType(caller, location, appName, arguments, mode)
         }
 
     private fun findFunctionType(
         caller: String,
         location: Location,
         appName: ApplicationName,
-        arguments: List<Type>
+        arguments: List<Type>,
+        mode: FindFunctionMode
     ): ErrorOrType =
         when (val size = arguments.size) {
             1 -> if (arguments.first().isUnitType) 0 else 1
@@ -104,16 +112,16 @@ data class InferenceInfo(
         }.let { numArguments ->
             val name = appName.name
             val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
-            cache.get(funName to arguments) {
+            cache.get(FindFunctionKey(funName, arguments, mode)) {
                 val firstArgument = arguments.first()
                 val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else inferenceContext
                 val secondSearch = if (appName.pck == null) prelude else null
 
-                firstSearch.findFunction(caller, name, numArguments, firstArgument)
+                firstSearch.findFunction(caller, name, numArguments, firstArgument, mode)
                     ?.infer(caller)
                     ?.unify(checker, inferenceContext.typeSystem, location, arguments)
                     ?.mapLeft { it.toString() }
-                    ?: secondSearch?.findFunction(caller, name, numArguments, firstArgument)
+                    ?: secondSearch?.findFunction(caller, name, numArguments, firstArgument, mode)
                         ?.infer(caller)
                         ?.unify(checker, prelude.typeSystem, location, arguments)
                         ?.mapLeft { it.toString() }
@@ -133,7 +141,7 @@ data class InferenceInfo(
     ): ErrorOrType =
         arguments.size.let { _ ->
             val name = appName.name
-            cache.get(name to arguments) {
+            cache.get(FindFunctionKey(name, arguments, FindFunctionMode.Complete)) {
                 val type = inferenceContext.typeSystem[name]
                 val result = if (type.isLeft) {
                     prelude.typeSystem[name]
