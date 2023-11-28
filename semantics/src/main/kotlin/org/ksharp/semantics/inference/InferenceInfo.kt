@@ -44,14 +44,18 @@ internal fun FunctionInfo.unify(
     checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
-    arguments: List<Type>
+    arguments: List<Type>,
+    mode: FindFunctionMode
 ): ErrorOrType {
     return types.last()().flatMap { returnType ->
         types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
             item1.unify(location, item2, checker)
         }
             .unwrap()
-            .flatMap { params ->
+            .flatMap { unifiedParams ->
+                val params = if (mode == FindFunctionMode.Partial) {
+                    unifiedParams + types.drop(unifiedParams.size).dropLast(1)
+                } else unifiedParams
                 if (returnType.parameters.firstOrNull() != null) {
                     substitute(checker, typeSystem, location, params)
                 } else {
@@ -65,10 +69,11 @@ internal fun Sequence<FunctionInfo>.unify(
     checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
-    arguments: List<Type>
+    arguments: List<Type>,
+    mode: FindFunctionMode
 ): ErrorOrType? {
     var firstResult: ErrorOrType? = null
-    for (item in map { it.unify(checker, typeSystem, location, arguments) }) {
+    for (item in map { it.unify(checker, typeSystem, location, arguments, mode) }) {
         if (firstResult == null) {
             firstResult = item
         }
@@ -138,11 +143,11 @@ data class InferenceInfo(
 
                 firstSearch.findFunction(caller, name, numArguments, firstArgument, mode)
                     ?.infer(caller)
-                    ?.unify(checker, inferenceContext.typeSystem, location, arguments)
+                    ?.unify(checker, inferenceContext.typeSystem, location, arguments, mode)
                     ?.mapLeft { it.toString() }
                     ?: secondSearch?.findFunction(caller, name, numArguments, firstArgument, mode)
                         ?.infer(caller)
-                        ?.unify(checker, prelude.typeSystem, location, arguments)
+                        ?.unify(checker, prelude.typeSystem, location, arguments, mode)
                         ?.mapLeft { it.toString() }
                     ?: Either.Left(functionName(name, arguments))
             }.mapLeft {

@@ -84,14 +84,14 @@ class InferenceWithParsingTest : StringSpec({
     "Inference module - function not found" {
         """
             sum a b = a + b
-            fn = sum 10
+            fn = sum2 10
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "sum (Num numeric<Long>)"
+                        "function" to "sum2 (Num numeric<Long>)"
                     )
                 )
             )

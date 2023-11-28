@@ -76,17 +76,14 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
         numParams: Int,
         firstArgument: Type
     ): Sequence<FunctionInfo>? {
-        "$name/".let { prefixName ->
+        return "$name/".let { prefixName ->
             moduleInfo.functions
                 .asSequence()
                 .filter { (key, value) ->
                     key.startsWith(prefixName) && value.arity > numParams
-                }.also {
-                    println("findPartialFunction: ${it.toList()}")
-                }
+                }.map { it.value }
+            //TODO join with partial traits to calculate the partial trait functions
         }
-        //TODO: implement
-        return null
     }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
@@ -117,17 +114,14 @@ class SemanticModuleInfoInferenceContext(
         numParams: Int,
         firstArgument: Type
     ): Sequence<FunctionInfo>? {
-        "$name/".let { prefixName ->
+        return "$name/".let { prefixName ->
             abstractions
                 .asSequence()
                 .filter { (key, value) ->
                     key.startsWith(prefixName) && value.info.parameters.size > numParams
-                }.also {
-                    println("findPartialFunction: ${it.toList()}")
-                }
+                }.map { AbstractionFunctionInfo(it.value) }
+            //TODO join with partial traits to calculate the partial trait functions
         }
-        //TODO: implement
-        return null
     }
 }
 

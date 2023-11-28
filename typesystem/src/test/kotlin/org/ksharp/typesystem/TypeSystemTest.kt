@@ -84,7 +84,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                     should("Sum should be function of Int -> Int -> Int") {
                         get("Sum").shouldBeType(
-                            FunctionType(
+                            FullFunctionType(
                                 handle,
                                 NoAttributes,
                                 listOf(
@@ -355,7 +355,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                     should("(Int -> Int -> Int) type") {
                         get("Sum").shouldBeType(
-                            FunctionType(
+                            FullFunctionType(
                                 handle,
                                 setOf(CommonAttribute.Public),
                                 listOf(
@@ -369,7 +369,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                     should("(a -> Int) type") {
                         get("Abs").shouldBeType(
-                            FunctionType(
+                            FullFunctionType(
                                 handle,
                                 setOf(CommonAttribute.Public),
                                 listOf(
@@ -383,7 +383,7 @@ class TypeSystemTest : ShouldSpec({
                     should("((List Int) -> Int) type") {
                         get("Get")
                             .shouldBeType(
-                                FunctionType(
+                                FullFunctionType(
                                     handle,
                                     setOf(CommonAttribute.Public),
                                     listOf(
@@ -402,7 +402,7 @@ class TypeSystemTest : ShouldSpec({
                     should("((List a) -> (a -> b) -> (List b)) type") {
                         get("MapFn")
                             .shouldBeType(
-                                FunctionType(
+                                FullFunctionType(
                                     handle,
                                     setOf(CommonAttribute.Public),
                                     listOf(
@@ -412,7 +412,7 @@ class TypeSystemTest : ShouldSpec({
                                             Alias(handle, "List"),
                                             listOf(Parameter(handle, "a"))
                                         ),
-                                        FunctionType(
+                                        FullFunctionType(
                                             handle,
                                             NoAttributes,
                                             listOf(
@@ -433,7 +433,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                     should("SumAlias (Int -> Int -> Int) type") {
                         get("SumAlias").valueOrNull!!().shouldBeType(
-                            FunctionType(
+                            FullFunctionType(
                                 handle,
                                 setOf(CommonAttribute.Public, CommonAttribute.Native),
                                 listOf(
@@ -1089,7 +1089,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                     should("(a: Int -> b -> result: Int) Type") {
                         get("Sum").shouldBeType(
-                            FunctionType(
+                            FullFunctionType(
                                 handle,
                                 setOf(CommonAttribute.Public),
                                 listOf(
@@ -1143,7 +1143,7 @@ class TypeSystemTest : ShouldSpec({
                     }
                     should("Int -> Int type") {
                         get("Abs").shouldBeType(
-                            FunctionType(
+                            FullFunctionType(
                                 handle,
                                 NoAttributes,
                                 listOf(

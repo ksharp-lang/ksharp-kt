@@ -64,7 +64,7 @@ class TypeTest : StringSpec({
         ).terms.toList().shouldBe(listOf(Alias(ts.handle, "List"), Parameter(ts.handle, "a")))
     }
     "Given a function type, should get the arguments and return terms in the sequence" {
-        FunctionType(
+        FullFunctionType(
             ts.handle,
             NoAttributes,
             listOf(

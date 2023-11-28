@@ -111,7 +111,7 @@ class TypeSystemSerializerTest : StringSpec({
         ).shouldBeSerializable()
     }
     "Serialize Function Types" {
-        FunctionType(
+        FullFunctionType(
             mockHandle, setOf(CommonAttribute.Public),
             listOf(
                 Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
@@ -121,7 +121,7 @@ class TypeSystemSerializerTest : StringSpec({
         ).shouldBeSerializable()
     }
     "Serialize type without attributes" {
-        FunctionType(
+        FullFunctionType(
             mockHandle, NoAttributes,
             listOf(
                 Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),

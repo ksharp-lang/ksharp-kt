@@ -3,6 +3,7 @@ package org.ksharp.typesystem.substitution
 import org.ksharp.common.ErrorOrValue
 import org.ksharp.common.Location
 import org.ksharp.typesystem.ErrorOrType
+import org.ksharp.typesystem.types.FullFunctionType
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
 
@@ -27,5 +28,5 @@ class FunctionSubstitution : CompoundSubstitution<FunctionType>() {
     ): ErrorOrType =
         type.arguments
             .substitute(context, location, typeContext)
-            .map { FunctionType(type.typeSystem, type.attributes, it) }
+            .map { FullFunctionType(type.typeSystem, type.attributes, it) }
 }

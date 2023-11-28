@@ -337,7 +337,7 @@ class TypeUnificationTest : StringSpec({
             )
     }
     "Compatible function type" {
-        val type1 = FunctionType(
+        val type1 = FullFunctionType(
             typeSystem.handle,
             NoAttributes,
             listOf(
@@ -345,7 +345,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Long"].valueOrNull!!
             )
         )
-        val type2 = FunctionType(
+        val type2 = FullFunctionType(
             typeSystem.handle,
             NoAttributes,
             listOf(
@@ -355,7 +355,7 @@ class TypeUnificationTest : StringSpec({
         )
         type1.unify(Location.NoProvided, type2, checker)
             .shouldBeRight(
-                FunctionType(
+                FullFunctionType(
                     typeSystem.handle,
                     NoAttributes,
                     listOf(
@@ -366,7 +366,7 @@ class TypeUnificationTest : StringSpec({
             )
     }
     "Incompatible function type" {
-        val type1 = FunctionType(
+        val type1 = FullFunctionType(
             typeSystem.handle,
             NoAttributes,
             listOf(
@@ -374,7 +374,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Long"].valueOrNull!!
             )
         )
-        val type2 = FunctionType(
+        val type2 = FullFunctionType(
             typeSystem.handle,
             NoAttributes,
             listOf(
