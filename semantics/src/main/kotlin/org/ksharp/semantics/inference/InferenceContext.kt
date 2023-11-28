@@ -34,7 +34,7 @@ sealed class InferenceContext : TraitFinderContext {
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>?
+    ): Sequence<FunctionInfo>
 
     abstract fun findFullFunction(
         caller: String,
@@ -75,7 +75,7 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>? {
+    ): Sequence<FunctionInfo> {
         return "$name/".let { prefixName ->
             moduleInfo.functions
                 .asSequence()
@@ -113,7 +113,7 @@ class SemanticModuleInfoInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>? {
+    ): Sequence<FunctionInfo> {
         return "$name/".let { prefixName ->
             abstractions
                 .asSequence()
@@ -161,9 +161,9 @@ class TraitInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>? {
+    ): Sequence<FunctionInfo> {
         //TODO: implement
-        return null
+        return emptySequence()
     }
 }
 
@@ -208,9 +208,9 @@ class ImplInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>? {
+    ): Sequence<FunctionInfo> {
         //TODO: implement
-        return null
+        return emptySequence()
     }
 }
 
