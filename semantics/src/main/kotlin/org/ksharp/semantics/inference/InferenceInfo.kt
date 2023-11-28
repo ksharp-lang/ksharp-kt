@@ -61,6 +61,22 @@ internal fun FunctionInfo.unify(
     }
 }
 
+internal fun Sequence<FunctionInfo>.unify(
+    checker: UnificationChecker,
+    typeSystem: TypeSystem,
+    location: Location,
+    arguments: List<Type>
+): ErrorOrType? {
+    var firstResult: ErrorOrType? = null
+    for (item in map { it.unify(checker, typeSystem, location, arguments) }) {
+        if (firstResult == null) {
+            firstResult = item
+        }
+        if (item.isRight) return item
+    }
+    return firstResult
+}
+
 data class InferenceInfo(
     val prelude: InferenceContext,
     val inferenceContext: InferenceContext,
@@ -86,8 +102,8 @@ data class InferenceInfo(
         return this
     }
 
-    private fun Sequence<FunctionInfo>.infer(caller: String): FunctionInfo? =
-        this.map { it.infer(caller) }.firstOrNull()
+    private fun Sequence<FunctionInfo>.infer(caller: String): Sequence<FunctionInfo> =
+        this.map { it.infer(caller) }
 
     fun findAppType(
         caller: String,
