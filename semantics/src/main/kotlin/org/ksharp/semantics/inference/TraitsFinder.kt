@@ -17,7 +17,8 @@ import org.ksharp.typesystem.unification.unify
 
 private class FunctionTypeInfo(
     override val name: String,
-    function: FunctionType
+    function: FunctionType,
+    override val arity: Int
 ) : FunctionInfo {
     override val attributes: Set<Attribute> = function.attributes
     override val types: List<Type> = function.arguments
@@ -46,7 +47,7 @@ interface TraitFinderContext {
         substitutionContext.addMapping(Location.NoProvided, trait.param, trait.toParametricType())
         val type =
             substitutionContext.substitute(Location.NoProvided, fnType, fnType).valueOrNull!!.cast<FunctionType>()
-        return FunctionTypeInfo(method.name, type)
+        return FunctionTypeInfo(method.name, type, type.arguments.arity)
     }
 }
 

@@ -8,12 +8,7 @@ interface FunctionInfo {
     val attributes: Set<Attribute>
     val name: String
     val types: List<Type>
-
     val arity: Int
-        get() = when (val size = types.size) {
-            2 -> if (types.first().isUnitType) 0 else 1
-            else -> size - 1
-        }
 
     val nameWithArity: String
         get() = "$name/$arity"
@@ -24,7 +19,14 @@ internal data class FunctionInfoImpl(
     override val attributes: Set<Attribute>,
     override val name: String,
     override val types: List<Type>
-) : FunctionInfo
+) : FunctionInfo {
+    override val arity: Int by lazy {
+        when (val size = types.size) {
+            2 -> if (types.first().isUnitType) 0 else 1
+            else -> size - 1
+        }
+    }
+}
 
 fun functionInfo(attributes: Set<Attribute>, name: String, types: List<Type>): FunctionInfo =
     FunctionInfoImpl(attributes, name, types)

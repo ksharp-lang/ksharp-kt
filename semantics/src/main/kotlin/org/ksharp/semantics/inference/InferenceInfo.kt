@@ -86,6 +86,9 @@ data class InferenceInfo(
         return this
     }
 
+    private fun Sequence<FunctionInfo>.infer(caller: String): FunctionInfo? =
+        this.map { it.infer(caller) }.firstOrNull()
+
     fun findAppType(
         caller: String,
         location: Location,
