@@ -29,8 +29,6 @@ class PartialFunctionSolver : Solver {
             }.unwrap()
             .map { arguments ->
                 PartialFunctionType(
-                    type.typeSystem,
-                    type.attributes,
                     arguments,
                     type.cast<PartialFunctionType>().function
                 )

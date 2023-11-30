@@ -67,6 +67,6 @@ class PartialFunctionSubstitution : FunctionSubstitution<PartialFunctionType>() 
         attributes: Set<Attribute>,
         arguments: List<Type>
     ): PartialFunctionType =
-        PartialFunctionType(typeSystem, attributes, arguments, originalType.function)
+        PartialFunctionType(arguments, originalType.function)
 
 }
