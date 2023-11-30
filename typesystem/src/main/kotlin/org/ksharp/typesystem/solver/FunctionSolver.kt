@@ -3,18 +3,37 @@ package org.ksharp.typesystem.solver
 import org.ksharp.common.cast
 import org.ksharp.common.unwrap
 import org.ksharp.typesystem.ErrorOrType
-import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.FullFunctionType
+import org.ksharp.typesystem.types.PartialFunctionType
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.types.toFunctionType
 
-class FunctionSolver : Solver {
+class FullFunctionSolver : Solver {
     override fun solve(type: Type): ErrorOrType =
-        type.cast<FunctionType>()
+        type.cast<FullFunctionType>()
             .arguments.map { p ->
                 p.solve()
             }.unwrap()
             .map { arguments ->
                 arguments.toFunctionType(type.typeSystem, type.attributes)
+            }
+
+
+}
+
+class PartialFunctionSolver : Solver {
+    override fun solve(type: Type): ErrorOrType =
+        type.cast<PartialFunctionType>()
+            .arguments.map { p ->
+                p.solve()
+            }.unwrap()
+            .map { arguments ->
+                PartialFunctionType(
+                    type.typeSystem,
+                    type.attributes,
+                    arguments,
+                    type.cast<PartialFunctionType>().function
+                )
             }
 
 

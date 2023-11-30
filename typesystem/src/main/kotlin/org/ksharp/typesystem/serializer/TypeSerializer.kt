@@ -25,6 +25,7 @@ enum class TypeSerializers(
     ParametricType(ParametricTypeSerializer()),
     Labeled(LabeledSerializer()),
     FunctionType(FunctionSerializer()),
+    PartialFunctionType(PartialFunctionSerializer()),
     IntersectionType(IntersectionSerializer()),
     TupleType(TupleSerializer()),
     ClassType(ClassTypeSerializer()),

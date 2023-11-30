@@ -5,16 +5,19 @@ import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.types.FullFunctionType
 import org.ksharp.typesystem.types.FunctionType
+import org.ksharp.typesystem.types.PartialFunctionType
 import org.ksharp.typesystem.types.Type
 
-class FunctionUnification : CompoundUnification<FunctionType>() {
-    override val Type.isSameTypeClass: Boolean
-        get() = this is FunctionType
+abstract class FunctionUnification<T : FunctionType> : CompoundUnification<T>() {
+    abstract fun createUnificationType(
+        originalType: T,
+        arguments: List<Type>
+    ): T
 
     override fun compoundUnify(
         location: Location,
-        type1: FunctionType,
-        type2: FunctionType,
+        type1: T,
+        type2: T,
         checker: UnificationChecker
     ): ErrorOrType =
         if (type1.arguments.size != type2.arguments.size) incompatibleType(location, type1, type2)
@@ -23,4 +26,28 @@ class FunctionUnification : CompoundUnification<FunctionType>() {
                 FullFunctionType(type1.typeSystem, type1.attributes, params)
             }
         }
+}
+
+class FullFunctionUnification : FunctionUnification<FullFunctionType>() {
+
+    override val Type.isSameTypeClass: Boolean
+        get() = this is FullFunctionType
+
+    override fun createUnificationType(
+        originalType: FullFunctionType,
+        arguments: List<Type>
+    ): FullFunctionType =
+        FullFunctionType(originalType.typeSystem, originalType.attributes, arguments)
+}
+
+class PartialFunctionUnification : FunctionUnification<PartialFunctionType>() {
+
+    override val Type.isSameTypeClass: Boolean
+        get() = this is PartialFunctionType
+
+    override fun createUnificationType(
+        originalType: PartialFunctionType,
+        arguments: List<Type>
+    ): PartialFunctionType =
+        PartialFunctionType(arguments, originalType.function)
 }

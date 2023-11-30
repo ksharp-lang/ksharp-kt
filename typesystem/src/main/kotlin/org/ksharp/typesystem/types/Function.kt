@@ -22,6 +22,24 @@ interface FunctionType : Type {
     val arguments: List<Type>
 }
 
+data class PartialFunctionType(
+    override val arguments: List<Type>,
+    val function: FunctionType
+) : FunctionType {
+
+    override val typeSystem: HandlePromise<TypeSystem> = function.typeSystem
+    override val attributes: Set<Attribute> = function.attributes
+
+    override val serializer: TypeSerializer = TypeSerializers.PartialFunctionType
+    override val unification: TypeUnification = TypeUnifications.PartialFunction
+    override val substitution: Substitution = Substitutions.PartialFunction
+    override val solver: Solver = Solvers.PartialFunction
+
+    override val terms: Sequence<Type> = arguments.asSequence()
+
+    override fun new(attributes: Set<Attribute>): Type = this
+}
+
 @Suppress("DataClassPrivateConstructor")
 data class FullFunctionType private constructor(
     override val attributes: Set<Attribute>,
