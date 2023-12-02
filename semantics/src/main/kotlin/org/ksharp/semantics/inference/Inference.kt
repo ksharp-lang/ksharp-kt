@@ -280,6 +280,7 @@ private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceI
                         return@flatMap calculateFunctionType(native, fn, info)
                     }
                     abstractionInfo.updateParameters(fn)
+                    info.inferenceContext.registerPartialFunctionAbstraction(this)
                 }
             }
             calculateFunctionType(native, returnType.toFixedTraitOrType(), info)

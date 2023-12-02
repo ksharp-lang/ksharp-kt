@@ -23,7 +23,6 @@ private fun List<AbstractionNode<SemanticInfo>>.stringRepresentation(prefix: Str
 
 private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg types: String) {
     shouldBeRight().value.apply {
-        abstractions.size.shouldBe(types.size)
         abstractions.stringRepresentation("")
             .shouldBeRight()
             .value
@@ -412,11 +411,11 @@ class InferenceWithParsingTest : StringSpec({
     }
     "Inference partial application over prelude function" {
         """
-            sum2 = (+) 2
+            keyValue = pair "Hello"
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))"
+                "keyValue :: (b -> (Pair String b))"
             )
     }
     "Inference partial application used in a function" {
@@ -428,7 +427,7 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))",
+                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))",
                 "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
             )
     }
@@ -441,7 +440,7 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))",
+                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))",
                 "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
             )
     }

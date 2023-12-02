@@ -17,7 +17,7 @@ import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
-typealias AbstractionNodeMap = Map<String, AbstractionNode<AbstractionSemanticInfo>>
+typealias AbstractionNodeMap = MutableMap<String, AbstractionNode<AbstractionSemanticInfo>>
 
 enum class FindFunctionMode {
     Partial,
@@ -51,6 +51,8 @@ sealed class InferenceContext : TraitFinderContext {
 
     abstract fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType
     fun methodName(name: String, numParams: Int) = "$name/$numParams"
+
+    abstract fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>)
 }
 
 class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
@@ -87,6 +89,10 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
     }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
+
+    override fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>) {
+        return
+    }
 }
 
 class SemanticModuleInfoInferenceContext(
@@ -124,6 +130,10 @@ class SemanticModuleInfoInferenceContext(
                 }
             //TODO join with partial traits to calculate the partial trait functions
         }
+    }
+
+    override fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>) {
+        abstractions[abstraction.nameWithArity] = abstraction.cast()
     }
 }
 
@@ -166,6 +176,10 @@ class TraitInferenceContext(
     ): Sequence<FunctionInfo> {
         //TODO: implement
         return emptySequence()
+    }
+
+    override fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>) {
+        TODO("Not yet implemented")
     }
 }
 
@@ -211,8 +225,12 @@ class ImplInferenceContext(
         numParams: Int,
         firstArgument: Type
     ): Sequence<FunctionInfo> {
-        //TODO: implement
+        //`TODO: implement
         return emptySequence()
+    }
+
+    override fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>) {
+        TODO("Not yet implemented")
     }
 }
 
@@ -233,7 +251,7 @@ class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemant
 private fun List<AbstractionNode<AbstractionSemanticInfo>>.toMap() =
     associateBy {
         it.nameWithArity
-    }
+    }.toMutableMap()
 
 fun List<AbstractionNode<SemanticInfo>>.toInferenceContext(
     typeSystem: TypeSystem,
