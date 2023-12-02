@@ -5,6 +5,7 @@ import org.ksharp.common.cast
 import org.ksharp.common.isRight
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.Impl
+import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
@@ -24,10 +25,24 @@ private class FunctionTypeInfo(
     override val types: List<Type> = function.arguments
 }
 
+internal fun methodTypeToFunctionInfo(
+    trait: TraitType,
+    method: TraitType.MethodType,
+    checker: UnificationChecker
+): FunctionInfo {
+    val fnType = method.arguments.toFunctionType(trait.typeSystem.handle!!, method.attributes)
+    val substitutionContext = SubstitutionContext(checker)
+    substitutionContext.extract(Location.NoProvided, fnType, fnType)
+    substitutionContext.addMapping(Location.NoProvided, trait.param, trait.toParametricType())
+    val type =
+        substitutionContext.substitute(Location.NoProvided, fnType, fnType).valueOrNull!!.cast<FunctionType>()
+    return FunctionTypeInfo(method.name, type, type.arguments.arity)
+}
 
-interface TraitFinderContext {
-    val typeSystem: TypeSystem
+class TraitFinderContext(
+    val typeSystem: TypeSystem,
     val impls: Sequence<Impl>
+) {
 
     fun findTraitFunction(methodName: String, type: Type): FunctionInfo? =
         getTraitsImplemented(type, this).mapNotNull { trait ->
@@ -36,19 +51,6 @@ interface TraitFinderContext {
             }
         }.firstOrNull()
 
-    fun methodTypeToFunctionInfo(
-        trait: TraitType,
-        method: TraitType.MethodType,
-        checker: UnificationChecker
-    ): FunctionInfo {
-        val fnType = method.arguments.toFunctionType(trait.typeSystem.handle!!, method.attributes)
-        val substitutionContext = SubstitutionContext(checker)
-        substitutionContext.extract(Location.NoProvided, fnType, fnType)
-        substitutionContext.addMapping(Location.NoProvided, trait.param, trait.toParametricType())
-        val type =
-            substitutionContext.substitute(Location.NoProvided, fnType, fnType).valueOrNull!!.cast<FunctionType>()
-        return FunctionTypeInfo(method.name, type, type.arguments.arity)
-    }
 }
 
 
@@ -62,7 +64,7 @@ fun unificationChecker(context: TraitFinderContext) = UnificationChecker { trait
         true
     } else sequenceOf(
         getTraitsImplemented(checkType, context),
-        getTraitsImplemented(checkType, ModuleInfoInferenceContext(preludeModule))
+        getTraitsImplemented(checkType, preludeTraitFinderContext)
     )
         .flatten()
         .any { t ->
@@ -112,3 +114,9 @@ fun getTraitsImplemented(type: Type, context: TraitFinderContext): Sequence<Trai
             else -> findTraits(resolvedType, context)
         }
     }.valueOrNull ?: emptySequence()
+
+val ModuleInfo.traitFinderContext
+    get() =
+        TraitFinderContext(typeSystem, impls.asSequence())
+
+val preludeTraitFinderContext = preludeModule.traitFinderContext

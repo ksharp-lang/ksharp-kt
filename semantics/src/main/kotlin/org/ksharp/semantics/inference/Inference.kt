@@ -276,11 +276,13 @@ private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceI
                 val fn = expression.info.cast<ApplicationSemanticInfo>().function
                 if (fn is PartialFunctionType) {
                     val abstractionInfo = this.info.cast<AbstractionSemanticInfo>()
+                    val previousName = nameWithArity
                     if (abstractionInfo.parameters.isNotEmpty()) {
                         return@flatMap calculateFunctionType(native, fn, info)
                     }
                     abstractionInfo.updateParameters(fn)
-                    info.inferenceContext.registerPartialFunctionAbstraction(this)
+                    info.inferenceContext.cast<CodeInferenceContext>()
+                        .registerPartialFunctionAbstraction(previousName, this)
                 }
             }
             calculateFunctionType(native, returnType.toFixedTraitOrType(), info)

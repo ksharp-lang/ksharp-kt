@@ -27,8 +27,14 @@ enum class FindFunctionMode {
 private inline fun run(sameToCaller: Boolean, action: () -> FunctionInfo?): FunctionInfo? =
     if (sameToCaller) null else action()
 
-sealed class InferenceContext : TraitFinderContext {
-    val checker: UnificationChecker by lazy { unificationChecker(this) }
+
+sealed class InferenceContext {
+    abstract val traitFinderContext: TraitFinderContext
+
+    val checker: UnificationChecker by lazy { unificationChecker(traitFinderContext) }
+
+    val typeSystem by lazy { traitFinderContext.typeSystem }
+
     abstract fun findPartialFunction(
         caller: String,
         name: String,
@@ -51,16 +57,13 @@ sealed class InferenceContext : TraitFinderContext {
 
     abstract fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType
     fun methodName(name: String, numParams: Int) = "$name/$numParams"
-
-    abstract fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>)
 }
 
-class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
+class ModuleInfoInferenceContext(
+    private val moduleInfo: ModuleInfo,
+    override val traitFinderContext: TraitFinderContext = moduleInfo.traitFinderContext,
+) :
     InferenceContext() {
-
-    override val typeSystem: TypeSystem = moduleInfo.typeSystem
-
-    override val impls: Sequence<Impl> = moduleInfo.impls.asSequence()
 
     override fun findFullFunction(
         caller: String,
@@ -69,7 +72,7 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
         firstArgument: Type
     ): Sequence<FunctionInfo>? =
         methodName(name, numParams).let { methodName ->
-            moduleInfo.functions[methodName] ?: findTraitFunction(methodName, firstArgument)
+            moduleInfo.functions[methodName] ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
 
     override fun findPartialFunction(
@@ -89,17 +92,12 @@ class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
     }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
-
-    override fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>) {
-        return
-    }
 }
 
 class SemanticModuleInfoInferenceContext(
-    override val typeSystem: TypeSystem,
-    override val impls: Sequence<Impl>,
+    override val traitFinderContext: TraitFinderContext,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext() {
+) : InferenceContext(), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
     override fun findFullFunction(
         caller: String,
         name: String,
@@ -109,7 +107,7 @@ class SemanticModuleInfoInferenceContext(
         methodName(name, numParams).let { methodName ->
             abstractions[methodName]?.let {
                 AbstractionFunctionInfo(it)
-            } ?: findTraitFunction(methodName, firstArgument)
+            } ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
@@ -132,22 +130,16 @@ class SemanticModuleInfoInferenceContext(
         }
     }
 
-    override fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>) {
-        abstractions[abstraction.nameWithArity] = abstraction.cast()
-    }
 }
 
 class TraitInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext() {
+) : InferenceContext(), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
 
-    override val impls: Sequence<Impl>
-        get() = parent.impls
-
-    override val typeSystem: TypeSystem
-        get() = parent.typeSystem
+    override val traitFinderContext: TraitFinderContext
+            by lazy { parent.traitFinderContext }
 
     override fun findFullFunction(
         caller: String,
@@ -159,7 +151,7 @@ class TraitInferenceContext(
             abstractions[methodName]?.let {
                 AbstractionFunctionInfo(it)
             }
-                ?: findTraitFunction(methodName, firstArgument)
+                ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
             ?: parent.findFullFunction(caller, name, numParams, firstArgument)
 
@@ -178,21 +170,16 @@ class TraitInferenceContext(
         return emptySequence()
     }
 
-    override fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>) {
-        TODO("Not yet implemented")
-    }
 }
 
 class ImplInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext() {
+) : InferenceContext(), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
 
-    override val impls: Sequence<Impl> = parent.impls
-
-    override val typeSystem: TypeSystem
-        get() = parent.typeSystem
+    override val traitFinderContext: TraitFinderContext
+            by lazy { parent.traitFinderContext }
 
     override fun findFullFunction(
         caller: String,
@@ -210,7 +197,7 @@ class ImplInferenceContext(
                 ?: traitType.methods[methodName]?.let {
                     methodTypeToFunctionInfo(traitType, it, checker)
                 }
-                ?: findTraitFunction(methodName, firstArgument)
+                ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
             ?: parent.findFullFunction(caller, name, numParams, firstArgument)
 
@@ -229,9 +216,6 @@ class ImplInferenceContext(
         return emptySequence()
     }
 
-    override fun registerPartialFunctionAbstraction(abstraction: AbstractionNode<SemanticInfo>) {
-        TODO("Not yet implemented")
-    }
 }
 
 class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemanticInfo>) : FunctionInfo {
@@ -258,8 +242,7 @@ fun List<AbstractionNode<SemanticInfo>>.toInferenceContext(
     impls: Set<Impl>,
 ) =
     SemanticModuleInfoInferenceContext(
-        typeSystem,
-        impls.asSequence(),
+        TraitFinderContext(typeSystem, impls.asSequence()),
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()
     )
