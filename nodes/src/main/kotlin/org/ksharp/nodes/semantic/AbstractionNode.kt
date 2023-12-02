@@ -1,13 +1,28 @@
 package org.ksharp.nodes.semantic
 
+import org.ksharp.common.Either
 import org.ksharp.common.Location
 import org.ksharp.nodes.NodeData
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.types.PartialFunctionType
 
 data class AbstractionSemanticInfo(
-    val parameters: List<SemanticInfo>,
+    private var _parameters: List<SemanticInfo>,
     val returnType: TypePromise? = null
-) : SemanticInfo()
+) : SemanticInfo() {
+
+    val parameters: List<SemanticInfo>
+        get() = _parameters
+
+    fun updateParameters(partial: PartialFunctionType) {
+        if (_parameters.isEmpty()) {
+            _parameters = partial.arguments.dropLast(1).map {
+                TypeSemanticInfo(Either.Right(it))
+            }
+        }
+    }
+
+}
 
 data class AbstractionNode<SemanticInfo>(
     val attributes: Set<Attribute>,

@@ -38,6 +38,8 @@ data class PartialFunctionType(
     override val terms: Sequence<Type> = arguments.asSequence()
 
     override fun new(attributes: Set<Attribute>): Type = this
+
+    override fun toString(): String = arguments.asSequence().map { it.representation }.joinToString(" -> ")
 }
 
 @Suppress("DataClassPrivateConstructor")

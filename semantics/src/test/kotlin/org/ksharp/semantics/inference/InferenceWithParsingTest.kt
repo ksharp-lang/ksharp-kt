@@ -407,7 +407,7 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
                 "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))"
+                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))"
             )
     }
     "Inference partial application over prelude function" {
@@ -443,6 +443,17 @@ class InferenceWithParsingTest : StringSpec({
                 "sum :: ((Add a) -> (Add a) -> (Add a))",
                 "sum2 :: ((Num numeric <Long>) -> (Num numeric<Long>))",
                 "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial application in abstraction with parameters" {
+        """
+            sum a b = a + b
+            sumN a = sum a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sumN :: ((Add a) -> ((Add a) -> (Add a)))"
             )
     }
 })

@@ -56,10 +56,15 @@ internal fun FunctionInfo.unify(
                 val params = if (mode == FindFunctionMode.Partial) {
                     unifiedParams + types.drop(unifiedParams.size).dropLast(1)
                 } else unifiedParams
-                if (returnType.parameters.firstOrNull() != null) {
+                val result = if (returnType.parameters.firstOrNull() != null) {
                     substitute(checker, typeSystem, location, params)
                 } else {
                     Either.Right((params + returnType).toFunctionType(typeSystem, attributes))
+                }
+                result.map {
+                    if (mode == FindFunctionMode.Partial) {
+                        PartialFunctionType(it.arguments.drop(arguments.size), it)
+                    } else it
                 }
             }
     }

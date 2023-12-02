@@ -185,7 +185,7 @@ class ImplSemanticTest : StringSpec({
                             info = ApplicationSemanticInfo(function = null), Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(),
+                            listOf(),
                             returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
                         ), Location.NoProvided
                     ),
@@ -210,7 +210,7 @@ class ImplSemanticTest : StringSpec({
                             ), Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(
+                            listOf(
                                 Symbol("a", TypeSemanticInfo(forType)),
                                 Symbol("b", TypeSemanticInfo(forType))
                             ),

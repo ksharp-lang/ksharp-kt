@@ -272,6 +272,16 @@ private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceI
                     ?: Either.Left(SemanticInfoErrorCode.TypeNotInferred.new(location))
             } else expression.inferType(caller, info)
         }.flatMap { returnType ->
+            if (expression is ApplicationNode) {
+                val fn = expression.info.cast<ApplicationSemanticInfo>().function
+                if (fn is PartialFunctionType) {
+                    val abstractionInfo = this.info.cast<AbstractionSemanticInfo>()
+                    if (abstractionInfo.parameters.isNotEmpty()) {
+                        return@flatMap calculateFunctionType(native, fn, info)
+                    }
+                    abstractionInfo.updateParameters(fn)
+                }
+            }
             calculateFunctionType(native, returnType.toFixedTraitOrType(), info)
         }
     }

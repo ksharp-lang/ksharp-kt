@@ -119,7 +119,9 @@ class SemanticModuleInfoInferenceContext(
                 .asSequence()
                 .filter { (key, value) ->
                     key.startsWith(prefixName) && value.info.parameters.size > numParams
-                }.map { AbstractionFunctionInfo(it.value) }
+                }.map {
+                    AbstractionFunctionInfo(it.value)
+                }
             //TODO join with partial traits to calculate the partial trait functions
         }
     }
