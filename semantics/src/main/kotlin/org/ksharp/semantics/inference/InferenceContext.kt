@@ -104,11 +104,17 @@ class SemanticModuleInfoInferenceContext(
         numParams: Int,
         firstArgument: Type
     ): Sequence<FunctionInfo>? =
-        methodName(name, numParams).let { methodName ->
-            abstractions[methodName]?.let {
-                AbstractionFunctionInfo(it)
-            } ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
-        }?.let { sequenceOf(it) }
+        (methodName(name, numParams) to "$name/0").let { (methodName, methodNameArityZero) ->
+            sequenceOf(
+                abstractions[methodName]?.let {
+                    AbstractionFunctionInfo(it)
+                },
+                abstractions[methodNameArityZero]?.let {
+                    AbstractionFunctionInfo(it)
+                },
+                traitFinderContext.findTraitFunction(methodName, firstArgument)
+            ).filterNotNull()
+        }.takeIf { it.firstOrNull() != null }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
 
