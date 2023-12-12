@@ -181,6 +181,7 @@ class TraitInferenceContext(
     ): Sequence<FunctionInfo> {
         return sequenceOf(
             abstractions.findPartialFunction(name, numParams),
+            traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument),
             parent.findPartialFunction(caller, name, numParams, firstArgument)
         ).flatten()
     }
