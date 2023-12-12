@@ -87,7 +87,6 @@ class ModuleInfoInferenceContext(
                 .filter { (key, value) ->
                     key.startsWith(prefixName) && value.arity > numParams
                 }.map { it.value }
-            //TODO join with partial traits to calculate the partial trait functions
         }
     }
 
@@ -132,7 +131,6 @@ class SemanticModuleInfoInferenceContext(
                 }.map {
                     AbstractionFunctionInfo(it.value)
                 }
-            //TODO join with partial traits to calculate the partial trait functions
         }
     }
 
