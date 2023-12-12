@@ -51,6 +51,21 @@ class TraitFinderContext(
             }
         }.firstOrNull()
 
+    fun findPartialTraitFunction(methodName: String, numParams: Int, type: Type): Sequence<FunctionInfo> =
+        unificationChecker(this).let { checker ->
+            "$methodName/".let { prefixName ->
+                getTraitsImplemented(type, this).map { trait ->
+                    trait.methods
+                        .asSequence()
+                        .filter { (key, value) ->
+                            key.startsWith(prefixName) && value.arguments.arity > numParams
+                        }.map {
+                            methodTypeToFunctionInfo(trait, it.value, checker)
+                        }
+                }.flatten()
+            }
+        }
+
 }
 
 

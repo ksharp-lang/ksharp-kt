@@ -27,6 +27,18 @@ enum class FindFunctionMode {
 private inline fun run(sameToCaller: Boolean, action: () -> FunctionInfo?): FunctionInfo? =
     if (sameToCaller) null else action()
 
+private fun AbstractionNodeMap.findPartialFunction(
+    name: String,
+    numParams: Int
+) =
+    "$name/".let { prefixName ->
+        asSequence()
+            .filter { (key, value) ->
+                key.startsWith(prefixName) && value.info.parameters.size > numParams
+            }.map {
+                AbstractionFunctionInfo(it.value)
+            }
+    }
 
 sealed class InferenceContext {
     abstract val traitFinderContext: TraitFinderContext
@@ -82,11 +94,14 @@ class ModuleInfoInferenceContext(
         firstArgument: Type
     ): Sequence<FunctionInfo> {
         return "$name/".let { prefixName ->
-            moduleInfo.functions
-                .asSequence()
-                .filter { (key, value) ->
-                    key.startsWith(prefixName) && value.arity > numParams
-                }.map { it.value }
+            sequenceOf(
+                moduleInfo.functions
+                    .asSequence()
+                    .filter { (key, value) ->
+                        key.startsWith(prefixName) && value.arity > numParams
+                    }.map { it.value },
+                traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument)
+            ).flatten()
         }
     }
 
@@ -122,17 +137,11 @@ class SemanticModuleInfoInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo> {
-        return "$name/".let { prefixName ->
-            abstractions
-                .asSequence()
-                .filter { (key, value) ->
-                    key.startsWith(prefixName) && value.info.parameters.size > numParams
-                }.map {
-                    AbstractionFunctionInfo(it.value)
-                }
-        }
-    }
+    ): Sequence<FunctionInfo> =
+        sequenceOf(
+            abstractions.findPartialFunction(name, numParams),
+            traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument)
+        ).flatten()
 
 }
 
@@ -170,8 +179,10 @@ class TraitInferenceContext(
         numParams: Int,
         firstArgument: Type
     ): Sequence<FunctionInfo> {
-        //TODO: implement
-        return emptySequence()
+        return sequenceOf(
+            abstractions.findPartialFunction(name, numParams),
+            parent.findPartialFunction(caller, name, numParams, firstArgument)
+        ).flatten()
     }
 
 }

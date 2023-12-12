@@ -97,14 +97,14 @@ class InferenceWithParsingTest : StringSpec({
     }
     "Inference module - function not found 2" {
         """
-            fn = (+) 10
+            fn = (+) "Hello"
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "(+) (Num numeric<Long>)"
+                        "function" to "(+) String"
                     )
                 )
             )
@@ -451,6 +451,41 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sumN :: ((Add a) -> ((Add a) -> (Add a)))"
+            )
+    }
+    "Inference partial module trait application in an abstraction" {
+        """
+            sum10 = (+) 10
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum10 :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial trait application in an abstraction" {
+        """
+            trait Op a =
+              sum :: a -> Long -> a
+            
+            sumN op = sum op
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sumN :: ((Op a) -> ((Num numeric<Long>) -> (Op a)))"
+            )
+    }
+    "Inference partial application into a trait" {
+        """
+            trait Op a =
+              sum :: Long -> a -> a
+              sumN :: a -> a
+              
+              sumN = sum 10
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTraitAbstractionsTypesBe(
                 "sum :: ((Add a) -> (Add a) -> (Add a))",
                 "sumN :: ((Add a) -> ((Add a) -> (Add a)))"
             )

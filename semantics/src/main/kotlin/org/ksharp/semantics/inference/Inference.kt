@@ -336,7 +336,9 @@ private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceI
                             this.info.cast<ApplicationSemanticInfo>().function = fn
                             val inferredFn = fn.cast<FunctionType>()
                             if (!isPreludeCollectionFlag) {
-                                inferredFn.arguments.asSequence()
+                                (if (inferredFn is PartialFunctionType)
+                                    inferredFn.function
+                                else inferredFn).arguments.asSequence()
                                     .zip(arguments.asSequence()) { fnArg, arg ->
                                         arg.info.setInferredType(fnArg.solve())
                                     }.last()
