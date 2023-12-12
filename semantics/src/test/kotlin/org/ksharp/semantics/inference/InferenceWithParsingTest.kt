@@ -54,6 +54,7 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredImplAbstractio
         }.unwrap().shouldBeRight()
             .value
             .flatten()
+            .onEach(::println)
             .shouldContainExactlyInAnyOrder(types.toList())
     }
 }
@@ -477,19 +478,23 @@ class InferenceWithParsingTest : StringSpec({
                 "sumN :: ((Op a) -> ((Num numeric<Long>) -> (Op a)))"
             )
     }
-    "Inference partial application into a trait" {
+    "Inference partial application into a impl" {
         """
             trait Op a =
               sum :: a -> Long -> a
               sum2 :: a -> a
-              
+            
+            impl Op for Int =
+              sum a b = a
               sumN n a = sum a n
               sum2 = sumN 10
         """.trimIndent()
+            .also { println(it) }
             .toSemanticModuleInfo()
-            .shouldInferredTraitAbstractionsTypesBe(
-                "Op :: sumN :: ((Num numeric<Long>) -> (Op a) -> (Op a))",
-                "Op :: sum2 :: ((Op a) -> (Op a))"
+            .shouldInferredImplAbstractionsTypesBe(
+                "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Long>) -> (Num numeric<Int>))",
+                "Op for Num numeric<Int> :: sumN :: ((Num numeric<Long>) -> (Num numeric<Int>) -> (Num numeric<Int>))",
+                "Op for Num numeric<Int> :: sum2 :: ((Num numeric<Int>) -> (Num numeric<Int>))"
             )
     }
 })

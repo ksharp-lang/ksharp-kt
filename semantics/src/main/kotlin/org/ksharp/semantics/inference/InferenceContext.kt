@@ -14,6 +14,7 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.arity
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
@@ -228,8 +229,20 @@ class ImplInferenceContext(
         numParams: Int,
         firstArgument: Type
     ): Sequence<FunctionInfo> {
-        //`TODO: implement
-        return emptySequence()
+        return sequenceOf(
+            abstractions.findPartialFunction(name, numParams),
+            "$name/".let {
+                traitType.methods
+                    .asSequence()
+                    .filter { (name, methodType) ->
+                        name.startsWith(name) && methodType.arguments.arity > numParams
+                    }.map {
+                        methodTypeToFunctionInfo(traitType, it.value, checker)
+                    }
+            },
+            traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument),
+            parent.findPartialFunction(caller, name, numParams, firstArgument)
+        ).flatten()
     }
 
 }
