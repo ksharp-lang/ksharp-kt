@@ -316,6 +316,11 @@ private fun Sequence<ErrorOrType>.unifyArguments(
         CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType(info.inferenceContext.typeSystem) })
     }
 
+private fun FunctionType.getOriginalFunction() =
+    if (this is PartialFunctionType)
+        this.function
+    else this
+
 private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
     functionName.pck.equals(PRELUDE_COLLECTION_FLAG).let { isPreludeCollectionFlag ->
         arguments.asSequence()
@@ -336,9 +341,7 @@ private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceI
                             this.info.cast<ApplicationSemanticInfo>().function = fn
                             val inferredFn = fn.cast<FunctionType>()
                             if (!isPreludeCollectionFlag) {
-                                (if (inferredFn is PartialFunctionType)
-                                    inferredFn.function
-                                else inferredFn).arguments.asSequence()
+                                fn.getOriginalFunction().arguments.asSequence()
                                     .zip(arguments.asSequence()) { fnArg, arg ->
                                         arg.info.setInferredType(fnArg.solve())
                                     }.last()
