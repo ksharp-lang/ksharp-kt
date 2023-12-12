@@ -478,6 +478,21 @@ class InferenceWithParsingTest : StringSpec({
                 "sumN :: ((Op a) -> ((Num numeric<Long>) -> (Op a)))"
             )
     }
+    "Inference partial trait application" {
+        """
+            trait Op a =
+              sum :: a -> Long -> a
+              sum2 :: a -> a
+              
+              sumN n op = sum op n
+              sum2 = sumN 10
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTraitAbstractionsTypesBe(
+                "Op :: sumN :: ((Num numeric<Long>) -> (Op a) -> (Op a))",
+                "Op :: sum2 :: ((Op a) -> (Op a))"
+            )
+    }
     "Inference partial application into a impl" {
         """
             trait Op a =
