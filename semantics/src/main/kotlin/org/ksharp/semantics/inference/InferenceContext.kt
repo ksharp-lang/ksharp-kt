@@ -157,7 +157,7 @@ sealed class ObjectInferenceContext(
 
 class TraitInferenceContext(
     private val parent: InferenceContext,
-    private val traitType: TraitType,
+    traitType: TraitType,
     private val abstractions: AbstractionNodeMap
 ) : ObjectInferenceContext(traitType), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
 
