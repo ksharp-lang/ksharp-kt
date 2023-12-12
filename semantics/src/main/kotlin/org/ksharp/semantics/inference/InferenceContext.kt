@@ -146,11 +146,20 @@ class SemanticModuleInfoInferenceContext(
 
 }
 
+sealed class ObjectInferenceContext(
+    private val traitType: TraitType,
+) : InferenceContext() {
+    override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
+        type.flatMap { t ->
+            traitType.methods[name]?.unify(location, t, checker) ?: type
+        }
+}
+
 class TraitInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext(), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
+) : ObjectInferenceContext(traitType), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
 
     override val traitFinderContext: TraitFinderContext
             by lazy { parent.traitFinderContext }
@@ -168,11 +177,6 @@ class TraitInferenceContext(
                 ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
             ?: parent.findFullFunction(caller, name, numParams, firstArgument)
-
-    override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
-        type.flatMap { t ->
-            traitType.methods[name]?.unify(location, t, checker) ?: type
-        }
 
     override fun findPartialFunction(
         caller: String,
@@ -193,7 +197,7 @@ class ImplInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext(), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
+) : ObjectInferenceContext(traitType), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
 
     override val traitFinderContext: TraitFinderContext
             by lazy { parent.traitFinderContext }
@@ -217,11 +221,6 @@ class ImplInferenceContext(
                 ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
             ?: parent.findFullFunction(caller, name, numParams, firstArgument)
-
-    override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
-        type.flatMap { t ->
-            traitType.methods[name]?.unify(location, t, checker) ?: type
-        }
 
     override fun findPartialFunction(
         caller: String,
