@@ -272,6 +272,19 @@ private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceI
                     ?: Either.Left(SemanticInfoErrorCode.TypeNotInferred.new(location))
             } else expression.inferType(caller, info)
         }.flatMap { returnType ->
+            if (expression is ApplicationNode) {
+                val fn = expression.info.cast<ApplicationSemanticInfo>().function
+                if (fn is PartialFunctionType) {
+                    val abstractionInfo = this.info.cast<AbstractionSemanticInfo>()
+                    val previousName = nameWithArity
+                    if (abstractionInfo.parameters.isNotEmpty()) {
+                        return@flatMap calculateFunctionType(native, fn, info)
+                    }
+                    abstractionInfo.updateParameters(fn)
+                    info.inferenceContext.cast<CodeInferenceContext>()
+                        .registerPartialFunctionAbstraction(previousName, this)
+                }
+            }
             calculateFunctionType(native, returnType.toFixedTraitOrType(), info)
         }
     }
@@ -303,6 +316,11 @@ private fun Sequence<ErrorOrType>.unifyArguments(
         CollectionFunctionName.Tuple -> sequenceOf(unwrap().map { it.toTupleType(info.inferenceContext.typeSystem) })
     }
 
+private fun FunctionType.getOriginalFunction() =
+    if (this is PartialFunctionType)
+        this.function
+    else this
+
 private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
     functionName.pck.equals(PRELUDE_COLLECTION_FLAG).let { isPreludeCollectionFlag ->
         arguments.asSequence()
@@ -313,18 +331,23 @@ private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceI
                     it.unifyArguments(functionName, location, info)
                 } else it
             }.unwrap().flatMap {
-                info.findAppType(caller, location, functionName, it).map { fn ->
-                    if (fn is FunctionType) {
-                        this.info.cast<ApplicationSemanticInfo>().function = fn
-                        val inferredFn = fn.cast<FunctionType>()
-                        if (!isPreludeCollectionFlag) {
-                            inferredFn.arguments.asSequence()
-                                .zip(arguments.asSequence()) { fnArg, arg ->
-                                    arg.info.setInferredType(fnArg.solve())
-                                }.last()
-                        }
-                        inferredFn.arguments.last()
-                    } else fn
-                }
+                info.findAppType(caller, location, functionName, it, FindFunctionMode.Complete)
+                    .flatMapLeft { e ->
+                        info.findAppType(caller, location, functionName, it, FindFunctionMode.Partial)
+                            .mapLeft { e }
+                    }
+                    .map { fn ->
+                        if (fn is FunctionType) {
+                            this.info.cast<ApplicationSemanticInfo>().function = fn
+                            val inferredFn = fn.cast<FunctionType>()
+                            if (!isPreludeCollectionFlag) {
+                                fn.getOriginalFunction().arguments.asSequence()
+                                    .zip(arguments.asSequence()) { fnArg, arg ->
+                                        arg.info.setInferredType(fnArg.solve())
+                                    }.last()
+                            }
+                            inferredFn.arguments.last()
+                        } else fn
+                    }
             }
     }

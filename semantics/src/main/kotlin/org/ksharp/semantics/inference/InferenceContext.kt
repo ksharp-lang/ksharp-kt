@@ -14,77 +14,182 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
+import org.ksharp.typesystem.types.arity
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
-typealias AbstractionNodeMap = Map<String, AbstractionNode<AbstractionSemanticInfo>>
+typealias AbstractionNodeMap = MutableMap<String, AbstractionNode<AbstractionSemanticInfo>>
+
+enum class FindFunctionMode {
+    Partial,
+    Complete
+}
 
 private inline fun run(sameToCaller: Boolean, action: () -> FunctionInfo?): FunctionInfo? =
     if (sameToCaller) null else action()
 
-sealed class InferenceContext : TraitFinderContext {
-    val checker: UnificationChecker by lazy { unificationChecker(this) }
-    abstract fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo?
+private fun AbstractionNodeMap.findPartialFunction(
+    name: String,
+    numParams: Int
+) =
+    "$name/".let { prefixName ->
+        asSequence()
+            .filter { (key, value) ->
+                key.startsWith(prefixName) && value.info.parameters.size > numParams
+            }.map {
+                AbstractionFunctionInfo(it.value)
+            }
+    }
+
+sealed class InferenceContext {
+    abstract val traitFinderContext: TraitFinderContext
+
+    val checker: UnificationChecker by lazy { unificationChecker(traitFinderContext) }
+
+    val typeSystem by lazy { traitFinderContext.typeSystem }
+
+    abstract fun findPartialFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo>
+
+    abstract fun findFullFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo>?
+
+    fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type, mode: FindFunctionMode) =
+        when (mode) {
+            FindFunctionMode.Partial -> findPartialFunction(caller, name, numParams, firstArgument)
+            FindFunctionMode.Complete -> findFullFunction(caller, name, numParams, firstArgument)
+        }
+
     abstract fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType
     fun methodName(name: String, numParams: Int) = "$name/$numParams"
 }
 
-class ModuleInfoInferenceContext(private val moduleInfo: ModuleInfo) :
+class ModuleInfoInferenceContext(
+    private val moduleInfo: ModuleInfo,
+    override val traitFinderContext: TraitFinderContext = moduleInfo.traitFinderContext,
+) :
     InferenceContext() {
 
-    override val typeSystem: TypeSystem = moduleInfo.typeSystem
-
-    override val impls: Sequence<Impl> = moduleInfo.impls.asSequence()
-
-    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+    override fun findFullFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo>? =
         methodName(name, numParams).let { methodName ->
-            moduleInfo.functions[methodName] ?: findTraitFunction(methodName, firstArgument)
+            moduleInfo.functions[methodName] ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
+        }?.let { sequenceOf(it) }
+
+    override fun findPartialFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo> {
+        return "$name/".let { prefixName ->
+            sequenceOf(
+                moduleInfo.functions
+                    .asSequence()
+                    .filter { (key, value) ->
+                        key.startsWith(prefixName) && value.arity > numParams
+                    }.map { it.value },
+                traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument)
+            ).flatten()
         }
+    }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
 }
 
 class SemanticModuleInfoInferenceContext(
-    override val typeSystem: TypeSystem,
-    override val impls: Sequence<Impl>,
+    override val traitFinderContext: TraitFinderContext,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext() {
-    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
-        methodName(name, numParams).let { methodName ->
-            abstractions[methodName]?.let {
-                AbstractionFunctionInfo(it)
-            } ?: findTraitFunction(methodName, firstArgument)
-        }
+) : InferenceContext(), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
+    override fun findFullFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo>? =
+        (methodName(name, numParams) to "$name/0").let { (methodName, methodNameArityZero) ->
+            sequenceOf(
+                abstractions[methodName]?.let {
+                    AbstractionFunctionInfo(it)
+                },
+                abstractions[methodNameArityZero]?.let {
+                    AbstractionFunctionInfo(it)
+                },
+                traitFinderContext.findTraitFunction(methodName, firstArgument)
+            ).filterNotNull()
+        }.takeIf { it.firstOrNull() != null }
 
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType = type
 
+    override fun findPartialFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo> =
+        sequenceOf(
+            abstractions.findPartialFunction(name, numParams),
+            traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument)
+        ).flatten()
+
 }
 
-class TraitInferenceContext(
-    private val parent: InferenceContext,
+sealed class ObjectInferenceContext(
     private val traitType: TraitType,
-    private val abstractions: AbstractionNodeMap
 ) : InferenceContext() {
-
-    override val impls: Sequence<Impl>
-        get() = parent.impls
-
-    override val typeSystem: TypeSystem
-        get() = parent.typeSystem
-
-    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
-        methodName(name, numParams).let { methodName ->
-            abstractions[methodName]?.let {
-                AbstractionFunctionInfo(it)
-            }
-                ?: findTraitFunction(methodName, firstArgument)
-                ?: parent.findFunction(caller, name, numParams, firstArgument)
-        }
-
     override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
         type.flatMap { t ->
             traitType.methods[name]?.unify(location, t, checker) ?: type
         }
+}
+
+class TraitInferenceContext(
+    private val parent: InferenceContext,
+    traitType: TraitType,
+    private val abstractions: AbstractionNodeMap
+) : ObjectInferenceContext(traitType), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
+
+    override val traitFinderContext: TraitFinderContext
+            by lazy { parent.traitFinderContext }
+
+    override fun findFullFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo>? =
+        methodName(name, numParams).let { methodName ->
+            abstractions[methodName]?.let {
+                AbstractionFunctionInfo(it)
+            }
+                ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
+        }?.let { sequenceOf(it) }
+            ?: parent.findFullFunction(caller, name, numParams, firstArgument)
+
+    override fun findPartialFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo> {
+        return sequenceOf(
+            abstractions.findPartialFunction(name, numParams),
+            traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument),
+            parent.findPartialFunction(caller, name, numParams, firstArgument)
+        ).flatten()
+    }
 
 }
 
@@ -92,14 +197,17 @@ class ImplInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
     private val abstractions: AbstractionNodeMap
-) : InferenceContext() {
+) : ObjectInferenceContext(traitType), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
 
-    override val impls: Sequence<Impl> = parent.impls
+    override val traitFinderContext: TraitFinderContext
+            by lazy { parent.traitFinderContext }
 
-    override val typeSystem: TypeSystem
-        get() = parent.typeSystem
-
-    override fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type): FunctionInfo? =
+    override fun findFullFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo>? =
         methodName(name, numParams).let { methodName ->
             val sameToCaller = methodName == caller
             run(sameToCaller) {
@@ -110,19 +218,40 @@ class ImplInferenceContext(
                 ?: traitType.methods[methodName]?.let {
                     methodTypeToFunctionInfo(traitType, it, checker)
                 }
-                ?: findTraitFunction(methodName, firstArgument)
-                ?: parent.findFunction(caller, name, numParams, firstArgument)
-        }
+                ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
+        }?.let { sequenceOf(it) }
+            ?: parent.findFullFunction(caller, name, numParams, firstArgument)
 
-    override fun unify(name: String, location: Location, type: ErrorOrType): ErrorOrType =
-        type.flatMap { t ->
-            traitType.methods[name]?.unify(location, t, checker) ?: type
-        }
+    override fun findPartialFunction(
+        caller: String,
+        name: String,
+        numParams: Int,
+        firstArgument: Type
+    ): Sequence<FunctionInfo> {
+        return sequenceOf(
+            abstractions.findPartialFunction(name, numParams),
+            "$name/".let {
+                traitType.methods
+                    .asSequence()
+                    .filter { (name, methodType) ->
+                        name.startsWith(name) && methodType.arguments.arity > numParams
+                    }.map {
+                        methodTypeToFunctionInfo(traitType, it.value, checker)
+                    }
+            },
+            traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument),
+            parent.findPartialFunction(caller, name, numParams, firstArgument)
+        ).flatten()
+    }
+
 }
 
 class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemanticInfo>) : FunctionInfo {
     override val attributes: Set<Attribute> = abstraction.attributes
     override val name: String = abstraction.name
+    override val arity: Int by lazy {
+        abstraction.info.parameters.size
+    }
     override val types: List<Type>
         get() {
             val info = abstraction.info
@@ -134,15 +263,14 @@ class AbstractionFunctionInfo(val abstraction: AbstractionNode<AbstractionSemant
 private fun List<AbstractionNode<AbstractionSemanticInfo>>.toMap() =
     associateBy {
         it.nameWithArity
-    }
+    }.toMutableMap()
 
 fun List<AbstractionNode<SemanticInfo>>.toInferenceContext(
     typeSystem: TypeSystem,
     impls: Set<Impl>,
 ) =
     SemanticModuleInfoInferenceContext(
-        typeSystem,
-        impls.asSequence(),
+        TraitFinderContext(typeSystem, impls.asSequence()),
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()
     )

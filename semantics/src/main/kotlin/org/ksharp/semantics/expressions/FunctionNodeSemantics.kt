@@ -1,6 +1,7 @@
 package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
+import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
@@ -20,6 +21,8 @@ import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.semantics.scopes.FunctionTableBuilder
 import org.ksharp.semantics.scopes.SymbolTableBuilder
+import org.ksharp.semantics.typesystem.TypeSemanticsErrorCode
+import org.ksharp.semantics.typesystem.nameWithArity
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
@@ -222,13 +225,45 @@ private fun List<AbstractionNode<SemanticInfo>>.inferTypes(
     }
 }
 
+private fun List<AbstractionNode<SemanticInfo>>.checkFunctionSemantics(
+    impl: Impl,
+    type: TraitType,
+    errors: ErrorCollector
+) {
+    val requiredMethodsToImplement = type
+        .methods
+        .values
+        .filter { !it.withDefaultImpl }
+        .map(TraitType.MethodType::nameWithArity).toSet()
+
+    val collector = mutableSetOf<String>()
+
+    forEach {
+        val methodArity = it.nameWithArity
+        if (!collector.add(methodArity))
+            errors.collect(
+                TypeSemanticsErrorCode.DuplicateImplMethod.new(it.location, "name" to methodArity)
+            )
+    }
+
+    val missingMethods = requiredMethodsToImplement.minus(collector.toSet())
+    if (missingMethods.isNotEmpty()) {
+        errors.collect(
+            TypeSemanticsErrorCode.MissingImplMethods.new(
+                "methods" to missingMethods.joinToString(", "),
+                "impl" to impl.type.representation,
+                "trait" to impl.trait
+            )
+        )
+    }
+}
+
 fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     val errors = ErrorCollector()
 
     val preludeInferenceContext = ModuleInfoInferenceContext(preludeModule)
     val moduleInferenceContext = functionInfo.abstractions.toInferenceContext(
-        typeSystemInfo.typeSystem,
-        typeSystemInfo.impls.keys
+        typeSystemInfo.typeSystem, typeSystemInfo.impls.keys
     )
     val dependencies = mapOf<String, ModuleInfo>()
     val abstractionsInferenceInfo = InferenceInfo(
@@ -258,7 +293,13 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
             ),
             dependencies
         )
-        impl.key to impl.value.inferTypes(errors, implInferenceInfo)
+        val result = impl.value.inferTypes(errors, implInferenceInfo)
+        typeSystemInfo.typeSystem[impl.key.trait]
+            .map { traitType ->
+                result.checkFunctionSemantics(impl.key, traitType.cast(), errors)
+            }
+
+        impl.key to result
     }
     return ModuleFunctionInfo(
         errors = errors.build(),

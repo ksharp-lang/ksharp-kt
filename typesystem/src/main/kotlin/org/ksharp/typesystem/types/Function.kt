@@ -18,11 +18,35 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
+interface FunctionType : Type {
+    val arguments: List<Type>
+}
+
+data class PartialFunctionType(
+    override val arguments: List<Type>,
+    val function: FunctionType
+) : FunctionType {
+
+    override val typeSystem: HandlePromise<TypeSystem> = function.typeSystem
+    override val attributes: Set<Attribute> = function.attributes
+
+    override val serializer: TypeSerializer = TypeSerializers.PartialFunctionType
+    override val unification: TypeUnification = TypeUnifications.PartialFunction
+    override val substitution: Substitution = Substitutions.PartialFunction
+    override val solver: Solver = Solvers.PartialFunction
+
+    override val terms: Sequence<Type> = arguments.asSequence()
+
+    override fun new(attributes: Set<Attribute>): Type = this
+
+    override fun toString(): String = arguments.asSequence().map { it.representation }.joinToString(" -> ")
+}
+
 @Suppress("DataClassPrivateConstructor")
-data class FunctionType private constructor(
+data class FullFunctionType private constructor(
     override val attributes: Set<Attribute>,
-    val arguments: List<Type>,
-) : Type {
+    override val arguments: List<Type>,
+) : FunctionType {
     override lateinit var typeSystem: HandlePromise<TypeSystem>
         private set
 
@@ -53,18 +77,18 @@ data class FunctionType private constructor(
 
     override fun toString(): String = arguments.asSequence().map { it.representation }.joinToString(" -> ")
 
-    override fun new(attributes: Set<Attribute>): Type = FunctionType(typeSystem, attributes, arguments)
+    override fun new(attributes: Set<Attribute>): Type = FullFunctionType(typeSystem, attributes, arguments)
 }
 
 fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
     ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { args ->
         if (args.size < 2) {
             Left(InvalidFunctionType.new())
-        } else Right(FunctionType(handle, attributes, args))
+        } else Right(FullFunctionType(handle, attributes, args))
     }
 
 fun List<Type>.toFunctionType(typeSystem: TypeSystem, attributes: Set<Attribute> = NoAttributes) =
-    FunctionType(typeSystem.handle, attributes, this)
+    FullFunctionType(typeSystem.handle, attributes, this)
 
 fun List<Type>.toFunctionType(handle: HandlePromise<TypeSystem>, attributes: Set<Attribute> = NoAttributes) =
-    FunctionType(handle, attributes, this)
+    FullFunctionType(handle, attributes, this)

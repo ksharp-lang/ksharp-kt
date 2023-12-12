@@ -42,7 +42,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    parameters = emptyList(),
+                                    emptyList(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(
@@ -77,7 +77,7 @@ class CompilerTestModuleInfo : StringSpec({
                                     )
                                 ),
                                 info = AbstractionSemanticInfo(
-                                    parameters = emptyList(),
+                                    emptyList(),
                                     TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
                                 ),
                                 location = Location(

@@ -13,10 +13,7 @@ data class ModuleTypeSystemInfo(
 ) {
 
     val traitFinderContext: TraitFinderContext by lazy {
-        object : TraitFinderContext {
-            override val typeSystem: TypeSystem = this@ModuleTypeSystemInfo.typeSystem
-            override val impls: Sequence<Impl> = this@ModuleTypeSystemInfo.impls.keys.asSequence()
-        }
+        TraitFinderContext(this@ModuleTypeSystemInfo.typeSystem, this@ModuleTypeSystemInfo.impls.keys.asSequence())
     }
 
 }

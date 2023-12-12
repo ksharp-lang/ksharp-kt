@@ -85,7 +85,7 @@ class SolverTest : StringSpec({
         val type = ts["Sum"].valueOrNull.shouldNotBeNull()
         type.solve().also { println(it) }
             .shouldBeRight(
-                FunctionType(
+                FullFunctionType(
                     ts.handle,
                     NoAttributes, listOf(
                         ParametricType(

@@ -23,7 +23,6 @@ private fun List<AbstractionNode<SemanticInfo>>.stringRepresentation(prefix: Str
 
 private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg types: String) {
     shouldBeRight().value.apply {
-        abstractions.size.shouldBe(types.size)
         abstractions.stringRepresentation("")
             .shouldBeRight()
             .value
@@ -41,6 +40,7 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTraitAbstracti
         }.unwrap().shouldBeRight()
             .value
             .flatten()
+            .onEach(::println)
             .shouldContainExactlyInAnyOrder(types.toList())
     }
 }
@@ -54,6 +54,7 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredImplAbstractio
         }.unwrap().shouldBeRight()
             .value
             .flatten()
+            .onEach(::println)
             .shouldContainExactlyInAnyOrder(types.toList())
     }
 }
@@ -84,28 +85,28 @@ class InferenceWithParsingTest : StringSpec({
     "Inference module - function not found" {
         """
             sum a b = a + b
-            fn = sum 10
+            fn = sum2 10
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "sum (Num numeric<Long>)"
+                        "function" to "sum2 (Num numeric<Long>)"
                     )
                 )
             )
     }
     "Inference module - function not found 2" {
         """
-            fn = (+) 10
+            fn = (+) "Hello"
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "(+) (Num numeric<Long>)"
+                        "function" to "(+) String"
                     )
                 )
             )
@@ -355,8 +356,27 @@ class InferenceWithParsingTest : StringSpec({
     }
 
     "Inference impl using a default trait method" {
-
+        """
+            trait Op a =
+              sum :: a -> a -> a
+              sum10 :: a -> a
+              
+              sum a b = a + b
+            
+            impl Op for Int =
+              sum10 a = sum (int 10) a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .apply {
+                shouldInferredImplAbstractionsTypesBe(
+                    "Op for Num numeric<Int> :: sum10 :: ((Num numeric<Int>) -> (Num numeric<Int>))"
+                )
+                shouldInferredTraitAbstractionsTypesBe(
+                    "Op :: sum :: ((Add a) -> (Add a) -> (Add a))"
+                )
+            }
     }
+
     "Inference parametric function" {
         """
             emptyHashMap k v :: () -> (Map k v)
@@ -378,6 +398,118 @@ class InferenceWithParsingTest : StringSpec({
             }
             .shouldInferredTypesBe(
                 "emptyHashMap :: (Unit -> (Map k v))"
+            )
+    }
+    "Inference partial application" {
+        """
+            sum a b = a + b
+            sum2 = sum 2
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial application over prelude function" {
+        """
+            keyValue = pair "Hello"
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "keyValue :: (b -> (Pair String b))"
+            )
+    }
+    "Inference partial application used in a function" {
+        """
+            sum a b = a + b
+            sum2 = sum 2           
+            fn a = sum2 a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))",
+                "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial application used in a function, partial declared after used" {
+        """
+            sum a b = a + b
+            fn a = sum2 a
+            sum2 = sum 2
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))",
+                "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial application in abstraction with parameters" {
+        """
+            sum a b = a + b
+            sumN a = sum a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum :: ((Add a) -> (Add a) -> (Add a))",
+                "sumN :: ((Add a) -> ((Add a) -> (Add a)))"
+            )
+    }
+    "Inference partial module trait application in an abstraction" {
+        """
+            sum10 = (+) 10
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sum10 :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+            )
+    }
+    "Inference partial trait application in an abstraction" {
+        """
+            trait Op a =
+              sum :: a -> Long -> a
+            
+            sumN op = sum op
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTypesBe(
+                "sumN :: ((Op a) -> ((Num numeric<Long>) -> (Op a)))"
+            )
+    }
+    "Inference partial trait application" {
+        """
+            trait Op a =
+              sum :: a -> Long -> a
+              sum2 :: a -> a
+              
+              sumN n op = sum op n
+              sum2 = sumN 10
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldInferredTraitAbstractionsTypesBe(
+                "Op :: sumN :: ((Num numeric<Long>) -> (Op a) -> (Op a))",
+                "Op :: sum2 :: ((Op a) -> (Op a))"
+            )
+    }
+    "Inference partial application into a impl" {
+        """
+            trait Op a =
+              sum :: a -> Long -> a
+              sum2 :: a -> a
+            
+            impl Op for Int =
+              sum a b = a
+              sumN n a = sum a n
+              sum2 = sumN 10
+        """.trimIndent()
+            .also { println(it) }
+            .toSemanticModuleInfo()
+            .shouldInferredImplAbstractionsTypesBe(
+                "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Long>) -> (Num numeric<Int>))",
+                "Op for Num numeric<Int> :: sumN :: ((Num numeric<Long>) -> (Num numeric<Int>) -> (Num numeric<Int>))",
+                "Op for Num numeric<Int> :: sum2 :: ((Num numeric<Int>) -> (Num numeric<Int>))"
             )
     }
 })

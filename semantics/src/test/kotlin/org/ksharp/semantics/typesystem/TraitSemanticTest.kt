@@ -188,7 +188,7 @@ class TraitSemanticTest : StringSpec({
                             ), location = Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(
+                            listOf(
                                 Symbol(
                                     name = "a",
                                     type = paramAType

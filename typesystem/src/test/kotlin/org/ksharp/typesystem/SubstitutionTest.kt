@@ -243,14 +243,14 @@ class SubstitutionTest : StringSpec({
             )
     }
     "Function substitution" {
-        val function1 = FunctionType(
+        val function1 = FullFunctionType(
             ts.handle,
             NoAttributes,
             listOf(
                 Concrete(ts.handle, NoAttributes, "Int"), ts.newParameter()
             )
         )
-        val function2 = FunctionType(
+        val function2 = FullFunctionType(
             ts.handle,
             NoAttributes,
             listOf(

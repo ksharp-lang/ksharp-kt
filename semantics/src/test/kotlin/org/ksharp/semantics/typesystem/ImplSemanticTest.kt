@@ -10,6 +10,7 @@ import org.ksharp.common.new
 import org.ksharp.module.Impl
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
+import org.ksharp.semantics.inference.InferenceErrorCode
 import org.ksharp.semantics.solve
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeLeft
@@ -84,10 +85,13 @@ class ImplSemanticTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
-                    TypeSemanticsErrorCode.MissingImplMethods.new(
+                    InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "methods" to "(!=)/2",
-                        "impl" to "Num",
+                        "function" to "(==) (Num a) (Num a)"
+                    ),
+                    TypeSemanticsErrorCode.MissingImplMethods.new(
+                        "methods" to "(=)/2, (!=)/2",
+                        "impl" to "(Num a)",
                         "trait" to "Eq"
                     )
                 )
@@ -185,7 +189,7 @@ class ImplSemanticTest : StringSpec({
                             info = ApplicationSemanticInfo(function = null), Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(),
+                            listOf(),
                             returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
                         ), Location.NoProvided
                     ),
@@ -210,7 +214,7 @@ class ImplSemanticTest : StringSpec({
                             ), Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(
-                            parameters = listOf(
+                            listOf(
                                 Symbol("a", TypeSemanticInfo(forType)),
                                 Symbol("b", TypeSemanticInfo(forType))
                             ),

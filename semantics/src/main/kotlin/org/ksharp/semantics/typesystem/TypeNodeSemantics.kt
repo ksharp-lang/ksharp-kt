@@ -350,34 +350,19 @@ internal val TraitType.MethodType.nameWithArity: String
             "$name/$it"
         }
 
-private fun ImplNode.checkFunctionSemantics(type: TraitType, collector: MutableSet<String>): ErrorOrValue<Boolean> {
-    val requiredMethodsToImplement = type
-        .methods
-        .values
-        .filter { !it.withDefaultImpl }
-        .map(TraitType.MethodType::nameWithArity).toSet()
-
+private fun ImplNode.checkFunctionSemantics(collector: MutableSet<String>): ErrorOrValue<Boolean> {
     return functions.map {
         val methodArity = it.nameWithArity
-        if (collector.add(methodArity)) {
+        if (collector.add(methodArity))
             Either.Right(methodArity)
-        } else Either.Left(
-            TypeSemanticsErrorCode.DuplicateImplMethod.new(location, "name" to methodArity)
-        )
-    }.unwrap().flatMap {
-        val missingMethods = requiredMethodsToImplement.minus(it.toSet())
-        if (missingMethods.isEmpty()) {
-            Either.Right(true)
-        } else {
+        else if (methodArity.endsWith("/0"))
+            Either.Right(methodArity)
+        else
             Either.Left(
-                TypeSemanticsErrorCode.MissingImplMethods.new(
-                    location,
-                    "methods" to missingMethods.joinToString(", "),
-                    "impl" to forType.representation,
-                    "trait" to traitName
-                )
+                TypeSemanticsErrorCode.DuplicateImplMethod.new(location, "name" to methodArity)
             )
-        }
+    }.unwrap().flatMap {
+        Either.Right(true)
     }
 }
 
@@ -385,40 +370,41 @@ private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: Ty
     val impls = mapBuilder<Impl, ImplNode>()
     val handle = ReadOnlyHandlePromise(typeSystem.handle)
     this.forEach { impl ->
-        typeSystem[impl.traitName].flatMap { traitType ->
-            val implMethods = mutableSetOf<String>()
-            impl.checkFunctionSemantics(traitType.cast(), implMethods)
-        }.mapLeft {
-            errors.collect(it)
-            it
-        }.flatMap {
-            instantiateType(errors, typeSystem, handle, impl.forType.cast())
-        }.flatMap { forType ->
-            if (forType is TraitType) {
-                errors.collect(
-                    TypeSemanticsErrorCode.TraitImplementingAnotherTrait.new(
-                        impl.location,
-                        "impl" to forType.name,
-                        "trait" to impl.traitName
-                    )
-                )
-                return@flatMap Either.Left(false)
+        typeSystem[impl.traitName]
+            .flatMap { _ ->
+                impl.checkFunctionSemantics(mutableSetOf())
             }
-            val i = Impl(impl.traitName, forType)
-            if (impls.containsKey(i) == false) {
-                impls.put(i, impl)
-                Either.Right(true)
-            } else {
-                errors.collect(
-                    TypeSemanticsErrorCode.DuplicateImpl.new(
-                        impl.location,
-                        "impl" to forType.representation,
-                        "trait" to impl.traitName
+            .mapLeft {
+                errors.collect(it)
+                it
+            }.flatMap {
+                instantiateType(errors, typeSystem, handle, impl.forType.cast())
+            }.flatMap { forType ->
+                if (forType is TraitType) {
+                    errors.collect(
+                        TypeSemanticsErrorCode.TraitImplementingAnotherTrait.new(
+                            impl.location,
+                            "impl" to forType.name,
+                            "trait" to impl.traitName
+                        )
                     )
-                )
-                Either.Left(false)
+                    return@flatMap Either.Left(false)
+                }
+                val i = Impl(impl.traitName, forType)
+                if (impls.containsKey(i) == false) {
+                    impls.put(i, impl)
+                    Either.Right(true)
+                } else {
+                    errors.collect(
+                        TypeSemanticsErrorCode.DuplicateImpl.new(
+                            impl.location,
+                            "impl" to forType.representation,
+                            "trait" to impl.traitName
+                        )
+                    )
+                    Either.Left(false)
+                }
             }
-        }
     }
     return impls.build()
 }
