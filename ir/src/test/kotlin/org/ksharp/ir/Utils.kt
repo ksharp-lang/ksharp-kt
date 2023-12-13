@@ -9,7 +9,7 @@ import org.ksharp.test.shouldBeRight
 fun String.toCodeModule() =
     this.parseModule("irTest.ks", true)
         .flatMap {
-            val moduleInfo = it.toCodeModule(preludeModule)
+            val moduleInfo = it.toCodeModule(preludeModule) { _, _ -> null }
             if (moduleInfo.errors.isNotEmpty()) {
                 Either.Left(moduleInfo.errors)
             } else Either.Right(moduleInfo)

@@ -5,13 +5,12 @@ import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.ksharp.common.new
-import org.ksharp.compiler.loader.DirectorySourceLoader
-import org.ksharp.compiler.loader.ModuleInfoInterface
-import org.ksharp.compiler.loader.ModuleLoader
-import org.ksharp.compiler.loader.ModuleLoaderErrorCode
+import org.ksharp.compiler.loader.*
+import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -31,12 +30,12 @@ class ModuleLoaderTest : StringSpec({
         loader.load("ten", "")
             .shouldBeRight()
             .map {
-                it.shouldBeInstanceOf<ModuleInfoInterface>()
+                it.shouldBeInstanceOf<Module>()
                 it.name.shouldBe("ten")
-                it.dependencies.shouldBeEmpty()
-                it.impls.shouldBeEmpty()
-                it.functions.mapValues { entry ->
-                    entry.value.types.toFunctionType(it.typeSystem).representation
+                it.info.dependencies.shouldBeEmpty()
+                it.info.impls.shouldBeEmpty()
+                it.info.functions.mapValues { entry ->
+                    entry.value.types.toFunctionType(it.info.typeSystem).representation
                 }.shouldBe(mapOf("ten/0" to "(Unit -> (Num numeric<Long>))"))
                 it.executable.execute("ten/0").shouldBe(10L)
                 Files.exists(binaries.resolve("ten.ksm")).shouldBeTrue()
@@ -47,14 +46,25 @@ class ModuleLoaderTest : StringSpec({
         loader2.load("ten", "")
             .shouldBeRight()
             .map {
-                it.shouldBeInstanceOf<ModuleInfoInterface>()
+                it.shouldBeInstanceOf<Module>()
                 it.name.shouldBe("ten")
-                it.dependencies.shouldBeEmpty()
-                it.impls.shouldBeEmpty()
-                it.functions.mapValues { entry ->
-                    entry.value.types.toFunctionType(it.typeSystem).representation
+                it.info.dependencies.shouldBeEmpty()
+                it.info.impls.shouldBeEmpty()
+                it.info.functions.mapValues { entry ->
+                    entry.value.types.toFunctionType(it.info.typeSystem).representation
                 }.shouldBe(mapOf("ten/0" to "(Unit -> (Num numeric<Long>))"))
                 it.executable.execute("ten/0").shouldBe(10L)
+            }
+
+        loader2.moduleInfoLoader.load("ten", "")
+            .shouldNotBeNull()
+            .apply {
+                shouldBeInstanceOf<ModuleInfo>()
+                dependencies.shouldBeEmpty()
+                impls.shouldBeEmpty()
+                functions.mapValues { entry ->
+                    entry.value.types.toFunctionType(typeSystem).representation
+                }.shouldBe(mapOf("ten/0" to "(Unit -> (Num numeric<Long>))"))
             }
     }
 

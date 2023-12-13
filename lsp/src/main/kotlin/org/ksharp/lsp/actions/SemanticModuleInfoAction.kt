@@ -14,7 +14,10 @@ fun codeModuleErrorsAction(moduleName: String, builder: ActionsGraphBuilder<List
     ) {
         execution { _, nodes ->
             nodes.asSequence().toModuleNode(moduleName)
-                .toCodeModule(preludeModule)
+                .toCodeModule(preludeModule) { _, _ ->
+                    //TODO Integrate reading modules using a module loader
+                    null
+                }
                 .errors
         }
         graphBuilder(builder)
