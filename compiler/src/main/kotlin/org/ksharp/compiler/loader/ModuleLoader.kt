@@ -6,10 +6,13 @@ import org.ksharp.common.ErrorCode
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.new
+import org.ksharp.ir.serializer.writeTo
+import org.ksharp.ir.toIrModule
 import org.ksharp.module.FunctionInfo
 import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.bytecode.readModuleInfo
+import org.ksharp.module.bytecode.writeTo
 import org.ksharp.parser.ksharp.parseModule
 import org.ksharp.semantics.nodes.toCodeModule
 import org.ksharp.typesystem.TypeSystem
@@ -60,11 +63,15 @@ class ModuleLoader(
                 listOf(it.error)
             }.flatMap {
                 it.toCodeModule(preludeModule).let { codeModule ->
-                    if (codeModule.errors.isEmpty())
-                        Either.Right(CodeModuleInterface(codeModule, sources).apply {
-                            compile()
-                        })
-                    else Either.Left(codeModule.errors)
+                    if (codeModule.errors.isEmpty()) {
+                        sources.outputStream(codeModule.name.toModulePath("ksm")).let { stream ->
+                            codeModule.module.writeTo(stream)
+                        }
+                        sources.outputStream(codeModule.name.toModulePath("ksc")).let { stream ->
+                            codeModule.toIrModule().writeTo(stream)
+                        }
+                        Either.Right(ModuleInfoInterface(codeModule.name, codeModule.module, sources))
+                    } else Either.Left(codeModule.errors)
                 }
             }
 

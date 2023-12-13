@@ -8,7 +8,10 @@ import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.ksharp.common.new
-import org.ksharp.compiler.loader.*
+import org.ksharp.compiler.loader.DirectorySourceLoader
+import org.ksharp.compiler.loader.ModuleInfoInterface
+import org.ksharp.compiler.loader.ModuleLoader
+import org.ksharp.compiler.loader.ModuleLoaderErrorCode
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -28,7 +31,7 @@ class ModuleLoaderTest : StringSpec({
         loader.load("ten", "")
             .shouldBeRight()
             .map {
-                it.shouldBeInstanceOf<CodeModuleInterface>()
+                it.shouldBeInstanceOf<ModuleInfoInterface>()
                 it.name.shouldBe("ten")
                 it.dependencies.shouldBeEmpty()
                 it.impls.shouldBeEmpty()
