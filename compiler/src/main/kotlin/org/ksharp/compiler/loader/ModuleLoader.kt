@@ -6,21 +6,20 @@ import org.ksharp.common.ErrorCode
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.new
+import org.ksharp.ir.serializer.readIrModule
 import org.ksharp.ir.serializer.writeTo
 import org.ksharp.ir.toIrModule
-import org.ksharp.module.FunctionInfo
-import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.bytecode.readModuleInfo
 import org.ksharp.module.bytecode.writeTo
 import org.ksharp.parser.ksharp.parseModule
+import org.ksharp.semantics.nodes.ModuleInfoLoader
 import org.ksharp.semantics.nodes.toCodeModule
-import org.ksharp.typesystem.TypeSystem
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.Reader
 
-typealias ErrorsOrModuleInterface = Either<List<Error>, ModuleInterface>
+typealias ErrorsOrModule = Either<List<Error>, Module>
 
 internal fun String.toModulePath(extension: String): String =
     "${this.replace('.', '/')}.$extension"
@@ -33,13 +32,17 @@ fun interface ModuleExecutable {
     fun execute(name: String, vararg args: Any): Any
 }
 
-interface ModuleInterface {
-    val name: String
-    val dependencies: Map<String, String>
-    val typeSystem: TypeSystem
-    val functions: Map<String, FunctionInfo>
-    val impls: Set<Impl>
-    val executable: ModuleExecutable
+class Module(
+    val name: String,
+    val info: ModuleInfo,
+    private val sources: SourceLoader
+) {
+    val executable: ModuleExecutable by lazy {
+        sources.binaryLoad(name.toModulePath("ksc"))!!
+            .bufferView {
+                IrModuleExecutable(it.readIrModule())
+            }
+    }
 }
 
 interface SourceLoader {
@@ -54,15 +57,15 @@ class ModuleLoader(
     private val preludeModule: ModuleInfo
 ) {
 
-    private fun InputStream.readModuleInfo(name: String): ErrorsOrModuleInterface =
-        Either.Right(ModuleInfoInterface(name, bufferView(BufferView::readModuleInfo), sources))
+    private fun InputStream.readModuleInfo(name: String): ErrorsOrModule =
+        Either.Right(Module(name, bufferView(BufferView::readModuleInfo), sources))
 
-    private fun Reader.codeModule(context: String, preludeModule: ModuleInfo): ErrorsOrModuleInterface =
+    private fun Reader.codeModule(context: String, preludeModule: ModuleInfo): ErrorsOrModule =
         this.parseModule(context, true)
             .mapLeft {
                 listOf(it.error)
             }.flatMap {
-                it.toCodeModule(preludeModule).let { codeModule ->
+                it.toCodeModule(preludeModule, moduleInfoLoader).let { codeModule ->
                     if (codeModule.errors.isEmpty()) {
                         sources.outputStream(codeModule.name.toModulePath("ksm")).let { stream ->
                             codeModule.module.writeTo(stream)
@@ -70,15 +73,20 @@ class ModuleLoader(
                         sources.outputStream(codeModule.name.toModulePath("ksc")).let { stream ->
                             codeModule.toIrModule().writeTo(stream)
                         }
-                        Either.Right(ModuleInfoInterface(codeModule.name, codeModule.module, sources))
+                        Either.Right(Module(codeModule.name, codeModule.module, sources))
                     } else Either.Left(codeModule.errors)
                 }
             }
 
-    fun load(name: String, from: String): ErrorsOrModuleInterface =
+    fun load(name: String, from: String): ErrorsOrModule =
         sources.binaryLoad(name.toModulePath("ksm"))?.readModuleInfo(name)
             ?: name.toModulePath("ks").let {
                 sources.sourceLoad(it)?.codeModule(it, preludeModule)
             } ?: Either.Left(listOf(ModuleLoaderErrorCode.ModuleNotFound.new("name" to name)))
 
 }
+
+val ModuleLoader.moduleInfoLoader: ModuleInfoLoader
+    get() = ModuleInfoLoader { name, from ->
+        load(name, from).valueOrNull?.info
+    }

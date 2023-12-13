@@ -17,7 +17,10 @@ import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.context.TypeSystemSemanticContext
 import org.ksharp.semantics.errors.ErrorCollector
 import org.ksharp.semantics.inference.InferenceErrorCode
-import org.ksharp.semantics.nodes.*
+import org.ksharp.semantics.nodes.ModuleFunctionInfo
+import org.ksharp.semantics.nodes.ModuleTypeSystemInfo
+import org.ksharp.semantics.nodes.SemanticModuleInterface
+import org.ksharp.semantics.nodes.getTypeSemanticInfo
 import org.ksharp.semantics.scopes.Function
 import org.ksharp.semantics.scopes.FunctionTable
 import org.ksharp.semantics.solve
@@ -69,6 +72,7 @@ private fun ModuleFunctionInfo.checkInferenceSemantics(
     SemanticModuleInterface(
         "interface",
         errors,
+        mapOf(),
         preludeModule,
         typeSystemInfo,
         this

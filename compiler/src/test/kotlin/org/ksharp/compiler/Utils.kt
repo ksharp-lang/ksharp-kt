@@ -17,7 +17,7 @@ fun Reader.moduleInfo(context: String, preludeModule: ModuleInfo): Either<List<E
         .mapLeft {
             listOf(it.error)
         }.flatMap {
-            it.toCodeModule(preludeModule).let { codeModule ->
+            it.toCodeModule(preludeModule) { _, _ -> null }.let { codeModule ->
                 if (codeModule.errors.isEmpty())
                     Either.Right(codeModule)
                 else Either.Left(codeModule.errors)

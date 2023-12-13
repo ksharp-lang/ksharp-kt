@@ -25,12 +25,28 @@ data class SemanticModuleInfo internal constructor(
 data class SemanticModuleInterface internal constructor(
     val name: String,
     val errors: List<Error>,
+    val dependencies: Map<String, ModuleInfo>,
     val preludeModule: ModuleInfo,
     val typeSystemInfo: ModuleTypeSystemInfo,
     val functionInfo: ModuleFunctionInfo
 )
 
-internal fun ModuleNode.toSemanticModuleInterface(preludeModule: ModuleInfo): SemanticModuleInterface {
+fun interface ModuleInfoLoader {
+    fun load(name: String, from: String): ModuleInfo?
+
+}
+
+internal fun ModuleNode.toSemanticModuleInterface(
+    preludeModule: ModuleInfo,
+    loader: ModuleInfoLoader
+): SemanticModuleInterface {
+    val dependencies = imports
+        .asSequence()
+        .mapNotNull {
+            loader.load(it.moduleName, name)?.let { module ->
+                it.key to module
+            }
+        }.toMap()
     val typeSemantics = this.checkTypesSemantics(preludeModule)
     val moduleSemantics = this.checkFunctionSemantics(typeSemantics)
     return SemanticModuleInterface(
@@ -40,6 +56,7 @@ internal fun ModuleNode.toSemanticModuleInterface(preludeModule: ModuleInfo): Se
             else name
         },
         errors + typeSemantics.errors + moduleSemantics.errors,
+        dependencies,
         preludeModule,
         typeSemantics,
         moduleSemantics
@@ -86,5 +103,5 @@ private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
     }.associateBy { it.nameWithArity }
 
 
-fun ModuleNode.toCodeModule(preludeModule: ModuleInfo): CodeModule =
-    toSemanticModuleInterface(preludeModule).toSemanticModuleInfo().toCodeModule()
+fun ModuleNode.toCodeModule(preludeModule: ModuleInfo, loader: ModuleInfoLoader): CodeModule =
+    toSemanticModuleInterface(preludeModule, loader).toSemanticModuleInfo().toCodeModule()
