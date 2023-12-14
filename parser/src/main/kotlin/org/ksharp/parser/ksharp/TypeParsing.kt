@@ -10,7 +10,7 @@ private enum class SetType {
     Intersection
 }
 
-private fun Token.toListLocations(emitLocations: Boolean) =
+fun Token.toListLocations(emitLocations: Boolean) =
     if (emitLocations) listOf(location) else listOf()
 
 private fun Token.appendToListLocations(locations: List<Location>) =

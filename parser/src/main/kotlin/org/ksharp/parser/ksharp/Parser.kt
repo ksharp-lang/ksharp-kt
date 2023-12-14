@@ -16,6 +16,11 @@ import java.nio.file.Path
 typealias KSharpParserResult = ParserResult<NodeData, KSharpLexerState>
 typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
 
+private val TypeRegexp = Regex("[a-z][a-zA-Z0-9_]*\\.[a-zA-Z0-9_]+")
+
+fun String.isValidType(): Boolean =
+    TypeRegexp.matches(this)
+
 fun KSharpConsumeResult.appendNode(block: (items: List<Any>) -> NodeData): KSharpConsumeResult =
     map {
         val items = it.collection.build()
@@ -48,6 +53,17 @@ fun KSharpLexerIterator.consumeLowerCaseWord(text: String? = null, discardToken:
     if (text != null) {
         consume(KSharpTokenType.LowerCaseWord, text, discardToken)
     } else consume(KSharpTokenType.LowerCaseWord, discardToken)
+
+fun KSharpConsumeResult.thenTypeName() =
+    then({
+        when {
+            it.type == KSharpTokenType.UpperCaseWord -> true
+            it.type == KSharpTokenType.FunctionName && it.text.isValidType() -> true
+            else -> false
+        }
+    }, {
+        createExpectedTokenError("<Type>", it)
+    }, false)
 
 fun KSharpConsumeResult.thenLowerCaseWord(text: String? = null, discardToken: Boolean = false) =
     if (text != null) {

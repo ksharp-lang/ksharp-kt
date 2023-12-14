@@ -22,7 +22,7 @@ fun KSharpLexerIterator.consumeImpl(): KSharpParserResult =
             state.value.annotations.build()
             it
         }
-        .thenUpperCaseWord()
+        .thenTypeName()
         .thenKeyword("for", false)
         .thenTypeExpr(state.value.emitLocations)
         .thenAssignOperator()
