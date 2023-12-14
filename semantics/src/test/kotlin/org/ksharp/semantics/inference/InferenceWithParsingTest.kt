@@ -21,7 +21,7 @@ private fun List<AbstractionNode<SemanticInfo>>.stringRepresentation(prefix: Str
             }
     }.unwrap()
 
-private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg types: String) {
+fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg types: String) {
     shouldBeRight().value.apply {
         abstractions.stringRepresentation("")
             .shouldBeRight()
@@ -31,7 +31,7 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTypesBe(vararg
     }
 }
 
-private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTraitAbstractionsTypesBe(
+fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTraitAbstractionsTypesBe(
     vararg types: String
 ) {
     shouldBeRight().value.apply {
@@ -45,7 +45,7 @@ private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredTraitAbstracti
     }
 }
 
-private fun Either<List<Error>, SemanticModuleInfo>.shouldInferredImplAbstractionsTypesBe(
+fun Either<List<Error>, SemanticModuleInfo>.shouldInferredImplAbstractionsTypesBe(
     vararg types: String
 ) {
     shouldBeRight().value.apply {
@@ -504,7 +504,6 @@ class InferenceWithParsingTest : StringSpec({
               sumN n a = sum a n
               sum2 = sumN 10
         """.trimIndent()
-            .also { println(it) }
             .toSemanticModuleInfo()
             .shouldInferredImplAbstractionsTypesBe(
                 "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Long>) -> (Num numeric<Int>))",

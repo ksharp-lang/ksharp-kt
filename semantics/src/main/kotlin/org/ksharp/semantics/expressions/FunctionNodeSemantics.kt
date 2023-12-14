@@ -2,7 +2,6 @@ package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
 import org.ksharp.module.Impl
-import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
@@ -265,7 +264,11 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     val moduleInferenceContext = functionInfo.abstractions.toInferenceContext(
         typeSystemInfo.typeSystem, typeSystemInfo.impls.keys
     )
-    val dependencies = mapOf<String, ModuleInfo>()
+
+    val dependencies = dependencies.mapValues {
+        ModuleInfoInferenceContext(it.value)
+    }
+    
     val abstractionsInferenceInfo = InferenceInfo(
         preludeInferenceContext,
         moduleInferenceContext,

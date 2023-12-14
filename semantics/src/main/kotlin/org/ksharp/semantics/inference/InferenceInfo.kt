@@ -2,13 +2,13 @@ package org.ksharp.semantics.inference
 
 import org.ksharp.common.*
 import org.ksharp.module.FunctionInfo
-import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.nodes.semantic.SemanticNode
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.incompatibleType
 import org.ksharp.typesystem.substitution.SubstitutionContext
 import org.ksharp.typesystem.substitution.extract
@@ -22,6 +22,12 @@ private data class FindFunctionKey(
     val arguments: List<Type>,
     val mode: FindFunctionMode
 )
+
+private val noFoundError =
+    Either.Left(TypeSystemErrorCode.TypeNotFound.new("type" to "<>"))
+private val ApplicationName.functionName
+    get() =
+        pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
 
 internal fun FunctionInfo.substitute(
     checker: UnificationChecker,
@@ -90,7 +96,7 @@ internal fun Sequence<FunctionInfo>.unify(
 data class InferenceInfo(
     val prelude: InferenceContext,
     val inferenceContext: InferenceContext,
-    val dependencies: Map<String, ModuleInfo> = emptyMap()
+    val dependencies: Map<String, InferenceContext>
 ) {
     private val cache = cacheOf<FindFunctionKey, Either<String, Type>>()
 
@@ -102,6 +108,18 @@ data class InferenceInfo(
                 it.representation
             }
         }"
+
+    private val ApplicationName.firstInferenceContext
+        get() =
+            when (pck) {
+                PRELUDE_COLLECTION_FLAG -> prelude
+                null -> inferenceContext
+                else -> dependencies[pck]
+            }
+
+    private val ApplicationName.secondInferenceContext
+        get() =
+            if (pck == null) prelude else null
 
     private fun FunctionInfo.infer(caller: String): FunctionInfo {
         if (this is AbstractionFunctionInfo) {
@@ -140,13 +158,11 @@ data class InferenceInfo(
             else -> size
         }.let { numArguments ->
             val name = appName.name
-            val funName = appName.pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
-            cache.get(FindFunctionKey(funName, arguments, mode)) {
+            cache.get(FindFunctionKey(appName.functionName, arguments, mode)) {
                 val firstArgument = arguments.first()
-                val firstSearch = if (appName.pck == PRELUDE_COLLECTION_FLAG) prelude else inferenceContext
-                val secondSearch = if (appName.pck == null) prelude else null
-
-                firstSearch.findFunction(caller, name, numArguments, firstArgument, mode)
+                val firstSearch = appName.firstInferenceContext
+                val secondSearch = appName.secondInferenceContext
+                firstSearch?.findFunction(caller, name, numArguments, firstArgument, mode)
                     ?.infer(caller)
                     ?.unify(checker, inferenceContext.typeSystem, location, arguments, mode)
                     ?.mapLeft { it.toString() }
@@ -170,10 +186,10 @@ data class InferenceInfo(
     ): ErrorOrType =
         arguments.size.let { _ ->
             val name = appName.name
-            cache.get(FindFunctionKey(name, arguments, FindFunctionMode.Complete)) {
-                val type = inferenceContext.typeSystem[name]
+            cache.get(FindFunctionKey(appName.functionName, arguments, FindFunctionMode.Complete)) {
+                val type = appName.firstInferenceContext?.typeSystem?.get(name) ?: noFoundError
                 val result = if (type.isLeft) {
-                    prelude.typeSystem[name]
+                    appName.secondInferenceContext?.typeSystem?.get(name) ?: noFoundError
                 } else type
                 result.mapLeft {
                     functionName(name, arguments)
