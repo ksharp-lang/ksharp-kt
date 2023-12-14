@@ -47,8 +47,8 @@ internal fun ModuleNode.toSemanticModuleInterface(
                 it.key to module
             }
         }.toMap()
-    val typeSemantics = this.checkTypesSemantics(preludeModule)
-    val moduleSemantics = this.checkFunctionSemantics(typeSemantics)
+    val typeSemantics = this.checkTypesSemantics(preludeModule, dependencies)
+    val moduleSemantics = this.checkFunctionSemantics(typeSemantics, dependencies)
     return SemanticModuleInterface(
         name.let {
             val ix = name.indexOf(".")

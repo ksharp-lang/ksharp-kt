@@ -2,6 +2,7 @@ package org.ksharp.semantics.expressions
 
 import org.ksharp.common.*
 import org.ksharp.module.Impl
+import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.ExpressionParserNode
 import org.ksharp.nodes.FunctionNode
 import org.ksharp.nodes.ModuleNode
@@ -22,6 +23,7 @@ import org.ksharp.semantics.scopes.FunctionTableBuilder
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.semantics.typesystem.TypeSemanticsErrorCode
 import org.ksharp.semantics.typesystem.nameWithArity
+import org.ksharp.semantics.typesystem.type
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
@@ -170,7 +172,10 @@ private fun List<FunctionNode>.checkFunctionSemantics(
     return abstractions
 }
 
-fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo): ModuleFunctionInfo {
+fun ModuleNode.checkFunctionSemantics(
+    moduleTypeSystemInfo: ModuleTypeSystemInfo,
+    dependencies: Map<String, ModuleInfo> = mapOf()
+): ModuleFunctionInfo {
     val errors = ErrorCollector()
     val typeSystem = moduleTypeSystemInfo.typeSystem
     val moduleContext = TypeSystemSemanticContext(typeSystem)
@@ -197,7 +202,7 @@ fun ModuleNode.checkFunctionSemantics(moduleTypeSystemInfo: ModuleTypeSystemInfo
                     typeSystem,
                     it.value.location,
                     it.key.type,
-                    typeSystem[it.key.trait].valueOrNull!!.cast(),
+                    it.key.trait.type(typeSystem, dependencies).valueOrNull!!.cast(),
                     unificationChecker
                 )
             it.key to it.value.functions.checkFunctionSemantics(errors, traitContext)
@@ -265,10 +270,11 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
         typeSystemInfo.typeSystem, typeSystemInfo.impls.keys
     )
 
+    val moduleDependencies = dependencies
     val dependencies = dependencies.mapValues {
         ModuleInfoInferenceContext(it.value)
     }
-    
+
     val abstractionsInferenceInfo = InferenceInfo(
         preludeInferenceContext,
         moduleInferenceContext,
@@ -288,18 +294,19 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
         trait.key to trait.value.inferTypes(errors, traitInferenceInfo)
     }
     val implAbstractions = functionInfo.implAbstractions.asSequence().associate { impl ->
+        val traitType = impl.key.trait.type(typeSystemInfo.typeSystem, moduleDependencies)
         val implInferenceInfo = InferenceInfo(
             preludeInferenceContext,
             impl.value.toImplInferenceContext(
                 moduleInferenceContext,
-                typeSystemInfo.typeSystem[impl.key.trait].valueOrNull!!.cast()
+                traitType.valueOrNull!!.cast()
             ),
             dependencies
         )
         val result = impl.value.inferTypes(errors, implInferenceInfo)
-        typeSystemInfo.typeSystem[impl.key.trait]
-            .map { traitType ->
-                result.checkFunctionSemantics(impl.key, traitType.cast(), errors)
+        traitType
+            .map { t ->
+                result.checkFunctionSemantics(impl.key, t.cast(), errors)
             }
 
         impl.key to result

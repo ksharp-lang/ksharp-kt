@@ -67,4 +67,31 @@ class ModuleDependenciesInferenceTest : StringSpec({
                 "false :: (Unit -> False2)"
             )
     }
+    "Inference trait for external module" {
+        val module1 = """
+            trait Op a =
+             sum :: a -> a -> a
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .map { it.toCodeModule() }
+            .map { it.module }
+            .shouldBeRight()
+            .value
+
+        """
+            import org.module1 as m
+
+            impl m.Op for Int =
+                sum a b = a + b
+        """.trimIndent()
+            .also { println(it) }
+            .toSemanticModuleInfo() { name, _ ->
+                if (name == "org.module1") module1
+                else null
+            }
+            .shouldBeRight()
+            .shouldInferredImplAbstractionsTypesBe(
+                "sum :: (Unit -> (Num numeric<Long>))"
+            )
+    }
 })

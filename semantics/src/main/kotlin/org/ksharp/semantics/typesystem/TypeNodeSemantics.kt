@@ -38,6 +38,18 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     DuplicateImpl("Duplicate impl '{trait}' for '{impl}'"),
 }
 
+fun String.type(typeSystem: TypeSystem, dependencies: Map<String, ModuleInfo>) =
+    indexOf('.').let { ix ->
+        if (ix == -1) typeSystem[this]
+        else {
+            val moduleName = substring(0, ix)
+            dependencies[moduleName]
+                ?.typeSystem
+                ?.get(substring(ix + 1))
+                ?: Either.Left(TypeSystemErrorCode.TypeNotFound.new("type" to this))
+        }
+    }
+
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
     (if (name.first().isUpperCase()) TypeSemanticsErrorCode.ParametersNotUsed
     else TypeSemanticsErrorCode.ParametersNotUsedInMethod).new(
@@ -366,11 +378,15 @@ private fun ImplNode.checkFunctionSemantics(collector: MutableSet<String>): Erro
     }
 }
 
-private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: TypeSystem): Map<Impl, ImplNode> {
+private fun List<ImplNode>.checkSemantics(
+    errors: ErrorCollector,
+    typeSystem: TypeSystem,
+    dependencies: Map<String, ModuleInfo>
+): Map<Impl, ImplNode> {
     val impls = mapBuilder<Impl, ImplNode>()
     val handle = ReadOnlyHandlePromise(typeSystem.handle)
     this.forEach { impl ->
-        typeSystem[impl.traitName]
+        impl.traitName.type(typeSystem, dependencies)
             .flatMap { _ ->
                 impl.checkFunctionSemantics(mutableSetOf())
             }
@@ -455,14 +471,17 @@ private fun Sequence<NodeData>.checkTypesSemantics(
     return typeSystem
 }
 
-fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemInfo {
+fun ModuleNode.checkTypesSemantics(
+    preludeModule: ModuleInfo,
+    dependencies: Map<String, ModuleInfo> = mapOf()
+): ModuleTypeSystemInfo {
     val errors = ErrorCollector()
     val typeSystem = sequenceOf(
         types.asSequence(),
         traits.asSequence(),
         typeDeclarations.asSequence()
     ).flatten().checkTypesSemantics(errors, preludeModule)
-    val impls = impls.checkSemantics(errors, typeSystem.value)
+    val impls = impls.checkSemantics(errors, typeSystem.value, dependencies)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(
         errors.build(),
