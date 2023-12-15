@@ -26,6 +26,7 @@ internal fun String.toModulePath(extension: String): String =
 
 enum class ModuleLoaderErrorCode(override val description: String) : ErrorCode {
     ModuleNotFound("Module '{name}' not found"),
+    CyclingReference("Cycling reference loading '{module}' from '{from}'")
 }
 
 fun interface ModuleExecutable {
@@ -56,6 +57,7 @@ class ModuleLoader(
     private val sources: SourceLoader,
     private val preludeModule: ModuleInfo
 ) {
+    private val cyclingRefs = CyclingReferences()
 
     private fun InputStream.readModuleInfo(name: String): ErrorsOrModule =
         Either.Right(Module(name, bufferView(BufferView::readModuleInfo), sources))
@@ -81,7 +83,22 @@ class ModuleLoader(
     fun load(name: String, from: String): ErrorsOrModule =
         sources.binaryLoad(name.toModulePath("ksm"))?.readModuleInfo(name)
             ?: name.toModulePath("ks").let {
-                sources.sourceLoad(it)?.codeModule(it, preludeModule)
+                val dependencies = cyclingRefs.loading(name, from)
+                if (dependencies.isEmpty()) {
+                    sources.sourceLoad(it)
+                        ?.codeModule(it, preludeModule)
+                        ?.map { module ->
+                            cyclingRefs.loaded(name)
+                            module
+                        }
+                } else Either.Left(
+                    listOf(
+                        ModuleLoaderErrorCode.CyclingReference.new(
+                            "module" to name,
+                            "from" to dependencies.joinToString(", ")
+                        )
+                    )
+                )
             } ?: Either.Left(listOf(ModuleLoaderErrorCode.ModuleNotFound.new("name" to name)))
 
 }
