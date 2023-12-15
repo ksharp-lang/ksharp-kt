@@ -34,9 +34,11 @@ private inline fun <reified T : Type> T.shouldBeSerializable() {
 
 class PreludeTypeSerializer : StringSpec({
     "Serialize Char Type" {
+        kernelTypeSystem
         charType.shouldBeSerializable()
     }
     "Serialize Numeric Type" {
+        kernelTypeSystem
         NumericType(Numeric.BigDecimal).shouldBeSerializable()
     }
 })
