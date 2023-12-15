@@ -8,7 +8,7 @@ import org.ksharp.module.functionInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
-import org.ksharp.semantics.nodes.*
+import org.ksharp.semantics.nodes.getTypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
@@ -38,7 +38,7 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
         ),
         emptySet()
     )
-    return InferenceInfo(ModuleInfoInferenceContext(preludeModule), ModuleInfoInferenceContext(testModule))
+    return InferenceInfo(ModuleInfoInferenceContext(preludeModule), ModuleInfoInferenceContext(testModule), mapOf())
 }
 
 class InferenceTest : StringSpec({

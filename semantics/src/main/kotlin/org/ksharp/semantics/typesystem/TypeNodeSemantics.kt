@@ -366,7 +366,10 @@ private fun ImplNode.checkFunctionSemantics(collector: MutableSet<String>): Erro
     }
 }
 
-private fun List<ImplNode>.checkSemantics(errors: ErrorCollector, typeSystem: TypeSystem): Map<Impl, ImplNode> {
+private fun List<ImplNode>.checkSemantics(
+    errors: ErrorCollector,
+    typeSystem: TypeSystem
+): Map<Impl, ImplNode> {
     val impls = mapBuilder<Impl, ImplNode>()
     val handle = ReadOnlyHandlePromise(typeSystem.handle)
     this.forEach { impl ->
@@ -455,13 +458,24 @@ private fun Sequence<NodeData>.checkTypesSemantics(
     return typeSystem
 }
 
-fun ModuleNode.checkTypesSemantics(preludeModule: ModuleInfo): ModuleTypeSystemInfo {
+fun ModuleNode.checkTypesSemantics(
+    preludeModule: ModuleInfo,
+    dependencies: Map<String, ModuleInfo> = mapOf()
+): ModuleTypeSystemInfo {
     val errors = ErrorCollector()
     val typeSystem = sequenceOf(
         types.asSequence(),
         traits.asSequence(),
         typeDeclarations.asSequence()
     ).flatten().checkTypesSemantics(errors, preludeModule)
+        .let {
+            if (dependencies.isEmpty()) it
+            else moduleTypeSystem(it) {
+                dependencies.forEach { (name, module) ->
+                    register(name, module.typeSystem)
+                }
+            }
+        }
     val impls = impls.checkSemantics(errors, typeSystem.value)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(

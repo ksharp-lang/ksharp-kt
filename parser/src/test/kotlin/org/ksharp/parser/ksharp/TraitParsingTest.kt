@@ -3,11 +3,10 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
+import org.ksharp.common.new
 import org.ksharp.nodes.*
-import org.ksharp.parser.TokenLexerIterator
-import org.ksharp.parser.collapseNewLines
-import org.ksharp.parser.enableLookAhead
-import org.ksharp.parser.excludeIgnoreNewLineTokens
+import org.ksharp.parser.*
+import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
@@ -616,6 +615,103 @@ class TraitParsingTest : StringSpec({
                         forKeyword = Location.NoProvided,
                         assignOperator = Location.NoProvided
                     )
+                )
+            )
+    }
+    "Parsing a impl from external module type" {
+        """
+            impl p.Eq for Num =
+                (=) a b = a == b
+                (!=) a b = a != b
+        """.trimIndent()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeImpl()
+            .map { it.value }
+            .shouldBeRight(
+                ImplNode(
+                    traitName = "p.Eq",
+                    forType = ConcreteTypeNode("Num", Location.NoProvided),
+                    functions = listOf(
+                        FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = null,
+                            name = "(=)",
+                            parameters = listOf("a", "b"),
+                            expression = OperatorNode(
+                                category = "Operator7", operator = "==",
+                                left = FunctionCallNode(
+                                    name = "a", type = FunctionType.Function, arguments = emptyList(),
+                                    location = Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "b", type = FunctionType.Function,
+                                    arguments = emptyList(),
+                                    location = Location.NoProvided
+                                ), location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = emptyList(),
+                                assignOperator = Location.NoProvided
+                            )
+                        ),
+                        FunctionNode(
+                            native = false,
+                            pub = false,
+                            annotations = null,
+                            name = "(!=)",
+                            parameters = listOf("a", "b"),
+                            expression = OperatorNode(
+                                category = "Operator7", operator = "!=",
+                                left = FunctionCallNode(
+                                    name = "a", type = FunctionType.Function, arguments = emptyList(),
+                                    location = Location.NoProvided
+                                ),
+                                right = FunctionCallNode(
+                                    name = "b", type = FunctionType.Function,
+                                    arguments = emptyList(),
+                                    location = Location.NoProvided
+                                ), location = Location.NoProvided
+                            ),
+                            location = Location.NoProvided,
+                            locations = FunctionNodeLocations(
+                                nativeLocation = Location.NoProvided,
+                                pubLocation = Location.NoProvided,
+                                name = Location.NoProvided,
+                                parameters = emptyList(),
+                                assignOperator = Location.NoProvided
+                            )
+                        )
+                    ),
+                    location = Location.NoProvided,
+                    locations = ImplNodeLocations(
+                        traitName = Location.NoProvided,
+                        forKeyword = Location.NoProvided,
+                        assignOperator = Location.NoProvided
+                    )
+                )
+            )
+    }
+    "Parsing a impl from external module type invalid" {
+        """
+            impl p-Eq for Num =
+                (=) a b = a == b
+                (!=) a b = a != b
+        """.trimIndent()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeImpl()
+            .mapLeft { it.error }
+            .shouldBeLeft(
+                BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
+                    "token" to "<Type>",
+                    "received-token" to "FunctionName:p-Eq"
                 )
             )
     }

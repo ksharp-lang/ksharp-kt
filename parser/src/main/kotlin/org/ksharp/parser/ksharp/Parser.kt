@@ -16,6 +16,11 @@ import java.nio.file.Path
 typealias KSharpParserResult = ParserResult<NodeData, KSharpLexerState>
 typealias KSharpConsumeResult = ConsumeResult<KSharpLexerState>
 
+private val TypeRegexp = Regex("[a-z][a-zA-Z0-9_]*\\.[a-zA-Z0-9_]+")
+
+fun String.isValidType(): Boolean =
+    TypeRegexp.matches(this)
+
 fun KSharpConsumeResult.appendNode(block: (items: List<Any>) -> NodeData): KSharpConsumeResult =
     map {
         val items = it.collection.build()
@@ -44,24 +49,35 @@ fun KSharpConsumeResult.lastNodeData(): KSharpParserResult =
 
 fun KSharpLexerIterator.consumeDot() = consume(KSharpTokenType.Operator0, ".")
 
-fun KSharpLexerIterator.consumeLowerCaseWord(text: String? = null, discardToken: Boolean = false) =
+fun KSharpLexerIterator.consumeLowerCaseWord(text: String? = null) =
     if (text != null) {
-        consume(KSharpTokenType.LowerCaseWord, text, discardToken)
-    } else consume(KSharpTokenType.LowerCaseWord, discardToken)
+        consume(KSharpTokenType.LowerCaseWord, text, false)
+    } else consume(KSharpTokenType.LowerCaseWord, false)
 
-fun KSharpConsumeResult.thenLowerCaseWord(text: String? = null, discardToken: Boolean = false) =
+fun KSharpConsumeResult.thenTypeName() =
+    then({
+        when {
+            it.type == KSharpTokenType.UpperCaseWord -> true
+            it.type == KSharpTokenType.FunctionName && it.text.isValidType() -> true
+            else -> false
+        }
+    }, {
+        createExpectedTokenError("Type", it)
+    }, false)
+
+fun KSharpConsumeResult.thenLowerCaseWord(text: String? = null) =
     if (text != null) {
-        then(KSharpTokenType.LowerCaseWord, text, discardToken)
-    } else then(KSharpTokenType.LowerCaseWord, discardToken)
+        then(KSharpTokenType.LowerCaseWord, text, false)
+    } else then(KSharpTokenType.LowerCaseWord, false)
 
-fun KSharpConsumeResult.thenUpperCaseWord(discardToken: Boolean = false) =
-    then(KSharpTokenType.UpperCaseWord, discardToken)
+fun KSharpConsumeResult.thenUpperCaseWord() =
+    then(KSharpTokenType.UpperCaseWord, false)
 
-fun KSharpLexerIterator.consumeKeyword(text: String, discardToken: Boolean = false) =
-    consumeLowerCaseWord(text, discardToken)
+fun KSharpLexerIterator.consumeKeyword(text: String) =
+    consumeLowerCaseWord(text)
 
-fun KSharpConsumeResult.thenKeyword(text: String, discardToken: Boolean = false) =
-    thenLowerCaseWord(text, discardToken)
+fun KSharpConsumeResult.thenKeyword(text: String) =
+    thenLowerCaseWord(text)
 
 fun KSharpConsumeResult.thenAssignOperator() =
     then(KSharpTokenType.AssignOperator, false)
@@ -85,7 +101,7 @@ fun Reader.lexerModule(withLocations: Boolean) =
 
 fun Reader.parseModule(
     name: String,
-    withLocations: Boolean = false
+    withLocations: Boolean
 ): ParserErrorOrValue<KSharpLexerState, ModuleNode> =
     lexerModule(withLocations)
         .emitLocations(withLocations) {
@@ -93,13 +109,13 @@ fun Reader.parseModule(
         }
         .map { it.value }
 
-fun Path.parseModule(withLocations: Boolean = false) =
+fun Path.parseModule(withLocations: Boolean) =
     Files.newBufferedReader(this, StandardCharsets.UTF_8).parseModule(fileName.toString(), withLocations)
 
-fun File.parseModule(withLocations: Boolean = false) =
+fun File.parseModule(withLocations: Boolean) =
     reader(StandardCharsets.UTF_8).parseModule(name, withLocations)
 
-fun String.parseModule(name: String, withLocations: Boolean = false) = reader().parseModule(name, withLocations)
+fun String.parseModule(name: String, withLocations: Boolean) = reader().parseModule(name, withLocations)
 
 fun String.parseModuleAsNodeSequence(): List<NodeData> =
     lexerModule(true)

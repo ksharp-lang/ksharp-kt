@@ -10,7 +10,7 @@ private enum class SetType {
     Intersection
 }
 
-private fun Token.toListLocations(emitLocations: Boolean) =
+fun Token.toListLocations(emitLocations: Boolean) =
     if (emitLocations) listOf(location) else listOf()
 
 private fun Token.appendToListLocations(locations: List<Location>) =
@@ -18,7 +18,9 @@ private fun Token.appendToListLocations(locations: List<Location>) =
 
 private fun KSharpLexerIterator.consumeTypeVariable() =
     consume({
-        it.type == KSharpTokenType.LowerCaseWord || it.type == KSharpTokenType.UpperCaseWord
+        it.type == KSharpTokenType.LowerCaseWord
+                || it.type == KSharpTokenType.UpperCaseWord
+                || (it.type == KSharpTokenType.FunctionName && it.text.isValidType())
     })
 
 private fun KSharpConsumeResult.thenIfTypeValueSeparator(block: (KSharpConsumeResult) -> KSharpConsumeResult) =
@@ -40,7 +42,7 @@ private fun KSharpLexerIterator.consumeTypeSetSeparator() =
     })
 
 private fun Token.toTypeExpression(): TypeExpression =
-    if (type == KSharpTokenType.UpperCaseWord)
+    if (type == KSharpTokenType.UpperCaseWord || type == KSharpTokenType.FunctionName)
         ConcreteTypeNode(text, location)
     else ParameterTypeNode(text, location)
 
@@ -294,7 +296,7 @@ private fun KSharpConsumeResult.thenTraitFunctionOrDeclaration(emitLocations: Bo
     }
 
 private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
-    thenKeyword("trait", false)
+    thenKeyword("trait")
         .map {
             val annotations = it.tokens.state.value.annotations.build()
             if (annotations != null) {

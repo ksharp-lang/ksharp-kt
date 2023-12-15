@@ -16,14 +16,14 @@ private fun KSharpConsumeResult.thenImplFunction(): KSharpParserResult =
     }
 
 fun KSharpLexerIterator.consumeImpl(): KSharpParserResult =
-    consumeKeyword("impl", false)
+    consumeKeyword("impl")
         .map {
             //remove all annotations, impl doesn't support annotations
             state.value.annotations.build()
             it
         }
-        .thenUpperCaseWord()
-        .thenKeyword("for", false)
+        .thenTypeName()
+        .thenKeyword("for")
         .thenTypeExpr(state.value.emitLocations)
         .thenAssignOperator()
         .thenRepeatingIndentation(true) { l ->

@@ -48,11 +48,11 @@ private fun KSharpLexerIterator.consumeModuleName() =
     }
 
 fun KSharpLexerIterator.consumeImport(): KSharpParserResult =
-    consumeKeyword("import", false)
+    consumeKeyword("import")
         .addIndentationOffset(IndentationOffsetType.Relative, OffsetType.Normal)
         .consume {
             it.consumeModuleName()
-        }.thenKeyword("as", false)
+        }.thenKeyword("as")
         .thenLowerCaseWord()
         .build {
             val importKeyword = it.first().cast<Token>()
