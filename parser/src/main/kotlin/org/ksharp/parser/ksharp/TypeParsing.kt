@@ -296,7 +296,7 @@ private fun KSharpConsumeResult.thenTraitFunctionOrDeclaration(emitLocations: Bo
     }
 
 private fun KSharpConsumeResult.consumeTrait(internal: Boolean, emitLocations: Boolean): KSharpParserResult =
-    thenKeyword("trait", false)
+    thenKeyword("trait")
         .map {
             val annotations = it.tokens.state.value.annotations.build()
             if (annotations != null) {

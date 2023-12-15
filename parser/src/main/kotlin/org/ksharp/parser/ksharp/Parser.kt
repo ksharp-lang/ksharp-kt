@@ -49,10 +49,10 @@ fun KSharpConsumeResult.lastNodeData(): KSharpParserResult =
 
 fun KSharpLexerIterator.consumeDot() = consume(KSharpTokenType.Operator0, ".")
 
-fun KSharpLexerIterator.consumeLowerCaseWord(text: String? = null, discardToken: Boolean = false) =
+fun KSharpLexerIterator.consumeLowerCaseWord(text: String? = null) =
     if (text != null) {
-        consume(KSharpTokenType.LowerCaseWord, text, discardToken)
-    } else consume(KSharpTokenType.LowerCaseWord, discardToken)
+        consume(KSharpTokenType.LowerCaseWord, text, false)
+    } else consume(KSharpTokenType.LowerCaseWord, false)
 
 fun KSharpConsumeResult.thenTypeName() =
     then({
@@ -65,19 +65,19 @@ fun KSharpConsumeResult.thenTypeName() =
         createExpectedTokenError("<Type>", it)
     }, false)
 
-fun KSharpConsumeResult.thenLowerCaseWord(text: String? = null, discardToken: Boolean = false) =
+fun KSharpConsumeResult.thenLowerCaseWord(text: String? = null) =
     if (text != null) {
-        then(KSharpTokenType.LowerCaseWord, text, discardToken)
-    } else then(KSharpTokenType.LowerCaseWord, discardToken)
+        then(KSharpTokenType.LowerCaseWord, text, false)
+    } else then(KSharpTokenType.LowerCaseWord, false)
 
-fun KSharpConsumeResult.thenUpperCaseWord(discardToken: Boolean = false) =
-    then(KSharpTokenType.UpperCaseWord, discardToken)
+fun KSharpConsumeResult.thenUpperCaseWord() =
+    then(KSharpTokenType.UpperCaseWord, false)
 
-fun KSharpLexerIterator.consumeKeyword(text: String, discardToken: Boolean = false) =
-    consumeLowerCaseWord(text, discardToken)
+fun KSharpLexerIterator.consumeKeyword(text: String) =
+    consumeLowerCaseWord(text)
 
-fun KSharpConsumeResult.thenKeyword(text: String, discardToken: Boolean = false) =
-    thenLowerCaseWord(text, discardToken)
+fun KSharpConsumeResult.thenKeyword(text: String) =
+    thenLowerCaseWord(text)
 
 fun KSharpConsumeResult.thenAssignOperator() =
     then(KSharpTokenType.AssignOperator, false)
