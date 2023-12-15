@@ -5,10 +5,17 @@ import org.ksharp.common.io.*
 import org.ksharp.common.mapBuilder
 import org.ksharp.common.put
 
-class EnumAttributeSerializerReader : SerializerReader<Attribute> {
+enum class AttributeSerializerReader(val reader: SerializerReader<Attribute>) {
+    //ADD new Serializers at the end of the list
+    Common(CommonAttributeSerializerReader()),
+    Name(NameAttributeSerializerReader()),
+    TargetLanguage(TargetLanguageAttributeSerializerReader()),
+}
+
+class CommonAttributeSerializerReader : SerializerReader<Attribute> {
     override fun read(buffer: BufferView, table: BinaryTableView): Attribute {
-        val clazz = Class.forName(table[buffer.readInt(8)]).cast<Class<Enum<*>>>()
-        return clazz.enumConstants[buffer.readInt(12)].cast()
+        val ordinal = buffer.readInt(8)
+        return CommonAttribute.entries[ordinal].cast()
     }
 
 }
@@ -27,18 +34,17 @@ class TargetLanguageAttributeSerializerReader : SerializerReader<Attribute> {
 }
 
 
-val EnumAttributeSerializerWriter =
-    SerializerWriter<Attribute> { input, buffer, table ->
-        buffer.add(16) //0
-        buffer.add(table.add(EnumAttributeSerializerReader::class.java.name)) //4
-        buffer.add(table.add(input.javaClass.name)) //8
-        buffer.add((input as Enum<*>).ordinal) // 12
+val CommonAttributeSerializerWriter =
+    SerializerWriter<Attribute> { input, buffer, _ ->
+        buffer.add(12) //0
+        buffer.add(AttributeSerializerReader.Common.ordinal) //4
+        buffer.add((input as Enum<*>).ordinal) // 8
     }
 
 val NameAttributeSerializerWriter = SerializerWriter<AttributeWithValue<Map<String, String>>> { input, buffer, table ->
     newBufferWriter().apply {
         add(0)
-        add(table.add(NameAttributeSerializerReader::class.java.name))
+        add(AttributeSerializerReader.Name.ordinal) //4
         input.value.writeTo(this, table)
         set(0, size)
         transferTo(buffer)
@@ -49,7 +55,7 @@ val TargetLanguageAttributeSerializerWriter =
     SerializerWriter<AttributeWithValue<Set<String>>> { input, buffer, table ->
         newBufferWriter().apply {
             add(0)
-            add(table.add(TargetLanguageAttributeSerializerReader::class.java.name))
+            add(AttributeSerializerReader.TargetLanguage.ordinal) //4
             input.value.writeTo(this, table)
             set(0, size)
             transferTo(buffer)
