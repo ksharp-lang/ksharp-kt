@@ -101,7 +101,7 @@ fun Reader.lexerModule(withLocations: Boolean) =
 
 fun Reader.parseModule(
     name: String,
-    withLocations: Boolean = false
+    withLocations: Boolean
 ): ParserErrorOrValue<KSharpLexerState, ModuleNode> =
     lexerModule(withLocations)
         .emitLocations(withLocations) {
@@ -109,13 +109,13 @@ fun Reader.parseModule(
         }
         .map { it.value }
 
-fun Path.parseModule(withLocations: Boolean = false) =
+fun Path.parseModule(withLocations: Boolean) =
     Files.newBufferedReader(this, StandardCharsets.UTF_8).parseModule(fileName.toString(), withLocations)
 
-fun File.parseModule(withLocations: Boolean = false) =
+fun File.parseModule(withLocations: Boolean) =
     reader(StandardCharsets.UTF_8).parseModule(name, withLocations)
 
-fun String.parseModule(name: String, withLocations: Boolean = false) = reader().parseModule(name, withLocations)
+fun String.parseModule(name: String, withLocations: Boolean) = reader().parseModule(name, withLocations)
 
 fun String.parseModuleAsNodeSequence(): List<NodeData> =
     lexerModule(true)
