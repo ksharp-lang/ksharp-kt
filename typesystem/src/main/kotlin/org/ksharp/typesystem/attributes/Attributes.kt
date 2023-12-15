@@ -15,13 +15,14 @@ interface AttributeWithValue<T> : Attribute {
 }
 
 enum class CommonAttribute(val description: String, override val writer: SerializerWriter<Attribute>) : Attribute {
-    Native("Symbol implementation is native", EnumAttributeSerializerWriter),
-    Public("Symbol accessible in any module", EnumAttributeSerializerWriter),
-    Internal("Symbol accessible only in the module where they are defined", EnumAttributeSerializerWriter),
-    Impure("Symbol has side effects", EnumAttributeSerializerWriter),
-    Pure("Symbol has not side effects", EnumAttributeSerializerWriter),
-    Constant("Symbol represent a compile constant value", EnumAttributeSerializerWriter),
-    TraitMethod("Symbol is a trait function", EnumAttributeSerializerWriter)
+    //ADD new Attributes at the end of the list
+    Native("Symbol implementation is native", CommonAttributeSerializerWriter),
+    Public("Symbol accessible in any module", CommonAttributeSerializerWriter),
+    Internal("Symbol accessible only in the module where they are defined", CommonAttributeSerializerWriter),
+    Impure("Symbol has side effects", CommonAttributeSerializerWriter),
+    Pure("Symbol has not side effects", CommonAttributeSerializerWriter),
+    Constant("Symbol represent a compile constant value", CommonAttributeSerializerWriter),
+    TraitMethod("Symbol is a trait function", CommonAttributeSerializerWriter)
 }
 
 interface NameAttribute : AttributeWithValue<Map<String, String>>
@@ -79,11 +80,10 @@ fun Set<Attribute>.writeTo(buffer: BufferWriter, table: BinaryTable) {
 }
 
 internal fun BufferView.readAttribute(table: BinaryTableView): Attribute {
-    val reader = table[readInt(4)]
-    val serializer = Class.forName(reader)
-        .getDeclaredConstructor()
-        .newInstance()
-        .cast<SerializerReader<Attribute>>()
+    val reader = readInt(4)
+    val serializer = AttributeSerializerReader
+        .entries[reader].cast<AttributeSerializerReader>()
+        .reader
     return serializer.read(this, table)
 }
 
