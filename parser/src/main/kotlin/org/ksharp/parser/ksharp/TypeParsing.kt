@@ -18,7 +18,9 @@ private fun Token.appendToListLocations(locations: List<Location>) =
 
 private fun KSharpLexerIterator.consumeTypeVariable() =
     consume({
-        it.type == KSharpTokenType.LowerCaseWord || it.type == KSharpTokenType.UpperCaseWord
+        it.type == KSharpTokenType.LowerCaseWord
+                || it.type == KSharpTokenType.UpperCaseWord
+                || (it.type == KSharpTokenType.FunctionName && it.text.isValidType())
     })
 
 private fun KSharpConsumeResult.thenIfTypeValueSeparator(block: (KSharpConsumeResult) -> KSharpConsumeResult) =
@@ -40,7 +42,7 @@ private fun KSharpLexerIterator.consumeTypeSetSeparator() =
     })
 
 private fun Token.toTypeExpression(): TypeExpression =
-    if (type == KSharpTokenType.UpperCaseWord)
+    if (type == KSharpTokenType.UpperCaseWord || type == KSharpTokenType.FunctionName)
         ConcreteTypeNode(text, location)
     else ParameterTypeNode(text, location)
 

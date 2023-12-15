@@ -211,6 +211,30 @@ class TypeParserTest : StringSpec({
                 )
             )
     }
+    "namespaced type" {
+        "type Integer = m.Int"
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeTypeDeclaration()
+            .map { it.value }
+            .shouldBeRight(
+                TypeNode(
+                    false,
+                    null,
+                    "Integer",
+                    listOf(),
+                    ConcreteTypeNode("m.Int", Location.NoProvided),
+                    Location.NoProvided,
+                    TypeNodeLocations(
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        Location.NoProvided,
+                        listOf(),
+                        Location.NoProvided
+                    )
+                )
+            )
+    }
     "Alias type" {
         "type Integer = Int"
             .kSharpLexer()
