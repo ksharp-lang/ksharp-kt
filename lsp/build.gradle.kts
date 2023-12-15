@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.shadow)
+    alias(libs.plugins.graalvm)
 }
 
 dependencies {
@@ -16,6 +17,19 @@ dependencies {
     testImplementation(libs.kotest)
 }
 
+graalvmNative {
+    toolchainDetection.set(true)
+    binaries {
+        named("main") {
+            imageName.set("ks-lsp")
+            mainClass.set("org.ksharp.lsp.KsLspMain")
+        }
+        named("test") {
+            imageName.set("ks-lsp-test")
+            buildArgs.addAll("--verbose", "-O0")
+        }
+    }
+}
 
 tasks.jar {
     manifest {
@@ -26,4 +40,8 @@ tasks.jar {
 
 tasks.shadowJar {
     archiveFileName.set("ks-lsp-all.jar")
+}
+
+tasks.nativeCompile {
+    classpathJar.set(tasks.shadowJar.flatMap { it.archiveFile })
 }

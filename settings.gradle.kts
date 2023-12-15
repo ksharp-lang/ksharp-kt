@@ -10,6 +10,11 @@ pluginManagement {
         id("org.sonarqube") version sonarqubeVersion
         id("org.jetbrains.kotlinx.kover") version koverVersion
     }
+
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
 dependencyResolutionManagement {
@@ -23,9 +28,11 @@ dependencyResolutionManagement {
             // Tooling
             version("plugin.com.github.johnrengelman.shadow", "8.1.1")
             version("plugin.org.jetbrains.kotlinx.kover", "0.7.5")
+            version("plugin.org.graalvm.buildtools.native", "0.9.28")
 
             // Plugins
             plugin("shadow", "com.github.johnrengelman.shadow").versionRef("plugin.com.github.johnrengelman.shadow")
+            plugin("graalvm", "org.graalvm.buildtools.native").versionRef("plugin.org.graalvm.buildtools.native")
 
             // Libraries
             library(
