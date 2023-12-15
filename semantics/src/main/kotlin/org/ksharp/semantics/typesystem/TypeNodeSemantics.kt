@@ -38,18 +38,6 @@ enum class TypeSemanticsErrorCode(override val description: String) : ErrorCode 
     DuplicateImpl("Duplicate impl '{trait}' for '{impl}'"),
 }
 
-fun String.type(typeSystem: TypeSystem, dependencies: Map<String, ModuleInfo>) =
-    indexOf('.').let { ix ->
-        if (ix == -1) typeSystem[this]
-        else {
-            val moduleName = substring(0, ix)
-            dependencies[moduleName]
-                ?.typeSystem
-                ?.get(substring(ix + 1))
-                ?: Either.Left(TypeSystemErrorCode.TypeNotFound.new("type" to this))
-        }
-    }
-
 private fun parametersNotUsed(name: String, location: Location, params: Sequence<String>) =
     (if (name.first().isUpperCase()) TypeSemanticsErrorCode.ParametersNotUsed
     else TypeSemanticsErrorCode.ParametersNotUsedInMethod).new(
@@ -380,13 +368,12 @@ private fun ImplNode.checkFunctionSemantics(collector: MutableSet<String>): Erro
 
 private fun List<ImplNode>.checkSemantics(
     errors: ErrorCollector,
-    typeSystem: TypeSystem,
-    dependencies: Map<String, ModuleInfo>
+    typeSystem: TypeSystem
 ): Map<Impl, ImplNode> {
     val impls = mapBuilder<Impl, ImplNode>()
     val handle = ReadOnlyHandlePromise(typeSystem.handle)
     this.forEach { impl ->
-        impl.traitName.type(typeSystem, dependencies)
+        typeSystem[impl.traitName]
             .flatMap { _ ->
                 impl.checkFunctionSemantics(mutableSetOf())
             }
@@ -481,7 +468,15 @@ fun ModuleNode.checkTypesSemantics(
         traits.asSequence(),
         typeDeclarations.asSequence()
     ).flatten().checkTypesSemantics(errors, preludeModule)
-    val impls = impls.checkSemantics(errors, typeSystem.value, dependencies)
+        .let {
+            if (dependencies.isEmpty()) it
+            else moduleTypeSystem(it) {
+                dependencies.forEach { (name, module) ->
+                    register(name, module.typeSystem)
+                }
+            }
+        }
+    val impls = impls.checkSemantics(errors, typeSystem.value)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(
         errors.build(),

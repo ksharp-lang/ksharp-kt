@@ -45,6 +45,10 @@ class ModuleTypeSystemBuilder(
         errors = errors + typeSystem.errors
     }
 
+    fun register(key: String, typeSystem: TypeSystem) {
+        builder.put(key, typeSystem)
+    }
+
     internal fun build() =
         handlePromise<TypeSystem>().let { handle ->
             PartialTypeSystem(

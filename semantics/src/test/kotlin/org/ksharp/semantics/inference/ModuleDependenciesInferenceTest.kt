@@ -91,7 +91,7 @@ class ModuleDependenciesInferenceTest : StringSpec({
             }
             .shouldBeRight()
             .shouldInferredImplAbstractionsTypesBe(
-                "sum :: (Unit -> (Num numeric<Long>))"
+                "m.Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
             )
     }
 })
