@@ -3,11 +3,10 @@ package org.ksharp.parser.ksharp
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
+import org.ksharp.common.new
 import org.ksharp.nodes.*
-import org.ksharp.parser.TokenLexerIterator
-import org.ksharp.parser.collapseNewLines
-import org.ksharp.parser.enableLookAhead
-import org.ksharp.parser.excludeIgnoreNewLineTokens
+import org.ksharp.parser.*
+import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 
 private fun TokenLexerIterator<KSharpLexerState>.prepareLexerForTypeParsing() =
@@ -695,6 +694,24 @@ class TraitParsingTest : StringSpec({
                         forKeyword = Location.NoProvided,
                         assignOperator = Location.NoProvided
                     )
+                )
+            )
+    }
+    "Parsing a impl from external module type invalid" {
+        """
+            impl p-Eq for Num =
+                (=) a b = a == b
+                (!=) a b = a != b
+        """.trimIndent()
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeImpl()
+            .mapLeft { it.error }
+            .shouldBeLeft(
+                BaseParserErrorCode.ExpectingToken.new(
+                    Location.NoProvided,
+                    "token" to "<Type>",
+                    "received-token" to "FunctionName:p-Eq"
                 )
             )
     }

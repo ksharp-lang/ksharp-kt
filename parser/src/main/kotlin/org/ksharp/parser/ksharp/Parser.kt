@@ -62,7 +62,7 @@ fun KSharpConsumeResult.thenTypeName() =
             else -> false
         }
     }, {
-        createExpectedTokenError("<Type>", it)
+        createExpectedTokenError("Type", it)
     }, false)
 
 fun KSharpConsumeResult.thenLowerCaseWord(text: String? = null) =
