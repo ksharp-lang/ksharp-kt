@@ -3,6 +3,9 @@ package org.ksharp.lsp.capabilities.semantic_tokens
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.eclipse.lsp4j.*
+import org.ksharp.lsp.actions.ActionExecutionState
+import org.ksharp.lsp.actions.ParseAction
+import org.ksharp.lsp.actions.PublishSemanticErrorsAction
 import org.ksharp.lsp.actions.documentActions
 import org.ksharp.lsp.client.Client
 import org.ksharp.lsp.mocks.LanguageClientMock
@@ -13,8 +16,9 @@ class DiagnosticsTest : StringSpec({
         val client = LanguageClientMock()
         Client.initialize(client)
         val actions = documentActions("doc")
-        actions.parseAction("a + 10")
-        actions.publishErrors.value.get().shouldBe(true)
+        val state = ActionExecutionState()
+        actions(state, ParseAction, "a + 10")
+        state[PublishSemanticErrorsAction].get().shouldBe(true)
         client.diagnostics.shouldBe(PublishDiagnosticsParams().apply {
             this.uri = "doc"
             this.diagnostics = listOf(

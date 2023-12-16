@@ -22,6 +22,9 @@ class KSharpLanguageServer(private val documentStorage: DocumentStorage = Docume
                         change = TextDocumentSyncKind.Incremental
                     })
                     semanticTokensProvider = kSharpSemanticTokensProvider
+                    setInlayHintProvider(InlayHintRegistrationOptions().apply {
+                        resolveProvider = true
+                    })
                 }
             }
         }

@@ -2,6 +2,24 @@ package org.ksharp.lsp.actions
 
 typealias ActionsGraphBuilder<Output> = PartialActionBuilder<Output>.() -> Unit
 
+class ActionCatalog(private val actions: MutableMap<ActionId<*>, Action<*, *>>) {
+
+    fun <Payload, Output> action(
+        id: ActionId<Output>,
+        whenCancelledOutput: Output,
+        builder: ActionsBuilder<Payload, Output>.() -> Unit
+    ): Action<Payload, Output> =
+        actions.containsKey(id).let {
+            if (!it)
+                ActionsBuilder<Payload, Output>(id, whenCancelledOutput)
+                    .apply(builder)
+                    .build().also { action ->
+                        actions[id] = action
+                    }
+            else throw RuntimeException("Action with id $id already exists")
+        }
+}
+
 class ActionDependsOnBuilder(private val dependsOn: MutableList<Action<*, *>>) {
 
     operator fun Action<*, *>.unaryPlus() {
@@ -19,7 +37,7 @@ class ActionTriggerBuilder<Output>(private val trigger: MutableList<Action<Outpu
 }
 
 class ActionsBuilder<Payload, Output>(
-    private val id: String,
+    private val id: ActionId<Output>,
     private val whenCancelledOutput: Output
 ) {
 
@@ -63,3 +81,9 @@ class PartialActionBuilder<Output>(private val builder: ActionsBuilder<*, Output
     fun trigger(builder: ActionTriggerBuilder<Output>.() -> Unit) = this.builder.trigger(builder)
 
 }
+
+fun actions(catalog: ActionCatalog.() -> Unit): Actions =
+    mutableMapOf<ActionId<*>, Action<*, *>>().let {
+        ActionCatalog(it).apply(catalog)
+        Actions(it)
+    }

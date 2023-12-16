@@ -6,114 +6,131 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 
 class ActionTest : StringSpec({
+    val action1 = ActionId<String>("action 1")
+    val dep1 = ActionId<String>("dep1")
+    val dep1Int = ActionId<Int>("dep1")
     "Action basics" {
-        action<String, String>(
-            "action 1",
-            "Cancelled"
-        ) {
-            execution { _, payload ->
-                payload
+        actions {
+            action(action1, "Cancelled") {
+                execution { _, payload ->
+                    payload
+                }
             }
-        }("Test")
-            .apply {
-                cancelled.shouldBeFalse()
-                value.get().shouldBe("Test")
-            }
+        }.apply {
+            val state = ActionExecutionState()
+            this(state, action1, "Test")
+            state.canceled.shouldBeFalse()
+            state[action1].get().shouldBe("Test")
+        }
     }
     "Cancelable action" {
-        action<String, String>(
-            "action 1",
-            "Cancelled"
-        ) {
-            execution { _, payload ->
-                Thread.sleep(100)
-                payload
+        actions {
+            action(
+                action1,
+                "Cancelled"
+            ) {
+                execution { _, payload ->
+                    Thread.sleep(100)
+                    payload
+                }
             }
-        }("Test")
-            .apply {
-                cancel()
-                cancelled.shouldBeTrue()
-                value.get().shouldBe("Cancelled")
-            }
+        }.apply {
+            val state = ActionExecutionState()
+            this(state, action1, "Test")
+            state.cancel()
+            state.canceled.shouldBeTrue()
+            state[action1].get().shouldBe("Cancelled")
+        }
     }
     "DependsOn action" {
-        val dep = action(
-            "dep1",
-            "Action Dep Cancelled 1"
-        ) {
-            execution { _, payload ->
-                Thread.sleep(1000)
-                payload
+        actions {
+            val dep = action(
+                dep1,
+                "Action Dep Cancelled 1"
+            ) {
+                execution { _, payload ->
+                    Thread.sleep(1000)
+                    payload
+                }
             }
+            action<String, String>(
+                action1,
+                "Cancelled",
+            ) {
+                dependsOn {
+                    +dep
+                }
+                execution { state, _ ->
+                    state[dep1]
+                }
+            }
+        }.apply {
+            val state = ActionExecutionState()
+            this(state, action1, "Test")
+            this(state, dep1, "Dep Value")
+            state.canceled.shouldBeFalse()
+            state[dep1].get().shouldBe("Dep Value")
+            state[action1].get().shouldBe("Dep Value")
         }
-        action<String, String>(
-            "action 1",
-            "Cancelled",
-        ) {
-            dependsOn {
-                +dep
-            }
-            execution { state, _ ->
-                state["dep1"] as String
-            }
-        }("Test")
-            .apply {
-                dep("Dep Value")
-                cancelled.shouldBeFalse()
-                value.get().shouldBe("Dep Value")
-            }
     }
-    "DependsOn action first time" {
-        val dep1 = action(
-            "dep1",
-            "Action Dep Cancelled 1"
-        ) {
-            execution { _, payload ->
-                Thread.sleep(1000)
-                payload
+    "DependsOn cancel state" {
+        actions {
+            val dep1Action = action(
+                dep1,
+                "Action Dep Cancelled 1"
+            ) {
+                execution { _, payload ->
+                    Thread.sleep(1000)
+                    payload
+                }
             }
+            action<String, String>(
+                action1,
+                "Cancelled"
+            ) {
+                dependsOn {
+                    +dep1Action
+                }
+                execution { state, _ ->
+                    state[dep1]
+                }
+            }
+        }.apply {
+            val state = ActionExecutionState()
+            this(state, dep1, "Test")
+            this(state, action1, "Test")
+            state.cancel()
+            state.canceled.shouldBeTrue()
+            state[dep1].get().shouldBe("Action Dep Cancelled 1")
+            state[action1].get().shouldBe("Cancelled")
         }
-        action<String, String>(
-            "action 1",
-            "Cancelled"
-        ) {
-            dependsOn {
-                +dep1
-            }
-            execution { state, _ ->
-                state["dep1"] as String
-            }
-        }("Test")
-            .apply {
-                dep1("Test").cancel()
-                cancelled.shouldBeFalse()
-                value.get().shouldBe("Action Dep Cancelled 1")
-            }
     }
     "Trigger action" {
-        val triggerAction = action<String, Int>(
-            "dep1",
-            0
-        ) {
-            execution { _, payload ->
-                payload.length
+        actions {
+            val triggerAction = action<String, Int>(
+                dep1Int,
+                0
+            ) {
+                execution { _, payload ->
+                    payload.length
+                }
             }
+            action(
+                action1,
+                "Cancelled"
+            ) {
+                trigger {
+                    +triggerAction
+                }
+                execution { _, payload ->
+                    payload
+                }
+            }
+        }.apply {
+            val state = ActionExecutionState()
+            this(state, action1, "Test")
+            state.canceled.shouldBeFalse()
+            state[dep1Int].get().shouldBe(4)
         }
-        action<String, String>(
-            "action 1",
-            "Cancelled"
-        ) {
-            trigger {
-                +triggerAction
-            }
-            execution { _, payload ->
-                payload
-            }
-        }("Test")
-            .apply {
-                cancelled.shouldBeFalse()
-                value.get()
-                triggerAction.value.get().shouldBe(4)
-            }
     }
 })

@@ -44,6 +44,9 @@ class KSharpLanguageServerTest : StringSpec({
                                     setFull(true)
                                     setRange(false)
                                 }
+                                setInlayHintProvider(InlayHintRegistrationOptions().apply {
+                                    resolveProvider = true
+                                })
                             }
                         })
                 shutdown()

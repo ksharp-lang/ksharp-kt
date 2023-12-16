@@ -3,6 +3,7 @@ package org.ksharp.lsp
 import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.TextDocumentService
 import org.ksharp.lsp.capabilities.semantic_tokens.calculateSemanticTokens
+import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.lsp.model.DocumentChange
 import org.ksharp.lsp.model.DocumentStorage
 import org.ksharp.lsp.model.Range
@@ -43,6 +44,10 @@ class KSharpDocumentService(private val documentStorage: DocumentStorage) : Text
     }
 
     override fun semanticTokensFull(params: SemanticTokensParams): CompletableFuture<SemanticTokens> =
-        documentStorage.withDocumentContent(params.textDocument.uri, ::calculateSemanticTokens)
+        documentStorage.withDocumentState(params.textDocument.uri, ::calculateSemanticTokens)
 
+    override fun inlayHint(params: InlayHintParams?): CompletableFuture<MutableList<InlayHint>> {
+        ClientLogger.info("Inlay hint $params.")
+        return CompletableFuture.supplyAsync { mutableListOf() }
+    }
 }

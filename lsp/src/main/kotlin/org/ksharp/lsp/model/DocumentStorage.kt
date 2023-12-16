@@ -1,6 +1,8 @@
 package org.ksharp.lsp.model
 
-import org.ksharp.lsp.actions.DocumentActions
+import org.ksharp.lsp.actions.ActionExecutionState
+import org.ksharp.lsp.actions.Actions
+import org.ksharp.lsp.actions.ParseAction
 import org.ksharp.lsp.actions.documentActions
 import java.util.concurrent.CompletableFuture
 
@@ -11,8 +13,16 @@ data class DocumentChange(
 
 data class DocumentInstance(
     val document: Document,
-    val actions: DocumentActions
-)
+    val actions: Actions,
+) {
+    var state = ActionExecutionState()
+        private set
+
+    fun executeActions() {
+        state = ActionExecutionState()
+        actions(state, ParseAction, document.content)
+    }
+}
 
 class DocumentStorage {
     private val documents = mutableMapOf<String, DocumentInstance>()
@@ -21,7 +31,9 @@ class DocumentStorage {
         documents[uri] = DocumentInstance(
             document(language, content),
             documentActions(uri)
-        )
+        ).also {
+            it.executeActions()
+        }
     }
 
     fun remove(uri: String) =
@@ -32,17 +44,18 @@ class DocumentStorage {
             changes.forEach {
                 doc.document.update(it.range, it.content)
             }
+            doc.executeActions()
             true
         } ?: false
 
     fun content(uri: String): String? = documents[uri]?.document?.content
 
-    fun <T> withDocumentContent(
+    fun <T> withDocumentState(
         uri: String,
-        action: (actions: DocumentActions, content: String) -> CompletableFuture<T>
+        action: (state: ActionExecutionState) -> CompletableFuture<T>
     ): CompletableFuture<T> =
         documents[uri]?.let {
-            action(it.actions, it.document.content)
+            action(it.state)
         } ?: CompletableFuture.failedFuture(RuntimeException("Document $uri not found"))
 
 }

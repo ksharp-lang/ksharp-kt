@@ -1,5 +1,20 @@
 package org.ksharp.lsp.model
 
+import org.ksharp.common.Location
+
+val org.ksharp.common.Position.lspPosition: org.eclipse.lsp4j.Position
+    get() =
+        org.eclipse.lsp4j.Position().apply {
+            this.line = (first.value - 1).coerceAtLeast(0)
+            this.character = (second.value - 1).coerceAtLeast(0)
+        }
+
+val Location.lspRange: org.eclipse.lsp4j.Range
+    get() =
+        org.eclipse.lsp4j.Range().apply {
+            this.start = this@lspRange.start.lspPosition
+            this.end = this@lspRange.end.lspPosition
+        }
 
 typealias Position = Pair<Int, Int>
 
