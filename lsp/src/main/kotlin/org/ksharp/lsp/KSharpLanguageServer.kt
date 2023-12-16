@@ -7,14 +7,13 @@ import org.ksharp.lsp.client.Client
 import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.lsp.model.DocumentStorage
 import java.util.concurrent.CompletableFuture
-import java.util.function.Supplier
 import kotlin.system.exitProcess
 
 class KSharpLanguageServer(private val documentStorage: DocumentStorage = DocumentStorage()) : LanguageServer,
     LanguageClientAware {
 
     override fun initialize(params: InitializeParams): CompletableFuture<InitializeResult> {
-        return CompletableFuture.supplyAsync(Supplier {
+        return CompletableFuture.supplyAsync {
             InitializeResult().apply {
                 capabilities = ServerCapabilities().apply {
                     positionEncoding = "utf-16"
@@ -25,7 +24,7 @@ class KSharpLanguageServer(private val documentStorage: DocumentStorage = Docume
                     semanticTokensProvider = kSharpSemanticTokensProvider
                 }
             }
-        })
+        }
     }
 
     override fun shutdown(): CompletableFuture<Any> {
