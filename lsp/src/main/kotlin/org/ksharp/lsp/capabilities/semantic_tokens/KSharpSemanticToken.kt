@@ -72,6 +72,7 @@ fun TokenType.semanticToken(text: String): String? =
             "if" -> SemanticTokenTypes.Keyword
             "then" -> SemanticTokenTypes.Keyword
             "as" -> SemanticTokenTypes.Keyword
+            "for" -> SemanticTokenTypes.Keyword
             else -> null
         }
 

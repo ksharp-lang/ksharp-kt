@@ -22,6 +22,7 @@ fun NodeData.visit(encoder: TokenEncoder) {
         is TraitNode -> semanticTokens(encoder)
         is TraitFunctionNode -> semanticTokens(encoder)
         is TraitFunctionsNode -> semanticTokens(encoder)
+        is ImplNode -> semanticTokens(encoder)
 
         is FunctionNode -> semanticTokens(encoder)
 

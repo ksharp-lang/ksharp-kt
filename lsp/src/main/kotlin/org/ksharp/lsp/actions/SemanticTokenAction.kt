@@ -2,7 +2,6 @@ package org.ksharp.lsp.actions
 
 import org.ksharp.lsp.capabilities.semantic_tokens.tokenEncoderSpec
 import org.ksharp.lsp.capabilities.semantic_tokens.visit
-import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.nodes.NodeData
 
 const val SemanticTokenAction = "SemanticTokenAction"
@@ -14,7 +13,6 @@ fun semanticTokenAction() = action<List<NodeData>, List<Int>>(
         tokenEncoderSpec.encoder()
             .let { encoder ->
                 nodes.forEach {
-                    ClientLogger.info("visit $it")
                     it.visit(encoder)
                 }
                 encoder.data()
