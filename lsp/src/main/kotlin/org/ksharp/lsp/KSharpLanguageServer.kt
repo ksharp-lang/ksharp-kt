@@ -45,6 +45,6 @@ class KSharpLanguageServer(private val documentStorage: DocumentStorage = Docume
     override fun getWorkspaceService(): WorkspaceService = KSharpWorkspaceService()
 
     override fun setTrace(params: SetTraceParams?) {
-        ClientLogger.info("Set trace $params")
+        ClientLogger.info("Set trace $params.")
     }
 }

@@ -61,4 +61,15 @@ class KSharpLanguageServerTest : StringSpec({
             )
         )
     }
+    "Trace method" {
+        val client = LanguageClientMock()
+        val server = KSharpLanguageServer()
+        server.connect(client)
+        server.setTrace(SetTraceParams(TraceValue.Off))
+        client.events.shouldBe(
+            listOf(
+                MessageParams(MessageType.Info, "Set trace SetTraceParams [\n  value = \"off\"\n].")
+            )
+        )
+    }
 })
