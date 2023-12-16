@@ -1,17 +1,20 @@
 package org.ksharp.lsp.actions
 
+import org.ksharp.common.Error
 import org.ksharp.nodes.NodeData
 
 data class DocumentActions(
     val parseAction: Action<String, List<NodeData>>,
-    val semanticTokens: Action<*, List<Int>>
+    val semanticTokens: Action<*, List<Int>>,
+    val publishErrors: Action<List<Error>, Boolean>,
 )
 
 fun documentActions(uri: String): DocumentActions {
+    val publishErrorsAction = publishSemanticErrorsAction(uri)
     val semanticTokensActions = semanticTokenAction()
     val codeModuleErrors = codeModuleErrorsAction {
         trigger {
-            +publishSemanticErrorsAction(uri)
+            +publishErrorsAction
         }
     }
     val codeModule = codeModuleAction(uri) {
@@ -27,6 +30,7 @@ fun documentActions(uri: String): DocumentActions {
     }
     return DocumentActions(
         parseAction,
-        semanticTokensActions
+        semanticTokensActions,
+        publishErrorsAction
     )
 }

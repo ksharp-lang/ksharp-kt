@@ -6,10 +6,9 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams
 import org.eclipse.lsp4j.Range
 import org.ksharp.common.Error
 import org.ksharp.common.Location
-import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.lsp.client.withClient
 
-const val PublishErrorsAction = "SemanticModuleInfoAction"
+const val PublishErrorsAction = "PublishErrorsAction"
 
 private val org.ksharp.common.Position.lspPosition: org.eclipse.lsp4j.Position
     get() =
@@ -25,13 +24,13 @@ private val Location.lspRange: Range
             this.end = this@lspRange.end.lspPosition
         }
 
-fun publishSemanticErrorsAction(uri: String) = action<List<Error>, Unit>(PublishErrorsAction, Unit) {
+fun publishSemanticErrorsAction(uri: String) = action<List<Error>, Boolean>(PublishErrorsAction, false) {
     execution { _, errors ->
+        var result = false
         withClient { client ->
             client.publishDiagnostics(PublishDiagnosticsParams().apply {
                 this.uri = uri
                 this.diagnostics = errors.map {
-                    ClientLogger.info("Publishing error: ${it.code} ${it.location}")
                     Diagnostic().apply {
                         this.range = it.location!!.lspRange
                         this.severity = DiagnosticSeverity.Error
@@ -40,6 +39,8 @@ fun publishSemanticErrorsAction(uri: String) = action<List<Error>, Unit>(Publish
                     }
                 }
             })
+            result = true
         }
+        result
     }
 }

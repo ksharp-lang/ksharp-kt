@@ -10,7 +10,8 @@ import org.ksharp.parser.ksharp.toModuleNode
 import org.ksharp.semantics.nodes.toCodeModule
 import org.ksharp.typesystem.typeSystem
 
-const val SemanticModuleInfoAction = "SemanticModuleInfoAction"
+const val CodeModuleAction = "CodeModuleAction"
+const val CodeModuleErrorsAction = "CodeErrorsAction"
 
 val emptyCodeModule =
     CodeModule(
@@ -24,7 +25,7 @@ val emptyCodeModule =
 
 fun codeModuleAction(moduleName: String, builder: ActionsGraphBuilder<CodeModule>) =
     action<List<NodeData>, CodeModule>(
-        SemanticModuleInfoAction,
+        CodeModuleAction,
         emptyCodeModule
     ) {
         execution { _, nodes ->
@@ -40,7 +41,7 @@ fun codeModuleAction(moduleName: String, builder: ActionsGraphBuilder<CodeModule
 
 fun codeModuleErrorsAction(builder: ActionsGraphBuilder<List<Error>>) =
     action<CodeModule, List<Error>>(
-        SemanticModuleInfoAction,
+        CodeModuleErrorsAction,
         emptyList()
     ) {
         execution { _, module ->
