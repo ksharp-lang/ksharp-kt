@@ -7,13 +7,19 @@ import org.eclipse.lsp4j.ShowMessageRequestParams
 import org.eclipse.lsp4j.services.LanguageClient
 import java.util.concurrent.CompletableFuture
 
-class LanguageClientMock(val events: MutableList<Any> = mutableListOf()) : LanguageClient {
+class LanguageClientMock(
+    val events: MutableList<Any> = mutableListOf(),
+) : LanguageClient {
+
+    var diagnostics: PublishDiagnosticsParams? = null
+        private set
+
     override fun telemetryEvent(`object`: Any?) {
         TODO("Not yet implemented")
     }
 
     override fun publishDiagnostics(diagnostics: PublishDiagnosticsParams?) {
-        TODO("Not yet implemented")
+        this.diagnostics = diagnostics
     }
 
     override fun showMessage(messageParams: MessageParams?) {

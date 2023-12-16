@@ -37,13 +37,12 @@ class Action<Payload, Output>(
         private set
 
     private fun begin() {
-        value = CompletableFuture()
+        if (value.isDone)
+            value = CompletableFuture()
     }
 
     operator fun invoke(payload: Payload): ActionExecution<Output> {
-        if (value.isDone) {
-            begin()
-        }
+        begin()
 
         val actions = dependsOn.stream().map { action ->
             action.value.thenApplyAsync { action.id to it!! }
