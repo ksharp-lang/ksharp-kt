@@ -44,7 +44,7 @@ class ActionState(
     private val dependencies: Map<ActionId<out Any?>, Any>
 ) {
 
-    val cancelled: Boolean get() = execution.canceled
+    val canceled: Boolean get() = execution.canceled
 
     @Suppress("UNCHECKED_CAST")
     operator fun <T> get(actionId: ActionId<T>): T = dependencies[actionId] as T
