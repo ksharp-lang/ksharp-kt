@@ -14,7 +14,7 @@ const val PublishErrorsAction = "SemanticModuleInfoAction"
 private val org.ksharp.common.Position.lspPosition: org.eclipse.lsp4j.Position
     get() =
         org.eclipse.lsp4j.Position().apply {
-            this.line = first.value - 1
+            this.line = (first.value - 1).coerceAtLeast(0)
             this.character = (second.value - 1).coerceAtLeast(0)
         }
 
