@@ -3,22 +3,25 @@ package org.ksharp.lsp.actions
 fun documentActions(uri: String): Actions =
     actions {
         val publishErrorsAction = publishSemanticErrorsAction(uri)
-        val abstractionsTypeInlayHint = abstractionsTypeInlayHintAction()
-        val semanticTokensActions = semanticTokenAction()
-        val codeModuleErrors = codeModuleErrorsAction {
+        val semanticTokensAction = semanticTokensAction()
+        val codeModuleErrorsAction = codeModuleErrorsAction {
             trigger {
                 +publishErrorsAction
             }
         }
         val codeModule = codeModuleAction(uri) {
             trigger {
-                +codeModuleErrors
-                +abstractionsTypeInlayHint
+                +codeModuleErrorsAction
             }
         }
         parseAction {
             trigger {
-                +semanticTokensActions
+                +semanticTokensAction
+                +codeModule
+            }
+        }
+        abstractionsHoverAction {
+            dependsOn {
                 +codeModule
             }
         }

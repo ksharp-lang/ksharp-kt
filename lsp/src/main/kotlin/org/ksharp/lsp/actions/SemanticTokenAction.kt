@@ -5,7 +5,7 @@ import org.ksharp.lsp.capabilities.semantic_tokens.visit
 import org.ksharp.nodes.NodeData
 
 val SemanticTokensAction = ActionId<List<Int>>("SemanticTokenAction")
-fun ActionCatalog.semanticTokenAction() = action<List<NodeData>, List<Int>>(
+fun ActionCatalog.semanticTokensAction() = action<List<NodeData>, List<Int>>(
     SemanticTokensAction,
     listOf()
 ) {

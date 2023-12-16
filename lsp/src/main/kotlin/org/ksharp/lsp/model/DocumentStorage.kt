@@ -1,9 +1,6 @@
 package org.ksharp.lsp.model
 
-import org.ksharp.lsp.actions.ActionExecutionState
-import org.ksharp.lsp.actions.Actions
-import org.ksharp.lsp.actions.ParseAction
-import org.ksharp.lsp.actions.documentActions
+import org.ksharp.lsp.actions.*
 import java.util.concurrent.CompletableFuture
 
 data class DocumentChange(
@@ -18,9 +15,14 @@ data class DocumentInstance(
     var state = ActionExecutionState()
         private set
 
-    fun executeActions() {
+    fun contentUpdated() {
         state = ActionExecutionState()
         actions(state, ParseAction, document.content)
+    }
+
+    fun <Payload, Output> executeAction(id: ActionId<Output>, payload: Payload): CompletableFuture<Output> {
+        actions(state, id, payload)
+        return state.resetActionState(id)
     }
 }
 
@@ -32,7 +34,7 @@ class DocumentStorage {
             document(language, content),
             documentActions(uri)
         ).also {
-            it.executeActions()
+            it.contentUpdated()
         }
     }
 
@@ -44,7 +46,7 @@ class DocumentStorage {
             changes.forEach {
                 doc.document.update(it.range, it.content)
             }
-            doc.executeActions()
+            doc.contentUpdated()
             true
         } ?: false
 
@@ -58,4 +60,12 @@ class DocumentStorage {
             action(it.state)
         } ?: CompletableFuture.failedFuture(RuntimeException("Document $uri not found"))
 
+    fun <Payload, Output> executeAction(
+        uri: String,
+        id: ActionId<Output>,
+        payload: Payload
+    ): CompletableFuture<Output> =
+        documents[uri]?.executeAction(id, payload) ?: CompletableFuture.failedFuture(
+            RuntimeException("Document $uri not found")
+        )
 }

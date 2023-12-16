@@ -37,6 +37,9 @@ class ActionExecutionState {
     fun cancel() {
         _canceled.set(true)
     }
+
+    fun <Output> resetActionState(id: ActionId<Output>): CompletableFuture<Output> =
+        executions.remove(id)!!.cast()
 }
 
 class ActionState(
