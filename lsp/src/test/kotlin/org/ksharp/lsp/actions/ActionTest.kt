@@ -1,5 +1,6 @@
 package org.ksharp.lsp.actions
 
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -9,6 +10,22 @@ class ActionTest : StringSpec({
     val action1 = ActionId<String>("action 1")
     val dep1 = ActionId<String>("dep1")
     val dep1Int = ActionId<Int>("dep1")
+    "Not allow to register the same actionId" {
+        shouldThrowExactly<RuntimeException> {
+            actions {
+                action(action1, "Cancelled") {
+                    execution { _, payload ->
+                        payload
+                    }
+                }
+                action<String, String>(action1, "Cancelled") {
+                    execution { _, _ ->
+                        "Action 2"
+                    }
+                }
+            }
+        }.message.shouldBe("Action with id $action1 already exists")
+    }
     "Action basics" {
         actions {
             action(action1, "Cancelled") {
