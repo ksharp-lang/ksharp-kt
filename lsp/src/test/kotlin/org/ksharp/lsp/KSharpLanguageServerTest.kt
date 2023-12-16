@@ -3,6 +3,7 @@ package org.ksharp.lsp
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.eclipse.lsp4j.*
+import org.ksharp.lsp.client.Client
 import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.lsp.mocks.LanguageClientMock
 
@@ -51,6 +52,7 @@ class KSharpLanguageServerTest : StringSpec({
             }
     }
     "Client logging" {
+        Client.reset()
         val client = LanguageClientMock()
         KSharpLanguageServer()
             .connect(client)
@@ -62,6 +64,7 @@ class KSharpLanguageServerTest : StringSpec({
         )
     }
     "Trace method" {
+        Client.reset()
         val client = LanguageClientMock()
         val server = KSharpLanguageServer()
         server.connect(client)

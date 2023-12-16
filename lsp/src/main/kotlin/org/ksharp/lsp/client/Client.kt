@@ -24,6 +24,10 @@ object Client {
         }
     }
 
+    internal fun reset() {
+        initialized = false
+    }
+
 }
 
 fun withClient(action: (client: LanguageClient) -> Unit) {
