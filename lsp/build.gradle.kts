@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":module"))
     implementation(project(":typesystem"))
     testImplementation(libs.kotest)
+    testImplementation(libs.reflections)
 }
 
 graalvmNative {

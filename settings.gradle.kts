@@ -24,6 +24,7 @@ dependencyResolutionManagement {
             version("eclipse.lsp4j", "0.21.1")
             version("graalvm", "22.3.4")
             version("netty", "4.1.101.Final")
+            version("reflections", "0.10.2")
 
             // Tooling
             version("plugin.com.github.johnrengelman.shadow", "8.1.1")
@@ -54,6 +55,7 @@ dependencyResolutionManagement {
                 "truffle-dsl-processor"
             ).versionRef("graalvm")
             library("netty.buffer", "io.netty", "netty-buffer").versionRef("netty")
+            library("reflections", "org.reflections", "reflections").versionRef("reflections")
         }
     }
 }

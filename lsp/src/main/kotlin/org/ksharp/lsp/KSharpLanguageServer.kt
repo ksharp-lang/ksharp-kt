@@ -4,6 +4,7 @@ import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.*
 import org.ksharp.lsp.capabilities.semantic_tokens.kSharpSemanticTokensProvider
 import org.ksharp.lsp.client.Client
+import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.lsp.model.DocumentStorage
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
@@ -42,4 +43,8 @@ class KSharpLanguageServer(private val documentStorage: DocumentStorage = Docume
     override fun getTextDocumentService(): TextDocumentService = KSharpDocumentService(documentStorage)
 
     override fun getWorkspaceService(): WorkspaceService = KSharpWorkspaceService()
+
+    override fun setTrace(params: SetTraceParams?) {
+        ClientLogger.info("Set trace $params")
+    }
 }

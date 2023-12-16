@@ -24,7 +24,17 @@
         ],
         "configuration": "./language-configuration.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "KSharp",
+      "properties": {
+        "ksharp.lspServerPath": {
+          "type": "string",
+          "default": "ks-lsp",
+          "description": "Set lsp server path"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
