@@ -42,6 +42,39 @@ class ActionTest : StringSpec({
             state[action1].get().shouldBe("Cancelled")
         }
     }
+    "DependsOn using graphBuilder" {
+        actions {
+            val dep = action(
+                dep1,
+                "Action Dep Cancelled 1"
+            ) {
+                execution { _, payload ->
+                    Thread.sleep(1000)
+                    payload
+                }
+            }
+            action<String, String>(
+                action1,
+                "Cancelled",
+            ) {
+                graphBuilder {
+                    dependsOn {
+                        +dep
+                    }
+                    execution { state, _ ->
+                        state[dep1]
+                    }
+                }
+            }
+        }.apply {
+            val state = ActionExecutionState()
+            this(state, action1, "Test")
+            this(state, dep1, "Dep Value")
+            state.canceled.shouldBeFalse()
+            state[dep1].get().shouldBe("Dep Value")
+            state[action1].get().shouldBe("Dep Value")
+        }
+    }
     "DependsOn action" {
         actions {
             val dep = action(
