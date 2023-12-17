@@ -1,7 +1,10 @@
-package org.ksharp.lsp.capabilities.semantic_tokens
+package org.ksharp.lsp.capabilities.actions
 
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
+import org.ksharp.lsp.actions.ActionExecutionState
+import org.ksharp.lsp.actions.ParseAction
+import org.ksharp.lsp.actions.SemanticTokensAction
 import org.ksharp.lsp.actions.documentActions
 
 private fun String.spec(document: String, expectedTokens: String) =
@@ -139,8 +142,9 @@ class CalculateSemanticTokensTest : FreeSpec({
         specs.forEach { (desc, spec) ->
             desc {
                 val actions = documentActions("doc")
-                actions.parseAction(spec.first)
-                actions.semanticTokens.value.get()
+                val state = ActionExecutionState()
+                actions(state, ParseAction, spec.first)
+                state[SemanticTokensAction].get()
                     .shouldBe(spec.second)
             }
         }

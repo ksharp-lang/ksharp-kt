@@ -44,6 +44,7 @@ class KSharpLanguageServerTest : StringSpec({
                                     setFull(true)
                                     setRange(false)
                                 }
+                                setHoverProvider(HoverOptions())
                             }
                         })
                 shutdown()

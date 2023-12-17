@@ -1,36 +1,28 @@
 package org.ksharp.lsp.actions
 
-import org.ksharp.common.Error
-import org.ksharp.nodes.NodeData
-
-data class DocumentActions(
-    val parseAction: Action<String, List<NodeData>>,
-    val semanticTokens: Action<*, List<Int>>,
-    val publishErrors: Action<List<Error>, Boolean>,
-)
-
-fun documentActions(uri: String): DocumentActions {
-    val publishErrorsAction = publishSemanticErrorsAction(uri)
-    val semanticTokensActions = semanticTokenAction()
-    val codeModuleErrors = codeModuleErrorsAction {
-        trigger {
-            +publishErrorsAction
+fun documentActions(uri: String): Actions =
+    actions {
+        val publishErrorsAction = publishSemanticErrorsAction(uri)
+        val semanticTokensAction = semanticTokensAction()
+        val codeModuleErrorsAction = codeModuleErrorsAction {
+            trigger {
+                +publishErrorsAction
+            }
+        }
+        val codeModule = codeModuleAction(uri) {
+            trigger {
+                +codeModuleErrorsAction
+            }
+        }
+        parseAction {
+            trigger {
+                +semanticTokensAction
+                +codeModule
+            }
+        }
+        abstractionsHoverAction {
+            dependsOn {
+                +codeModule
+            }
         }
     }
-    val codeModule = codeModuleAction(uri) {
-        trigger {
-            +codeModuleErrors
-        }
-    }
-    val parseAction = parseAction {
-        trigger {
-            +semanticTokensActions
-            +codeModule
-        }
-    }
-    return DocumentActions(
-        parseAction,
-        semanticTokensActions,
-        publishErrorsAction
-    )
-}

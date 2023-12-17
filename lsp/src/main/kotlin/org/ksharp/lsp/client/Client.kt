@@ -6,9 +6,7 @@ import org.eclipse.lsp4j.services.LanguageClient
 object Client {
 
     private lateinit var clientInstance: LanguageClient
-
-    var initialized = false
-        private set
+    private var initialized = false
 
 
     fun initialize(client: LanguageClient) {

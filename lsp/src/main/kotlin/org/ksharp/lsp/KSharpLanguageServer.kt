@@ -22,6 +22,7 @@ class KSharpLanguageServer(private val documentStorage: DocumentStorage = Docume
                         change = TextDocumentSyncKind.Incremental
                     })
                     semanticTokensProvider = kSharpSemanticTokensProvider
+                    setHoverProvider(HoverOptions())
                 }
             }
         }

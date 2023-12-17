@@ -65,4 +65,55 @@ class KSharpDocumentServiceTest : StringSpec({
             this.data = listOf(0, 0, 6, 6, 0, 0, 7, 4, 7, 0, 0, 5, 2, 6, 0, 0, 3, 1, 7, 0)
         })
     }
+    "Test hover function" {
+        val storage = DocumentStorage()
+        val server = KSharpLanguageServer(storage)
+        val service = server.textDocumentService
+        service.didOpen(DidOpenTextDocumentParams().apply {
+            this.textDocument = TextDocumentItem().apply {
+                this.languageId = "ksharp"
+                this.uri = "testDoc"
+                this.text = "sum a b = a + b"
+            }
+        })
+        service.hover(HoverParams().apply {
+            textDocument = TextDocumentIdentifier().apply {
+                uri = "testDoc"
+            }
+            position = Position().apply {
+                line = 0
+                character = 1
+            }
+        }).get().shouldBe(
+            Hover().apply {
+                setContents(
+                    MarkupContent(
+                        MarkupKind.PLAINTEXT,
+                        "sum/2 :: ((Add a) -> (Add a) -> (Add a))"
+                    )
+                )
+            }
+        )
+    }
+    "Test hover function, returns null when there is no hover" {
+        val storage = DocumentStorage()
+        val server = KSharpLanguageServer(storage)
+        val service = server.textDocumentService
+        service.didOpen(DidOpenTextDocumentParams().apply {
+            this.textDocument = TextDocumentItem().apply {
+                this.languageId = "ksharp"
+                this.uri = "testDoc"
+                this.text = "sum a b = a + b"
+            }
+        })
+        service.hover(HoverParams().apply {
+            textDocument = TextDocumentIdentifier().apply {
+                uri = "testDoc"
+            }
+            position = Position().apply {
+                line = 5
+                character = 1
+            }
+        }).get().shouldBeNull()
+    }
 })

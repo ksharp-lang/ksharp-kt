@@ -4,9 +4,9 @@ import org.ksharp.lsp.capabilities.semantic_tokens.tokenEncoderSpec
 import org.ksharp.lsp.capabilities.semantic_tokens.visit
 import org.ksharp.nodes.NodeData
 
-const val SemanticTokenAction = "SemanticTokenAction"
-fun semanticTokenAction() = action<List<NodeData>, List<Int>>(
-    SemanticTokenAction,
+val SemanticTokensAction = ActionId<List<Int>>("SemanticTokenAction")
+fun ActionCatalog.semanticTokensAction() = action<List<NodeData>, List<Int>>(
+    SemanticTokensAction,
     listOf()
 ) {
     execution { _, nodes ->

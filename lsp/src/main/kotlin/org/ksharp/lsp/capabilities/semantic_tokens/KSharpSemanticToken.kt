@@ -2,7 +2,8 @@ package org.ksharp.lsp.capabilities.semantic_tokens
 
 import org.eclipse.lsp4j.*
 import org.ksharp.common.Location
-import org.ksharp.lsp.actions.DocumentActions
+import org.ksharp.lsp.actions.ActionExecutionState
+import org.ksharp.lsp.actions.SemanticTokensAction
 import org.ksharp.parser.TokenType
 import org.ksharp.parser.ksharp.KSharpTokenType
 import java.util.concurrent.CompletableFuture
@@ -96,13 +97,12 @@ fun TokenEncoder.register(location: Location, tokenType: String, vararg modifier
     )
 }
 
-fun calculateSemanticTokens(actions: DocumentActions, content: String): CompletableFuture<SemanticTokens> =
-    actions.parseAction(content).let {
-        actions.semanticTokens
-            .value
-            .thenApplyAsync { d ->
-                SemanticTokens().apply {
-                    data = d
-                }
+fun calculateSemanticTokens(
+    state: ActionExecutionState
+): CompletableFuture<SemanticTokens> =
+    state[SemanticTokensAction]
+        .thenApplyAsync { d ->
+            SemanticTokens().apply {
+                data = d
             }
-    }
+        }

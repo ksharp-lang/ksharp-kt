@@ -1,92 +1,98 @@
 package org.ksharp.lsp.actions
 
+import org.ksharp.common.cast
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.ReentrantLock
 import java.util.stream.Collectors
+import kotlin.concurrent.withLock
 
-class ActionState(
-    private val _cancelled: AtomicBoolean,
-    private val dependencies: Map<String, Any>
+data class ActionId<Output>(
+    val id: String
+)
+
+class Actions(
+    private val actions: Map<ActionId<*>, Action<*, *>>,
 ) {
-
-    val cancelled: Boolean get() = _cancelled.get()
-
-    operator fun get(actionId: String) = dependencies[actionId]
-
-}
-
-class ActionExecution<Output>(
-    val value: CompletableFuture<Output>,
-    private val _cancelled: AtomicBoolean
-) {
-    val cancelled: Boolean get() = _cancelled.get()
-
-    fun cancel() {
-        _cancelled.set(true)
+    operator fun <Payload, Output> invoke(state: ActionExecutionState, actionId: ActionId<Output>, payload: Payload) {
+        actions[actionId]?.let { it.cast<Action<Payload, Output>>()(state, payload) }
     }
 }
 
+class ActionExecutionState {
+    private val lock = ReentrantLock()
+    private val executions = mutableMapOf<ActionId<*>, CompletableFuture<Any>>()
+    private val _canceled = AtomicBoolean(false)
+
+    val canceled get() = _canceled.get()
+
+    @Suppress("UNCHECKED_CAST")
+    operator fun <T> get(actionId: ActionId<T>): CompletableFuture<T> =
+        lock.withLock {
+            (executions[actionId] ?: CompletableFuture<Any>().also {
+                executions[actionId] = it
+            }) as CompletableFuture<T>
+        }
+
+    fun cancel() {
+        _canceled.set(true)
+    }
+
+    fun <Output> resetActionState(id: ActionId<Output>): CompletableFuture<Output> =
+        executions.remove(id)!!.cast()
+}
+
+class ActionState(
+    private val execution: ActionExecutionState,
+    private val dependencies: Map<ActionId<out Any?>, Any>
+) {
+
+    val canceled: Boolean get() = execution.canceled
+
+    @Suppress("UNCHECKED_CAST")
+    operator fun <T> get(actionId: ActionId<T>): T = dependencies[actionId] as T
+
+}
+
 class Action<Payload, Output>(
-    private val id: String,
+    private val id: ActionId<Output>,
     private val whenCancelledOutput: Output,
     private val trigger: List<Action<Output, *>> = listOf(),
     private val dependsOn: List<Action<*, *>> = listOf(),
     private val execution: (ActionState, Payload) -> Output,
 ) {
-    var value: CompletableFuture<Output> = CompletableFuture()
-        private set
-
-    private fun begin() {
-        if (value.isDone)
-            value = CompletableFuture()
-    }
-
-    operator fun invoke(payload: Payload): ActionExecution<Output> {
-        begin()
-
+    operator fun invoke(execution: ActionExecutionState, payload: Payload): CompletableFuture<Output> {
         val actions = dependsOn.stream().map { action ->
-            action.value.thenApplyAsync { action.id to it!! }
+            execution[action.id].thenApplyAsync { action.id to it!! }
         }.collect(Collectors.toList())
 
-        trigger.forEach {
-            it.begin()
-        }
-
-        val cancelled = AtomicBoolean(false)
-
+        val future = execution[id]
         CompletableFuture.allOf(*actions.toTypedArray())
             .thenApplyAsync {
                 val dependencies = actions.associate {
                     it.get()
                 }
-                val actionState = ActionState(cancelled, dependencies)
-                val result = execution(actionState, payload)
+                val actionState = ActionState(execution, dependencies)
 
-                if (cancelled.get()) value.complete(whenCancelledOutput)
-                else {
-                    value.complete(result)
-                    triggerActions(result)
+                try {
+                    val result = this.execution(actionState, payload)
+                    if (execution.canceled) future.complete(whenCancelledOutput)
+                    else {
+                        future.complete(result)
+                        triggerActions(execution, result)
+                    }
+                } catch (e: Exception) {
+                    future.completeExceptionally(e)
+                    throw e
                 }
             }
 
-        return ActionExecution(
-            value,
-            cancelled
-        )
+        return future
     }
 
-    private fun triggerActions(result: Output) {
+    private fun triggerActions(execution: ActionExecutionState, result: Output) {
         trigger.forEach {
-            it(result)
+            it(execution, result)
         }
     }
 }
-
-fun <Payload, Output> action(
-    id: String,
-    whenCancelledOutput: Output,
-    builder: ActionsBuilder<Payload, Output>.() -> Unit
-): Action<Payload, Output> =
-    ActionsBuilder<Payload, Output>(id, whenCancelledOutput)
-        .apply(builder)
-        .build()
