@@ -1,4 +1,4 @@
-package org.ksharp.lsp.capabilities.semantic_tokens
+package org.ksharp.lsp.capabilities.actions
 
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe

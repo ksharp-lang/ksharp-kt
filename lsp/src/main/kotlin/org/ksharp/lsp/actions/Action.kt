@@ -73,12 +73,17 @@ class Action<Payload, Output>(
                     it.get()
                 }
                 val actionState = ActionState(execution, dependencies)
-                val result = this.execution(actionState, payload)
 
-                if (execution.canceled) future.complete(whenCancelledOutput)
-                else {
-                    future.complete(result)
-                    triggerActions(execution, result)
+                try {
+                    val result = this.execution(actionState, payload)
+                    if (execution.canceled) future.complete(whenCancelledOutput)
+                    else {
+                        future.complete(result)
+                        triggerActions(execution, result)
+                    }
+                } catch (e: Exception) {
+                    future.completeExceptionally(e)
+                    throw e
                 }
             }
 
