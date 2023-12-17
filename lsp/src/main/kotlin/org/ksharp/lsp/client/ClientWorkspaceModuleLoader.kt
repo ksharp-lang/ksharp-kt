@@ -5,6 +5,7 @@ import org.ksharp.compiler.loader.ModuleLoader
 import org.ksharp.module.prelude.preludeModule
 import java.net.URI
 import java.nio.file.Files
+import kotlin.io.path.exists
 import kotlin.io.path.name
 import kotlin.io.path.toPath
 
@@ -13,12 +14,15 @@ object ClientWorkspaceModuleLoader {
         private set
 
     fun setWorkspaceFolder(uri: URI) {
+        moduleLoader = null
         val sources = uri.toPath().toAbsolutePath()
-        val folderName = sources.name
-        val sourceLoader = DirectorySourceLoader(
-            sources,
-            Files.createTempDirectory("ksharp-$folderName")
-        )
-        moduleLoader = ModuleLoader(sourceLoader, preludeModule)
+        if (sources.exists()) {
+            val folderName = sources.name
+            val sourceLoader = DirectorySourceLoader(
+                sources,
+                Files.createTempDirectory("ksharp-$folderName")
+            )
+            moduleLoader = ModuleLoader(sourceLoader, preludeModule)
+        }
     }
 }
