@@ -1,12 +1,15 @@
 package org.ksharp.lsp.actions
 
 import org.ksharp.common.Error
+import org.ksharp.compiler.loader.moduleInfoLoader
+import org.ksharp.lsp.client.ClientWorkspaceModuleLoader
 import org.ksharp.module.CodeArtifact
 import org.ksharp.module.CodeModule
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.NodeData
 import org.ksharp.parser.ksharp.toModuleNode
+import org.ksharp.semantics.nodes.ModuleInfoLoader
 import org.ksharp.semantics.nodes.toCodeModule
 import org.ksharp.typesystem.typeSystem
 
@@ -29,12 +32,15 @@ fun ActionCatalog.codeModuleAction(moduleName: String, builder: ActionsGraphBuil
         emptyCodeModule
     ) {
         execution { _, nodes ->
+            val defaultModuleInfoLoader = ModuleInfoLoader { _, _ ->
+                null
+            }
             nodes.asSequence()
                 .toModuleNode(moduleName)
-                .toCodeModule(preludeModule) { _, _ ->
-                    //TODO Integrate reading modules using a module loader
-                    null
-                }
+                .toCodeModule(
+                    preludeModule,
+                    ClientWorkspaceModuleLoader.moduleLoader?.moduleInfoLoader ?: defaultModuleInfoLoader
+                )
         }
         graphBuilder(builder)
     }

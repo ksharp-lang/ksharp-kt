@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":semantics"))
     implementation(project(":module"))
     implementation(project(":typesystem"))
+    implementation(project(":compiler"))
     testImplementation(libs.kotest)
     testImplementation(libs.reflections)
 }

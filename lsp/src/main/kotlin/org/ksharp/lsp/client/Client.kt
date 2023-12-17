@@ -4,10 +4,8 @@ import org.eclipse.lsp4j.services.LanguageClient
 
 
 object Client {
-
     private lateinit var clientInstance: LanguageClient
     private var initialized = false
-
 
     fun initialize(client: LanguageClient) {
         if (!initialized) {
