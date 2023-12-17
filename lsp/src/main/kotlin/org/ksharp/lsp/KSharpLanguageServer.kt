@@ -5,7 +5,9 @@ import org.eclipse.lsp4j.services.*
 import org.ksharp.lsp.capabilities.semantic_tokens.kSharpSemanticTokensProvider
 import org.ksharp.lsp.client.Client
 import org.ksharp.lsp.client.ClientLogger
+import org.ksharp.lsp.client.ClientWorkspaceModuleLoader
 import org.ksharp.lsp.model.DocumentStorage
+import java.net.URI
 import java.util.concurrent.CompletableFuture
 import kotlin.system.exitProcess
 
@@ -13,6 +15,12 @@ class KSharpLanguageServer(private val documentStorage: DocumentStorage = Docume
     LanguageClientAware {
 
     override fun initialize(params: InitializeParams): CompletableFuture<InitializeResult> {
+        (params.workspaceFolders ?: emptyList())
+            .asSequence()
+            .map { URI(it.uri) }
+            .firstOrNull()?.let {
+                ClientWorkspaceModuleLoader.setWorkspaceFolder(it)
+            }
         return CompletableFuture.supplyAsync {
             InitializeResult().apply {
                 capabilities = ServerCapabilities().apply {
