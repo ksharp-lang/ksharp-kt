@@ -4,7 +4,6 @@ import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.TextDocumentService
 import org.ksharp.lsp.actions.AbstractionsHoverAction
 import org.ksharp.lsp.capabilities.semantic_tokens.calculateSemanticTokens
-import org.ksharp.lsp.client.ClientLogger
 import org.ksharp.lsp.model.DocumentChange
 import org.ksharp.lsp.model.DocumentStorage
 import org.ksharp.lsp.model.Range
@@ -47,16 +46,11 @@ class KSharpDocumentService(private val documentStorage: DocumentStorage) : Text
     override fun semanticTokensFull(params: SemanticTokensParams): CompletableFuture<SemanticTokens> =
         documentStorage.withDocumentState(params.textDocument.uri, ::calculateSemanticTokens)
 
-    override fun hover(params: HoverParams?): CompletableFuture<Hover> {
-        ClientLogger.info("Hover $params.")
-        return documentStorage.executeAction(
+    override fun hover(params: HoverParams?): CompletableFuture<Hover> =
+        documentStorage.executeAction(
             params!!.textDocument.uri,
             AbstractionsHoverAction,
             params.position
-        ).thenApplyAsync {
-            ClientLogger.info("Hovering $it.")
-            it
-        }
-    }
+        ).thenApplyAsync { it }
 
 }
