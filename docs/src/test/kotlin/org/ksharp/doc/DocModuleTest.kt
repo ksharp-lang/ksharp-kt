@@ -7,7 +7,7 @@ import org.ksharp.common.io.bufferView
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
-private fun SerializableDocModule.shouldBeSerializable() {
+private fun DocModule.shouldBeSerializable() {
     val output = ByteArrayOutputStream()
     writeTo(output)
     ByteArrayInputStream(output.toByteArray()).bufferView {
@@ -19,23 +19,29 @@ class DocModuleTest : StringSpec({
     "Search into the MemoryDocModule" {
         docModule(
             listOf(
+                Trait(
+                    "Trait",
+                    "A trait",
+                    listOf(
+                        DocAbstraction(
+                            "abs/1",
+                            "Long -> Long",
+                            "Return the absolute value of a number, using trait"
+                        )
+                    ),
+                    listOf("Int", "Long")
+                )
+            ),
+            listOf(
                 DocAbstraction(
                     "sum/2",
-                    "",
                     "Int -> Int -> Int",
                     "Sum two numbers"
                 ),
                 DocAbstraction(
                     "abs/1",
-                    "",
                     "Int -> Int",
                     "Return the absolute value of a number"
-                ),
-                DocAbstraction(
-                    "abs/1",
-                    "Trait",
-                    "Long -> Long",
-                    "Return the absolute value of a number, using trait"
                 )
             )
         ).apply {
@@ -44,27 +50,34 @@ class DocModuleTest : StringSpec({
             representation("sum/2").shouldBe("Int -> Int -> Int")
             representation("abs/1", "Trait").shouldBe("Long -> Long")
             documentation("abs/1", "Trait").shouldBe("Return the absolute value of a number, using trait")
+            documentation("abs/1").shouldBe("Return the absolute value of a number")
         }
     }
     "Serialize DocModule" {
         docModule(
             listOf(
+                Trait(
+                    "Trait",
+                    "A trait",
+                    listOf(
+                        DocAbstraction(
+                            "abs/1",
+                            "Long -> Long",
+                            "Return the absolute value of a number, using trait"
+                        )
+                    ),
+                    listOf("Int", "Long")
+                )
+            ),
+            listOf(
                 DocAbstraction(
                     "sum/2",
-                    "",
                     "Int -> Int -> Int",
                     "Sum two numbers"
                 ),
                 DocAbstraction(
                     "abs/1",
-                    "",
                     "Int -> Int",
-                    "Return the absolute value of a number"
-                ),
-                DocAbstraction(
-                    "abs/1",
-                    "Trait",
-                    "Long -> Long",
                     "Return the absolute value of a number"
                 )
             )

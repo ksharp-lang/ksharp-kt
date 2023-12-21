@@ -1,14 +1,16 @@
 package org.ksharp.doc
 
-import org.ksharp.common.io.BufferWriter
-import org.ksharp.common.io.newBufferWriter
-import java.io.OutputStream
-
 data class DocAbstraction(
     val name: String,
-    val container: String = "",
     val representation: String,
     val documentation: String = ""
+)
+
+data class Trait(
+    val name: String,
+    val documentation: String = "",
+    val abstractions: List<DocAbstraction>,
+    val impls: List<String>
 )
 
 interface DocModule {
@@ -16,22 +18,50 @@ interface DocModule {
 
     fun documentation(name: String, container: String = ""): String?
 
+    val traits: List<Trait>
+    val abstractions: List<DocAbstraction>
 }
 
-interface SerializableDocModule : DocModule {
-    fun writeTo(buffer: BufferWriter)
+internal data class MemoryDocModule internal constructor(
+    override val traits: List<Trait>,
+    override val abstractions: List<DocAbstraction>
+) : DocModule {
 
+    private fun List<DocAbstraction>.abstraction(name: String): DocAbstraction? =
+        binarySearch {
+            it.name.compareTo(name)
+        }.let {
+            if (it < 0) return null
+            else this[it]
+        }
+
+    private fun List<Trait>.trait(name: String): Trait? =
+        binarySearch {
+            it.name.compareTo(name)
+        }.let {
+            if (it < 0) return null
+            else this[it]
+        }
+
+    private fun abstractions(container: String): List<DocAbstraction> =
+        if (container.isEmpty()) abstractions
+        else traits.trait(container)?.abstractions ?: emptyList()
+
+    override fun representation(name: String, container: String): String? =
+        abstractions(container).abstraction(name)?.representation
+
+    override fun documentation(name: String, container: String): String? =
+        abstractions(container).abstraction(name)?.documentation
 }
 
-fun docModule(abstractions: List<DocAbstraction>): SerializableDocModule =
+fun docModule(
+    traits: List<Trait>,
+    abstractions: List<DocAbstraction>
+): DocModule =
     MemoryDocModule(
+        traits.sortedBy {
+            it.name
+        },
         abstractions.sortedBy {
-            "${it.name} :: ${it.container}"
+            it.name
         })
-
-
-fun SerializableDocModule.writeTo(output: OutputStream) {
-    val buffer = newBufferWriter()
-    writeTo(buffer)
-    buffer.transferTo(output)
-}
