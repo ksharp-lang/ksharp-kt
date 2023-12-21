@@ -15,6 +15,9 @@ interface BufferWriter {
 
     val size: Int
     fun add(value: String): Int
+
+    fun add(value: ByteArray)
+
     fun set(index: Int, value: Int)
     fun add(value: Int)
     fun add(value: Long)
@@ -81,6 +84,10 @@ private class BufferWriterImpl : BufferWriter {
 
     override fun add(double: Double) {
         buffer.writeDouble(double)
+    }
+
+    override fun add(value: ByteArray) {
+        buffer.writeBytes(value)
     }
 
     override fun transferTo(output: OutputStream) {
