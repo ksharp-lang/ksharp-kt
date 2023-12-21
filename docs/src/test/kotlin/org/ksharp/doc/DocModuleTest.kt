@@ -49,6 +49,8 @@ class DocModuleTest : StringSpec({
             representation("abs/1").shouldBe("Int -> Int")
             representation("sum/2").shouldBe("Int -> Int -> Int")
             representation("abs/1", "Trait").shouldBe("Long -> Long")
+            documentation("abs/1", "Trait2").shouldBeNull()
+            documentation("abs/3", "Trait").shouldBeNull()
             documentation("abs/1", "Trait").shouldBe("Return the absolute value of a number, using trait")
             documentation("abs/1").shouldBe("Return the absolute value of a number")
         }
