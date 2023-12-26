@@ -21,6 +21,25 @@ private fun String.docModule(): ErrorOrValue<DocModule> =
 
 
 class DocModuleBuilderTest : StringSpec({
+    "No doc annotation" {
+        """
+            pub sum a b = a + b
+        """.trimIndent()
+            .docModule()
+            .shouldBeRight(
+                docModule(
+                    emptyList(),
+                    emptyList(),
+                    listOf(
+                        DocAbstraction(
+                            "sum/2",
+                            "(Add a) -> (Add a) -> (Add a)",
+                            ""
+                        )
+                    )
+                )
+            )
+    }
     "Doc on functions" {
         """
             @doc("Sum two values")
