@@ -12,7 +12,7 @@ private val List<AnnotationNode>?.documentationValue: String
             a.name == "doc"
         }
         return if (docAnnotation != null) {
-            docAnnotation.attrs["default"] as? String ?: ""
+            docAnnotation.attrs["default"]?.toString() ?: ""
         } else ""
     }
 
@@ -50,12 +50,16 @@ fun ModuleNode.toDocModule(moduleInfo: ModuleInfo): DocModule {
             } else null
         }
 
-    val abstractions = functions.map {
-        DocAbstraction(
-            it.name,
-            "",
-            it.annotations.documentationValue
-        )
+    val abstractions = functions.mapNotNull {
+        val name = "${it.name}/${it.parameters.size}"
+        val fn = moduleInfo.functions[name]
+        if (fn != null) {
+            DocAbstraction(
+                name,
+                fn.types.joinToString(" -> ") { t -> t.representation },
+                it.annotations.documentationValue
+            )
+        } else null
     }
 
     return docModule(
