@@ -33,11 +33,6 @@ class ModuleTypeSystem(
             typeSystem[type]
         }
 
-    override fun has(name: String): Boolean {
-        val (typeSystem, type) = typeSystemAndTypeName(name)
-        return typeSystem?.has(type) == true
-    }
-
     override fun asSequence(): Sequence<Pair<String, Type>> = emptySequence()
 }
 
