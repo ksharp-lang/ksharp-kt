@@ -13,12 +13,14 @@ private val testLocation = Location.NoProvided
 class TypeNodeTest : StringSpec({
     "Test Node Interface over TraitFunctionNode" {
         TraitFunctionNode(
+            emptyList(),
             "sum",
             InvalidSetTypeNode(testLocation),
             testLocation,
             TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
         ).node.apply {
             cast<TraitFunctionNode>().apply {
+                annotations.shouldBeEmpty()
                 name.shouldBe("sum")
                 type.shouldBe(InvalidSetTypeNode(testLocation))
                 location.shouldBe(testLocation)
@@ -34,6 +36,7 @@ class TypeNodeTest : StringSpec({
         TraitFunctionsNode(
             listOf(
                 TraitFunctionNode(
+                    emptyList(),
                     "sum",
                     InvalidSetTypeNode(testLocation),
                     testLocation,
@@ -45,6 +48,7 @@ class TypeNodeTest : StringSpec({
                 definitions.shouldBe(
                     listOf(
                         TraitFunctionNode(
+                            emptyList(),
                             "sum",
                             InvalidSetTypeNode(testLocation),
                             testLocation,
@@ -59,6 +63,7 @@ class TypeNodeTest : StringSpec({
                 listOf(
                     Node(
                         this, testLocation, TraitFunctionNode(
+                            emptyList(),
                             "sum",
                             InvalidSetTypeNode(testLocation),
                             testLocation,
