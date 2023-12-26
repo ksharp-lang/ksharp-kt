@@ -19,6 +19,18 @@ class DocModuleTest : StringSpec({
     "Search into the MemoryDocModule" {
         docModule(
             listOf(
+                Type(
+                    "Int",
+                    "Num numeric<Int>",
+                    "Represent an integer"
+                ),
+                Type(
+                    "String",
+                    "List Char",
+                    "Represent a list of characters"
+                )
+            ),
+            listOf(
                 Trait(
                     "Trait",
                     "A trait",
@@ -49,14 +61,28 @@ class DocModuleTest : StringSpec({
             representation("abs/1").shouldBe("Int -> Int")
             representation("sum/2").shouldBe("Int -> Int -> Int")
             representation("abs/1", "Trait").shouldBe("Long -> Long")
+            representation("String").shouldBe("List Char")
             documentation("abs/1", "Trait2").shouldBeNull()
             documentation("abs/3", "Trait").shouldBeNull()
             documentation("abs/1", "Trait").shouldBe("Return the absolute value of a number, using trait")
             documentation("abs/1").shouldBe("Return the absolute value of a number")
+            documentation("String").shouldBe("Represent a list of characters")
         }
     }
     "Serialize DocModule" {
         docModule(
+            listOf(
+                Type(
+                    "Int",
+                    "Num numeric<Int>",
+                    "Represent an integer"
+                ),
+                Type(
+                    "String",
+                    "List Char",
+                    "Represent a list of characters"
+                )
+            ),
             listOf(
                 Trait(
                     "Trait",
