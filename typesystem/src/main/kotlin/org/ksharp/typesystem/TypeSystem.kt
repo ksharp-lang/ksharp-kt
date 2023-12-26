@@ -18,6 +18,11 @@ interface TypeSystem {
      * return the type value resolved
      */
     operator fun get(name: String): ErrorOrType
+
+    /**
+     * return true if type exists in the typesystem
+     */
+    fun has(name: String): Boolean
 }
 
 class TypeSystemImpl internal constructor(
@@ -40,6 +45,8 @@ class TypeSystemImpl internal constructor(
                 )
             )
 
+    override fun has(name: String): Boolean =
+        types.containsKey(name) || parent?.has(name) == true
 }
 
 val PartialTypeSystem.size get() = value.size

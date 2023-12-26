@@ -17,6 +17,12 @@ private val Map<*, CodeArtifact>.abstractions
             it.value.abstractions.asSequence()
         }.flatten()
 
+private val List<CodeArtifact>.abstractions
+    get() =
+        asSequence().map {
+            it.abstractions.asSequence()
+        }.flatten()
+
 private fun Sequence<AbstractionNode<SemanticInfo>>.first(position: Position) =
     run {
         val line = position.line + 1
