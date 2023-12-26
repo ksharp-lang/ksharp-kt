@@ -702,6 +702,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 TraitFunctionsNode(
                     listOf(
                         TraitFunctionNode(
+                            emptyList(),
                             "sum",
                             FunctionTypeNode(
                                 listOf(
@@ -744,6 +745,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 TraitFunctionsNode(
                     listOf(
                         TraitFunctionNode(
+                            emptyList(),
                             "sum",
                             FunctionTypeNode(
                                 listOf(
@@ -758,6 +760,7 @@ class TypeSystemSemanticsTest : StringSpec({
                             TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
+                            emptyList(),
                             "prod",
                             FunctionTypeNode(
                                 listOf(
@@ -803,6 +806,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 TraitFunctionsNode(
                     listOf(
                         TraitFunctionNode(
+                            emptyList(),
                             "sum",
                             FunctionTypeNode(
                                 listOf(
@@ -815,6 +819,7 @@ class TypeSystemSemanticsTest : StringSpec({
                             Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
+                            emptyList(),
                             "prod",
                             FunctionTypeNode(
                                 listOf(
@@ -858,6 +863,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 TraitFunctionsNode(
                     listOf(
                         TraitFunctionNode(
+                            emptyList(),
                             "sum",
                             FunctionTypeNode(
                                 listOf(
@@ -872,6 +878,7 @@ class TypeSystemSemanticsTest : StringSpec({
                             TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
+                            emptyList(),
                             "prod",
                             FunctionTypeNode(
                                 listOf(
@@ -920,6 +927,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 TraitFunctionsNode(
                     listOf(
                         TraitFunctionNode(
+                            emptyList(),
                             "sum",
                             FunctionTypeNode(
                                 listOf(
@@ -934,6 +942,7 @@ class TypeSystemSemanticsTest : StringSpec({
                             TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
+                            emptyList(),
                             "prod",
                             FunctionTypeNode(
                                 listOf(
@@ -989,6 +998,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 TraitFunctionsNode(
                     listOf(
                         TraitFunctionNode(
+                            emptyList(),
                             "sum",
                             FunctionTypeNode(
                                 listOf(
@@ -1002,6 +1012,7 @@ class TypeSystemSemanticsTest : StringSpec({
                             TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                         ),
                         TraitFunctionNode(
+                            emptyList(),
                             "prod",
                             FunctionTypeNode(
                                 listOf(
@@ -1083,6 +1094,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                emptyList(),
                                 "eq",
                                 FunctionTypeNode(
                                     listOf(
@@ -1115,6 +1127,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                emptyList(),
                                 "eq",
                                 FunctionTypeNode(
                                     listOf(
@@ -1183,6 +1196,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                emptyList(),
                                 "eq",
                                 FunctionTypeNode(
                                     listOf(
@@ -1213,6 +1227,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                emptyList(),
                                 "eq",
                                 FunctionTypeNode(
                                     listOf(

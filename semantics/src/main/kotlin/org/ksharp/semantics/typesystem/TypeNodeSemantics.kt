@@ -412,15 +412,6 @@ private fun List<ImplNode>.checkSemantics(
     return impls.build()
 }
 
-internal val FunctionTypeNode.arity: Int
-    get() = params.size.let { sizeArgs ->
-        when (sizeArgs) {
-            2 -> if (params.first() is UnitTypeNode) 0 else 1
-
-            else -> sizeArgs - 1
-        }
-    }
-
 private fun TypeDeclarationNode.checkTypesSemantics(
     errors: ErrorCollector,
     builder: TypeSystemBuilder

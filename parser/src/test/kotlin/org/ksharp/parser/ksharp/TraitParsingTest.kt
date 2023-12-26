@@ -36,6 +36,7 @@ class TraitParsingTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                null,
                                 "sum",
                                 FunctionTypeNode(
                                     listOf(
@@ -48,6 +49,7 @@ class TraitParsingTest : StringSpec({
                                 Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             ),
                             TraitFunctionNode(
+                                null,
                                 "prod",
                                 FunctionTypeNode(
                                     listOf(
@@ -91,6 +93,7 @@ class TraitParsingTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                null,
                                 "(+)",
                                 FunctionTypeNode(
                                     listOf(
@@ -103,6 +106,7 @@ class TraitParsingTest : StringSpec({
                                 Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             ),
                             TraitFunctionNode(
+                                null,
                                 "prod",
                                 FunctionTypeNode(
                                     listOf(
@@ -148,6 +152,7 @@ class TraitParsingTest : StringSpec({
                     definition = TraitFunctionsNode(
                         definitions = listOf(
                             TraitFunctionNode(
+                                null,
                                 name = "sum",
                                 type = FunctionTypeNode(
                                     params = listOf(
@@ -170,6 +175,7 @@ class TraitParsingTest : StringSpec({
                                     operator = Location.NoProvided
                                 )
                             ), TraitFunctionNode(
+                                null,
                                 name = "prod",
                                 type = FunctionTypeNode(
                                     params = listOf(
@@ -240,6 +246,7 @@ class TraitParsingTest : StringSpec({
         """
             trait Num a =
                 sum :: a -> a -> a
+                @doc("doc string")
                 prod :: a -> a -> a
                 
                 @native(lang="java")
@@ -258,6 +265,7 @@ class TraitParsingTest : StringSpec({
                     definition = TraitFunctionsNode(
                         definitions = listOf(
                             TraitFunctionNode(
+                                null,
                                 name = "sum",
                                 type = FunctionTypeNode(
                                     params = listOf(
@@ -280,6 +288,18 @@ class TraitParsingTest : StringSpec({
                                     operator = Location.NoProvided
                                 )
                             ), TraitFunctionNode(
+                                listOf(
+                                    AnnotationNode(
+                                        name = "doc",
+                                        attrs = mapOf("default" to "doc string"),
+                                        location = Location.NoProvided,
+                                        locations = AnnotationNodeLocations(
+                                            altLocation = Location.NoProvided,
+                                            name = Location.NoProvided,
+                                            attrs = emptyList()
+                                        )
+                                    )
+                                ),
                                 name = "prod",
                                 type = FunctionTypeNode(
                                     params = listOf(
@@ -378,6 +398,7 @@ class TraitParsingTest : StringSpec({
                     definition = TraitFunctionsNode(
                         definitions = listOf(
                             TraitFunctionNode(
+                                null,
                                 name = "sum",
                                 type = FunctionTypeNode(
                                     params = listOf(
@@ -400,6 +421,7 @@ class TraitParsingTest : StringSpec({
                                     operator = Location.NoProvided
                                 )
                             ), TraitFunctionNode(
+                                null,
                                 name = "prod",
                                 type = FunctionTypeNode(
                                     params = listOf(
@@ -452,6 +474,7 @@ class TraitParsingTest : StringSpec({
                     definition = TraitFunctionsNode(
                         definitions = listOf(
                             TraitFunctionNode(
+                                null,
                                 name = "sum",
                                 type = FunctionTypeNode(
                                     params = listOf(
@@ -737,6 +760,7 @@ class TraitParsingTest : StringSpec({
                         definition = TraitFunctionsNode(
                             definitions = listOf(
                                 TraitFunctionNode(
+                                    null,
                                     name = "sum",
                                     type = FunctionTypeNode(
                                         params = listOf(
@@ -757,6 +781,7 @@ class TraitParsingTest : StringSpec({
                                     )
                                 ),
                                 TraitFunctionNode(
+                                    null,
                                     name = "prod",
                                     type = FunctionTypeNode(
                                         params = listOf(
@@ -796,6 +821,7 @@ class TraitParsingTest : StringSpec({
                         definition = TraitFunctionsNode(
                             definitions = listOf(
                                 TraitFunctionNode(
+                                    null,
                                     name = "(=)",
                                     type = FunctionTypeNode(
                                         params = listOf(
@@ -816,6 +842,7 @@ class TraitParsingTest : StringSpec({
                                     )
                                 ),
                                 TraitFunctionNode(
+                                    null,
                                     name = "(!=)",
                                     type = FunctionTypeNode(
                                         params = listOf(

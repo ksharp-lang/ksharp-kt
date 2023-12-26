@@ -330,6 +330,7 @@ class ModuleParserTest : StringSpec({
                             TraitFunctionsNode(
                                 listOf(
                                     TraitFunctionNode(
+                                        null,
                                         "sum",
                                         FunctionTypeNode(
                                             listOf(
@@ -398,6 +399,7 @@ class ModuleParserTest : StringSpec({
                             TraitFunctionsNode(
                                 listOf(
                                     TraitFunctionNode(
+                                        null,
                                         "sum",
                                         FunctionTypeNode(
                                             listOf(

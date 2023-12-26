@@ -38,7 +38,10 @@ class ModuleLoaderTest : StringSpec({
                     entry.value.types.toFunctionType(it.info.typeSystem).representation
                 }.shouldBe(mapOf("ten/0" to "(Unit -> (Num numeric<Long>))"))
                 it.executable.execute("ten/0").shouldBe(10L)
+                it.documentation.documentation("ten/0").shouldBe("Number 10")
+                it.documentation.representation("ten/0").shouldBe("Unit -> (Num numeric<Long>)")
                 Files.exists(binaries.resolve("ten.ksm")).shouldBeTrue()
+                Files.exists(binaries.resolve("ten.kdoc")).shouldBeTrue()
                 Files.exists(binaries.resolve("ten.ksc")).shouldBeTrue()
             }
 
@@ -54,6 +57,8 @@ class ModuleLoaderTest : StringSpec({
                     entry.value.types.toFunctionType(it.info.typeSystem).representation
                 }.shouldBe(mapOf("ten/0" to "(Unit -> (Num numeric<Long>))"))
                 it.executable.execute("ten/0").shouldBe(10L)
+                it.documentation.documentation("ten/0").shouldBe("Number 10")
+                it.documentation.representation("ten/0").shouldBe("Unit -> (Num numeric<Long>)")
             }
 
         loader2.moduleInfoLoader.load("ten", "")

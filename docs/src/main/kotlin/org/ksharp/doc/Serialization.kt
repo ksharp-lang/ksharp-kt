@@ -73,6 +73,12 @@ private fun List<String>.writeTo(buffer: BufferWriter) {
 }
 
 private fun DocModule.writeTo(buffer: BufferWriter) {
+    buffer.add(this.types.size)
+    this.types.forEach {
+        buffer.writeString(it.name)
+        buffer.writeString(it.representation)
+        buffer.writeString(it.documentation)
+    }
     buffer.add(this.traits.size)
     this.traits.forEach {
         buffer.writeString(it.name)
@@ -90,8 +96,19 @@ fun DocModule.writeTo(output: OutputStream) {
 }
 
 fun BufferView.readDocModule(): DocModule {
-    val traitsSize = readInt(0)
+    val typeSize = readInt(0)
     var offset = 4
+    val types = mutableListOf<Type>()
+    repeat(typeSize) {
+        val (name, nameOffset) = readString(this, offset)
+        val (representation, representationOffset) = readString(this, nameOffset)
+        val (documentation, documentationOffset) = readString(this, representationOffset)
+        offset = documentationOffset
+        types.add(Type(name, representation, documentation))
+    }
+
+    val traitsSize = readInt(offset)
+    offset += 4
     val traits = mutableListOf<Trait>()
     repeat(traitsSize) {
         val (name, nameOffset) = readString(this, offset)
@@ -101,6 +118,7 @@ fun BufferView.readDocModule(): DocModule {
         offset = implsOffset
         traits.add(Trait(name, documentation, abstractions, impls))
     }
+
     val (abstractions, _) = readAbstractions(offset)
-    return MemoryDocModule(traits, abstractions)
+    return MemoryDocModule(types, traits, abstractions)
 }

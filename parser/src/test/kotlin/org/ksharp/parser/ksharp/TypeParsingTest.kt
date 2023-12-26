@@ -943,6 +943,7 @@ class TypeParserTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                null,
                                 "sum",
                                 FunctionTypeNode(
                                     listOf(
@@ -955,6 +956,7 @@ class TypeParserTest : StringSpec({
                                 Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             ),
                             TraitFunctionNode(
+                                null,
                                 "prod",
                                 FunctionTypeNode(
                                     listOf(
@@ -998,6 +1000,7 @@ class TypeParserTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                null,
                                 "sum",
                                 FunctionTypeNode(
                                     listOf(
@@ -1012,6 +1015,7 @@ class TypeParserTest : StringSpec({
                                 TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             ),
                             TraitFunctionNode(
+                                null,
                                 "prod",
                                 FunctionTypeNode(
                                     listOf(
@@ -1056,6 +1060,7 @@ class TypeParserTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                null,
                                 "sum",
                                 FunctionTypeNode(
                                     listOf(
@@ -1068,6 +1073,7 @@ class TypeParserTest : StringSpec({
                                 Location.NoProvided, TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
                             ),
                             TraitFunctionNode(
+                                null,
                                 "prod",
                                 FunctionTypeNode(
                                     listOf(
@@ -1110,6 +1116,7 @@ class TypeParserTest : StringSpec({
                     TraitFunctionsNode(
                         listOf(
                             TraitFunctionNode(
+                                null,
                                 "sum",
                                 FunctionTypeNode(
                                     listOf(
