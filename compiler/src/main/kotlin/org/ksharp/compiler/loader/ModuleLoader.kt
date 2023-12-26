@@ -43,7 +43,7 @@ class Module(
     private val sources: SourceLoader
 ) {
     val documentation: DocModule by lazy {
-        sources.binaryLoad(name.toModulePath("kdoc"))!!
+        sources.binaryLoad(name.toModulePath("ksd"))!!
             .bufferView {
                 it.readDocModule()
             }
@@ -80,7 +80,7 @@ class ModuleLoader(
             }.flatMap {
                 it.toCodeModule(preludeModule, moduleInfoLoader).let { codeModule ->
                     if (codeModule.errors.isEmpty()) {
-                        sources.outputStream(codeModule.name.toModulePath("kdoc")).use { stream ->
+                        sources.outputStream(codeModule.name.toModulePath("ksd")).use { stream ->
                             it.toDocModule(codeModule.module)
                                 .writeTo(stream)
                         }

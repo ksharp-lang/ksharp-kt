@@ -14,7 +14,7 @@ private val List<AnnotationNode>?.documentationValue: String
             a.name == "doc"
         }
         return if (docAnnotation != null) {
-            docAnnotation.attrs["default"]?.toString() ?: ""
+            docAnnotation.attrs["default"]?.toString()?.trimIndent() ?: ""
         } else ""
     }
 
