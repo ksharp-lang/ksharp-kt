@@ -2,7 +2,9 @@ package org.ksharp.doc
 
 import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.AnnotationNode
+import org.ksharp.nodes.FunctionTypeNode
 import org.ksharp.nodes.ModuleNode
+import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.TraitType
 
 private val List<AnnotationNode>?.documentationValue: String
@@ -16,10 +18,8 @@ private val List<AnnotationNode>?.documentationValue: String
         } else ""
     }
 
-fun ModuleNode.toDocModule(moduleInfo: ModuleInfo): DocModule {
-    val typeSystem = moduleInfo.typeSystem
-
-    val types = this.types
+private fun ModuleNode.getTypes(typeSystem: TypeSystem) =
+    this.types
         .mapNotNull {
             val t = typeSystem[it.name].valueOrNull
             if (t != null) {
@@ -31,24 +31,39 @@ fun ModuleNode.toDocModule(moduleInfo: ModuleInfo): DocModule {
             } else null
         }
 
-    val traits = this.traits
+private fun ModuleNode.getTraits(typeSystem: TypeSystem) =
+    this.traits
         .mapNotNull {
             val t = typeSystem[it.name].valueOrNull
             if (t != null && t is TraitType) {
                 Trait(
                     it.name,
                     it.annotations.documentationValue,
-                    it.definition.definitions.map { abstraction ->
-                        DocAbstraction(
-                            abstraction.name,
-                            "",
-                            ""
-                        )
+                    it.definition.definitions.mapNotNull { abstraction ->
+                        val fnNode = abstraction.type
+                        if (fnNode is FunctionTypeNode) {
+                            val name = "${abstraction.name}/${fnNode.arity}"
+                            val traitFunction = t.methods[name]
+                            if (traitFunction != null) {
+                                DocAbstraction(
+                                    name,
+                                    traitFunction.representation,
+                                    abstraction.annotations.documentationValue
+                                )
+                            } else null
+                        } else null
                     },
                     emptyList()
                 )
             } else null
         }
+
+fun ModuleNode.toDocModule(moduleInfo: ModuleInfo): DocModule {
+    val typeSystem = moduleInfo.typeSystem
+
+    val types = getTypes(typeSystem)
+
+    val traits = getTraits(typeSystem)
 
     val abstractions = functions.mapNotNull {
         val name = "${it.name}/${it.parameters.size}"

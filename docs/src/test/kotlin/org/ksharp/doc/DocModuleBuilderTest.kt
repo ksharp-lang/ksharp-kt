@@ -57,7 +57,60 @@ class DocModuleBuilderTest : StringSpec({
                         )
                     ),
                     emptyList(),
-                    listOf()
+                    emptyList()
+                )
+            )
+    }
+    "Doc on traits" {
+        """
+            @doc("Math operations")
+            trait Math a =
+                @doc("Sum two values")
+                sum :: a -> a -> a
+                
+                @doc("Subtract two values")
+                sub :: a -> a -> a
+                
+                @doc("Pi value")
+                pi :: () -> a
+                
+                @doc("Euler number")
+                euler :: Unit -> a
+        """.trimIndent()
+            .docModule()
+            .shouldBeRight(
+                docModule(
+                    emptyList(),
+                    listOf(
+                        Trait(
+                            "Math",
+                            "Math operations",
+                            listOf(
+                                DocAbstraction(
+                                    "sum/2",
+                                    "sum :: a -> a -> a",
+                                    "Sum two values"
+                                ),
+                                DocAbstraction(
+                                    "sub/2",
+                                    "sub :: a -> a -> a",
+                                    "Subtract two values"
+                                ),
+                                DocAbstraction(
+                                    "pi/0",
+                                    "pi :: Unit -> a",
+                                    "Pi value"
+                                ),
+                                DocAbstraction(
+                                    "euler/0",
+                                    "euler :: Unit -> a",
+                                    "Euler number"
+                                )
+                            ),
+                            emptyList()
+                        )
+                    ),
+                    emptyList()
                 )
             )
     }

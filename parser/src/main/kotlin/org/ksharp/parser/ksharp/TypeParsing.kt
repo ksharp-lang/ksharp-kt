@@ -248,11 +248,18 @@ private fun KSharpConsumeResult.thenTraitFunction(emitLocations: Boolean): KShar
             val name = it.first().cast<Token>()
             val type = it.last().cast<NodeData>()
             TraitFunctionNode(
+                null,
                 name.text,
                 type,
                 name.location,
                 if (emitLocations) TraitFunctionNodeLocation(name.location, it[1].cast<Token>().location)
                 else TraitFunctionNodeLocation(Location.NoProvided, Location.NoProvided)
+            )
+        }.map {
+            ParserValue(
+                it.value.cast<TraitFunctionNode>()
+                    .copy(annotations = it.remainTokens.state.value.annotations.build()),
+                it.remainTokens
             )
         }
 

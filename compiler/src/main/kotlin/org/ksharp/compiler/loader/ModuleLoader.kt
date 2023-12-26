@@ -6,6 +6,10 @@ import org.ksharp.common.ErrorCode
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.new
+import org.ksharp.doc.DocModule
+import org.ksharp.doc.readDocModule
+import org.ksharp.doc.toDocModule
+import org.ksharp.doc.writeTo
 import org.ksharp.ir.serializer.readIrModule
 import org.ksharp.ir.serializer.writeTo
 import org.ksharp.ir.toIrModule
@@ -38,6 +42,13 @@ class Module(
     val info: ModuleInfo,
     private val sources: SourceLoader
 ) {
+    val documentation: DocModule by lazy {
+        sources.binaryLoad(name.toModulePath("kdoc"))!!
+            .bufferView {
+                it.readDocModule()
+            }
+    }
+
     val executable: ModuleExecutable by lazy {
         sources.binaryLoad(name.toModulePath("ksc"))!!
             .bufferView {
@@ -69,10 +80,14 @@ class ModuleLoader(
             }.flatMap {
                 it.toCodeModule(preludeModule, moduleInfoLoader).let { codeModule ->
                     if (codeModule.errors.isEmpty()) {
-                        sources.outputStream(codeModule.name.toModulePath("ksm")).let { stream ->
+                        sources.outputStream(codeModule.name.toModulePath("kdoc")).use { stream ->
+                            it.toDocModule(codeModule.module)
+                                .writeTo(stream)
+                        }
+                        sources.outputStream(codeModule.name.toModulePath("ksm")).use { stream ->
                             codeModule.module.writeTo(stream)
                         }
-                        sources.outputStream(codeModule.name.toModulePath("ksc")).let { stream ->
+                        sources.outputStream(codeModule.name.toModulePath("ksc")).use { stream ->
                             codeModule.toIrModule().writeTo(stream)
                         }
                         Either.Right(Module(codeModule.name, codeModule.module, sources))

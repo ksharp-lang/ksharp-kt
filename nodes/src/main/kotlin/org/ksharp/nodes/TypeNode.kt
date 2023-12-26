@@ -55,6 +55,7 @@ data class TypeDeclarationNodeLocations(
 ) : NodeLocations
 
 data class TraitFunctionNode(
+    val annotations: List<AnnotationNode>?,
     val name: String,
     val type: NodeData,
     override val location: Location,
@@ -170,6 +171,22 @@ data class FunctionTypeNode(
 
     override val representation: String
         get() = "(${params.joinToString(" -> ") { it.representation }})"
+
+    val arity: Int
+        get() = params.size.let { sizeArgs ->
+            when (sizeArgs) {
+                2 -> {
+                    val first = params.first()
+                    when {
+                        first is UnitTypeNode -> 0
+                        first is ConcreteTypeNode && first.name == "Unit" -> 0
+                        else -> 1
+                    }
+                }
+
+                else -> sizeArgs - 1
+            }
+        }
 }
 
 data class TupleTypeNode(
