@@ -41,7 +41,7 @@ class ModuleLoaderTest : StringSpec({
                 it.documentation.documentation("ten/0").shouldBe("Number 10")
                 it.documentation.representation("ten/0").shouldBe("Unit -> (Num numeric<Long>)")
                 Files.exists(binaries.resolve("ten.ksm")).shouldBeTrue()
-                Files.exists(binaries.resolve("ten.kdoc")).shouldBeTrue()
+                Files.exists(binaries.resolve("ten.ksd")).shouldBeTrue()
                 Files.exists(binaries.resolve("ten.ksc")).shouldBeTrue()
             }
 
