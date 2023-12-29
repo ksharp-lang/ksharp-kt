@@ -1,6 +1,7 @@
 package org.ksharp.doc
 
 import org.ksharp.common.io.bufferView
+import org.ksharp.module.prelude.types.Numeric
 
 private val preludeDocModuleFile: DocModule
     get() =
@@ -14,58 +15,29 @@ private val preludeDocModuleFile: DocModule
 private val kernelDocModule: DocModule
     get() =
         docModule(
-            listOf(
-                Type(
-                    "Unit",
-                    "()",
-                    "The **Unit** type is the terminal object in the category of types"
-                ),
-                Type(
-                    "Char",
-                    "char<Char>",
-                    "Datatype representing a single Unicode character"
-                ),
-                Type(
-                    "Byte",
-                    "(Num numeric<Byte>)",
-                    "Signed 8-bit integer"
-                ),
-                Type(
-                    "Short",
-                    "(Num numeric<Short>)",
-                    "Signed 16-bit integer"
-                ),
-                Type(
-                    "Int",
-                    "(Num numeric<Int>)",
-                    "Signed 32-bit integer"
-                ),
-                Type(
-                    "Long",
-                    "(Num numeric<Long>)",
-                    "Signed 64-bit integer. *This is the default type for integer numbers*"
-                ),
-                Type(
-                    "BigInt",
-                    "(Num numeric<BigInt>)",
-                    "Signed arbitrary-precision integer"
-                ),
-                Type(
-                    "Float",
-                    "(Num numeric<Float>)",
-                    "Signed 32-bit floating point number."
-                ),
-                Type(
-                    "Double",
-                    "(Num numeric<Double>)",
-                    "Signed 64-bit floating point number. *This is the default type for integer numbers*"
-                ),
-                Type(
-                    "BigDecimal",
-                    "(Num numeric<BigDecimal>)",
-                    "Signed arbitrary-precision floating point number"
+            sequenceOf(
+                Numeric.entries.asSequence().map {
+                    Type(
+                        it.name,
+                        "(Num numeric<${it.name}>)",
+                        "Signed ${it.size}-bit ${if (it.isInteger) "integer" else "floating point number"}"
+                    )
+                },
+                sequenceOf(
+                    Type(
+                        "Unit",
+                        "()",
+                        "The **Unit** type is the terminal object in the category of types"
+                    ),
+                    Type(
+                        "Char",
+                        "char<Char>",
+                        "Datatype representing a single Unicode character"
+                    )
                 )
-            ), emptyList(), emptyList()
+            ).flatten().toList(),
+            emptyList(),
+            emptyList()
         )
 
 val preludeDocModule: DocModule

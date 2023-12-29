@@ -1,14 +1,68 @@
 package org.ksharp.doc
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import org.ksharp.doc.transpiler.DocusaurusTranspilerPlugin
+import org.ksharp.doc.transpiler.FileProducer
 import org.ksharp.doc.transpiler.FileSystemProducer
 import org.ksharp.doc.transpiler.transpile
 import java.io.File
 import java.nio.file.Files
 
+class MemoryFileProducer : FileProducer {
+    val content = mutableMapOf<String, String>()
+
+    override fun write(path: String, content: String) {
+        this.content[path] = content
+    }
+}
+
 class DocToMarkdownTest : StringSpec({
-    "prelude docModule to markdown" {
+    "Type to markdown" {
+        val module = docModule(
+            listOf(
+                Type(
+                    "Int",
+                    "type Int = Int",
+                    "Int is a 32-bit integer type"
+                )
+            ),
+            emptyList(),
+            emptyList()
+        )
+        val producer = MemoryFileProducer()
+        module.transpile("test", DocusaurusTranspilerPlugin(producer))
+        producer.content.shouldBe(
+            mapOf(
+                "test/_category_.yml" to "className: hidden",
+                "test.mdx" to """
+                    ---
+                    title: test
+                    ---
+
+
+                    ## Types
+
+                    ### Int
+
+                    ```haskell
+                    type Int = Int
+                    ```
+
+                    Int is a 32-bit integer type
+
+
+                    ## Traits
+
+
+                    ## Functions
+                    
+                    
+                """.trimIndent()
+            )
+        )
+    }
+    "Create markdown for prelude module" {
         val prelude = preludeDocModule
         val root = File("docOutput").absoluteFile.toPath()
         Files.createDirectories(root)
