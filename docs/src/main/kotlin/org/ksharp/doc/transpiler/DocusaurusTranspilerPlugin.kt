@@ -3,34 +3,33 @@ package org.ksharp.doc.transpiler
 import org.ksharp.doc.DocAbstraction
 import org.ksharp.doc.Trait
 import org.ksharp.doc.Type
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.io.path.writeText
 
-private fun String.cleanMarkdownText(): String =
-    this.replace("<", "&lt;").replace(">", "&gt;")
+private val String.markdownText: String
+    get() =
+        this.replace("<", "&lt;").replace(">", "&gt;")
 
-private fun String.representationMarkdown(): String =
-    """```haskell
+private val String.representationMarkdown: String
+    get() =
+        """```haskell
         |${this}
         |```
     """.trimMargin()
 
-class DocusaurusTranspilerPlugin(private val root: Path) : DocModuleTranspilerPlugin {
+class DocusaurusTranspilerPlugin(private val fileProducer: FileProducer) : DocModuleTranspilerPlugin {
     override fun beginModule(name: String): DocModuleTranspiler {
-        return DocusaurusModuleTranspiler(this, root, name)
+        return DocusaurusModuleTranspiler(this, fileProducer, name)
     }
 
 }
 
 class DocusaurusModuleTranspiler(
     private val plugin: DocModuleTranspilerPlugin,
-    private val root: Path,
+    private val fileProducer: FileProducer,
     private val module: String
 ) : DocModuleTranspiler {
     private val content = StringBuilder().apply {
         appendLine("---")
-        appendLine("title: ${module.cleanMarkdownText()}")
+        appendLine("title: $module")
         appendLine("---")
         appendLine()
     }
@@ -50,10 +49,8 @@ class DocusaurusModuleTranspiler(
             appendLine("## Traits")
             appendLine()
         }
-        val traitRoot = root.resolve(module)
-        Files.createDirectories(traitRoot)
-        traitRoot.resolve("_category_.yml").writeText("className: hidden", Charsets.UTF_8)
-        return DocusaurusTraitsTranspiler(this, traitRoot, module, content)
+        fileProducer.write("$module/_category_.yml", "className: hidden")
+        return DocusaurusTraitsTranspiler(this, fileProducer, module, content)
     }
 
     override fun beginAbstractions(): DocModuleAbstractionsTranspiler {
@@ -66,8 +63,7 @@ class DocusaurusModuleTranspiler(
     }
 
     override fun endModule(): DocModuleTranspilerPlugin {
-        val modulePath = root.resolve("$module.mdx")
-        modulePath.writeText(content.toString(), Charsets.UTF_8)
+        fileProducer.write("$module.mdx", content.toString())
         return plugin
     }
 
@@ -80,11 +76,11 @@ class DocusaurusTypesTranspiler(
     DocModuleTypesTranspiler {
     override fun appendType(type: Type) {
         content.apply {
-            appendLine("### ${type.name.cleanMarkdownText()}")
+            appendLine("### ${type.name.markdownText}")
             appendLine()
-            appendLine(type.representation.representationMarkdown())
+            appendLine(type.representation.representationMarkdown)
             appendLine()
-            appendLine(type.documentation.cleanMarkdownText())
+            appendLine(type.documentation.markdownText)
             appendLine()
         }
     }
@@ -95,29 +91,29 @@ class DocusaurusTypesTranspiler(
 
 class DocusaurusTraitsTranspiler(
     private val moduleTranspiler: DocModuleTranspiler,
-    private val traitRoot: Path,
+    private val fileProducer: FileProducer,
     private val module: String,
     private val content: StringBuilder
 ) : DocModuleTraitsTranspiler {
     override fun appendTrait(type: Trait): DocModuleTraitTranspiler {
         val traitContent = StringBuilder().apply {
             appendLine("---")
-            appendLine("title: ${type.name.cleanMarkdownText()}")
+            appendLine("title: ${type.name}")
             appendLine("---")
             appendLine()
-            appendLine(type.documentation.cleanMarkdownText())
+            appendLine(type.documentation.markdownText)
             appendLine()
             appendLine("## Methods")
             appendLine()
         }
         content.apply {
-            appendLine("### ${type.name.cleanMarkdownText()}")
+            appendLine("### ${type.name.markdownText}")
             appendLine()
-            appendLine(type.documentation.cleanMarkdownText())
+            appendLine(type.documentation.markdownText)
             appendLine("[details]($module/${type.name})")
             appendLine()
         }
-        return DocusaurusTraitTranspiler(this, traitRoot, type.name, traitContent)
+        return DocusaurusTraitTranspiler(this, fileProducer, module, type.name, traitContent)
     }
 
     override fun endTraits(): DocModuleTranspiler = moduleTranspiler
@@ -127,24 +123,24 @@ class DocusaurusTraitsTranspiler(
 
 class DocusaurusTraitTranspiler(
     private val traitsTranspiler: DocModuleTraitsTranspiler,
-    private val traitRoot: Path,
+    private val fileProducer: FileProducer,
+    private val module: String,
     private val name: String,
     private val content: StringBuilder
 ) : DocModuleTraitTranspiler {
     override fun appendTraitMethod(function: DocAbstraction) {
         content.apply {
-            appendLine("### ${function.name.cleanMarkdownText()}")
+            appendLine("### ${function.name.markdownText}")
             appendLine()
-            appendLine(function.representation.representationMarkdown())
+            appendLine(function.representation.representationMarkdown)
             appendLine()
-            appendLine(function.documentation.cleanMarkdownText())
+            appendLine(function.documentation.markdownText)
             appendLine()
         }
     }
 
     override fun endTrait(): DocModuleTraitsTranspiler {
-        val modulePath = traitRoot.resolve("$name.mdx")
-        modulePath.writeText(content.toString(), Charsets.UTF_8)
+        fileProducer.write("$module/$name.mdx", content.toString())
         return traitsTranspiler
     }
 
@@ -157,11 +153,11 @@ class DocusaurusAbstractionsTranspiler(
     DocModuleAbstractionsTranspiler {
     override fun appendAbstraction(abstraction: DocAbstraction) {
         content.apply {
-            appendLine("#### ${abstraction.name.cleanMarkdownText()}")
+            appendLine("#### ${abstraction.name.markdownText}")
             appendLine()
-            appendLine(abstraction.representation.representationMarkdown())
+            appendLine(abstraction.representation.representationMarkdown)
             appendLine()
-            appendLine(abstraction.documentation.cleanMarkdownText())
+            appendLine(abstraction.documentation.markdownText)
             appendLine()
         }
     }
