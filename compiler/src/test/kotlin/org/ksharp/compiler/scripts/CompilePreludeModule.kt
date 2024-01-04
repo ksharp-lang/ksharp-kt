@@ -1,7 +1,10 @@
 package org.ksharp.compiler.scripts
 
 import io.kotest.core.spec.style.StringSpec
-import org.ksharp.compiler.moduleInfo
+import org.ksharp.compiler.codeModule
+import org.ksharp.compiler.docModule
+import org.ksharp.compiler.moduleNode
+import org.ksharp.doc.writeTo
 import org.ksharp.module.bytecode.writeTo
 import org.ksharp.module.prelude.kernelModule
 import org.ksharp.test.shouldBeRight
@@ -14,8 +17,9 @@ class CompilePreludeModule : StringSpec({
         val moduleReader = String.Companion::class.java
             .getResourceAsStream("/org/ksharp/module/prelude.ks")!!
             .bufferedReader(StandardCharsets.UTF_8)
-        val moduleInfo = moduleReader.moduleInfo("prelude.ks", kernelModule)
-        moduleInfo
+        val moduleInfo = moduleReader.moduleNode("prelude.ks")
+        val codeModule = moduleInfo.codeModule(kernelModule)
+        codeModule
             .shouldBeRight()
             .map {
                 it.module
@@ -31,7 +35,11 @@ class CompilePreludeModule : StringSpec({
                         m.impls.onEach(::println)
                     }
                     .writeTo(FileOutputStream("prelude.ksm"))
-            }
 
+                moduleInfo.docModule(it.module)
+                    .map { docModule ->
+                        docModule.writeTo(FileOutputStream("prelude.ksd"))
+                    }
+            }
     }
 })

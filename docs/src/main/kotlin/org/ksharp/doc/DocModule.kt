@@ -1,13 +1,17 @@
 package org.ksharp.doc
 
+import org.intellij.lang.annotations.Language
+
 data class DocAbstraction(
     val name: String,
     val representation: String,
+    @Language("markdown")
     val documentation: String = ""
 )
 
 data class Trait(
     val name: String,
+    @Language("markdown")
     val documentation: String = "",
     val abstractions: List<DocAbstraction>,
     val impls: List<String>
@@ -16,6 +20,7 @@ data class Trait(
 data class Type(
     val name: String,
     val representation: String,
+    @Language("markdown")
     val documentation: String = "",
 )
 

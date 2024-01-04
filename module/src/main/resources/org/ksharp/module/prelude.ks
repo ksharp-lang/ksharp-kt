@@ -76,6 +76,9 @@ native pub mapOf p
 emptyMap k v :: () -> (Map k v)
 native pub emptyMap
 
+@doc("""
+    Allow add two types producing a new type
+""")
 @name("prelude::sum" for="ir")
 trait Add a =
     (+) :: a -> a -> a
