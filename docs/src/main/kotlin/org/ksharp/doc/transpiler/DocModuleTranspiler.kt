@@ -44,18 +44,21 @@ fun interface DocModuleTranspilerPlugin {
 fun DocModule.transpile(name: String, plugin: DocModuleTranspilerPlugin) {
     plugin.beginModule(name)
         .apply {
-            beginTypes().apply {
-                types.forEach(::appendType)
-            }.endTypes()
-            beginTraits().apply {
-                traits.forEach {
-                    appendTrait(it).apply {
-                        it.abstractions.forEach(::appendTraitMethod)
-                    }.endTrait()
-                }
-            }.endTraits()
-            beginAbstractions().apply {
-                abstractions.forEach(::appendAbstraction)
-            }.endAbstractions()
+            if (types.isNotEmpty())
+                beginTypes().apply {
+                    types.forEach(::appendType)
+                }.endTypes()
+            if (traits.isNotEmpty())
+                beginTraits().apply {
+                    traits.forEach {
+                        appendTrait(it).apply {
+                            it.abstractions.forEach(::appendTraitMethod)
+                        }.endTrait()
+                    }
+                }.endTraits()
+            if (abstractions.isNotEmpty())
+                beginAbstractions().apply {
+                    abstractions.forEach(::appendAbstraction)
+                }.endAbstractions()
         }.endModule()
 }
