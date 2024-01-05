@@ -98,7 +98,7 @@ class CompilerTestModuleInfo : StringSpec({
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location(Line(1) to Offset(6), Line(value = 1) to Offset(value = 18)),
-                        "function" to "no-exist-fun (Num numeric<Long>)"
+                        "function" to "no-exist-fun Long"
                     )
                 )
             )
