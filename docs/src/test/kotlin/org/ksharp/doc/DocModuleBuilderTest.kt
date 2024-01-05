@@ -33,7 +33,7 @@ class DocModuleBuilderTest : StringSpec({
                     listOf(
                         DocAbstraction(
                             "sum/2",
-                            "(Add a) -> (Add a) -> (Add a)",
+                            "(Num a) -> (Num a) -> (Num a)",
                             ""
                         )
                     )
@@ -53,7 +53,7 @@ class DocModuleBuilderTest : StringSpec({
                     listOf(
                         DocAbstraction(
                             "sum/2",
-                            "(Add a) -> (Add a) -> (Add a)",
+                            "(Num a) -> (Num a) -> (Num a)",
                             "Sum two values"
                         )
                     )
