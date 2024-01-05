@@ -30,7 +30,7 @@ class AbstractionHoverActionTest : StringSpec({
                 setContents(
                     MarkupContent(
                         MarkupKind.PLAINTEXT,
-                        "sum/2 :: ((Add a) -> (Add a) -> (Add a))"
+                        "sum/2 :: ((Num a) -> (Num a) -> (Num a))"
                     )
                 )
             }
