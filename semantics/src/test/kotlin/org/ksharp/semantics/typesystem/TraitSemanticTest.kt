@@ -197,12 +197,24 @@ class TraitSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 val paramA = it.typeSystem.newNamedParameter("a")
-                val addA = it.typeSystem["Add"].valueOrNull!!.cast<TraitType>().toParametricType()
+                val addA = it.typeSystem["Num"].valueOrNull!!.cast<TraitType>().toParametricType()
 
                 it.typeSystem
                     .getTraits()
                     .shouldNotBeEmpty()
-                    .shouldDefine(mapOf("Sum::sum/2" to true))
+                    .shouldDefine(
+                        mapOf(
+                            "Sum::sum/2" to true,
+                            "Num::(+)/2" to true,
+                            "Num::(-)/2" to true,
+                            "Num::(*)/2" to true,
+                            "Num::(/)/2" to true,
+                            "Num::(%)/2" to true,
+                            "Num::(**)/2" to true,
+                            "Num::signum/1" to true,
+                            "Num::negate/1" to true
+                        )
+                    )
                 val paramAType = TypeSemanticInfo(type = Either.Right(paramA))
                 val expectedAbstractions = listOf(
                     AbstractionNode(
