@@ -11,33 +11,56 @@ import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
 import org.ksharp.typesystem.serializer.registerCatalog
 import org.ksharp.typesystem.typeSystem
+import org.ksharp.typesystem.types.TraitTypeFactory
 import org.ksharp.typesystem.types.parametricType
+import org.ksharp.typesystem.types.trait
 import org.ksharp.typesystem.types.type
 
-private fun TypeSystemBuilder.number(alias: String, type: Numeric) =
-    type(setOf(nameAttribute(mapOf("ir" to "num"))), alias) {
-        parametricType("Num") {
-            numeric(type)
-        }
+private fun TypeSystemBuilder.number(type: Numeric) =
+    type(setOf(nameAttribute(mapOf("ir" to "num"))), type.name) {
+        numeric(type)
+    }
+
+private fun TraitTypeFactory.binaryOp(name: String) =
+    method(name, true) {
+        parameter("a")
+        parameter("a")
+        parameter("a")
     }
 
 private fun createKernelTypeSystem() = typeSystem {
     registerCatalog("prelude") {
         TypeSerializers.entries[it]
     }
+    trait(setOf(nameAttribute(mapOf("ir" to "prelude::num"))), "Num", "a") {
+        binaryOp("(+)")
+        binaryOp("(-)")
+        binaryOp("(*)")
+        binaryOp("(/)")
+        binaryOp("(%)")
+        binaryOp("(**)")
+        method("signum", true) {
+            parameter("a")
+            parameter("a")
+        }
+        method("negate", true) {
+            parameter("a")
+            parameter("a")
+        }
+    }
     type(NoAttributes, "Unit")
     type(NoAttributes, "Char") { Either.Right(charType) }
     parametricType(setOf(nameAttribute(mapOf("ir" to "num"))), "Num") {
         parameter("a")
     }
-    number("Byte", Numeric.Byte)
-    number("Short", Numeric.Short)
-    number("Int", Numeric.Int)
-    number("Long", Numeric.Long)
-    number("BigInt", Numeric.BigInt)
-    number("Float", Numeric.Float)
-    number("Double", Numeric.Double)
-    number("BigDecimal", Numeric.BigDecimal)
+    number(Numeric.Byte)
+    number(Numeric.Short)
+    number(Numeric.Int)
+    number(Numeric.Long)
+    number(Numeric.BigInt)
+    number(Numeric.Float)
+    number(Numeric.Double)
+    number(Numeric.BigDecimal)
 }
 
 internal val kernelTypeSystem = createKernelTypeSystem()

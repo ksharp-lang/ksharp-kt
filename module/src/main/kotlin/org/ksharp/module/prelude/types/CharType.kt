@@ -36,7 +36,7 @@ class CharType : Type {
 
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()
-    override val representation: String = "char<Char>"
+    override val representation: String = "Char"
 
     override fun toString(): String = representation
 

@@ -1,8 +1,17 @@
 package org.ksharp.module.prelude
 
 import org.ksharp.common.io.bufferView
+import org.ksharp.module.Impl
 import org.ksharp.module.ModuleInfo
 import org.ksharp.module.bytecode.readModuleInfo
+import org.ksharp.module.prelude.types.Numeric
+import org.ksharp.typesystem.TypeSystem
+
+private fun TypeSystem.preludeImpls() =
+    Numeric.entries
+        .asSequence()
+        .map { Impl("Num", this[it.name].valueOrNull!!) }
+        .toSet()
 
 /**
  * Kernel module contains the minimal types and functions required to compile ks code
@@ -14,7 +23,7 @@ private fun createKernelModule(): ModuleInfo = kernelTypeSystem
             mapOf(),
             typeSystem = ts,
             functions = mapOf(),
-            impls = setOf(),
+            impls = ts.preludeImpls()
         )
     }
 
@@ -25,6 +34,9 @@ val preludeModule: ModuleInfo
         String.Companion::class.java.getResourceAsStream("/org/ksharp/module/prelude.ksm")!!
             .use { input ->
                 input.bufferView {
-                    it.readModuleInfo()
+                    val kernelTypeSystem = kernelTypeSystem.value
+                    it.readModuleInfo(kernelTypeSystem).let { module ->
+                        module.copy(impls = module.impls + kernelTypeSystem.preludeImpls())
+                    }
                 }
             }

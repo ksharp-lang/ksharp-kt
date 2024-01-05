@@ -27,7 +27,7 @@ class ModuleDependenciesInferenceTest : StringSpec({
             }
             .shouldBeRight()
             .shouldInferredTypesBe(
-                "sum :: (Unit -> (Num numeric<Long>))"
+                "sum :: (Unit -> Long)"
             )
     }
     "Inference type instance application for external module" {
@@ -91,7 +91,7 @@ class ModuleDependenciesInferenceTest : StringSpec({
             }
             .shouldBeRight()
             .shouldInferredImplAbstractionsTypesBe(
-                "m.Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
+                "m.Op for Num numeric<Int> :: sum :: (Int -> Int -> Int)"
             )
     }
 })

@@ -1,5 +1,6 @@
 package org.ksharp.module.prelude.types
 
+import org.ksharp.common.Either
 import org.ksharp.common.HandlePromise
 import org.ksharp.module.prelude.preludeTypeSystem
 import org.ksharp.module.prelude.serializer.TypeSerializers
@@ -12,7 +13,6 @@ import org.ksharp.typesystem.solver.Solver
 import org.ksharp.typesystem.solver.Solvers
 import org.ksharp.typesystem.substitution.Substitution
 import org.ksharp.typesystem.substitution.Substitutions
-import org.ksharp.typesystem.types.ParametricTypeFactory
 import org.ksharp.typesystem.types.ParametricTypeParam
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.TypeUnification
@@ -51,10 +51,10 @@ data class NumericType internal constructor(
 
     override val compound: Boolean = false
     override val terms: Sequence<Type> = emptySequence()
-    override val representation: String = "numeric<${type}>"
+    override val representation: String = type.name
 
     override fun toString(): String = representation
     override fun new(attributes: Set<Attribute>): Type = this
 }
 
-fun ParametricTypeFactory.numeric(type: Numeric) = this.add(NumericType(type))
+fun numeric(type: Numeric) = Either.Right(NumericType(type))

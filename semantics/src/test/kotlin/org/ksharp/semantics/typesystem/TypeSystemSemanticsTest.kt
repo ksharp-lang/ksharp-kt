@@ -92,7 +92,7 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
-            typeSystem["Int"].map { it.representation }.shouldBeRight("(Num numeric<Int>)")
+            typeSystem["Int"].map { it.representation }.shouldBeRight("Int")
             typeSystem["Integer"].map { it.representationWithVisibility }
                 .shouldBeRight("Public-Int")
         }
@@ -116,7 +116,7 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics(preludeModule).apply {
             errors.shouldBeEmpty()
-            typeSystem["Int"].map { it.representation }.shouldBeRight("(Num numeric<Int>)")
+            typeSystem["Int"].map { it.representation }.shouldBeRight("Int")
             typeSystem["Integer"].map { it.representationWithVisibility }
                 .shouldBeRight("Public-Int")
         }

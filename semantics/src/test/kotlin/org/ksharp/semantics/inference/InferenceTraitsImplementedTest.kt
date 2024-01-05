@@ -32,7 +32,8 @@ class InferenceTraitsImplementedTest : StringSpec({
                 it.traitsImplemented(preludeModule.typeSystem.newParameter())
                     .shouldBe(
                         listOf(
-                            it.typeSystem["Sum"].valueOrNull!!
+                            it.typeSystem["Sum"].valueOrNull!!,
+                            it.typeSystem["Num"].valueOrNull!!
                         )
                     )
             }
@@ -60,7 +61,7 @@ class InferenceTraitsImplementedTest : StringSpec({
             .toSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                it.traitsImplemented(preludeModule.typeSystem.newParameter())
+                it.traitsImplemented(preludeModule.typeSystem["Int"].valueOrNull!!)
                     .shouldBe(
                         listOf(
                             it.typeSystem["Sum"].valueOrNull!!
