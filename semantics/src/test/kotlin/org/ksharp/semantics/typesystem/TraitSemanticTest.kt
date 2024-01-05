@@ -105,7 +105,19 @@ class TraitSemanticTest : StringSpec({
             .map {
                 it.typeSystem
                     .getTraits()
-                    .shouldDefine(mapOf("Sum::sum/2" to true))
+                    .shouldDefine(
+                        mapOf(
+                            "Sum::sum/2" to true,
+                            "Num::(+)/2" to true,
+                            "Num::(-)/2" to true,
+                            "Num::(*)/2" to true,
+                            "Num::(/)/2" to true,
+                            "Num::(%)/2" to true,
+                            "Num::(**)/2" to true,
+                            "Num::signum/1" to true,
+                            "Num::negate/1" to true
+                        )
+                    )
                     .map { t -> t.representation }
             }
             .shouldBeRight(
@@ -113,6 +125,17 @@ class TraitSemanticTest : StringSpec({
                     """
                     trait Sum a =
                         sum :: a -> a -> a
+                    """.trimIndent(),
+                    """
+                    trait Num a =
+                        (+) :: a -> a -> a
+                        (-) :: a -> a -> a
+                        (*) :: a -> a -> a
+                        ( :: a -> a -> a
+                        (%) :: a -> a -> a
+                        (**) :: a -> a -> a
+                        signum :: a -> a
+                        negate :: a -> a
                     """.trimIndent()
                 )
             )
@@ -127,7 +150,19 @@ class TraitSemanticTest : StringSpec({
             .map {
                 it.typeSystem
                     .getTraits()
-                    .shouldDefine(mapOf("Sum::sum/2" to false))
+                    .shouldDefine(
+                        mapOf(
+                            "Sum::sum/2" to false,
+                            "Num::(+)/2" to true,
+                            "Num::(-)/2" to true,
+                            "Num::(*)/2" to true,
+                            "Num::(/)/2" to true,
+                            "Num::(%)/2" to true,
+                            "Num::(**)/2" to true,
+                            "Num::signum/1" to true,
+                            "Num::negate/1" to true
+                        )
+                    )
                     .map { t -> t.representation }
             }
             .shouldBeRight(
@@ -135,6 +170,17 @@ class TraitSemanticTest : StringSpec({
                     """
                     trait Sum a =
                         sum :: a -> a -> a
+                    """.trimIndent(),
+                    """
+                    trait Num a =
+                        (+) :: a -> a -> a
+                        (-) :: a -> a -> a
+                        (*) :: a -> a -> a
+                        ( :: a -> a -> a
+                        (%) :: a -> a -> a
+                        (**) :: a -> a -> a
+                        signum :: a -> a
+                        negate :: a -> a
                     """.trimIndent()
                 )
             )
@@ -151,12 +197,24 @@ class TraitSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 val paramA = it.typeSystem.newNamedParameter("a")
-                val addA = it.typeSystem["Add"].valueOrNull!!.cast<TraitType>().toParametricType()
+                val addA = it.typeSystem["Num"].valueOrNull!!.cast<TraitType>().toParametricType()
 
                 it.typeSystem
                     .getTraits()
                     .shouldNotBeEmpty()
-                    .shouldDefine(mapOf("Sum::sum/2" to true))
+                    .shouldDefine(
+                        mapOf(
+                            "Sum::sum/2" to true,
+                            "Num::(+)/2" to true,
+                            "Num::(-)/2" to true,
+                            "Num::(*)/2" to true,
+                            "Num::(/)/2" to true,
+                            "Num::(%)/2" to true,
+                            "Num::(**)/2" to true,
+                            "Num::signum/1" to true,
+                            "Num::negate/1" to true
+                        )
+                    )
                 val paramAType = TypeSemanticInfo(type = Either.Right(paramA))
                 val expectedAbstractions = listOf(
                     AbstractionNode(

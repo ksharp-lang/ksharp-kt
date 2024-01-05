@@ -35,12 +35,12 @@ private class FunctionLookupImpl : FunctionLookup {
     private val cache = cacheOf<CallScope, IrTopLevelSymbol>()
 
     private var irNodeFactory = mapOf(
-        "prelude::sum::(+)/2" to binaryExpressionFunction("(+)", ::IrSum),
-        "prelude::sub::(-)/2" to binaryExpressionFunction("(-)", ::IrSub),
-        "prelude::mul::(*)/2" to binaryExpressionFunction("(-)", ::IrMul),
-        "prelude::div::(/)/2" to binaryExpressionFunction("(-)", ::IrDiv),
-        "prelude::pow::(**)/2" to binaryExpressionFunction("(-)", ::IrPow),
-        "prelude::mod::(%)/2" to binaryExpressionFunction("(-)", ::IrMod),
+        "prelude::num::(+)/2" to binaryExpressionFunction("(+)", ::IrSum),
+        "prelude::num::(-)/2" to binaryExpressionFunction("(-)", ::IrSub),
+        "prelude::num::(*)/2" to binaryExpressionFunction("(*)", ::IrMul),
+        "prelude::num::(/)/2" to binaryExpressionFunction("(/)", ::IrDiv),
+        "prelude::num::(**)/2" to binaryExpressionFunction("(**)", ::IrPow),
+        "prelude::num::(%)/2" to binaryExpressionFunction("(%)", ::IrMod),
     )
 
     private fun findCustomFunction(call: CallScope): IrTopLevelSymbol? {

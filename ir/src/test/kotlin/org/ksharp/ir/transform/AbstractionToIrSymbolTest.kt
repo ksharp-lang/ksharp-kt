@@ -174,7 +174,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                 """.trimIndent(), IrCall(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 null,
-                CallScope("sum/2", traitScopeName = "prelude::sum", true),
+                CallScope("sum/2", traitScopeName = "prelude::num", true),
                 listOf(
                     IrInteger(
                         1,
@@ -374,27 +374,7 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
     val functionLookup = FunctionLookup { _, _ -> null }
     "Check a custom spec" {
         createSpec(
-            "Constant IrCall expression",
-            """
-                    fn = sum 1 2
-                    
-                    sum a b = a + b
-                """.trimIndent(), IrCall(
-                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
-                null,
-                CallScope("sum/2", "prelude::sum", true),
-                listOf(
-                    IrInteger(
-                        1,
-                        Location(Line(1) to Offset(9), Line(1) to Offset(10))
-                    ),
-                    IrInteger(
-                        2,
-                        Location(Line(1) to Offset(11), Line(1) to Offset(12))
-                    )
-                ),
-                Location(Line(1) to Offset(5), Line(1) to Offset(8))
-            )
+            "IrSum expression", """fn = 1 + 2""", arithmeticExpected(::IrSum)
         ).let { (_, code, expected) ->
             code.getFirstAbstraction()
                 .toIrSymbol(functionLookup)

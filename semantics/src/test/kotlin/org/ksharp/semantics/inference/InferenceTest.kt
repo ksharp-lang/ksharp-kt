@@ -121,7 +121,7 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         ).inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("(Unit -> (Num numeric<Long>))")
+                .shouldBeRight("(Unit -> Long)")
         }
     }
     "Inference type over operators with substitution" {
@@ -152,7 +152,7 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         ).inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("(Unit -> (Num numeric<Long>))")
+                .shouldBeRight("(Unit -> Long)")
         }
     }
     "Inference type over operators and variables with substitution" {
@@ -186,7 +186,7 @@ class InferenceTest : StringSpec({
         )
         abstraction.inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("((Num numeric<Long>) -> (Num numeric<Long>))")
+                .shouldBeRight("(Long -> Long)")
         }
         abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
             .arguments.first().info.getInferredType(Location.NoProvided)
@@ -223,7 +223,7 @@ class InferenceTest : StringSpec({
         )
         abstraction.inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("((Num numeric<Int>) -> (Num numeric<Int>))")
+                .shouldBeRight("(Int -> Int)")
         }
         abstraction.expression.cast<ApplicationNode<SemanticInfo>>()
             .arguments.first().info.getInferredType(Location.NoProvided)
@@ -265,7 +265,7 @@ class InferenceTest : StringSpec({
         )
         abstraction.inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("(Unit -> (Num numeric<Int>))")
+                .shouldBeRight("(Unit -> Int)")
         }
     }
     "Inference let binding" {
@@ -309,7 +309,7 @@ class InferenceTest : StringSpec({
         )
         abstraction.inferType("", module).apply {
             map { it.representation }
-                .shouldBeRight("(Unit -> (Num numeric<Long>))")
+                .shouldBeRight("(Unit -> Long)")
         }
     }
     "Inference test function doesn't exists" {
@@ -336,7 +336,7 @@ class InferenceTest : StringSpec({
             shouldBeLeft(
                 InferenceErrorCode.FunctionNotFound.new(
                     Location.NoProvided,
-                    "function" to "not-found (Num numeric<Int>)"
+                    "function" to "not-found Int"
                 )
             )
         }
@@ -379,7 +379,7 @@ class InferenceTest : StringSpec({
             shouldBeLeft(
                 InferenceErrorCode.FunctionNotFound.new(
                     Location.NoProvided,
-                    "function" to "not-found (Num numeric<Long>)"
+                    "function" to "not-found Long"
                 )
             )
         }
@@ -429,7 +429,7 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         ).inferType("", module)
             .map { it.representation }
-            .shouldBeRight("(Unit -> (List (Num numeric<Byte>)))")
+            .shouldBeRight("(Unit -> (List Byte))")
     }
     "mapOf inference" {
         val module = createInferenceInfo(ts)
@@ -473,7 +473,7 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         ).inferType("", module)
             .map { it.representation }
-            .shouldBeRight("(Unit -> (Map String (Num numeric<Byte>)))")
+            .shouldBeRight("(Unit -> (Map String Byte))")
     }
     "setOf inference" {
         val module = createInferenceInfo(ts)
@@ -520,7 +520,7 @@ class InferenceTest : StringSpec({
             Location.NoProvided
         ).inferType("", module)
             .map { it.representation }
-            .shouldBeRight("(Unit -> (Set (Num numeric<Byte>)))")
+            .shouldBeRight("(Unit -> (Set Byte))")
     }
     "tupleOf inference" {
         val module = createInferenceInfo(ts)
@@ -568,7 +568,7 @@ class InferenceTest : StringSpec({
         )
         abstraction.inferType("", module)
             .map { it.representation }
-            .shouldBeRight("(Unit -> ((Num numeric<Byte>), (Num numeric<Byte>)))")
+            .shouldBeRight("(Unit -> (Byte, Byte))")
         abstraction.expression.info.cast<ApplicationSemanticInfo>()
             .function!!
             .attributes.filterIsInstance<NameAttribute>()

@@ -67,8 +67,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference module 2" {
@@ -78,8 +78,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference module - function not found" {
@@ -92,7 +92,7 @@ class InferenceWithParsingTest : StringSpec({
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "sum2 (Num numeric<Long>)"
+                        "function" to "sum2 Long"
                     )
                 )
             )
@@ -118,7 +118,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference let expression - tuple variable binding" {
@@ -128,7 +128,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference let expression - tuple variable binding 2" {
@@ -138,7 +138,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference let expression - not a tuple binding" {
@@ -151,7 +151,7 @@ class InferenceWithParsingTest : StringSpec({
                 listOf(
                     InferenceErrorCode.NoATuple.new(
                         Location.NoProvided,
-                        "type" to "(Num numeric<Long>)"
+                        "type" to "Long"
                     )
                 )
             )
@@ -166,7 +166,7 @@ class InferenceWithParsingTest : StringSpec({
                 listOf(
                     InferenceErrorCode.IncompatibleType.new(
                         Location.NoProvided,
-                        "type" to "((Num numeric<Long>), (Num numeric<Long>), (Num numeric<Long>))"
+                        "type" to "(Long, Long, Long)"
                     )
                 )
             )
@@ -178,7 +178,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference let expression - no a list" {
@@ -220,7 +220,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference let expression - binding with guards" {
@@ -233,8 +233,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "isEven :: ((Num numeric<Long>) -> True)",
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "isEven :: (Long -> True)",
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference let expression - list binding used as guard" {
@@ -269,8 +269,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "ten :: (Unit -> (Num numeric<Long>))",
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "ten :: (Unit -> Long)",
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference match expression 2" {
@@ -280,7 +280,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "fn :: (Unit -> (Num numeric<Long>))"
+                "fn :: (Unit -> Long)"
             )
     }
     "Inference match expression with error" {
@@ -294,7 +294,7 @@ class InferenceWithParsingTest : StringSpec({
                 listOf(
                     TypeSystemErrorCode.IncompatibleTypes.new(
                         Location.NoProvided,
-                        "type1" to "(Num numeric<Long>)",
+                        "type1" to "Long",
                         "type2" to "True"
                     )
                 )
@@ -310,7 +310,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTraitAbstractionsTypesBe(
-                "Op :: len :: (a -> (Num numeric<Int>))"
+                "Op :: len :: (a -> Int)"
             )
     }
     "Inference impl abstraction" {
@@ -323,7 +323,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredImplAbstractionsTypesBe(
-                "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
+                "Op for Int :: sum :: (Int -> Int -> Int)"
             )
     }
     "Inference trait used in a function" {
@@ -345,7 +345,7 @@ class InferenceWithParsingTest : StringSpec({
             .apply {
                 shouldBeRight()
                 shouldInferredImplAbstractionsTypesBe(
-                    "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Int>) -> (Num numeric<Int>))"
+                    "Op for Int :: sum :: (Int -> Int -> Int)"
                 )
                 shouldInferredTypesBe(
                     "fn :: ((Op a) -> (Op a) -> (Op a))",
@@ -369,10 +369,10 @@ class InferenceWithParsingTest : StringSpec({
             .toSemanticModuleInfo()
             .apply {
                 shouldInferredImplAbstractionsTypesBe(
-                    "Op for Num numeric<Int> :: sum10 :: ((Num numeric<Int>) -> (Num numeric<Int>))"
+                    "Op for Int :: sum10 :: (Int -> Int)"
                 )
                 shouldInferredTraitAbstractionsTypesBe(
-                    "Op :: sum :: ((Add a) -> (Add a) -> (Add a))"
+                    "Op :: sum :: ((Num a) -> (Num a) -> (Num a))"
                 )
             }
     }
@@ -407,8 +407,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "sum2 :: (Long -> Long)"
             )
     }
     "Inference partial application over prelude function" {
@@ -428,9 +428,9 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))",
-                "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "sum2 :: (Long -> Long)",
+                "fn :: (Long -> Long)"
             )
     }
     "Inference partial application used in a function, partial declared after used" {
@@ -441,9 +441,9 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "sum2 :: ((Num numeric<Long>) -> (Num numeric<Long>))",
-                "fn :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "sum2 :: (Long -> Long)",
+                "fn :: (Long -> Long)"
             )
     }
     "Inference partial application in abstraction with parameters" {
@@ -453,8 +453,8 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum :: ((Add a) -> (Add a) -> (Add a))",
-                "sumN :: ((Add a) -> ((Add a) -> (Add a)))"
+                "sum :: ((Num a) -> (Num a) -> (Num a))",
+                "sumN :: ((Num a) -> ((Num a) -> (Num a)))"
             )
     }
     "Inference partial module trait application in an abstraction" {
@@ -463,7 +463,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sum10 :: ((Num numeric<Long>) -> (Num numeric<Long>))"
+                "sum10 :: (Long -> Long)"
             )
     }
     "Inference partial trait application in an abstraction" {
@@ -475,7 +475,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTypesBe(
-                "sumN :: ((Op a) -> ((Num numeric<Long>) -> (Op a)))"
+                "sumN :: ((Op a) -> (Long -> (Op a)))"
             )
     }
     "Inference partial trait application" {
@@ -489,7 +489,7 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredTraitAbstractionsTypesBe(
-                "Op :: sumN :: ((Num numeric<Long>) -> (Op a) -> (Op a))",
+                "Op :: sumN :: (Long -> (Op a) -> (Op a))",
                 "Op :: sum2 :: ((Op a) -> (Op a))"
             )
     }
@@ -506,9 +506,9 @@ class InferenceWithParsingTest : StringSpec({
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldInferredImplAbstractionsTypesBe(
-                "Op for Num numeric<Int> :: sum :: ((Num numeric<Int>) -> (Num numeric<Long>) -> (Num numeric<Int>))",
-                "Op for Num numeric<Int> :: sumN :: ((Num numeric<Long>) -> (Num numeric<Int>) -> (Num numeric<Int>))",
-                "Op for Num numeric<Int> :: sum2 :: ((Num numeric<Int>) -> (Num numeric<Int>))"
+                "Op for Int :: sum :: (Int -> Long -> Int)",
+                "Op for Int :: sumN :: (Long -> Int -> Int)",
+                "Op for Int :: sum2 :: (Int -> Int)"
             )
     }
 })

@@ -41,3 +41,4 @@ bin/
 ### Mac OS ###
 .DS_Store
 /prelude.ksm
+/prelude.ksd
