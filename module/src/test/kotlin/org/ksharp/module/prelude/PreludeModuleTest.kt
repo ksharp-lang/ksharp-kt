@@ -31,14 +31,14 @@ class PreludeModuleTest : StringSpec({
                     "emptySet :: Unit -> (List a)",
                     "mapOf :: (Pair k v) -> (Map k v)",
                     "emptyMap :: Unit -> (Map k v)",
-                    "byte :: (Num a) -> (Num numeric<Byte>)",
-                    "short :: (Num a) -> (Num numeric<Short>)",
-                    "int :: (Num a) -> (Num numeric<Int>)",
-                    "long :: (Num a) -> (Num numeric<Long>)",
-                    "bigint :: (Num a) -> (Num numeric<BigInt>)",
-                    "float :: (Num a) -> (Num numeric<Float>)",
-                    "double :: (Num a) -> (Num numeric<Double>)",
-                    "bigdec :: (Num a) -> (Num numeric<BigDecimal>)"
+                    "byte :: (Num a) -> Byte",
+                    "short :: (Num a) -> Short",
+                    "int :: (Num a) -> Int",
+                    "long :: (Num a) -> Long",
+                    "bigint :: (Num a) -> BigInt",
+                    "float :: (Num a) -> Float",
+                    "double :: (Num a) -> Double",
+                    "bigdec :: (Num a) -> BigDecimal"
                 )
             )
     }
