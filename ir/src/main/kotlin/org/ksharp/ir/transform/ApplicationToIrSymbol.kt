@@ -47,12 +47,12 @@ private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::mapOf" to IrMapFactory,
     "prelude::bool" to IrBoolFactory,
     "prelude::pair" to binaryOperationFactory(::IrPair),
-    "prelude::sum::num" to binaryOperationFactory(::IrSum),
-    "prelude::sub::num" to binaryOperationFactory(::IrSub),
-    "prelude::mul::num" to binaryOperationFactory(::IrMul),
-    "prelude::div::num" to binaryOperationFactory(::IrDiv),
-    "prelude::pow::num" to binaryOperationFactory(::IrPow),
-    "prelude::mod::num" to binaryOperationFactory(::IrMod),
+    "prelude::num::(+)/2" to binaryOperationFactory(::IrSum),
+    "prelude::num::(-)/2" to binaryOperationFactory(::IrSub),
+    "prelude::num::(*)/2" to binaryOperationFactory(::IrMul),
+    "prelude::num::(/)/2" to binaryOperationFactory(::IrDiv),
+    "prelude::num::(**)/2" to binaryOperationFactory(::IrPow),
+    "prelude::num::(%)/2" to binaryOperationFactory(::IrMod),
     "prelude::num-cast" to IrNumCastFactory,
     "prelude::if" to IrIfFactory
 )
@@ -126,11 +126,7 @@ val ApplicationNode<SemanticInfo>.customIrNode: String?
                     info.isATraitFunction() -> {
                         info.traitType()?.let { traitType ->
                             val traitCustomNode = traitType.irCustomNode
-                            val implCustomNode = arguments.first().inferredType.irCustomNode
-                            if (traitCustomNode != null
-                                && implCustomNode != null
-                                && traitCustomNode != implCustomNode
-                            ) "$traitCustomNode::$implCustomNode"
+                            if (traitCustomNode != null) "$traitCustomNode::${functionName.name}/${info.function!!.arguments.arity}"
                             else null
                         }
                     }
