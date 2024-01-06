@@ -19,7 +19,7 @@ private val kernelDocModule: DocModule
                 Numeric.entries.asSequence().map {
                     Type(
                         it.name,
-                        "(Num numeric<${it.name}>)",
+                        it.name,
                         "Signed ${it.size}-bit ${if (it.isInteger) "integer" else "floating point number"}"
                     )
                 },
@@ -31,12 +31,40 @@ private val kernelDocModule: DocModule
                     ),
                     Type(
                         "Char",
-                        "char<Char>",
+                        "Char",
                         "Datatype representing a single Unicode character"
                     )
                 )
             ).flatten().toList(),
-            emptyList(),
+            listOf(
+                Trait(
+                    "Num",
+                    "Allow operations over numeric types",
+                    sequenceOf(
+                        sequenceOf("(+)", "(-)", "(*)", "(/)", "(%)", "(**)")
+                            .map {
+                                DocAbstraction(
+                                    it,
+                                    "a -> a -> a",
+                                    ""
+                                )
+                            },
+                        sequenceOf(
+                            DocAbstraction(
+                                "signum",
+                                "a -> a",
+                                "Returns the sign of a number: -1, 0 (for zero value), 1"
+                            ),
+                            DocAbstraction(
+                                "negate",
+                                "a -> a",
+                                "Returns value * (signum value)"
+                            )
+                        )
+                    ).flatten().toList(),
+                    emptyList()
+                )
+            ),
             emptyList()
         )
 
