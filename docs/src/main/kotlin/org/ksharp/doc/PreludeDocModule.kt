@@ -40,28 +40,14 @@ private val kernelDocModule: DocModule
                 Trait(
                     "Num",
                     "Allow operations over numeric types",
-                    sequenceOf(
-                        sequenceOf("(+)", "(-)", "(*)", "(/)", "(%)", "(**)")
-                            .map {
-                                DocAbstraction(
-                                    it,
-                                    "a -> a -> a",
-                                    ""
-                                )
-                            },
-                        sequenceOf(
+                    sequenceOf("(+)", "(-)", "(*)", "(/)", "(%)", "(**)")
+                        .map {
                             DocAbstraction(
-                                "signum",
-                                "a -> a",
-                                "Returns the sign of a number: -1, 0 (for zero value), 1"
-                            ),
-                            DocAbstraction(
-                                "negate",
-                                "a -> a",
-                                "Returns value * (signum value)"
+                                it,
+                                "a -> a -> a",
+                                ""
                             )
-                        )
-                    ).flatten().toList(),
+                        }.toList(),
                     emptyList()
                 )
             ),

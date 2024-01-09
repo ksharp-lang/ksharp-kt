@@ -113,9 +113,7 @@ class TraitSemanticTest : StringSpec({
                             "Num::(*)/2" to true,
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
-                            "Num::(**)/2" to true,
-                            "Num::signum/1" to true,
-                            "Num::negate/1" to true
+                            "Num::(**)/2" to true
                         )
                     )
                     .map { t -> t.representation }
@@ -134,8 +132,6 @@ class TraitSemanticTest : StringSpec({
                         ( :: a -> a -> a
                         (%) :: a -> a -> a
                         (**) :: a -> a -> a
-                        signum :: a -> a
-                        negate :: a -> a
                     """.trimIndent()
                 )
             )
@@ -158,9 +154,7 @@ class TraitSemanticTest : StringSpec({
                             "Num::(*)/2" to true,
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
-                            "Num::(**)/2" to true,
-                            "Num::signum/1" to true,
-                            "Num::negate/1" to true
+                            "Num::(**)/2" to true
                         )
                     )
                     .map { t -> t.representation }
@@ -179,8 +173,6 @@ class TraitSemanticTest : StringSpec({
                         ( :: a -> a -> a
                         (%) :: a -> a -> a
                         (**) :: a -> a -> a
-                        signum :: a -> a
-                        negate :: a -> a
                     """.trimIndent()
                 )
             )
@@ -210,9 +202,7 @@ class TraitSemanticTest : StringSpec({
                             "Num::(*)/2" to true,
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
-                            "Num::(**)/2" to true,
-                            "Num::signum/1" to true,
-                            "Num::negate/1" to true
+                            "Num::(**)/2" to true
                         )
                     )
                 val paramAType = TypeSemanticInfo(type = Either.Right(paramA))

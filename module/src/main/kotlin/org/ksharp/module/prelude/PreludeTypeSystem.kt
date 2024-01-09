@@ -39,14 +39,6 @@ private fun createKernelTypeSystem() = typeSystem {
         binaryOp("(/)")
         binaryOp("(%)")
         binaryOp("(**)")
-        method("signum", true) {
-            parameter("a")
-            parameter("a")
-        }
-        method("negate", true) {
-            parameter("a")
-            parameter("a")
-        }
     }
     type(NoAttributes, "Unit")
     type(NoAttributes, "Char") { Either.Right(charType) }
