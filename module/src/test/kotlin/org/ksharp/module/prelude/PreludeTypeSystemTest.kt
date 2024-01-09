@@ -42,8 +42,6 @@ class PreludeTypeSystemTest : StringSpec({
                     ( :: a -> a -> a
                     (%) :: a -> a -> a
                     (**) :: a -> a -> a
-                    signum :: a -> a
-                    negate :: a -> a
             """.trimIndent()
             )
             repr("List").shouldBeRight("List v")
