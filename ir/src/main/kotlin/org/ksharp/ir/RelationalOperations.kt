@@ -3,10 +3,7 @@ package org.ksharp.ir
 import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.ir.serializer.IrNodeSerializers
-import org.ksharp.ir.truffle.relational.GeNode
-import org.ksharp.ir.truffle.relational.GtNode
-import org.ksharp.ir.truffle.relational.LeNode
-import org.ksharp.ir.truffle.relational.LtNode
+import org.ksharp.ir.truffle.relational.*
 import org.ksharp.typesystem.attributes.Attribute
 
 data class IrLt(
@@ -50,5 +47,27 @@ data class IrGt(
 ) : GtNode(left.cast(), right.cast()), IrBinaryOperation {
     override val serializer: IrNodeSerializers
         get() = IrNodeSerializers.Gt
+
+}
+
+data class IrEq(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : EqNode(left.cast(), right.cast()), IrBinaryOperation {
+    override val serializer: IrNodeSerializers
+        get() = IrNodeSerializers.Eq
+
+}
+
+data class IrNotEq(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : NotEqNode(left.cast(), right.cast()), IrBinaryOperation {
+    override val serializer: IrNodeSerializers
+        get() = IrNodeSerializers.NotEq
 
 }

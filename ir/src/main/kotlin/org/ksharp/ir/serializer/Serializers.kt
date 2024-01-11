@@ -36,6 +36,8 @@ enum class IrNodeSerializers(
     Le(IrBinaryOperationSerializer(::IrLe)),
     Ge(IrBinaryOperationSerializer(::IrGe)),
     Gt(IrBinaryOperationSerializer(::IrGt)),
+    Eq(IrBinaryOperationSerializer(::IrEq)),
+    NotEq(IrBinaryOperationSerializer(::IrNotEq)),
     Arg(IrVarValueSerializer(::IrArg)),
     Var(IrVarValueSerializer(::IrVar)),
     If(IrIfSerializer()),
