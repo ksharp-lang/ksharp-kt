@@ -53,6 +53,12 @@ private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::num::(/)/2" to binaryOperationFactory(::IrDiv),
     "prelude::num::(**)/2" to binaryOperationFactory(::IrPow),
     "prelude::num::(%)/2" to binaryOperationFactory(::IrMod),
+    "prelude::num::lt" to binaryOperationFactory(::IrLt),
+    "prelude::num::le" to binaryOperationFactory(::IrLe),
+    "prelude::num::ge" to binaryOperationFactory(::IrGe),
+    "prelude::num::gt" to binaryOperationFactory(::IrGt),
+    "prelude::equals" to equalsOperationFactory(::IrEq, ::IrEquals),
+    "prelude::not-equals" to equalsOperationFactory(::IrNotEq, ::IrNotEquals),
     "prelude::num-cast" to IrNumCastFactory,
     "prelude::if" to IrIfFactory
 )

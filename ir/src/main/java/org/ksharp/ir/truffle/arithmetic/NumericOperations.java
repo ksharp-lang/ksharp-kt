@@ -3,7 +3,7 @@ package org.ksharp.ir.truffle.arithmetic;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-interface ArithmeticOperations {
+public interface NumericOperations {
 
     byte doByte(byte left, byte right);
 

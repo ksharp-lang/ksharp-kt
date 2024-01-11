@@ -80,14 +80,14 @@ class ImplSemanticTest : StringSpec({
                 (!=) :: a -> a -> Bool
             
             impl Eq for Int =
-                (=) a b = a == b
+                (=) a b = a === b
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "(==) Int Int"
+                        "function" to "(===) Int Int"
                     ),
                     TypeSemanticsErrorCode.MissingImplMethods.new(
                         "methods" to "(=)/2, (!=)/2",

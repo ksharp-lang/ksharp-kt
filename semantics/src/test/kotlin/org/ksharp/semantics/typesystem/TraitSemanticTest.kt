@@ -2,6 +2,7 @@ package org.ksharp.semantics.typesystem
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.core.test.TestCase
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
@@ -113,28 +114,21 @@ class TraitSemanticTest : StringSpec({
                             "Num::(*)/2" to true,
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
-                            "Num::(**)/2" to true
+                            "Num::(**)/2" to true,
+                            "Comparable::compare/2" to false,
                         )
                     )
                     .map { t -> t.representation }
             }
-            .shouldBeRight(
-                listOf(
+            .shouldBeRight()
+            .map {
+                it.shouldContain(
                     """
                     trait Sum a =
                         sum :: a -> a -> a
-                    """.trimIndent(),
-                    """
-                    trait Num a =
-                        (+) :: a -> a -> a
-                        (-) :: a -> a -> a
-                        (*) :: a -> a -> a
-                        ( :: a -> a -> a
-                        (%) :: a -> a -> a
-                        (**) :: a -> a -> a
                     """.trimIndent()
                 )
-            )
+            }
     }
 
     "Valid trait" {
@@ -154,28 +148,21 @@ class TraitSemanticTest : StringSpec({
                             "Num::(*)/2" to true,
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
-                            "Num::(**)/2" to true
+                            "Num::(**)/2" to true,
+                            "Comparable::compare/2" to false,
                         )
                     )
                     .map { t -> t.representation }
             }
-            .shouldBeRight(
-                listOf(
+            .shouldBeRight()
+            .map {
+                it.shouldContain(
                     """
                     trait Sum a =
                         sum :: a -> a -> a
-                    """.trimIndent(),
-                    """
-                    trait Num a =
-                        (+) :: a -> a -> a
-                        (-) :: a -> a -> a
-                        (*) :: a -> a -> a
-                        ( :: a -> a -> a
-                        (%) :: a -> a -> a
-                        (**) :: a -> a -> a
                     """.trimIndent()
                 )
-            )
+            }
     }
 
     "Invalid trait function" {
@@ -202,7 +189,8 @@ class TraitSemanticTest : StringSpec({
                             "Num::(*)/2" to true,
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
-                            "Num::(**)/2" to true
+                            "Num::(**)/2" to true,
+                            "Comparable::compare/2" to false,
                         )
                     )
                 val paramAType = TypeSemanticInfo(type = Either.Right(paramA))

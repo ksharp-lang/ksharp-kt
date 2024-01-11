@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @NodeInfo(shortName = "-")
-public class SubNode extends BaseArithmeticNode {
+public class SubNode extends BaseNumericNode {
 
     public SubNode(KSharpNode left, KSharpNode right) {
         super(left, right);

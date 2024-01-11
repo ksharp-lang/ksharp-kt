@@ -38,7 +38,13 @@ class PreludeModuleTest : StringSpec({
                     "bigint :: (Num a) -> BigInt",
                     "float :: (Num a) -> Float",
                     "double :: (Num a) -> Double",
-                    "bigdec :: (Num a) -> BigDecimal"
+                    "bigdec :: (Num a) -> BigDecimal",
+                    "(>) :: (Num a) -> (Num a) -> True\n|False",
+                    "(>=) :: (Num a) -> (Num a) -> True\n|False",
+                    "(<) :: (Num a) -> (Num a) -> True\n|False",
+                    "(<=) :: (Num a) -> (Num a) -> True\n|False",
+                    "(==) :: a -> a -> True\n|False",
+                    "(!=) :: a -> a -> True\n|False",
                 )
             )
     }

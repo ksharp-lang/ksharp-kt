@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @NodeInfo(shortName = "**")
-public class PowNode extends BaseArithmeticNode {
+public class PowNode extends BaseNumericNode {
 
     public PowNode(KSharpNode left, KSharpNode right) {
         super(left, right);
