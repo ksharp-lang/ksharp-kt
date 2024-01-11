@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @NodeInfo(shortName = "+")
-public class SumNode extends BaseArithmeticNode {
+public class SumNode extends BaseNumericNode {
 
     public SumNode(KSharpNode left, KSharpNode right) {
         super(left, right);

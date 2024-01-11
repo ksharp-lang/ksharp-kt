@@ -51,6 +51,14 @@ class EvaluateTest : StringSpec({
         createSpec("Div expression", "fn = 6 / 2", 3.toLong()),
         createSpec("Pow expression", "fn = 2 ** 3", 8.toLong()),
         createSpec("Mod expression", "fn = 7 % 2", 1.toLong()),
+
+        createSpec("< expression", "fn = 1 < 2", true),
+        createSpec("<= expression", "fn = 2 <= 1", false),
+        createSpec("> expression", "fn = 2 > 3", false),
+        createSpec(">= expression", "fn = 6 >= 2", true),
+        createSpec("== expression", "fn = 2 == 2", true),
+        createSpec("!= expression", "fn = 7 != 7", false),
+
         createSpec("If then expression", "fn = if True then 1 else 2", 1.toLong()),
         createSpec("If else expression", "fn = if False then 1 else 2", 2.toLong()),
         createSpec(

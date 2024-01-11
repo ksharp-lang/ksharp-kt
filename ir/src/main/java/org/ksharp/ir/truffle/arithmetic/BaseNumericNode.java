@@ -3,14 +3,14 @@ package org.ksharp.ir.truffle.arithmetic;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import org.ksharp.ir.truffle.KSharpNode;
 
-public abstract class BaseArithmeticNode extends KSharpNode implements ArithmeticOperations {
+public abstract class BaseNumericNode extends KSharpNode implements NumericOperations {
 
     @SuppressWarnings("FieldMayBeFinal")
     @Child
-    private ArithmeticNode arithmeticNode;
+    private NumericNode arithmeticNode;
 
-    protected BaseArithmeticNode(KSharpNode left, KSharpNode right) {
-        this.arithmeticNode = ArithmeticNodeGen.create(left, right, this);
+    protected BaseNumericNode(KSharpNode left, KSharpNode right) {
+        this.arithmeticNode = NumericNodeGen.create(left, right, this);
     }
 
     @Override

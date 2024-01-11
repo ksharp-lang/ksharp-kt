@@ -1,4 +1,4 @@
-package org.ksharp.ir.truffle.arithmetic;
+package org.ksharp.ir.truffle.relational;
 
 import com.oracle.truffle.api.dsl.NodeField;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -7,48 +7,48 @@ import org.ksharp.ir.truffle.BinaryOperationNode;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-@NodeField(name = "operations", type = ArithmeticOperations.class)
-public abstract class ArithmeticNode extends BinaryOperationNode {
+@NodeField(name = "operations", type = RelationalOperations.class)
+public abstract class RelationalNode extends BinaryOperationNode {
 
-    protected abstract ArithmeticOperations getOperations();
+    protected abstract RelationalOperations getOperations();
 
     @Specialization
-    protected byte doByte(byte left, byte right) {
+    protected boolean doByte(byte left, byte right) {
         return getOperations().doByte(left, right);
     }
 
     @Specialization
-    protected short doShort(short left, short right) {
+    protected boolean doShort(short left, short right) {
         return getOperations().doShort(left, right);
     }
 
     @Specialization
-    protected int doInt(int left, int right) {
+    protected boolean doInt(int left, int right) {
         return getOperations().doInt(left, right);
     }
 
     @Specialization
-    protected long doLong(long left, long right) {
+    protected boolean doLong(long left, long right) {
         return getOperations().doLong(left, right);
     }
 
     @Specialization
-    protected float doFloat(float left, float right) {
+    protected boolean doFloat(float left, float right) {
         return getOperations().doFloat(left, right);
     }
 
     @Specialization
-    protected double doDouble(double left, double right) {
+    protected boolean doDouble(double left, double right) {
         return getOperations().doDouble(left, right);
     }
 
     @Specialization
-    protected BigInteger doBigInteger(BigInteger left, BigInteger right) {
+    protected boolean doBigInteger(BigInteger left, BigInteger right) {
         return getOperations().doBigInteger(left, right);
     }
 
     @Specialization
-    protected BigDecimal doBigDecimal(BigDecimal left, BigDecimal right) {
+    protected boolean doBigDecimal(BigDecimal left, BigDecimal right) {
         return getOperations().doBigDecimal(left, right);
     }
 

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @NodeInfo(shortName = "*")
-public class MulNode extends BaseArithmeticNode {
+public class MulNode extends BaseNumericNode {
 
     public MulNode(KSharpNode left, KSharpNode right) {
         super(left, right);
