@@ -56,8 +56,11 @@ class EvaluateTest : StringSpec({
         createSpec("<= expression", "fn = 2 <= 1", false),
         createSpec("> expression", "fn = 2 > 3", false),
         createSpec(">= expression", "fn = 6 >= 2", true),
-        createSpec("== expression", "fn = 2 == 2", true),
-        createSpec("not == expression", "fn = 7 != 7", false),
+        createSpec("== numeric expression", "fn = 2 == 2", true),
+        createSpec("not == numeric expression", "fn = 7 != 7", false),
+
+        createSpec("== object expression", "fn = \"Hola\" == \"Mundo\"", false),
+        createSpec("not == object expression", "fn = \"Hola\" != \"Mundo\"", true),
 
         createSpec("If then expression", "fn = if True then 1 else 2", 1.toLong()),
         createSpec("If else expression", "fn = if False then 1 else 2", 2.toLong()),

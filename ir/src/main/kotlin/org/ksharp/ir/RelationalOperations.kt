@@ -69,5 +69,26 @@ data class IrNotEq(
 ) : NotEqNode(left.cast(), right.cast()), IrBinaryOperation {
     override val serializer: IrNodeSerializers
         get() = IrNodeSerializers.NotEq
+}
+
+data class IrEquals(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : EqualsNode(left.cast(), right.cast()), IrBinaryOperation {
+    override val serializer: IrNodeSerializers
+        get() = IrNodeSerializers.Equals
+
+}
+
+data class IrNotEquals(
+    override val attributes: Set<Attribute>,
+    override val left: IrExpression,
+    override val right: IrExpression,
+    override val location: Location
+) : NotEqualsNode(left.cast(), right.cast()), IrBinaryOperation {
+    override val serializer: IrNodeSerializers
+        get() = IrNodeSerializers.NotEquals
 
 }
