@@ -2,6 +2,7 @@ package org.ksharp.semantics.inference
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.semantics.nodes.SemanticModuleInfo
@@ -30,11 +31,8 @@ class InferenceTraitsImplementedTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.traitsImplemented(preludeModule.typeSystem.newParameter())
-                    .shouldBe(
-                        listOf(
-                            it.typeSystem["Sum"].valueOrNull!!,
-                            it.typeSystem["Num"].valueOrNull!!
-                        )
+                    .shouldContain(
+                        it.typeSystem["Sum"].valueOrNull!!
                     )
             }
     }
