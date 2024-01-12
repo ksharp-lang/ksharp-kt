@@ -13,8 +13,6 @@ enum class InferenceErrorCode(override val description: String) : ErrorCode {
     FunctionNotFound("Function '{function}' not found"),
     NoATuple("Type '{type}' is not a tuple"),
     NoAList("Type '{type}' is not a list"),
-    NoASet("Type '{type}' is not a set"),
-    NoAnArray("Type '{type}' is not an array"),
     IncompatibleType("Type '{type}' is not compatible in binding"),
     BindingUsedAsGuard("Binding used as guard")
 }
@@ -145,21 +143,6 @@ private fun SemanticNode<SemanticInfo>.bindList(type: Type, info: InferenceInfo)
             .forEach { arg -> arg.info.setInferredType(argType) }
     }
 
-private fun SemanticNode<SemanticInfo>.bindSet(type: Type, info: InferenceInfo): ErrorOrType =
-    bindParametricType(type, info, "Set", 1, InferenceErrorCode.NoASet) {
-        val argType = Either.Right(it.params[0])
-        this.cast<ApplicationNode<SemanticInfo>>()
-            .arguments
-            .forEach { arg -> arg.info.setInferredType(argType) }
-    }
-
-private fun SemanticNode<SemanticInfo>.bindArray(type: Type, info: InferenceInfo): ErrorOrType =
-    bindParametricType(type, info, "Array", 1, InferenceErrorCode.NoAnArray) {
-        val argType = Either.Right(it.params[0])
-        this.cast<ApplicationNode<SemanticInfo>>()
-            .arguments
-            .forEach { arg -> arg.info.setInferredType(argType) }
-    }
 
 private fun SemanticNode<SemanticInfo>.bindListWithTail(type: Type, info: InferenceInfo): ErrorOrType =
     bindParametricType(type, info, "List", 1, InferenceErrorCode.NoAList) {
@@ -175,8 +158,6 @@ private fun SemanticNode<SemanticInfo>.bindType(caller: String, type: Type, info
         this is VarNode -> Either.Right(type)
         isTuple -> bindTuple(caller, type, info)
         isList -> bindList(type, info)
-        isArray -> bindArray(type, info)
-        isSet -> bindSet(type, info)
         this is ListMatchValueNode -> bindListWithTail(type, info)
         this is ConditionalMatchValueNode -> {
             left.bindType(caller, type, info).flatMap { bType ->
