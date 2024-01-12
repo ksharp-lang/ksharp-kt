@@ -41,6 +41,12 @@ private class FunctionLookupImpl : FunctionLookup {
         "prelude::num::(/)/2" to binaryExpressionFunction("(/)", ::IrDiv),
         "prelude::num::(**)/2" to binaryExpressionFunction("(**)", ::IrPow),
         "prelude::num::(%)/2" to binaryExpressionFunction("(%)", ::IrMod),
+
+        "prelude::bit::(&)/2" to binaryExpressionFunction("(&)", ::IrBitAnd),
+        "prelude::bit::(|)/2" to binaryExpressionFunction("(|)", ::IrBitOr),
+        "prelude::bit::(^)/2" to binaryExpressionFunction("(^)", ::IrBitXor),
+        "prelude::bit::(>>)/2" to binaryExpressionFunction("(>>)", ::IrBitShr),
+        "prelude::bit::(<<)/2" to binaryExpressionFunction("(<<)", ::IrBitShl),
     )
 
     private fun findCustomFunction(call: CallScope): IrTopLevelSymbol? {
