@@ -49,6 +49,19 @@ private val kernelDocModule: DocModule
                             )
                         }.toList(),
                     emptyList()
+                ),
+                Trait(
+                    "Bitwise",
+                    "Allow operations over numeric types",
+                    sequenceOf("(&)", "(|)", "(^)", "(<<)", "(>>)")
+                        .map {
+                            DocAbstraction(
+                                it,
+                                "a -> a -> a",
+                                ""
+                            )
+                        }.toList(),
+                    emptyList()
                 )
             ),
             emptyList()

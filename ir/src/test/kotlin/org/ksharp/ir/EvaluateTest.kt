@@ -203,6 +203,36 @@ class EvaluateTest : StringSpec({
         createSpec("double != expression 2", "fn = (double 1.0) != (double 1.0)", false),
         createSpec("BigDecimal != expression 2", "fn = (bigdec 1.0) != (bigdec 1.0)", false),
 
+        createSpec("BitAnd byte expression", "fn = (byte 3) & (byte 2)", 2.toByte()),
+        createSpec("BitAnd short expression", "fn = (short 3) & (short 2)", 2.toShort()),
+        createSpec("BitAnd int expression", "fn = (int 3) & (int 2)", 2),
+        createSpec("BitAnd long expression", "fn = (long 3) & (long 2)", 2.toLong()),
+        createSpec("BitAnd bigint expression", "fn = (bigint 3) & (bigint 2)", BigInteger.valueOf(2)),
+
+        createSpec("BitOr byte expression", "fn = (byte 1) | (byte 2)", 3.toByte()),
+        createSpec("BitOr short expression", "fn = (short 1) | (short 2)", 3.toShort()),
+        createSpec("BitOr int expression", "fn = (int 1) | (int 2)", 3),
+        createSpec("BitOr long expression", "fn = (long 1) | (long 2)", 3.toLong()),
+        createSpec("BitOr bigint expression", "fn = (bigint 1) | (bigint 2)", BigInteger.valueOf(3)),
+
+        createSpec("BitXor byte expression", "fn = (byte 3) ^ (byte 2)", 1.toByte()),
+        createSpec("BitXor short expression", "fn = (short 3) ^ (short 2)", 1.toShort()),
+        createSpec("BitXor int expression", "fn = (int 3) ^ (int 2)", 1),
+        createSpec("BitXor long expression", "fn = (long 3) ^ (long 2)", 1.toLong()),
+        createSpec("BitXor bigint expression", "fn = (bigint 3) ^ (bigint 2)", BigInteger.valueOf(1)),
+
+        createSpec("BitShr byte expression", "fn = (byte 16) >> (byte 3)", 2.toByte()),
+        createSpec("BitShr short expression", "fn = (short 16) >> (short 3)", 2.toShort()),
+        createSpec("BitShr int expression", "fn = (int 16) >> (int 3)", 2),
+        createSpec("BitShr long expression", "fn = (long 16) >> (long 3)", 2.toLong()),
+        createSpec("BitShr bigint expression", "fn = (bigint 16) >> (bigint 3)", BigInteger.valueOf(2)),
+
+        createSpec("BitShl byte expression", "fn = (byte 2) << (byte 3)", 16.toByte()),
+        createSpec("BitShl short expression", "fn = (short 2) << (short 3)", 16.toShort()),
+        createSpec("BitShl int expression", "fn = (int 2) << (int 3)", 16),
+        createSpec("BitShl long expression", "fn = (long 2) << (long 3)", 16.toLong()),
+        createSpec("BitShl bigint expression", "fn = (bigint 2) << (bigint 3)", BigInteger.valueOf(16)),
+
         createSpec("Sum byte expression", "fn = (byte 1) + (byte 2)", 3.toByte()),
         createSpec("Sum short expression", "fn = (short 1) + (short 2)", 3.toShort()),
         createSpec("Sum int expression", "fn = (int 1) + (int 2)", 3),

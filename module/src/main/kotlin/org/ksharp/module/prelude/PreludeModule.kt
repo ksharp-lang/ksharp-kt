@@ -8,9 +8,14 @@ import org.ksharp.module.prelude.types.Numeric
 import org.ksharp.typesystem.TypeSystem
 
 private fun TypeSystem.preludeImpls() =
-    Numeric.entries
+    sequenceOf(Numeric.entries
         .asSequence()
-        .map { Impl("Num", this[it.name].valueOrNull!!) }
+        .map { Impl("Num", this[it.name].valueOrNull!!) },
+        Numeric.entries
+            .asSequence()
+            .filter { it.isInteger }
+            .map { Impl("Bitwise", this[it.name].valueOrNull!!) })
+        .flatten()
         .toSet()
 
 /**

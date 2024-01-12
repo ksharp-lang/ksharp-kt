@@ -40,6 +40,15 @@ private fun createKernelTypeSystem() = typeSystem {
         binaryOp("(%)")
         binaryOp("(**)")
     }
+
+    trait(setOf(nameAttribute(mapOf("ir" to "prelude::bit"))), "Bitwise", "a") {
+        binaryOp("(&)")
+        binaryOp("(|)")
+        binaryOp("(^)")
+        binaryOp("(>>)")
+        binaryOp("(<<)")
+    }
+
     type(NoAttributes, "Unit")
     type(NoAttributes, "Char") { Either.Right(charType) }
     parametricType(setOf(nameAttribute(mapOf("ir" to "num"))), "Num") {

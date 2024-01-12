@@ -1,16 +1,15 @@
-package org.ksharp.ir.truffle.arithmetic;
+package org.ksharp.ir.truffle.numeric;
 
 import com.oracle.truffle.api.dsl.NodeField;
 import com.oracle.truffle.api.dsl.Specialization;
 import org.ksharp.ir.truffle.BinaryOperationNode;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
-@NodeField(name = "operations", type = NumericOperations.class)
-public abstract class NumericNode extends BinaryOperationNode {
+@NodeField(name = "operations", type = IntegerOperations.class)
+public abstract class IntegerNode extends BinaryOperationNode {
 
-    protected abstract NumericOperations getOperations();
+    public abstract IntegerOperations getOperations();
 
     @Specialization
     protected byte doByte(byte left, byte right) {
@@ -33,23 +32,9 @@ public abstract class NumericNode extends BinaryOperationNode {
     }
 
     @Specialization
-    protected float doFloat(float left, float right) {
-        return getOperations().doFloat(left, right);
-    }
-
-    @Specialization
-    protected double doDouble(double left, double right) {
-        return getOperations().doDouble(left, right);
-    }
-
-    @Specialization
     protected BigInteger doBigInteger(BigInteger left, BigInteger right) {
         return getOperations().doBigInteger(left, right);
     }
 
-    @Specialization
-    protected BigDecimal doBigDecimal(BigDecimal left, BigDecimal right) {
-        return getOperations().doBigDecimal(left, right);
-    }
 
 }

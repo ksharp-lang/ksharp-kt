@@ -116,6 +116,11 @@ class TraitSemanticTest : StringSpec({
                             "Num::(%)/2" to true,
                             "Num::(**)/2" to true,
                             "Comparable::compare/2" to false,
+                            "Bitwise::(&)/2" to true,
+                            "Bitwise::(|)/2" to true,
+                            "Bitwise::(^)/2" to true,
+                            "Bitwise::(>>)/2" to true,
+                            "Bitwise::(<<)/2" to true,
                         )
                     )
                     .map { t -> t.representation }
@@ -150,6 +155,11 @@ class TraitSemanticTest : StringSpec({
                             "Num::(%)/2" to true,
                             "Num::(**)/2" to true,
                             "Comparable::compare/2" to false,
+                            "Bitwise::(&)/2" to true,
+                            "Bitwise::(|)/2" to true,
+                            "Bitwise::(^)/2" to true,
+                            "Bitwise::(>>)/2" to true,
+                            "Bitwise::(<<)/2" to true,
                         )
                     )
                     .map { t -> t.representation }
@@ -191,6 +201,11 @@ class TraitSemanticTest : StringSpec({
                             "Num::(%)/2" to true,
                             "Num::(**)/2" to true,
                             "Comparable::compare/2" to false,
+                            "Bitwise::(&)/2" to true,
+                            "Bitwise::(|)/2" to true,
+                            "Bitwise::(^)/2" to true,
+                            "Bitwise::(>>)/2" to true,
+                            "Bitwise::(<<)/2" to true,
                         )
                     )
                 val paramAType = TypeSemanticInfo(type = Either.Right(paramA))
