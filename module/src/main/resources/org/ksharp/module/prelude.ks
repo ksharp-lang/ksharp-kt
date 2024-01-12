@@ -1,6 +1,7 @@
 type List v = List v
 type Set v = Set v
 type Map k v = Map k v
+type Array v = Array v
 type String = String
 
 @name("prelude::bool" for="ir")
@@ -59,6 +60,14 @@ native pub listOf a
 @name("prelude::listOf" for="ir")
 emptyList a :: () -> (List a)
 native pub emptyList
+
+@name("prelude::arrayOf" for="ir")
+arrayOf a :: a -> (Array a)
+native pub arrayOf a
+
+@name("prelude::arrayOf" for="ir")
+emptyArray a :: () -> (Array a)
+native pub emptyArray
 
 @name("prelude::setOf" for="ir")
 setOf a :: a -> (Set a)

@@ -1011,7 +1011,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName(PRELUDE_COLLECTION_FLAG, "listOf"),
+                            ApplicationName(null, "listOf"),
                             listOf(
                                 ConstantNode(
                                     10.toLong(),
@@ -1091,7 +1091,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName(PRELUDE_COLLECTION_FLAG, "setOf"),
+                            ApplicationName(null, "setOf"),
                             listOf(
                                 ConstantNode(
                                     1.toLong(),
@@ -1162,7 +1162,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName(PRELUDE_COLLECTION_FLAG, "tupleOf"),
+                            ApplicationName(null, "tupleOf"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(null, "x"),
@@ -1252,7 +1252,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                         setOf(CommonAttribute.Public),
                         "n",
                         ApplicationNode(
-                            ApplicationName(PRELUDE_COLLECTION_FLAG, "mapOf"),
+                            ApplicationName(null, "mapOf"),
                             listOf(
                                 ApplicationNode(
                                     ApplicationName(null, "pair"),
@@ -1292,12 +1292,12 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
     should("Semantic node: let") {
         module(
             FunctionNode(
-                false,
-                true,
-                null,
-                "n",
-                listOf(),
-                LetExpressionNode(
+                native = false,
+                pub = true,
+                annotations = null,
+                name = "n",
+                parameters = listOf(),
+                expression = LetExpressionNode(
                     listOf(
                         MatchAssignNode(
                             FunctionCallNode("x", FunctionType.Function, listOf(), Location.NoProvided),
@@ -1324,7 +1324,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                     Location.NoProvided,
                     LetExpressionNodeLocations(Location.NoProvided, Location.NoProvided)
                 ),
-                Location.NoProvided, FunctionNodeLocations(
+                location = Location.NoProvided, locations = FunctionNodeLocations(
                     Location.NoProvided,
                     Location.NoProvided,
                     Location.NoProvided,
@@ -1519,7 +1519,7 @@ class FunctionNodeSemanticTransformSemanticNodeTest : ShouldSpec({
                                         location = Location.NoProvided
                                     ),
                                     expression = ApplicationNode(
-                                        functionName = ApplicationName(pck = "::collection", name = "listOf"),
+                                        functionName = ApplicationName(pck = null, name = "listOf"),
                                         arguments = listOf(
                                             ConstantNode(
                                                 value = 1.toLong(),

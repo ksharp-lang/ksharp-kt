@@ -5,7 +5,6 @@ import org.ksharp.module.FunctionInfo
 import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.nodes.semantic.SemanticNode
-import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode
@@ -27,7 +26,7 @@ private val noFoundError =
     Either.Left(TypeSystemErrorCode.TypeNotFound.new("type" to "<>"))
 private val ApplicationName.functionName
     get() =
-        pck?.let { if (it == PRELUDE_COLLECTION_FLAG) null else "$it.$name" } ?: name
+        if (pck == null) name else "$pck.$name"
 
 internal fun FunctionInfo.substitute(
     checker: UnificationChecker,
@@ -112,7 +111,6 @@ data class InferenceInfo(
     private val ApplicationName.firstInferenceContext
         get() =
             when (pck) {
-                PRELUDE_COLLECTION_FLAG -> prelude
                 null -> inferenceContext
                 else -> dependencies[pck]
             }

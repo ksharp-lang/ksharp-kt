@@ -44,6 +44,7 @@ val IrNumCastFactory: CustomApplicationIrNode = { state ->
 private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::listOf" to IrListFactory,
     "prelude::setOf" to IrSetFactory,
+    "prelude::arrayOf" to IrArrayFactory,
     "prelude::mapOf" to IrMapFactory,
     "prelude::bool" to IrBoolFactory,
     "prelude::pair" to binaryOperationFactory(::IrPair),

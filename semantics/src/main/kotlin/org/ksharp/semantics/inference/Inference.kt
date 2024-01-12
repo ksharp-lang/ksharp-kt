@@ -3,7 +3,6 @@ package org.ksharp.semantics.inference
 import org.ksharp.common.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.expressions.CollectionFunctionName
-import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.solver.solve
@@ -14,6 +13,8 @@ enum class InferenceErrorCode(override val description: String) : ErrorCode {
     FunctionNotFound("Function '{function}' not found"),
     NoATuple("Type '{type}' is not a tuple"),
     NoAList("Type '{type}' is not a list"),
+    NoASet("Type '{type}' is not a set"),
+    NoAnArray("Type '{type}' is not an array"),
     IncompatibleType("Type '{type}' is not compatible in binding"),
     BindingUsedAsGuard("Binding used as guard")
 }
@@ -24,18 +25,25 @@ private fun ApplicationName.calculateType(info: InferenceInfo): ErrorOrType =
 private fun SemanticNode<SemanticInfo>.isCollectionApplication(fnName: String): Boolean =
     this is ApplicationNode
             && this.cast<ApplicationNode<SemanticInfo>>().functionName == ApplicationName(
-        PRELUDE_COLLECTION_FLAG,
+        null,
         fnName
     )
 
 val <T : SemanticInfo> AbstractionNode<T>.nameWithArity: String
     get() = info.cast<AbstractionSemanticInfo>().parameters.size.let { "$name/$it" }
 
+private val SemanticNode<SemanticInfo>.isArray: Boolean
+    get() = isCollectionApplication("arrayOf")
+
 private val SemanticNode<SemanticInfo>.isTuple: Boolean
     get() = isCollectionApplication("tupleOf")
 
 private val SemanticNode<SemanticInfo>.isList: Boolean
     get() = isCollectionApplication("listOf")
+
+private val SemanticNode<SemanticInfo>.isSet: Boolean
+    get() = isCollectionApplication("setOf")
+
 
 private val SemanticNode<SemanticInfo>.isType: Boolean
     get() = this is ApplicationNode
@@ -137,6 +145,22 @@ private fun SemanticNode<SemanticInfo>.bindList(type: Type, info: InferenceInfo)
             .forEach { arg -> arg.info.setInferredType(argType) }
     }
 
+private fun SemanticNode<SemanticInfo>.bindSet(type: Type, info: InferenceInfo): ErrorOrType =
+    bindParametricType(type, info, "Set", 1, InferenceErrorCode.NoAList) {
+        val argType = Either.Right(it.params[0])
+        this.cast<ApplicationNode<SemanticInfo>>()
+            .arguments
+            .forEach { arg -> arg.info.setInferredType(argType) }
+    }
+
+private fun SemanticNode<SemanticInfo>.bindArray(type: Type, info: InferenceInfo): ErrorOrType =
+    bindParametricType(type, info, "Array", 1, InferenceErrorCode.NoAnArray) {
+        val argType = Either.Right(it.params[0])
+        this.cast<ApplicationNode<SemanticInfo>>()
+            .arguments
+            .forEach { arg -> arg.info.setInferredType(argType) }
+    }
+
 private fun SemanticNode<SemanticInfo>.bindListWithTail(type: Type, info: InferenceInfo): ErrorOrType =
     bindParametricType(type, info, "List", 1, InferenceErrorCode.NoAList) {
         val argType = Either.Right(it.params[0])
@@ -151,6 +175,8 @@ private fun SemanticNode<SemanticInfo>.bindType(caller: String, type: Type, info
         this is VarNode -> Either.Right(type)
         isTuple -> bindTuple(caller, type, info)
         isList -> bindList(type, info)
+        isArray -> bindArray(type, info)
+        isSet -> bindSet(type, info)
         this is ListMatchValueNode -> bindListWithTail(type, info)
         this is ConditionalMatchValueNode -> {
             left.bindType(caller, type, info).flatMap { bType ->
@@ -302,7 +328,7 @@ private fun Sequence<ErrorOrType>.unifyArguments(
     info: InferenceInfo
 ): Sequence<ErrorOrType> =
     when (CollectionFunctionName.entries.first { it.applicationName == name }) {
-        CollectionFunctionName.List, CollectionFunctionName.Set, CollectionFunctionName.Map -> {
+        CollectionFunctionName.List, CollectionFunctionName.Set, CollectionFunctionName.Map, CollectionFunctionName.Array -> {
             val unifiedType = reduceOrNull { acc, type ->
                 acc.flatMap { left ->
                     type.flatMap { right ->
@@ -321,8 +347,11 @@ private fun FunctionType.getOriginalFunction() =
         this.function
     else this
 
+private fun ApplicationName.isPreludeCollectionFunction(): Boolean =
+    CollectionFunctionName.entries.any { it.applicationName == this }
+
 private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
-    functionName.pck.equals(PRELUDE_COLLECTION_FLAG).let { isPreludeCollectionFlag ->
+    functionName.isPreludeCollectionFunction().let { isPreludeCollectionFlag ->
         arguments.asSequence()
             .map {
                 it.inferType(caller, info)

@@ -38,11 +38,27 @@ class EvaluateTest : StringSpec({
             listOf(1.toLong(), 2.toLong(), 3.toLong())
         ),
         createSpec(
+            "List expression 2", "fn = listOf 1 2 3",
+            listOf(1.toLong(), 2.toLong(), 3.toLong())
+        ),
+        createSpec(
+            "Array expression", "fn = arrayOf 1 2 3",
+            arrayOf(1.toLong(), 2.toLong(), 3.toLong())
+        ),
+        createSpec(
             "Set expression", "fn = #[1, 2, 3]",
             setOf(1.toLong(), 2.toLong(), 3.toLong())
         ),
         createSpec(
+            "Set expression 2", "fn = setOf 1 2 3",
+            setOf(1.toLong(), 2.toLong(), 3.toLong())
+        ),
+        createSpec(
             "Map expression", "fn = {1 : 2, 2: 4, 3: 6}",
+            mapOf(1.toLong() to 2.toLong(), 2.toLong() to 4.toLong(), 3.toLong() to 6.toLong())
+        ),
+        createSpec(
+            "Map expression 2", "fn = mapOf (pair 1 2) (pair 2 4) (pair 3 6)",
             mapOf(1.toLong() to 2.toLong(), 2.toLong() to 4.toLong(), 3.toLong() to 6.toLong())
         ),
         createSpec("Sum expression", "fn = 1 + 2", 3.toLong()),
