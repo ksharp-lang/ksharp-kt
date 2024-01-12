@@ -1,4 +1,4 @@
-package org.ksharp.ir.truffle.bitwise;
+package org.ksharp.ir.truffle.numeric;
 
 import com.oracle.truffle.api.dsl.NodeField;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -6,10 +6,10 @@ import org.ksharp.ir.truffle.BinaryOperationNode;
 
 import java.math.BigInteger;
 
-@NodeField(name = "operations", type = BitwiseOperations.class)
-public abstract class BitwiseNode extends BinaryOperationNode {
+@NodeField(name = "operations", type = IntegerOperations.class)
+public abstract class IntegerNode extends BinaryOperationNode {
 
-    protected abstract BitwiseOperations getOperations();
+    public abstract IntegerOperations getOperations();
 
     @Specialization
     protected byte doByte(byte left, byte right) {

@@ -1,8 +1,8 @@
-package org.ksharp.ir.truffle.bitwise;
+package org.ksharp.ir.truffle.numeric;
 
 import java.math.BigInteger;
 
-public interface BitwiseOperations {
+public interface IntegerOperations {
 
     byte doByte(byte left, byte right);
 

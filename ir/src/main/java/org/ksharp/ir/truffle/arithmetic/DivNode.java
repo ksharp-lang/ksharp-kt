@@ -8,7 +8,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 
 @NodeInfo(shortName = "/")
-public class DivNode extends BaseNumericNode {
+public class DivNode extends BaseArithmeticNode {
 
     public DivNode(KSharpNode left, KSharpNode right) {
         super(left, right);

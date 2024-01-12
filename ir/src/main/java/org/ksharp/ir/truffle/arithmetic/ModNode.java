@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @NodeInfo(shortName = "%")
-public class ModNode extends BaseNumericNode {
+public class ModNode extends BaseArithmeticNode {
 
     public ModNode(KSharpNode left, KSharpNode right) {
         super(left, right);
