@@ -27,6 +27,8 @@ class PreludeModuleTest : StringSpec({
                     "tupleOf :: a -> a",
                     "listOf :: a -> (List a)",
                     "emptyList :: Unit -> (List a)",
+                    "arrayOf :: a -> (Array a)",
+                    "emptyArray :: Unit -> (Array a)",
                     "setOf :: a -> (Set a)",
                     "emptySet :: Unit -> (List a)",
                     "mapOf :: (Pair k v) -> (Map k v)",

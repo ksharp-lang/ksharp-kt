@@ -18,13 +18,12 @@ enum class ExpressionSemanticsErrorCode(override val description: String) : Erro
     SymbolAlreadyUsed("Symbol already used '{name}'")
 }
 
-internal const val PRELUDE_COLLECTION_FLAG = "::collection"
-
 enum class CollectionFunctionName(val applicationName: ApplicationName) {
-    List(ApplicationName(PRELUDE_COLLECTION_FLAG, "listOf")),
-    Map(ApplicationName(PRELUDE_COLLECTION_FLAG, "mapOf")),
-    Tuple(ApplicationName(PRELUDE_COLLECTION_FLAG, "tupleOf")),
-    Set(ApplicationName(PRELUDE_COLLECTION_FLAG, "setOf"))
+    Array(ApplicationName(null, "arrayOf")),
+    List(ApplicationName(null, "listOf")),
+    Map(ApplicationName(null, "mapOf")),
+    Tuple(ApplicationName(null, "tupleOf")),
+    Set(ApplicationName(null, "setOf"))
 }
 
 private val LiteralCollectionType.applicationName

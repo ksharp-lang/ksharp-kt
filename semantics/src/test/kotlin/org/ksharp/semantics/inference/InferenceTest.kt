@@ -7,7 +7,6 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.module.functionInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.nodes.semantic.*
-import org.ksharp.semantics.expressions.PRELUDE_COLLECTION_FLAG
 import org.ksharp.semantics.nodes.getTypeSemanticInfo
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
@@ -391,7 +390,7 @@ class InferenceTest : StringSpec({
             setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
-                ApplicationName(PRELUDE_COLLECTION_FLAG, "listOf"),
+                ApplicationName(null, "listOf"),
                 listOf(
                     ConstantNode(
                         10.toLong(),
@@ -439,7 +438,7 @@ class InferenceTest : StringSpec({
             setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
-                ApplicationName(PRELUDE_COLLECTION_FLAG, "mapOf"),
+                ApplicationName(null, "mapOf"),
                 listOf(
                     ApplicationNode(
                         ApplicationName(null, "pair"),
@@ -482,7 +481,7 @@ class InferenceTest : StringSpec({
             setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
-                ApplicationName(PRELUDE_COLLECTION_FLAG, "setOf"),
+                ApplicationName(null, "setOf"),
                 listOf(
                     ConstantNode(
                         10.toLong(),
@@ -529,7 +528,7 @@ class InferenceTest : StringSpec({
             setOf(CommonAttribute.Public),
             "n",
             ApplicationNode(
-                ApplicationName(PRELUDE_COLLECTION_FLAG, "tupleOf"),
+                ApplicationName(null, "tupleOf"),
                 listOf(
                     ConstantNode(
                         10.toLong(),
