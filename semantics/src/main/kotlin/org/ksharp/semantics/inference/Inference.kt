@@ -146,7 +146,7 @@ private fun SemanticNode<SemanticInfo>.bindList(type: Type, info: InferenceInfo)
     }
 
 private fun SemanticNode<SemanticInfo>.bindSet(type: Type, info: InferenceInfo): ErrorOrType =
-    bindParametricType(type, info, "Set", 1, InferenceErrorCode.NoAList) {
+    bindParametricType(type, info, "Set", 1, InferenceErrorCode.NoASet) {
         val argType = Either.Right(it.params[0])
         this.cast<ApplicationNode<SemanticInfo>>()
             .arguments
