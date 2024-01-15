@@ -397,6 +397,15 @@ class EvaluateTest : StringSpec({
             """.trimMargin(),
             "Hello".length
         ),
+        createSpec(
+            "Evaluate calling an abstraction",
+            """|n = fn 10 20
+               |
+               |fn :: Long -> Long -> Long
+               |fn a b = a + b              
+            """.trimMargin(),
+            30.toLong()
+        ),
     ).forEach { (description, code, call) ->
         description {
             code.evaluateFirstFunction(call.arguments)
