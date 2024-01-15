@@ -7,6 +7,7 @@ import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.toIrSymbol
 import org.ksharp.module.CodeModule
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 
 fun interface FunctionLookup {
@@ -77,7 +78,9 @@ data class IrModule(
 fun CodeModule.toIrModule(): IrModule {
     val lookup = FunctionLookupImpl()
     val module = IrModule(
-        artifact.abstractions.map { it.toIrSymbol(lookup) }
+        artifact.abstractions
+            .filterNot { it.attributes.contains(CommonAttribute.Native) }
+            .map { it.toIrSymbol(name, lookup) }
     )
     lookup.functions = module.symbols.cast()
     return module
