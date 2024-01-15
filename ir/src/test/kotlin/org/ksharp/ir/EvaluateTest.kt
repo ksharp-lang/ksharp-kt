@@ -16,7 +16,9 @@ private fun String.evaluateFirstFunction(arguments: List<Any>) =
     toCodeModule()
         .toIrModule()
         .symbols
-        .first { it is IrFunction }
+        .first {
+            it is IrFunction
+        }
         .cast<IrFunction>()
         .call(*arguments.toTypedArray())
 
@@ -38,11 +40,27 @@ class EvaluateTest : StringSpec({
             listOf(1.toLong(), 2.toLong(), 3.toLong())
         ),
         createSpec(
+            "List expression 2", "fn = listOf 1 2 3",
+            listOf(1.toLong(), 2.toLong(), 3.toLong())
+        ),
+        createSpec(
+            "Array expression", "fn = arrayOf 1 2 3",
+            arrayOf(1.toLong(), 2.toLong(), 3.toLong())
+        ),
+        createSpec(
             "Set expression", "fn = #[1, 2, 3]",
             setOf(1.toLong(), 2.toLong(), 3.toLong())
         ),
         createSpec(
+            "Set expression 2", "fn = setOf 1 2 3",
+            setOf(1.toLong(), 2.toLong(), 3.toLong())
+        ),
+        createSpec(
             "Map expression", "fn = {1 : 2, 2: 4, 3: 6}",
+            mapOf(1.toLong() to 2.toLong(), 2.toLong() to 4.toLong(), 3.toLong() to 6.toLong())
+        ),
+        createSpec(
+            "Map expression 2", "fn = mapOf (pair 1 2) (pair 2 4) (pair 3 6)",
             mapOf(1.toLong() to 2.toLong(), 2.toLong() to 4.toLong(), 3.toLong() to 6.toLong())
         ),
         createSpec("Sum expression", "fn = 1 + 2", 3.toLong()),
@@ -51,6 +69,17 @@ class EvaluateTest : StringSpec({
         createSpec("Div expression", "fn = 6 / 2", 3.toLong()),
         createSpec("Pow expression", "fn = 2 ** 3", 8.toLong()),
         createSpec("Mod expression", "fn = 7 % 2", 1.toLong()),
+
+        createSpec("< expression", "fn = 1 < 2", true),
+        createSpec("<= expression", "fn = 2 <= 1", false),
+        createSpec("> expression", "fn = 2 > 3", false),
+        createSpec(">= expression", "fn = 6 >= 2", true),
+        createSpec("== numeric expression", "fn = 2 == 2", true),
+        createSpec("not == numeric expression", "fn = 7 != 7", false),
+
+        createSpec("== object expression", "fn = \"Hola\" == \"Mundo\"", false),
+        createSpec("not == object expression", "fn = \"Hola\" != \"Mundo\"", true),
+
         createSpec("If then expression", "fn = if True then 1 else 2", 1.toLong()),
         createSpec("If else expression", "fn = if False then 1 else 2", 2.toLong()),
         createSpec(
@@ -65,6 +94,162 @@ class EvaluateTest : StringSpec({
             sum a b = a + b
         """.trimIndent(), 30.toLong()
         ),
+
+        createSpec("< byte expression", "fn = (byte 1) < (byte 2)", true),
+        createSpec("< short expression", "fn = (short 1) < (short 2)", true),
+        createSpec("< int expression", "fn = (int 1) < (int 2)", true),
+        createSpec("< long expression", "fn = (long 1) < (long 2)", true),
+        createSpec("< bigint expression", "fn = (bigint 1) < (bigint 2)", true),
+        createSpec("< float expression", "fn = (float 1.0) < (float 2.0)", true),
+        createSpec("< double expression", "fn = (double 1.0) < (double 2.0)", true),
+        createSpec("< BigDecimal expression", "fn = (bigdec 1.0) < (bigdec 2.0)", true),
+
+        createSpec("< byte expression 2", "fn = (byte 2) < (byte 1)", false),
+        createSpec("< short expression 2", "fn = (short 2) < (short 1)", false),
+        createSpec("< int expression 2", "fn = (int 2) < (int 1)", false),
+        createSpec("< long expression 2", "fn = (long 2) < (long 1)", false),
+        createSpec("< bigint expression 2", "fn = (bigint 2) < (bigint 1)", false),
+        createSpec("< float expression 2", "fn = (float 2.0) < (float 1.0)", false),
+        createSpec("< double expression 2", "fn = (double 2.0) < (double 1.0)", false),
+        createSpec("< BigDecimal expression 2", "fn = (bigdec 2.0) < (bigdec 1.0)", false),
+
+        createSpec("<= byte expression", "fn = (byte 1) <= (byte 2)", true),
+        createSpec("<= short expression", "fn = (short 1) <= (short 2)", true),
+        createSpec("<= int expression", "fn = (int 1) <= (int 2)", true),
+        createSpec("<= long expression", "fn = (long 1) <= (long 2)", true),
+        createSpec("<= bigint expression", "fn = (bigint 1) <= (bigint 2)", true),
+        createSpec("<= float expression", "fn = (float 1.0) <= (float 2.0)", true),
+        createSpec("<= double expression", "fn = (double 1.0) <= (double 2.0)", true),
+        createSpec("<= BigDecimal expression", "fn = (bigdec 1.0) <= (bigdec 2.0)", true),
+
+        createSpec("<= byte expression 2", "fn = (byte 2) <= (byte 2)", true),
+        createSpec("<= short expression 2", "fn = (short 2) <= (short 2)", true),
+        createSpec("<= int expression 2", "fn = (int 2) <= (int 2)", true),
+        createSpec("<= long expression 2", "fn = (long 2) <= (long 2)", true),
+        createSpec("<= bigint expression 2", "fn = (bigint 2) <= (bigint 2)", true),
+        createSpec("<= float expression 2", "fn = (float 2.0) <= (float 2.0)", true),
+        createSpec("<= double expression 2", "fn = (double 2.0) <= (double 2.0)", true),
+        createSpec("<= BigDecimal expression 2", "fn = (bigdec 2.0) <= (bigdec 2.0)", true),
+
+        createSpec("<= byte expression 3", "fn = (byte 3) <= (byte 2)", false),
+        createSpec("<= short expression 3", "fn = (short 3) <= (short 2)", false),
+        createSpec("<= int expression 3", "fn = (int 3) <= (int 2)", false),
+        createSpec("<= long expression 3", "fn = (long 3) <= (long 2)", false),
+        createSpec("<= bigint expression 3", "fn = (bigint 3) <= (bigint 2)", false),
+        createSpec("<= float expression 3", "fn = (float 3.0) <= (float 2.0)", false),
+        createSpec("<= double expression 3", "fn = (double 3.0) <= (double 2.0)", false),
+        createSpec("<= BigDecimal expression 3", "fn = (bigdec 3.0) <= (bigdec 2.0)", false),
+
+        createSpec(">= byte expression", "fn = (byte 1) >= (byte 2)", false),
+        createSpec(">= short expression", "fn = (short 1) >= (short 2)", false),
+        createSpec(">= int expression", "fn = (int 1) >= (int 2)", false),
+        createSpec(">= long expression", "fn = (long 1) >= (long 2)", false),
+        createSpec(">= bigint expression", "fn = (bigint 1) >= (bigint 2)", false),
+        createSpec(">= float expression", "fn = (float 1.0) >= (float 2.0)", false),
+        createSpec(">= double expression", "fn = (double 1.0) >= (double 2.0)", false),
+        createSpec(">= BigDecimal expression", "fn = (bigdec 1.0) >= (bigdec 2.0)", false),
+
+        createSpec(">= byte expression 2", "fn = (byte 2) >= (byte 2)", true),
+        createSpec(">= short expression 2", "fn = (short 2) >= (short 2)", true),
+        createSpec(">= int expression 2", "fn = (int 2) >= (int 2)", true),
+        createSpec(">= long expression 2", "fn = (long 2) >= (long 2)", true),
+        createSpec(">= bigint expression 2", "fn = (bigint 2) >= (bigint 2)", true),
+        createSpec(">= float expression 2", "fn = (float 2.0) >= (float 2.0)", true),
+        createSpec(">= double expression 2", "fn = (double 2.0) >= (double 2.0)", true),
+        createSpec(">= BigDecimal expression 2", "fn = (bigdec 2.0) >= (bigdec 2.0)", true),
+
+        createSpec(">= byte expression 3", "fn = (byte 3) >= (byte 2)", true),
+        createSpec(">= short expression 3", "fn = (short 3) >= (short 2)", true),
+        createSpec(">= int expression 3", "fn = (int 3) >= (int 2)", true),
+        createSpec(">= long expression 3", "fn = (long 3) >= (long 2)", true),
+        createSpec(">= bigint expression 3", "fn = (bigint 3) >= (bigint 2)", true),
+        createSpec(">= float expression 3", "fn = (float 3.0) >= (float 2.0)", true),
+        createSpec(">= double expression 3", "fn = (double 3.0) >= (double 2.0)", true),
+        createSpec(">= BigDecimal expression 3", "fn = (bigdec 3.0) >= (bigdec 2.0)", true),
+
+        createSpec("> byte expression", "fn = (byte 1) > (byte 2)", false),
+        createSpec("> short expression", "fn = (short 1) > (short 2)", false),
+        createSpec("> int expression", "fn = (int 1) > (int 2)", false),
+        createSpec("> long expression", "fn = (long 1) > (long 2)", false),
+        createSpec("> bigint expression", "fn = (bigint 1) > (bigint 2)", false),
+        createSpec("> float expression", "fn = (float 1.0) > (float 2.0)", false),
+        createSpec("> double expression", "fn = (double 1.0) > (double 2.0)", false),
+        createSpec("> BigDecimal expression", "fn = (bigdec 1.0) > (bigdec 2.0)", false),
+
+        createSpec("> byte expression 2", "fn = (byte 3) > (byte 2)", true),
+        createSpec("> short expression 2", "fn = (short 3) > (short 2)", true),
+        createSpec("> int expression 2", "fn = (int 3) > (int 2)", true),
+        createSpec("> long expression 2", "fn = (long 3) > (long 2)", true),
+        createSpec("> bigint expression 2", "fn = (bigint 3) > (bigint 2)", true),
+        createSpec("> float expression 2", "fn = (float 3.0) > (float 2.0)", true),
+        createSpec("> double expression 2", "fn = (double 3.0) > (double 2.0)", true),
+        createSpec("> BigDecimal expression 2", "fn = (bigdec 3.0) > (bigdec 2.0)", true),
+
+        createSpec("byte == expression", "fn = (byte 1) == (byte 2)", false),
+        createSpec("short == expression", "fn = (short 1) == (short 2)", false),
+        createSpec("int == expression", "fn = (int 1) == (int 2)", false),
+        createSpec("long == expression", "fn = (long 1) == (long 2)", false),
+        createSpec("bigint == expression", "fn = (bigint 1) == (bigint 2)", false),
+        createSpec("float == expression", "fn = (float 1.0) == (float 2.0)", false),
+        createSpec("double == expression", "fn = (double 1.0) == (double 2.0)", false),
+        createSpec("BigDecimal == expression", "fn = (bigdec 1.0) == (bigdec 2.0)", false),
+
+        createSpec("byte == expression 2", "fn = (byte 1) == (byte 1)", true),
+        createSpec("short == expression 2", "fn = (short 1) == (short 1)", true),
+        createSpec("int == expression 2", "fn = (int 1) == (int 1)", true),
+        createSpec("long == expression 2", "fn = (long 1) == (long 1)", true),
+        createSpec("bigint == expression 2", "fn = (bigint 1) == (bigint 1)", true),
+        createSpec("float == expression 2", "fn = (float 1.0) == (float 1.0)", true),
+        createSpec("double == expression 2", "fn = (double 1.0) == (double 1.0)", true),
+        createSpec("BigDecimal == expression 2", "fn = (bigdec 1.0) == (bigdec 1.0)", true),
+
+        createSpec("byte != expression", "fn = (byte 1) != (byte 2)", true),
+        createSpec("short != expression", "fn = (short 1) != (short 2)", true),
+        createSpec("int != expression", "fn = (int 1) != (int 2)", true),
+        createSpec("long != expression", "fn = (long 1) != (long 2)", true),
+        createSpec("bigint != expression", "fn = (bigint 1) != (bigint 2)", true),
+        createSpec("float != expression", "fn = (float 1.0) != (float 2.0)", true),
+        createSpec("double != expression", "fn = (double 1.0) != (double 2.0)", true),
+        createSpec("BigDecimal != expression", "fn = (bigdec 1.0) != (bigdec 2.0)", true),
+
+        createSpec("byte != expression 2", "fn = (byte 1) != (byte 1)", false),
+        createSpec("short != expression 2", "fn = (short 1) != (short 1)", false),
+        createSpec("int != expression 2", "fn = (int 1) != (int 1)", false),
+        createSpec("long != expression 2", "fn = (long 1) != (long 1)", false),
+        createSpec("bigint != expression 2", "fn = (bigint 1) != (bigint 1)", false),
+        createSpec("float != expression 2", "fn = (float 1.0) != (float 1.0)", false),
+        createSpec("double != expression 2", "fn = (double 1.0) != (double 1.0)", false),
+        createSpec("BigDecimal != expression 2", "fn = (bigdec 1.0) != (bigdec 1.0)", false),
+
+        createSpec("BitAnd byte expression", "fn = (byte 3) & (byte 2)", 2.toByte()),
+        createSpec("BitAnd short expression", "fn = (short 3) & (short 2)", 2.toShort()),
+        createSpec("BitAnd int expression", "fn = (int 3) & (int 2)", 2),
+        createSpec("BitAnd long expression", "fn = (long 3) & (long 2)", 2.toLong()),
+        createSpec("BitAnd bigint expression", "fn = (bigint 3) & (bigint 2)", BigInteger.valueOf(2)),
+
+        createSpec("BitOr byte expression", "fn = (byte 1) | (byte 2)", 3.toByte()),
+        createSpec("BitOr short expression", "fn = (short 1) | (short 2)", 3.toShort()),
+        createSpec("BitOr int expression", "fn = (int 1) | (int 2)", 3),
+        createSpec("BitOr long expression", "fn = (long 1) | (long 2)", 3.toLong()),
+        createSpec("BitOr bigint expression", "fn = (bigint 1) | (bigint 2)", BigInteger.valueOf(3)),
+
+        createSpec("BitXor byte expression", "fn = (byte 3) ^ (byte 2)", 1.toByte()),
+        createSpec("BitXor short expression", "fn = (short 3) ^ (short 2)", 1.toShort()),
+        createSpec("BitXor int expression", "fn = (int 3) ^ (int 2)", 1),
+        createSpec("BitXor long expression", "fn = (long 3) ^ (long 2)", 1.toLong()),
+        createSpec("BitXor bigint expression", "fn = (bigint 3) ^ (bigint 2)", BigInteger.valueOf(1)),
+
+        createSpec("BitShr byte expression", "fn = (byte 16) >> (byte 3)", 2.toByte()),
+        createSpec("BitShr short expression", "fn = (short 16) >> (short 3)", 2.toShort()),
+        createSpec("BitShr int expression", "fn = (int 16) >> (int 3)", 2),
+        createSpec("BitShr long expression", "fn = (long 16) >> (long 3)", 2.toLong()),
+        createSpec("BitShr bigint expression", "fn = (bigint 16) >> (bigint 3)", BigInteger.valueOf(2)),
+
+        createSpec("BitShl byte expression", "fn = (byte 2) << (byte 3)", 16.toByte()),
+        createSpec("BitShl short expression", "fn = (short 2) << (short 3)", 16.toShort()),
+        createSpec("BitShl int expression", "fn = (int 2) << (int 3)", 16),
+        createSpec("BitShl long expression", "fn = (long 2) << (long 3)", 16.toLong()),
+        createSpec("BitShl bigint expression", "fn = (bigint 2) << (bigint 3)", BigInteger.valueOf(16)),
 
         createSpec("Sum byte expression", "fn = (byte 1) + (byte 2)", 3.toByte()),
         createSpec("Sum short expression", "fn = (short 1) + (short 2)", 3.toShort()),
@@ -202,6 +387,24 @@ class EvaluateTest : StringSpec({
                |     then x
             """.trimMargin(),
             true
+        ),
+        createSpec(
+            "Evaluate native method",
+            """|n = fn "Hello"
+               |
+               |fn :: String -> Int
+               |native fn a              
+            """.trimMargin(),
+            "Hello".length
+        ),
+        createSpec(
+            "Evaluate calling an abstraction",
+            """|n = fn 10 20
+               |
+               |fn :: Long -> Long -> Long
+               |fn a b = a + b              
+            """.trimMargin(),
+            30.toLong()
         ),
     ).forEach { (description, code, call) ->
         description {

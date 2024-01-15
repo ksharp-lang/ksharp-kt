@@ -5,11 +5,13 @@ import org.ksharp.common.Location
 import org.ksharp.module.prelude.types.NumericType
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.incompatibleType
+import org.ksharp.typesystem.types.ImplType
 import org.ksharp.typesystem.types.Parameter
 import org.ksharp.typesystem.types.Type
 import org.ksharp.typesystem.unification.UnificationAlgo
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.innerType
+import org.ksharp.typesystem.unification.unify
 
 class NumericUnification : UnificationAlgo<NumericType> {
     override fun unify(location: Location, type1: NumericType, type2: Type, checker: UnificationChecker): ErrorOrType =
@@ -24,6 +26,7 @@ class NumericUnification : UnificationAlgo<NumericType> {
                     else incompatibleType(location, type1, type2)
                 }
 
+                is ImplType -> innerRType.impl.unify(location, type1, checker)
                 else -> incompatibleType(location, type1, type2)
             }
         }

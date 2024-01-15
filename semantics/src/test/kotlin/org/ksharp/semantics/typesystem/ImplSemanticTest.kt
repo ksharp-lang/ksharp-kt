@@ -40,10 +40,10 @@ class ImplSemanticTest : StringSpec({
             trait Sum a =
                 (&) :: a -> a -> a
             
-            impl Sum for Num =
+            impl Sum for Int =
                 (&) a b = a + b
             
-            impl Sum for Num =
+            impl Sum for Int =
                 (&) a b = a + b
         """.trimIndent()
             .toSemanticModuleInfo()
@@ -52,7 +52,7 @@ class ImplSemanticTest : StringSpec({
                     TypeSemanticsErrorCode.DuplicateImpl.new(
                         Location.NoProvided,
                         "trait" to "Sum",
-                        "impl" to preludeModule.typeSystem.solve("Num").representation
+                        "impl" to preludeModule.typeSystem.solve("Int").representation
                     )
                 )
             )
@@ -79,19 +79,19 @@ class ImplSemanticTest : StringSpec({
                 (=) :: a -> a -> Bool
                 (!=) :: a -> a -> Bool
             
-            impl Eq for Num =
-                (=) a b = a == b
+            impl Eq for Int =
+                (=) a b = a === b
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeLeft(
                 listOf(
                     InferenceErrorCode.FunctionNotFound.new(
                         Location.NoProvided,
-                        "function" to "(==) (Num a) (Num a)"
+                        "function" to "(===) Int Int"
                     ),
                     TypeSemanticsErrorCode.MissingImplMethods.new(
                         "methods" to "(=)/2, (!=)/2",
-                        "impl" to "(Num a)",
+                        "impl" to "Int",
                         "trait" to "Eq"
                     )
                 )
@@ -126,14 +126,14 @@ class ImplSemanticTest : StringSpec({
             trait Sum a =
                 (+) :: a -> a -> a
             
-            impl Sum for Num =
+            impl Sum for Int =
                 (+) a b = a + b
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeRight()
             .map {
                 it.impls.shouldBe(
-                    setOf(Impl("Sum", it.typeSystem["Num"].valueOrNull!!))
+                    setOf(Impl("Sum", it.typeSystem["Int"].valueOrNull!!))
                 )
             }
     }
@@ -144,14 +144,14 @@ class ImplSemanticTest : StringSpec({
                 (!=) :: a -> a -> Bool
                 (=) a b = True
             
-            impl Eq for Num =
+            impl Eq for Int =
                 (!=) a b = a != b
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeRight()
             .map {
                 it.impls.shouldBe(
-                    setOf(Impl("Eq", it.typeSystem["Num"].valueOrNull!!))
+                    setOf(Impl("Eq", it.typeSystem["Int"].valueOrNull!!))
                 )
             }
     }
@@ -162,7 +162,7 @@ class ImplSemanticTest : StringSpec({
                 (!=) :: a -> a -> Bool
                 (=) a b = True
             
-            impl Eq for Num =
+            impl Eq for Int =
                 support = True
                  
                 (!=) a b = a != b
@@ -171,7 +171,7 @@ class ImplSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 val boolType = it.typeSystem["Bool"].valueOrNull!!
-                val forType = it.typeSystem["Num"]
+                val forType = it.typeSystem["Int"]
                 val unitType = it.typeSystem["Unit"]
                 val implType = ImplType(it.typeSystem["Eq"].valueOrNull!!.cast(), forType.valueOrNull!!)
                 val expectedAbstractions = listOf(

@@ -1,6 +1,7 @@
 type List v = List v
 type Set v = Set v
 type Map k v = Map k v
+type Array v = Array v
 type String = String
 
 @name("prelude::bool" for="ir")
@@ -60,6 +61,14 @@ native pub listOf a
 emptyList a :: () -> (List a)
 native pub emptyList
 
+@name("prelude::arrayOf" for="ir")
+arrayOf a :: a -> (Array a)
+native pub arrayOf a
+
+@name("prelude::arrayOf" for="ir")
+emptyArray a :: () -> (Array a)
+native pub emptyArray
+
 @name("prelude::setOf" for="ir")
 setOf a :: a -> (Set a)
 native pub setOf a
@@ -76,44 +85,31 @@ native pub mapOf p
 emptyMap k v :: () -> (Map k v)
 native pub emptyMap
 
-@name("prelude::sum" for="ir")
-trait Add a =
-    (+) :: a -> a -> a
+@name("prelude::num::gt" for="ir")
+(>) a :: (Num a) -> (Num a) -> Bool
+native pub (>) a b
 
-@name("prelude::sub" for="ir")
-trait Sub a =
-    (-) :: a -> a -> a
+@name("prelude::num::ge" for="ir")
+(>=) a :: (Num a) -> (Num a) -> Bool
+native pub (>=) a b
 
-@name("prelude::mul" for="ir")
-trait Mul a =
-    (*) :: a -> a -> a
+@name("prelude::num::lt" for="ir")
+(<) a :: (Num a) -> (Num a) -> Bool
+native pub (<) a b
 
-@name("prelude::div" for="ir")
-trait Div a =
-    (/) :: a -> a -> a
+@name("prelude::num::le" for="ir")
+(<=) a :: (Num a) -> (Num a) -> Bool
+native pub (<=) a b
 
-@name("prelude::mod" for="ir")
-trait Mod a =
-    (%) :: a -> a -> a
+type Ordering = Less | Equal | Greater
 
-@name("prelude::pow" for="ir")
-trait Pow a =
-    (**) :: a -> a -> a
+trait Comparable a =
+    compare :: a -> a -> Ordering
 
-impl Add for Num =
-    native (+) a b
+@name("prelude::equals" for="ir")
+(==) a :: a -> a -> Bool
+native pub (==) a b
 
-impl Sub for Num =
-    native (-) a b
-
-impl Mul for Num =
-    native (*) a b
-
-impl Div for Num =
-    native (/) a b
-
-impl Mod for Num =
-    native (%) a b
-
-impl Pow for Num =
-    native (**) a b
+@name("prelude::not-equals" for="ir")
+(!=) a :: a -> a -> Bool
+native pub (!=) a b

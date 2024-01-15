@@ -12,7 +12,6 @@ import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.parser.ksharp.parseModule
 import org.ksharp.semantics.expressions.nameWithArity
 import org.ksharp.semantics.inference.nameWithArity
-import org.ksharp.semantics.typesystem.arity
 import org.ksharp.semantics.typesystem.nameWithArity
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.types.TraitType

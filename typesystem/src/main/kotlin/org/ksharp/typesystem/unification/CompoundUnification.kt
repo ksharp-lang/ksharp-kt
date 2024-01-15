@@ -19,6 +19,7 @@ abstract class CompoundUnification<T : Type> : UnificationAlgo<T> {
             }
         }
 
+
     open fun elseUnify(location: Location, type1: T, type2: Type, checker: UnificationChecker): ErrorOrType =
         incompatibleType(location, type1, type2)
 

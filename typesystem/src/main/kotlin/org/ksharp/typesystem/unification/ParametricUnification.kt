@@ -41,7 +41,14 @@ class ParametricUnification : CompoundUnification<ParametricType>() {
         when (type2) {
             is ImplType -> type2.unify(location, type1, checker)
             is FixedTraitType -> type2.unify(location, type1, checker)
-            else -> incompatibleType(location, type1, type2)
+            else -> when (val type1Type = type1.type().valueOrNull) {
+                is TraitType -> {
+                    if (checker.isImplemented(type1Type, type2)) Either.Right(ImplType(type1Type, type2))
+                    else incompatibleType(location, type1, type2)
+                }
+
+                else -> incompatibleType(location, type1, type2)
+            }
         }
 
 

@@ -7,6 +7,7 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.types.*
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 typealias CustomApplicationIrNode = ApplicationNode<SemanticInfo>.(state: IrState) -> IrExpression
@@ -44,15 +45,27 @@ val IrNumCastFactory: CustomApplicationIrNode = { state ->
 private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::listOf" to IrListFactory,
     "prelude::setOf" to IrSetFactory,
+    "prelude::arrayOf" to IrArrayFactory,
     "prelude::mapOf" to IrMapFactory,
     "prelude::bool" to IrBoolFactory,
     "prelude::pair" to binaryOperationFactory(::IrPair),
-    "prelude::sum::num" to binaryOperationFactory(::IrSum),
-    "prelude::sub::num" to binaryOperationFactory(::IrSub),
-    "prelude::mul::num" to binaryOperationFactory(::IrMul),
-    "prelude::div::num" to binaryOperationFactory(::IrDiv),
-    "prelude::pow::num" to binaryOperationFactory(::IrPow),
-    "prelude::mod::num" to binaryOperationFactory(::IrMod),
+    "prelude::num::(+)/2" to binaryOperationFactory(::IrSum),
+    "prelude::num::(-)/2" to binaryOperationFactory(::IrSub),
+    "prelude::num::(*)/2" to binaryOperationFactory(::IrMul),
+    "prelude::num::(/)/2" to binaryOperationFactory(::IrDiv),
+    "prelude::num::(**)/2" to binaryOperationFactory(::IrPow),
+    "prelude::num::(%)/2" to binaryOperationFactory(::IrMod),
+    "prelude::num::lt" to binaryOperationFactory(::IrLt),
+    "prelude::num::le" to binaryOperationFactory(::IrLe),
+    "prelude::num::ge" to binaryOperationFactory(::IrGe),
+    "prelude::num::gt" to binaryOperationFactory(::IrGt),
+    "prelude::equals" to equalsOperationFactory(::IrEq, ::IrEquals),
+    "prelude::not-equals" to equalsOperationFactory(::IrNotEq, ::IrNotEquals),
+    "prelude::bit::(&)/2" to binaryOperationFactory(::IrBitAnd),
+    "prelude::bit::(|)/2" to binaryOperationFactory(::IrBitOr),
+    "prelude::bit::(^)/2" to binaryOperationFactory(::IrBitXor),
+    "prelude::bit::(>>)/2" to binaryOperationFactory(::IrBitShr),
+    "prelude::bit::(<<)/2" to binaryOperationFactory(::IrBitShl),
     "prelude::num-cast" to IrNumCastFactory,
     "prelude::if" to IrIfFactory
 )
@@ -126,11 +139,7 @@ val ApplicationNode<SemanticInfo>.customIrNode: String?
                     info.isATraitFunction() -> {
                         info.traitType()?.let { traitType ->
                             val traitCustomNode = traitType.irCustomNode
-                            val implCustomNode = arguments.first().inferredType.irCustomNode
-                            if (traitCustomNode != null
-                                && implCustomNode != null
-                                && traitCustomNode != implCustomNode
-                            ) "$traitCustomNode::$implCustomNode"
+                            if (traitCustomNode != null) "$traitCustomNode::${functionName.name}/${info.function!!.arguments.arity}"
                             else null
                         }
                     }
@@ -157,14 +166,25 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
         val scopeName = if (isTrait) {
             trait?.irCustomNode
         } else null
-        IrCall(
-            attributes,
-            null,
-            CallScope(callName, scopeName, isTrait),
-            arguments,
-            location,
-        ).apply {
-            this.functionLookup = state.functionLookup
-        }
+        if (functionType.attributes.contains(CommonAttribute.Native))
+            IrNativeCall(
+                attributes,
+                "${state.moduleName.replace("([A-Z])".toRegex(), "_$1").lowercase()}.${
+                    callName.replace("/", "")
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                }",
+                arguments,
+                location,
+            )
+        else
+            IrCall(
+                attributes,
+                null,
+                CallScope(callName, scopeName, isTrait),
+                arguments,
+                location,
+            ).apply {
+                this.functionLookup = state.functionLookup
+            }
     }
 }

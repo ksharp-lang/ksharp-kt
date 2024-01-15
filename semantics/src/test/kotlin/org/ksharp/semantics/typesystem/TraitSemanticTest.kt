@@ -2,6 +2,7 @@ package org.ksharp.semantics.typesystem
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.core.test.TestCase
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.*
@@ -105,17 +106,34 @@ class TraitSemanticTest : StringSpec({
             .map {
                 it.typeSystem
                     .getTraits()
-                    .shouldDefine(mapOf("Sum::sum/2" to true))
+                    .shouldDefine(
+                        mapOf(
+                            "Sum::sum/2" to true,
+                            "Num::(+)/2" to true,
+                            "Num::(-)/2" to true,
+                            "Num::(*)/2" to true,
+                            "Num::(/)/2" to true,
+                            "Num::(%)/2" to true,
+                            "Num::(**)/2" to true,
+                            "Comparable::compare/2" to false,
+                            "Bitwise::(&)/2" to true,
+                            "Bitwise::(|)/2" to true,
+                            "Bitwise::(^)/2" to true,
+                            "Bitwise::(>>)/2" to true,
+                            "Bitwise::(<<)/2" to true,
+                        )
+                    )
                     .map { t -> t.representation }
             }
-            .shouldBeRight(
-                listOf(
+            .shouldBeRight()
+            .map {
+                it.shouldContain(
                     """
                     trait Sum a =
                         sum :: a -> a -> a
                     """.trimIndent()
                 )
-            )
+            }
     }
 
     "Valid trait" {
@@ -127,17 +145,34 @@ class TraitSemanticTest : StringSpec({
             .map {
                 it.typeSystem
                     .getTraits()
-                    .shouldDefine(mapOf("Sum::sum/2" to false))
+                    .shouldDefine(
+                        mapOf(
+                            "Sum::sum/2" to false,
+                            "Num::(+)/2" to true,
+                            "Num::(-)/2" to true,
+                            "Num::(*)/2" to true,
+                            "Num::(/)/2" to true,
+                            "Num::(%)/2" to true,
+                            "Num::(**)/2" to true,
+                            "Comparable::compare/2" to false,
+                            "Bitwise::(&)/2" to true,
+                            "Bitwise::(|)/2" to true,
+                            "Bitwise::(^)/2" to true,
+                            "Bitwise::(>>)/2" to true,
+                            "Bitwise::(<<)/2" to true,
+                        )
+                    )
                     .map { t -> t.representation }
             }
-            .shouldBeRight(
-                listOf(
+            .shouldBeRight()
+            .map {
+                it.shouldContain(
                     """
                     trait Sum a =
                         sum :: a -> a -> a
                     """.trimIndent()
                 )
-            )
+            }
     }
 
     "Invalid trait function" {
@@ -151,12 +186,28 @@ class TraitSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 val paramA = it.typeSystem.newNamedParameter("a")
-                val addA = it.typeSystem["Add"].valueOrNull!!.cast<TraitType>().toParametricType()
+                val addA = it.typeSystem["Num"].valueOrNull!!.cast<TraitType>().toParametricType()
 
                 it.typeSystem
                     .getTraits()
                     .shouldNotBeEmpty()
-                    .shouldDefine(mapOf("Sum::sum/2" to true))
+                    .shouldDefine(
+                        mapOf(
+                            "Sum::sum/2" to true,
+                            "Num::(+)/2" to true,
+                            "Num::(-)/2" to true,
+                            "Num::(*)/2" to true,
+                            "Num::(/)/2" to true,
+                            "Num::(%)/2" to true,
+                            "Num::(**)/2" to true,
+                            "Comparable::compare/2" to false,
+                            "Bitwise::(&)/2" to true,
+                            "Bitwise::(|)/2" to true,
+                            "Bitwise::(^)/2" to true,
+                            "Bitwise::(>>)/2" to true,
+                            "Bitwise::(<<)/2" to true,
+                        )
+                    )
                 val paramAType = TypeSemanticInfo(type = Either.Right(paramA))
                 val expectedAbstractions = listOf(
                     AbstractionNode(

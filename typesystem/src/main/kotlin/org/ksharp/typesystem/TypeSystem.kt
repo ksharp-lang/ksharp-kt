@@ -27,9 +27,15 @@ class TypeSystemImpl internal constructor(
 ) : TypeSystem {
     override val size: Int = types.size
 
-    override fun asSequence(): Sequence<Pair<String, Type>> = types.asSequence().map {
-        it.key to it.value
-    }
+    override fun asSequence(): Sequence<Pair<String, Type>> =
+        types.asSequence().map {
+            it.key to it.value
+        }.let { types ->
+            if (parent != null) {
+                sequenceOf(types, parent.asSequence()).flatten()
+            } else types
+        }
+
 
     override fun get(name: String): ErrorOrType =
         types[name]?.let { Either.Right(it) }

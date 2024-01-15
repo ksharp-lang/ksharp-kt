@@ -23,17 +23,27 @@ private fun PartialTypeSystem.repr(name: String): ErrorOrValue<String> =
 class PreludeTypeSystemTest : StringSpec({
     "Check prelude type system" {
         preludeTypeSystem.apply {
-            repr("Char").shouldBeRight("char<Char>")
-            repr("Byte").shouldBeRight("Num numeric<Byte>")
-            repr("Short").shouldBeRight("Num numeric<Short>")
-            repr("Int").shouldBeRight("Num numeric<Int>")
-            repr("Long").shouldBeRight("Num numeric<Long>")
-            repr("BigInt").shouldBeRight("Num numeric<BigInt>")
-            repr("Float").shouldBeRight("Num numeric<Float>")
-            repr("Double").shouldBeRight("Num numeric<Double>")
-            repr("BigDecimal").shouldBeRight("Num numeric<BigDecimal>")
+            repr("Char").shouldBeRight("Char")
+            repr("Byte").shouldBeRight("Byte")
+            repr("Short").shouldBeRight("Short")
+            repr("Int").shouldBeRight("Int")
+            repr("Long").shouldBeRight("Long")
+            repr("BigInt").shouldBeRight("BigInt")
+            repr("Float").shouldBeRight("Float")
+            repr("Double").shouldBeRight("Double")
+            repr("BigDecimal").shouldBeRight("BigDecimal")
             repr("String").shouldBeRight("String")
-            repr("Num").shouldBeRight("Num a")
+            repr("Num").shouldBeRight(
+                """
+                trait Num a =
+                    (+) :: a -> a -> a
+                    (-) :: a -> a -> a
+                    (*) :: a -> a -> a
+                    ( :: a -> a -> a
+                    (%) :: a -> a -> a
+                    (**) :: a -> a -> a
+            """.trimIndent()
+            )
             repr("List").shouldBeRight("List v")
             repr("Set").shouldBeRight("Set v")
             repr("Map").shouldBeRight("Map k v")
@@ -45,14 +55,14 @@ class PreludeTypeSystemTest : StringSpec({
         charType.apply {
             compound.shouldBeFalse()
             terms.shouldBeEmpty()
-            representation.shouldBe("char<Char>")
+            representation.shouldBe("Char")
         }
     }
     "Check numeric types" {
         NumericType(Numeric.Int).apply {
             compound.shouldBeFalse()
             terms.shouldBeEmpty()
-            representation.shouldBe("numeric<Int>")
+            representation.shouldBe("Int")
         }
     }
 })

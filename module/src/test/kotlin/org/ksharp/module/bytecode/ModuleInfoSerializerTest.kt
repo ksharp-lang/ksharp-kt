@@ -19,7 +19,7 @@ private fun ModuleInfo.shouldBeSerializable() {
     writeTo(output)
     val input = ByteArrayInputStream(output.toByteArray())
     input.bufferView {
-        it.readModuleInfo(MockHandlePromise())
+        it.readModuleInfo(null, MockHandlePromise())
     }.apply {
         this@shouldBeSerializable.dependencies.shouldBe(dependencies)
         this@shouldBeSerializable.functions.shouldBe(functions)

@@ -7,6 +7,7 @@ import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.toIrSymbol
 import org.ksharp.module.CodeModule
+import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 
 fun interface FunctionLookup {
@@ -35,12 +36,18 @@ private class FunctionLookupImpl : FunctionLookup {
     private val cache = cacheOf<CallScope, IrTopLevelSymbol>()
 
     private var irNodeFactory = mapOf(
-        "prelude::sum::(+)/2" to binaryExpressionFunction("(+)", ::IrSum),
-        "prelude::sub::(-)/2" to binaryExpressionFunction("(-)", ::IrSub),
-        "prelude::mul::(*)/2" to binaryExpressionFunction("(-)", ::IrMul),
-        "prelude::div::(/)/2" to binaryExpressionFunction("(-)", ::IrDiv),
-        "prelude::pow::(**)/2" to binaryExpressionFunction("(-)", ::IrPow),
-        "prelude::mod::(%)/2" to binaryExpressionFunction("(-)", ::IrMod),
+        "prelude::num::(+)/2" to binaryExpressionFunction("(+)", ::IrSum),
+        "prelude::num::(-)/2" to binaryExpressionFunction("(-)", ::IrSub),
+        "prelude::num::(*)/2" to binaryExpressionFunction("(*)", ::IrMul),
+        "prelude::num::(/)/2" to binaryExpressionFunction("(/)", ::IrDiv),
+        "prelude::num::(**)/2" to binaryExpressionFunction("(**)", ::IrPow),
+        "prelude::num::(%)/2" to binaryExpressionFunction("(%)", ::IrMod),
+
+        "prelude::bit::(&)/2" to binaryExpressionFunction("(&)", ::IrBitAnd),
+        "prelude::bit::(|)/2" to binaryExpressionFunction("(|)", ::IrBitOr),
+        "prelude::bit::(^)/2" to binaryExpressionFunction("(^)", ::IrBitXor),
+        "prelude::bit::(>>)/2" to binaryExpressionFunction("(>>)", ::IrBitShr),
+        "prelude::bit::(<<)/2" to binaryExpressionFunction("(<<)", ::IrBitShl),
     )
 
     private fun findCustomFunction(call: CallScope): IrTopLevelSymbol? {
@@ -71,7 +78,9 @@ data class IrModule(
 fun CodeModule.toIrModule(): IrModule {
     val lookup = FunctionLookupImpl()
     val module = IrModule(
-        artifact.abstractions.map { it.toIrSymbol(lookup) }
+        artifact.abstractions
+            .filterNot { it.attributes.contains(CommonAttribute.Native) }
+            .map { it.toIrSymbol(name, lookup) }
     )
     lookup.functions = module.symbols.cast()
     return module

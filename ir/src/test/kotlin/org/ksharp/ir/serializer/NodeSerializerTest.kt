@@ -206,4 +206,13 @@ class NodeSerializerTest : StringSpec({
         )
             .shouldBeSerializable()
     }
+    "NativeCall Test" {
+        IrNativeCall(
+            attributes,
+            "test",
+            listOf(IrInteger(1, location), IrInteger(2, location)),
+            location
+        )
+            .shouldBeSerializable()
+    }
 })

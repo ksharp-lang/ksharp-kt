@@ -7,6 +7,7 @@ import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
 import org.ksharp.ir.CallScope
 import org.ksharp.ir.IrCall
+import org.ksharp.ir.IrNativeCall
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
 
@@ -51,6 +52,31 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
             attributes,
             module,
             callScope,
+            arguments.cast(),
+            location
+        )
+    }
+}
+
+class IrNativeCallSerializer : IrNodeSerializer<IrNativeCall> {
+    override fun write(input: IrNativeCall, buffer: BufferWriter, table: BinaryTable) {
+        input.argAttributes.writeTo(buffer, table)
+        buffer.add(table.add(input.functionClass))
+        input.location.writeTo(buffer)
+        input.arguments.writeTo(buffer, table)
+    }
+
+    override fun read(buffer: BufferView, table: BinaryTableView): IrNativeCall {
+        val argAttributes = buffer.readAttributes(table)
+        var offset = buffer.readInt(0)
+        val functionClass = table[buffer.readInt(offset)]
+        offset += 4
+        val location = buffer.bufferFrom(offset).readLocation()
+        offset += 16
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(table)
+        return IrNativeCall(
+            argAttributes,
+            functionClass,
             arguments.cast(),
             location
         )

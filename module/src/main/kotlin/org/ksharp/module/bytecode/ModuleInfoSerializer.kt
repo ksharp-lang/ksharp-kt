@@ -2,9 +2,9 @@ package org.ksharp.module.bytecode
 
 import org.ksharp.common.HandlePromise
 import org.ksharp.common.handlePromise
-import org.ksharp.common.io.*
+import org.ksharp.common.io.BufferView
+import org.ksharp.common.io.newBufferWriter
 import org.ksharp.module.ModuleInfo
-import org.ksharp.module.prelude.kernelTypeSystem
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.readMapOfStrings
 import org.ksharp.typesystem.attributes.writeTo
@@ -40,7 +40,10 @@ fun ModuleInfo.writeTo(output: OutputStream) {
     implsTable.transferTo(output)
 }
 
-fun BufferView.readModuleInfo(handle: HandlePromise<TypeSystem> = handlePromise()): ModuleInfo {
+fun BufferView.readModuleInfo(
+    parent: TypeSystem? = null,
+    handle: HandlePromise<TypeSystem> = handlePromise()
+): ModuleInfo {
     val stringPoolSize = readInt(0)
     val dependenciesSize = readInt(4)
     val typeSystemSize = readInt(8)
@@ -49,9 +52,8 @@ fun BufferView.readModuleInfo(handle: HandlePromise<TypeSystem> = handlePromise(
 
     val stringPool = StringPoolView(bufferFrom(offset))
     val dependencies = bufferFrom(offset + stringPoolSize).readMapOfStrings(stringPool)
-    val kernelTypeSystem = kernelTypeSystem.value
     val typeSystem =
-        bufferFrom(offset + dependenciesSize + stringPoolSize).readTypeSystem(stringPool, kernelTypeSystem, handle)
+        bufferFrom(offset + dependenciesSize + stringPoolSize).readTypeSystem(stringPool, parent, handle)
     val functions =
         bufferFrom(offset + dependenciesSize + stringPoolSize + typeSystemSize).readFunctionInfoTable(
             typeSystem.handle,
