@@ -7,7 +7,7 @@ import org.ksharp.ir.truffle.KSharpNode;
 public abstract class BaseCallNode extends KSharpNode {
     @Children
     private final KSharpNode[] arguments;
-    private TruffleString.ToJavaStringNode toJavaStringNode;
+    private final TruffleString.ToJavaStringNode toJavaStringNode;
 
     protected BaseCallNode(KSharpNode[] arguments) {
         this.arguments = arguments;
