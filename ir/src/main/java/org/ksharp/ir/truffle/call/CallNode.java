@@ -5,7 +5,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import org.ksharp.ir.truffle.KSharpNode;
 import org.ksharp.ir.truffle.runtime.FunctionObject;
 
-public abstract class CallNode extends KSharpNode {
+public abstract class CallNode extends BaseCallNode {
 
     private FunctionObject functionTarget;
 
@@ -13,11 +13,8 @@ public abstract class CallNode extends KSharpNode {
     @Child
     private FunctionDispatchNode dispatchNode;
 
-    @Children
-    private final KSharpNode[] arguments;
-
     protected CallNode(KSharpNode[] arguments) {
-        this.arguments = arguments;
+        super(arguments);
         this.dispatchNode = FunctionDispatchNodeGen.create();
     }
 
@@ -30,12 +27,7 @@ public abstract class CallNode extends KSharpNode {
             var rootNode = getCallTarget();
             functionTarget = new FunctionObject(rootNode);
         }
-
-        var argumentValues = new Object[arguments.length];
-        for (int i = 0; i < arguments.length; i++) {
-            argumentValues[i] = arguments[i].execute(frame);
-        }
-
+        var argumentValues = getArguments(frame);
         return dispatchNode.executeDispatch(functionTarget, argumentValues);
     }
 }

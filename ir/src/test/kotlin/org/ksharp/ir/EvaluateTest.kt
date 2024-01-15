@@ -16,7 +16,9 @@ private fun String.evaluateFirstFunction(arguments: List<Any>) =
     toCodeModule()
         .toIrModule()
         .symbols
-        .first { it is IrFunction }
+        .first {
+            it is IrFunction
+        }
         .cast<IrFunction>()
         .call(*arguments.toTypedArray())
 
@@ -174,14 +176,14 @@ class EvaluateTest : StringSpec({
         createSpec("> double expression", "fn = (double 1.0) > (double 2.0)", false),
         createSpec("> BigDecimal expression", "fn = (bigdec 1.0) > (bigdec 2.0)", false),
 
-        createSpec("> byte expression", "fn = (byte 3) > (byte 2)", true),
-        createSpec("> short expression", "fn = (short 3) > (short 2)", true),
-        createSpec("> int expression", "fn = (int 3) > (int 2)", true),
-        createSpec("> long expression", "fn = (long 3) > (long 2)", true),
-        createSpec("> bigint expression", "fn = (bigint 3) > (bigint 2)", true),
-        createSpec("> float expression", "fn = (float 3.0) > (float 2.0)", true),
-        createSpec("> double expression", "fn = (double 3.0) > (double 2.0)", true),
-        createSpec("> BigDecimal expression", "fn = (bigdec 3.0) > (bigdec 2.0)", true),
+        createSpec("> byte expression 2", "fn = (byte 3) > (byte 2)", true),
+        createSpec("> short expression 2", "fn = (short 3) > (short 2)", true),
+        createSpec("> int expression 2", "fn = (int 3) > (int 2)", true),
+        createSpec("> long expression 2", "fn = (long 3) > (long 2)", true),
+        createSpec("> bigint expression 2", "fn = (bigint 3) > (bigint 2)", true),
+        createSpec("> float expression 2", "fn = (float 3.0) > (float 2.0)", true),
+        createSpec("> double expression 2", "fn = (double 3.0) > (double 2.0)", true),
+        createSpec("> BigDecimal expression 2", "fn = (bigdec 3.0) > (bigdec 2.0)", true),
 
         createSpec("byte == expression", "fn = (byte 1) == (byte 2)", false),
         createSpec("short == expression", "fn = (short 1) == (short 2)", false),
@@ -385,6 +387,15 @@ class EvaluateTest : StringSpec({
                |     then x
             """.trimMargin(),
             true
+        ),
+        createSpec(
+            "Evaluate native method",
+            """|n = fn "Hello"
+               |
+               |fn :: String -> Int
+               |native fn a              
+            """.trimMargin(),
+            "Hello".length
         ),
     ).forEach { (description, code, call) ->
         description {

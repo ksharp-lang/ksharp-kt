@@ -7,6 +7,7 @@ import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.types.*
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 typealias CustomApplicationIrNode = ApplicationNode<SemanticInfo>.(state: IrState) -> IrExpression
@@ -165,14 +166,25 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
         val scopeName = if (isTrait) {
             trait?.irCustomNode
         } else null
-        IrCall(
-            attributes,
-            null,
-            CallScope(callName, scopeName, isTrait),
-            arguments,
-            location,
-        ).apply {
-            this.functionLookup = state.functionLookup
-        }
+        if (functionType.attributes.contains(CommonAttribute.Native))
+            IrNativeCall(
+                attributes,
+                "${state.moduleName.replace("([A-Z])".toRegex(), "_$1").lowercase()}.${
+                    callName.replace("/", "")
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                }",
+                arguments,
+                location,
+            )
+        else
+            IrCall(
+                attributes,
+                null,
+                CallScope(callName, scopeName, isTrait),
+                arguments,
+                location,
+            ).apply {
+                this.functionLookup = state.functionLookup
+            }
     }
 }

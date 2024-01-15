@@ -15,9 +15,6 @@ private fun String.getFirstAbstraction() =
     toCodeModule()
         .artifact
         .abstractions
-        .also {
-            println(it.first())
-        }
         .first()
 
 private fun createSpec(description: String, code: String, expected: IrNode) =
@@ -301,7 +298,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
-                .toIrSymbol(functionLookup)
+                .toIrSymbol("test", functionLookup)
                 .expr
                 .shouldBe(expected)
         }
@@ -309,7 +306,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
-            .toIrSymbol(IrState({ _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(IrState("test", { _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
             .shouldBe(
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
@@ -330,7 +327,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             ten = 10
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(IrState(functionLookup, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(IrState("test", functionLookup, mutableVariableIndexes(emptyVariableIndex)))
             .attributes
             .apply {
                 shouldBe(
@@ -349,7 +346,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             c a = a
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(IrState(functionLookup, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(IrState("test", functionLookup, mutableVariableIndexes(emptyVariableIndex)))
             .apply {
                 shouldBe(
                     IrFunction(
@@ -377,11 +374,8 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
             "IrSum expression", """fn = 1 + 2""", arithmeticExpected(::IrSum)
         ).let { (_, code, expected) ->
             code.getFirstAbstraction()
-                .toIrSymbol(functionLookup)
+                .toIrSymbol("test", functionLookup)
                 .expr
-                .also {
-                    println(it)
-                }
                 .shouldBe(expected)
         }
     }

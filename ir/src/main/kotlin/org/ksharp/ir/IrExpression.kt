@@ -9,6 +9,7 @@ import org.ksharp.ir.truffle.ArgAccessNode
 import org.ksharp.ir.truffle.IfNode
 import org.ksharp.ir.truffle.KSharpNode
 import org.ksharp.ir.truffle.call.CallNode
+import org.ksharp.ir.truffle.call.NativeCallNode
 import org.ksharp.ir.truffle.cast.NumCastNode
 import org.ksharp.ir.truffle.variable.VarAccessNode
 import org.ksharp.typesystem.attributes.Attribute
@@ -103,5 +104,19 @@ data class IrCall(
         functionLookup.find(module, scope)?.cast<RootNode>()?.callTarget
 
     override val serializer: IrNodeSerializers = IrNodeSerializers.Call
+
+}
+
+data class IrNativeCall(
+    val argAttributes: Set<Attribute>,
+    val functionClass: String,
+    val arguments: List<IrExpression>,
+    override val location: Location
+) : NativeCallNode(functionClass, arguments.cast<List<KSharpNode>>().toTypedArray()), IrExpression {
+
+    override val attributes: Set<Attribute>
+        get() = nativeCall.getAttributes(argAttributes)
+
+    override val serializer: IrNodeSerializers = IrNodeSerializers.NativeCall
 
 }

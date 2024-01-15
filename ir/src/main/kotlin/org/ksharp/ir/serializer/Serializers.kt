@@ -49,6 +49,7 @@ enum class IrNodeSerializers(
     Var(IrVarValueSerializer(::IrVar)),
     If(IrIfSerializer()),
     Call(IrCallSerializer()),
+    NativeCall(IrNativeCallSerializer()),
     Let(IrLetSerializer()),
     LetSetVar(IrSetVarSerializer()),
 
