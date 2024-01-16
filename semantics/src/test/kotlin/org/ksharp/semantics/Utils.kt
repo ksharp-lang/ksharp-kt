@@ -18,7 +18,7 @@ fun String.toSemanticModuleInfo(loader: ModuleInfoLoader = ModuleInfoLoader { _,
             if (it.errors.isNotEmpty()) {
                 return@flatMap Either.Left(it.errors)
             }
-            val moduleInfo = it.toSemanticModuleInterface(preludeModule, loader).toSemanticModuleInfo()
+            val moduleInfo = it.toSemanticModuleInterface(preludeModule, loader).toSemanticModuleInfo(emptyList())
             if (moduleInfo.errors.isNotEmpty()) {
                 Either.Left(moduleInfo.errors)
             } else Either.Right(moduleInfo)
@@ -27,7 +27,7 @@ fun String.toSemanticModuleInfo(loader: ModuleInfoLoader = ModuleInfoLoader { _,
 fun String.getSemanticModuleInfo(loader: ModuleInfoLoader = ModuleInfoLoader { _, _ -> null }): ErrorOrValue<SemanticModuleInfo> =
     this.parseModule("irTest.ks", false)
         .flatMap {
-            Either.Right(it.toSemanticModuleInterface(preludeModule, loader).toSemanticModuleInfo())
+            Either.Right(it.toSemanticModuleInterface(preludeModule, loader).toSemanticModuleInfo(emptyList()))
         }
 
 

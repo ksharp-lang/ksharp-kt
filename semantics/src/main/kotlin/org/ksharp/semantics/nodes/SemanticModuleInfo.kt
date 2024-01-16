@@ -3,6 +3,7 @@ package org.ksharp.semantics.nodes
 import org.ksharp.common.Error
 import org.ksharp.common.cast
 import org.ksharp.module.*
+import org.ksharp.nodes.ImportNode
 import org.ksharp.nodes.ModuleNode
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.SemanticInfo
@@ -15,6 +16,7 @@ import org.ksharp.typesystem.types.FunctionType
 data class SemanticModuleInfo internal constructor(
     val name: String,
     val errors: List<Error>,
+    val dependencies: Map<String, String>,
     val typeSystem: TypeSystem,
     val impls: Set<Impl>,
     val traitsAbstractions: Map<String, List<AbstractionNode<SemanticInfo>>>,
@@ -63,7 +65,7 @@ internal fun ModuleNode.toSemanticModuleInterface(
     )
 }
 
-internal fun SemanticModuleInterface.toSemanticModuleInfo(): SemanticModuleInfo {
+internal fun SemanticModuleInterface.toSemanticModuleInfo(imports: List<ImportNode>): SemanticModuleInfo {
     val functionInfo = checkInferenceSemantics()
     return SemanticModuleInfo(
         name.let {
@@ -72,6 +74,9 @@ internal fun SemanticModuleInterface.toSemanticModuleInfo(): SemanticModuleInfo 
             else name
         },
         errors + functionInfo.errors,
+        imports.asSequence().map {
+            it.key to it.moduleName
+        }.toMap(),
         typeSystemInfo.typeSystem,
         typeSystemInfo.impls.keys,
         functionInfo.traitsAbstractions,
@@ -85,7 +90,7 @@ internal fun SemanticModuleInfo.toCodeModule() =
         name,
         errors,
         ModuleInfo(
-            dependencies = mapOf(),
+            dependencies = dependencies,
             typeSystem = typeSystem,
             functions = abstractions.toFunctionInfoMap(),
             impls = impls,
@@ -104,4 +109,4 @@ private fun List<AbstractionNode<SemanticInfo>>.toFunctionInfoMap() =
 
 
 fun ModuleNode.toCodeModule(preludeModule: ModuleInfo, loader: ModuleInfoLoader): CodeModule =
-    toSemanticModuleInterface(preludeModule, loader).toSemanticModuleInfo().toCodeModule()
+    toSemanticModuleInterface(preludeModule, loader).toSemanticModuleInfo(imports).toCodeModule()

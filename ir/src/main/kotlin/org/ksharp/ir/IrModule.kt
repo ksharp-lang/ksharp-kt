@@ -80,7 +80,7 @@ fun CodeModule.toIrModule(): IrModule {
     val module = IrModule(
         artifact.abstractions
             .filterNot { it.attributes.contains(CommonAttribute.Native) }
-            .map { it.toIrSymbol(name, lookup) }
+            .map { it.toIrSymbol(name, module.dependencies, lookup) }
     )
     lookup.functions = module.symbols.cast()
     return module

@@ -60,8 +60,7 @@ class Module(
 interface SourceLoader {
     fun binaryLoad(path: String): InputStream?
     fun sourceLoad(path: String): Reader?
-    fun outputStream(path: String): OutputStream
-
+    fun outputStream(path: String, action: (OutputStream) -> Unit)
 }
 
 class ModuleLoader(
@@ -73,6 +72,10 @@ class ModuleLoader(
     private fun InputStream.readModuleInfo(name: String): ErrorsOrModule =
         Either.Right(Module(name, bufferView(BufferView::readModuleInfo), sources))
 
+    private fun SourceLoader.write(path: String, action: (stream: OutputStream) -> Unit) {
+        outputStream(path, action)
+    }
+
     private fun Reader.codeModule(context: String, preludeModule: ModuleInfo): ErrorsOrModule =
         this.parseModule(context, true)
             .mapLeft {
@@ -80,14 +83,14 @@ class ModuleLoader(
             }.flatMap {
                 it.toCodeModule(preludeModule, moduleInfoLoader).let { codeModule ->
                     if (codeModule.errors.isEmpty()) {
-                        sources.outputStream(codeModule.name.toModulePath("ksd")).use { stream ->
+                        sources.write(codeModule.name.toModulePath("ksd")) { stream ->
                             it.toDocModule(codeModule.module)
                                 .writeTo(stream)
                         }
-                        sources.outputStream(codeModule.name.toModulePath("ksm")).use { stream ->
+                        sources.write(codeModule.name.toModulePath("ksm")) { stream ->
                             codeModule.module.writeTo(stream)
                         }
-                        sources.outputStream(codeModule.name.toModulePath("ksc")).use { stream ->
+                        sources.write(codeModule.name.toModulePath("ksc")) { stream ->
                             codeModule.toIrModule().writeTo(stream)
                         }
                         Either.Right(Module(codeModule.name, codeModule.module, sources))

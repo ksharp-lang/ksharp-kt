@@ -161,6 +161,9 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
         val (attributes, arguments) = arguments.toIrSymbols(state)
         val functionType = info.function!!
         val callName = "${functionName.name}/${functionType.arguments.arity}"
+        val functionModuleName =
+            if (functionName.pck == null) state.moduleName
+            else state.dependencies[functionName.pck]!!
         val trait = functionType.arguments.first().asTraitType()
         val isTrait = trait != null
         val scopeName = if (isTrait) {
@@ -169,7 +172,7 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
         if (functionType.attributes.contains(CommonAttribute.Native))
             IrNativeCall(
                 attributes,
-                "${state.moduleName.replace("([A-Z])".toRegex(), "_$1").lowercase()}.${
+                "${functionModuleName.replace("([A-Z])".toRegex(), "_$1").lowercase()}.${
                     callName.replace("/", "")
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
                 }",

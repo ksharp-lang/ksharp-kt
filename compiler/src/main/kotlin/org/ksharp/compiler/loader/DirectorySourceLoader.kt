@@ -6,6 +6,7 @@ import java.io.Reader
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.deleteIfExists
 
 class DirectorySourceLoader(
     private val sources: Path,
@@ -24,9 +25,15 @@ class DirectorySourceLoader(
             else null
         }
 
-    override fun outputStream(path: String): OutputStream =
+    override fun outputStream(path: String, action: (OutputStream) -> Unit) {
         binaries.resolve(path).let {
-            Files.newOutputStream(it)
+            try {
+                Files.newOutputStream(it).use(action)
+            } catch (e: Exception) {
+                it.deleteIfExists()
+                throw e
+            }
         }
+    }
 
 }

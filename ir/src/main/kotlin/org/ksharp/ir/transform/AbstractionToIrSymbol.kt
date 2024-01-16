@@ -12,6 +12,7 @@ val pureArgument = setOf(CommonAttribute.Pure)
 
 fun AbstractionNode<SemanticInfo>.toIrSymbol(
     moduleName: String,
+    dependencies: Map<String, String>,
     functionLookup: FunctionLookup
 ): IrFunction {
     val arguments = info.cast<AbstractionSemanticInfo>().parameters.filter {
@@ -31,7 +32,7 @@ fun AbstractionNode<SemanticInfo>.toIrSymbol(
         .let {
             argIndex(it)
         }
-    val irState = IrState(moduleName, functionLookup, mutableVariableIndexes(variableIndex))
+    val irState = IrState(moduleName, dependencies, functionLookup, mutableVariableIndexes(variableIndex))
     val expression = expression.toIrSymbol(irState)
     return IrFunction(
         //all functions are pure, except if it is marked impure
