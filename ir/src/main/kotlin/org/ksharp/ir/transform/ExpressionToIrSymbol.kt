@@ -51,7 +51,7 @@ fun SemanticNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression =
         is ConstantNode -> toIrSymbol()
         is VarNode -> toIrSymbol(state)
         is ApplicationNode -> toIrSymbol(state)
-        is AbstractionNode -> toIrSymbol(state.moduleName, state.functionLookup)
+        is AbstractionNode -> toIrSymbol(state.moduleName, state.dependencies, state.functionLookup)
         is LetNode -> toIrSymbol(state)
 
         else -> TODO("$this")

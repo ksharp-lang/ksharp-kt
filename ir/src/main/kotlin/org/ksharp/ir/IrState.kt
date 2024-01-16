@@ -4,6 +4,7 @@ import org.ksharp.typesystem.attributes.Attribute
 
 data class IrState(
     val moduleName: String,
+    val dependencies: Map<String, String>,
     val functionLookup: FunctionLookup,
     val variableIndex: MutableVariableIndex,
 ) {

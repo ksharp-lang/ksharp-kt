@@ -298,7 +298,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
-                .toIrSymbol("test", functionLookup)
+                .toIrSymbol("test", emptyMap(), functionLookup)
                 .expr
                 .shouldBe(expected)
         }
@@ -306,7 +306,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
-            .toIrSymbol(IrState("test", { _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(IrState("test", emptyMap(), { _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
             .shouldBe(
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
@@ -327,7 +327,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             ten = 10
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(IrState("test", functionLookup, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(IrState("test", emptyMap(), functionLookup, mutableVariableIndexes(emptyVariableIndex)))
             .attributes
             .apply {
                 shouldBe(
@@ -346,7 +346,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             c a = a
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(IrState("test", functionLookup, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(IrState("test", emptyMap(), functionLookup, mutableVariableIndexes(emptyVariableIndex)))
             .apply {
                 shouldBe(
                     IrFunction(
@@ -374,7 +374,7 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
             "IrSum expression", """fn = 1 + 2""", arithmeticExpected(::IrSum)
         ).let { (_, code, expected) ->
             code.getFirstAbstraction()
-                .toIrSymbol("test", functionLookup)
+                .toIrSymbol("test", emptyMap(), functionLookup)
                 .expr
                 .shouldBe(expected)
         }

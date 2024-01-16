@@ -1,6 +1,7 @@
 package org.ksharp.ir.truffle.call;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
+import org.ksharp.ir.NativeCall;
 import org.ksharp.ir.truffle.KSharpNode;
 
 import java.lang.reflect.InvocationTargetException;

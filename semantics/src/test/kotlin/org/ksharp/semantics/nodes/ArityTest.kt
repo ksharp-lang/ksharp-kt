@@ -97,7 +97,7 @@ class ArityTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.toSemanticModuleInterface(preludeModule) { _, _ -> null }
-                    .toSemanticModuleInfo()
+                    .toSemanticModuleInfo(emptyList())
                     .typeSystem["Sum"].valueOrNull!!.cast<TraitType>()
                     .methods.values
                     .map(TraitType.MethodType::nameWithArity)
@@ -115,7 +115,7 @@ class ArityTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.toSemanticModuleInterface(preludeModule) { _, _ -> null }
-                    .toSemanticModuleInfo()
+                    .toSemanticModuleInfo(emptyList())
                     .abstractions
                     .map(AbstractionNode<SemanticInfo>::nameWithArity)
                     .shouldBe(listOf("ten/0", "ten/1", "sum/2"))
