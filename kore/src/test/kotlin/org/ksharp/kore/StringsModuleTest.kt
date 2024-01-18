@@ -20,4 +20,12 @@ class StringsModuleTest : StringSpec({
             .evaluateFunction("fn/0")
             .shouldBeRight(5)
     }
+    "comparable" {
+        """
+            import strings as s
+            fn = "Hello" < "World"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
 })

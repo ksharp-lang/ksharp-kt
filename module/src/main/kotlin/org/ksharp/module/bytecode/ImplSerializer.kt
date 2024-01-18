@@ -12,17 +12,19 @@ import org.ksharp.typesystem.types.Type
 fun Impl.writeTo(buffer: BufferWriter, table: BinaryTable) {
     newBufferWriter().apply {
         add(0) // 0
-        add(table.add(trait)) // 4
-        type.writeTo(this, table) //8
+        add(table.add(module)) //4
+        add(table.add(trait)) // 8
+        type.writeTo(this, table) //12
         set(0, size)
         transferTo(buffer)
     }
 }
 
 fun BufferView.readImpl(handle: HandlePromise<TypeSystem>, table: BinaryTableView): Impl {
-    val name = table[readInt(4)]
-    val type = bufferFrom(8).readType<Type>(handle, table)
-    return Impl(name, type)
+    val module = table[readInt(4)]
+    val name = table[readInt(8)]
+    val type = bufferFrom(12).readType<Type>(handle, table)
+    return Impl(module, name, type)
 }
 
 fun Set<Impl>.writeTo(buffer: BufferWriter, table: BinaryTable) {

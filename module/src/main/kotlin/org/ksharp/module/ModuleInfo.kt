@@ -4,6 +4,7 @@ import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 
 data class Impl(
+    val module: String,
     val trait: String,
     val type: Type
 )

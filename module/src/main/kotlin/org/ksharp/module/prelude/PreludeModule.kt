@@ -12,15 +12,15 @@ private fun TypeSystem.preludeImpls(): Set<Impl> =
         .asSequence()
         .map {
             sequenceOf(
-                Impl("Num", this[it.name].valueOrNull!!),
-                Impl("Comparable", this[it.name].valueOrNull!!)
+                Impl("", "Num", this[it.name].valueOrNull!!),
+                Impl("", "Comparable", this[it.name].valueOrNull!!)
             )
         }
         .flatten(),
         Numeric.entries
             .asSequence()
             .filter { it.isInteger }
-            .map { Impl("Bitwise", this[it.name].valueOrNull!!) })
+            .map { Impl("", "Bitwise", this[it.name].valueOrNull!!) })
         .flatten()
         .toSet()
 
