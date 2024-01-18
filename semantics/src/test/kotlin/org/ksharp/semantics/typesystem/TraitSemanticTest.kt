@@ -24,6 +24,7 @@ private fun Collection<TraitType>.shouldDefine(methods: Map<String, Boolean>): C
         }
     }.flatten()
         .toMap()
+        .onEach { println(it) }
         .shouldBe(methods)
     return this
 }
@@ -115,12 +116,12 @@ class TraitSemanticTest : StringSpec({
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
                             "Num::(**)/2" to true,
-                            "Comparable::compare/2" to false,
                             "Bitwise::(&)/2" to true,
                             "Bitwise::(|)/2" to true,
                             "Bitwise::(^)/2" to true,
                             "Bitwise::(>>)/2" to true,
                             "Bitwise::(<<)/2" to true,
+                            "Comparable::compare/2" to true
                         )
                     )
                     .map { t -> t.representation }
@@ -154,7 +155,7 @@ class TraitSemanticTest : StringSpec({
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
                             "Num::(**)/2" to true,
-                            "Comparable::compare/2" to false,
+                            "Comparable::compare/2" to true,
                             "Bitwise::(&)/2" to true,
                             "Bitwise::(|)/2" to true,
                             "Bitwise::(^)/2" to true,
@@ -200,7 +201,7 @@ class TraitSemanticTest : StringSpec({
                             "Num::(/)/2" to true,
                             "Num::(%)/2" to true,
                             "Num::(**)/2" to true,
-                            "Comparable::compare/2" to false,
+                            "Comparable::compare/2" to true,
                             "Bitwise::(&)/2" to true,
                             "Bitwise::(|)/2" to true,
                             "Bitwise::(^)/2" to true,

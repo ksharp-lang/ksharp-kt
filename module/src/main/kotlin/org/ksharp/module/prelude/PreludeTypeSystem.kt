@@ -11,10 +11,7 @@ import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.attributes.nameAttribute
 import org.ksharp.typesystem.serializer.registerCatalog
 import org.ksharp.typesystem.typeSystem
-import org.ksharp.typesystem.types.TraitTypeFactory
-import org.ksharp.typesystem.types.parametricType
-import org.ksharp.typesystem.types.trait
-import org.ksharp.typesystem.types.type
+import org.ksharp.typesystem.types.*
 
 private fun TypeSystemBuilder.number(type: Numeric) =
     type(setOf(nameAttribute(mapOf("ir" to "num"))), type.name) {
@@ -47,6 +44,22 @@ private fun createKernelTypeSystem() = typeSystem {
         binaryOp("(^)")
         binaryOp("(>>)")
         binaryOp("(<<)")
+    }
+
+    type(NoAttributes, "Ordering") {
+        unionType {
+            clazz("Less")
+            clazz("Equal")
+            clazz("Greater")
+        }
+    }
+    
+    trait(setOf(nameAttribute(mapOf("ir" to "prelude::comparable"))), "Comparable", "a") {
+        method("compare", true) {
+            parameter("a")
+            parameter("a")
+            type("Ordering")
+        }
     }
 
     type(NoAttributes, "Unit")
