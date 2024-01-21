@@ -11,6 +11,7 @@ import org.ksharp.typesystem.types.TraitType
 class MethodTypeSerializer : SerializerWriter<TraitType.MethodType>, TypeSerializerReader<TraitType.MethodType> {
     override fun write(input: TraitType.MethodType, buffer: BufferWriter, table: BinaryTable) {
         input.attributes.writeTo(buffer, table)
+        buffer.add(table.add(input.traitName))
         buffer.add(table.add(input.name))
         buffer.add(if (input.withDefaultImpl) 1 else 0)
         input.arguments.writeTo(buffer, table)
@@ -23,10 +24,11 @@ class MethodTypeSerializer : SerializerWriter<TraitType.MethodType>, TypeSeriali
     ): TraitType.MethodType {
         val offset = buffer.readInt(0)
         val attributes = buffer.readAttributes(table)
-        val name = table[buffer.readInt(offset)]
-        val withDefaultImpl = buffer.readInt(offset + 4) == 1
-        val arguments = buffer.bufferFrom(8 + offset).readListOfTypes(handle, table)
-        return TraitType.MethodType(handle, attributes, name, arguments, withDefaultImpl)
+        val traitName = table[buffer.readInt(offset)]
+        val name = table[buffer.readInt(offset + 4)]
+        val withDefaultImpl = buffer.readInt(offset + 8) == 1
+        val arguments = buffer.bufferFrom(offset + 12).readListOfTypes(handle, table)
+        return TraitType.MethodType(handle, attributes, traitName, name, arguments, withDefaultImpl)
     }
 
 }

@@ -117,7 +117,8 @@ class TypeSystemSerializerTest : StringSpec({
                 Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
                 Concrete(mockHandle, setOf(CommonAttribute.Public), "Int2"),
                 Concrete(mockHandle, setOf(CommonAttribute.Public), "Int3")
-            )
+            ),
+            FunctionScope(FunctionScopeType.Module, null, null)
         ).shouldBeSerializable()
     }
     "Serialize Partial Function Types" {
@@ -132,7 +133,7 @@ class TypeSystemSerializerTest : StringSpec({
                     Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
                     Concrete(mockHandle, setOf(CommonAttribute.Public), "Int2"),
                     Concrete(mockHandle, setOf(CommonAttribute.Public), "Int3")
-                )
+                ), FunctionScope(FunctionScopeType.Module, null, null)
             )
         ).shouldBeSerializable()
     }
@@ -143,7 +144,7 @@ class TypeSystemSerializerTest : StringSpec({
                 Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
                 Concrete(mockHandle, setOf(CommonAttribute.Public), "Int2"),
                 Concrete(mockHandle, setOf(CommonAttribute.Public), "Int3")
-            )
+            ), FunctionScope(FunctionScopeType.Module, null, null)
         ).shouldBeSerializable()
     }
     "Serialize Intersection Types" {
@@ -188,6 +189,7 @@ class TypeSystemSerializerTest : StringSpec({
             mapOf(
                 "sum" to TraitType.MethodType(
                     mockHandle, setOf(CommonAttribute.Public),
+                    "Num",
                     "sum",
                     listOf(
                         Parameter(mockHandle, "a"),
@@ -197,6 +199,7 @@ class TypeSystemSerializerTest : StringSpec({
                 ),
                 "sub" to TraitType.MethodType(
                     mockHandle, setOf(CommonAttribute.Public),
+                    "Num",
                     "sub",
                     listOf(
                         Parameter(mockHandle, "a"),
@@ -223,6 +226,7 @@ class TypeSystemSerializerTest : StringSpec({
                 mapOf(
                     "sum" to TraitType.MethodType(
                         mockHandle, setOf(CommonAttribute.Public),
+                        "Num",
                         "sum",
                         listOf(
                             Parameter(mockHandle, "a"),
@@ -232,6 +236,7 @@ class TypeSystemSerializerTest : StringSpec({
                     ),
                     "sub" to TraitType.MethodType(
                         mockHandle, setOf(CommonAttribute.Public),
+                        "Num",
                         "sub",
                         listOf(
                             Parameter(mockHandle, "a"),
@@ -252,6 +257,7 @@ class TypeSystemSerializerTest : StringSpec({
                 mapOf(
                     "sum" to TraitType.MethodType(
                         mockHandle, setOf(CommonAttribute.Public),
+                        "Num",
                         "sum",
                         listOf(
                             Parameter(mockHandle, "a"),
@@ -261,6 +267,7 @@ class TypeSystemSerializerTest : StringSpec({
                     ),
                     "sub" to TraitType.MethodType(
                         mockHandle, setOf(CommonAttribute.Public),
+                        "Num",
                         "sub",
                         listOf(
                             Parameter(mockHandle, "a"),

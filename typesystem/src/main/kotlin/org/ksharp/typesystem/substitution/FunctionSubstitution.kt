@@ -52,7 +52,7 @@ class FullFunctionSubstitution : FunctionSubstitution<FullFunctionType>() {
         attributes: Set<Attribute>,
         arguments: List<Type>
     ): FullFunctionType =
-        FullFunctionType(typeSystem, attributes, arguments)
+        FullFunctionType(typeSystem, attributes, arguments, originalType.scope)
 
 }
 

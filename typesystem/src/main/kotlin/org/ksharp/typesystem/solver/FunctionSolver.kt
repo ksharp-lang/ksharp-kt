@@ -10,15 +10,15 @@ import org.ksharp.typesystem.types.toFunctionType
 
 class FullFunctionSolver : Solver {
     override fun solve(type: Type): ErrorOrType =
-        type.cast<FullFunctionType>()
-            .arguments.map { p ->
+        type.cast<FullFunctionType>().let { f ->
+            f.arguments.map { p ->
                 p.solve()
             }.unwrap()
-            .map { arguments ->
-                arguments.toFunctionType(type.typeSystem, type.attributes)
-            }
-
-
+                .map { arguments ->
+                    arguments.toFunctionType(type.typeSystem, type.attributes, f.scope)
+                }
+        }
+    
 }
 
 class PartialFunctionSolver : Solver {

@@ -71,7 +71,8 @@ class TypeTest : StringSpec({
                 Concrete(ts.handle, NoAttributes, "Int"),
                 Parameter(ts.handle, "a"),
                 Parameter(ts.handle, "b")
-            )
+            ),
+            FunctionScope(FunctionScopeType.Module, null, null)
         ).terms.toList().shouldBe(
             listOf(
                 Concrete(ts.handle, NoAttributes, "Int"),

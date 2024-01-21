@@ -10,7 +10,7 @@ import org.ksharp.typesystem.types.toFunctionType
 class MethodUnification : UnificationAlgo<TraitType.MethodType> {
 
     private fun toFunctionType(type: Type) =
-        if (type is TraitType.MethodType) type.arguments.toFunctionType(type.typeSystem, type.attributes)
+        if (type is TraitType.MethodType) type.arguments.toFunctionType(type.typeSystem, type.attributes, type.scope)
         else type
 
     override fun unify(

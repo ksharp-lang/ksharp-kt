@@ -78,9 +78,25 @@ data class IrModule(
 fun CodeModule.toIrModule(): IrModule {
     val lookup = FunctionLookupImpl()
     val module = IrModule(
-        artifact.abstractions
-            .filterNot { it.attributes.contains(CommonAttribute.Native) }
-            .map { it.toIrSymbol(name, module.dependencies, lookup) }
+        sequenceOf(
+            traitArtifacts
+                .asSequence()
+                .map { entry ->
+                    entry.value.abstractions
+                        .map { it.toIrSymbol(name, module.dependencies, lookup) }
+                }.flatten(),
+            implArtifacts
+                .asSequence()
+                .map { entry ->
+                    entry.value.abstractions
+                        .map { it.toIrSymbol(name, module.dependencies, lookup) }
+                }.flatten(),
+            artifact.abstractions
+                .asSequence()
+                .filterNot { it.attributes.contains(CommonAttribute.Native) }
+                .map { it.toIrSymbol(name, module.dependencies, lookup) }
+        ).flatten()
+            .toList()
     )
     lookup.functions = module.symbols.cast()
     return module

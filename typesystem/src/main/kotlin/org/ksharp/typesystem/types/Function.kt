@@ -8,7 +8,6 @@ import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode.InvalidFunctionType
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.solver.Solver
@@ -18,7 +17,22 @@ import org.ksharp.typesystem.substitution.Substitutions
 import org.ksharp.typesystem.unification.TypeUnification
 import org.ksharp.typesystem.unification.TypeUnifications
 
+enum class FunctionScopeType {
+    Module,
+    Trait,
+    Impl
+}
+
+data class FunctionScope(
+    val type: FunctionScopeType,
+    val trait: String?,
+    val impl: String?
+)
+
+val ModuleFunctionScope = FunctionScope(FunctionScopeType.Module, null, null)
+
 interface FunctionType : Type {
+    val scope: FunctionScope
     val arguments: List<Type>
 }
 
@@ -27,6 +41,7 @@ data class PartialFunctionType(
     val function: FunctionType
 ) : FunctionType {
 
+    override val scope: FunctionScope = function.scope
     override val typeSystem: HandlePromise<TypeSystem> = function.typeSystem
     override val attributes: Set<Attribute> = function.attributes
 
@@ -46,17 +61,21 @@ data class PartialFunctionType(
 data class FullFunctionType private constructor(
     override val attributes: Set<Attribute>,
     override val arguments: List<Type>,
+    override val scope: FunctionScope
 ) : FunctionType {
+
     override lateinit var typeSystem: HandlePromise<TypeSystem>
         private set
 
     internal constructor(
         typeSystem: HandlePromise<TypeSystem>,
         attributes: Set<Attribute>,
-        arguments: List<Type>
+        arguments: List<Type>,
+        scope: FunctionScope
     ) : this(
         attributes,
-        arguments
+        arguments,
+        scope
     ) {
         this.typeSystem = typeSystem
     }
@@ -77,18 +96,26 @@ data class FullFunctionType private constructor(
 
     override fun toString(): String = arguments.asSequence().map { it.representation }.joinToString(" -> ")
 
-    override fun new(attributes: Set<Attribute>): Type = FullFunctionType(typeSystem, attributes, arguments)
+    override fun new(attributes: Set<Attribute>): Type = FullFunctionType(typeSystem, attributes, arguments, scope)
 }
 
 fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
     ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { args ->
         if (args.size < 2) {
             Left(InvalidFunctionType.new())
-        } else Right(FullFunctionType(handle, attributes, args))
+        } else Right(FullFunctionType(handle, attributes, args, FunctionScope(FunctionScopeType.Module, null, null)))
     }
 
-fun List<Type>.toFunctionType(typeSystem: TypeSystem, attributes: Set<Attribute> = NoAttributes) =
-    FullFunctionType(typeSystem.handle, attributes, this)
+fun List<Type>.toFunctionType(
+    typeSystem: TypeSystem,
+    attributes: Set<Attribute>,
+    scope: FunctionScope
+) =
+    FullFunctionType(typeSystem.handle, attributes, this, scope)
 
-fun List<Type>.toFunctionType(handle: HandlePromise<TypeSystem>, attributes: Set<Attribute> = NoAttributes) =
-    FullFunctionType(handle, attributes, this)
+fun List<Type>.toFunctionType(
+    handle: HandlePromise<TypeSystem>,
+    attributes: Set<Attribute>,
+    scope: FunctionScope
+) =
+    FullFunctionType(handle, attributes, this, scope)

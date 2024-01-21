@@ -23,7 +23,7 @@ abstract class FunctionUnification<T : FunctionType> : CompoundUnification<T>() 
         if (type1.arguments.size != type2.arguments.size) incompatibleType(location, type1, type2)
         else {
             unifyListOfTypes(location, type1, type2, type1.arguments, type2.arguments, checker).map { params ->
-                FullFunctionType(type1.typeSystem, type1.attributes, params)
+                FullFunctionType(type1.typeSystem, type1.attributes, params, type1.scope)
             }
         }
 }
@@ -37,7 +37,7 @@ class FullFunctionUnification : FunctionUnification<FullFunctionType>() {
         originalType: FullFunctionType,
         arguments: List<Type>
     ): FullFunctionType =
-        FullFunctionType(originalType.typeSystem, originalType.attributes, arguments)
+        FullFunctionType(originalType.typeSystem, originalType.attributes, arguments, originalType.scope)
 }
 
 class PartialFunctionUnification : FunctionUnification<PartialFunctionType>() {

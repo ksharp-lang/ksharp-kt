@@ -91,7 +91,8 @@ class TypeSystemTest : ShouldSpec({
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int")
-                                )
+                                ),
+                                FunctionScope(FunctionScopeType.Module, null, null)
                             ), "(Int -> Int -> Int)"
                         )
                     }
@@ -362,7 +363,7 @@ class TypeSystemTest : ShouldSpec({
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int")
-                                )
+                                ), FunctionScope(FunctionScopeType.Module, null, null)
                             ),
                             "(Int -> Int -> Int)"
                         )
@@ -375,7 +376,7 @@ class TypeSystemTest : ShouldSpec({
                                 listOf(
                                     Parameter(handle, "a"),
                                     Alias(handle, "Int")
-                                )
+                                ), FunctionScope(FunctionScopeType.Module, null, null)
                             ),
                             "(a -> Int)"
                         )
@@ -394,7 +395,7 @@ class TypeSystemTest : ShouldSpec({
                                             listOf(Alias(handle, "Int"))
                                         ),
                                         Alias(handle, "Int")
-                                    )
+                                    ), FunctionScope(FunctionScopeType.Module, null, null)
                                 ),
                                 "((List Int) -> Int)"
                             )
@@ -418,7 +419,7 @@ class TypeSystemTest : ShouldSpec({
                                             listOf(
                                                 Parameter(handle, "a"),
                                                 Parameter(handle, "b")
-                                            )
+                                            ), FunctionScope(FunctionScopeType.Module, null, null)
                                         ),
                                         ParametricType(
                                             handle,
@@ -426,7 +427,8 @@ class TypeSystemTest : ShouldSpec({
                                             Alias(handle, "List"),
                                             listOf(Parameter(handle, "b"))
                                         ),
-                                    )
+                                    ),
+                                    FunctionScope(FunctionScopeType.Module, null, null)
                                 ),
                                 "((List a) -> (a -> b) -> (List b))"
                             )
@@ -440,7 +442,7 @@ class TypeSystemTest : ShouldSpec({
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int")
-                                )
+                                ), FunctionScope(FunctionScopeType.Module, null, null)
                             ),
                             "(Int -> Int -> Int)"
                         )
@@ -807,6 +809,7 @@ class TypeSystemTest : ShouldSpec({
                                     "(+)/2" to TraitType.MethodType(
                                         handle,
                                         setOf(CommonAttribute.TraitMethod),
+                                        "Num",
                                         "(+)",
                                         listOf(
                                             Parameter(handle, "a"),
@@ -817,6 +820,7 @@ class TypeSystemTest : ShouldSpec({
                                     "(-)/2" to TraitType.MethodType(
                                         handle,
                                         setOf(CommonAttribute.TraitMethod),
+                                        "Num",
                                         "(-)",
                                         listOf(
                                             Parameter(handle, "a"),
@@ -1096,7 +1100,8 @@ class TypeSystemTest : ShouldSpec({
                                     Alias(handle, "Int").labeled("a"),
                                     Parameter(handle, "b"),
                                     Alias(handle, "Int").labeled("result")
-                                )
+                                ),
+                                FunctionScope(FunctionScopeType.Module, null, null)
                             ),
                             "(a: Int -> b -> result: Int)"
                         )
@@ -1149,7 +1154,7 @@ class TypeSystemTest : ShouldSpec({
                                 listOf(
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int")
-                                )
+                                ), FunctionScope(FunctionScopeType.Module, null, null)
                             ),
                             "(Int -> Int)"
                         )

@@ -5,6 +5,7 @@ import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.expressions.CollectionFunctionName
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.solver.solve
 import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.unify
@@ -235,7 +236,11 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
     this.info.cast<AbstractionSemanticInfo>().parameters.let { params ->
         if (params.isEmpty()) {
             info.prelude.typeSystem["Unit"].map { unitType ->
-                listOf(unitType, returnType).toFunctionType(info.inferenceContext.typeSystem)
+                listOf(unitType, returnType).toFunctionType(
+                    info.inferenceContext.typeSystem,
+                    NoAttributes,
+                    ModuleFunctionScope
+                )
             }
         } else {
             params.asSequence().run {

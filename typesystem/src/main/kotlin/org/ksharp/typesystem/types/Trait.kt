@@ -57,21 +57,26 @@ data class TraitType private constructor(
     @Suppress("DataClassPrivateConstructor")
     data class MethodType private constructor(
         override val attributes: Set<Attribute>,
+        val traitName: String,
         val name: String,
-        val arguments: List<Type>,
+        override val arguments: List<Type>,
         val withDefaultImpl: Boolean,
-    ) : Type {
+    ) : FunctionType {
+        override val scope: FunctionScope get() = FunctionScope(FunctionScopeType.Trait, traitName, null)
+        
         override lateinit var typeSystem: HandlePromise<TypeSystem>
             private set
 
         internal constructor(
             typeSystem: HandlePromise<TypeSystem>,
             attributes: Set<Attribute>,
+            traitName: String,
             name: String,
             arguments: List<Type>,
             withDefaultImpl: Boolean,
         ) : this(
             attributes,
+            traitName,
             name,
             arguments,
             withDefaultImpl
@@ -101,7 +106,7 @@ data class TraitType private constructor(
             } :: ${arguments.joinToString(" -> ") { it.representation }}"
 
         override fun new(attributes: Set<Attribute>): Type =
-            MethodType(typeSystem, attributes, name, arguments, withDefaultImpl)
+            MethodType(typeSystem, attributes, traitName, name, arguments, withDefaultImpl)
     }
 
     override val compound: Boolean
@@ -146,6 +151,7 @@ class TraitTypeFactory(
                         traitMethodName, TraitType.MethodType(
                             factory.handle,
                             setOf(CommonAttribute.TraitMethod),
+                            traitName,
                             name,
                             args,
                             withDefaultImpl

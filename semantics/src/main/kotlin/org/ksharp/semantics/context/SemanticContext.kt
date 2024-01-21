@@ -36,7 +36,7 @@ class TypeSystemSemanticContext(override val typeSystem: TypeSystem) : SemanticC
 class TraitSemanticContext(override val typeSystem: TypeSystem, private val trait: TraitType) : SemanticContext {
     override fun findFunctionType(name: String): FunctionType? =
         trait.methods[name]?.let {
-            it.arguments.toFunctionType(it.typeSystem.handle!!, it.attributes)
+            it.arguments.toFunctionType(it.typeSystem.handle!!, it.attributes, it.scope)
         }
 
     override fun calculateVisibility(function: FunctionNode): CommonAttribute {
@@ -57,7 +57,7 @@ class ImplSemanticContext(
 ) : SemanticContext {
     override fun findFunctionType(name: String): FunctionType? =
         trait.methods[name]?.let {
-            val fnType = it.arguments.toFunctionType(it.typeSystem.handle!!, it.attributes)
+            val fnType = it.arguments.toFunctionType(it.typeSystem.handle!!, it.attributes, it.scope)
             val substitutionContext = SubstitutionContext(checker)
             substitutionContext.extract(location, fnType, fnType)
             substitutionContext.addMapping(location, trait.param, forType)
