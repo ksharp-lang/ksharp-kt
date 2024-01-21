@@ -31,18 +31,11 @@ private fun SemanticNode<SemanticInfo>.isCollectionApplication(fnName: String): 
 val <T : SemanticInfo> AbstractionNode<T>.nameWithArity: String
     get() = info.cast<AbstractionSemanticInfo>().parameters.size.let { "$name/$it" }
 
-private val SemanticNode<SemanticInfo>.isArray: Boolean
-    get() = isCollectionApplication("arrayOf")
-
 private val SemanticNode<SemanticInfo>.isTuple: Boolean
     get() = isCollectionApplication("tupleOf")
 
 private val SemanticNode<SemanticInfo>.isList: Boolean
     get() = isCollectionApplication("listOf")
-
-private val SemanticNode<SemanticInfo>.isSet: Boolean
-    get() = isCollectionApplication("setOf")
-
 
 private val SemanticNode<SemanticInfo>.isType: Boolean
     get() = this is ApplicationNode
