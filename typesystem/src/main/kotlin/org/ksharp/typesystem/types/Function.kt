@@ -8,6 +8,7 @@ import org.ksharp.typesystem.TypeItemBuilder
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.TypeSystemErrorCode.InvalidFunctionType
 import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.serializer.TypeSerializer
 import org.ksharp.typesystem.serializer.TypeSerializers
 import org.ksharp.typesystem.solver.Solver
@@ -108,14 +109,14 @@ fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
 
 fun List<Type>.toFunctionType(
     typeSystem: TypeSystem,
-    attributes: Set<Attribute>,
-    scope: FunctionScope
+    attributes: Set<Attribute> = NoAttributes,
+    scope: FunctionScope = ModuleFunctionScope
 ) =
     FullFunctionType(typeSystem.handle, attributes, this, scope)
 
 fun List<Type>.toFunctionType(
     handle: HandlePromise<TypeSystem>,
-    attributes: Set<Attribute>,
-    scope: FunctionScope
+    attributes: Set<Attribute> = NoAttributes,
+    scope: FunctionScope = ModuleFunctionScope
 ) =
     FullFunctionType(handle, attributes, this, scope)
