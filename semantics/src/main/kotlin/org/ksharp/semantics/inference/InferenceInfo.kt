@@ -93,6 +93,7 @@ internal fun Sequence<FunctionInfo>.unify(
 }
 
 data class InferenceInfo(
+    val scope: FunctionScope,
     val prelude: InferenceContext,
     val inferenceContext: InferenceContext,
     val dependencies: Map<String, InferenceContext>

@@ -26,8 +26,7 @@ import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
-import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.TraitType
+import org.ksharp.typesystem.types.*
 
 enum class FunctionSemanticsErrorCode(override val description: String) : ErrorCode {
     WrongNumberOfParameters("Wrong number of parameters for '{name}' respecting their declaration {fnParams} != {declParams}"),
@@ -266,12 +265,13 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     val moduleInferenceContext = functionInfo.abstractions.toInferenceContext(
         typeSystemInfo.typeSystem, typeSystemInfo.impls.keys
     )
-    
+
     val dependencies = dependencies.mapValues {
         ModuleInfoInferenceContext(it.value)
     }
 
     val abstractionsInferenceInfo = InferenceInfo(
+        ModuleFunctionScope,
         preludeInferenceContext,
         moduleInferenceContext,
         dependencies
@@ -280,6 +280,7 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     val abstractions = functionInfo.abstractions.inferTypes(errors, abstractionsInferenceInfo)
     val traitsAbstractions = functionInfo.traitsAbstractions.asSequence().associate { trait ->
         val traitInferenceInfo = InferenceInfo(
+            FunctionScope(FunctionScopeType.Trait, trait.key),
             preludeInferenceContext,
             trait.value.toTraitInferenceContext(
                 moduleInferenceContext,
@@ -292,6 +293,7 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     val implAbstractions = functionInfo.implAbstractions.asSequence().associate { impl ->
         val traitType = typeSystemInfo.typeSystem[impl.key.trait]
         val implInferenceInfo = InferenceInfo(
+            FunctionScope(FunctionScopeType.Trait, impl.key.trait),
             preludeInferenceContext,
             impl.value.toImplInferenceContext(
                 moduleInferenceContext,

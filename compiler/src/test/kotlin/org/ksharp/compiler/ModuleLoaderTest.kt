@@ -14,6 +14,8 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.types.ModuleFunctionScope
 import org.ksharp.typesystem.types.toFunctionType
 import java.io.File
 import java.nio.file.Files
@@ -35,7 +37,11 @@ class ModuleLoaderTest : StringSpec({
                 it.info.dependencies.shouldBeEmpty()
                 it.info.impls.shouldBeEmpty()
                 it.info.functions.mapValues { entry ->
-                    entry.value.types.toFunctionType(it.info.typeSystem).representation
+                    entry.value.types.toFunctionType(
+                        it.info.typeSystem,
+                        NoAttributes,
+                        ModuleFunctionScope
+                    ).representation
                 }.shouldBe(mapOf("ten/0" to "(Unit -> Long)"))
                 it.executable.execute("ten/0").shouldBe(10L)
                 it.documentation.documentation("ten/0").shouldBe("Number 10")
@@ -54,7 +60,11 @@ class ModuleLoaderTest : StringSpec({
                 it.info.dependencies.shouldBeEmpty()
                 it.info.impls.shouldBeEmpty()
                 it.info.functions.mapValues { entry ->
-                    entry.value.types.toFunctionType(it.info.typeSystem).representation
+                    entry.value.types.toFunctionType(
+                        it.info.typeSystem,
+                        NoAttributes,
+                        ModuleFunctionScope
+                    ).representation
                 }.shouldBe(mapOf("ten/0" to "(Unit -> Long)"))
                 it.executable.execute("ten/0").shouldBe(10L)
                 it.documentation.documentation("ten/0").shouldBe("Number 10")
@@ -68,7 +78,7 @@ class ModuleLoaderTest : StringSpec({
                 dependencies.shouldBeEmpty()
                 impls.shouldBeEmpty()
                 functions.mapValues { entry ->
-                    entry.value.types.toFunctionType(typeSystem).representation
+                    entry.value.types.toFunctionType(typeSystem, NoAttributes, ModuleFunctionScope).representation
                 }.shouldBe(mapOf("ten/0" to "(Unit -> Long)"))
             }
     }

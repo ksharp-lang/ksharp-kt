@@ -13,6 +13,8 @@ import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
+import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.types.ModuleFunctionScope
 import org.ksharp.typesystem.types.newParameter
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
@@ -37,7 +39,12 @@ private fun createInferenceInfo(typeSystem: TypeSystem): InferenceInfo {
         ),
         emptySet()
     )
-    return InferenceInfo(ModuleInfoInferenceContext(preludeModule), ModuleInfoInferenceContext(testModule), mapOf())
+    return InferenceInfo(
+        ModuleFunctionScope,
+        ModuleInfoInferenceContext(preludeModule),
+        ModuleInfoInferenceContext(testModule),
+        mapOf()
+    )
 }
 
 class InferenceTest : StringSpec({
@@ -61,7 +68,7 @@ class InferenceTest : StringSpec({
                 listOf(
                     unitTypePromise.type.valueOrNull!!,
                     longTypePromise.type.valueOrNull!!
-                ).toFunctionType(MockHandlePromise())
+                ).toFunctionType(MockHandlePromise(), NoAttributes, ModuleFunctionScope)
             )
         }
     }
@@ -89,7 +96,7 @@ class InferenceTest : StringSpec({
                 listOf(
                     unitTypePromise.type.valueOrNull!!,
                     param
-                ).toFunctionType(MockHandlePromise())
+                ).toFunctionType(MockHandlePromise(), NoAttributes, ModuleFunctionScope)
             )
         }
     }

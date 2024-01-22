@@ -1703,7 +1703,9 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                 .info.getInferredType(Location.NoProvided)
                 .shouldBeRight(
                     listOf(ts["Unit"].valueOrNull!!, ts.solve("Long")).toFunctionType(
-                        MockHandlePromise()
+                        MockHandlePromise(),
+                        NoAttributes,
+                        ModuleFunctionScope
                     )
                 )
         }
@@ -1763,7 +1765,9 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
                 .info.getInferredType(Location.NoProvided)
                 .shouldBeRight(
                     listOf(ts.solve("Long"), ts.solve("Long")).toFunctionType(
-                        MockHandlePromise()
+                        MockHandlePromise(),
+                        NoAttributes,
+                        ModuleFunctionScope
                     )
                 )
         }

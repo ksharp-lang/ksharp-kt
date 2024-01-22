@@ -254,7 +254,11 @@ private fun AbstractionNode<SemanticInfo>.calculateFunctionType(
                 }
             }.unwrap()
                 .map {
-                    (it + returnType).toFunctionType(info.inferenceContext.typeSystem)
+                    (it + returnType).toFunctionType(
+                        info.inferenceContext.typeSystem,
+                        NoAttributes,
+                        info.scope
+                    )
                 }
         }
     }
