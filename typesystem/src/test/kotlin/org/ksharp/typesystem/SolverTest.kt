@@ -95,7 +95,7 @@ class SolverTest : StringSpec({
                             listOf(Concrete(ts.handle, NoAttributes, "String"))
                         ),
                         Concrete(ts.handle, NoAttributes, "String")
-                    ), FunctionScope(FunctionScopeType.Module, null, null)
+                    ), FunctionScope(FunctionScopeType.Module, null)
                 )
             )
     }

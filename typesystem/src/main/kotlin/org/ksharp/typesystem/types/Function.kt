@@ -20,17 +20,15 @@ import org.ksharp.typesystem.unification.TypeUnifications
 
 enum class FunctionScopeType {
     Module,
-    Trait,
-    Impl
+    Trait
 }
 
 data class FunctionScope(
     val type: FunctionScopeType,
-    val trait: String?,
-    val impl: String?
+    val trait: String?
 )
 
-val ModuleFunctionScope = FunctionScope(FunctionScopeType.Module, null, null)
+val ModuleFunctionScope = FunctionScope(FunctionScopeType.Module, null)
 
 interface FunctionType : Type {
     val scope: FunctionScope
@@ -104,7 +102,7 @@ fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
     ParametricTypeFactory(this.createForSubtypes()).apply(factory).build().flatMap { args ->
         if (args.size < 2) {
             Left(InvalidFunctionType.new())
-        } else Right(FullFunctionType(handle, attributes, args, FunctionScope(FunctionScopeType.Module, null, null)))
+        } else Right(FullFunctionType(handle, attributes, args, FunctionScope(FunctionScopeType.Module, null)))
     }
 
 fun List<Type>.toFunctionType(

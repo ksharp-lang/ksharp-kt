@@ -118,7 +118,7 @@ class TypeSystemSerializerTest : StringSpec({
                 Concrete(mockHandle, setOf(CommonAttribute.Public), "Int2"),
                 Concrete(mockHandle, setOf(CommonAttribute.Public), "Int3")
             ),
-            FunctionScope(FunctionScopeType.Module, null, null)
+            FunctionScope(FunctionScopeType.Module, null)
         ).shouldBeSerializable()
     }
     "Serialize Partial Function Types" {
@@ -133,7 +133,7 @@ class TypeSystemSerializerTest : StringSpec({
                     Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
                     Concrete(mockHandle, setOf(CommonAttribute.Public), "Int2"),
                     Concrete(mockHandle, setOf(CommonAttribute.Public), "Int3")
-                ), FunctionScope(FunctionScopeType.Module, null, null)
+                ), FunctionScope(FunctionScopeType.Module, null)
             )
         ).shouldBeSerializable()
     }
@@ -144,7 +144,7 @@ class TypeSystemSerializerTest : StringSpec({
                 Concrete(mockHandle, setOf(CommonAttribute.Internal), "Int"),
                 Concrete(mockHandle, setOf(CommonAttribute.Public), "Int2"),
                 Concrete(mockHandle, setOf(CommonAttribute.Public), "Int3")
-            ), FunctionScope(FunctionScopeType.Module, null, null)
+            ), FunctionScope(FunctionScopeType.Module, null)
         ).shouldBeSerializable()
     }
     "Serialize Intersection Types" {

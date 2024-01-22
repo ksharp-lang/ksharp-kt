@@ -72,7 +72,7 @@ class TypeTest : StringSpec({
                 Parameter(ts.handle, "a"),
                 Parameter(ts.handle, "b")
             ),
-            FunctionScope(FunctionScopeType.Module, null, null)
+            ModuleFunctionScope
         ).terms.toList().shouldBe(
             listOf(
                 Concrete(ts.handle, NoAttributes, "Int"),

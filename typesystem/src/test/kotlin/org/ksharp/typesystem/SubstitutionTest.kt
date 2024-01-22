@@ -248,14 +248,14 @@ class SubstitutionTest : StringSpec({
             NoAttributes,
             listOf(
                 Concrete(ts.handle, NoAttributes, "Int"), ts.newParameter()
-            ), FunctionScope(FunctionScopeType.Module, null, null)
+            ), FunctionScope(FunctionScopeType.Module, null)
         )
         val function2 = FullFunctionType(
             ts.handle,
             NoAttributes,
             listOf(
                 Concrete(ts.handle, NoAttributes, "Int"), Concrete(ts.handle, NoAttributes, "String")
-            ), FunctionScope(FunctionScopeType.Module, null, null)
+            ), FunctionScope(FunctionScopeType.Module, null)
         )
         val context = SubstitutionContext(checker)
         context.extract(Location.NoProvided, function1, function2).shouldBeRight(true)

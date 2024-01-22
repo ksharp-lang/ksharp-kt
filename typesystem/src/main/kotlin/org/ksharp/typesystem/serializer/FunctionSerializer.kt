@@ -7,31 +7,34 @@ import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
 import org.ksharp.typesystem.types.*
 
+
+fun FunctionScope.writeTo(buffer: BufferWriter, table: BinaryTable) {
+    buffer.add(type.ordinal)
+    buffer.add(if (trait == null) -1 else table.add(trait))
+}
+
+fun BufferView.readFunctionScope(table: BinaryTableView): FunctionScope =
+    FunctionScope(
+        FunctionScopeType.entries[readInt(0)],
+        readInt(4).let {
+            if (it == -1) null else table[it]
+        }
+    )
+
 class FunctionSerializer : SerializerWriter<FullFunctionType>, TypeSerializerReader<FullFunctionType> {
     override fun write(input: FullFunctionType, buffer: BufferWriter, table: BinaryTable) {
-        val scope = input.scope
-        buffer.add(scope.type.ordinal)
-        buffer.add(if (scope.trait == null) -1 else table.add(scope.trait))
-        buffer.add(if (scope.impl == null) -1 else table.add(scope.impl))
+        input.scope.writeTo(buffer, table)
         input.attributes.writeTo(buffer, table)
         input.arguments.writeTo(buffer, table)
     }
 
-    override fun read(handle: HandlePromise<TypeSystem>, buffer: BufferView, table: BinaryTableView): FullFunctionType {
-        val scopeType = FunctionScopeType.entries[buffer.readInt(0)]
-        val trait = buffer.readInt(4).let {
-            if (it == -1) null else table[it]
-        }
-        val impl = buffer.readInt(8).let {
-            if (it == -1) null else table[it]
-        }
-        return FullFunctionType(
+    override fun read(handle: HandlePromise<TypeSystem>, buffer: BufferView, table: BinaryTableView): FullFunctionType =
+        FullFunctionType(
             handle,
-            buffer.bufferFrom(12).readAttributes(table),
-            buffer.bufferFrom(12 + buffer.readInt(12)).readListOfTypes(handle, table),
-            FunctionScope(scopeType, trait, impl)
+            buffer.bufferFrom(8).readAttributes(table),
+            buffer.bufferFrom(8 + buffer.readInt(8)).readListOfTypes(handle, table),
+            buffer.readFunctionScope(table)
         )
-    }
 }
 
 class PartialFunctionSerializer : SerializerWriter<PartialFunctionType>, TypeSerializerReader<PartialFunctionType> {

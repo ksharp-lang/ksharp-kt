@@ -343,7 +343,7 @@ class TypeUnificationTest : StringSpec({
             listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
-            ), FunctionScope(FunctionScopeType.Module, null, null)
+            ), ModuleFunctionScope
         )
         val type2 = FullFunctionType(
             typeSystem.handle,
@@ -351,7 +351,7 @@ class TypeUnificationTest : StringSpec({
             listOf(
                 typeSystem["Integer"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
-            ), FunctionScope(FunctionScopeType.Module, null, null)
+            ), ModuleFunctionScope
         )
         type1.unify(Location.NoProvided, type2, checker)
             .shouldBeRight(
@@ -361,7 +361,7 @@ class TypeUnificationTest : StringSpec({
                     listOf(
                         typeSystem["Int"].valueOrNull!!,
                         typeSystem["Long"].valueOrNull!!
-                    ), FunctionScope(FunctionScopeType.Module, null, null)
+                    ), ModuleFunctionScope
                 )
             )
     }
@@ -372,7 +372,7 @@ class TypeUnificationTest : StringSpec({
             listOf(
                 typeSystem["Int"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
-            ), FunctionScope(FunctionScopeType.Module, null, null)
+            ), ModuleFunctionScope
         )
         val type2 = FullFunctionType(
             typeSystem.handle,
@@ -382,7 +382,7 @@ class TypeUnificationTest : StringSpec({
                 typeSystem["Long"].valueOrNull!!,
                 typeSystem["Long"].valueOrNull!!
             ),
-            FunctionScope(FunctionScopeType.Module, null, null)
+            ModuleFunctionScope
         )
         type1.unify(Location.NoProvided, type2, checker)
             .shouldBeLeft(

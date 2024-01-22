@@ -92,7 +92,7 @@ class TypeSystemTest : ShouldSpec({
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int")
                                 ),
-                                FunctionScope(FunctionScopeType.Module, null, null)
+                                ModuleFunctionScope
                             ), "(Int -> Int -> Int)"
                         )
                     }
@@ -363,7 +363,7 @@ class TypeSystemTest : ShouldSpec({
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int")
-                                ), FunctionScope(FunctionScopeType.Module, null, null)
+                                ), ModuleFunctionScope
                             ),
                             "(Int -> Int -> Int)"
                         )
@@ -376,7 +376,7 @@ class TypeSystemTest : ShouldSpec({
                                 listOf(
                                     Parameter(handle, "a"),
                                     Alias(handle, "Int")
-                                ), FunctionScope(FunctionScopeType.Module, null, null)
+                                ), ModuleFunctionScope
                             ),
                             "(a -> Int)"
                         )
@@ -395,7 +395,7 @@ class TypeSystemTest : ShouldSpec({
                                             listOf(Alias(handle, "Int"))
                                         ),
                                         Alias(handle, "Int")
-                                    ), FunctionScope(FunctionScopeType.Module, null, null)
+                                    ), ModuleFunctionScope
                                 ),
                                 "((List Int) -> Int)"
                             )
@@ -419,7 +419,7 @@ class TypeSystemTest : ShouldSpec({
                                             listOf(
                                                 Parameter(handle, "a"),
                                                 Parameter(handle, "b")
-                                            ), FunctionScope(FunctionScopeType.Module, null, null)
+                                            ), ModuleFunctionScope
                                         ),
                                         ParametricType(
                                             handle,
@@ -428,7 +428,7 @@ class TypeSystemTest : ShouldSpec({
                                             listOf(Parameter(handle, "b"))
                                         ),
                                     ),
-                                    FunctionScope(FunctionScopeType.Module, null, null)
+                                    ModuleFunctionScope
                                 ),
                                 "((List a) -> (a -> b) -> (List b))"
                             )
@@ -442,7 +442,7 @@ class TypeSystemTest : ShouldSpec({
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int")
-                                ), FunctionScope(FunctionScopeType.Module, null, null)
+                                ), ModuleFunctionScope
                             ),
                             "(Int -> Int -> Int)"
                         )
@@ -1101,7 +1101,7 @@ class TypeSystemTest : ShouldSpec({
                                     Parameter(handle, "b"),
                                     Alias(handle, "Int").labeled("result")
                                 ),
-                                FunctionScope(FunctionScopeType.Module, null, null)
+                                ModuleFunctionScope
                             ),
                             "(a: Int -> b -> result: Int)"
                         )
@@ -1154,7 +1154,7 @@ class TypeSystemTest : ShouldSpec({
                                 listOf(
                                     Alias(handle, "Int"),
                                     Alias(handle, "Int")
-                                ), FunctionScope(FunctionScopeType.Module, null, null)
+                                ), ModuleFunctionScope
                             ),
                             "(Int -> Int)"
                         )

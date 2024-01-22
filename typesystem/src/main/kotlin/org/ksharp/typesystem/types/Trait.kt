@@ -62,8 +62,8 @@ data class TraitType private constructor(
         override val arguments: List<Type>,
         val withDefaultImpl: Boolean,
     ) : FunctionType {
-        override val scope: FunctionScope get() = FunctionScope(FunctionScopeType.Trait, traitName, null)
-        
+        override val scope: FunctionScope get() = FunctionScope(FunctionScopeType.Trait, traitName)
+
         override lateinit var typeSystem: HandlePromise<TypeSystem>
             private set
 
