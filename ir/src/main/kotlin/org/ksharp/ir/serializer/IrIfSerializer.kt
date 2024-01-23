@@ -21,7 +21,7 @@ class IrIfSerializer : IrNodeSerializer<IrIf> {
         val location = buffer.readLocation()
         val attributes = buffer.bufferFrom(16).readAttributes(table)
         val exprs = buffer.bufferFrom(16 + buffer.readInt(16))
-            .readListOfNodes(table)
+            .readListOfNodes(table).second
             .cast<List<IrExpression>>()
         return IrIf(attributes, exprs[0], exprs[1], exprs[2], location)
     }

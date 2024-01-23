@@ -418,10 +418,13 @@ class EvaluateTest : StringSpec({
 class CustomEvaluationTest : StringSpec({
     "Check a custom spec" {
         createSpec(
-            "Call expression", """
-            fn = sum 10 20
-            sum a b = a + b
-        """.trimIndent(), 30.toLong()
+            "Evaluate calling an abstraction",
+            """|n = fn 10 20
+               |
+               |fn :: Long -> Long -> Long
+               |fn a b = a + b              
+            """.trimMargin(),
+            30.toLong()
         )
             .let { (_, code, call) ->
                 code.evaluateFirstFunction(call.arguments)

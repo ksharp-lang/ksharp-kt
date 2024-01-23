@@ -10,9 +10,14 @@ import org.ksharp.ir.IrModule
 class IrModuleSerializer : IrNodeSerializer<IrModule> {
     override fun write(input: IrModule, buffer: BufferWriter, table: BinaryTable) {
         input.symbols.writeTo(buffer, table)
+        input.traitSymbols.writeTo(buffer, table)
+        input.implSymbols.writeTo(buffer, table)
     }
 
     override fun read(buffer: BufferView, table: BinaryTableView): IrModule {
-        return IrModule(buffer.readListOfNodes(table).cast())
+        val (listOffset, functions) = buffer.readListOfNodes(table)
+        val (traitOffset, traitSymbols) = buffer.bufferFrom(listOffset).readMapOfTraitNodes(table)
+        val (_, implSymbols) = buffer.bufferFrom(listOffset + traitOffset).readMapOfImplNodes(table)
+        return IrModule(functions.cast(), traitSymbols.cast(), implSymbols.cast())
     }
 }

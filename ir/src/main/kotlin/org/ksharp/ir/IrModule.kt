@@ -7,6 +7,10 @@ import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.toIrSymbol
 import org.ksharp.module.CodeModule
+import org.ksharp.module.Impl
+import org.ksharp.module.ModuleInfo
+import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 
@@ -70,17 +74,38 @@ private class FunctionLookupImpl : FunctionLookup {
 }
 
 data class IrModule(
-    val symbols: List<IrTopLevelSymbol>
+    val symbols: List<IrTopLevelSymbol>,
+    val traitSymbols: Map<String, List<IrTopLevelSymbol>>,
+    val implSymbols: Map<Impl, List<IrTopLevelSymbol>>,
 ) : IrNode {
     override val serializer: IrNodeSerializers = IrNodeSerializers.Module
 }
+
+private fun List<AbstractionNode<SemanticInfo>>.mapToIrSymbols(
+    name: String,
+    module: ModuleInfo,
+    lookup: FunctionLookupImpl
+) =
+    asSequence()
+        .filterNot { it.attributes.contains(CommonAttribute.Native) }
+        .map { it.toIrSymbol(name, module.dependencies, lookup) }
+        .toList()
 
 fun CodeModule.toIrModule(): IrModule {
     val lookup = FunctionLookupImpl()
     val module = IrModule(
         artifact.abstractions
-            .filterNot { it.attributes.contains(CommonAttribute.Native) }
-            .map { it.toIrSymbol(name, module.dependencies, lookup) }
+            .mapToIrSymbols(name, module, lookup),
+        traitArtifacts
+            .mapValues { entry ->
+                entry.value.abstractions
+                    .mapToIrSymbols(name, module, lookup)
+            },
+        implArtifacts
+            .mapValues { entry ->
+                entry.value.abstractions
+                    .mapToIrSymbols(name, module, lookup)
+            }
     )
     lookup.functions = module.symbols.cast()
     return module

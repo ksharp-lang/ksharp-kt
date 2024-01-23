@@ -22,7 +22,7 @@ class IrLetSerializer : IrNodeSerializer<IrLet> {
         var offset = buffer.readInt(0)
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
-        val expressions = buffer.bufferFrom(offset).readListOfNodes(table)
+        val expressions = buffer.bufferFrom(offset).readListOfNodes(table).second
         return IrLet(
             attributes,
             expressions.cast(),
