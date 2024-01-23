@@ -27,7 +27,9 @@ class ModuleTest : StringSpec({
                                     ),
                                     Location(Line(1) to Offset(0), Line(1) to Offset(3))
                                 )
-                            )
+                            ),
+                            emptyMap(),
+                            emptyMap()
                         )
                     )
             }

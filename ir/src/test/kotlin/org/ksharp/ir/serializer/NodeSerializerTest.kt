@@ -8,7 +8,9 @@ import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.ir.*
+import org.ksharp.module.Impl
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.newParameterForTesting
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicInteger
@@ -168,6 +170,30 @@ class NodeSerializerTest : StringSpec({
                     1,
                     IrInteger(1, location),
                     location
+                )
+            ),
+            mapOf(
+                "Trait" to listOf(
+                    IrFunction(
+                        attributes,
+                        "test",
+                        listOf("a", "b"),
+                        1,
+                        IrInteger(1, location),
+                        location
+                    )
+                )
+            ),
+            mapOf(
+                Impl("Trait", newParameterForTesting(1)) to listOf(
+                    IrFunction(
+                        attributes,
+                        "test",
+                        listOf("a", "b"),
+                        1,
+                        IrInteger(1, location),
+                        location
+                    )
                 )
             )
         ).apply {

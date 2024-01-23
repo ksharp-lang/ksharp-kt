@@ -3,8 +3,12 @@ package org.ksharp.ir.serializer
 import org.ksharp.common.*
 import org.ksharp.common.io.*
 import org.ksharp.ir.*
+import org.ksharp.module.Impl
 import org.ksharp.module.bytecode.StringPoolBuilder
 import org.ksharp.module.bytecode.StringPoolView
+import org.ksharp.module.bytecode.readImpl
+import org.ksharp.module.bytecode.writeTo
+import org.ksharp.module.prelude.preludeModule
 import java.io.OutputStream
 
 interface IrNodeSerializer<S : IrNode> : SerializerWriter<S>, SerializerReader<S>
@@ -97,7 +101,27 @@ fun List<IrNode>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     }
 }
 
-fun BufferView.readListOfNodes(tableView: BinaryTableView): List<IrNode> {
+fun Map<String, List<IrNode>>.writeTo(buffer: BufferWriter, table: BinaryTable) {
+    buffer.add(size)
+    forEach {
+        buffer.add(table.add(it.key))
+        it.value.writeTo(buffer, table)
+    }
+}
+
+@JvmName("writeMapOfImplNodes")
+fun Map<Impl, List<IrNode>>.writeTo(buffer: BufferWriter, table: BinaryTable) {
+    buffer.add(size)
+    forEach {
+        it.key.writeTo(buffer, table)
+        newBufferWriter().apply {
+            it.value.writeTo(this, table)
+            transferTo(buffer)
+        }
+    }
+}
+
+fun BufferView.readListOfNodes(tableView: BinaryTableView): Pair<Int, List<IrNode>> {
     val paramsSize = readInt(0)
     val result = listBuilder<IrNode>()
     var position = 4
@@ -106,8 +130,41 @@ fun BufferView.readListOfNodes(tableView: BinaryTableView): List<IrNode> {
         position += typeBuffer.readInt(0)
         result.add(typeBuffer.readIrNode(tableView))
     }
-    return result.build()
+    return position to result.build()
 }
+
+fun BufferView.readMapOfTraitNodes(tableView: BinaryTableView): Pair<Int, Map<String, List<IrNode>>> {
+    val paramsSize = readInt(0)
+    val result = mapBuilder<String, List<IrNode>>()
+    var position = 4
+    repeat(paramsSize) {
+        val key = tableView[readInt(position)]
+        position += 4
+        val listBuffer = bufferFrom(position)
+        val (listPosition, listItems) = listBuffer.readListOfNodes(tableView)
+        position += listPosition
+        result.put(key, listItems)
+    }
+    return position to result.build()
+}
+
+fun BufferView.readMapOfImplNodes(tableView: BinaryTableView): Pair<Int, Map<Impl, List<IrNode>>> {
+    val handle = preludeModule.typeSystem.handle
+    val paramsSize = readInt(0)
+    val result = mapBuilder<Impl, List<IrNode>>()
+    var position = 4
+    repeat(paramsSize) {
+        val implBuffer = bufferFrom(position)
+        val key = bufferFrom(position).readImpl(handle, tableView)
+        position += implBuffer.readInt(0)
+        val listBuffer = bufferFrom(position)
+        val (listPosition, listItems) = listBuffer.readListOfNodes(tableView)
+        position += listPosition
+        result.put(key, listItems)
+    }
+    return position to result.build()
+}
+
 
 fun IrModule.writeTo(output: OutputStream) {
     val stringPool = StringPoolBuilder()

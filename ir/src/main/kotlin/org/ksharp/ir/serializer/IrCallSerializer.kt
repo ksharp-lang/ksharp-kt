@@ -47,7 +47,7 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
         offset += 12
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
-        val arguments = buffer.bufferFrom(offset).readListOfNodes(table)
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(table).second
         return IrCall(
             attributes,
             module,
@@ -73,7 +73,7 @@ class IrNativeCallSerializer : IrNodeSerializer<IrNativeCall> {
         offset += 4
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
-        val arguments = buffer.bufferFrom(offset).readListOfNodes(table)
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(table).second
         return IrNativeCall(
             argAttributes,
             functionClass,

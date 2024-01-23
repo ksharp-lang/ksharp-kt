@@ -33,7 +33,7 @@ class IrCollectionsSerializer(private val factory: IrCollectionFactory) : IrNode
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
 
-        return factory(attributes, buffer.bufferFrom(offset).readListOfNodes(table).cast(), location)
+        return factory(attributes, buffer.bufferFrom(offset).readListOfNodes(table).second.cast(), location)
     }
 
 }
@@ -53,7 +53,7 @@ class IrMapSerializer : IrNodeSerializer<IrMap> {
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
 
-        return IrMap(attributes, buffer.bufferFrom(offset).readListOfNodes(table).cast(), location)
+        return IrMap(attributes, buffer.bufferFrom(offset).readListOfNodes(table).second.cast(), location)
     }
 
 }
