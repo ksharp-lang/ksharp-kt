@@ -17,10 +17,7 @@ import org.ksharp.test.shouldBeLeft
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.TypeSystemErrorCode
 import org.ksharp.typesystem.attributes.CommonAttribute
-import org.ksharp.typesystem.types.ImplType
-import org.ksharp.typesystem.types.newParameterForTesting
-import org.ksharp.typesystem.types.resetParameterCounterForTesting
-import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.types.*
 
 class ImplSemanticTest : StringSpec({
     "Trait not defined" {
@@ -210,7 +207,11 @@ class ImplSemanticTest : StringSpec({
                                     implType,
                                     implType,
                                     boolType
-                                ).toFunctionType(it.typeSystem, setOf(CommonAttribute.TraitMethod))
+                                ).toFunctionType(
+                                    it.typeSystem,
+                                    setOf(CommonAttribute.TraitMethod),
+                                    FunctionScope(FunctionScopeType.Trait, "Eq")
+                                )
                             ), Location.NoProvided
                         ),
                         info = AbstractionSemanticInfo(

@@ -107,13 +107,13 @@ fun TypeItemBuilder.functionType(factory: ParametricTypeFactoryBuilder) =
 fun List<Type>.toFunctionType(
     typeSystem: TypeSystem,
     attributes: Set<Attribute>,
-    scope: FunctionScope = ModuleFunctionScope
+    scope: FunctionScope
 ) =
     FullFunctionType(typeSystem.handle, attributes, this, scope)
 
 fun List<Type>.toFunctionType(
     handle: HandlePromise<TypeSystem>,
     attributes: Set<Attribute>,
-    scope: FunctionScope = ModuleFunctionScope
+    scope: FunctionScope
 ) =
     FullFunctionType(handle, attributes, this, scope)

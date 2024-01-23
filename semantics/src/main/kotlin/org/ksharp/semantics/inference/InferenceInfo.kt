@@ -16,6 +16,11 @@ import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
+data class InferenceFunctionInfo(
+    val function: FunctionInfo,
+    val scope: FunctionScope
+)
+
 private data class FindFunctionKey(
     val name: String,
     val arguments: List<Type>,
@@ -28,43 +33,43 @@ private val ApplicationName.functionName
     get() =
         if (pck == null) name else "$pck.$name"
 
-internal fun FunctionInfo.substitute(
+internal fun InferenceFunctionInfo.substitute(
     checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>
 ): ErrorOrValue<FunctionType> {
     val context = SubstitutionContext(checker)
-    val result: ErrorOrValue<FunctionType>? = types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
+    val result: ErrorOrValue<FunctionType>? = function.types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
         val substitutionResult = context.extract(location, item1, item2)
         if (substitutionResult.isLeft) {
             incompatibleType<List<Type>>(location, item1, item2).cast<Either.Left<Error>>()
         } else substitutionResult
     }.firstNotNullOfOrNull { if (it.isLeft) it.cast<ErrorOrValue<FunctionType>>() else null }
-    val fnType = types.toFunctionType(typeSystem, attributes)
+    val fnType = function.types.toFunctionType(typeSystem, function.attributes, scope)
     return result ?: context.substitute(location, fnType, fnType).cast()
 }
 
-internal fun FunctionInfo.unify(
+internal fun InferenceFunctionInfo.unify(
     checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
     arguments: List<Type>,
     mode: FindFunctionMode
 ): ErrorOrType {
-    return types.last()().flatMap { returnType ->
-        types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
+    return function.types.last()().flatMap { returnType ->
+        function.types.asSequence().zip(arguments.asSequence()) { item1, item2 ->
             item1.unify(location, item2, checker)
         }
             .unwrap()
             .flatMap { unifiedParams ->
                 val params = if (mode == FindFunctionMode.Partial) {
-                    unifiedParams + types.drop(unifiedParams.size).dropLast(1)
+                    unifiedParams + function.types.drop(unifiedParams.size).dropLast(1)
                 } else unifiedParams
                 val result = if (returnType.parameters.firstOrNull() != null) {
                     substitute(checker, typeSystem, location, params)
                 } else {
-                    Either.Right((params + returnType).toFunctionType(typeSystem, attributes))
+                    Either.Right((params + returnType).toFunctionType(typeSystem, function.attributes, scope))
                 }
                 result.map {
                     if (mode == FindFunctionMode.Partial) {
@@ -75,7 +80,7 @@ internal fun FunctionInfo.unify(
     }
 }
 
-internal fun Sequence<FunctionInfo>.unify(
+internal fun Sequence<InferenceFunctionInfo>.unify(
     checker: UnificationChecker,
     typeSystem: TypeSystem,
     location: Location,
@@ -120,16 +125,16 @@ data class InferenceInfo(
         get() =
             if (pck == null) prelude else null
 
-    private fun FunctionInfo.infer(caller: String): FunctionInfo {
-        if (this is AbstractionFunctionInfo) {
-            this.abstraction
+    private fun InferenceFunctionInfo.infer(caller: String): InferenceFunctionInfo {
+        if (function is AbstractionFunctionInfo) {
+            function.abstraction
                 .cast<SemanticNode<SemanticInfo>>()
                 .inferType(caller, this@InferenceInfo)
         }
         return this
     }
 
-    private fun Sequence<FunctionInfo>.infer(caller: String): Sequence<FunctionInfo> =
+    private fun Sequence<InferenceFunctionInfo>.infer(caller: String): Sequence<InferenceFunctionInfo> =
         this.map { it.infer(caller) }
 
     fun findAppType(

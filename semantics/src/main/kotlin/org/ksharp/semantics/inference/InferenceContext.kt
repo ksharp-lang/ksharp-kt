@@ -11,10 +11,7 @@ import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.ErrorOrType
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.attributes.Attribute
-import org.ksharp.typesystem.types.FunctionType
-import org.ksharp.typesystem.types.TraitType
-import org.ksharp.typesystem.types.Type
-import org.ksharp.typesystem.types.arity
+import org.ksharp.typesystem.types.*
 import org.ksharp.typesystem.unification.UnificationChecker
 import org.ksharp.typesystem.unification.unify
 
@@ -25,19 +22,20 @@ enum class FindFunctionMode {
     Complete
 }
 
-private inline fun run(sameToCaller: Boolean, action: () -> FunctionInfo?): FunctionInfo? =
+private inline fun run(sameToCaller: Boolean, action: () -> InferenceFunctionInfo?): InferenceFunctionInfo? =
     if (sameToCaller) null else action()
 
 private fun AbstractionNodeMap.findPartialFunction(
+    scope: FunctionScope,
     name: String,
     numParams: Int
-) =
+): Sequence<InferenceFunctionInfo> =
     "$name/".let { prefixName ->
         asSequence()
             .filter { (key, value) ->
                 key.startsWith(prefixName) && value.info.parameters.size > numParams
             }.map {
-                AbstractionFunctionInfo(it.value)
+                InferenceFunctionInfo(AbstractionFunctionInfo(it.value), scope)
             }
     }
 
@@ -53,14 +51,14 @@ sealed class InferenceContext {
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>
+    ): Sequence<InferenceFunctionInfo>
 
     abstract fun findFullFunction(
         caller: String,
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>?
+    ): Sequence<InferenceFunctionInfo>?
 
     fun findFunction(caller: String, name: String, numParams: Int, firstArgument: Type, mode: FindFunctionMode) =
         when (mode) {
@@ -83,9 +81,11 @@ class ModuleInfoInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>? =
+    ): Sequence<InferenceFunctionInfo>? =
         methodName(name, numParams).let { methodName ->
-            moduleInfo.functions[methodName] ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
+            moduleInfo.functions[methodName]?.let {
+                InferenceFunctionInfo(it, ModuleFunctionScope)
+            } ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
 
     override fun findPartialFunction(
@@ -93,14 +93,16 @@ class ModuleInfoInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo> {
+    ): Sequence<InferenceFunctionInfo> {
         return "$name/".let { prefixName ->
             sequenceOf(
                 moduleInfo.functions
                     .asSequence()
                     .filter { (key, value) ->
                         key.startsWith(prefixName) && value.arity > numParams
-                    }.map { it.value },
+                    }.map {
+                        InferenceFunctionInfo(it.value, ModuleFunctionScope)
+                    },
                 traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument)
             ).flatten()
         }
@@ -118,14 +120,14 @@ class SemanticModuleInfoInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>? =
+    ): Sequence<InferenceFunctionInfo>? =
         (methodName(name, numParams) to "$name/0").let { (methodName, methodNameArityZero) ->
             sequenceOf(
                 abstractions[methodName]?.let {
-                    AbstractionFunctionInfo(it)
+                    InferenceFunctionInfo(AbstractionFunctionInfo(it), ModuleFunctionScope)
                 },
                 abstractions[methodNameArityZero]?.let {
-                    AbstractionFunctionInfo(it)
+                    InferenceFunctionInfo(AbstractionFunctionInfo(it), ModuleFunctionScope)
                 },
                 traitFinderContext.findTraitFunction(methodName, firstArgument)
             ).filterNotNull()
@@ -138,9 +140,9 @@ class SemanticModuleInfoInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo> =
+    ): Sequence<InferenceFunctionInfo> =
         sequenceOf(
-            abstractions.findPartialFunction(name, numParams),
+            abstractions.findPartialFunction(ModuleFunctionScope, name, numParams),
             traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument)
         ).flatten()
 
@@ -158,6 +160,7 @@ sealed class ObjectInferenceContext(
 class TraitInferenceContext(
     private val parent: InferenceContext,
     traitType: TraitType,
+    private val scope: FunctionScope,
     private val abstractions: AbstractionNodeMap
 ) : ObjectInferenceContext(traitType), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
 
@@ -169,10 +172,10 @@ class TraitInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>? =
+    ): Sequence<InferenceFunctionInfo>? =
         methodName(name, numParams).let { methodName ->
             abstractions[methodName]?.let {
-                AbstractionFunctionInfo(it)
+                InferenceFunctionInfo(AbstractionFunctionInfo(it), scope)
             }
                 ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
@@ -183,9 +186,9 @@ class TraitInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo> {
+    ): Sequence<InferenceFunctionInfo> {
         return sequenceOf(
-            abstractions.findPartialFunction(name, numParams),
+            abstractions.findPartialFunction(scope, name, numParams),
             traitFinderContext.findPartialTraitFunction(name, numParams, firstArgument),
             parent.findPartialFunction(caller, name, numParams, firstArgument)
         ).flatten()
@@ -196,6 +199,7 @@ class TraitInferenceContext(
 class ImplInferenceContext(
     private val parent: InferenceContext,
     private val traitType: TraitType,
+    private val scope: FunctionScope,
     private val abstractions: AbstractionNodeMap
 ) : ObjectInferenceContext(traitType), CodeInferenceContext by AbstractionsCodeInferenceContext(abstractions) {
 
@@ -207,18 +211,17 @@ class ImplInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo>? =
+    ): Sequence<InferenceFunctionInfo>? =
         methodName(name, numParams).let { methodName ->
             val sameToCaller = methodName == caller
             run(sameToCaller) {
                 abstractions[methodName]?.let {
-                    AbstractionFunctionInfo(it)
+                    InferenceFunctionInfo(AbstractionFunctionInfo(it), scope)
                 }
+            } ?: traitType.methods[methodName]?.let {
+                methodTypeToFunctionInfo(traitType, it, checker)
             }
-                ?: traitType.methods[methodName]?.let {
-                    methodTypeToFunctionInfo(traitType, it, checker)
-                }
-                ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
+            ?: traitFinderContext.findTraitFunction(methodName, firstArgument)
         }?.let { sequenceOf(it) }
             ?: parent.findFullFunction(caller, name, numParams, firstArgument)
 
@@ -227,9 +230,9 @@ class ImplInferenceContext(
         name: String,
         numParams: Int,
         firstArgument: Type
-    ): Sequence<FunctionInfo> {
+    ): Sequence<InferenceFunctionInfo> {
         return sequenceOf(
-            abstractions.findPartialFunction(name, numParams),
+            abstractions.findPartialFunction(scope, name, numParams),
             "$name/".let {
                 traitType.methods
                     .asSequence()
@@ -282,6 +285,7 @@ fun List<AbstractionNode<SemanticInfo>>.toTraitInferenceContext(
     TraitInferenceContext(
         inferenceContext,
         traitType,
+        FunctionScope(FunctionScopeType.Trait, traitType.name),
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()
     )
@@ -293,6 +297,7 @@ fun List<AbstractionNode<SemanticInfo>>.toImplInferenceContext(
     ImplInferenceContext(
         inferenceContext,
         traitType,
+        FunctionScope(FunctionScopeType.Trait, traitType.name),
         this.cast<List<AbstractionNode<AbstractionSemanticInfo>>>()
             .toMap()
     )

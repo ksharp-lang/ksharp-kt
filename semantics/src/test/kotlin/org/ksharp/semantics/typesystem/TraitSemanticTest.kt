@@ -234,7 +234,8 @@ class TraitSemanticTest : StringSpec({
                             ), info = ApplicationSemanticInfo(
                                 function = listOf(addA, addA, addA).toFunctionType(
                                     MockHandlePromise(),
-                                    setOf(CommonAttribute.TraitMethod)
+                                    setOf(CommonAttribute.TraitMethod),
+                                    FunctionScope(FunctionScopeType.Trait, "Num")
                                 )
                             ), location = Location.NoProvided
                         ),

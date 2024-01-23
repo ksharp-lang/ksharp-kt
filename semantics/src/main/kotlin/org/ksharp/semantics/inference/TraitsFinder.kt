@@ -29,14 +29,14 @@ internal fun methodTypeToFunctionInfo(
     trait: TraitType,
     method: TraitType.MethodType,
     checker: UnificationChecker
-): FunctionInfo {
-    val fnType = method.arguments.toFunctionType(trait.typeSystem.handle!!, method.attributes)
+): InferenceFunctionInfo {
+    val fnType = method.arguments.toFunctionType(trait.typeSystem.handle!!, method.attributes, method.scope)
     val substitutionContext = SubstitutionContext(checker)
     substitutionContext.extract(Location.NoProvided, fnType, fnType)
     substitutionContext.addMapping(Location.NoProvided, trait.param, trait.toParametricType())
     val type =
         substitutionContext.substitute(Location.NoProvided, fnType, fnType).valueOrNull!!.cast<FunctionType>()
-    return FunctionTypeInfo(method.name, type, type.arguments.arity)
+    return InferenceFunctionInfo(FunctionTypeInfo(method.name, type, type.arguments.arity), method.scope)
 }
 
 class TraitFinderContext(
@@ -44,14 +44,14 @@ class TraitFinderContext(
     val impls: Sequence<Impl>
 ) {
 
-    fun findTraitFunction(methodName: String, type: Type): FunctionInfo? =
+    fun findTraitFunction(methodName: String, type: Type): InferenceFunctionInfo? =
         getTraitsImplemented(type, this).mapNotNull { trait ->
             trait.methods[methodName]?.let {
                 methodTypeToFunctionInfo(trait, it, unificationChecker(this))
             }
         }.firstOrNull()
 
-    fun findPartialTraitFunction(methodName: String, numParams: Int, type: Type): Sequence<FunctionInfo> =
+    fun findPartialTraitFunction(methodName: String, numParams: Int, type: Type): Sequence<InferenceFunctionInfo> =
         unificationChecker(this).let { checker ->
             "$methodName/".let { prefixName ->
                 getTraitsImplemented(type, this).map { trait ->
