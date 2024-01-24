@@ -11,6 +11,8 @@ import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.nameAttribute
+import org.ksharp.typesystem.solver.solve
+import org.ksharp.typesystem.types.ImplType
 
 private fun String.getFirstAbstraction() =
     toCodeModule()
@@ -172,7 +174,12 @@ class AbstractionToIrSymbolTest : StringSpec({
                 """.trimIndent(), IrCall(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 null,
-                CallScope("sum/2", preludeModule.typeSystem["Num"].valueOrNull),
+                CallScope(
+                    "sum/2", ImplType(
+                        preludeModule.typeSystem["Num"].valueOrNull!!.cast(),
+                        preludeModule.typeSystem["Long"].valueOrNull!!.solve().valueOrNull!!
+                    )
+                ),
                 listOf(
                     IrInteger(
                         1,
@@ -372,7 +379,32 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
     val functionLookup = FunctionLookup { _, _ -> null }
     "Check a custom spec" {
         createSpec(
-            "IrSum expression", """fn = 1 + 2""", arithmeticExpected(::IrSum)
+            "Constant IrCall expression",
+            """
+                    fn = sum 1 2
+                    
+                    sum a b = a + b
+                """.trimIndent(), IrCall(
+                setOf(CommonAttribute.Constant, CommonAttribute.Pure),
+                null,
+                CallScope(
+                    "sum/2", ImplType(
+                        preludeModule.typeSystem["Num"].valueOrNull!!.cast(),
+                        preludeModule.typeSystem["Long"].valueOrNull!!.solve().valueOrNull!!
+                    )
+                ),
+                listOf(
+                    IrInteger(
+                        1,
+                        Location(Line(1) to Offset(9), Line(1) to Offset(10))
+                    ),
+                    IrInteger(
+                        2,
+                        Location(Line(1) to Offset(11), Line(1) to Offset(12))
+                    )
+                ),
+                Location(Line(1) to Offset(5), Line(1) to Offset(8))
+            )
         ).let { (_, code, expected) ->
             code.getFirstAbstraction()
                 .toIrSymbol("test", emptyMap(), functionLookup)

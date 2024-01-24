@@ -104,11 +104,11 @@ fun List<SemanticNode<SemanticInfo>>.toIrSymbols(
 }
 
 
-fun Type.asTraitType(): TraitType? =
+fun Type.asTraitType(): Type? =
     when (this) {
         is TraitType -> this
-        is ImplType -> this.trait
-        is FixedTraitType -> this.trait
+        is ImplType -> this
+        is FixedTraitType -> this
         is ParametricType -> this.type.asTraitType()
         else -> null
     }
@@ -122,7 +122,14 @@ private fun ApplicationSemanticInfo.isATraitFunction(): Boolean =
     function != null && function!!.attributes.contains(CommonAttribute.TraitMethod)
 
 private fun ApplicationSemanticInfo.traitType(): TraitType? =
-    function!!.arguments.first().asTraitType()
+    function!!.arguments.first().asTraitType().let { t ->
+        when (t) {
+            is TraitType -> t
+            is ImplType -> t.trait
+            is FixedTraitType -> t.trait
+            else -> null
+        }
+    }
 
 val ApplicationNode<SemanticInfo>.customIrNode: String?
     get() =
