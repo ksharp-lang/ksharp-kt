@@ -449,7 +449,7 @@ class EvaluateTest : StringSpec({
                |    
                |    double a = sum a a
                |
-               |impl Sum for Long =
+               |impl Sum for Int =
                |    sum a b = a + b
                |            
             """.trimMargin(),
@@ -465,10 +465,10 @@ class EvaluateTest : StringSpec({
                |    
                |    double a = sum a a
                |
-               |impl Sum for Long =
+               |impl Sum for Int =
                |    sum a b = a + b
                |    
-               |    double a = a + 2
+               |    double a = a + (int 2)
                |            
             """.trimMargin(),
             12.toInt()
@@ -485,8 +485,8 @@ class EvaluateTest : StringSpec({
 class CustomEvaluationTest : StringSpec({
     "Check a custom spec" {
         createSpec(
-            "Evaluate trait abstractions",
-            """|fn a = double a
+            "Evaluate impl abstractions",
+            """|fn = double (int 10)  
                |
                |trait Sum a =
                |    sum :: a -> a -> a
@@ -496,10 +496,11 @@ class CustomEvaluationTest : StringSpec({
                |
                |impl Sum for Int =
                |    sum a b = a + b
+               |    
+               |    double a = a + (int 2)
                |            
             """.trimMargin(),
-            12.toInt(),
-            6.toInt()
+            12.toInt()
         )
             .let { (_, code, call) ->
                 code.evaluateFirstFunction(call.arguments)
