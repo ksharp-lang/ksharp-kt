@@ -40,7 +40,8 @@ enum class CastType {
 
 data class CallScope(
     val callName: String,
-    val traitType: Type?
+    val traitName: String?,
+    val traitScopeName: String?,
 )
 
 data class IrNumCast(

@@ -1,5 +1,6 @@
 package org.ksharp.ir.transform
 
+import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.ir.*
 import org.ksharp.nodes.semantic.*
@@ -104,11 +105,11 @@ fun List<SemanticNode<SemanticInfo>>.toIrSymbols(
 }
 
 
-fun Type.asTraitType(): Type? =
+fun Type.asTraitType(): TraitType? =
     when (this) {
         is TraitType -> this
-        is ImplType -> this
-        is FixedTraitType -> this
+        is ImplType -> this.trait
+        is FixedTraitType -> this.trait
         is ParametricType -> this.type.asTraitType()
         else -> null
     }
@@ -122,14 +123,7 @@ private fun ApplicationSemanticInfo.isATraitFunction(): Boolean =
     function != null && function!!.attributes.contains(CommonAttribute.TraitMethod)
 
 private fun ApplicationSemanticInfo.traitType(): TraitType? =
-    function!!.arguments.first().asTraitType().let { t ->
-        when (t) {
-            is TraitType -> t
-            is ImplType -> t.trait
-            is FixedTraitType -> t.trait
-            else -> null
-        }
-    }
+    function!!.arguments.first().asTraitType()
 
 val ApplicationNode<SemanticInfo>.customIrNode: String?
     get() =
@@ -149,6 +143,30 @@ val ApplicationNode<SemanticInfo>.customIrNode: String?
                 }
             }
         }
+
+private fun toIrCallSymbol(
+    functionType: FunctionType,
+    attributes: Set<Attribute>,
+    callName: String,
+    arguments: List<IrExpression>,
+    location: Location,
+): IrCall {
+    val trait = functionType.arguments.first().asTraitType()
+    val isTrait = trait != null
+    val traitName = if (isTrait) {
+        trait?.name
+    } else null
+    val scopeName = if (isTrait) {
+        trait?.irCustomNode
+    } else null
+    return IrCall(
+        attributes,
+        null,
+        CallScope(callName, traitName, scopeName),
+        arguments,
+        location,
+    )
+}
 
 fun ApplicationNode<SemanticInfo>.toIrSymbol(
     state: IrState
@@ -176,16 +194,8 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
                 location,
             )
         else {
-            val trait = functionType.arguments.first().asTraitType()
-            IrCall(
-                attributes,
-                null,
-                CallScope(callName, trait),
-                arguments,
-                location,
-            ).apply {
-                this.functionLookup = state.functionLookup
-            }
+            toIrCallSymbol(functionType, attributes, callName, arguments, location)
+                .apply { this.functionLookup = state.functionLookup }
         }
     }
 }

@@ -408,6 +408,23 @@ class EvaluateTest : StringSpec({
         ),
         createSpec(
             "Evaluate trait abstractions",
+            """|fn a = double a
+               |
+               |trait Sum a =
+               |    sum :: a -> a -> a
+               |    double :: a -> a
+               |    
+               |    double a = sum a a
+               |
+               |impl Sum for Int =
+               |    sum a b = a + b
+               |            
+            """.trimMargin(),
+            12.toInt(),
+            6.toInt()
+        ),
+        createSpec(
+            "Evaluate trait abstractions 2",
             """|fn = double 10  
                |
                |trait Sum a =
@@ -420,7 +437,41 @@ class EvaluateTest : StringSpec({
                |    sum a b = a + b
                |            
             """.trimMargin(),
-            12.toLong()
+            20.toLong()
+        ),
+        createSpec(
+            "Evaluate trait abstractions 3",
+            """|fn = double (int 10)  
+               |
+               |trait Sum a =
+               |    sum :: a -> a -> a
+               |    double :: a -> a
+               |    
+               |    double a = sum a a
+               |
+               |impl Sum for Long =
+               |    sum a b = a + b
+               |            
+            """.trimMargin(),
+            20.toInt()
+        ),
+        createSpec(
+            "Evaluate impl abstractions",
+            """|fn = double (int 10)  
+               |
+               |trait Sum a =
+               |    sum :: a -> a -> a
+               |    double :: a -> a
+               |    
+               |    double a = sum a a
+               |
+               |impl Sum for Long =
+               |    sum a b = a + b
+               |    
+               |    double a = a + 2
+               |            
+            """.trimMargin(),
+            12.toInt()
         ),
     ).forEach { (description, code, call) ->
         description {
@@ -448,7 +499,7 @@ class CustomEvaluationTest : StringSpec({
                |            
             """.trimMargin(),
             12.toInt(),
-            10.toInt()
+            6.toInt()
         )
             .let { (_, code, call) ->
                 code.evaluateFirstFunction(call.arguments)

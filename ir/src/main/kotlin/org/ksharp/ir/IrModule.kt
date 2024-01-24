@@ -14,9 +14,6 @@ import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
-import org.ksharp.typesystem.types.FixedTraitType
-import org.ksharp.typesystem.types.ImplType
-import org.ksharp.typesystem.types.TraitType
 import org.ksharp.typesystem.types.Type
 
 fun interface FunctionLookup {
@@ -50,7 +47,7 @@ private class FunctionLookupImpl : FunctionLookup {
     lateinit var traits: Map<String, List<IrTopLevelSymbol>>
     lateinit var impls: Map<Impl, List<IrTopLevelSymbol>>
 
-    private val cache = cacheOf<CallScope, IrTopLevelSymbol>()
+    private val cache = cacheOf<Pair<Type?, CallScope>, IrTopLevelSymbol>()
 
     private var irNodeFactory = mapOf(
         "prelude::num::(+)/2" to binaryExpressionFunction("(+)", ::IrSum),
@@ -68,31 +65,11 @@ private class FunctionLookupImpl : FunctionLookup {
     )
 
     private fun findCustomFunction(call: CallScope): IrTopLevelSymbol? {
-        if (call.traitType != null) {
-            return irNodeFactory["${call.traitType.asTraitType!!.irCustomNode}::${call.callName}"]?.invoke()
+        if (call.traitScopeName != null) {
+            return irNodeFactory["${call.traitScopeName}::${call.callName}"]?.invoke()
         }
         return null
     }
-
-    private val ImplType.implInstance get() = Impl(this.trait.name, this.impl)
-
-    private val Type.asTraitType
-        get() =
-            when (this) {
-                is ImplType -> this.trait
-                is TraitType -> this
-                is FixedTraitType -> this.trait
-                else -> null
-            }
-
-    private val Type.traitName
-        get() =
-            when (this) {
-                is ImplType -> this.trait.name
-                is TraitType -> this.name
-                is FixedTraitType -> this.trait.name
-                else -> null
-            }
 
     private fun List<IrTopLevelSymbol>?.findFunction(call: CallScope): IrTopLevelSymbol? =
         if (this == null) null
@@ -100,35 +77,22 @@ private class FunctionLookupImpl : FunctionLookup {
             .filter { it.name == call.callName }
             .firstOrNull()
 
-    private fun ImplType.findImplFunction(call: CallScope): IrTopLevelSymbol? =
-        impls[this.implInstance].findFunction(call)
-
-    private fun CallScope.withType(firstValue: Type?): CallScope =
-        if (this.traitType != null) {
-            if (this.traitType is ImplType) {
-                this
-            } else {
-                copy(traitType = ImplType(this.traitType.asTraitType!!, firstValue!!))
-            }
-        } else this
+    private fun Impl.findImplFunction(call: CallScope): IrTopLevelSymbol? =
+        impls[this].findFunction(call)
 
     private fun String?.findTraitFunction(call: CallScope): IrTopLevelSymbol? =
         if (this == null) null
         else traits[this].findFunction(call)
 
-    private fun findFunction(call: CallScope): IrTopLevelSymbol? =
-        (if (call.traitType != null) {
-            val type = call.traitType
-            when {
-                type is ImplType -> type.findImplFunction(call) ?: type.traitName.findTraitFunction(call)
-                else -> type.traitName.findTraitFunction(call)
-            }
+    private fun findFunction(call: CallScope, firstValue: Type?): IrTopLevelSymbol? =
+        (if (call.traitName != null && firstValue != null) {
+            Impl(call.traitName, firstValue).findImplFunction(call) ?: call.traitName.findTraitFunction(call)
         } else null)
             ?: functions.findFunction(call)
 
     override fun find(module: String?, call: CallScope, firstValue: Type?): IrTopLevelSymbol =
-        cache.get(call.withType(firstValue)) {
-            findFunction(call) ?: findCustomFunction(call)!!
+        cache.get(firstValue to call) {
+            findFunction(call, firstValue) ?: findCustomFunction(call)!!
         }
 
 }
