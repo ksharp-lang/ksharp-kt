@@ -2,7 +2,10 @@ package org.ksharp.ir.truffle.call;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.strings.TruffleString;
+import kotlin.Pair;
+import org.ksharp.ir.KValue;
 import org.ksharp.ir.truffle.KSharpNode;
+import org.ksharp.typesystem.types.Type;
 
 public abstract class BaseCallNode extends KSharpNode {
     @Children
@@ -14,14 +17,21 @@ public abstract class BaseCallNode extends KSharpNode {
         toJavaStringNode = TruffleString.ToJavaStringNode.create();
     }
 
-    public Object[] getArguments(VirtualFrame frame) {
+    public Pair<Type, Object[]> getArguments(VirtualFrame frame) {
         var argumentValues = new Object[arguments.length];
+        Type firstArgumentType = null;
         for (int i = 0; i < arguments.length; i++) {
             var argument = arguments[i].execute(frame);
             if (argument instanceof TruffleString truffleStringArgument) {
-                argumentValues[i] = toJavaStringNode.execute(truffleStringArgument);
-            } else argumentValues[i] = argument;
+                argument = toJavaStringNode.execute(truffleStringArgument);
+            }
+            if (i == 0) {
+                firstArgumentType = KValue.type(argument);
+            }
+            argumentValues[i] = argument;
         }
-        return argumentValues;
+        return new Pair<>(firstArgumentType, argumentValues);
     }
+
+
 }

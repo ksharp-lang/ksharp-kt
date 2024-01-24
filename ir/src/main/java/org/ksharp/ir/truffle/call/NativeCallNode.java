@@ -37,7 +37,7 @@ public abstract class NativeCallNode extends BaseCallNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        var argumentValues = getArguments(frame);
+        var argumentValues = getArguments(frame).getSecond();
         return getNativeCall().execute(argumentValues);
     }
 }

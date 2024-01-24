@@ -100,8 +100,8 @@ data class IrCall(
 
     lateinit var functionLookup: FunctionLookup
 
-    override fun getCallTarget(): CallTarget? =
-        functionLookup.find(module, scope, null)?.cast<RootNode>()?.callTarget
+    override fun getCallTarget(firstArgument: Type?): CallTarget? =
+        functionLookup.find(module, scope, firstArgument)?.cast<RootNode>()?.callTarget
 
     override val serializer: IrNodeSerializers = IrNodeSerializers.Call
 
