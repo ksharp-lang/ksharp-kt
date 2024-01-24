@@ -36,6 +36,8 @@ private fun binaryExpressionFunction(
 private class FunctionLookupImpl : FunctionLookup {
 
     lateinit var functions: List<IrTopLevelSymbol>
+    lateinit var traits: Map<String, List<IrTopLevelSymbol>>
+    lateinit var impls: Map<Impl, List<IrTopLevelSymbol>>
 
     private val cache = cacheOf<CallScope, IrTopLevelSymbol>()
 
@@ -73,6 +75,16 @@ private class FunctionLookupImpl : FunctionLookup {
 
 }
 
+fun functionLookup(): FunctionLookup = FunctionLookupImpl()
+
+fun FunctionLookup.link(module: IrModule) {
+    if (this is FunctionLookupImpl) {
+        functions = module.symbols.cast()
+        traits = module.traitSymbols.cast()
+        impls = module.implSymbols.cast()
+    }
+}
+
 data class IrModule(
     val symbols: List<IrTopLevelSymbol>,
     val traitSymbols: Map<String, List<IrTopLevelSymbol>>,
@@ -84,7 +96,7 @@ data class IrModule(
 private fun List<AbstractionNode<SemanticInfo>>.mapToIrSymbols(
     name: String,
     module: ModuleInfo,
-    lookup: FunctionLookupImpl
+    lookup: FunctionLookup
 ) =
     asSequence()
         .filterNot { it.attributes.contains(CommonAttribute.Native) }
@@ -92,7 +104,7 @@ private fun List<AbstractionNode<SemanticInfo>>.mapToIrSymbols(
         .toList()
 
 fun CodeModule.toIrModule(): IrModule {
-    val lookup = FunctionLookupImpl()
+    val lookup = functionLookup()
     val module = IrModule(
         artifact.abstractions
             .mapToIrSymbols(name, module, lookup),
@@ -107,6 +119,6 @@ fun CodeModule.toIrModule(): IrModule {
                     .mapToIrSymbols(name, module, lookup)
             }
     )
-    lookup.functions = module.symbols.cast()
+    lookup.link(module)
     return module
 }

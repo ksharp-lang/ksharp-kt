@@ -12,7 +12,7 @@ class IrIntegerSerializer : IrNodeSerializer<IrInteger> {
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrInteger {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrInteger {
         return IrInteger(
             buffer.readLong(0),
             buffer.bufferFrom(8).readLocation()
@@ -27,7 +27,7 @@ class IrDecimalSerializer : IrNodeSerializer<IrDecimal> {
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrDecimal {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrDecimal {
         return IrDecimal(
             buffer.readDouble(0),
             buffer.bufferFrom(8).readLocation()
@@ -42,7 +42,7 @@ class IrCharacterSerializer : IrNodeSerializer<IrCharacter> {
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrCharacter {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrCharacter {
         return IrCharacter(
             buffer.readInt(0).toChar(),
             buffer.bufferFrom(4).readLocation()
@@ -57,7 +57,7 @@ class IrStringSerializer : IrNodeSerializer<IrString> {
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrString {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrString {
         return IrString(
             table[buffer.readInt(0)],
             buffer.bufferFrom(4).readLocation()
@@ -72,7 +72,7 @@ class IrBoolSerializer : IrNodeSerializer<IrBool> {
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrBool {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrBool {
         return IrBool(
             buffer.readInt(0) == 1,
             buffer.bufferFrom(4).readLocation()

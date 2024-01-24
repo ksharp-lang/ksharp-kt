@@ -37,8 +37,9 @@ private inline fun <reified T : IrNode> T.shouldBeSerializable() {
     buffer.transferTo(output)
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
+    val lookup = functionLookup()
     this.shouldBe(input.bufferView {
-        it.readIrNode(stringPoolView).also(::println)
+        it.readIrNode(lookup, stringPoolView).also(::println)
     })
 }
 

@@ -6,6 +6,7 @@ import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
 import org.ksharp.ir.CallScope
+import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrCall
 import org.ksharp.ir.IrNativeCall
 import org.ksharp.typesystem.attributes.readAttributes
@@ -38,7 +39,7 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
         input.arguments.writeTo(buffer, table)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrCall {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrCall {
         val attributes = buffer.readAttributes(table)
         var offset = buffer.readInt(0)
         val module = buffer.readInt(offset).let { if (it == -1) null else table[it] }
@@ -47,7 +48,7 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
         offset += 12
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
-        val arguments = buffer.bufferFrom(offset).readListOfNodes(table).second
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, table).second
         return IrCall(
             attributes,
             module,
@@ -66,14 +67,14 @@ class IrNativeCallSerializer : IrNodeSerializer<IrNativeCall> {
         input.arguments.writeTo(buffer, table)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrNativeCall {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrNativeCall {
         val argAttributes = buffer.readAttributes(table)
         var offset = buffer.readInt(0)
         val functionClass = table[buffer.readInt(offset)]
         offset += 4
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
-        val arguments = buffer.bufferFrom(offset).readListOfNodes(table).second
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, table).second
         return IrNativeCall(
             argAttributes,
             functionClass,
