@@ -35,7 +35,7 @@ private fun arithmeticExpected(factory: BinaryOperationFactory) =
     )
 
 class AbstractionToIrSymbolTest : StringSpec({
-    val functionLookup = FunctionLookup { _, _, _ -> null }
+    val functionLookup = FunctionLookup { _, _, _ -> throw RuntimeException("Not Supported") }
     listOf(
         createSpec(
             "IrInteger expression", "fn = 10", IrInteger(
@@ -306,7 +306,14 @@ class AbstractionToIrSymbolTest : StringSpec({
     "irFunction without arguments" {
         "ten = 10"
             .getFirstAbstraction()
-            .toIrSymbol(IrState("test", emptyMap(), { _, _, _ -> null }, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(
+                IrState(
+                    "test",
+                    emptyMap(),
+                    { _, _, _ -> throw RuntimeException("Not supported") },
+                    mutableVariableIndexes(emptyVariableIndex)
+                )
+            )
             .shouldBe(
                 IrFunction(
                     setOf(CommonAttribute.Internal, CommonAttribute.Constant),
@@ -368,7 +375,7 @@ class AbstractionToIrSymbolTest : StringSpec({
 
 
 class CustomAbstractionToIrSymbolTest : StringSpec({
-    val functionLookup = FunctionLookup { _, _, _ -> null }
+    val functionLookup = FunctionLookup { _, _, _ -> throw RuntimeException("Not Supported") }
     "Check a custom spec" {
         createSpec(
             "Constant IrCall expression",

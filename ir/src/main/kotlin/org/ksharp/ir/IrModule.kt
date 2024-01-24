@@ -17,7 +17,7 @@ import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.Type
 
 fun interface FunctionLookup {
-    fun find(module: String?, call: CallScope, firstValue: Type?): IrTopLevelSymbol?
+    fun find(module: String?, call: CallScope, firstValue: Type?): IrTopLevelSymbol
 }
 
 internal val Type?.irCustomNode: String?
