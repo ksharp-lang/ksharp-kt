@@ -207,7 +207,17 @@ class NodeSerializerTest : StringSpec({
         IrCall(
             attributes,
             "test",
-            CallScope("test", null, false),
+            CallScope("test", null),
+            listOf(IrInteger(1, location), IrInteger(2, location)),
+            location
+        )
+            .shouldBeSerializable()
+    }
+    "IrCall test 2" {
+        IrCall(
+            attributes,
+            "test",
+            CallScope("test", newParameterForTesting(1)),
             listOf(IrInteger(1, location), IrInteger(2, location)),
             location
         )

@@ -12,11 +12,19 @@ import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.types.Type
 
 fun interface FunctionLookup {
     fun find(module: String?, call: CallScope): IrTopLevelSymbol?
 }
+
+internal val Type?.irCustomNode: String?
+    get() =
+        if (this != null) attributes.firstOrNull { a -> a is NameAttribute }
+            ?.let { a -> a.cast<NameAttribute>().value["ir"] }
+        else null
 
 private fun binaryExpressionFunction(
     name: String,
@@ -57,8 +65,8 @@ private class FunctionLookupImpl : FunctionLookup {
     )
 
     private fun findCustomFunction(call: CallScope): IrTopLevelSymbol? {
-        if (call.isFirstArgTrait) {
-            return irNodeFactory["${call.traitScopeName}::${call.callName}"]?.invoke()
+        if (call.traitType != null) {
+            return irNodeFactory["${call.traitType.irCustomNode}::${call.callName}"]?.invoke()
         }
         return null
     }

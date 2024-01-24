@@ -7,6 +7,7 @@ import org.ksharp.common.Location
 import org.ksharp.common.Offset
 import org.ksharp.common.cast
 import org.ksharp.ir.*
+import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.nameAttribute
@@ -171,7 +172,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                 """.trimIndent(), IrCall(
                 setOf(CommonAttribute.Constant, CommonAttribute.Pure),
                 null,
-                CallScope("sum/2", traitScopeName = "prelude::num", true),
+                CallScope("sum/2", preludeModule.typeSystem["Num"].valueOrNull),
                 listOf(
                     IrInteger(
                         1,

@@ -14,6 +14,7 @@ import org.ksharp.ir.truffle.cast.NumCastNode
 import org.ksharp.ir.truffle.variable.VarAccessNode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.types.Type
 
 sealed interface IrExpression : IrSymbol
 
@@ -39,8 +40,7 @@ enum class CastType {
 
 data class CallScope(
     val callName: String,
-    val traitScopeName: String?,
-    val isFirstArgTrait: Boolean
+    val traitType: Type?
 )
 
 data class IrNumCast(
