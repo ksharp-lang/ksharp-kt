@@ -11,9 +11,11 @@ public abstract class BaseCallNode extends KSharpNode {
     @Children
     private final KSharpNode[] arguments;
     private final TruffleString.ToJavaStringNode toJavaStringNode;
+    protected final Type returnType;
 
-    protected BaseCallNode(KSharpNode[] arguments) {
+    protected BaseCallNode(KSharpNode[] arguments, Type returnType) {
         this.arguments = arguments;
+        this.returnType = returnType;
         toJavaStringNode = TruffleString.ToJavaStringNode.create();
     }
 

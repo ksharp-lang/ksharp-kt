@@ -485,7 +485,7 @@ class EvaluateTest : StringSpec({
 class CustomEvaluationTest : StringSpec({
     "Check a custom spec" {
         createSpec(
-            "Evaluate impl abstractions",
+            "Evaluate trait abstractions 3",
             """|fn = double (int 10)  
                |
                |trait Sum a =
@@ -496,11 +496,9 @@ class CustomEvaluationTest : StringSpec({
                |
                |impl Sum for Int =
                |    sum a b = a + b
-               |    
-               |    double a = a + (int 2)
                |            
             """.trimMargin(),
-            12.toInt()
+            20.toInt()
         )
             .let { (_, code, call) ->
                 code.evaluateFirstFunction(call.arguments)

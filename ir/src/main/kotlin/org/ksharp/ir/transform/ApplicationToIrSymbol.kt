@@ -149,6 +149,7 @@ private fun toIrCallSymbol(
     attributes: Set<Attribute>,
     callName: String,
     arguments: List<IrExpression>,
+    returnType: Type,
     location: Location,
 ): IrCall {
     val trait = functionType.arguments.first().asTraitType()
@@ -164,6 +165,7 @@ private fun toIrCallSymbol(
         null,
         CallScope(callName, traitName, scopeName),
         arguments,
+        returnType,
         location,
     )
 }
@@ -183,6 +185,7 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
         val functionModuleName =
             if (functionName.pck == null) state.moduleName
             else state.dependencies[functionName.pck]!!
+        val returnType = info.getInferredType(location).valueOrNull!!
         if (functionType.attributes.contains(CommonAttribute.Native))
             IrNativeCall(
                 attributes,
@@ -191,10 +194,18 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
                 }",
                 arguments,
+                returnType,
                 location,
             )
         else {
-            toIrCallSymbol(functionType, attributes, callName, arguments, location)
+            toIrCallSymbol(
+                functionType,
+                attributes,
+                callName,
+                arguments,
+                returnType,
+                location
+            )
                 .apply { this.functionLookup = state.functionLookup }
         }
     }

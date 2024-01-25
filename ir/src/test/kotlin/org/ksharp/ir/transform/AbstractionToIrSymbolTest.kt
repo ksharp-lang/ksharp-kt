@@ -7,9 +7,11 @@ import org.ksharp.common.Location
 import org.ksharp.common.Offset
 import org.ksharp.common.cast
 import org.ksharp.ir.*
+import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.nameAttribute
+import org.ksharp.typesystem.types.ImplType
 
 private fun String.getFirstAbstraction() =
     toCodeModule()
@@ -181,6 +183,10 @@ class AbstractionToIrSymbolTest : StringSpec({
                         2,
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
+                ),
+                ImplType(
+                    preludeModule.typeSystem["Num"].valueOrNull!!.cast(),
+                    preludeModule.typeSystem["Long"].valueOrNull!!
                 ),
                 Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )
@@ -396,6 +402,10 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
                         2,
                         Location(Line(1) to Offset(11), Line(1) to Offset(12))
                     )
+                ),
+                ImplType(
+                    preludeModule.typeSystem["Num"].valueOrNull!!.cast(),
+                    preludeModule.typeSystem["Long"].valueOrNull!!
                 ),
                 Location(Line(1) to Offset(5), Line(1) to Offset(8))
             )

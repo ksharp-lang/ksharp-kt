@@ -47,5 +47,10 @@ data class KValue(
                 is Boolean -> boolType
                 else -> null
             }
+
+        @JvmStatic
+        fun wrap(value: Any, type: Type): KValue =
+            if (value is KValue) KValue(type, value.value)
+            else KValue(type, value)
     }
 }

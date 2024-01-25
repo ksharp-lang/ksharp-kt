@@ -9,8 +9,12 @@ import org.ksharp.ir.CallScope
 import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrCall
 import org.ksharp.ir.IrNativeCall
+import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
+import org.ksharp.typesystem.serializer.readType
+import org.ksharp.typesystem.serializer.writeTo
+import org.ksharp.typesystem.types.Type
 
 
 private fun CallScope.writeTo(buffer: BufferWriter, table: BinaryTable) {
@@ -38,6 +42,7 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
             .let { buffer.add(it) }
         input.scope.writeTo(buffer, table)
         input.location.writeTo(buffer)
+        input.type.writeTo(buffer, table)
         input.arguments.writeTo(buffer, table)
     }
 
@@ -50,12 +55,15 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
         offset += callScopePosition
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
+        val type = buffer.bufferFrom(offset).readType<Type>(preludeModule.typeSystem.handle, table)
+        offset += buffer.readInt(offset)
         val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, table).second
         return IrCall(
             attributes,
             module,
             callScope,
             arguments.cast(),
+            type,
             location
         )
     }
@@ -66,6 +74,7 @@ class IrNativeCallSerializer : IrNodeSerializer<IrNativeCall> {
         input.argAttributes.writeTo(buffer, table)
         buffer.add(table.add(input.functionClass))
         input.location.writeTo(buffer)
+        input.type.writeTo(buffer, table)
         input.arguments.writeTo(buffer, table)
     }
 
@@ -76,11 +85,14 @@ class IrNativeCallSerializer : IrNodeSerializer<IrNativeCall> {
         offset += 4
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
+        val type = buffer.bufferFrom(offset).readType<Type>(preludeModule.typeSystem.handle, table)
+        offset += buffer.readInt(offset)
         val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, table).second
         return IrNativeCall(
             argAttributes,
             functionClass,
             arguments.cast(),
+            type,
             location
         )
     }

@@ -209,6 +209,7 @@ class NodeSerializerTest : StringSpec({
             "test",
             CallScope("test", null, null),
             listOf(IrInteger(1, location), IrInteger(2, location)),
+            newParameterForTesting(2),
             location
         )
             .shouldBeSerializable()
@@ -219,6 +220,7 @@ class NodeSerializerTest : StringSpec({
             "test",
             CallScope("test", "T", "T"),
             listOf(IrInteger(1, location), IrInteger(2, location)),
+            newParameterForTesting(2),
             location
         )
             .shouldBeSerializable()
@@ -248,6 +250,7 @@ class NodeSerializerTest : StringSpec({
             attributes,
             "test",
             listOf(IrInteger(1, location), IrInteger(2, location)),
+            newParameterForTesting(2),
             location
         )
             .shouldBeSerializable()

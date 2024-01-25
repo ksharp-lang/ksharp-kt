@@ -96,8 +96,9 @@ data class IrCall(
     val module: String?,
     val scope: CallScope,
     val arguments: List<IrExpression>,
+    val type: Type,
     override val location: Location
-) : CallNode(arguments.cast<List<KSharpNode>>().toTypedArray()), IrExpression {
+) : CallNode(arguments.cast<List<KSharpNode>>().toTypedArray(), type), IrExpression {
 
     lateinit var functionLookup: FunctionLookup
 
@@ -112,8 +113,9 @@ data class IrNativeCall(
     val argAttributes: Set<Attribute>,
     val functionClass: String,
     val arguments: List<IrExpression>,
+    val type: Type,
     override val location: Location
-) : NativeCallNode(functionClass, arguments.cast<List<KSharpNode>>().toTypedArray()), IrExpression {
+) : NativeCallNode(functionClass, arguments.cast<List<KSharpNode>>().toTypedArray(), type), IrExpression {
 
     override val attributes: Set<Attribute>
         get() = nativeCall.getAttributes(argAttributes)
