@@ -7,12 +7,24 @@ import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.toIrSymbol
 import org.ksharp.module.CodeModule
+import org.ksharp.module.Impl
+import org.ksharp.module.ModuleInfo
+import org.ksharp.nodes.semantic.AbstractionNode
+import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.types.Type
 
 fun interface FunctionLookup {
-    fun find(module: String?, call: CallScope): IrTopLevelSymbol?
+    fun find(module: String?, call: CallScope, firstValue: Type?): IrTopLevelSymbol
 }
+
+internal val Type?.irCustomNode: String?
+    get() =
+        if (this != null) attributes.firstOrNull { a -> a is NameAttribute }
+            ?.let { a -> a.cast<NameAttribute>().value["ir"] }
+        else null
 
 private fun binaryExpressionFunction(
     name: String,
@@ -32,8 +44,10 @@ private fun binaryExpressionFunction(
 private class FunctionLookupImpl : FunctionLookup {
 
     lateinit var functions: List<IrTopLevelSymbol>
+    lateinit var traits: Map<String, List<IrTopLevelSymbol>>
+    lateinit var impls: Map<Impl, List<IrTopLevelSymbol>>
 
-    private val cache = cacheOf<CallScope, IrTopLevelSymbol>()
+    private val cache = cacheOf<Pair<Type?, CallScope>, IrTopLevelSymbol>()
 
     private var irNodeFactory = mapOf(
         "prelude::num::(+)/2" to binaryExpressionFunction("(+)", ::IrSum),
@@ -51,37 +65,82 @@ private class FunctionLookupImpl : FunctionLookup {
     )
 
     private fun findCustomFunction(call: CallScope): IrTopLevelSymbol? {
-        if (call.isFirstArgTrait) {
+        if (call.traitScopeName != null) {
             return irNodeFactory["${call.traitScopeName}::${call.callName}"]?.invoke()
         }
         return null
     }
 
-    override fun find(module: String?, call: CallScope): IrTopLevelSymbol =
-        cache.get(call) {
-            functions.asSequence()
-                .filter {
-                    it.name == call.callName
-                }
-                .firstOrNull()
-                ?: findCustomFunction(call)!!
+    private fun List<IrTopLevelSymbol>?.findFunction(call: CallScope): IrTopLevelSymbol? =
+        if (this == null) null
+        else asSequence()
+            .filter { it.name == call.callName }
+            .firstOrNull()
+
+    private fun Impl.findImplFunction(call: CallScope): IrTopLevelSymbol? =
+        impls[this].findFunction(call)
+
+    private fun String?.findTraitFunction(call: CallScope): IrTopLevelSymbol? =
+        if (this == null) null
+        else traits[this].findFunction(call)
+
+    private fun findFunction(call: CallScope, firstValue: Type?): IrTopLevelSymbol? =
+        (if (call.traitName != null && firstValue != null) {
+            Impl(call.traitName, firstValue).findImplFunction(call) ?: call.traitName.findTraitFunction(call)
+        } else null)
+            ?: functions.findFunction(call)
+
+    override fun find(module: String?, call: CallScope, firstValue: Type?): IrTopLevelSymbol =
+        cache.get(firstValue to call) {
+            findFunction(call, firstValue) ?: findCustomFunction(call)!!
         }
 
 }
 
+fun functionLookup(): FunctionLookup = FunctionLookupImpl()
+
+fun FunctionLookup.link(module: IrModule) {
+    if (this is FunctionLookupImpl) {
+        functions = module.symbols.cast()
+        traits = module.traitSymbols.cast()
+        impls = module.implSymbols.cast()
+    }
+}
+
 data class IrModule(
-    val symbols: List<IrTopLevelSymbol>
+    val symbols: List<IrTopLevelSymbol>,
+    val traitSymbols: Map<String, List<IrTopLevelSymbol>>,
+    val implSymbols: Map<Impl, List<IrTopLevelSymbol>>,
 ) : IrNode {
     override val serializer: IrNodeSerializers = IrNodeSerializers.Module
 }
 
+private fun List<AbstractionNode<SemanticInfo>>.mapToIrSymbols(
+    name: String,
+    module: ModuleInfo,
+    lookup: FunctionLookup
+) =
+    asSequence()
+        .filterNot { it.attributes.contains(CommonAttribute.Native) }
+        .map { it.toIrSymbol(name, module.dependencies, lookup) }
+        .toList()
+
 fun CodeModule.toIrModule(): IrModule {
-    val lookup = FunctionLookupImpl()
+    val lookup = functionLookup()
     val module = IrModule(
         artifact.abstractions
-            .filterNot { it.attributes.contains(CommonAttribute.Native) }
-            .map { it.toIrSymbol(name, module.dependencies, lookup) }
+            .mapToIrSymbols(name, module, lookup),
+        traitArtifacts
+            .mapValues { entry ->
+                entry.value.abstractions
+                    .mapToIrSymbols(name, module, lookup)
+            },
+        implArtifacts
+            .mapValues { entry ->
+                entry.value.abstractions
+                    .mapToIrSymbols(name, module, lookup)
+            }
     )
-    lookup.functions = module.symbols.cast()
+    lookup.link(module)
     return module
 }

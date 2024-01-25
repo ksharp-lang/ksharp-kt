@@ -3,15 +3,12 @@ package org.ksharp.ir.truffle.variable;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeField;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import org.ksharp.ir.truffle.KSharpNode;
-import org.ksharp.ir.truffle.PreludeTypeSystem;
 
 @NodeField(name = "slot", type = int.class)
 @NodeChild("value")
-@TypeSystemReference(PreludeTypeSystem.class)
 public abstract class BaseSetVarNode extends KSharpNode {
 
     protected abstract int getSlot();

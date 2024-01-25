@@ -6,6 +6,7 @@ import org.ksharp.common.io.BinaryTable
 import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
+import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrBinaryOperation
 import org.ksharp.ir.IrExpression
 import org.ksharp.typesystem.attributes.Attribute
@@ -20,16 +21,17 @@ typealias IrBinaryNodeFactory = (
 ) -> IrExpression
 
 internal fun BufferView.readIrBinaryNode(
+    lookup: FunctionLookup,
     table: BinaryTableView,
     factory: IrBinaryNodeFactory
 ): IrExpression {
     var offset = this.readInt(0)
     val attributes = this.readAttributes(table)
 
-    val left = this.bufferFrom(offset).readIrNode(table)
+    val left = this.bufferFrom(offset).readIrNode(lookup, table)
     offset += this.readInt(offset)
 
-    val right = this.bufferFrom(offset).readIrNode(table)
+    val right = this.bufferFrom(offset).readIrNode(lookup, table)
     offset += this.readInt(offset)
 
     val location = this.bufferFrom(offset).readLocation()
@@ -45,7 +47,7 @@ class IrBinaryOperationSerializer(private val factory: IrBinaryNodeFactory) : Ir
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrBinaryOperation {
-        return buffer.readIrBinaryNode(table, factory).cast()
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrBinaryOperation {
+        return buffer.readIrBinaryNode(lookup, table, factory).cast()
     }
 }

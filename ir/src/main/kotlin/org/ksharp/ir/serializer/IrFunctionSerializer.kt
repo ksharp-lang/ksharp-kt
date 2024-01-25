@@ -7,6 +7,7 @@ import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
 import org.ksharp.common.listBuilder
+import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrFunction
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
@@ -40,7 +41,7 @@ class IrFunctionSerializer : IrNodeSerializer<IrFunction> {
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrFunction {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrFunction {
         var offset = buffer.readInt(0)
         val attributes = buffer.readAttributes(table)
         val name = table[buffer.readInt(offset)]
@@ -49,7 +50,7 @@ class IrFunctionSerializer : IrNodeSerializer<IrFunction> {
         offset += 4 + arguments.size * 4
         val frameSlot = buffer.readInt(offset)
         offset += 4
-        val expr = buffer.bufferFrom(offset).readIrNode(table)
+        val expr = buffer.bufferFrom(offset).readIrNode(lookup, table)
         offset += buffer.readInt(offset)
         val location = buffer.bufferFrom(offset).readLocation()
         return IrFunction(
