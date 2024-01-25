@@ -406,6 +406,73 @@ class EvaluateTest : StringSpec({
             """.trimMargin(),
             30.toLong()
         ),
+        createSpec(
+            "Evaluate trait abstractions",
+            """|fn a = double a
+               |
+               |trait Sum a =
+               |    sum :: a -> a -> a
+               |    double :: a -> a
+               |    
+               |    double a = sum a a
+               |
+               |impl Sum for Int =
+               |    sum a b = a + b
+               |            
+            """.trimMargin(),
+            12.toInt(),
+            6.toInt()
+        ),
+        createSpec(
+            "Evaluate trait abstractions 2",
+            """|fn = double 10  
+               |
+               |trait Sum a =
+               |    sum :: a -> a -> a
+               |    double :: a -> a
+               |    
+               |    double a = sum a a
+               |
+               |impl Sum for Long =
+               |    sum a b = a + b
+               |            
+            """.trimMargin(),
+            20.toLong()
+        ),
+        createSpec(
+            "Evaluate trait abstractions 3",
+            """|fn = double (int 10)  
+               |
+               |trait Sum a =
+               |    sum :: a -> a -> a
+               |    double :: a -> a
+               |    
+               |    double a = sum a a
+               |
+               |impl Sum for Int =
+               |    sum a b = a + b
+               |            
+            """.trimMargin(),
+            20.toInt()
+        ),
+        createSpec(
+            "Evaluate impl abstractions",
+            """|fn = double (int 10)  
+               |
+               |trait Sum a =
+               |    sum :: a -> a -> a
+               |    double :: a -> a
+               |    
+               |    double a = sum a a
+               |
+               |impl Sum for Int =
+               |    sum a b = a + b
+               |    
+               |    double a = a + (int 2)
+               |            
+            """.trimMargin(),
+            12.toInt()
+        ),
     ).forEach { (description, code, call) ->
         description {
             code.evaluateFirstFunction(call.arguments)
@@ -418,10 +485,20 @@ class EvaluateTest : StringSpec({
 class CustomEvaluationTest : StringSpec({
     "Check a custom spec" {
         createSpec(
-            "Call expression", """
-            fn = sum 10 20
-            sum a b = a + b
-        """.trimIndent(), 30.toLong()
+            "Evaluate trait abstractions 3",
+            """|fn = double (int 10)  
+               |
+               |trait Sum a =
+               |    sum :: a -> a -> a
+               |    double :: a -> a
+               |    
+               |    double a = sum a a
+               |
+               |impl Sum for Int =
+               |    sum a b = a + b
+               |            
+            """.trimMargin(),
+            20.toInt()
         )
             .let { (_, code, call) ->
                 code.evaluateFirstFunction(call.arguments)

@@ -14,6 +14,7 @@ import org.ksharp.ir.truffle.cast.NumCastNode
 import org.ksharp.ir.truffle.variable.VarAccessNode
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.types.Type
 
 sealed interface IrExpression : IrSymbol
 
@@ -39,8 +40,8 @@ enum class CastType {
 
 data class CallScope(
     val callName: String,
+    val traitName: String?,
     val traitScopeName: String?,
-    val isFirstArgTrait: Boolean
 )
 
 data class IrNumCast(
@@ -95,13 +96,14 @@ data class IrCall(
     val module: String?,
     val scope: CallScope,
     val arguments: List<IrExpression>,
+    val type: Type,
     override val location: Location
-) : CallNode(arguments.cast<List<KSharpNode>>().toTypedArray()), IrExpression {
+) : CallNode(arguments.cast<List<KSharpNode>>().toTypedArray(), type), IrExpression {
 
     lateinit var functionLookup: FunctionLookup
 
-    override fun getCallTarget(): CallTarget? =
-        functionLookup.find(module, scope)?.cast<RootNode>()?.callTarget
+    override fun getCallTarget(firstArgument: Type?): CallTarget? =
+        functionLookup.find(module, scope, firstArgument).cast<RootNode>().callTarget
 
     override val serializer: IrNodeSerializers = IrNodeSerializers.Call
 
@@ -111,8 +113,9 @@ data class IrNativeCall(
     val argAttributes: Set<Attribute>,
     val functionClass: String,
     val arguments: List<IrExpression>,
+    val type: Type,
     override val location: Location
-) : NativeCallNode(functionClass, arguments.cast<List<KSharpNode>>().toTypedArray()), IrExpression {
+) : NativeCallNode(functionClass, arguments.cast<List<KSharpNode>>().toTypedArray(), type), IrExpression {
 
     override val attributes: Set<Attribute>
         get() = nativeCall.getAttributes(argAttributes)

@@ -5,6 +5,7 @@ import org.ksharp.common.io.BinaryTable
 import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
+import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrLet
 import org.ksharp.ir.IrSetVar
 import org.ksharp.typesystem.attributes.readAttributes
@@ -17,12 +18,12 @@ class IrLetSerializer : IrNodeSerializer<IrLet> {
         input.expressions.writeTo(buffer, table)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrLet {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrLet {
         val attributes = buffer.readAttributes(table)
         var offset = buffer.readInt(0)
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
-        val expressions = buffer.bufferFrom(offset).readListOfNodes(table)
+        val expressions = buffer.bufferFrom(offset).readListOfNodes(lookup, table).second
         return IrLet(
             attributes,
             expressions.cast(),
@@ -39,12 +40,12 @@ class IrSetVarSerializer : IrNodeSerializer<IrSetVar> {
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrSetVar {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrSetVar {
         val attributes = buffer.readAttributes(table)
         var offset = buffer.readInt(0)
         val index = buffer.readInt(offset)
         offset += 4
-        val value = buffer.bufferFrom(offset).readIrNode(table)
+        val value = buffer.bufferFrom(offset).readIrNode(lookup, table)
         offset += buffer.readInt(offset)
         val location = buffer.bufferFrom(offset).readLocation()
         return IrSetVar(

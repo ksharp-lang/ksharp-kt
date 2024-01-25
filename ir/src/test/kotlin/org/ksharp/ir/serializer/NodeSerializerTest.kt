@@ -8,7 +8,9 @@ import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.ir.*
+import org.ksharp.module.Impl
 import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.newParameterForTesting
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicInteger
@@ -35,8 +37,9 @@ private inline fun <reified T : IrNode> T.shouldBeSerializable() {
     buffer.transferTo(output)
     val stringPoolView = mockStringTableView(stringPool.build())
     val input = ByteArrayInputStream(output.toByteArray())
+    val lookup = functionLookup()
     this.shouldBe(input.bufferView {
-        it.readIrNode(stringPoolView).also(::println)
+        it.readIrNode(lookup, stringPoolView).also(::println)
     })
 }
 
@@ -169,6 +172,30 @@ class NodeSerializerTest : StringSpec({
                     IrInteger(1, location),
                     location
                 )
+            ),
+            mapOf(
+                "Trait" to listOf(
+                    IrFunction(
+                        attributes,
+                        "test",
+                        listOf("a", "b"),
+                        1,
+                        IrInteger(1, location),
+                        location
+                    )
+                )
+            ),
+            mapOf(
+                Impl("Trait", newParameterForTesting(1)) to listOf(
+                    IrFunction(
+                        attributes,
+                        "test",
+                        listOf("a", "b"),
+                        1,
+                        IrInteger(1, location),
+                        location
+                    )
+                )
             )
         ).apply {
             shouldBeSerializable()
@@ -180,8 +207,20 @@ class NodeSerializerTest : StringSpec({
         IrCall(
             attributes,
             "test",
-            CallScope("test", null, false),
+            CallScope("test", null, null),
             listOf(IrInteger(1, location), IrInteger(2, location)),
+            newParameterForTesting(2),
+            location
+        )
+            .shouldBeSerializable()
+    }
+    "IrCall test 2" {
+        IrCall(
+            attributes,
+            "test",
+            CallScope("test", "T", "T"),
+            listOf(IrInteger(1, location), IrInteger(2, location)),
+            newParameterForTesting(2),
             location
         )
             .shouldBeSerializable()
@@ -211,6 +250,7 @@ class NodeSerializerTest : StringSpec({
             attributes,
             "test",
             listOf(IrInteger(1, location), IrInteger(2, location)),
+            newParameterForTesting(2),
             location
         )
             .shouldBeSerializable()

@@ -6,6 +6,7 @@ import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
 import org.ksharp.ir.CastType
+import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrNumCast
 
 class IrNumCastSerializer : IrNodeSerializer<IrNumCast> {
@@ -15,8 +16,8 @@ class IrNumCastSerializer : IrNodeSerializer<IrNumCast> {
         input.location.writeTo(buffer)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrNumCast {
-        val expr = buffer.readIrNode(table)
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrNumCast {
+        val expr = buffer.readIrNode(lookup, table)
         val offset = buffer.readInt(0)
         val type = CastType.entries[buffer.readInt(offset)]
         val location = buffer.bufferFrom(offset + 4).readLocation()

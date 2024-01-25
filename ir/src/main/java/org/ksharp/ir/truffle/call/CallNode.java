@@ -2,8 +2,10 @@ package org.ksharp.ir.truffle.call;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import org.ksharp.ir.KValue;
 import org.ksharp.ir.truffle.KSharpNode;
 import org.ksharp.ir.truffle.runtime.FunctionObject;
+import org.ksharp.typesystem.types.Type;
 
 public abstract class CallNode extends BaseCallNode {
 
@@ -13,21 +15,24 @@ public abstract class CallNode extends BaseCallNode {
     @Child
     private FunctionDispatchNode dispatchNode;
 
-    protected CallNode(KSharpNode[] arguments) {
-        super(arguments);
+    protected CallNode(KSharpNode[] arguments, Type returnType) {
+        super(arguments, returnType);
         this.dispatchNode = FunctionDispatchNodeGen.create();
     }
 
 
-    public abstract CallTarget getCallTarget();
+    public abstract CallTarget getCallTarget(Type firstArgument);
 
     @Override
     public Object execute(VirtualFrame frame) {
+        var argumentValues = getArguments(frame);
         if (functionTarget == null) {
-            var rootNode = getCallTarget();
+            var rootNode = getCallTarget(argumentValues.getFirst());
             functionTarget = new FunctionObject(rootNode);
         }
-        var argumentValues = getArguments(frame);
-        return dispatchNode.executeDispatch(functionTarget, argumentValues);
+        return KValue.wrap(
+                dispatchNode.executeDispatch(functionTarget, argumentValues.getSecond()),
+                returnType
+        );
     }
 }

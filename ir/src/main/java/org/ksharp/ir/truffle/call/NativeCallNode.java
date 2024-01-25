@@ -1,8 +1,10 @@
 package org.ksharp.ir.truffle.call;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
+import org.ksharp.ir.KValue;
 import org.ksharp.ir.NativeCall;
 import org.ksharp.ir.truffle.KSharpNode;
+import org.ksharp.typesystem.types.Type;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -17,8 +19,8 @@ public abstract class NativeCallNode extends BaseCallNode {
     private final String functionClass;
     private NativeCall call;
 
-    protected NativeCallNode(String functionClass, KSharpNode[] arguments) {
-        super(arguments);
+    protected NativeCallNode(String functionClass, KSharpNode[] arguments, Type returnType) {
+        super(arguments, returnType);
         this.functionClass = functionClass;
     }
 
@@ -37,7 +39,7 @@ public abstract class NativeCallNode extends BaseCallNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        var argumentValues = getArguments(frame);
-        return getNativeCall().execute(argumentValues);
+        var argumentValues = getArguments(frame).getSecond();
+        return KValue.wrap(getNativeCall().execute(argumentValues), returnType);
     }
 }

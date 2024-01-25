@@ -6,6 +6,7 @@ import org.ksharp.common.io.BinaryTable
 import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
+import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrCollections
 import org.ksharp.ir.IrExpression
 import org.ksharp.ir.IrMap
@@ -26,14 +27,14 @@ class IrCollectionsSerializer(private val factory: IrCollectionFactory) : IrNode
         input.items.writeTo(buffer, table)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrCollections {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrCollections {
         var offset = buffer.readInt(0)
         val attributes = buffer.readAttributes(table)
 
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
 
-        return factory(attributes, buffer.bufferFrom(offset).readListOfNodes(table).cast(), location)
+        return factory(attributes, buffer.bufferFrom(offset).readListOfNodes(lookup, table).second.cast(), location)
     }
 
 }
@@ -46,14 +47,14 @@ class IrMapSerializer : IrNodeSerializer<IrMap> {
         input.entries.writeTo(buffer, table)
     }
 
-    override fun read(buffer: BufferView, table: BinaryTableView): IrMap {
+    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrMap {
         var offset = buffer.readInt(0)
         val attributes = buffer.readAttributes(table)
 
         val location = buffer.bufferFrom(offset).readLocation()
         offset += 16
 
-        return IrMap(attributes, buffer.bufferFrom(offset).readListOfNodes(table).cast(), location)
+        return IrMap(attributes, buffer.bufferFrom(offset).readListOfNodes(lookup, table).second.cast(), location)
     }
 
 }
