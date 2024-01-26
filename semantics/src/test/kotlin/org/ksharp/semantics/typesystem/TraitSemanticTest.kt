@@ -130,7 +130,7 @@ class TraitSemanticTest : StringSpec({
             .map {
                 it.shouldContain(
                     """
-                    trait Sum a =
+                    trait irTest.Sum a =
                         sum :: a -> a -> a
                     """.trimIndent()
                 )
@@ -169,7 +169,7 @@ class TraitSemanticTest : StringSpec({
             .map {
                 it.shouldContain(
                     """
-                    trait Sum a =
+                    trait irTest.Sum a =
                         sum :: a -> a -> a
                     """.trimIndent()
                 )

@@ -29,7 +29,7 @@ private fun createKernelTypeSystem() = typeSystem {
     registerCatalog("prelude") {
         TypeSerializers.entries[it]
     }
-    trait(setOf(nameAttribute(mapOf("ir" to "prelude::num"))), "Num", "a") {
+    trait(setOf(nameAttribute(mapOf("ir" to "prelude::num"))), "", "Num", "a") {
         binaryOp("(+)")
         binaryOp("(-)")
         binaryOp("(*)")
@@ -38,7 +38,7 @@ private fun createKernelTypeSystem() = typeSystem {
         binaryOp("(**)")
     }
 
-    trait(setOf(nameAttribute(mapOf("ir" to "prelude::bit"))), "Bitwise", "a") {
+    trait(setOf(nameAttribute(mapOf("ir" to "prelude::bit"))), "", "Bitwise", "a") {
         binaryOp("(&)")
         binaryOp("(|)")
         binaryOp("(^)")

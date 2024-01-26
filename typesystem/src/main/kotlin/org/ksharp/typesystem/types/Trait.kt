@@ -20,6 +20,7 @@ interface IsTrait
 @Suppress("DataClassPrivateConstructor")
 data class TraitType private constructor(
     override val attributes: Set<Attribute>,
+    val module: String,
     val name: String,
     val param: String,
     val methods: Map<String, MethodType>,
@@ -31,11 +32,13 @@ data class TraitType private constructor(
     internal constructor(
         typeSystem: HandlePromise<TypeSystem>,
         attributes: Set<Attribute>,
+        module: String,
         name: String,
         param: String,
         methods: Map<String, MethodType>,
     ) : this(
         attributes,
+        module,
         name,
         param,
         methods
@@ -111,11 +114,11 @@ data class TraitType private constructor(
         get() = methods.values.asSequence()
 
     override fun toString(): String = """
-        |trait $name $param =
+        |trait ${if (module.isNotEmpty()) "$module." else ""}$name $param =
         |    ${methods.values.joinToString("\n    ") { it.representation }}
     """.trimMargin("|")
 
-    override fun new(attributes: Set<Attribute>): Type = TraitType(typeSystem, attributes, name, param, methods)
+    override fun new(attributes: Set<Attribute>): Type = TraitType(typeSystem, attributes, module, name, param, methods)
 
 }
 
@@ -166,6 +169,7 @@ class TraitTypeFactory(
 
 fun TypeSystemBuilder.trait(
     attributes: Set<Attribute>,
+    module: String,
     name: String,
     paramName: String,
     factory: TraitTypeFactoryBuilder
@@ -173,7 +177,7 @@ fun TypeSystemBuilder.trait(
     item(attributes, name) {
         validateTypeParamName(paramName).flatMap {
             TraitTypeFactory(name, this).apply(factory).build().map {
-                TraitType(handle, attributes, name, paramName, it)
+                TraitType(handle, attributes, module, name, paramName, it)
             }
         }
     }

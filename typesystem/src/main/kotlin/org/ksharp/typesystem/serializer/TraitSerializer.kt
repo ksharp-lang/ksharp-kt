@@ -34,17 +34,22 @@ class MethodTypeSerializer : SerializerWriter<TraitType.MethodType>, TypeSeriali
 class TraitSerializer : SerializerWriter<TraitType>, TypeSerializerReader<TraitType> {
     override fun write(input: TraitType, buffer: BufferWriter, table: BinaryTable) {
         input.attributes.writeTo(buffer, table)
+        buffer.add(table.add(input.module))
         buffer.add(table.add(input.name))
         buffer.add(table.add(input.param))
         input.methods.writeTo(buffer, table)
     }
 
     override fun read(handle: HandlePromise<TypeSystem>, buffer: BufferView, table: BinaryTableView): TraitType {
-        val offset = buffer.readInt(0)
+        var offset = buffer.readInt(0)
         val attributes = buffer.readAttributes(table)
+        val module = table[buffer.readInt(offset)]
+        offset += 4
         val name = table[buffer.readInt(offset)]
-        val param = table[buffer.readInt(4 + offset)]
-        val methods = buffer.bufferFrom(8 + offset).readMapOfTypes(handle, table)
-        return TraitType(handle, attributes, name, param, methods.cast())
+        offset += 4
+        val param = table[buffer.readInt(offset)]
+        offset += 4
+        val methods = buffer.bufferFrom(offset).readMapOfTypes(handle, table)
+        return TraitType(handle, attributes, module, name, param, methods.cast())
     }
 }

@@ -729,7 +729,7 @@ class TypeSystemSemanticsTest : StringSpec({
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
-                |Public-trait Number a =
+                |Public-trait module.Number a =
                 |    sum :: a -> a -> a
             """.trimMargin()
             )
@@ -789,7 +789,7 @@ class TypeSystemSemanticsTest : StringSpec({
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
-                |Public-trait Number a =
+                |Public-trait module.Number a =
                 |    sum :: a -> a -> a
                 |    prod :: a -> a -> a
             """.trimMargin()
@@ -846,7 +846,7 @@ class TypeSystemSemanticsTest : StringSpec({
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
-                |Internal-trait Number a =
+                |Internal-trait module.Number a =
                 |    sum :: a -> a -> a
                 |    prod :: a -> a -> a
             """.trimMargin()
