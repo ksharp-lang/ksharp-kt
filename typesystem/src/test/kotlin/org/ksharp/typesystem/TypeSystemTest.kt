@@ -747,7 +747,7 @@ class TypeSystemTest : ShouldSpec({
         }
         context("Trait types") {
             typeSystem {
-                trait(setOf(CommonAttribute.Public), "Num", "a") {
+                trait(setOf(CommonAttribute.Public), "num", "Num", "a") {
                     method("(+)", true) {
                         parameter("a")
                         parameter("a")
@@ -759,7 +759,7 @@ class TypeSystemTest : ShouldSpec({
                         parameter("a")
                     }
                 }
-                trait(setOf(CommonAttribute.Public), "Num2", "a") {
+                trait(setOf(CommonAttribute.Public), "num", "Num2", "a") {
                     method("(+)") {
                         parameter("a")
                         parameter("a")
@@ -771,14 +771,14 @@ class TypeSystemTest : ShouldSpec({
                         parameter("a")
                     }
                 }
-                trait(setOf(CommonAttribute.Public), "num", "a") {
+                trait(setOf(CommonAttribute.Public), "num", "num", "a") {
                     method("(+)") {
                         parameter("a")
                         parameter("a")
                         parameter("a")
                     }
                 }
-                trait(setOf(CommonAttribute.Public), "Functor", "F") {
+                trait(setOf(CommonAttribute.Public), "num", "Functor", "F") {
                     method("map") {
                         functionType {
                             parameter("a")
@@ -787,7 +787,7 @@ class TypeSystemTest : ShouldSpec({
                         parameter("b")
                     }
                 }
-                trait(setOf(CommonAttribute.Public), "Monad", "m") {
+                trait(setOf(CommonAttribute.Public), "num", "Monad", "m") {
                     method("map ing") {
                         functionType {
                             parameter("a")
@@ -802,7 +802,7 @@ class TypeSystemTest : ShouldSpec({
                         get("Num").shouldBeType(
                             TraitType(
                                 handle,
-                                setOf(CommonAttribute.Public),
+                                setOf(CommonAttribute.Public), "num",
                                 "Num", "a", mapOf(
                                     "(+)/2" to TraitType.MethodType(
                                         handle,
@@ -825,7 +825,7 @@ class TypeSystemTest : ShouldSpec({
                                         ), false
                                     )
                                 )
-                            ), "trait Num a =\n" +
+                            ), "trait num.Num a =\n" +
                                     "    (+) :: a -> a -> a\n" +
                                     "    (-) :: a -> a -> a"
                         )
@@ -859,14 +859,14 @@ class TypeSystemTest : ShouldSpec({
                 type(NoAttributes, "TypeOrdNum") {
                     alias("OrdNum")
                 }
-                trait(setOf(CommonAttribute.Public), "Num", "a") {
+                trait(setOf(CommonAttribute.Public), "num", "Num", "a") {
                     method("(+)") {
                         parameter("a")
                         parameter("a")
                         parameter("a")
                     }
                 }
-                trait(setOf(CommonAttribute.Public), "Ord", "a") {
+                trait(setOf(CommonAttribute.Public), "num", "Ord", "a") {
                     method("(<=)") {
                         parameter("a")
                         parameter("a")
