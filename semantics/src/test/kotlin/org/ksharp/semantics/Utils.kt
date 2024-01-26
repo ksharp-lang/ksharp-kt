@@ -13,7 +13,7 @@ import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.solver.solve
 
 fun String.toSemanticModuleInfo(loader: ModuleInfoLoader = ModuleInfoLoader { _, _ -> null }): Either<List<Error>, SemanticModuleInfo> =
-    this.parseModule("irTest.ks", false)
+    this.parseModule("irTest", false)
         .flatMap {
             if (it.errors.isNotEmpty()) {
                 return@flatMap Either.Left(it.errors)

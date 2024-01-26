@@ -17,7 +17,7 @@ class CompilePreludeModule : StringSpec({
         val moduleReader = String.Companion::class.java
             .getResourceAsStream("/org/ksharp/module/prelude.ks")!!
             .bufferedReader(StandardCharsets.UTF_8)
-        val moduleInfo = moduleReader.moduleNode("prelude.ks")
+        val moduleInfo = moduleReader.moduleNode("")
         val codeModule = moduleInfo.codeModule(kernelModule)
         codeModule
             .shouldBeRight()
@@ -28,7 +28,7 @@ class CompilePreludeModule : StringSpec({
                         println("=== Traits ===")
                         m.typeSystem.asSequence().forEach { (_, type) ->
                             if (type is TraitType) {
-                                println(type.name)
+                                println("${type.module}${type.name}")
                             }
                         }
                         println("=== Impls ===")

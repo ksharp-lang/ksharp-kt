@@ -274,6 +274,7 @@ internal val TraitFunctionNode.nameWithArity: String
 
 
 private fun TraitNode.checkTypesSemantics(
+    module: String,
     errors: ErrorCollector,
     builder: TypeSystemBuilder
 ) = when {
@@ -291,6 +292,7 @@ private fun TraitNode.checkTypesSemantics(
     }.toSet()
     builder.trait(
         annotations.checkAnnotations(internal),
+        module,
         name,
         params.first()
     ) {
@@ -433,6 +435,7 @@ private fun TypeDeclarationNode.checkTypesSemantics(
 }
 
 private fun Sequence<NodeData>.checkTypesSemantics(
+    module: String,
     errors: ErrorCollector,
     preludeModule: ModuleInfo
 ): PartialTypeSystem {
@@ -440,7 +443,7 @@ private fun Sequence<NodeData>.checkTypesSemantics(
         this@checkTypesSemantics.forEach {
             when (it) {
                 is TypeNode -> it.checkTypesSemantics(errors, this)
-                is TraitNode -> it.checkTypesSemantics(errors, this)
+                is TraitNode -> it.checkTypesSemantics(module, errors, this)
                 is TypeDeclarationNode -> it.checkTypesSemantics(errors, this)
                 else -> TODO("$it")
             }
@@ -458,7 +461,7 @@ fun ModuleNode.checkTypesSemantics(
         types.asSequence(),
         traits.asSequence(),
         typeDeclarations.asSequence()
-    ).flatten().checkTypesSemantics(errors, preludeModule)
+    ).flatten().checkTypesSemantics(name, errors, preludeModule)
         .let {
             if (dependencies.isEmpty()) it
             else moduleTypeSystem(it) {

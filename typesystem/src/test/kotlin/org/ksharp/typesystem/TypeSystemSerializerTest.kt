@@ -183,6 +183,35 @@ class TypeSystemSerializerTest : StringSpec({
     "Serialize Trait Types" {
         TraitType(
             mockHandle, setOf(CommonAttribute.Internal),
+            "module",
+            "Num",
+            "a",
+            mapOf(
+                "sum" to TraitType.MethodType(
+                    mockHandle, setOf(CommonAttribute.Public),
+                    "sum",
+                    listOf(
+                        Parameter(mockHandle, "a"),
+                        Parameter(mockHandle, "a"),
+                        Parameter(mockHandle, "a")
+                    ), true
+                ),
+                "sub" to TraitType.MethodType(
+                    mockHandle, setOf(CommonAttribute.Public),
+                    "sub",
+                    listOf(
+                        Parameter(mockHandle, "a"),
+                        Parameter(mockHandle, "a"),
+                        Parameter(mockHandle, "a")
+                    ), false
+                )
+            )
+        ).shouldBeSerializable()
+    }
+    "Serialize Trait Types 2" {
+        TraitType(
+            mockHandle, setOf(CommonAttribute.Internal),
+            "",
             "Num",
             "a",
             mapOf(
@@ -218,6 +247,7 @@ class TypeSystemSerializerTest : StringSpec({
         FixedTraitType(
             TraitType(
                 mockHandle, setOf(CommonAttribute.Internal),
+                "",
                 "Num",
                 "a",
                 mapOf(
@@ -247,6 +277,7 @@ class TypeSystemSerializerTest : StringSpec({
         ImplType(
             TraitType(
                 mockHandle, setOf(CommonAttribute.Internal),
+                "",
                 "Num",
                 "a",
                 mapOf(
