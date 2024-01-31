@@ -54,7 +54,7 @@ private fun createKernelTypeSystem() = typeSystem {
         }
     }
 
-    trait(setOf(nameAttribute(mapOf("ir" to "prelude::comparable"))), "Comparable", "a") {
+    trait(setOf(nameAttribute(mapOf("ir" to "prelude::comparable"))), "", "Comparable", "a") {
         method("compare", true) {
             parameter("a")
             parameter("a")

@@ -86,7 +86,7 @@ private class FunctionLookupImpl : FunctionLookup {
 
     private fun findFunction(call: CallScope, firstValue: Type?): IrTopLevelSymbol? =
         (if (call.traitName != null && firstValue != null) {
-            Impl(call.traitName, firstValue).findImplFunction(call) ?: call.traitName.findTraitFunction(call)
+            Impl("", call.traitName, firstValue).findImplFunction(call) ?: call.traitName.findTraitFunction(call)
         } else null)
             ?: functions.findFunction(call)
 

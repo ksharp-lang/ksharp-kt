@@ -186,7 +186,7 @@ class NodeSerializerTest : StringSpec({
                 )
             ),
             mapOf(
-                Impl("Trait", newParameterForTesting(1)) to listOf(
+                Impl("", "Trait", newParameterForTesting(1)) to listOf(
                     IrFunction(
                         attributes,
                         "test",
