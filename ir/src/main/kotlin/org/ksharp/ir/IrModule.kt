@@ -5,16 +5,19 @@ import org.ksharp.common.cacheOf
 import org.ksharp.common.cast
 import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.transform.BinaryOperationFactory
-import org.ksharp.ir.transform.toIrSymbol
+import org.ksharp.ir.transform.abstractionToIrSymbol
 import org.ksharp.module.CodeModule
 import org.ksharp.module.Impl
-import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.Type
+
+fun interface LoadIrModuleFn {
+    fun load(name: String): IrModule?
+}
 
 fun interface FunctionLookup {
     fun find(module: String?, call: CallScope, firstValue: Type?): IrTopLevelSymbol
@@ -78,7 +81,13 @@ private class FunctionLookupImpl : FunctionLookup {
             .firstOrNull()
 
     private fun Impl.findImplFunction(call: CallScope): IrTopLevelSymbol? =
-        impls[this].findFunction(call)
+        impls.asSequence()
+            .filter {
+                val i = it.key
+                i.trait == this.trait && i.type == this.type
+            }.map {
+                it.value
+            }.firstOrNull().findFunction(call)
 
     private fun String?.findTraitFunction(call: CallScope): IrTopLevelSymbol? =
         if (this == null) null
@@ -116,29 +125,28 @@ data class IrModule(
 }
 
 private fun List<AbstractionNode<SemanticInfo>>.mapToIrSymbols(
-    name: String,
-    module: ModuleInfo,
-    lookup: FunctionLookup
+    state: PartialIrState
 ) =
     asSequence()
         .filterNot { it.attributes.contains(CommonAttribute.Native) }
-        .map { it.toIrSymbol(name, module.dependencies, lookup) }
+        .map { it.abstractionToIrSymbol(state) }
         .toList()
 
-fun CodeModule.toIrModule(): IrModule {
+fun CodeModule.toIrModule(loader: LoadIrModuleFn): IrModule {
     val lookup = functionLookup()
+    val state = PartialIrState(name, module, loader, lookup)
     val module = IrModule(
         artifact.abstractions
-            .mapToIrSymbols(name, module, lookup),
+            .mapToIrSymbols(state),
         traitArtifacts
             .mapValues { entry ->
                 entry.value.abstractions
-                    .mapToIrSymbols(name, module, lookup)
+                    .mapToIrSymbols(state)
             },
         implArtifacts
             .mapValues { entry ->
                 entry.value.abstractions
-                    .mapToIrSymbols(name, module, lookup)
+                    .mapToIrSymbols(state)
             }
     )
     lookup.link(module)

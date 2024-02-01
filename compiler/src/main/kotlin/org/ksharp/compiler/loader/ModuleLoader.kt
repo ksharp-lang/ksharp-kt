@@ -10,6 +10,7 @@ import org.ksharp.doc.DocModule
 import org.ksharp.doc.readDocModule
 import org.ksharp.doc.toDocModule
 import org.ksharp.doc.writeTo
+import org.ksharp.ir.IrModule
 import org.ksharp.ir.serializer.readIrModule
 import org.ksharp.ir.serializer.writeTo
 import org.ksharp.ir.toIrModule
@@ -46,6 +47,13 @@ class Module(
         sources.binaryLoad(name.toModulePath("ksd"))!!
             .bufferView {
                 it.readDocModule()
+            }
+    }
+
+    val irModule: IrModule by lazy {
+        sources.binaryLoad(name.toModulePath("ksc"))!!
+            .bufferView {
+                it.readIrModule()
             }
     }
 
@@ -91,7 +99,9 @@ class ModuleLoader(
                             codeModule.module.writeTo(stream)
                         }
                         sources.write(codeModule.name.toModulePath("ksc")) { stream ->
-                            codeModule.toIrModule().writeTo(stream)
+                            codeModule.toIrModule {
+                                load(it, context).valueOrNull!!.irModule
+                            }.writeTo(stream)
                         }
                         Either.Right(Module(codeModule.name, codeModule.module, sources))
                     } else Either.Left(codeModule.errors)

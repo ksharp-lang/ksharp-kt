@@ -55,12 +55,12 @@ private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::num::(/)/2" to binaryOperationFactory(::IrDiv),
     "prelude::num::(**)/2" to binaryOperationFactory(::IrPow),
     "prelude::num::(%)/2" to binaryOperationFactory(::IrMod),
-    "prelude::comparable::lt" to binaryOperationFactory(::IrLt),
-    "prelude::comparable::le" to binaryOperationFactory(::IrLe),
-    "prelude::comparable::ge" to binaryOperationFactory(::IrGe),
-    "prelude::comparable::gt" to binaryOperationFactory(::IrGt),
-    "prelude::equals" to equalsOperationFactory(::IrEq, ::IrEquals),
-    "prelude::not-equals" to equalsOperationFactory(::IrNotEq, ::IrNotEquals),
+    "prelude::comparable::lt" to relationalOperationFactory(::IrLt, ::IrLt),
+    "prelude::comparable::le" to relationalOperationFactory(::IrLe, ::IrLe),
+    "prelude::comparable::ge" to relationalOperationFactory(::IrGe, ::IrGe),
+    "prelude::comparable::gt" to relationalOperationFactory(::IrGt, ::IrGt),
+    "prelude::equals" to relationalOperationFactory(::IrEq, ::IrEquals),
+    "prelude::not-equals" to relationalOperationFactory(::IrNotEq, ::IrNotEquals),
     "prelude::bit::(&)/2" to binaryOperationFactory(::IrBitAnd),
     "prelude::bit::(|)/2" to binaryOperationFactory(::IrBitOr),
     "prelude::bit::(^)/2" to binaryOperationFactory(::IrBitXor),
@@ -184,7 +184,7 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
         val callName = "${functionName.name}/${functionType.arguments.arity}"
         val functionModuleName =
             if (functionName.pck == null) state.moduleName
-            else state.dependencies[functionName.pck]!!
+            else state.module.dependencies[functionName.pck]!!
         val returnType = info.getInferredType(location).valueOrNull!!
         if (functionType.attributes.contains(CommonAttribute.Native))
             IrNativeCall(

@@ -37,7 +37,15 @@ private fun arithmeticExpected(factory: BinaryOperationFactory) =
     )
 
 class AbstractionToIrSymbolTest : StringSpec({
+    val moduleInfo = preludeModule
+    val loaderIrModule = LoadIrModuleFn { null }
     val functionLookup = FunctionLookup { _, _, _ -> throw RuntimeException("Not Supported") }
+    val partialState = PartialIrState(
+        "test",
+        moduleInfo,
+        loaderIrModule,
+        functionLookup,
+    )
     listOf(
         createSpec(
             "IrInteger expression", "fn = 10", IrInteger(
@@ -304,7 +312,7 @@ class AbstractionToIrSymbolTest : StringSpec({
     ).forEach { (description, code, expected) ->
         description {
             code.getFirstAbstraction()
-                .toIrSymbol("test", emptyMap(), functionLookup)
+                .abstractionToIrSymbol(partialState)
                 .expr
                 .shouldBe(expected)
         }
@@ -315,7 +323,7 @@ class AbstractionToIrSymbolTest : StringSpec({
             .toIrSymbol(
                 IrState(
                     "test",
-                    emptyMap(),
+                    moduleInfo, { null },
                     { _, _, _ -> throw RuntimeException("Not supported") },
                     mutableVariableIndexes(emptyVariableIndex)
                 )
@@ -340,7 +348,15 @@ class AbstractionToIrSymbolTest : StringSpec({
             ten = 10
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(IrState("test", emptyMap(), functionLookup, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(
+                IrState(
+                    "test",
+                    moduleInfo,
+                    { null },
+                    functionLookup,
+                    mutableVariableIndexes(emptyVariableIndex)
+                )
+            )
             .attributes
             .apply {
                 shouldBe(
@@ -359,7 +375,15 @@ class AbstractionToIrSymbolTest : StringSpec({
             c a = a
         """.trimIndent()
             .getFirstAbstraction()
-            .toIrSymbol(IrState("test", emptyMap(), functionLookup, mutableVariableIndexes(emptyVariableIndex)))
+            .toIrSymbol(
+                IrState(
+                    "test",
+                    moduleInfo,
+                    { null },
+                    functionLookup,
+                    mutableVariableIndexes(emptyVariableIndex)
+                )
+            )
             .apply {
                 shouldBe(
                     IrFunction(
@@ -382,6 +406,12 @@ class AbstractionToIrSymbolTest : StringSpec({
 
 class CustomAbstractionToIrSymbolTest : StringSpec({
     val functionLookup = FunctionLookup { _, _, _ -> throw RuntimeException("Not Supported") }
+    val partialState = PartialIrState(
+        "test",
+        preludeModule,
+        { null },
+        functionLookup,
+    )
     "Check a custom spec" {
         createSpec(
             "Constant IrCall expression",
@@ -411,7 +441,7 @@ class CustomAbstractionToIrSymbolTest : StringSpec({
             )
         ).let { (_, code, expected) ->
             code.getFirstAbstraction()
-                .toIrSymbol("test", emptyMap(), functionLookup)
+                .abstractionToIrSymbol(partialState)
                 .expr
                 .shouldBe(expected)
         }

@@ -12,7 +12,7 @@ class ModuleTest : StringSpec({
         "ten = 10"
             .toCodeModule()
             .apply {
-                toIrModule()
+                toIrModule { null }
                     .shouldBe(
                         IrModule(
                             listOf(

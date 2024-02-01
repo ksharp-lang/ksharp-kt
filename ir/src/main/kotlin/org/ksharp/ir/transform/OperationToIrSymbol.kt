@@ -17,7 +17,7 @@ fun binaryOperationFactory(factory: BinaryOperationFactory): CustomApplicationIr
     )
 }
 
-fun equalsOperationFactory(
+fun relationalOperationFactory(
     numericFactory: BinaryOperationFactory,
     objectFactory: BinaryOperationFactory
 ): CustomApplicationIrNode = { state ->
