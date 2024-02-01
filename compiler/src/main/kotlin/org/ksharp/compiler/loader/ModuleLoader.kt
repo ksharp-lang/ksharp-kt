@@ -104,7 +104,7 @@ class ModuleLoader(
                 val dependencies = cyclingRefs.loading(name, from)
                 if (dependencies.isEmpty()) {
                     sources.sourceLoad(it)
-                        ?.codeModule(it, preludeModule)
+                        ?.codeModule(it.substring(0, it.length - 3), preludeModule)
                         ?.map { module ->
                             cyclingRefs.loaded(name)
                             module
