@@ -49,7 +49,7 @@ internal fun ModuleNode.toSemanticModuleInterface(
                 it.key to module
             }
         }.toMap()
-    val typeSemantics = this.checkTypesSemantics(preludeModule, dependencies)
+    val typeSemantics = this.checkTypesSemantics(name, preludeModule, dependencies)
     val moduleSemantics = this.checkFunctionSemantics(typeSemantics)
     return SemanticModuleInterface(
         name.let {
