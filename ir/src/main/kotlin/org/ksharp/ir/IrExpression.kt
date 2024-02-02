@@ -12,8 +12,10 @@ import org.ksharp.ir.truffle.call.CallNode
 import org.ksharp.ir.truffle.call.NativeCallNode
 import org.ksharp.ir.truffle.cast.NumCastNode
 import org.ksharp.ir.truffle.variable.VarAccessNode
+import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.NoAttributes
+import org.ksharp.typesystem.types.FunctionType
 import org.ksharp.typesystem.types.Type
 
 sealed interface IrExpression : IrSymbol
@@ -110,7 +112,7 @@ data class IrCall(
 }
 
 data class IrNativeCall(
-    val argAttributes: Set<Attribute>,
+    val mAttributes: Set<Attribute>,
     val functionClass: String,
     val arguments: List<IrExpression>,
     val type: Type,
@@ -118,8 +120,18 @@ data class IrNativeCall(
 ) : NativeCallNode(functionClass, arguments.cast<List<KSharpNode>>().toTypedArray(), type), IrExpression {
 
     override val attributes: Set<Attribute>
-        get() = nativeCall.getAttributes(argAttributes)
+        get() = nativeCall.getAttributes(mAttributes)
 
     override val serializer: IrNodeSerializers = IrNodeSerializers.NativeCall
 
+}
+
+data class IrModuleCall(
+    override val attributes: Set<Attribute>,
+    val moduleName: String,
+    val functionName: ApplicationName,
+    val type: FunctionType,
+    override val location: Location
+) : IrExpression {
+    override val serializer: IrNodeSerializers get() = TODO()
 }

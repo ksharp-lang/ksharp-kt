@@ -71,7 +71,7 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
 
 class IrNativeCallSerializer : IrNodeSerializer<IrNativeCall> {
     override fun write(input: IrNativeCall, buffer: BufferWriter, table: BinaryTable) {
-        input.argAttributes.writeTo(buffer, table)
+        input.mAttributes.writeTo(buffer, table)
         buffer.add(table.add(input.functionClass))
         input.location.writeTo(buffer)
         input.type.writeTo(buffer, table)
