@@ -206,6 +206,7 @@ fun ModuleNode.checkFunctionSemantics(
         }.toMap()
     return ModuleFunctionInfo(
         errors.build(),
+        emptySet(),
         functionAbstractions,
         traitAbstractions,
         implAbstractions
@@ -317,6 +318,7 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     }
     return ModuleFunctionInfo(
         errors = errors.build(),
+        completeImpls,
         abstractions,
         traitsAbstractions,
         implAbstractions

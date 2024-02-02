@@ -78,7 +78,7 @@ internal fun SemanticModuleInterface.toSemanticModuleInfo(imports: List<ImportNo
             it.key to it.moduleName
         }.toMap(),
         typeSystemInfo.typeSystem,
-        typeSystemInfo.impls.keys,
+        functionInfo.impls,
         functionInfo.traitsAbstractions,
         functionInfo.implAbstractions,
         functionInfo.abstractions,

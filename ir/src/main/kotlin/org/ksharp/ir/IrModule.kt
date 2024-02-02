@@ -81,13 +81,7 @@ private class FunctionLookupImpl : FunctionLookup {
             .firstOrNull()
 
     private fun Impl.findImplFunction(call: CallScope): IrTopLevelSymbol? =
-        impls.asSequence()
-            .filter {
-                val i = it.key
-                i.trait == this.trait && i.type == this.type
-            }.map {
-                it.value
-            }.firstOrNull().findFunction(call)
+        impls[this].findFunction(call)
 
     private fun String?.findTraitFunction(call: CallScope): IrTopLevelSymbol? =
         if (this == null) null
