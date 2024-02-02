@@ -11,6 +11,7 @@ import org.ksharp.doc.readDocModule
 import org.ksharp.doc.toDocModule
 import org.ksharp.doc.writeTo
 import org.ksharp.ir.IrModule
+import org.ksharp.ir.IrModuleInfo
 import org.ksharp.ir.serializer.readIrModule
 import org.ksharp.ir.serializer.writeTo
 import org.ksharp.ir.toIrModule
@@ -99,8 +100,12 @@ class ModuleLoader(
                             codeModule.module.writeTo(stream)
                         }
                         sources.write(codeModule.name.toModulePath("ksc")) { stream ->
-                            codeModule.toIrModule {
-                                load(it, context).valueOrNull!!.irModule
+                            codeModule.toIrModule { name ->
+                                val result = load(name, context).valueOrNull!!
+                                IrModuleInfo(
+                                    result.info,
+                                    result.irModule
+                                )
                             }.writeTo(stream)
                         }
                         Either.Right(Module(codeModule.name, codeModule.module, sources))

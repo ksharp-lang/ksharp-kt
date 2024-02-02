@@ -8,6 +8,7 @@ import org.ksharp.ir.transform.BinaryOperationFactory
 import org.ksharp.ir.transform.abstractionToIrSymbol
 import org.ksharp.module.CodeModule
 import org.ksharp.module.Impl
+import org.ksharp.module.ModuleInfo
 import org.ksharp.nodes.semantic.AbstractionNode
 import org.ksharp.nodes.semantic.SemanticInfo
 import org.ksharp.typesystem.attributes.CommonAttribute
@@ -15,8 +16,13 @@ import org.ksharp.typesystem.attributes.NameAttribute
 import org.ksharp.typesystem.attributes.NoAttributes
 import org.ksharp.typesystem.types.Type
 
+class IrModuleInfo(
+    val moduleInfo: ModuleInfo,
+    val irModule: IrModule
+)
+
 fun interface LoadIrModuleFn {
-    fun load(name: String): IrModule?
+    fun load(name: String): IrModuleInfo?
 }
 
 fun interface FunctionLookup {
