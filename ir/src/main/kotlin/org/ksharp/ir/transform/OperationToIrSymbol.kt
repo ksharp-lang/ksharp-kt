@@ -2,6 +2,7 @@ package org.ksharp.ir.transform
 
 import org.ksharp.common.Location
 import org.ksharp.common.cast
+import org.ksharp.ir.IrComparable
 import org.ksharp.ir.IrExpression
 import org.ksharp.ir.IrModuleCall
 import org.ksharp.module.Impl
@@ -39,18 +40,23 @@ fun relationalOperationFactory(
             location
         )
     } else {
+        val (argsAttributes, arguments) = arguments.toIrSymbols(state)
         val impl = state.module.impls.first { it == Impl("", firstType.trait.name, firstType.impl) }
         val module = impl.module
         val returnType = info.getInferredType(location).valueOrNull!!
         val functionType = listOf(firstType, secondType, returnType).toFunctionType(state.module.typeSystem, attributes)
         val moduleCall = IrModuleCall(
-            attributes,
+            argsAttributes,
             module,
             functionName,
+            arguments,
             functionType,
             location
         )
-        TODO()
+        IrComparable(
+            moduleCall,
+            listOf(*expected)
+        )
     }
 }
 

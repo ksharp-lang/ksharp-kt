@@ -92,3 +92,18 @@ data class IrNotEquals(
         get() = IrNodeSerializers.NotEquals
 
 }
+
+data class IrComparable(
+    val call: IrModuleCall,
+    val expected: List<String>
+) : IrExpression {
+
+    override val attributes: Set<Attribute>
+        get() = call.attributes
+
+    override val location: Location
+        get() = call.location
+
+    override val serializer: IrNodeSerializers
+        get() = IrNodeSerializers.Comparable
+}

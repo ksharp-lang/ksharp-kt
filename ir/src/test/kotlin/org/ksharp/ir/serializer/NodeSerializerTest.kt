@@ -9,8 +9,11 @@ import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.ir.*
 import org.ksharp.module.Impl
+import org.ksharp.module.prelude.preludeModule
+import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.newParameterForTesting
+import org.ksharp.typesystem.types.toFunctionType
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicInteger
@@ -254,5 +257,38 @@ class NodeSerializerTest : StringSpec({
             location
         )
             .shouldBeSerializable()
+    }
+    "ModuleCall Test" {
+        IrModuleCall(
+            attributes,
+            "test",
+            ApplicationName("test", "name"),
+            listOf(IrInteger(1, location), IrInteger(2, location)),
+            listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
+            location
+        ).shouldBeSerializable()
+    }
+    "ModuleCall Test 2" {
+        IrModuleCall(
+            attributes,
+            "test",
+            ApplicationName(null, "name"),
+            listOf(IrInteger(1, location), IrInteger(2, location)),
+            listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
+            location
+        ).shouldBeSerializable()
+    }
+    "Comparable Test" {
+        IrComparable(
+            IrModuleCall(
+                attributes,
+                "test",
+                ApplicationName(null, "name"),
+                listOf(IrInteger(1, location), IrInteger(2, location)),
+                listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
+                location
+            ),
+            listOf("a", "b")
+        ).shouldBeSerializable()
     }
 })

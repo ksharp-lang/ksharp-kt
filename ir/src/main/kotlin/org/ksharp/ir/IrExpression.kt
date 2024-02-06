@@ -130,8 +130,9 @@ data class IrModuleCall(
     override val attributes: Set<Attribute>,
     val moduleName: String,
     val functionName: ApplicationName,
+    val arguments: List<IrExpression>,
     val type: FunctionType,
     override val location: Location
 ) : IrExpression {
-    override val serializer: IrNodeSerializers get() = TODO()
+    override val serializer: IrNodeSerializers get() = IrNodeSerializers.ModuleCall
 }
