@@ -288,7 +288,7 @@ class NodeSerializerTest : StringSpec({
                 listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
                 location
             ),
-            listOf("a", "b")
+            listOf(Less, Equal)
         ).shouldBeSerializable()
     }
 })

@@ -8,6 +8,7 @@ import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
 import org.ksharp.common.listBuilder
 import org.ksharp.ir.*
+import org.ksharp.ir.types.Symbol
 import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
@@ -150,7 +151,7 @@ class IrComparableSerializer : IrNodeSerializer<IrComparable> {
     override fun write(input: IrComparable, buffer: BufferWriter, table: BinaryTable) {
         input.expected.let {
             buffer.add(it.size)
-            it.forEach { e -> buffer.add(table.add(e)) }
+            it.forEach { e -> buffer.add(table.add(e.value)) }
         }
         input.call.serialize(buffer, table)
     }
@@ -162,9 +163,9 @@ class IrComparableSerializer : IrNodeSerializer<IrComparable> {
         table: BinaryTableView
     ): IrComparable {
         val size = buffer.readInt(0) + 1
-        val expected = listBuilder<String>()
+        val expected = listBuilder<Symbol>()
         (1 until size).map {
-            expected.add(table[buffer.readInt(it * 4)])
+            expected.add(Symbol(table[buffer.readInt(it * 4)]))
         }
         val call = buffer.bufferFrom(4 * size).readIrNode(lookup, loader, table).cast<IrModuleCall>()
         return IrComparable(call, expected.build())
