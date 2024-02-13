@@ -1,7 +1,7 @@
 rootProject.name = "ksharp-kt"
 
 pluginManagement {
-    val kotlinVersion = "1.9.21"
+    val kotlinVersion = "1.9.22"
     val sonarqubeVersion = "4.4.1.3373"
     val koverVersion = "0.7.5"
 
@@ -17,22 +17,22 @@ pluginManagement {
     }
 }
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("kotest", "5.8.0")
-            version("eclipse.lsp4j", "0.21.1")
+            version("eclipse.lsp4j", "0.21.2")
             version("graalvm", "22.3.4")
-            version("netty", "4.1.101.Final")
+            version("netty", "4.1.106.Final")
             version("reflections", "0.10.2")
 
             // Tooling
             version("plugin.com.github.johnrengelman.shadow", "8.1.1")
             version("plugin.org.jetbrains.kotlinx.kover", "0.7.5")
-            version("plugin.org.graalvm.buildtools.native", "0.9.28")
+            version("plugin.org.graalvm.buildtools.native", "0.10.0")
 
             // Plugins
             plugin("shadow", "com.github.johnrengelman.shadow").versionRef("plugin.com.github.johnrengelman.shadow")
