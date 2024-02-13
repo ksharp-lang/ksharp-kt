@@ -1,12 +1,8 @@
 package strings
 
-import org.ksharp.ir.NativeCall
-import org.ksharp.ir.returnIfConstant
-import org.ksharp.typesystem.attributes.Attribute
+import org.ksharp.ir.ConstantNativeCall
 
-class StartsDASHwithQUESTION2 : NativeCall {
-    override fun getAttributes(attributes: Set<Attribute>): Set<Attribute> =
-        attributes.returnIfConstant
+class StartsDASHwithQUESTION2 : ConstantNativeCall() {
 
     override fun execute(vararg arguments: Any): Any =
         arguments.first().toString().startsWith(arguments.last().toString())
