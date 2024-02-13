@@ -4,7 +4,12 @@ import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.truffle.relational.*
+import org.ksharp.ir.types.Symbol
 import org.ksharp.typesystem.attributes.Attribute
+
+val Less = Symbol("Less")
+val Greater = Symbol("Greater")
+val Equal = Symbol("Equal")
 
 data class IrLt(
     override val attributes: Set<Attribute>,
@@ -95,7 +100,7 @@ data class IrNotEquals(
 
 data class IrComparable(
     val call: IrModuleCall,
-    val expected: List<String>
+    val expected: List<Symbol>
 ) : ComparableNode(call.cast(), expected), IrExpression {
 
     override val attributes: Set<Attribute>

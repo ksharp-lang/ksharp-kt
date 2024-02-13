@@ -5,6 +5,7 @@ import org.ksharp.common.cast
 import org.ksharp.ir.IrComparable
 import org.ksharp.ir.IrExpression
 import org.ksharp.ir.IrModuleCall
+import org.ksharp.ir.types.Symbol
 import org.ksharp.module.Impl
 import org.ksharp.module.prelude.types.NumericType
 import org.ksharp.typesystem.attributes.Attribute
@@ -26,7 +27,7 @@ fun binaryOperationFactory(factory: BinaryOperationFactory): CustomApplicationIr
 
 fun relationalOperationFactory(
     numericFactory: BinaryOperationFactory,
-    vararg expected: String
+    vararg expected: Symbol
 ): CustomApplicationIrNode = { state ->
     val (attributes, symbols) = arguments.toIrSymbols(state)
     val first = symbols.first()

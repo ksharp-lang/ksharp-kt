@@ -76,4 +76,36 @@ class StringsModuleTest : StringSpec({
             .evaluateFunction("fn/0")
             .shouldBeRight(false)
     }
+    "comparable less - equals -1" {
+        """
+            import strings as s
+            fn = "Hello" <= "World"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
+    "comparable less - equals - 2" {
+        """
+            import strings as s
+            fn = "Hello" <= "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
+    "comparable greater - equals -1" {
+        """
+            import strings as s
+            fn = "World" >= "Hello" 
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
+    "comparable greater - equals - 2" {
+        """
+            import strings as s
+            fn = "Hello" >= "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
 })
