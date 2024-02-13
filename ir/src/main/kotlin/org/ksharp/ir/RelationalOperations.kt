@@ -96,7 +96,7 @@ data class IrNotEquals(
 data class IrComparable(
     val call: IrModuleCall,
     val expected: List<String>
-) : IrExpression {
+) : ComparableNode(call.cast(), expected), IrExpression {
 
     override val attributes: Set<Attribute>
         get() = call.attributes

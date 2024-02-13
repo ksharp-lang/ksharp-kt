@@ -28,12 +28,52 @@ class StringsModuleTest : StringSpec({
             .evaluateFunction("fn/0")
             .shouldBeRight('H')
     }
-    "comparable" {
+    "comparable less" {
         """
             import strings as s
             fn = "Hello" < "World"
         """.trimIndent()
             .evaluateFunction("fn/0")
             .shouldBeRight(true)
+    }
+    "comparable less - false" {
+        """
+            import strings as s
+            fn = "World" < "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(false)
+    }
+    "comparable greater" {
+        """
+            import strings as s
+            fn = "World" > "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
+    "comparable greater - false" {
+        """
+            import strings as s
+            fn = "Hello" > "World"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(false)
+    }
+    "comparable equal" {
+        """
+            import strings as s
+            fn = "World" == "World"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
+    "comparable equal - false" {
+        """
+            import strings as s
+            fn = "World" == "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(false)
     }
 })

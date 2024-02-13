@@ -2,6 +2,7 @@ package org.ksharp.ir.transform
 
 import org.ksharp.common.Location
 import org.ksharp.common.cast
+import org.ksharp.ir.IrComparable
 import org.ksharp.ir.IrExpression
 import org.ksharp.ir.IrModuleCall
 import org.ksharp.module.Impl
@@ -57,11 +58,10 @@ fun relationalOperationFactory(
             functionType,
             location
         )
-//        IrComparable(
-//            moduleCall,
-//            listOf(*expected)
-//        )
-        moduleCall
+        IrComparable(
+            moduleCall,
+            listOf(*expected)
+        )
     }
 }
 
