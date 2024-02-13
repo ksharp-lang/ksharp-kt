@@ -9,8 +9,10 @@ import org.ksharp.common.io.bufferView
 import org.ksharp.common.io.newBufferWriter
 import org.ksharp.ir.*
 import org.ksharp.module.Impl
+import org.ksharp.module.prelude.preludeModule
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.newParameterForTesting
+import org.ksharp.typesystem.types.toFunctionType
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicInteger
@@ -39,7 +41,7 @@ private inline fun <reified T : IrNode> T.shouldBeSerializable() {
     val input = ByteArrayInputStream(output.toByteArray())
     val lookup = functionLookup()
     this.shouldBe(input.bufferView {
-        it.readIrNode(lookup, stringPoolView).also(::println)
+        it.readIrNode(lookup, { _ -> null }, stringPoolView).also(::println)
     })
 }
 
@@ -48,7 +50,7 @@ private fun IrModule.shouldBeSerializableModule() {
     writeTo(output)
     val input = ByteArrayInputStream(output.toByteArray())
     this.shouldBe(input.bufferView {
-        it.readIrModule().also(::println)
+        it.readIrModule { _ -> null }.also(::println)
     })
 }
 
@@ -186,7 +188,7 @@ class NodeSerializerTest : StringSpec({
                 )
             ),
             mapOf(
-                Impl("Trait", newParameterForTesting(1)) to listOf(
+                Impl("", "Trait", newParameterForTesting(1)) to listOf(
                     IrFunction(
                         attributes,
                         "test",
@@ -254,5 +256,39 @@ class NodeSerializerTest : StringSpec({
             location
         )
             .shouldBeSerializable()
+    }
+    "ModuleCall Test" {
+        IrModuleCall(
+            attributes,
+            { _ -> null },
+            "test",
+            "name",
+            listOf(IrInteger(1, location), IrInteger(2, location)),
+            listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
+            location
+        ).shouldBeSerializable()
+    }
+    "ModuleCall Test 2" {
+        IrModuleCall(
+            attributes,
+            "test",
+            "name",
+            listOf(IrInteger(1, location), IrInteger(2, location)),
+            listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
+            location
+        ).shouldBeSerializable()
+    }
+    "Comparable Test" {
+        IrComparable(
+            IrModuleCall(
+                attributes,
+                "test",
+                "name",
+                listOf(IrInteger(1, location), IrInteger(2, location)),
+                listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
+                location
+            ),
+            listOf("a", "b")
+        ).shouldBeSerializable()
     }
 })

@@ -2,6 +2,7 @@ package org.ksharp.doc
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import org.ksharp.common.io.bufferView
 import org.ksharp.doc.transpiler.DocusaurusTranspilerPlugin
 import org.ksharp.doc.transpiler.FileProducer
 import org.ksharp.doc.transpiler.FileSystemProducer
@@ -158,5 +159,8 @@ class DocToMarkdownTest : StringSpec({
         val root = File("preludeDoc").absoluteFile.toPath()
         Files.createDirectories(root)
         prelude.transpile("prelude", DocusaurusTranspilerPlugin(FileSystemProducer(root)))
+        javaClass.getResourceAsStream("/strings.ksd")!!
+            .bufferView { it.readDocModule() }
+            .transpile("strings", DocusaurusTranspilerPlugin(FileSystemProducer(root)))
     }
 })

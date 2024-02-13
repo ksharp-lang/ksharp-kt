@@ -1679,6 +1679,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         val errors = ErrorCollector()
         val info = ModuleFunctionInfo(
             errors.build(),
+            emptySet(),
             listOf(
                 AbstractionNode(
                     setOf(CommonAttribute.Public),
@@ -1714,6 +1715,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         val symbol = Symbol("a", TypeSemanticInfo(Either.Right(param)))
         val info = ModuleFunctionInfo(
             errors.build(),
+            emptySet(),
             listOf(
                 AbstractionNode(
                     setOf(CommonAttribute.Public),
@@ -1774,6 +1776,7 @@ class FunctionNodeSemanticCheckInferenceTest : StringSpec({
         val symbol = Symbol("a", TypeSemanticInfo(Either.Right(param)))
         val info = ModuleFunctionInfo(
             errors.build(),
+            emptySet(),
             listOf(
                 AbstractionNode(
                     NoAttributes,

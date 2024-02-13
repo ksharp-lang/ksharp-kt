@@ -85,26 +85,21 @@ native pub mapOf p
 emptyMap k v :: () -> (Map k v)
 native pub emptyMap
 
-@name("prelude::num::gt" for="ir")
-(>) a :: (Num a) -> (Num a) -> Bool
+@name("prelude::comparable::gt" for="ir")
+(>) a :: (Comparable a) -> (Comparable a) -> Bool
 native pub (>) a b
 
-@name("prelude::num::ge" for="ir")
-(>=) a :: (Num a) -> (Num a) -> Bool
+@name("prelude::comparable::ge" for="ir")
+(>=) a :: (Comparable a) -> (Comparable a) -> Bool
 native pub (>=) a b
 
-@name("prelude::num::lt" for="ir")
-(<) a :: (Num a) -> (Num a) -> Bool
+@name("prelude::comparable::lt" for="ir")
+(<) a :: (Comparable a) -> (Comparable a) -> Bool
 native pub (<) a b
 
-@name("prelude::num::le" for="ir")
-(<=) a :: (Num a) -> (Num a) -> Bool
+@name("prelude::comparable::le" for="ir")
+(<=) a :: (Comparable a) -> (Comparable a) -> Bool
 native pub (<=) a b
-
-type Ordering = Less | Equal | Greater
-
-trait Comparable a =
-    compare :: a -> a -> Ordering
 
 @name("prelude::equals" for="ir")
 (==) a :: a -> a -> Bool

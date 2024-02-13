@@ -55,8 +55,8 @@ class ModuleInfoSerializerTest : StringSpec({
                 )
             ),
             setOf(
-                Impl("Eq", ts.newParameter()),
-                Impl("Eq2", ts.newParameter())
+                Impl("", "Eq", ts.newParameter()),
+                Impl("", "Eq2", ts.newParameter())
             )
         ).shouldBeSerializable()
     }

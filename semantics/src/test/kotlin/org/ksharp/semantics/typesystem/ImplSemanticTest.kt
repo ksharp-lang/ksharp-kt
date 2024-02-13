@@ -133,7 +133,7 @@ class ImplSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.impls.shouldBe(
-                    setOf(Impl("Sum", it.typeSystem["Int"].valueOrNull!!))
+                    setOf(Impl("irTest", "Sum", it.typeSystem["Int"].valueOrNull!!))
                 )
             }
     }
@@ -151,7 +151,7 @@ class ImplSemanticTest : StringSpec({
             .shouldBeRight()
             .map {
                 it.impls.shouldBe(
-                    setOf(Impl("Eq", it.typeSystem["Int"].valueOrNull!!))
+                    setOf(Impl("irTest", "Eq", it.typeSystem["Int"].valueOrNull!!))
                 )
             }
     }
@@ -226,7 +226,7 @@ class ImplSemanticTest : StringSpec({
                 it.implAbstractions
                     .shouldBe(
                         mapOf(
-                            Impl("Eq", forType.valueOrNull!!)
+                            Impl("irTest", "Eq", forType.valueOrNull!!)
                                     to expectedAbstractions
                         )
                     )

@@ -7,6 +7,7 @@ import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
 import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrValueAccess
+import org.ksharp.ir.LoadIrModuleFn
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
@@ -24,7 +25,12 @@ class IrVarValueSerializer(private val factory: IrVarAccessFactory) : IrNodeSeri
         input.attributes.writeTo(buffer, table)
     }
 
-    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrValueAccess =
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrValueAccess =
         factory(
             buffer.bufferFrom(20).readAttributes(table),
             buffer.readInt(0),

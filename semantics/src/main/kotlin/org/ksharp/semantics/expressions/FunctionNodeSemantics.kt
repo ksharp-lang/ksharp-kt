@@ -206,6 +206,7 @@ fun ModuleNode.checkFunctionSemantics(
         }.toMap()
     return ModuleFunctionInfo(
         errors.build(),
+        emptySet(),
         functionAbstractions,
         traitAbstractions,
         implAbstractions
@@ -262,11 +263,19 @@ private fun List<AbstractionNode<SemanticInfo>>.checkFunctionSemantics(
 fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     val errors = ErrorCollector()
 
+    val completeImpls = dependencies
+        .values
+        .asSequence()
+        .map { it.impls }
+        .flatten()
+        .toSet() +
+            typeSystemInfo.impls.keys
+
     val preludeInferenceContext = ModuleInfoInferenceContext(preludeModule)
     val moduleInferenceContext = functionInfo.abstractions.toInferenceContext(
-        typeSystemInfo.typeSystem, typeSystemInfo.impls.keys
+        typeSystemInfo.typeSystem, completeImpls
     )
-    
+
     val dependencies = dependencies.mapValues {
         ModuleInfoInferenceContext(it.value)
     }
@@ -309,6 +318,7 @@ fun SemanticModuleInterface.checkInferenceSemantics(): ModuleFunctionInfo {
     }
     return ModuleFunctionInfo(
         errors = errors.build(),
+        completeImpls,
         abstractions,
         traitsAbstractions,
         implAbstractions

@@ -3,10 +3,17 @@ package org.ksharp.module
 import org.ksharp.typesystem.TypeSystem
 import org.ksharp.typesystem.types.Type
 
-data class Impl(
+data class Impl internal constructor(
     val trait: String,
     val type: Type
-)
+) {
+    lateinit var module: String
+        private set
+
+    constructor(module: String, trait: String, type: Type) : this(trait, type) {
+        this.module = module
+    }
+}
 
 data class ModuleInfo(
     /**

@@ -12,5 +12,6 @@ dependencies {
     testImplementation(project(":semantics"))
     testImplementation(project(":parser"))
     testImplementation(project(":test"))
+    testImplementation(project(":kore"))
     testImplementation(libs.kotest)
 }

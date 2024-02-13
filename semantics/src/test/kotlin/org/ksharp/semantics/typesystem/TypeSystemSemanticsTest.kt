@@ -90,7 +90,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Int"].map { it.representation }.shouldBeRight("Int")
             typeSystem["Integer"].map { it.representationWithVisibility }
@@ -114,7 +114,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Int"].map { it.representation }.shouldBeRight("Int")
             typeSystem["Integer"].map { it.representationWithVisibility }
@@ -138,7 +138,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Unidad"].map { it.representationWithVisibility }
                 .shouldBeRight("Public-Unit")
@@ -168,7 +168,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Point"].map { it.representationWithVisibility }
                 .shouldBeRight("Internal-(Double, Double)")
@@ -207,7 +207,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Maybe"]
                 .map { it.representationWithVisibility }
@@ -241,7 +241,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
             typeSystem["Maybe"].shouldBeLeft(
                 TypeSystemErrorCode.TypeNotFound.new(
@@ -282,7 +282,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParamNameNoDefined.new(
@@ -339,7 +339,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.InvalidUnionArm.new(
@@ -394,7 +394,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
             typeSystem["Maybe"].shouldBeLeft(
                 TypeSystemErrorCode.TypeNotFound.new(
@@ -435,7 +435,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParamNameAlreadyDefined.new(
@@ -479,7 +479,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParametersNotUsed.new(
@@ -523,7 +523,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSystemErrorCode.TypeAlreadyRegistered.new(
@@ -557,7 +557,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["KVStore"].map { it.representation }.shouldBeRight("(Map k v)")
         }
@@ -579,7 +579,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.TypeShouldStartWithName.new(Location.NoProvided)
@@ -615,7 +615,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.TypeShouldStartWithName.new(Location.NoProvided)
@@ -653,7 +653,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Sum"].map { it.representation }.shouldBeRight("(a -> a -> a)")
         }
@@ -682,7 +682,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["ToString"].map { it.representation }.shouldBeRight("(a -> String)")
         }
@@ -725,7 +725,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
@@ -785,7 +785,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
@@ -842,7 +842,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representationWithVisibility }.shouldBeRight(
                 """
@@ -903,7 +903,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.TraitShouldHaveJustOneParameter
@@ -967,7 +967,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParamNameNoDefinedInMethod.new(
@@ -1036,7 +1036,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.ParametersNotUsedInMethod.new(
@@ -1153,7 +1153,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     )
                 ),
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Number"].map { it.representation }.shouldBeRight("(EqTest & OrdTest)")
         }
@@ -1251,7 +1251,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     )
                 ),
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.InterceptorTypeWithInvalidType.new(Location.NoProvided, "name" to "Number")
@@ -1287,7 +1287,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["KVStore"].map { it.representation }.shouldBeRight("(Map key: k value: v)")
         }
@@ -1318,7 +1318,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Point2D"].map { it.representation }.shouldBeRight("(x: Double, y: Double)")
         }
@@ -1367,7 +1367,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Composite"].map { it.representation }
                 .shouldBeRight("(n: (Num a), point: (x: Double, y: Double))")
@@ -1410,7 +1410,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Composite"].map { it.representation }.shouldBeRight("(n: Unit, point: (x: Double, y: Double))")
         }
@@ -1460,7 +1460,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Composite"].map { it.representation }
                 .shouldBeRight("(n: (Int -> Int), point: (x: Double, y: Double))")
@@ -1506,7 +1506,7 @@ class TypeSystemSemanticsTest : StringSpec({
                     Location.NoProvided
                 )
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.ParametricTypeShouldStartWithName.new(Location.NoProvided)))
             typeSystem["Composite"].shouldBeLeft(TypeSystemErrorCode.TypeNotFound.new("type" to "Composite"))
         }
@@ -1530,7 +1530,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 Location.NoProvided,
                 TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Decl__ten/0"].map { it.representation }
                 .shouldBeRight("(Unit -> Int)")
@@ -1550,7 +1550,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 Location.NoProvided,
                 TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Decl__ten/0"].map { it.representation }
                 .shouldBeRight("(Unit -> Int)")
@@ -1566,7 +1566,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 Location.NoProvided,
                 TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(
                     TypeSemanticsErrorCode.FunctionDeclarationShouldBeAFunctionType.new(
@@ -1608,7 +1608,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 Location.NoProvided,
                 TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
             typeSystem["Decl__sum/2"].map { it.representation }
                 .shouldBeRight("((Num a) -> (Num a) -> Int)")
@@ -1644,7 +1644,7 @@ class TypeSystemSemanticsTest : StringSpec({
                 Location.NoProvided,
                 TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
             )
-        ).checkTypesSemantics(preludeModule).apply {
+        ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(
                 listOf(FunctionSemanticsErrorCode.InvalidFunctionName.new(Location.NoProvided, "name" to "dot.sum"))
             )

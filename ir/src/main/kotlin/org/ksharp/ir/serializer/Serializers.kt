@@ -12,7 +12,7 @@ import org.ksharp.module.prelude.preludeModule
 import java.io.OutputStream
 
 interface IrNodeSerializer<S : IrNode> : SerializerWriter<S> {
-    fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): S
+    fun read(lookup: FunctionLookup, loader: LoadIrModuleFn, buffer: BufferView, table: BinaryTableView): S
 }
 
 enum class IrNodeSerializers(
@@ -58,7 +58,8 @@ enum class IrNodeSerializers(
     NativeCall(IrNativeCallSerializer()),
     Let(IrLetSerializer()),
     LetSetVar(IrSetVarSerializer()),
-
+    ModuleCall(IrModuleCallSerializer()),
+    Comparable(IrComparableSerializer()),
 }
 
 fun Location.writeTo(buffer: BufferWriter) {
@@ -88,12 +89,13 @@ fun IrNode.serialize(buffer: BufferWriter, table: BinaryTable) {
     }
 }
 
-fun BufferView.readIrNode(lookup: FunctionLookup, table: BinaryTableView): IrNode {
+fun BufferView.readIrNode(lookup: FunctionLookup, loader: LoadIrModuleFn, table: BinaryTableView): IrNode {
     val serializerIndex = readInt(4)
     return IrNodeSerializers.entries[serializerIndex]
         .serializer
         .read(
             lookup,
+            loader,
             bufferFrom(8),
             table
         )
@@ -123,20 +125,25 @@ fun Map<Impl, List<IrNode>>.writeTo(buffer: BufferWriter, table: BinaryTable) {
     }
 }
 
-fun BufferView.readListOfNodes(lookup: FunctionLookup, tableView: BinaryTableView): Pair<Int, List<IrNode>> {
+fun BufferView.readListOfNodes(
+    lookup: FunctionLookup,
+    loader: LoadIrModuleFn,
+    tableView: BinaryTableView
+): Pair<Int, List<IrNode>> {
     val paramsSize = readInt(0)
     val result = listBuilder<IrNode>()
     var position = 4
     repeat(paramsSize) {
         val typeBuffer = bufferFrom(position)
         position += typeBuffer.readInt(0)
-        result.add(typeBuffer.readIrNode(lookup, tableView))
+        result.add(typeBuffer.readIrNode(lookup, loader, tableView))
     }
     return position to result.build()
 }
 
 fun BufferView.readMapOfTraitNodes(
     lookup: FunctionLookup,
+    loader: LoadIrModuleFn,
     tableView: BinaryTableView
 ): Pair<Int, Map<String, List<IrNode>>> {
     val paramsSize = readInt(0)
@@ -146,7 +153,7 @@ fun BufferView.readMapOfTraitNodes(
         val key = tableView[readInt(position)]
         position += 4
         val listBuffer = bufferFrom(position)
-        val (listPosition, listItems) = listBuffer.readListOfNodes(lookup, tableView)
+        val (listPosition, listItems) = listBuffer.readListOfNodes(lookup, loader, tableView)
         position += listPosition
         result.put(key, listItems)
     }
@@ -155,6 +162,7 @@ fun BufferView.readMapOfTraitNodes(
 
 fun BufferView.readMapOfImplNodes(
     lookup: FunctionLookup,
+    loader: LoadIrModuleFn,
     tableView: BinaryTableView
 ): Pair<Int, Map<Impl, List<IrNode>>> {
     val handle = preludeModule.typeSystem.handle
@@ -166,7 +174,7 @@ fun BufferView.readMapOfImplNodes(
         val key = bufferFrom(position).readImpl(handle, tableView)
         position += implBuffer.readInt(0)
         val listBuffer = bufferFrom(position)
-        val (listPosition, listItems) = listBuffer.readListOfNodes(lookup, tableView)
+        val (listPosition, listItems) = listBuffer.readListOfNodes(lookup, loader, tableView)
         position += listPosition
         result.put(key, listItems)
     }
@@ -186,12 +194,12 @@ fun IrModule.writeTo(output: OutputStream) {
 }
 
 
-fun BufferView.readIrModule(): IrModule {
+fun BufferView.readIrModule(loader: LoadIrModuleFn): IrModule {
     val stringPoolSize = readInt(0)
     val offset = 4
     val stringPool = StringPoolView(bufferFrom(offset))
     val lookup = functionLookup()
-    return bufferFrom(offset + stringPoolSize).readIrNode(lookup, stringPool).cast<IrModule>().also {
+    return bufferFrom(offset + stringPoolSize).readIrNode(lookup, loader, stringPool).cast<IrModule>().also {
         lookup.link(it)
     }
 }

@@ -7,14 +7,20 @@ import org.ksharp.module.bytecode.readModuleInfo
 import org.ksharp.module.prelude.types.Numeric
 import org.ksharp.typesystem.TypeSystem
 
-private fun TypeSystem.preludeImpls() =
+private fun TypeSystem.preludeImpls(): Set<Impl> =
     sequenceOf(Numeric.entries
         .asSequence()
-        .map { Impl("Num", this[it.name].valueOrNull!!) },
+        .map {
+            sequenceOf(
+                Impl("", "Num", this[it.name].valueOrNull!!),
+                Impl("", "Comparable", this[it.name].valueOrNull!!)
+            )
+        }
+        .flatten(),
         Numeric.entries
             .asSequence()
             .filter { it.isInteger }
-            .map { Impl("Bitwise", this[it.name].valueOrNull!!) })
+            .map { Impl("", "Bitwise", this[it.name].valueOrNull!!) })
         .flatten()
         .toSet()
 

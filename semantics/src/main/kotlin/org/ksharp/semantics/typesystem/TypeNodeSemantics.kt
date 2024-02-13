@@ -369,6 +369,7 @@ private fun ImplNode.checkFunctionSemantics(collector: MutableSet<String>): Erro
 }
 
 private fun List<ImplNode>.checkSemantics(
+    moduleName: String,
     errors: ErrorCollector,
     typeSystem: TypeSystem
 ): Map<Impl, ImplNode> {
@@ -395,7 +396,7 @@ private fun List<ImplNode>.checkSemantics(
                     )
                     return@flatMap Either.Left(false)
                 }
-                val i = Impl(impl.traitName, forType)
+                val i = Impl(moduleName, impl.traitName, forType)
                 if (impls.containsKey(i) == false) {
                     impls.put(i, impl)
                     Either.Right(true)
@@ -453,6 +454,7 @@ private fun Sequence<NodeData>.checkTypesSemantics(
 }
 
 fun ModuleNode.checkTypesSemantics(
+    moduleName: String,
     preludeModule: ModuleInfo,
     dependencies: Map<String, ModuleInfo> = mapOf()
 ): ModuleTypeSystemInfo {
@@ -470,7 +472,7 @@ fun ModuleNode.checkTypesSemantics(
                 }
             }
         }
-    val impls = impls.checkSemantics(errors, typeSystem.value)
+    val impls = impls.checkSemantics(moduleName, errors, typeSystem.value)
     errors.collectAll(typeSystem.errors)
     return ModuleTypeSystemInfo(
         errors.build(),
