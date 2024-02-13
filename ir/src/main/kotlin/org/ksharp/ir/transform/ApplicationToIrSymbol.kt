@@ -169,12 +169,22 @@ private fun toIrCallSymbol(
     )
 }
 
+fun cleanSymbols(value: String): String {
+    return value.replace(Regex("([-?])")) {
+        when (val v = it.groupValues.first()) {
+            "-" -> "DASH"
+            "?" -> "QUESTION"
+            else -> v
+        }
+    }
+}
+
 fun nativeModuleName(moduleName: String) = moduleName.replace("([A-Z])".toRegex(), "_$1").lowercase()
 
 fun nativeApplicationName(moduleName: String, callName: String) =
     "${nativeModuleName(moduleName)}.${
-        callName.replace("/", "")
-            .replaceFirstChar { it.uppercaseChar() }
+        cleanSymbols(callName.replace("/", "")
+            .replaceFirstChar { it.uppercaseChar() })
     }"
 
 fun ApplicationNode<SemanticInfo>.toIrSymbol(
