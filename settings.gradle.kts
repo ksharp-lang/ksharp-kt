@@ -25,7 +25,7 @@ dependencyResolutionManagement {
         create("libs") {
             version("kotest", "5.8.0")
             version("eclipse.lsp4j", "0.21.2")
-            version("graalvm", "23.1.2")
+            version("graalvm", "22.3.4")
             version("netty", "4.1.106.Final")
             version("reflections", "0.10.2")
 
