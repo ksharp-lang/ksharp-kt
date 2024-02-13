@@ -135,7 +135,7 @@ class StringsModuleTest : StringSpec({
     "starts-with" {
         """
             import strings as s
-            fn = s.starts-with "Hello World" "Hello"
+            fn = s.starts-with? "Hello World" "Hello"
         """.trimIndent()
             .evaluateFunction("fn/0")
             .shouldBeRight(true)
@@ -143,7 +143,7 @@ class StringsModuleTest : StringSpec({
     "starts-with 2" {
         """
             import strings as s
-            fn = s.starts-with "Hello World" "World"
+            fn = s.starts-with? "Hello World" "World"
         """.trimIndent()
             .evaluateFunction("fn/0")
             .shouldBeRight(false)
@@ -151,7 +151,7 @@ class StringsModuleTest : StringSpec({
     "ends-with" {
         """
             import strings as s
-            fn = s.ends-with "Hello World" "World"
+            fn = s.ends-with? "Hello World" "World"
         """.trimIndent()
             .evaluateFunction("fn/0")
             .shouldBeRight(true)
@@ -159,7 +159,7 @@ class StringsModuleTest : StringSpec({
     "ends-with 2" {
         """
             import strings as s
-            fn = s.ends-with "Hello World" "Hello"
+            fn = s.ends-with? "Hello World" "Hello"
         """.trimIndent()
             .evaluateFunction("fn/0")
             .shouldBeRight(false)

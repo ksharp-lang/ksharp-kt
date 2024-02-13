@@ -170,9 +170,10 @@ private fun toIrCallSymbol(
 }
 
 fun cleanSymbols(value: String): String {
-    return value.replace(Regex("([-])")) {
+    return value.replace(Regex("([-?])")) {
         when (val v = it.groupValues.first()) {
-            "-" -> "_dash_"
+            "-" -> "DASH"
+            "?" -> "QUESTION"
             else -> v
         }
     }
