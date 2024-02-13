@@ -108,4 +108,60 @@ class StringsModuleTest : StringSpec({
             .evaluateFunction("fn/0")
             .shouldBeRight(true)
     }
+    "lowercase" {
+        """
+            import strings as s
+            fn = s.lowercase "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight("hello")
+    }
+    "uppercase" {
+        """
+            import strings as s
+            fn = s.uppercase "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight("HELLO")
+    }
+    "trim" {
+        """
+            import strings as s
+            fn = s.trim "   Hello    "
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight("Hello")
+    }
+    "starts-with" {
+        """
+            import strings as s
+            fn = s.starts-with "Hello World" "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
+    "starts-with 2" {
+        """
+            import strings as s
+            fn = s.starts-with "Hello World" "World"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(false)
+    }
+    "ends-with" {
+        """
+            import strings as s
+            fn = s.ends-with "Hello World" "World"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(true)
+    }
+    "ends-with 2" {
+        """
+            import strings as s
+            fn = s.ends-with "Hello World" "Hello"
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight(false)
+    }
 })
