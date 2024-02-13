@@ -12,6 +12,7 @@ import org.ksharp.doc.toDocModule
 import org.ksharp.doc.writeTo
 import org.ksharp.ir.IrModule
 import org.ksharp.ir.IrModuleInfo
+import org.ksharp.ir.LoadIrModuleFn
 import org.ksharp.ir.serializer.readIrModule
 import org.ksharp.ir.serializer.writeTo
 import org.ksharp.ir.toIrModule
@@ -42,6 +43,7 @@ fun interface ModuleExecutable {
 class Module(
     val name: String,
     val info: ModuleInfo,
+    private val loader: LoadIrModuleFn,
     private val sources: SourceLoader
 ) {
     val documentation: DocModule by lazy {
@@ -54,14 +56,14 @@ class Module(
     val irModule: IrModule by lazy {
         sources.binaryLoad(name.toModulePath("ksc"))!!
             .bufferView {
-                it.readIrModule()
+                it.readIrModule(loader)
             }
     }
 
     val executable: ModuleExecutable by lazy {
         sources.binaryLoad(name.toModulePath("ksc"))!!
             .bufferView {
-                IrModuleExecutable(it.readIrModule())
+                IrModuleExecutable(it.readIrModule(loader))
             }
     }
 }
@@ -78,11 +80,19 @@ class ModuleLoader(
 ) {
     private val cyclingRefs = CyclingReferences()
 
-    private fun InputStream.readModuleInfo(name: String): ErrorsOrModule =
-        Either.Right(Module(name, bufferView(BufferView::readModuleInfo), sources))
+    private fun InputStream.readModuleInfo(name: String, context: String): ErrorsOrModule =
+        Either.Right(Module(name, bufferView(BufferView::readModuleInfo), loader(context), sources))
 
     private fun SourceLoader.write(path: String, action: (stream: OutputStream) -> Unit) {
         outputStream(path, action)
+    }
+
+    private fun loader(context: String): LoadIrModuleFn = LoadIrModuleFn { name ->
+        val result = load(name, context).valueOrNull!!
+        IrModuleInfo(
+            result.info,
+            result.irModule
+        )
     }
 
     private fun Reader.codeModule(context: String, preludeModule: ModuleInfo): ErrorsOrModule =
@@ -91,6 +101,7 @@ class ModuleLoader(
                 listOf(it.error)
             }.flatMap {
                 it.toCodeModule(preludeModule, moduleInfoLoader).let { codeModule ->
+                    val loadFn = loader(context)
                     if (codeModule.errors.isEmpty()) {
                         sources.write(codeModule.name.toModulePath("ksd")) { stream ->
                             it.toDocModule(codeModule.module)
@@ -100,21 +111,15 @@ class ModuleLoader(
                             codeModule.module.writeTo(stream)
                         }
                         sources.write(codeModule.name.toModulePath("ksc")) { stream ->
-                            codeModule.toIrModule { name ->
-                                val result = load(name, context).valueOrNull!!
-                                IrModuleInfo(
-                                    result.info,
-                                    result.irModule
-                                )
-                            }.writeTo(stream)
+                            codeModule.toIrModule(loadFn).writeTo(stream)
                         }
-                        Either.Right(Module(codeModule.name, codeModule.module, sources))
+                        Either.Right(Module(codeModule.name, codeModule.module, loadFn, sources))
                     } else Either.Left(codeModule.errors)
                 }
             }
 
     fun load(name: String, from: String): ErrorsOrModule =
-        sources.binaryLoad(name.toModulePath("ksm"))?.readModuleInfo(name)
+        sources.binaryLoad(name.toModulePath("ksm"))?.readModuleInfo(name, from)
             ?: name.toModulePath("ks").let {
                 val dependencies = cyclingRefs.loading(name, from)
                 if (dependencies.isEmpty()) {
@@ -133,6 +138,7 @@ class ModuleLoader(
                     )
                 )
             } ?: Either.Left(listOf(ModuleLoaderErrorCode.ModuleNotFound.new("name" to name)))
+
 
 }
 

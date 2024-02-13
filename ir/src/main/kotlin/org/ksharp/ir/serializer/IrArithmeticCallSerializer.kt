@@ -7,6 +7,7 @@ import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
 import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrArithmeticCall
+import org.ksharp.ir.LoadIrModuleFn
 
 class IrArithmeticCallSerializer : IrNodeSerializer<IrArithmeticCall> {
     override fun write(input: IrArithmeticCall, buffer: BufferWriter, table: BinaryTable) {
@@ -16,11 +17,12 @@ class IrArithmeticCallSerializer : IrNodeSerializer<IrArithmeticCall> {
 
     override fun read(
         lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
         buffer: BufferView,
         table: BinaryTableView
     ): IrArithmeticCall {
         val name = table[buffer.readInt(0)]
-        val expr = buffer.bufferFrom(4).readIrNode(lookup, table)
+        val expr = buffer.bufferFrom(4).readIrNode(lookup, loader, table)
         return IrArithmeticCall(name, expr.cast())
     }
 }

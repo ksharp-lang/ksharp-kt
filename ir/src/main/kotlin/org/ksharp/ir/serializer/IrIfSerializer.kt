@@ -8,6 +8,7 @@ import org.ksharp.common.io.BufferWriter
 import org.ksharp.ir.FunctionLookup
 import org.ksharp.ir.IrExpression
 import org.ksharp.ir.IrIf
+import org.ksharp.ir.LoadIrModuleFn
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
 
@@ -18,11 +19,16 @@ class IrIfSerializer : IrNodeSerializer<IrIf> {
         listOf(input.condition, input.thenExpr, input.elseExpr).writeTo(buffer, table)
     }
 
-    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrIf {
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrIf {
         val location = buffer.readLocation()
         val attributes = buffer.bufferFrom(16).readAttributes(table)
         val exprs = buffer.bufferFrom(16 + buffer.readInt(16))
-            .readListOfNodes(lookup, table).second
+            .readListOfNodes(lookup, loader, table).second
             .cast<List<IrExpression>>()
         return IrIf(attributes, exprs[0], exprs[1], exprs[2], location)
     }

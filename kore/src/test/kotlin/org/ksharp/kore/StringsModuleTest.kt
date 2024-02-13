@@ -20,6 +20,14 @@ class StringsModuleTest : StringSpec({
             .evaluateFunction("fn/0")
             .shouldBeRight(5)
     }
+    "char-at/2" {
+        """
+            import strings as s
+            fn = s.char-at "Hello" (int 0)
+        """.trimIndent()
+            .evaluateFunction("fn/0")
+            .shouldBeRight('H')
+    }
     "comparable" {
         """
             import strings as s

@@ -9,7 +9,6 @@ import org.ksharp.common.io.BufferWriter
 import org.ksharp.common.listBuilder
 import org.ksharp.ir.*
 import org.ksharp.module.prelude.preludeModule
-import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
 import org.ksharp.typesystem.serializer.readType
@@ -46,7 +45,12 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
         input.arguments.writeTo(buffer, table)
     }
 
-    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrCall {
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrCall {
         val attributes = buffer.readAttributes(table)
         var offset = buffer.readInt(0)
         val module = buffer.readInt(offset).let { if (it == -1) null else table[it] }
@@ -57,7 +61,7 @@ class IrCallSerializer : IrNodeSerializer<IrCall> {
         offset += 16
         val type = buffer.bufferFrom(offset).readType<Type>(preludeModule.typeSystem.handle, table)
         offset += buffer.readInt(offset)
-        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, table).second
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, loader, table).second
         return IrCall(
             attributes,
             module,
@@ -78,7 +82,12 @@ class IrNativeCallSerializer : IrNodeSerializer<IrNativeCall> {
         input.arguments.writeTo(buffer, table)
     }
 
-    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrNativeCall {
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrNativeCall {
         val argAttributes = buffer.readAttributes(table)
         var offset = buffer.readInt(0)
         val functionClass = table[buffer.readInt(offset)]
@@ -87,7 +96,7 @@ class IrNativeCallSerializer : IrNodeSerializer<IrNativeCall> {
         offset += 16
         val type = buffer.bufferFrom(offset).readType<Type>(preludeModule.typeSystem.handle, table)
         offset += buffer.readInt(offset)
-        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, table).second
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, loader, table).second
         return IrNativeCall(
             argAttributes,
             functionClass,
@@ -102,21 +111,21 @@ class IrModuleCallSerializer : IrNodeSerializer<IrModuleCall> {
     override fun write(input: IrModuleCall, buffer: BufferWriter, table: BinaryTable) {
         input.attributes.writeTo(buffer, table)
         buffer.add(table.add(input.moduleName))
-        input.functionName.let {
-            buffer.add(it.pck.let { pck -> if (pck == null) -1 else table.add(pck) })
-            buffer.add(table.add(it.name))
-        }
+        buffer.add(table.add(input.functionName))
         input.location.writeTo(buffer)
         input.type.writeTo(buffer, table)
         input.arguments.writeTo(buffer, table)
     }
 
-    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrModuleCall {
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrModuleCall {
         val attributes = buffer.readAttributes(table)
         var offset = buffer.readInt(0)
         val moduleName = table[buffer.readInt(offset)]
-        offset += 4
-        val namePackage = buffer.readInt(offset).let { if (it == -1) null else table[it] }
         offset += 4
         val name = table[buffer.readInt(offset)]
         offset += 4
@@ -124,11 +133,12 @@ class IrModuleCallSerializer : IrNodeSerializer<IrModuleCall> {
         offset += 16
         val type = buffer.bufferFrom(offset).readType<Type>(preludeModule.typeSystem.handle, table)
         offset += buffer.readInt(offset)
-        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, table).second
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, loader, table).second
         return IrModuleCall(
             attributes,
+            loader,
             moduleName,
-            ApplicationName(namePackage, name),
+            name,
             arguments.cast(),
             type.cast(),
             location
@@ -145,13 +155,18 @@ class IrComparableSerializer : IrNodeSerializer<IrComparable> {
         input.call.serialize(buffer, table)
     }
 
-    override fun read(lookup: FunctionLookup, buffer: BufferView, table: BinaryTableView): IrComparable {
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrComparable {
         val size = buffer.readInt(0) + 1
         val expected = listBuilder<String>()
         (1 until size).map {
             expected.add(table[buffer.readInt(it * 4)])
         }
-        val call = buffer.bufferFrom(4 * size).readIrNode(lookup, table).cast<IrModuleCall>()
+        val call = buffer.bufferFrom(4 * size).readIrNode(lookup, loader, table).cast<IrModuleCall>()
         return IrComparable(call, expected.build())
     }
 }

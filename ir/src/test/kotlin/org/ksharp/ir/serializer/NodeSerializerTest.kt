@@ -10,7 +10,6 @@ import org.ksharp.common.io.newBufferWriter
 import org.ksharp.ir.*
 import org.ksharp.module.Impl
 import org.ksharp.module.prelude.preludeModule
-import org.ksharp.nodes.semantic.ApplicationName
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.newParameterForTesting
 import org.ksharp.typesystem.types.toFunctionType
@@ -42,7 +41,7 @@ private inline fun <reified T : IrNode> T.shouldBeSerializable() {
     val input = ByteArrayInputStream(output.toByteArray())
     val lookup = functionLookup()
     this.shouldBe(input.bufferView {
-        it.readIrNode(lookup, stringPoolView).also(::println)
+        it.readIrNode(lookup, { _ -> null }, stringPoolView).also(::println)
     })
 }
 
@@ -51,7 +50,7 @@ private fun IrModule.shouldBeSerializableModule() {
     writeTo(output)
     val input = ByteArrayInputStream(output.toByteArray())
     this.shouldBe(input.bufferView {
-        it.readIrModule().also(::println)
+        it.readIrModule { _ -> null }.also(::println)
     })
 }
 
@@ -261,8 +260,9 @@ class NodeSerializerTest : StringSpec({
     "ModuleCall Test" {
         IrModuleCall(
             attributes,
+            { _ -> null },
             "test",
-            ApplicationName("test", "name"),
+            "name",
             listOf(IrInteger(1, location), IrInteger(2, location)),
             listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
             location
@@ -272,7 +272,7 @@ class NodeSerializerTest : StringSpec({
         IrModuleCall(
             attributes,
             "test",
-            ApplicationName(null, "name"),
+            "name",
             listOf(IrInteger(1, location), IrInteger(2, location)),
             listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
             location
@@ -283,7 +283,7 @@ class NodeSerializerTest : StringSpec({
             IrModuleCall(
                 attributes,
                 "test",
-                ApplicationName(null, "name"),
+                "name",
                 listOf(IrInteger(1, location), IrInteger(2, location)),
                 listOf(newParameterForTesting(2)).toFunctionType(preludeModule.typeSystem, emptySet()),
                 location

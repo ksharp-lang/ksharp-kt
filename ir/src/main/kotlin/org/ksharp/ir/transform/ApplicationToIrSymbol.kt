@@ -7,7 +7,6 @@ import org.ksharp.nodes.semantic.*
 import org.ksharp.typesystem.attributes.Attribute
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.*
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 typealias CustomApplicationIrNode = ApplicationNode<SemanticInfo>.(state: IrState) -> IrExpression
@@ -42,7 +41,7 @@ val IrNumCastFactory: CustomApplicationIrNode = { state ->
     )
 }
 
-private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
+private var irNodeFactory = mapOf(
     "prelude::listOf" to IrListFactory,
     "prelude::setOf" to IrSetFactory,
     "prelude::arrayOf" to IrArrayFactory,
@@ -70,12 +69,12 @@ private var irNodeFactory = mapOf<String, CustomApplicationIrNode>(
     "prelude::if" to IrIfFactory
 )
 
-fun computeAttributes(exprsCounter: Int, constantCounter: Int, pureCounter: Int): Set<Attribute> {
+fun computeAttributes(expressionsCounter: Int, constantCounter: Int, pureCounter: Int): Set<Attribute> {
     val attributes = mutableSetOf<Attribute>()
-    if (constantCounter == exprsCounter) {
+    if (constantCounter == expressionsCounter) {
         attributes.add(CommonAttribute.Constant)
     }
-    attributes.add(if (pureCounter == exprsCounter) CommonAttribute.Pure else CommonAttribute.Impure)
+    attributes.add(if (pureCounter == expressionsCounter) CommonAttribute.Pure else CommonAttribute.Impure)
     return attributes
 }
 
@@ -170,6 +169,14 @@ private fun toIrCallSymbol(
     )
 }
 
+fun nativeModuleName(moduleName: String) = moduleName.replace("([A-Z])".toRegex(), "_$1").lowercase()
+
+fun nativeApplicationName(moduleName: String, callName: String) =
+    "${nativeModuleName(moduleName)}.${
+        callName.replace("/", "")
+            .replaceFirstChar { it.uppercaseChar() }
+    }"
+
 fun ApplicationNode<SemanticInfo>.toIrSymbol(
     state: IrState
 ): IrExpression {
@@ -186,27 +193,36 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
             if (functionName.pck == null) state.moduleName
             else state.module.dependencies[functionName.pck]!!
         val returnType = info.getInferredType(location).valueOrNull!!
-        if (functionType.attributes.contains(CommonAttribute.Native))
-            IrNativeCall(
-                attributes,
-                "${functionModuleName.replace("([A-Z])".toRegex(), "_$1").lowercase()}.${
-                    callName.replace("/", "")
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                }",
-                arguments,
-                returnType,
-                location,
-            )
-        else {
-            toIrCallSymbol(
-                functionType,
-                attributes,
-                callName,
-                arguments,
-                returnType,
-                location
-            )
-                .apply { this.functionLookup = state.functionLookup }
+        when {
+            functionName.pck != null ->
+                IrModuleCall(
+                    attributes,
+                    state.loader,
+                    functionModuleName,
+                    callName,
+                    arguments,
+                    functionType,
+                    location
+                )
+
+            functionType.attributes.contains(CommonAttribute.Native) ->
+                IrNativeCall(
+                    attributes,
+                    nativeApplicationName(functionModuleName, callName),
+                    arguments,
+                    returnType,
+                    location,
+                )
+
+            else ->
+                toIrCallSymbol(
+                    functionType,
+                    attributes,
+                    callName,
+                    arguments,
+                    returnType,
+                    location
+                ).apply { this.functionLookup = state.functionLookup }
         }
     }
 }

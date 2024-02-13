@@ -7,7 +7,7 @@ import org.ksharp.common.cast
 import java.math.BigDecimal
 import java.math.BigInteger
 
-private data class Call(
+private data class CallSpec(
     val arguments: List<Any>,
     val expectedResult: Any
 )
@@ -25,7 +25,7 @@ private fun String.evaluateFirstFunction(arguments: List<Any>) =
         .call(*arguments.toTypedArray())
 
 private fun createSpec(description: String, code: String, expected: Any, vararg arguments: Any) =
-    Triple(description, code.also(::println), Call(arguments.toList(), expected))
+    Triple(description, code.also(::println), CallSpec(arguments.toList(), expected))
 
 
 class EvaluateTest : StringSpec({
@@ -487,20 +487,13 @@ class EvaluateTest : StringSpec({
 class CustomEvaluationTest : StringSpec({
     "Check a custom spec" {
         createSpec(
-            "Evaluate trait abstractions 3",
-            """|fn = double (int 10)  
+            "Evaluate native method",
+            """|n = fn "Hello"
                |
-               |trait Sum a =
-               |    sum :: a -> a -> a
-               |    double :: a -> a
-               |    
-               |    double a = sum a a
-               |
-               |impl Sum for Int =
-               |    sum a b = a + b
-               |            
+               |fn :: String -> Int
+               |native fn a              
             """.trimMargin(),
-            20.toInt()
+            "Hello".length
         )
             .let { (_, code, call) ->
                 code.evaluateFirstFunction(call.arguments)

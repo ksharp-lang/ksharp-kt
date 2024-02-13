@@ -1,6 +1,7 @@
 package org.ksharp.ir.truffle.call;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
+import org.ksharp.ir.CallNotFound;
 import org.ksharp.ir.KValue;
 import org.ksharp.ir.NativeCall;
 import org.ksharp.ir.truffle.KSharpNode;
@@ -10,12 +11,6 @@ import java.lang.reflect.InvocationTargetException;
 
 public abstract class NativeCallNode extends BaseCallNode {
 
-    private static class NativeCallNotFound extends RuntimeException {
-        public NativeCallNotFound(Exception exception) {
-            super(exception);
-        }
-    }
-
     private final String functionClass;
     private NativeCall call;
 
@@ -24,7 +19,7 @@ public abstract class NativeCallNode extends BaseCallNode {
         this.functionClass = functionClass;
     }
 
-    public NativeCall getNativeCall() {
+    public NativeCall getCall() {
         try {
             if (call == null) {
                 call = (NativeCall) Class.forName(functionClass).getConstructor().newInstance();
@@ -33,13 +28,13 @@ public abstract class NativeCallNode extends BaseCallNode {
             return call;
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
                  IllegalAccessException e) {
-            throw new NativeCallNotFound(e);
+            throw new CallNotFound(e);
         }
     }
 
     @Override
     public Object execute(VirtualFrame frame) {
         var argumentValues = getArguments(frame).getSecond();
-        return KValue.wrap(getNativeCall().execute(argumentValues), returnType);
+        return KValue.wrap(getCall().execute(argumentValues), returnType);
     }
 }
