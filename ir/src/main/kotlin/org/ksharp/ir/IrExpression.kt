@@ -14,6 +14,7 @@ import org.ksharp.ir.truffle.call.CallNode
 import org.ksharp.ir.truffle.call.ModuleCallNode
 import org.ksharp.ir.truffle.call.NativeCallNode
 import org.ksharp.ir.truffle.cast.NumCastNode
+import org.ksharp.ir.truffle.cast.ToStringNode
 import org.ksharp.ir.truffle.variable.VarAccessNode
 import org.ksharp.module.Impl
 import org.ksharp.typesystem.attributes.Attribute
@@ -60,6 +61,16 @@ data class IrNumCast(
         get() = NoAttributes
 
     override val serializer: IrNodeSerializers = IrNodeSerializers.NumCast
+}
+
+data class IrToString(
+    val expr: IrExpression,
+    override val location: Location
+) : ToStringNode(expr.cast()), IrExpression {
+    override val attributes: Set<Attribute>
+        get() = NoAttributes
+
+    override val serializer: IrNodeSerializers = IrNodeSerializers.ToString
 }
 
 data class IrPair(

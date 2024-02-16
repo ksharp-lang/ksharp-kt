@@ -83,6 +83,10 @@ class NodeSerializerTest : StringSpec({
         IrNumCast(IrInteger(1, location), CastType.Int, location)
             .shouldBeSerializable()
     }
+    "IrToString test" {
+        IrToString(IrInteger(1, location), location)
+            .shouldBeSerializable()
+    }
     "IrPair test" {
         IrPair(attributes, IrInteger(1, location), IrInteger(2, location), location)
             .shouldBeSerializable()

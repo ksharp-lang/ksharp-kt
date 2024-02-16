@@ -22,6 +22,7 @@ class PreludeModuleTest : StringSpec({
             .toSet()
             .shouldBe(
                 setOf(
+                    "str :: a -> String",
                     "if :: True\n|False -> a -> a -> a",
                     "pair :: a -> b -> (Pair a b)",
                     "tupleOf :: a -> a",

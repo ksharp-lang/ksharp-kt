@@ -475,6 +475,12 @@ class EvaluateTest : StringSpec({
             """.trimMargin(),
             12.toInt()
         ),
+        createSpec(
+            "ToString function",
+            """|fn = str 10           
+            """.trimMargin(),
+            TruffleString.FromJavaStringNode.create().execute("10", TruffleString.Encoding.UTF_16)
+        ),
     ).forEach { (description, code, call) ->
         description {
             code.evaluateFirstFunction(call.arguments)
@@ -487,13 +493,10 @@ class EvaluateTest : StringSpec({
 class CustomEvaluationTest : StringSpec({
     "Check a custom spec" {
         createSpec(
-            "Evaluate native method",
-            """|n = fn "Hello"
-               |
-               |fn :: String -> Int
-               |native fn a              
+            "ToString function",
+            """|fn = str 10           
             """.trimMargin(),
-            "Hello".length
+            TruffleString.FromJavaStringNode.create().execute("10", TruffleString.Encoding.UTF_16)
         )
             .let { (_, code, call) ->
                 code.evaluateFirstFunction(call.arguments)

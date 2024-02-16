@@ -41,6 +41,14 @@ val IrNumCastFactory: CustomApplicationIrNode = { state ->
     )
 }
 
+val IrToStringFactory: CustomApplicationIrNode = { state ->
+    val (_, symbols) = arguments.toIrSymbols(state)
+    IrToString(
+        symbols[0],
+        location
+    )
+}
+
 private var irNodeFactory = mapOf(
     "prelude::listOf" to IrListFactory,
     "prelude::setOf" to IrSetFactory,
@@ -66,7 +74,8 @@ private var irNodeFactory = mapOf(
     "prelude::bit::(>>)/2" to binaryOperationFactory(::IrBitShr),
     "prelude::bit::(<<)/2" to binaryOperationFactory(::IrBitShl),
     "prelude::num-cast" to IrNumCastFactory,
-    "prelude::if" to IrIfFactory
+    "prelude::if" to IrIfFactory,
+    "prelude::to-string" to IrToStringFactory
 )
 
 fun computeAttributes(expressionsCounter: Int, constantCounter: Int, pureCounter: Int): Set<Attribute> {
