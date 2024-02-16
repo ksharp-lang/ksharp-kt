@@ -9,6 +9,10 @@ type Bool = True | False
 
 type Pair a b = Pair a b
 
+@name("prelude::to-string" for="ir")
+str a :: a -> String
+native pub str a
+
 @name("prelude::num-cast" for="ir")
 byte a :: (Num a) -> Byte
 native pub byte a
