@@ -23,7 +23,7 @@ class IrToStringSerializer : IrNodeSerializer<IrToString> {
     ): IrToString {
         val expr = buffer.readIrNode(lookup, loader, table)
         val offset = buffer.readInt(0)
-        val location = buffer.bufferFrom(offset + 4).readLocation()
+        val location = buffer.bufferFrom(offset).readLocation()
         return IrToString(expr.cast(), location)
     }
 }
