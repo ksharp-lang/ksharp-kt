@@ -9,6 +9,8 @@ type Bool = True | False
 
 type Pair a b = Pair a b
 
+type Maybe a = Just a | None
+
 @name("prelude::to-string" for="ir")
 str a :: a -> String
 native pub str a
@@ -112,3 +114,7 @@ native pub (==) a b
 @name("prelude::not-equals" for="ir")
 (!=) a :: a -> a -> Bool
 native pub (!=) a b
+
+@name("prelude::threading" for="ir")
+(|>) a :: a -> (a -> c) -> b
+native pub (|>)
