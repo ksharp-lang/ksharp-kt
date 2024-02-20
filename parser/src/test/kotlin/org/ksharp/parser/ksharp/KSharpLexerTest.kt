@@ -10,6 +10,20 @@ import org.ksharp.common.Offset
 import org.ksharp.parser.*
 
 class KSharpLexerTest : StringSpec({
+    "Test lambda" {
+        "\\a".kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence()
+            .first()
+            .shouldBe(LexerToken(KSharpTokenType.Lambda, TextToken("a", 0, 2)))
+    }
+    "Test unit lambda" {
+        "\\->".kSharpLexer()
+            .collapseKSharpTokens()
+            .asSequence()
+            .first()
+            .shouldBe(LexerToken(KSharpTokenType.UnitLambda, TextToken("\\->", 0, 3)))
+    }
     "Check escaope characters" {
         "t'\"rnf\\b".asSequence().map { it.isEscapeCharacter() }.filter { !it }.shouldBeEmpty()
     }
