@@ -1,9 +1,6 @@
 package org.ksharp.parser.ksharp
 
-import org.ksharp.common.Either
-import org.ksharp.common.Location
-import org.ksharp.common.add
-import org.ksharp.common.cast
+import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.parser.*
 
@@ -34,6 +31,90 @@ private fun KSharpConsumeResult.thenRepeatingFunCallIndentation(): KSharpConsume
                         o.consumeExpressionValue(tupleWithoutParenthesis = true, withBindings = true)
                     }
                 }
+        }
+    }
+
+private fun KSharpLexerIterator.lambdaIfConsume(
+    predicate: (Token) -> Boolean,
+    block: (tokens: KSharpConsumeResult) -> ParserResult<Any, KSharpLexerState>
+): ParserResult<Any, KSharpLexerState> =
+    ifConsume(predicate, true, block).orCollect {
+        block(it)
+    }
+
+private fun KSharpConsumeResult.lambdaIfConsume(
+    predicate: (Token) -> Boolean,
+    block: (tokens: KSharpConsumeResult) -> KSharpConsumeResult
+): KSharpConsumeResult =
+    thenIfConsume(predicate, true) {
+        block(it).build { i -> i }
+    }.orCollect {
+        block(it).build { i -> i }
+    }.map {
+        val items = listBuilder<Any>()
+        items.addAll(it.value)
+        NodeCollector(items, it.remainTokens)
+    }
+
+internal fun KSharpLexerIterator.consumeLambdaExpression(): KSharpParserResult =
+    ifConsume({
+        it.type == KSharpTokenType.Lambda
+    }) { l ->
+        l.flatMap { nc ->
+            val lexer = nc.tokens
+            val indentationOffset = lexer.state.value.indentationOffset
+            lexer.withNextTokenIndentationOffset(OffsetType.Repeating) {
+                val offset = indentationOffset.currentOffset
+                val tokenPredicate: (Token) -> Boolean = { tk ->
+                    tk.type == BaseTokenType.NewLine && indentationOffset.currentOffset == offset
+                }
+                Either.Right(nc)
+                    .thenLoop { l ->
+                        l.lambdaIfConsume(tokenPredicate) { iL ->
+                            iL.thenLowerCaseWord()
+                                .build { i -> i.first().cast<Token>() }
+                        }
+                    }
+                    .build { i -> i }
+                    .resume()
+                    .lambdaIfConsume(tokenPredicate) {
+                        it.then(KSharpTokenType.Operator10, "->", false)
+                    }.lambdaIfConsume(tokenPredicate) {
+                        it.consume(KSharpLexerIterator::consumeExpression)
+                    }
+            }
+        }.build {
+            val parameters = it.first().cast<List<Token>>()
+            val assignOperator = it[1].cast<Token>()
+            val expression = it.last().cast<NodeData>()
+            LambdaNode(
+                parameters.map(Token::text),
+                expression,
+                parameters.first().location,
+                LambdaNodeLocations(assignOperator.location, parameters.map(Token::location))
+            )
+        }
+    }
+
+internal fun KSharpLexerIterator.consumeUnitLambdaExpression(): KSharpParserResult =
+    ifConsume({
+        it.type == KSharpTokenType.UnitLambda
+    }) { l ->
+        l.flatMap { nc ->
+            val lexer = nc.tokens
+            lexer.withNextTokenIndentationOffset(OffsetType.Optional) {
+                Either.Right(nc)
+                    .consume(KSharpLexerIterator::consumeExpression)
+            }
+        }.build {
+            val assignOperator = it.first().cast<Token>()
+            val expression = it.last().cast<NodeData>()
+            LambdaNode(
+                emptyList(),
+                expression,
+                assignOperator.location,
+                LambdaNodeLocations(assignOperator.location, emptyList())
+            )
         }
     }
 

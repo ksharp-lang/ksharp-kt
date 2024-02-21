@@ -23,3 +23,18 @@ data class FunctionNode(
     override val children: Sequence<NodeData>
         get() = sequenceOf(expression)
 }
+
+data class LambdaNodeLocations(
+    val assignOperator: Location,
+    val parameters: List<Location>
+) : NodeLocations
+
+data class LambdaNode(
+    val parameters: List<String>,
+    val expression: NodeData,
+    override val location: Location,
+    override val locations: LambdaNodeLocations
+) : NodeData() {
+    override val children: Sequence<NodeData>
+        get() = sequenceOf(expression)
+}
