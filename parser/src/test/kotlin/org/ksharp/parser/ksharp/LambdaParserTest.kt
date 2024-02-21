@@ -23,7 +23,7 @@ class LambdaParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForLambdaParsing()
-            .consumeLambdaExpression()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LambdaNode(
@@ -54,7 +54,7 @@ class LambdaParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForLambdaParsing()
-            .consumeLambdaExpression()
+            .consumeExpression()
             .map { it.value.also { println(it) } }
             .shouldBeRight(
                 LambdaNode(
@@ -98,7 +98,7 @@ class LambdaParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForLambdaParsing()
-            .consumeLambdaExpression()
+            .consumeExpression()
             .map { it.value.also { println(it) } }
             .shouldBeRight(
                 LambdaNode(
@@ -141,7 +141,7 @@ class LambdaParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForLambdaParsing()
-            .consumeUnitLambdaExpression()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LambdaNode(
@@ -165,7 +165,7 @@ class LambdaParserTest : StringSpec({
         """.trimIndent()
             .kSharpLexer()
             .prepareLexerForLambdaParsing()
-            .consumeUnitLambdaExpression()
+            .consumeExpression()
             .map { it.value }
             .shouldBeRight(
                 LambdaNode(

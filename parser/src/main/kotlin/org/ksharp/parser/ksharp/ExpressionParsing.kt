@@ -231,6 +231,8 @@ internal fun KSharpLexerIterator.consumeExpressionValue(
     }.or { it.consumeIfExpression() }
         .or { it.consumeLetExpression() }
         .or { it.consumeMatchExpression() }
+        .or { it.consumeLambdaExpression() }
+        .or { it.consumeUnitLambdaExpression() }
 
     val withFunctionCall =
         if (!withBindings) groupExpression.or {
