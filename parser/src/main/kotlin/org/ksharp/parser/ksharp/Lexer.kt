@@ -69,7 +69,9 @@ enum class KSharpTokenType : TokenType {
     Match,
     Then,
     Else,
-    With
+    With,
+    Lambda,
+    UnitLambda
 }
 
 private val mappings = mapOf(
@@ -362,6 +364,9 @@ val kSharpTokenFactory: TokenFactory<KSharpLexerState> = { c ->
     }
 }
 
+private fun isLambda(current: Token, newToken: Token): Boolean =
+    current.type == KSharpTokenType.Operator && current.text == "\\" && newToken.type == KSharpTokenType.LowerCaseWord
+
 private fun isUnitToken(current: Token, newToken: Token): Boolean =
     current.type == KSharpTokenType.OpenParenthesis && newToken.type == KSharpTokenType.CloseParenthesis
 
@@ -414,7 +419,7 @@ private fun Token.mapOperatorToken(): Token = when (type) {
             text == "&&" -> new(type = KSharpTokenType.Operator3)
             text == "||" -> new(type = KSharpTokenType.Operator2)
             text == "=" -> new(type = KSharpTokenType.AssignOperator)
-
+            text == "\\->" -> new(type = KSharpTokenType.UnitLambda)
             text.isEmpty() -> this
 
             operator11.contains(text.first()) -> new(type = KSharpTokenType.Operator11)
@@ -507,6 +512,15 @@ fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
 
             lastToken = next()
             val nextToken = lastToken!!
+
+            if (isLambda(token, nextToken)) {
+                token = token.collapse(
+                    KSharpTokenType.Lambda,
+                    nextToken.text,
+                    nextToken
+                )
+                continue
+            }
 
             if (isUnitToken(token, nextToken)) {
                 token = token.collapse(
