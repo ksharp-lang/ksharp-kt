@@ -293,15 +293,15 @@ private fun AbstractionNode<SemanticInfo>.infer(caller: String, info: InferenceI
         }
     }
 
-private fun AbstractionLambdaNode<SemanticInfo>.infer(caller: String, info: InferenceInfo): ErrorOrType =
+private fun AbstractionLambdaNode<SemanticInfo>.infer(caller: String, inferenceInfo: InferenceInfo): ErrorOrType =
     expression
-        .inferType(caller, info)
+        .inferType(caller, inferenceInfo)
         .flatMap { type ->
             val returnType = type.toFixedTraitOrType()
             info.cast<AbstractionSemanticInfo>().parameters.let { params ->
                 if (params.isEmpty()) {
-                    info.prelude.typeSystem["Unit"].map { unitType ->
-                        listOf(unitType, returnType).toFunctionType(info.inferenceContext.typeSystem)
+                    inferenceInfo.prelude.typeSystem["Unit"].map { unitType ->
+                        listOf(unitType, returnType).toFunctionType(inferenceInfo.inferenceContext.typeSystem)
                     }
                 } else {
                     params.asSequence().run {
@@ -314,7 +314,7 @@ private fun AbstractionLambdaNode<SemanticInfo>.infer(caller: String, info: Infe
                         }
                     }.unwrap()
                         .map {
-                            (it + returnType).toFunctionType(info.inferenceContext.typeSystem)
+                            (it + returnType).toFunctionType(inferenceInfo.inferenceContext.typeSystem)
                         }
                 }
             }
