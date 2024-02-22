@@ -53,4 +53,42 @@ class AbstractionNodeTest : StringSpec({
             )
         }
     }
+    "Test Node Interface over AbstractionLambdaNode" {
+        AbstractionLambdaNode(
+            VarNode(
+                "a",
+                ("VarInfo"),
+                Location.NoProvided
+            ),
+            ("AbstractionLambdaNode"),
+            Location.NoProvided
+        ).node.apply {
+            cast<AbstractionLambdaNode<String>>().apply {
+                info.shouldBe(("AbstractionLambdaNode"))
+                expression.shouldBe(
+                    VarNode(
+                        "a",
+                        ("VarInfo"),
+                        Location.NoProvided
+                    )
+                )
+                location.shouldBe(Location.NoProvided)
+                locations.shouldBe(NoLocationsDefined)
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(
+                        this,
+                        Location.NoProvided,
+                        VarNode(
+                            "a",
+                            ("VarInfo"),
+                            Location.NoProvided
+                        )
+                    )
+                )
+            )
+        }
+    }
 })

@@ -1,9 +1,6 @@
 package org.ksharp.semantics.expressions
 
-import org.ksharp.common.ErrorCode
-import org.ksharp.common.Location
-import org.ksharp.common.cast
-import org.ksharp.common.new
+import org.ksharp.common.*
 import org.ksharp.nodes.*
 import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.errors.ErrorCollector
@@ -13,6 +10,7 @@ import org.ksharp.semantics.nodes.toTypePromise
 import org.ksharp.semantics.scopes.SymbolTable
 import org.ksharp.semantics.scopes.SymbolTableBuilder
 import org.ksharp.typesystem.TypeSystem
+import org.ksharp.typesystem.types.newParameter
 
 enum class ExpressionSemanticsErrorCode(override val description: String) : ErrorCode {
     SymbolAlreadyUsed("Symbol already used '{name}'")
@@ -85,6 +83,25 @@ private fun String.toApplicationName(): ApplicationName {
         ApplicationName(this.substring(0, ix), this.substring(ix + 1))
     } else ApplicationName(name = this)
 }
+
+private fun LambdaNode.buildSymbolTable(
+    errors: ErrorCollector,
+    info: SemanticInfo,
+    typeSystem: TypeSystem
+): Either<Boolean, SymbolTable> =
+    SymbolTableBuilder(info.cast<SymbolTable>(), errors).let { st ->
+        val invalidSymbolTable = Flag()
+
+        for (param in parameters) {
+            if (invalidSymbolTable.enabled) break
+            st.register(param, TypeSemanticInfo(Either.Right(typeSystem.newParameter())), location).mapLeft {
+                invalidSymbolTable.activate()
+            }
+        }
+
+        if (invalidSymbolTable.enabled) Either.Left(false)
+        else Either.Right(st.build())
+    }
 
 internal fun ExpressionParserNode.toSemanticNode(
     errors: ErrorCollector,
@@ -173,6 +190,24 @@ internal fun ExpressionParserNode.toSemanticNode(
                 ApplicationSemanticInfo(),
                 location
             )
+        }
+
+        is LambdaNode -> {
+            buildSymbolTable(errors, info, typeSystem).map { symbolTable ->
+                val semanticNode = expression
+                    .cast<ExpressionParserNode>()
+                    .toSemanticNode(errors, SymbolTableSemanticInfo(symbolTable), typeSystem)
+                AbstractionLambdaNode(
+                    semanticNode,
+                    AbstractionSemanticInfo(
+                        if (parameters.isEmpty()) {
+                            emptyList()
+                        } else parameters.map { p -> symbolTable[p]!!.first }.toList(),
+                        TypeSemanticInfo(Either.Right(typeSystem.newParameter()))
+                    ),
+                    location
+                )
+            }.valueOrNull!!.cast()
         }
 
         is LetExpressionNode -> {

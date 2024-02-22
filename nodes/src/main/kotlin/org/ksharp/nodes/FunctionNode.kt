@@ -34,7 +34,7 @@ data class LambdaNode(
     val expression: NodeData,
     override val location: Location,
     override val locations: LambdaNodeLocations
-) : NodeData() {
+) : NodeData(), ExpressionParserNode {
     override val children: Sequence<NodeData>
         get() = sequenceOf(expression)
 }
