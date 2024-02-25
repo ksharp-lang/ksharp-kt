@@ -1,18 +1,85 @@
 package org.ksharp.semantics.inference
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import org.ksharp.common.Either
+import org.ksharp.common.Location
+import org.ksharp.common.MockHandlePromise
+import org.ksharp.common.cast
+import org.ksharp.module.prelude.preludeModule
+import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeRight
+import org.ksharp.typesystem.attributes.CommonAttribute
+import org.ksharp.typesystem.types.ImplType
+import org.ksharp.typesystem.types.newParameterForTesting
+import org.ksharp.typesystem.types.toFunctionType
 
 class InferenceLambdaTest : StringSpec({
+    val typeSystem = preludeModule.typeSystem
     "Inference unit lambda" {
         """
-            fun doubleFn = \a -> a * 2
+            doubleFn = \a -> a * 2
         """.trimIndent()
             .toSemanticModuleInfo()
             .shouldBeRight()
             .map {
-                TODO()
+                val longType = typeSystem["Long"]
+                val longTypeImpl = ImplType(typeSystem["Num"].valueOrNull!!.cast(), longType.valueOrNull!!)
+                it.abstractions
+                    .apply {
+                        size.shouldBe(1)
+                    }
+                    .first()
+                    .shouldBe(
+                        AbstractionNode(
+                            attributes = setOf(CommonAttribute.Internal),
+                            name = "doubleFn",
+                            expression = AbstractionLambdaNode(
+                                expression = ApplicationNode(
+                                    functionName = ApplicationName(pck = null, name = "(*)"),
+                                    arguments = listOf(
+                                        VarNode(
+                                            name = "a", info = Symbol(
+                                                name = "a", type = TypeSemanticInfo(
+                                                    type = Either.Right(
+                                                        newParameterForTesting(1)
+                                                    )
+                                                )
+                                            ), location = Location.NoProvided
+                                        ),
+                                        ConstantNode(
+                                            value = 2.toLong(), info = TypeSemanticInfo(type = longType),
+                                            location = Location.NoProvided
+                                        )
+                                    ),
+                                    info = ApplicationSemanticInfo(
+                                        function =
+                                        listOf(longTypeImpl, longTypeImpl, longTypeImpl)
+                                            .toFunctionType(
+                                                MockHandlePromise(),
+                                                setOf(CommonAttribute.TraitMethod)
+                                            )
+                                    ), location = Location.NoProvided
+                                ),
+                                info = AbstractionSemanticInfo(
+                                    listOf(
+                                        Symbol(
+                                            name = "a",
+                                            type = TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
+                                        )
+                                    ),
+                                    returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(2)))
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            info = AbstractionSemanticInfo(
+                                emptyList(),
+                                returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
+                            ),
+                            location = Location.NoProvided
+                        )
+                    )
             }
     }
     "Inference lambda with arguments" {}
