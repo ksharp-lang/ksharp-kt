@@ -19,6 +19,43 @@ class InferenceLambdaTest : StringSpec({
     val typeSystem = preludeModule.typeSystem
     "Inference unit lambda" {
         """
+            tenFn = \-> 10
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeRight()
+            .map {
+                val longType = typeSystem["Long"]
+                it.abstractions
+                    .apply {
+                        size.shouldBe(1)
+                    }
+                    .first()
+                    .shouldBe(
+                        AbstractionNode(
+                            attributes = setOf(CommonAttribute.Internal),
+                            name = "tenFn",
+                            expression = AbstractionLambdaNode(
+                                expression = ConstantNode(
+                                    value = 10.toLong(), info = TypeSemanticInfo(longType),
+                                    location = Location.NoProvided
+                                ),
+                                info = AbstractionSemanticInfo(
+                                    emptyList(),
+                                    returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(1)))
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            info = AbstractionSemanticInfo(
+                                emptyList(),
+                                returnType = TypeSemanticInfo(Either.Right(newParameterForTesting(0)))
+                            ),
+                            location = Location.NoProvided
+                        )
+                    )
+            }
+    }
+    "Inference lambda with arguments" {
+        """
             doubleFn = \a -> a * 2
         """.trimIndent()
             .toSemanticModuleInfo()
@@ -82,7 +119,6 @@ class InferenceLambdaTest : StringSpec({
                     )
             }
     }
-    "Inference lambda with arguments" {}
     "Inference closure unit lambda" {}
     "Inference closure lambda with arguments" {}
     "Inference pass lambda as high order function" {}
