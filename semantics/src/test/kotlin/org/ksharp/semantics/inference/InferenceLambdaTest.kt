@@ -1,6 +1,8 @@
 package org.ksharp.semantics.inference
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.test.TestCase
+import io.kotest.core.test.TestResult
 import io.kotest.matchers.shouldBe
 import org.ksharp.common.Either
 import org.ksharp.common.Location
@@ -13,6 +15,7 @@ import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.attributes.CommonAttribute
 import org.ksharp.typesystem.types.ImplType
 import org.ksharp.typesystem.types.newParameterForTesting
+import org.ksharp.typesystem.types.resetParameterCounterForTesting
 import org.ksharp.typesystem.types.toFunctionType
 
 class InferenceLambdaTest : StringSpec({
@@ -188,4 +191,9 @@ class InferenceLambdaTest : StringSpec({
     }
     "Inference closure lambda with arguments" {}
     "Inference pass lambda as high order function" {}
-})
+}) {
+    override suspend fun afterAny(testCase: TestCase, result: TestResult) {
+        super.afterAny(testCase, result)
+        resetParameterCounterForTesting()
+    }
+}
