@@ -119,7 +119,73 @@ class InferenceLambdaTest : StringSpec({
                     )
             }
     }
-    "Inference closure unit lambda" {}
+    "Inference closure unit lambda" {
+        """          
+            doubleFn a = \-> a * 2
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeRight()
+            .map {
+                val longType = typeSystem["Long"]
+                val longTypeImpl = ImplType(typeSystem["Num"].valueOrNull!!.cast(), longType.valueOrNull!!)
+                it.abstractions
+                    .apply {
+                        size.shouldBe(1)
+                        println(first())
+                    }
+                    .first()
+                    .shouldBe(
+                        AbstractionNode(
+                            attributes = setOf(CommonAttribute.Internal),
+                            name = "doubleFn",
+                            expression = AbstractionLambdaNode(
+                                expression = ApplicationNode(
+                                    functionName = ApplicationName(pck = null, name = "(*)"),
+                                    arguments = listOf(
+                                        VarNode(
+                                            name = "a",
+                                            info = Symbol(
+                                                name = "a", type = TypeSemanticInfo(
+                                                    type = Either.Right(
+                                                        newParameterForTesting(0)
+                                                    )
+                                                )
+                                            ),
+                                            location = Location.NoProvided
+                                        ),
+                                        ConstantNode(
+                                            value = 2.toLong(), info = TypeSemanticInfo(longType),
+                                            location = Location.NoProvided
+                                        )
+                                    ),
+                                    info = ApplicationSemanticInfo(
+                                        function = listOf(longTypeImpl, longTypeImpl, longTypeImpl)
+                                            .toFunctionType(
+                                                MockHandlePromise(),
+                                                setOf(CommonAttribute.TraitMethod)
+                                            )
+                                    ), location = Location.NoProvided
+                                ),
+                                info = AbstractionSemanticInfo(
+                                    _parameters = emptyList(),
+                                    returnType = TypeSemanticInfo(type = Either.Right(newParameterForTesting(2)))
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            info = AbstractionSemanticInfo(
+                                _parameters = listOf(
+                                    Symbol(
+                                        name = "a",
+                                        type = TypeSemanticInfo(type = Either.Right(newParameterForTesting(0)))
+                                    )
+                                ),
+                                returnType = TypeSemanticInfo(type = Either.Right(newParameterForTesting(1)))
+                            ),
+                            location = Location.NoProvided
+                        )
+                    )
+            }
+    }
     "Inference closure lambda with arguments" {}
     "Inference pass lambda as high order function" {}
 })
