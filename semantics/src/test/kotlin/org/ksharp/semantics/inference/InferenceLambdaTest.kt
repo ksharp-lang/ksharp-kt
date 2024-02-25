@@ -13,10 +13,7 @@ import org.ksharp.nodes.semantic.*
 import org.ksharp.semantics.toSemanticModuleInfo
 import org.ksharp.test.shouldBeRight
 import org.ksharp.typesystem.attributes.CommonAttribute
-import org.ksharp.typesystem.types.ImplType
-import org.ksharp.typesystem.types.newParameterForTesting
-import org.ksharp.typesystem.types.resetParameterCounterForTesting
-import org.ksharp.typesystem.types.toFunctionType
+import org.ksharp.typesystem.types.*
 
 class InferenceLambdaTest : StringSpec({
     val typeSystem = preludeModule.typeSystem
@@ -134,7 +131,6 @@ class InferenceLambdaTest : StringSpec({
                 it.abstractions
                     .apply {
                         size.shouldBe(1)
-                        println(first())
                     }
                     .first()
                     .shouldBe(
@@ -189,7 +185,110 @@ class InferenceLambdaTest : StringSpec({
                     )
             }
     }
-    "Inference closure lambda with arguments" {}
+    "Inference closure lambda with arguments" {
+        """
+            doubleFn b = \a -> (a + b) * 2
+        """.trimIndent()
+            .toSemanticModuleInfo()
+            .shouldBeRight()
+            .map {
+                val longType = typeSystem["Long"]
+                val numType = ImplType(
+                    typeSystem["Num"].valueOrNull!!.cast(),
+                    FixedTraitType(typeSystem["Num"].valueOrNull!!.cast())
+                )
+                val parametricNumType = numType.trait.toParametricType()
+                it.abstractions
+                    .apply {
+                        size.shouldBe(1)
+                    }
+                    .first()
+                    .shouldBe(
+                        AbstractionNode(
+                            attributes = setOf(CommonAttribute.Internal),
+                            name = "doubleFn",
+                            expression = AbstractionLambdaNode(
+                                expression =
+                                ApplicationNode(
+                                    functionName = ApplicationName(pck = null, name = "(*)"),
+                                    arguments = listOf(
+                                        ApplicationNode(
+                                            functionName = ApplicationName(pck = null, name = "(+)"),
+                                            arguments = listOf(
+                                                VarNode(
+                                                    name = "a", info = Symbol(
+                                                        name = "a", type = TypeSemanticInfo(
+                                                            type = Either.Right(
+                                                                newParameterForTesting(2)
+                                                            )
+                                                        )
+                                                    ), location = Location.NoProvided
+                                                ),
+                                                VarNode(
+                                                    name = "b",
+                                                    info = Symbol(
+                                                        name = "b", type = TypeSemanticInfo(
+                                                            type = Either.Right(
+                                                                newParameterForTesting(0)
+                                                            )
+                                                        )
+                                                    ), location = Location.NoProvided
+                                                )
+                                            ),
+                                            info = ApplicationSemanticInfo(
+                                                function =
+                                                listOf(parametricNumType, parametricNumType, parametricNumType)
+                                                    .toFunctionType(
+                                                        MockHandlePromise(),
+                                                        setOf(CommonAttribute.TraitMethod)
+                                                    )
+                                            ),
+                                            location = Location.NoProvided
+                                        ),
+                                        ConstantNode(
+                                            value = 2.toLong(),
+                                            info = TypeSemanticInfo(type = longType),
+                                            location = Location.NoProvided
+                                        )
+                                    ),
+                                    info = ApplicationSemanticInfo(
+                                        function = listOf(numType, numType, numType)
+                                            .toFunctionType(
+                                                MockHandlePromise(),
+                                                setOf(CommonAttribute.TraitMethod)
+                                            )
+                                    ),
+                                    location = Location.NoProvided
+                                ),
+                                info = AbstractionSemanticInfo(
+                                    _parameters = listOf(
+                                        Symbol(
+                                            name = "a", type = TypeSemanticInfo(
+                                                type = Either.Right(
+                                                    newParameterForTesting(2)
+                                                )
+                                            )
+                                        )
+                                    ), returnType = TypeSemanticInfo(type = Either.Right(newParameterForTesting(3)))
+                                ),
+                                location = Location.NoProvided
+                            ),
+                            info = AbstractionSemanticInfo(
+                                _parameters = listOf(
+                                    Symbol(
+                                        name = "b", type = TypeSemanticInfo(
+                                            type = Either.Right(
+                                                newParameterForTesting(0)
+                                            )
+                                        )
+                                    )
+                                ), returnType = TypeSemanticInfo(type = Either.Right(newParameterForTesting(1)))
+                            ),
+                            location = Location.NoProvided
+                        )
+                    )
+            }
+    }
     "Inference pass lambda as high order function" {}
 }) {
     override suspend fun afterAny(testCase: TestCase, result: TestResult) {
