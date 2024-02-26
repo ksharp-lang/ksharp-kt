@@ -71,6 +71,12 @@ private fun SemanticInfo.getVarSemanticInfo(name: String, location: Location, ty
     } else cast<SymbolResolver>().getSymbol(name)
         ?: typeSystem.paramTypePromise()
 
+private fun SemanticInfo.findSymbol(name: String): Symbol? =
+    if (this is MatchSemanticInfo) {
+        table[name]?.first
+    } else cast<SymbolResolver>().getSymbol(name)
+
+
 private fun SemanticInfo.callSemanticInfo(fnName: String): SemanticInfo =
     if (this is MatchSemanticInfo) {
         if (fnName.first().isUpperCase()) this
@@ -151,13 +157,13 @@ internal fun ExpressionParserNode.toSemanticNode(
         } else {
             val appName = name.toApplicationName()
             val callInfo = info.callSemanticInfo(appName.name)
-            val varInfo = if (appName.pck == null) info.getVarSemanticInfo(appName.name, location, typeSystem) else null
+            val varInfo = if (appName.pck == null) info.findSymbol(appName.name) else null
             ApplicationNode(
                 appName,
                 arguments.map {
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
                 },
-                ApplicationSemanticInfo(functionSymbol = varInfo?.takeIf { it is Symbol }?.cast()),
+                ApplicationSemanticInfo(functionSymbol = varInfo),
                 location
             )
         }

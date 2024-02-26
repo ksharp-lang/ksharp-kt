@@ -316,7 +316,7 @@ class InferenceLambdaTest : StringSpec({
                                         )
                                     ),
                                     info = ApplicationSemanticInfo(
-                                        function = listOf(longType.valueOrNull!!, newParameterForTesting(8))
+                                        function = listOf(longType.valueOrNull!!, newParameterForTesting(7))
                                             .toFunctionType(MockHandlePromise(), NoAttributes),
                                         functionSymbol = Symbol(
                                             name = "f", type = TypeSemanticInfo(
@@ -404,7 +404,7 @@ class InferenceLambdaTest : StringSpec({
                                         VarNode(
                                             name = "doubleFn", info = TypeSemanticInfo(
                                                 type = Either.Right(
-                                                    newParameterForTesting(7)
+                                                    newParameterForTesting(6)
                                                 )
                                             ),
                                             location = Location.NoProvided
@@ -412,12 +412,12 @@ class InferenceLambdaTest : StringSpec({
                                     ),
                                     info = ApplicationSemanticInfo(
                                         function = listOf(
-                                            listOf(longType.valueOrNull!!, newParameterForTesting(8))
+                                            listOf(longType.valueOrNull!!, newParameterForTesting(7))
                                                 .toFunctionType(
                                                     MockHandlePromise(),
                                                     NoAttributes
                                                 ),
-                                            newParameterForTesting(8)
+                                            newParameterForTesting(7)
                                         ).toFunctionType(MockHandlePromise(), setOf(CommonAttribute.Internal)),
                                         functionSymbol = null
                                     ),
