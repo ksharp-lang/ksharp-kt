@@ -364,23 +364,37 @@ private fun ApplicationNode<SemanticInfo>.infer(caller: String, info: InferenceI
                     it.unifyArguments(functionName, location, info)
                 } else it
             }.unwrap().flatMap {
-                info.findAppType(caller, location, functionName, it, FindFunctionMode.Complete)
-                    .flatMapLeft { e ->
-                        info.findAppType(caller, location, functionName, it, FindFunctionMode.Partial)
-                            .mapLeft { e }
+                val appInfo = this.info.cast<ApplicationSemanticInfo>()
+                when {
+                    appInfo.functionSymbol != null -> {
+                        val symbol = appInfo.functionSymbol!!
+                        val typeSystem = info.inferenceContext.typeSystem
+                        val returnType = typeSystem.newParameter()
+                        val arguments = it + returnType
+                        val appFunctionType = arguments.toFunctionType(typeSystem)
+                        val newSymbolType = symbol.getType(location)
+                            .flatMap { symbolType -> symbolType.unify(location, appFunctionType, info.checker) }
+                        symbol.setInferredType(newSymbolType)
+                        newSymbolType
                     }
-                    .map { fn ->
-                        if (fn is FunctionType) {
-                            this.info.cast<ApplicationSemanticInfo>().function = fn
-                            val inferredFn = fn.cast<FunctionType>()
-                            if (!isPreludeCollectionFlag) {
-                                fn.getOriginalFunction().arguments.asSequence()
-                                    .zip(arguments.asSequence()) { fnArg, arg ->
-                                        arg.info.setInferredType(fnArg.solve())
-                                    }.last()
-                            }
-                            inferredFn.arguments.last()
-                        } else fn
-                    }
+
+                    else -> info.findAppType(caller, location, functionName, it, FindFunctionMode.Complete)
+                        .flatMapLeft { e ->
+                            info.findAppType(caller, location, functionName, it, FindFunctionMode.Partial)
+                                .mapLeft { e }
+                        }
+                }.map { fn ->
+                    if (fn is FunctionType) {
+                        this.info.cast<ApplicationSemanticInfo>().function = fn
+                        val inferredFn = fn.cast<FunctionType>()
+                        if (!isPreludeCollectionFlag) {
+                            fn.getOriginalFunction().arguments.asSequence()
+                                .zip(arguments.asSequence()) { fnArg, arg ->
+                                    arg.info.setInferredType(fnArg.solve())
+                                }.last()
+                        }
+                        inferredFn.arguments.last()
+                    } else fn
+                }
             }
     }

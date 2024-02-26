@@ -151,12 +151,13 @@ internal fun ExpressionParserNode.toSemanticNode(
         } else {
             val appName = name.toApplicationName()
             val callInfo = info.callSemanticInfo(appName.name)
+            val varInfo = if (appName.pck == null) info.getVarSemanticInfo(appName.name, location, typeSystem) else null
             ApplicationNode(
                 appName,
                 arguments.map {
                     it.cast<ExpressionParserNode>().toSemanticNode(errors, callInfo, typeSystem)
                 },
-                ApplicationSemanticInfo(),
+                ApplicationSemanticInfo(functionSymbol = varInfo?.takeIf { it is Symbol }?.cast()),
                 location
             )
         }
