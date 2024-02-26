@@ -9,7 +9,8 @@ data class ApplicationName(
     val name: String
 )
 
-data class ApplicationSemanticInfo(var function: FunctionType? = null) : SemanticInfo()
+data class ApplicationSemanticInfo(var function: FunctionType? = null, val functionSymbol: Symbol? = null) :
+    SemanticInfo()
 
 data class ApplicationNode<SemanticInfo>(
     val functionName: ApplicationName,
