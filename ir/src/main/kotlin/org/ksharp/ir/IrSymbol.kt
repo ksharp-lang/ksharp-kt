@@ -4,6 +4,7 @@ import org.ksharp.common.Location
 import org.ksharp.common.cast
 import org.ksharp.ir.serializer.IrNodeSerializers
 import org.ksharp.ir.truffle.FunctionNode
+import org.ksharp.ir.truffle.LambdaNode
 import org.ksharp.typesystem.attributes.Attribute
 
 interface IrSymbol : IrNode {
@@ -27,4 +28,14 @@ data class IrFunction(
     fun call(vararg arguments: Any): Any = KValue.value(callTarget.call(*arguments))
 
     override val serializer: IrNodeSerializers = IrNodeSerializers.Function
+}
+
+data class IrLambda(
+    override val attributes: Set<Attribute>,
+    val arguments: List<String>,
+    val frameSlots: Int,
+    val expr: IrExpression,
+    override val location: Location
+) : LambdaNode(frameSlots, expr.cast()), IrExpression {
+    override val serializer: IrNodeSerializers = IrNodeSerializers.Lambda
 }

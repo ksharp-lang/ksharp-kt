@@ -34,6 +34,12 @@ fun argIndex(positions: Map<String, VarInfo>) = object : VariableIndex {
     override operator fun get(name: String): VarInfo? = positions[name]
 }
 
+fun closureIndex(index: VariableIndex, parent: VariableIndex) = object : VariableIndex {
+    override val size: Int = index.size + parent.size
+
+    override operator fun get(name: String): VarInfo? = index[name] ?: parent[name]
+}
+
 fun mutableVariableIndexes(parent: VariableIndex) = object : MutableVariableIndex {
     private val repo = mutableMapOf<String, VarInfo>()
 

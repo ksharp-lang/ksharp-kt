@@ -481,6 +481,14 @@ class EvaluateTest : StringSpec({
             """.trimMargin(),
             TruffleString.FromJavaStringNode.create().execute("10", TruffleString.Encoding.UTF_16)
         ),
+        createSpec(
+            "Lambda function",
+            """|fn = let d = doblar
+               |     then d 5
+               |doblar = \a-> a * 2           
+            """.trimMargin(),
+            10.toLong()
+        )
     ).forEach { (description, code, call) ->
         description {
             code.evaluateFirstFunction(call.arguments)
@@ -493,10 +501,12 @@ class EvaluateTest : StringSpec({
 class CustomEvaluationTest : StringSpec({
     "Check a custom spec" {
         createSpec(
-            "ToString function",
-            """|fn = str 10           
+            "Lambda function",
+            """|fn = let d = doblar
+               |     then d 5
+               |doblar = \a-> a * 2           
             """.trimMargin(),
-            TruffleString.FromJavaStringNode.create().execute("10", TruffleString.Encoding.UTF_16)
+            10.toLong()
         )
             .let { (_, code, call) ->
                 code.evaluateFirstFunction(call.arguments)
