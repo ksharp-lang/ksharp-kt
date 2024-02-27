@@ -488,6 +488,14 @@ class EvaluateTest : StringSpec({
                |doblar = \a-> a * 2           
             """.trimMargin(),
             10.toLong()
+        ),
+        createSpec(
+            "Closure expression",
+            """|fn = let d = multiply 2
+               |     then d 5
+               |multiply b = \a-> a * b           
+            """.trimMargin(),
+            10.toLong()
         )
     ).forEach { (description, code, call) ->
         description {
@@ -501,10 +509,10 @@ class EvaluateTest : StringSpec({
 class CustomEvaluationTest : StringSpec({
     "Check a custom spec" {
         createSpec(
-            "Lambda function",
-            """|fn = let d = doblar
+            "Closure expression",
+            """|fn = let d = multiply 2
                |     then d 5
-               |doblar = \a-> a * 2           
+               |multiply b = \a-> a * b           
             """.trimMargin(),
             10.toLong()
         )
