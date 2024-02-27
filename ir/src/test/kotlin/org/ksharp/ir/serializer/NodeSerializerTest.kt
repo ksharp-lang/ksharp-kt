@@ -295,4 +295,22 @@ class NodeSerializerTest : StringSpec({
             listOf(Less, Equal)
         ).shouldBeSerializable()
     }
+    "IrLambda Test" {
+        IrLambda(
+            attributes,
+            listOf("a"),
+            4,
+            IrInteger(1, location),
+            location
+        ).shouldBeSerializable()
+    }
+    "IrLambdaCall Test" {
+        IrLambdaCall(
+            attributes,
+            IrInteger(1, location),
+            listOf(IrInteger(1, location)),
+            newParameterForTesting(0),
+            location
+        ).shouldBeSerializable()
+    }
 })

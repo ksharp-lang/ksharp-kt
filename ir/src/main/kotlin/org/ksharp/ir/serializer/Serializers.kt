@@ -61,6 +61,7 @@ enum class IrNodeSerializers(
     ModuleCall(IrModuleCallSerializer()),
     Comparable(IrComparableSerializer()),
     ToString(IrToStringSerializer()),
+    LambdaCall(IrLambdaCallSerializer()),
     Lambda(IrLambdaSerializer())
 }
 

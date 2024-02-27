@@ -11,6 +11,7 @@ import org.ksharp.ir.truffle.ArgAccessNode
 import org.ksharp.ir.truffle.IfNode
 import org.ksharp.ir.truffle.KSharpNode
 import org.ksharp.ir.truffle.call.CallNode
+import org.ksharp.ir.truffle.call.LambdaCallNode
 import org.ksharp.ir.truffle.call.ModuleCallNode
 import org.ksharp.ir.truffle.call.NativeCallNode
 import org.ksharp.ir.truffle.cast.NumCastNode
@@ -225,4 +226,16 @@ data class IrModuleCall internal constructor(
                 getTraitCall(it.irModule)
             } else getCall(it.irModule)
         }!!
+}
+
+data class IrLambdaCall(
+    override val attributes: Set<Attribute>,
+    val lambda: IrExpression,
+    val arguments: List<IrExpression>,
+    val type: Type,
+    override val location: Location
+) : LambdaCallNode(lambda.cast(), arguments.cast<List<KSharpNode>>().toTypedArray(), type), IrExpression {
+    override val serializer: IrNodeSerializers
+        get() = IrNodeSerializers.LambdaCall
+
 }

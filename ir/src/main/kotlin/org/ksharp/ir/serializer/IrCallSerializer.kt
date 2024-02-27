@@ -147,6 +147,41 @@ class IrModuleCallSerializer : IrNodeSerializer<IrModuleCall> {
     }
 }
 
+class IrLambdaCallSerializer : IrNodeSerializer<IrLambdaCall> {
+    override fun write(input: IrLambdaCall, buffer: BufferWriter, table: BinaryTable) {
+        input.attributes.writeTo(buffer, table)
+        input.lambda.serialize(buffer, table)
+        input.location.writeTo(buffer)
+        input.type.writeTo(buffer, table)
+        input.arguments.writeTo(buffer, table)
+    }
+
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrLambdaCall {
+        val attributes = buffer.readAttributes(table)
+        var offset = buffer.readInt(0)
+        val lambda = buffer.bufferFrom(offset).readIrNode(lookup, loader, table).cast<IrExpression>()
+        offset += buffer.readInt(offset)
+        val location = buffer.bufferFrom(offset).readLocation()
+        offset += 16
+        val type = buffer.bufferFrom(offset).readType<Type>(preludeModule.typeSystem.handle, table)
+        offset += buffer.readInt(offset)
+        val arguments = buffer.bufferFrom(offset).readListOfNodes(lookup, loader, table).second
+        return IrLambdaCall(
+            attributes,
+            lambda,
+            arguments.cast(),
+            type.cast(),
+            location
+        )
+    }
+
+}
+
 class IrComparableSerializer : IrNodeSerializer<IrComparable> {
     override fun write(input: IrComparable, buffer: BufferWriter, table: BinaryTable) {
         input.expected.let {
