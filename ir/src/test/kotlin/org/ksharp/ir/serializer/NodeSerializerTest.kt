@@ -322,4 +322,15 @@ class NodeSerializerTest : StringSpec({
             location
         ).shouldBeSerializable()
     }
+    "CaptureVar Test" {
+        IrCaptureVar(
+            "a",
+            IrVar(
+                attributes,
+                NoCaptured,
+                1,
+                location
+            )
+        ).shouldBeSerializable()
+    }
 })

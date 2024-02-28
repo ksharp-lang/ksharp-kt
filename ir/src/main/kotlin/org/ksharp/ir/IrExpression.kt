@@ -89,7 +89,7 @@ data class IrArg(
     override val captureName: String? = null,
     override val index: Int,
     override val location: Location
-) : ArgAccessNode(index), IrValueAccess {
+) : ArgAccessNode(index, captureName), IrValueAccess {
     override val serializer: IrNodeSerializers = IrNodeSerializers.Arg
 }
 
@@ -98,7 +98,7 @@ data class IrVar(
     override val captureName: String? = null,
     override val index: Int,
     override val location: Location
-) : VarAccessNode(index), IrValueAccess {
+) : VarAccessNode(index, captureName), IrValueAccess {
     override val serializer: IrNodeSerializers = IrNodeSerializers.Var
 }
 

@@ -32,25 +32,25 @@ fun ConstantNode<SemanticInfo>.toIrSymbol(): IrExpression =
         else -> TODO("Constant node value not supported $value: ${this}")
     }
 
-fun VarInfo.toIrSymbol(name: String?, location: Location): IrValueAccess =
+fun VarInfo.toIrSymbol(location: Location): IrValueAccess =
     when (kind) {
         VarKind.Arg -> IrArg(
             attributes,
-            name,
+            captureName,
             index,
             location
         )
 
         VarKind.Var -> IrVar(
             attributes,
-            name,
+            captureName,
             index,
             location
         )
     }
 
 fun VarNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression =
-    state.variableIndex[name]!!.toIrSymbol(NoCaptured, location)
+    state.variableIndex[name]!!.toIrSymbol(location)
 
 fun AbstractionLambdaNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression {
     val arguments = info.cast<AbstractionSemanticInfo>().parameters.filter {
@@ -80,9 +80,12 @@ fun AbstractionLambdaNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression
     return IrLambda(
         //all functions are pure, except if it is marked impure
         expression.addExpressionAttributes(NoAttributes, CommonAttribute.Constant, CommonAttribute.Impure),
-        capturedState.asSequence().map { (name, info) ->
-            info.toIrSymbol(name, location)
-        }.toList(),
+        capturedState.map { entry ->
+            IrCaptureVar(
+                entry.key,
+                entry.value.copy(captureName = NoCaptured).toIrSymbol(location)
+            )
+        },
         arguments,
         irState.variableIndex.size,
         expression,

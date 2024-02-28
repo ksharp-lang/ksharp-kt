@@ -12,7 +12,8 @@ enum class VarKind {
 data class VarInfo(
     val index: Int,
     val kind: VarKind,
-    val attributes: Set<Attribute>
+    val attributes: Set<Attribute>,
+    val captureName: String? = NoCaptured
 )
 
 interface VariableIndex {
@@ -31,11 +32,11 @@ class ClosureIndex(val arguments: VariableIndex, val context: VariableIndex) : V
         if (arg != null) return arg
 
         val alreadyCaptured = captured[name]
-        if (alreadyCaptured != null) return alreadyCaptured
+        if (alreadyCaptured != null) return alreadyCaptured.copy(captureName = name)
 
         val captureVar = context[name]
         if (captureVar != null) {
-            captured[name] = captureVar
+            captured[name] = captureVar.copy(captureName = name)
         }
 
         return captureVar
