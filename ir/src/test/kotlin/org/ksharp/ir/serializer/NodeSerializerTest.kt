@@ -139,11 +139,19 @@ class NodeSerializerTest : StringSpec({
             .shouldBeSerializable()
     }
     "IrArg test" {
-        IrArg(attributes, 1, location)
+        IrArg(attributes, NoCaptured, 1, location)
             .shouldBeSerializable()
     }
     "IrVar test" {
-        IrVar(attributes, 1, location)
+        IrVar(attributes, NoCaptured, 1, location)
+            .shouldBeSerializable()
+    }
+    "IrArg captured test" {
+        IrArg(attributes, "Test", 1, location)
+            .shouldBeSerializable()
+    }
+    "IrVar captured test" {
+        IrVar(attributes, "Test", 1, location)
             .shouldBeSerializable()
     }
     "IrIf test" {
@@ -298,6 +306,7 @@ class NodeSerializerTest : StringSpec({
     "IrLambda Test" {
         IrLambda(
             attributes,
+            emptyList(),
             listOf("a"),
             4,
             IrInteger(1, location),

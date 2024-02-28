@@ -393,6 +393,7 @@ class AbstractionToIrSymbolTest : StringSpec({
                         0,
                         IrArg(
                             setOf(CommonAttribute.Pure),
+                            NoCaptured,
                             0,
                             Location(Line(2) to Offset(6), Line(2) to Offset(7))
                         ),

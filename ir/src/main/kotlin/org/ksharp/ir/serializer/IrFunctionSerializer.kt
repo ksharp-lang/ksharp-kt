@@ -75,6 +75,7 @@ class IrLambdaSerializer : IrNodeSerializer<IrLambda> {
     override fun write(input: IrLambda, buffer: BufferWriter, table: BinaryTable) {
         input.attributes.writeTo(buffer, table)
         input.arguments.writeTo(buffer, table)
+        input.capturedContext.writeTo(buffer, table)
         buffer.add(input.frameSlots)
         input.expr.serialize(buffer, table)
         input.location.writeTo(buffer)
@@ -90,6 +91,9 @@ class IrLambdaSerializer : IrNodeSerializer<IrLambda> {
         val attributes = buffer.readAttributes(table)
         val arguments = buffer.bufferFrom(offset).readListOfStrings(table)
         offset += 4 + arguments.size * 4
+        val (capturedContextPosition, capturedContext) = buffer.bufferFrom(offset)
+            .readListOfNodes(lookup, loader, table)
+        offset += capturedContextPosition
         val frameSlot = buffer.readInt(offset)
         offset += 4
         val expr = buffer.bufferFrom(offset).readIrNode(lookup, loader, table)
@@ -97,6 +101,7 @@ class IrLambdaSerializer : IrNodeSerializer<IrLambda> {
         val location = buffer.bufferFrom(offset).readLocation()
         return IrLambda(
             attributes,
+            capturedContext.cast(),
             arguments,
             frameSlot,
             expr.cast(),

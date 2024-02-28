@@ -32,23 +32,25 @@ fun ConstantNode<SemanticInfo>.toIrSymbol(): IrExpression =
         else -> TODO("Constant node value not supported $value: ${this}")
     }
 
-fun VarInfo.toIrSymbol(location: Location): IrExpression =
+fun VarInfo.toIrSymbol(name: String?, location: Location): IrValueAccess =
     when (kind) {
         VarKind.Arg -> IrArg(
             attributes,
+            name,
             index,
             location
         )
 
         VarKind.Var -> IrVar(
             attributes,
+            name,
             index,
             location
         )
     }
 
 fun VarNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression =
-    state.variableIndex[name]!!.toIrSymbol(location)
+    state.variableIndex[name]!!.toIrSymbol(NoCaptured, location)
 
 fun AbstractionLambdaNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression {
     val arguments = info.cast<AbstractionSemanticInfo>().parameters.filter {
@@ -57,7 +59,7 @@ fun AbstractionLambdaNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression
         it.cast<Symbol>().name
     }
     val variableIndex = if (arguments.isEmpty()) {
-        state.variableIndex
+        closureIndex(emptyVariableIndex, state.variableIndex)
     } else {
         val size = state.variableIndex.size
         arguments.mapIndexed { index, argument ->
@@ -71,11 +73,16 @@ fun AbstractionLambdaNode<SemanticInfo>.toIrSymbol(state: IrState): IrExpression
                 closureIndex(argIndex(it), state.variableIndex)
             }
     }
+
     val irState = state.toIrState(mutableVariableIndexes(variableIndex))
     val expression = expression.toIrSymbol(irState)
+    val capturedState = variableIndex.captured
     return IrLambda(
         //all functions are pure, except if it is marked impure
         expression.addExpressionAttributes(NoAttributes, CommonAttribute.Constant, CommonAttribute.Impure),
+        capturedState.asSequence().map { (name, info) ->
+            info.toIrSymbol(name, location)
+        }.toList(),
         arguments,
         irState.variableIndex.size,
         expression,

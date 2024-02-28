@@ -2,6 +2,8 @@ package org.ksharp.ir
 
 import org.ksharp.typesystem.attributes.Attribute
 
+val NoCaptured: String? = null
+
 enum class VarKind {
     Var,
     Arg
@@ -16,6 +18,28 @@ data class VarInfo(
 interface VariableIndex {
     val size: Int
     operator fun get(name: String): VarInfo?
+}
+
+class ClosureIndex(val arguments: VariableIndex, val context: VariableIndex) : VariableIndex {
+    override val size: Int
+        get() = arguments.size + 1
+
+    val captured = mutableMapOf<String, VarInfo>()
+
+    override operator fun get(name: String): VarInfo? {
+        val arg = arguments[name]
+        if (arg != null) return arg
+
+        val alreadyCaptured = captured[name]
+        if (alreadyCaptured != null) return alreadyCaptured
+
+        val captureVar = context[name]
+        if (captureVar != null) {
+            captured[name] = captureVar
+        }
+
+        return captureVar
+    }
 }
 
 interface MutableVariableIndex : VariableIndex {
@@ -34,11 +58,7 @@ fun argIndex(positions: Map<String, VarInfo>) = object : VariableIndex {
     override operator fun get(name: String): VarInfo? = positions[name]
 }
 
-fun closureIndex(index: VariableIndex, parent: VariableIndex) = object : VariableIndex {
-    override val size: Int = index.size + parent.size
-
-    override operator fun get(name: String): VarInfo? = index[name] ?: parent[name]
-}
+fun closureIndex(index: VariableIndex, parent: VariableIndex) = ClosureIndex(index, parent)
 
 fun mutableVariableIndexes(parent: VariableIndex) = object : MutableVariableIndex {
     private val repo = mutableMapOf<String, VarInfo>()

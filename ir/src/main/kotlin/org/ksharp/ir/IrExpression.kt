@@ -33,6 +33,7 @@ sealed interface IrBinaryOperation : IrExpression {
 }
 
 sealed interface IrValueAccess : IrExpression {
+    val captureName: String?
     val index: Int
 }
 
@@ -85,6 +86,7 @@ data class IrPair(
 
 data class IrArg(
     override val attributes: Set<Attribute>,
+    override val captureName: String? = null,
     override val index: Int,
     override val location: Location
 ) : ArgAccessNode(index), IrValueAccess {
@@ -93,6 +95,7 @@ data class IrArg(
 
 data class IrVar(
     override val attributes: Set<Attribute>,
+    override val captureName: String? = null,
     override val index: Int,
     override val location: Location
 ) : VarAccessNode(index), IrValueAccess {

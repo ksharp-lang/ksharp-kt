@@ -200,7 +200,7 @@ fun ApplicationNode<SemanticInfo>.toIrSymbol(
     state: IrState,
     symbol: Symbol
 ): IrExpression {
-    val lambda = state.variableIndex[symbol.name]!!.toIrSymbol(location)
+    val lambda = state.variableIndex[symbol.name]!!.toIrSymbol(NoCaptured, location)
     val (attributes, arguments) = arguments.toIrSymbols(state)
     return IrLambdaCall(
         attributes,
