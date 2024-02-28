@@ -43,8 +43,8 @@ private fun binaryExpressionFunction(
         name,
         factory(
             NoAttributes,
-            IrArg(NoAttributes, 0, Location.NoProvided),
-            IrArg(NoAttributes, 1, Location.NoProvided),
+            IrArg(NoAttributes, NoCaptured, 0, Location.NoProvided),
+            IrArg(NoAttributes, NoCaptured, 1, Location.NoProvided),
             Location.NoProvided
         ).cast(),
     )

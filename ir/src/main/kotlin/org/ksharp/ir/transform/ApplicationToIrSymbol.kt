@@ -197,14 +197,32 @@ fun nativeApplicationName(moduleName: String, callName: String) =
     }"
 
 fun ApplicationNode<SemanticInfo>.toIrSymbol(
+    state: IrState,
+    symbol: Symbol
+): IrExpression {
+    val lambda = state.variableIndex[symbol.name]!!.toIrSymbol(location)
+    val (attributes, arguments) = arguments.toIrSymbols(state)
+    return IrLambdaCall(
+        attributes,
+        lambda,
+        arguments,
+        info.getInferredType(location).valueOrNull!!,
+        location
+    )
+}
+
+fun ApplicationNode<SemanticInfo>.toIrSymbol(
     state: IrState
 ): IrExpression {
+    val info = this.info.cast<ApplicationSemanticInfo>()
+    if (info.functionSymbol != null) {
+        return toIrSymbol(state, info.functionSymbol!!)
+    }
     val factory = customIrNode?.let {
         irNodeFactory[it] ?: throw RuntimeException("Ir symbol factory $it not found")
     }
     return if (factory != null) factory(state)
     else {
-        val info = this.info.cast<ApplicationSemanticInfo>()
         val (attributes, arguments) = arguments.toIrSymbols(state)
         val functionType = info.function!!
         val callName = "${functionName.name}/${functionType.arguments.arity}"
