@@ -39,7 +39,7 @@ class ClosureIndex(val arguments: VariableIndex, val context: VariableIndex) : V
             captured[name] = captureVar.copy(captureName = name)
         }
 
-        return captureVar
+        return captured[name]
     }
 }
 
