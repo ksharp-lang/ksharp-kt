@@ -61,6 +61,9 @@ enum class IrNodeSerializers(
     ModuleCall(IrModuleCallSerializer()),
     Comparable(IrComparableSerializer()),
     ToString(IrToStringSerializer()),
+    LambdaCall(IrLambdaCallSerializer()),
+    Lambda(IrLambdaSerializer()),
+    CaptureVar(IrCaptureVarSerializer())
 }
 
 fun Location.writeTo(buffer: BufferWriter) {

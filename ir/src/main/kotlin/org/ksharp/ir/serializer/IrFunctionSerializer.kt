@@ -7,9 +7,7 @@ import org.ksharp.common.io.BinaryTableView
 import org.ksharp.common.io.BufferView
 import org.ksharp.common.io.BufferWriter
 import org.ksharp.common.listBuilder
-import org.ksharp.ir.FunctionLookup
-import org.ksharp.ir.IrFunction
-import org.ksharp.ir.LoadIrModuleFn
+import org.ksharp.ir.*
 import org.ksharp.typesystem.attributes.readAttributes
 import org.ksharp.typesystem.attributes.writeTo
 
@@ -66,6 +64,66 @@ class IrFunctionSerializer : IrNodeSerializer<IrFunction> {
             frameSlot,
             expr.cast(),
             location
+        )
+    }
+}
+
+class IrLambdaSerializer : IrNodeSerializer<IrLambda> {
+    override fun write(input: IrLambda, buffer: BufferWriter, table: BinaryTable) {
+        input.attributes.writeTo(buffer, table)
+        input.arguments.writeTo(buffer, table)
+        input.capturedContext.writeTo(buffer, table)
+        buffer.add(input.frameSlots)
+        input.expr.serialize(buffer, table)
+        input.location.writeTo(buffer)
+    }
+
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrLambda {
+        var offset = buffer.readInt(0)
+        val attributes = buffer.readAttributes(table)
+        val arguments = buffer.bufferFrom(offset).readListOfStrings(table)
+        offset += 4 + arguments.size * 4
+        val (capturedContextPosition, capturedContext) = buffer.bufferFrom(offset)
+            .readListOfNodes(lookup, loader, table)
+        offset += capturedContextPosition
+        val frameSlot = buffer.readInt(offset)
+        offset += 4
+        val expr = buffer.bufferFrom(offset).readIrNode(lookup, loader, table)
+        offset += buffer.readInt(offset)
+        val location = buffer.bufferFrom(offset).readLocation()
+        return IrLambda(
+            attributes,
+            capturedContext.cast(),
+            arguments,
+            frameSlot,
+            expr.cast(),
+            location
+        )
+    }
+}
+
+
+class IrCaptureVarSerializer : IrNodeSerializer<IrCaptureVar> {
+    override fun write(input: IrCaptureVar, buffer: BufferWriter, table: BinaryTable) {
+        buffer.add(table.add(input.name))
+        input.variable.serialize(buffer, table)
+    }
+
+    override fun read(
+        lookup: FunctionLookup,
+        loader: LoadIrModuleFn,
+        buffer: BufferView,
+        table: BinaryTableView
+    ): IrCaptureVar {
+        val name = table[buffer.readInt(0)]
+        val variable = buffer.bufferFrom(4).readIrNode(lookup, loader, table)
+        return IrCaptureVar(
+            name, variable.cast()
         )
     }
 }

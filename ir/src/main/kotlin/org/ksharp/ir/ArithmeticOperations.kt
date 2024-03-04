@@ -78,7 +78,7 @@ data class IrMod(
 data class IrArithmeticCall(
     @get:JvmName("getSymbolName") override val name: String,
     override val expr: IrBinaryOperation,
-) : FunctionNode(2, expr.cast()), IrTopLevelSymbol {
+) : FunctionNode(2, null, expr.cast()), IrTopLevelSymbol {
 
     override val attributes: Set<Attribute> = expr.attributes
     override val location: Location = expr.location

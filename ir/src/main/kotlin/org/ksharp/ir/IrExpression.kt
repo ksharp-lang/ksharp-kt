@@ -11,6 +11,7 @@ import org.ksharp.ir.truffle.ArgAccessNode
 import org.ksharp.ir.truffle.IfNode
 import org.ksharp.ir.truffle.KSharpNode
 import org.ksharp.ir.truffle.call.CallNode
+import org.ksharp.ir.truffle.call.LambdaCallNode
 import org.ksharp.ir.truffle.call.ModuleCallNode
 import org.ksharp.ir.truffle.call.NativeCallNode
 import org.ksharp.ir.truffle.cast.NumCastNode
@@ -32,6 +33,7 @@ sealed interface IrBinaryOperation : IrExpression {
 }
 
 sealed interface IrValueAccess : IrExpression {
+    val captureName: String?
     val index: Int
 }
 
@@ -84,17 +86,19 @@ data class IrPair(
 
 data class IrArg(
     override val attributes: Set<Attribute>,
+    override val captureName: String? = null,
     override val index: Int,
     override val location: Location
-) : ArgAccessNode(index), IrValueAccess {
+) : ArgAccessNode(index, captureName), IrValueAccess {
     override val serializer: IrNodeSerializers = IrNodeSerializers.Arg
 }
 
 data class IrVar(
     override val attributes: Set<Attribute>,
+    override val captureName: String? = null,
     override val index: Int,
     override val location: Location
-) : VarAccessNode(index), IrValueAccess {
+) : VarAccessNode(index, captureName), IrValueAccess {
     override val serializer: IrNodeSerializers = IrNodeSerializers.Var
 }
 
@@ -225,4 +229,16 @@ data class IrModuleCall internal constructor(
                 getTraitCall(it.irModule)
             } else getCall(it.irModule)
         }!!
+}
+
+data class IrLambdaCall(
+    override val attributes: Set<Attribute>,
+    val lambda: IrExpression,
+    val arguments: List<IrExpression>,
+    val type: Type,
+    override val location: Location
+) : LambdaCallNode(lambda.cast(), arguments.cast<List<KSharpNode>>().toTypedArray(), type), IrExpression {
+    override val serializer: IrNodeSerializers
+        get() = IrNodeSerializers.LambdaCall
+
 }

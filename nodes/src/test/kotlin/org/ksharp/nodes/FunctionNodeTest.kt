@@ -9,6 +9,39 @@ import io.kotest.matchers.shouldBe
 import org.ksharp.common.Location
 
 class FunctionNodeTest : StringSpec({
+    "Test Node interface over LambdaNode" {
+        LambdaNode(
+            listOf("a1"),
+            LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided),
+            Location.NoProvided,
+            LambdaNodeLocations(
+                Location.NoProvided,
+                listOf(Location.NoProvided)
+            )
+        ).node.apply {
+            cast<LambdaNode>().apply {
+                parameters.shouldBe(listOf("a1"))
+                expression.shouldBe(LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided))
+                location.shouldBe(Location.NoProvided)
+                locations.shouldBe(
+                    LambdaNodeLocations(
+                        Location.NoProvided,
+                        listOf(Location.NoProvided)
+                    )
+                )
+            }
+            parent.shouldBeNull()
+            children.toList().shouldBe(
+                listOf(
+                    Node(
+                        this,
+                        Location.NoProvided,
+                        LiteralValueNode("10", LiteralValueType.Integer, Location.NoProvided)
+                    )
+                )
+            )
+        }
+    }
     "Test Node interface over FunctionNode" {
         FunctionNode(
             false,
