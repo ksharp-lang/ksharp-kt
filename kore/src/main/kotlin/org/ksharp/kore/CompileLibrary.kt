@@ -1,5 +1,6 @@
 package org.ksharp.kore
 
+import org.ksharp.common.Location
 import org.ksharp.compiler.loader.DirectorySourceLoader
 import org.ksharp.compiler.loader.ModuleLoader
 import org.ksharp.module.prelude.preludeModule
@@ -35,6 +36,12 @@ fun main() {
         val moduleName = p.relativeTo(sourcesDir).toString().let {
             it.substring(0, it.length - ".ks".length)
         }
-        moduleLoader.load(moduleName, "")
+        moduleLoader.load(moduleName, "").mapLeft {
+            it.forEach { e ->
+                println("$e (${moduleName}.ks: ${(e.location ?: Location.NoProvided).start.first.value})")
+            }
+        }.map {
+            println("Compiled $moduleName")
+        }
     }
 }

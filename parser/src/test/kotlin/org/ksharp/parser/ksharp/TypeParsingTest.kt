@@ -124,7 +124,7 @@ class TypeParserTest : StringSpec({
                         listOf(
                             ConcreteTypeNode("List", Location.NoProvided),
                             ConcreteTypeNode("Int", Location.NoProvided)
-                        ), Location.NoProvided
+                        ), true, Location.NoProvided
                     ),
                     Location.NoProvided,
                     TypeNodeLocations(
@@ -155,7 +155,7 @@ class TypeParserTest : StringSpec({
                                 listOf(
                                     ConcreteTypeNode("List", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
-                                ), Location.NoProvided
+                                ), true, Location.NoProvided
                             ),
                             ParameterTypeNode("a", Location.NoProvided),
                             ParameterTypeNode(
@@ -299,7 +299,7 @@ class TypeParserTest : StringSpec({
                         listOf(
                             ConcreteTypeNode("List", Location.NoProvided),
                             ConcreteTypeNode("Int", Location.NoProvided)
-                        ), Location.NoProvided
+                        ), false, Location.NoProvided
                     ),
                     Location.NoProvided,
                     TypeNodeLocations(
@@ -329,7 +329,7 @@ class TypeParserTest : StringSpec({
                             ConcreteTypeNode("Map", Location.NoProvided),
                             ParameterTypeNode("k", Location.NoProvided),
                             ParameterTypeNode("v", Location.NoProvided)
-                        ), Location.NoProvided
+                        ), false, Location.NoProvided
                     ),
                     Location.NoProvided,
                     TypeNodeLocations(
@@ -383,7 +383,7 @@ class TypeParserTest : StringSpec({
                             ParameterTypeNode("n", Location.NoProvided),
                             ConcreteTypeNode("String", Location.NoProvided)
                         ),
-                        Location.NoProvided
+                        false, Location.NoProvided
                     ),
                     Location.NoProvided,
                     TypeNodeLocations(
@@ -609,7 +609,7 @@ class TypeParserTest : StringSpec({
                                     ), ParameterTypeNode(
                                         "a", Location.NoProvided
                                     )
-                                ), Location.NoProvided
+                                ), false, Location.NoProvided
                             ),
                             ConcreteTypeNode(
                                 "Nothing", Location.NoProvided
@@ -681,7 +681,7 @@ class TypeParserTest : StringSpec({
                                     ), ParameterTypeNode(
                                         "a", Location.NoProvided
                                     )
-                                ), Location.NoProvided
+                                ), false, Location.NoProvided
                             ),
                             ConcreteTypeNode(
                                 "Nothing", Location.NoProvided
@@ -720,7 +720,7 @@ class TypeParserTest : StringSpec({
                                     ), ParameterTypeNode(
                                         "a", Location.NoProvided
                                     )
-                                ), Location.NoProvided
+                                ), false, Location.NoProvided
                             ),
                             TupleTypeNode(
                                 listOf(
@@ -767,7 +767,7 @@ class TypeParserTest : StringSpec({
                                     ), ParameterTypeNode(
                                         "a", Location.NoProvided
                                     )
-                                ), Location.NoProvided
+                                ), false, Location.NoProvided
                             ),
                             ParametricTypeNode(
                                 listOf(
@@ -778,7 +778,7 @@ class TypeParserTest : StringSpec({
                                         "Name", Location.NoProvided
                                     )
                                 ),
-                                Location.NoProvided
+                                false, Location.NoProvided
                             )
                         ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                     ),
@@ -814,7 +814,7 @@ class TypeParserTest : StringSpec({
                                     ), ParameterTypeNode(
                                         "a", Location.NoProvided
                                     )
-                                ), Location.NoProvided
+                                ), false, Location.NoProvided
                             ),
                             ConcreteTypeNode(
                                 "Nothing", Location.NoProvided
@@ -1165,7 +1165,7 @@ class TypeParserTest : StringSpec({
                                 ParameterTypeNode("v", Location.NoProvided),
                                 Location.NoProvided,
                             )
-                        ), Location.NoProvided
+                        ), false, Location.NoProvided
                     ),
                     Location.NoProvided,
                     TypeNodeLocations(
@@ -1272,7 +1272,7 @@ class TypeParserTest : StringSpec({
                                     listOf(
                                         ConcreteTypeNode("Num", Location.NoProvided),
                                         ParameterTypeNode("a", Location.NoProvided)
-                                    ), Location.NoProvided
+                                    ), true, Location.NoProvided
                                 ), Location.NoProvided
                             ),
                             LabelTypeNode(
@@ -1565,14 +1565,14 @@ class TypeParserTest : StringSpec({
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided),
                                 ),
-                                Location.NoProvided
+                                true, Location.NoProvided
                             ),
                             ParametricTypeNode(
                                 listOf(
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided),
                                 ),
-                                Location.NoProvided
+                                true, Location.NoProvided
                             ),
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ),
@@ -1601,14 +1601,14 @@ class TypeParserTest : StringSpec({
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided),
                                 ),
-                                Location.NoProvided
+                                true, Location.NoProvided
                             ),
                             ParametricTypeNode(
                                 listOf(
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided),
                                 ),
-                                Location.NoProvided
+                                true, Location.NoProvided
                             ),
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ),
@@ -1616,6 +1616,96 @@ class TypeParserTest : StringSpec({
                     ),
                     Location.NoProvided,
                     TypeDeclarationNodeLocations(Location.NoProvided, Location.NoProvided, listOf())
+                )
+            )
+    }
+    "Nested Parametric Type" {
+        "type Val a b = (Seq (Pair a b))"
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeTypeDeclaration()
+            .map { it.value.also(::println) }
+            .shouldBeRight(
+                TypeNode(
+                    internal = false,
+                    annotations = null,
+                    name = "Val",
+                    params = listOf("a", "b"),
+                    expr = ParametricTypeNode(
+                        variables = listOf(
+                            ConcreteTypeNode(name = "Seq", location = Location.NoProvided),
+                            ParametricTypeNode(
+                                variables = listOf(
+                                    ConcreteTypeNode(name = "Pair", location = Location.NoProvided),
+                                    ParameterTypeNode(name = "a", location = Location.NoProvided),
+                                    ParameterTypeNode(name = "b", location = Location.NoProvided)
+                                ), true, Location.NoProvided
+                            )
+                        ), true, location = Location.NoProvided
+                    ),
+                    location = Location.NoProvided,
+                    locations = TypeNodeLocations(
+                        internalLocation = Location.NoProvided,
+                        typeLocation = Location.NoProvided,
+                        name = Location.NoProvided,
+                        params = emptyList(),
+                        assignOperatorLocation = Location.NoProvided
+                    )
+                )
+            )
+    }
+    "Type declaration complex name with two arguments" {
+        "map->sequence a b :: (Map a b) -> (Seq (Pair a b))"
+            .kSharpLexer()
+            .prepareLexerForTypeParsing()
+            .consumeFunctionTypeDeclaration()
+            .map { it.value.also(::println) }
+            .shouldBeRight(
+                TypeDeclarationNode(
+                    annotations = null,
+                    name = "map->sequence",
+                    params = listOf("a", "b"),
+                    type = FunctionTypeNode(
+                        params = listOf(
+                            ParametricTypeNode(
+                                variables = listOf(
+                                    ConcreteTypeNode(name = "Map", location = Location.NoProvided),
+                                    ParameterTypeNode(name = "a", location = Location.NoProvided),
+                                    ParameterTypeNode(name = "b", location = Location.NoProvided)
+                                ),
+                                closed = true,
+                                location = Location.NoProvided
+                            ),
+                            ParametricTypeNode(
+                                variables = listOf(
+                                    ConcreteTypeNode(
+                                        name = "Seq",
+                                        location = Location.NoProvided
+                                    ), ParametricTypeNode(
+                                        variables = listOf(
+                                            ConcreteTypeNode(
+                                                name = "Pair",
+                                                location = Location.NoProvided
+                                            ),
+                                            ParameterTypeNode(name = "a", location = Location.NoProvided),
+                                            ParameterTypeNode(
+                                                name = "b",
+                                                location = Location.NoProvided
+                                            )
+                                        ), closed = true, location = Location.NoProvided
+                                    )
+                                ), closed = true, location = Location.NoProvided
+                            )
+                        ),
+                        location = Location.NoProvided,
+                        locations = FunctionTypeNodeLocations(separators = emptyList())
+                    ),
+                    location = Location.NoProvided,
+                    locations = TypeDeclarationNodeLocations(
+                        name = Location.NoProvided,
+                        separator = Location.NoProvided,
+                        params = emptyList()
+                    )
                 )
             )
     }
@@ -1637,14 +1727,14 @@ class TypeParserTest : StringSpec({
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided),
                                 ),
-                                Location.NoProvided
+                                true, Location.NoProvided
                             ),
                             ParametricTypeNode(
                                 listOf(
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided),
                                 ),
-                                Location.NoProvided
+                                true, Location.NoProvided
                             ),
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ),
@@ -1700,14 +1790,14 @@ class TypeParserTest : StringSpec({
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided),
                                 ),
-                                Location.NoProvided
+                                true, Location.NoProvided
                             ),
                             ParametricTypeNode(
                                 listOf(
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided),
                                 ),
-                                Location.NoProvided
+                                true, Location.NoProvided
                             ),
                             ConcreteTypeNode("Int", Location.NoProvided)
                         ),

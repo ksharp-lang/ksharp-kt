@@ -116,5 +116,5 @@ native pub (==) a b
 native pub (!=) a b
 
 @name("prelude::threading" for="ir")
-(|>) a :: a -> (a -> c) -> b
-native pub (|>)
+(|>) a b c :: a -> (a -> c) -> b
+native pub (|>) a b

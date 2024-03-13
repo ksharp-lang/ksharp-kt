@@ -497,7 +497,7 @@ private fun KSharpLexerIterator.mapKeywords(): KSharpLexerIterator =
     }
 
 fun KSharpLexerIterator.collapseTokensExceptNewLines(): KSharpLexerIterator =
-    collapseTokens(BaseTokenType.NewLine)
+    collapseTokens(BaseTokenType.NewLine, KSharpTokenType.OpenParenthesis, KSharpTokenType.CloseParenthesis)
 
 fun KSharpLexerIterator.collapseKSharpTokens(): KSharpLexerIterator {
     var lastToken: Token? = null

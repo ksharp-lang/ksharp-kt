@@ -20,6 +20,12 @@ class CompilePreludeModule : StringSpec({
         val moduleInfo = moduleReader.moduleNode("")
         val codeModule = moduleInfo.codeModule(kernelModule)
         codeModule
+            .mapLeft {
+                it.forEach { e ->
+                    println(e.representation)
+                }
+                it
+            }
             .shouldBeRight()
             .map {
                 it.module

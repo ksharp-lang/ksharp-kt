@@ -171,6 +171,7 @@ class TypeNodeTest : StringSpec({
     "Test Node Interface over ParametricTypeNode" {
         ParametricTypeNode(
             listOf(ConcreteTypeNode("List", testLocation), ConcreteTypeNode("Int", testLocation)),
+            true,
             testLocation
         ).node.apply {
             cast<ParametricTypeNode>().apply {
@@ -180,6 +181,7 @@ class TypeNodeTest : StringSpec({
                         ConcreteTypeNode("Int", testLocation)
                     )
                 )
+                closed.shouldBeTrue()
                 location.shouldBe(testLocation)
                 representation.shouldBe("(List Int)")
             }

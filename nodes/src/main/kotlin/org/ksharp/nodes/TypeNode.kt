@@ -148,6 +148,7 @@ data class ParameterTypeNode(
 
 data class ParametricTypeNode(
     val variables: List<TypeExpression>,
+    val closed: Boolean,
     override val location: Location
 ) : NodeData(), TypeExpression {
     override val children: Sequence<NodeData>
