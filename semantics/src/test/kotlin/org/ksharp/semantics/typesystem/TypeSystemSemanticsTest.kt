@@ -179,21 +179,21 @@ class TypeSystemSemanticsTest : StringSpec({
             TypeNode(
                 false,
                 null,
-                "Maybe",
+                "Maybe2",
                 listOf("a"),
                 UnionTypeNode(
                     listOf(
                         ParametricTypeNode(
                             listOf(
                                 ConcreteTypeNode(
-                                    "Just", Location.NoProvided
+                                    "Just2", Location.NoProvided
                                 ), ParameterTypeNode(
                                     "a", Location.NoProvided
                                 )
-                            ), Location.NoProvided
+                            ), false, Location.NoProvided
                         ),
                         ConcreteTypeNode(
-                            "Nothing", Location.NoProvided
+                            "Nothing2", Location.NoProvided
                         )
                     ), Location.NoProvided,
                     UnionTypeNodeLocations(listOf())
@@ -209,9 +209,9 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBeEmpty()
-            typeSystem["Maybe"]
+            typeSystem["Maybe2"]
                 .map { it.representationWithVisibility }
-                .shouldBeRight("Public-Just a\n|Nothing")
+                .shouldBeRight("Public-Just2 a\n|Nothing2")
         }
     }
     "Union semantics arm not starting with concrete type " {
@@ -219,7 +219,7 @@ class TypeSystemSemanticsTest : StringSpec({
             TypeNode(
                 false,
                 null,
-                "Maybe",
+                "Maybe2",
                 listOf("a"),
                 UnionTypeNode(
                     listOf(
@@ -227,7 +227,7 @@ class TypeSystemSemanticsTest : StringSpec({
                             "a", Location.NoProvided
                         ),
                         ConcreteTypeNode(
-                            "Nothing", Location.NoProvided
+                            "Nothing2", Location.NoProvided
                         )
                     ), Location.NoProvided,
                     UnionTypeNodeLocations(listOf())
@@ -243,9 +243,9 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
-            typeSystem["Maybe"].shouldBeLeft(
+            typeSystem["Maybe2"].shouldBeLeft(
                 TypeSystemErrorCode.TypeNotFound.new(
-                    "type" to "Maybe"
+                    "type" to "Maybe2"
                 )
             )
         }
@@ -255,7 +255,7 @@ class TypeSystemSemanticsTest : StringSpec({
             TypeNode(
                 false,
                 null,
-                "Maybe",
+                "Maybe2",
                 listOf(),
                 UnionTypeNode(
                     listOf(
@@ -266,7 +266,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                 ), ParameterTypeNode(
                                     "a", Location.NoProvided
                                 )
-                            ), Location.NoProvided
+                            ), false, Location.NoProvided
                         ),
                         ConcreteTypeNode(
                             "Nothing", Location.NoProvided
@@ -288,13 +288,13 @@ class TypeSystemSemanticsTest : StringSpec({
                     TypeSemanticsErrorCode.ParamNameNoDefined.new(
                         Location.NoProvided,
                         "name" to "a",
-                        "type" to "Maybe"
+                        "type" to "Maybe2"
                     )
                 )
             )
-            typeSystem["Maybe"].shouldBeLeft(
+            typeSystem["Maybe2"].shouldBeLeft(
                 TypeSystemErrorCode.TypeNotFound.new(
-                    "type" to "Maybe"
+                    "type" to "Maybe2"
                 )
             )
         }
@@ -304,26 +304,26 @@ class TypeSystemSemanticsTest : StringSpec({
             TypeNode(
                 false,
                 null,
-                "Maybe",
+                "Maybe2",
                 listOf("a"),
                 UnionTypeNode(
                     listOf(
                         ParametricTypeNode(
                             listOf(
                                 ConcreteTypeNode(
-                                    "Just", Location.NoProvided
+                                    "Just2", Location.NoProvided
                                 ), ParameterTypeNode(
                                     "a", Location.NoProvided
                                 )
-                            ), Location.NoProvided
+                            ), false, Location.NoProvided
                         ),
                         TupleTypeNode(
                             listOf(
                                 ConcreteTypeNode(
-                                    "Nothing", Location.NoProvided
+                                    "Nothing2", Location.NoProvided
                                 ),
                                 ConcreteTypeNode(
-                                    "Name", Location.NoProvided
+                                    "Name2", Location.NoProvided
                                 )
                             ),
                             Location.NoProvided, TupleTypeNodeLocations(listOf())
@@ -347,9 +347,9 @@ class TypeSystemSemanticsTest : StringSpec({
                     )
                 )
             )
-            typeSystem["Maybe"].shouldBeLeft(
+            typeSystem["Maybe2"].shouldBeLeft(
                 TypeSystemErrorCode.TypeNotFound.new(
-                    "type" to "Maybe"
+                    "type" to "Maybe2"
                 )
             )
         }
@@ -359,18 +359,18 @@ class TypeSystemSemanticsTest : StringSpec({
             TypeNode(
                 false,
                 null,
-                "Maybe",
+                "Maybe2",
                 listOf("a"),
                 UnionTypeNode(
                     listOf(
                         ParametricTypeNode(
                             listOf(
                                 ConcreteTypeNode(
-                                    "Just", Location.NoProvided
+                                    "Just2", Location.NoProvided
                                 ), ParameterTypeNode(
                                     "a", Location.NoProvided
                                 )
-                            ), Location.NoProvided
+                            ), false, Location.NoProvided
                         ),
                         ParametricTypeNode(
                             listOf(
@@ -378,10 +378,10 @@ class TypeSystemSemanticsTest : StringSpec({
                                     "a", Location.NoProvided
                                 ),
                                 ConcreteTypeNode(
-                                    "Name", Location.NoProvided
+                                    "Name2", Location.NoProvided
                                 )
                             ),
-                            Location.NoProvided
+                            false, Location.NoProvided
                         )
                     ), Location.NoProvided, UnionTypeNodeLocations(listOf())
                 ),
@@ -396,9 +396,9 @@ class TypeSystemSemanticsTest : StringSpec({
             )
         ).checkTypesSemantics("", preludeModule).apply {
             errors.shouldBe(listOf(TypeSemanticsErrorCode.UnionTypeArmShouldStartWithName.new(Location.NoProvided)))
-            typeSystem["Maybe"].shouldBeLeft(
+            typeSystem["Maybe2"].shouldBeLeft(
                 TypeSystemErrorCode.TypeNotFound.new(
-                    "type" to "Maybe"
+                    "type" to "Maybe2"
                 )
             )
         }
@@ -419,7 +419,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                 ), ParameterTypeNode(
                                     "a", Location.NoProvided
                                 )
-                            ), Location.NoProvided
+                            ), false, Location.NoProvided
                         ),
                         ConcreteTypeNode(
                             "Nothing", Location.NoProvided
@@ -463,7 +463,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                 ), ParameterTypeNode(
                                     "a", Location.NoProvided
                                 )
-                            ), Location.NoProvided
+                            ), false, Location.NoProvided
                         ),
                         ConcreteTypeNode(
                             "Nothing", Location.NoProvided
@@ -546,7 +546,7 @@ class TypeSystemSemanticsTest : StringSpec({
                         ConcreteTypeNode("Map", Location.NoProvided),
                         ParameterTypeNode("k", Location.NoProvided),
                         ParameterTypeNode("v", Location.NoProvided)
-                    ), Location.NoProvided
+                    ), false, Location.NoProvided
                 ),
                 Location.NoProvided,
                 TypeNodeLocations(
@@ -604,7 +604,7 @@ class TypeSystemSemanticsTest : StringSpec({
                         ParameterTypeNode("n", Location.NoProvided),
                         ConcreteTypeNode("String", Location.NoProvided)
                     ),
-                    Location.NoProvided
+                    false, Location.NoProvided
                 ),
                 Location.NoProvided,
                 TypeNodeLocations(
@@ -1276,7 +1276,7 @@ class TypeSystemSemanticsTest : StringSpec({
                         LabelTypeNode(
                             "value", ParameterTypeNode("v", Location.NoProvided), Location.NoProvided
                         )
-                    ), Location.NoProvided
+                    ), false, Location.NoProvided
                 ),
                 Location.NoProvided,
                 TypeNodeLocations(
@@ -1337,7 +1337,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                 listOf(
                                     ConcreteTypeNode("Num", Location.NoProvided),
                                     ParameterTypeNode("a", Location.NoProvided)
-                                ), Location.NoProvided
+                                ), false, Location.NoProvided
                             ), Location.NoProvided
                         ),
                         LabelTypeNode(
@@ -1477,7 +1477,7 @@ class TypeSystemSemanticsTest : StringSpec({
                                 listOf(
                                     ParameterTypeNode("a", Location.NoProvided),
                                     ConcreteTypeNode("Int", Location.NoProvided)
-                                ), Location.NoProvided
+                                ), false, Location.NoProvided
                             ), Location.NoProvided
                         ),
                         LabelTypeNode(
@@ -1591,14 +1591,14 @@ class TypeSystemSemanticsTest : StringSpec({
                                 ConcreteTypeNode("Num", Location.NoProvided),
                                 ParameterTypeNode("a", Location.NoProvided),
                             ),
-                            Location.NoProvided
+                            false, Location.NoProvided
                         ),
                         ParametricTypeNode(
                             listOf(
                                 ConcreteTypeNode("Num", Location.NoProvided),
                                 ParameterTypeNode("a", Location.NoProvided),
                             ),
-                            Location.NoProvided
+                            false, Location.NoProvided
                         ),
                         ConcreteTypeNode("Int", Location.NoProvided)
                     ),
@@ -1627,14 +1627,14 @@ class TypeSystemSemanticsTest : StringSpec({
                                 ConcreteTypeNode("Num", Location.NoProvided),
                                 ParameterTypeNode("a", Location.NoProvided),
                             ),
-                            Location.NoProvided
+                            false, Location.NoProvided
                         ),
                         ParametricTypeNode(
                             listOf(
                                 ConcreteTypeNode("Num", Location.NoProvided),
                                 ParameterTypeNode("a", Location.NoProvided),
                             ),
-                            Location.NoProvided
+                            false, Location.NoProvided
                         ),
                         ConcreteTypeNode("Int", Location.NoProvided)
                     ),

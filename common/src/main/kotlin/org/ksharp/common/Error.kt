@@ -24,6 +24,8 @@ data class Error(
     val location: Location?,
     val arguments: Map<String, Any> = mapOf()
 ) {
+    val representation get() = "${toString()} :${location?.start?.first?.value}"
+
     override fun toString(): String {
         val description = arguments.entries.fold(code.description) { description, entry ->
             description.replace("{${entry.key}}", entry.value.toString())

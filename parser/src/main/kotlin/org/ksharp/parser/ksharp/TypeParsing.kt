@@ -53,7 +53,7 @@ private fun List<Any>.toValueTypes(token: Token?): NodeData {
         .drop(if (hasLabel) 1 else 0)
         .forEach { item ->
             if (item is TypeExpression) {
-                if (item is ParametricTypeNode) valueTypes.addAll(item.variables)
+                if (item is ParametricTypeNode && !item.closed) valueTypes.addAll(item.variables)
                 else valueTypes.add(item)
                 return@forEach
             }
@@ -66,7 +66,7 @@ private fun List<Any>.toValueTypes(token: Token?): NodeData {
     val firstNode = result.first().cast<NodeData>()
 
     return if (result.size == 1) firstNode
-    else ParametricTypeNode(result, firstNode.location)
+    else ParametricTypeNode(result, false, firstNode.location)
 }
 
 private fun List<Any>.toFunctionType(separator: Token, emitLocations: Boolean): NodeData {
@@ -131,11 +131,14 @@ private fun KSharpLexerIterator.consumeTypeValue(allowLabel: Boolean, emitLocati
     ifConsume(KSharpTokenType.OpenParenthesis, true) {
         it.consume { i -> i.consumeTypeValue(true, emitLocations) }
             .then(KSharpTokenType.CloseParenthesis, true)
-            .let { l ->
-                if (allowLabel) l.thenJoinType(emitLocations)
-                else l.build { items ->
-                    items.toLabelOrValueType()
+            .build { items ->
+                items.toLabelOrValueType().let { node ->
+                    if (node is ParametricTypeNode) node.copy(closed = true) else node
                 }
+            }
+            .let { l ->
+                if (allowLabel) l.resume().thenJoinType(emitLocations)
+                else l
             }
     }.or {
         it.ifConsume(KSharpTokenType.UnitValue) { l ->
