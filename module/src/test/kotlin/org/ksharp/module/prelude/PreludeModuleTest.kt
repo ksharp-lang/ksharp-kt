@@ -48,6 +48,7 @@ class PreludeModuleTest : StringSpec({
                     "(<=) :: (Comparable a) -> (Comparable a) -> True\n|False",
                     "(==) :: a -> a -> True\n|False",
                     "(!=) :: a -> a -> True\n|False",
+                    "(|>) :: a -> (a -> c) -> b"
                 )
             )
     }

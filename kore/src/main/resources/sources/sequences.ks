@@ -30,14 +30,15 @@ native pub gen->sequence a
 @doc("Returns a sequence of elements from the input sequence that satisfy the predicate.")
 filter a :: (Seq a) -> (a -> Bool) -> (Seq a)
 pub filter a f =
-    gen->sequence \->
-        let item = next a
-        if item == NoneFmaybe
-           then Done
-           else let acceptValue = f item
-                if acceptValue
-                   then Yield item
-                   else Next
+    let pred = \->
+                   let item = next a
+                   if item == None
+                      then Done
+                      else let acceptValue = f item
+                           if acceptValue
+                              then Yield item
+                              else Next
+    gen->sequence pred
 
 @doc("Returns a sequence of elements from the input sequence that are the result of applying the function to each element.")
 map a b :: (Seq a) -> (a -> b) -> (Seq b)
